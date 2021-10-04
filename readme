@@ -1,0 +1,19 @@
+GHCLI
+=====
+
+An effort to build a somewhat portable, simple and easily
+comprehendable GitHub commandline utility so you can avoid the web
+browser entirely.
+
+But hold on, there is an official utility out there!
+
+Yes, but it is written in Go, which is a security nightmare for sane
+people using Tor. This is, because the Go runtime circumvents the DNS
+resolution mechanisms of the Operating System entirely, thus at least
+leaking your IP to the DNS server.
+
+License
+~~~~~~
+
+BSD-2 CLAUSE (aka. FreeBSD License). Please see the LICENSE file
+attached.

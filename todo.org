@@ -1,0 +1,7 @@
+#+TITLE: ghcli todos
+
+** TODO handle errors from the github api
+   - [[file:src/curl.c::ghcli_fetch(const char *url, ghcli_fetch_buffer *out)][ghcli_fetch]]
+   - [[file:src/curl.c::ghcli_curl(FILE *stream, const char *url, const char *content_type)][ghcli_curl]]
+** TODO find a better way to pass the content type to ghcli_curl
+** TODO Man page

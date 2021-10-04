@@ -42,6 +42,6 @@ struct ghcli_issue {
 };
 
 int  ghcli_get_issues(const char *org, const char *reponame, ghcli_issue **out);
-void ghcli_print_issue_table(FILE *stream, ghcli_issue *issues, int issues_size);
+void ghcli_print_issues_table(FILE *stream, ghcli_issue *issues, int issues_size);
 
 #endif /* ISSUES_H */

@@ -29,23 +29,62 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+#include <ghcli/issues.h>
 #include <ghcli/pulls.h>
 
 #include <sn/sn.h>
 
-int
-main(int argc, char *argv[])
+static char *
+shift(int *argc, char ***argv)
 {
-    if (argc != 3)
-        errx(1, "usage: %s <user> <repo>", argv[0]);
+    if (*argc == 0)
+        errx(1, "Not enough arguments");
 
+    (void)*argc++;
+    return *((*argv)++);
+}
+
+static int
+subcommand_pulls(int argc, char *argv[])
+{
     ghcli_pull *pulls      = NULL;
     int         pulls_size = 0;
 
-    pulls_size = ghcli_get_pulls(argv[1], argv[2], &pulls);
+    pulls_size = ghcli_get_pulls(argv[0], argv[1], &pulls);
 
     ghcli_print_pulls_table(stdout, pulls, pulls_size);
 
     return EXIT_SUCCESS;
+}
+
+static int
+subcommand_issues(int argc, char *argv[])
+{
+    ghcli_issue *issues      = NULL;
+    int          issues_size = 0;
+
+    issues_size = ghcli_get_issues(argv[0], argv[1], &issues);
+
+    ghcli_print_issues_table(stdout, issues, issues_size);
+
+    return EXIT_SUCCESS;
+}
+
+int
+main(int argc, char *argv[])
+{
+    shift(&argc, &argv);
+
+    const char *subcommand = shift(&argc, &argv);
+
+    if (strcmp(subcommand, "pulls") == 0)
+        return subcommand_pulls(argc, argv);
+    else if (strcmp(subcommand, "issues") == 0)
+        return subcommand_issues(argc, argv);
+    else
+        errx(1, "unknown subcommand %s", subcommand);
+
+    return 42;
 }

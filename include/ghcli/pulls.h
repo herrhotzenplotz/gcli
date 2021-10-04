@@ -27,25 +27,20 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef PULLS_H
+#define PULLS_H
+
 #include <stdio.h>
-#include <stdlib.h>
 
-#include <ghcli/pulls.h>
+typedef struct ghcli_pull ghcli_pull;
 
-#include <sn/sn.h>
+struct ghcli_pull {
+    const char *title, *state, *creator;
+    int number, id;
+};
 
-int
-main(int argc, char *argv[])
-{
-    if (argc != 3)
-        errx(1, "usage: %s <user> <repo>", argv[0]);
+int  ghcli_get_pulls(const char *org, const char *reponame, ghcli_pull **out);
+void ghcli_print_pulls_table(FILE *stream, ghcli_pull *pulls, int pulls_size);
 
-    ghcli_pull *pulls      = NULL;
-    int         pulls_size = 0;
 
-    pulls_size = ghcli_get_pulls(argv[1], argv[2], &pulls);
-
-    ghcli_print_pulls_table(stdout, pulls, pulls_size);
-
-    return EXIT_SUCCESS;
-}
+#endif /* PULLS_H */

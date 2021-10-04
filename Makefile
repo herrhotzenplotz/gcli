@@ -15,6 +15,7 @@ CPPFLAGS			=	-D_XOPEN_SOURCE=600 -D_POSIX_C_SOURCE=200112L
 ghcli_SRCS			=	src/ghcli.c \
 					src/curl.c \
 					src/issues.c \
+					src/pulls.c \
 					thirdparty/sn/sn.c \
 					thirdparty/pdjson/pdjson.c
 

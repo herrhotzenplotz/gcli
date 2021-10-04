@@ -26,16 +26,37 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include <string.h>
 
 #include <sn/sn.h>
 #include <ghcli/curl.h>
-#include <ghcli/issues.h>
+#include <ghcli/pulls.h>
 #include <pdjson/pdjson.h>
 
+static const char *
+pull_get_user(json_stream *input)
+{
+    const char *result = NULL;
+    while (json_next(input) == JSON_STRING) {
+        size_t      len = 0;
+        const char *key = json_get_string(input, &len);
+
+        if (strncmp("login", key, len) == 0) {
+            if (json_next(input) != JSON_STRING)
+                errx(1, "login of the pull request creator is not a string");
+
+            result = json_get_string(input, &len);
+            result = sn_strndup(result, len);
+        } else {
+            json_next(input);
+        }
+    }
+
+    return result;
+}
+
 static void
-parse_issue_entry(json_stream *input, ghcli_issue *it)
+parse_pull_entry(json_stream *input, ghcli_pull *it)
 {
     if (json_next(input) != JSON_OBJECT)
         errx(1, "Expected Issue Object");
@@ -71,6 +92,11 @@ parse_issue_entry(json_stream *input, ghcli_issue *it)
                 errx(1, "id-field is not a number");
 
             it->id = json_get_number(input);
+        } else if (strncmp("user", key, len) == 0) {
+            if (json_next(input) != JSON_OBJECT)
+                errx(1, "user field is not an object");
+
+            it->creator = pull_get_user(input);
         } else {
             value_type = json_next(input);
 
@@ -89,14 +115,14 @@ parse_issue_entry(json_stream *input, ghcli_issue *it)
 }
 
 int
-ghcli_get_issues(const char *org, const char *reponame, ghcli_issue **out)
+ghcli_get_pulls(const char *org, const char *reponame, ghcli_pull **out)
 {
     int                 count       = 0;
     json_stream         stream      = {0};
     ghcli_fetch_buffer  json_buffer = {0};
     char               *url         = NULL;
 
-    url = sn_asprintf("https://api.github.com/repos/%s/%s/issues?per_page=100", org, reponame);
+    url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls?per_page=100", org, reponame);
     ghcli_fetch(url, &json_buffer);
 
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
@@ -111,10 +137,10 @@ ghcli_get_issues(const char *org, const char *reponame, ghcli_issue **out)
             errx(1, "Parser error: %s", json_get_error(&stream));
             break;
         case JSON_OBJECT: {
-            *out = realloc(*out, sizeof(ghcli_issue) * (count + 1));
-            ghcli_issue *it = &(*out)[count];
-            memset(it, 0, sizeof(ghcli_issue));
-            parse_issue_entry(&stream, it);
+            *out = realloc(*out, sizeof(ghcli_pull) * (count + 1));
+            ghcli_pull *it = &(*out)[count];
+            memset(it, 0, sizeof(ghcli_pull));
+            parse_pull_entry(&stream, it);
             count += 1;
         } break;
         default:
@@ -130,10 +156,10 @@ ghcli_get_issues(const char *org, const char *reponame, ghcli_issue **out)
 }
 
 void
-ghcli_print_issue_table(FILE *stream, ghcli_issue *issues, int issues_size)
+ghcli_print_pulls_table(FILE *stream, ghcli_pull *pulls, int pulls_size)
 {
-    fprintf(stream, "%5s  %7s  %s\n", "NUMBER", "STATE", "TITLE");
-    for (int i = 0; i < issues_size; ++i) {
-        fprintf(stream, "%5d  %7s  %s\n", issues[i].number, issues[i].state, issues[i].title);
+    fprintf(stream, "%5s  %7s  %10s  %-s\n", "NUMBER", "STATE", "CREATOR", "TITLE");
+    for (int i = 0; i < pulls_size; ++i) {
+        fprintf(stream, "%5d  %7s  %10s  %-s\n", pulls[i].number, pulls[i].state, pulls[i].creator, pulls[i].title);
     }
 }

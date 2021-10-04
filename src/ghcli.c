@@ -45,9 +45,7 @@ main(int argc, char *argv[])
 
     issues_size = ghcli_get_issues(argv[1], argv[2], &issues);
 
-    for (int i = 0; i < issues_size; ++i) {
-        printf("%5d  %7s  %s\n", issues[i].number, issues[i].state, issues[i].title);
-    }
+    ghcli_print_issue_table(stdout, issues, issues_size);
 
     return EXIT_SUCCESS;
 }

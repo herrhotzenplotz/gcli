@@ -126,3 +126,12 @@ ghcli_get_issues(const char *org, const char *reponame, ghcli_issue **out)
 
     return count;
 }
+
+void
+ghcli_print_issue_table(FILE *stream, ghcli_issue *issues, int issues_size)
+{
+    fprintf(stream, "%5s  %7s  %s\n", "NUMBER", "STATE", "TITLE");
+    for (int i = 0; i < issues_size; ++i) {
+        fprintf(stream, "%5d  %7s  %s\n", issues[i].number, issues[i].state, issues[i].title);
+    }
+}

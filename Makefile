@@ -9,6 +9,9 @@ CFLAGS				=	-std=iso9899:1999 \
 CFLAGS_amd64-freebsd-clang	=	-pedantic -I/usr/local/include \
 					-g -O0 -ggdb -Wall -Wextra
 LDFLAGS_amd64-freebsd-clang	=	-L/usr/local/lib -lcurl
+CFLAGS_sparc-sunos-sunstudio	=	-pedantic -I/opt/bw/include \
+					-g -xO0
+LDFLAGS_sparc-sunos-sunstudio	=	-L/opt/bw/lib -lcurl -R/opt/bw/lib
 CPPFLAGS			=	-D_XOPEN_SOURCE=600 -D_POSIX_C_SOURCE=200112L
 
 # List the source files for each binary to be built

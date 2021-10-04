@@ -44,7 +44,7 @@ compiler_flags() {
 
     case "${CCNAME}" in
         sunstudio)
-            COMPILER_FLAGS="\${CFLAGS} -errfmt=error -erroff=%none -errshort=full -xstrconst -xildoff -xmemalign=8s -xnolibmil -xcode=pic32 -xregs=no%appl -xlibmieee -ftrap=%none -xbuiltin=%none -xunroll=1 -Qy -xdebugformat=dwarf \${CPPFLAGS} -D_POSIX_PTHREAD_SEMANTICS -D_LARGEFILE64_SOURCE -D_TS_ERRNO -D_FILE_OFFSET_BITS=64 \${LDFLAGS} -m64"
+            COMPILER_FLAGS="\${CFLAGS} \${CFLAGS_${TARGET}} -errfmt=error -erroff=%none -errshort=full -xstrconst -xildoff -xmemalign=8s -xnolibmil -xcode=pic32 -xregs=no%appl -xlibmieee -ftrap=%none -xbuiltin=%none -xunroll=1 -Qy -xdebugformat=dwarf \${CPPFLAGS} -D_POSIX_PTHREAD_SEMANTICS -D_LARGEFILE64_SOURCE -D_TS_ERRNO -D_FILE_OFFSET_BITS=64 \${LDFLAGS} -m64"
             ;;
         *)
             COMPILER_FLAGS="\${CFLAGS} \${CPPFLAGS} \${CFLAGS_${TARGET}}"

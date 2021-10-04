@@ -31,4 +31,6 @@
  * LibSN - things I reuse all the time.
  */
 
+/* error functions */
 void errx(int code, const char *fmt, ...);
+void err(int code, const char *fmt, ...);

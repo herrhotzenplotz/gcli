@@ -27,40 +27,54 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * LibSN - things I reuse all the time.
- */
-
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 
+#include <ghcli/curl.h>
+
+#include <curl/curl.h>
 #include <sn/sn.h>
 
-void
-errx(int code, const char *fmt, ...)
+static size_t
+write_callback(char *in, size_t size, size_t nmemb, void *data)
 {
-    va_list ap;
+    ghcli_fetch_buffer *out = data;
 
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    va_end(ap);
+    out->data = realloc(out->data, out->length + size * nmemb);
+    memcpy(&(out->data[out->length]), in, size * nmemb);
+    out->length += size + nmemb - 1; // <---- why? wtf?
 
-    fputc('\n', stderr);
-    exit(code);
+    return size * nmemb;
 }
 
-void
-err(int code, const char *fmt, ...)
+int
+ghcli_fetch(const char *url, ghcli_fetch_buffer *out)
 {
-    va_list ap;
+    CURLcode           ret;
+    CURL              *session;
+    struct curl_slist *headers;
 
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    va_end(ap);
+    if (!out)
+        errx(1, "ghcli_fetch: out parameter is null");
 
-    fprintf(stderr, ": %s\n", strerror(errno));
-    exit(code);
+    headers = NULL;
+    headers = curl_slist_append(headers, "Accept: application/vnd.github.v3+json");
+
+    session = curl_easy_init();
+
+    curl_easy_setopt(session, CURLOPT_URL, url);
+    curl_easy_setopt(session, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(session, CURLOPT_USERAGENT, "urmomxd");
+    curl_easy_setopt(session, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
+    curl_easy_setopt(session, CURLOPT_TCP_KEEPALIVE, 1L);
+    curl_easy_setopt(session, CURLOPT_WRITEDATA, out);
+    curl_easy_setopt(session, CURLOPT_WRITEFUNCTION, write_callback);
+
+    ret = curl_easy_perform(session);
+    if (ret != CURLE_OK)
+        errx(1, "Unable to perform GET request to %s: %s", url, curl_easy_strerror(ret));
+
+    curl_easy_cleanup(session);
+    curl_slist_free_all(headers);
+
+    return 0;
 }

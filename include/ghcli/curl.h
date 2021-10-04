@@ -27,40 +27,13 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * LibSN - things I reuse all the time.
- */
-
-#include <stdarg.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <errno.h>
 
-#include <sn/sn.h>
+typedef struct ghcli_fetch_buffer ghcli_fetch_buffer;
 
-void
-errx(int code, const char *fmt, ...)
-{
-    va_list ap;
+struct ghcli_fetch_buffer {
+    char   *data;
+    size_t  length;
+};
 
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    va_end(ap);
-
-    fputc('\n', stderr);
-    exit(code);
-}
-
-void
-err(int code, const char *fmt, ...)
-{
-    va_list ap;
-
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    va_end(ap);
-
-    fprintf(stderr, ": %s\n", strerror(errno));
-    exit(code);
-}
+int ghcli_fetch(const char *url, ghcli_fetch_buffer *out);

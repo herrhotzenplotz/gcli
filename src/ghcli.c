@@ -32,27 +32,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <ghcli/curl.h>
 #include <sn/sn.h>
-
-#include <curl/curl.h>
 #include <pdjson.h>
-
-struct json_buffer {
-    char   *data;
-    size_t  length;
-};
-
-static size_t
-write_callback(char *in, size_t size, size_t nmemb, void *data)
-{
-    struct json_buffer *out = data;
-
-    out->data = realloc(out->data, out->length + size * nmemb);
-    memcpy(&(out->data[out->length]), in, size * nmemb);
-    out->length += size + nmemb - 1; // <---- why? wtf?
-
-    return size * nmemb;
-}
 
 static void
 parse_issue_entry(json_stream *input)
@@ -92,30 +74,10 @@ parse_issue_entry(json_stream *input)
 int
 main(int argc, char *argv[])
 {
-    CURLcode           ret;
-    CURL              *hnd;
-    struct curl_slist *slist1;
-
-    struct json_buffer json_buffer = {0};
     json_stream        stream      = {0};
+    ghcli_fetch_buffer json_buffer = {0};
 
-    slist1 = NULL;
-    slist1 = curl_slist_append(slist1, "Accept: application/vnd.github.v3+json");
-
-    hnd = curl_easy_init();
-    curl_easy_setopt(hnd, CURLOPT_URL, "https://api.github.com/repos/kraxarn/spotify-qt/issues");
-    curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, slist1);
-    curl_easy_setopt(hnd, CURLOPT_USERAGENT, "urmomxd");
-    curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
-    curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
-    curl_easy_setopt(hnd, CURLOPT_WRITEDATA, &json_buffer);
-    curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, write_callback);
-
-    ret = curl_easy_perform(hnd);
-
-    FILE *f = fopen("foo.dat", "w");
-    fwrite(json_buffer.data, json_buffer.length, 1, f);
-    fclose(f);
+    ghcli_fetch("https://api.github.com/repos/kraxarn/spotify-qt/issues?per_page=100", &json_buffer);
 
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
     json_set_streaming(&stream, true);
@@ -137,11 +99,6 @@ main(int argc, char *argv[])
         }
 
     }
-
-    curl_easy_cleanup(hnd);
-    hnd = NULL;
-    curl_slist_free_all(slist1);
-    slist1 = NULL;
 
     return EXIT_SUCCESS;
 }

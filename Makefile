@@ -13,6 +13,7 @@ CPPFLAGS			=	-D_XOPEN_SOURCE=600
 
 # List the source files for each binary to be built
 ghcli_SRCS			=	src/ghcli.c \
+					src/curl.c \
 					thirdparty/sn/sn.c \
 					thirdparty/pdjson/pdjson.c
 

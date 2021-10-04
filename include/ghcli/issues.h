@@ -27,27 +27,18 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
+#ifndef ISSUES_H
+#define ISSUES_H
 
-#include <ghcli/issues.h>
+typedef struct ghcli_issue ghcli_issue;
 
-#include <sn/sn.h>
+struct ghcli_issue {
+    const char *title;
+    const char *state;
+    int         number;
+    int         id;
+};
 
-int
-main(int argc, char *argv[])
-{
-    if (argc != 3)
-        errx(1, "usage: %s <user> <repo>", argv[0]);
+int ghcli_get_issues(const char *org, const char *reponame, ghcli_issue **out);
 
-    ghcli_issue *issues      = NULL;
-    int          issues_size = 0;
-
-    issues_size = ghcli_get_issues(argv[1], argv[2], &issues);
-
-    for (int i = 0; i < issues_size; ++i) {
-        printf("%5d  %7s  %s\n", issues[i].number, issues[i].state, issues[i].title);
-    }
-
-    return EXIT_SUCCESS;
-}
+#endif /* ISSUES_H */

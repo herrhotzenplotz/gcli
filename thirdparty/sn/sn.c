@@ -64,3 +64,39 @@ err(int code, const char *fmt, ...)
     fprintf(stderr, ": %s\n", strerror(errno));
     exit(code);
 }
+
+char *
+sn_strndup(const char *it, size_t len)
+{
+    size_t actual = 0;
+    const char *tmp = NULL;
+    char *result = NULL;
+
+    tmp = it;
+
+    while (tmp[actual++] && actual < len);
+
+    result = calloc(1, actual + 1);
+    memcpy(result, it, actual);
+    return result;
+}
+
+char *
+sn_asprintf(const char *fmt, ...)
+{
+    char    tmp    = 0, *result = NULL;
+    size_t  actual = 0;
+    va_list vp;
+
+    va_start(vp, fmt);
+
+    actual = vsnprintf(&tmp, 1, fmt, vp);
+    va_end(vp);
+    result = calloc(1, actual + 1);
+
+    va_start(vp, fmt);
+    vsnprintf(result, actual + 1, fmt, vp);
+    va_end(vp);
+
+    return result;
+}

@@ -34,3 +34,7 @@
 /* error functions */
 void errx(int code, const char *fmt, ...);
 void err(int code, const char *fmt, ...);
+
+/* string functions */
+char *sn_strndup (const char *it, size_t len);
+char *sn_asprintf(const char *fmt, ...);

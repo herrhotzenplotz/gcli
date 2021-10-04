@@ -163,3 +163,13 @@ ghcli_print_pulls_table(FILE *stream, ghcli_pull *pulls, int pulls_size)
         fprintf(stream, "%5d  %7s  %10s  %-s\n", pulls[i].number, pulls[i].state, pulls[i].creator, pulls[i].title);
     }
 }
+
+void
+ghcli_print_pull_diff(FILE *stream, const char *org, const char *reponame, int pr_number)
+{
+    char *url = NULL;
+
+    url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d", org, reponame, pr_number);
+
+    ghcli_curl(stream, url, "Accept: application/vnd.github.v3.diff");
+}

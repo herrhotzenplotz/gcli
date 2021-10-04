@@ -27,6 +27,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef CURL_H
+#define CURL_H
+
+#include <stdio.h>
 #include <stdlib.h>
 
 typedef struct ghcli_fetch_buffer ghcli_fetch_buffer;
@@ -36,4 +40,7 @@ struct ghcli_fetch_buffer {
     size_t  length;
 };
 
-int ghcli_fetch(const char *url, ghcli_fetch_buffer *out);
+int  ghcli_fetch(const char *url, ghcli_fetch_buffer *out);
+void ghcli_curl(FILE *stream, const char *url, const char *content_type);
+
+#endif /* CURL_H */

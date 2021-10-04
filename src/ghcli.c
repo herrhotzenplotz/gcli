@@ -42,7 +42,7 @@ shift(int *argc, char ***argv)
     if (*argc == 0)
         errx(1, "Not enough arguments");
 
-    (void)*argc++;
+    (*argc)--;
     return *((*argv)++);
 }
 
@@ -52,9 +52,37 @@ subcommand_pulls(int argc, char *argv[])
     ghcli_pull *pulls      = NULL;
     int         pulls_size = 0;
 
-    pulls_size = ghcli_get_pulls(argv[0], argv[1], &pulls);
+    if (argc == 2) {
+        pulls_size = ghcli_get_pulls(argv[0], argv[1], &pulls);
+        ghcli_print_pulls_table(stdout, pulls, pulls_size);
 
-    ghcli_print_pulls_table(stdout, pulls, pulls_size);
+        return EXIT_SUCCESS;
+    }
+
+    int diff = 0;
+    while (argc > 2) {
+        const char *option = shift(&argc, &argv);
+
+        if (strcmp(option, "--diff") == 0) {
+
+            if (diff)
+                errx(1, "--diff is specified multiple times");
+
+            char *optarg = shift(&argc, &argv);
+            char *endptr = NULL;
+
+            diff = strtoul(optarg, &endptr, 10);
+            if (endptr != (optarg + strlen(optarg)))
+                err(1, "cannot parse pr number of --diff option");
+
+            if (diff <= 0)
+                errx(1, "pr number is out of range");
+        } else {
+            errx(1, "unknown option %s", option);
+        }
+    }
+
+    ghcli_print_pull_diff(stdout, argv[0], argv[1], diff);
 
     return EXIT_SUCCESS;
 }
@@ -64,6 +92,8 @@ subcommand_issues(int argc, char *argv[])
 {
     ghcli_issue *issues      = NULL;
     int          issues_size = 0;
+
+    (void) argc;
 
     issues_size = ghcli_get_issues(argv[0], argv[1], &issues);
 

@@ -35,7 +35,7 @@
 #include <sn/sn.h>
 
 static size_t
-write_callback(char *in, size_t size, size_t nmemb, void *data)
+fetch_write_callback(char *in, size_t size, size_t nmemb, void *data)
 {
     ghcli_fetch_buffer *out = data;
 
@@ -67,7 +67,7 @@ ghcli_fetch(const char *url, ghcli_fetch_buffer *out)
     curl_easy_setopt(session, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
     curl_easy_setopt(session, CURLOPT_TCP_KEEPALIVE, 1L);
     curl_easy_setopt(session, CURLOPT_WRITEDATA, out);
-    curl_easy_setopt(session, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
 
     ret = curl_easy_perform(session);
     if (ret != CURLE_OK)
@@ -77,4 +77,31 @@ ghcli_fetch(const char *url, ghcli_fetch_buffer *out)
     curl_slist_free_all(headers);
 
     return 0;
+}
+
+void
+ghcli_curl(FILE *stream, const char *url, const char *content_type)
+{
+    CURLcode           ret;
+    CURL              *session;
+    struct curl_slist *headers;
+
+    headers = NULL;
+    headers = curl_slist_append(headers, content_type);
+
+    session = curl_easy_init();
+
+    curl_easy_setopt(session, CURLOPT_URL, url);
+    curl_easy_setopt(session, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(session, CURLOPT_USERAGENT, "urmomxd");
+    curl_easy_setopt(session, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
+    curl_easy_setopt(session, CURLOPT_TCP_KEEPALIVE, 1L);
+    curl_easy_setopt(session, CURLOPT_WRITEDATA, stream);
+
+    ret = curl_easy_perform(session);
+    if (ret != CURLE_OK)
+        errx(1, "Unable to perform GET request to %s: %s", url, curl_easy_strerror(ret));
+
+    curl_easy_cleanup(session);
+    curl_slist_free_all(headers);
 }

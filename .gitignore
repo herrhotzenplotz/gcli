@@ -1,3 +1,5 @@
 /config.mk
 /ghcli
 /src/*.o
+/thirdparty/pdjson/pdjson.o
+/thirdparty/sn/sn.o

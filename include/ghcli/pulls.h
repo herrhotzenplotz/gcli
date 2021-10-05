@@ -34,6 +34,7 @@
 #include <stdbool.h>
 
 typedef struct ghcli_pull            ghcli_pull;
+typedef struct ghcli_commit          ghcli_commit;
 typedef struct ghcli_pull_inspection ghcli_pull_inspection;
 
 struct ghcli_pull {
@@ -43,9 +44,13 @@ struct ghcli_pull {
 };
 
 struct ghcli_pull_inspection {
-    const char *author, *state, *title, *body, *created_at;
+    const char *author, *state, *title, *body, *created_at, *commits_link;
     int         id, number, comments, additions, deletions, commits, changed_files;
     bool        merged, mergeable, draft;
+};
+
+struct ghcli_commit {
+    const char *sha, *message, *date, *author, *email;
 };
 
 int  ghcli_get_pulls(const char *org, const char *reponame, ghcli_pull **out);

@@ -317,13 +317,165 @@ ghcli_print_pull_inspect_summary(FILE *out, ghcli_pull_inspection *it)
             yesno(it->draft));
 }
 
+static void
+parse_commit_author_field(json_stream *input, ghcli_commit *it)
+{
+    enum json_type key_type, value_type;
+    const char *key;
+
+    json_next(input);
+
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t len;
+        key = json_get_string(input, &len);
+
+        if (strncmp(key, "name", len) == 0)
+            it->author = get_string(input);
+        else if (strncmp(key, "email", len))
+            it->email = get_string(input);
+        else if (strncmp(key, "date", len))
+            it->date = get_string(input);
+        else {
+            value_type = json_next(input);
+
+            switch (value_type) {
+            case JSON_ARRAY:
+                json_skip_until(input, JSON_ARRAY_END);
+                break;
+            case JSON_OBJECT:
+                json_skip_until(input, JSON_OBJECT_END);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    if (key_type != JSON_OBJECT_END)
+        errx(1, "Unexpected non-string object key");
+}
+
+static void
+parse_commit_commit_field(json_stream *input, ghcli_commit *it)
+{
+    enum json_type key_type, value_type;
+    const char *key;
+
+    json_next(input);
+
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t len;
+        key = json_get_string(input, &len);
+
+        if (strncmp(key, "message", len) == 0)
+            it->message = get_string(input);
+        else if (strncmp(key, "author", len) == 0)
+            parse_commit_author_field(input, it);
+        else {
+            value_type = json_next(input);
+
+            switch (value_type) {
+            case JSON_ARRAY:
+                json_skip_until(input, JSON_ARRAY_END);
+                break;
+            case JSON_OBJECT:
+                json_skip_until(input, JSON_OBJECT_END);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    if (key_type != JSON_OBJECT_END)
+        errx(1, "Unexpected non-string object key");
+}
+
+static void
+ghcli_parse_commit(json_stream *input, ghcli_commit *it)
+{
+    enum json_type key_type, value_type;
+    const char *key;
+
+    json_next(input);
+
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t len;
+        key = json_get_string(input, &len);
+
+        if (strncmp(key, "sha", len) == 0)
+            it->sha = get_string(input);
+        else if (strncmp(key, "commit", len) == 0)
+            parse_commit_commit_field(input, it);
+        else {
+            value_type = json_next(input);
+
+            switch (value_type) {
+            case JSON_ARRAY:
+                json_skip_until(input, JSON_ARRAY_END);
+                break;
+            case JSON_OBJECT:
+                json_skip_until(input, JSON_OBJECT_END);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    if (key_type != JSON_OBJECT_END)
+        errx(1, "Unexpected non-string object key");
+}
+
+static int
+ghcli_get_pull_commits(const char *url, ghcli_commit **out)
+{
+    int                count       = 0;
+    json_stream        stream      = {0};
+    ghcli_fetch_buffer json_buffer = {0};
+
+    ghcli_fetch(url, &json_buffer);
+    json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+    json_set_streaming(&stream, true);
+
+    enum json_type next_token = json_next(&stream);
+
+    while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
+        if (next_token != JSON_OBJECT)
+            errx(1, "Unexpected non-object in commit list");
+
+        *out = realloc(*out, (count + 1) * sizeof(ghcli_commit));
+        ghcli_commit *it = &(*out)[count];
+        ghcli_parse_commit(&stream, it);
+        count += 1;
+    }
+
+    return count;
+}
+
+static void
+ghcli_print_commits_table(FILE *stream, ghcli_commit *commits, int commits_size)
+{
+    fprintf(stream,     "%6.6s  %-15.15s  %-20.20s  %16.16s  %-s\n", "SHA", "AUTHOR", "EMAIL", "DATE", "MESSAGE");
+    for (int i = 0; i < commits_size; ++i) {
+        fprintf(stream, "%6.6s  %-15.15s  %-20.20s  %16.16s  %-s\n",
+                commits[i].sha,
+                commits[i].author,
+                commits[i].date,
+                commits[i].email,
+                commits[i].message);
+    }
+}
+
 void
 ghcli_inspect_pull(FILE *out, const char *org, const char *reponame, int pr_number)
 {
-    json_stream            stream      = {0};
-    ghcli_fetch_buffer     json_buffer = {0};
-    char                  *url         = NULL;
-    ghcli_pull_inspection  result      = {0};
+    json_stream            stream       = {0};
+    ghcli_fetch_buffer     json_buffer  = {0};
+    char                  *url          = NULL;
+    ghcli_pull_inspection  result       = {0};
+    ghcli_commit          *commits      = NULL;
+    int                    commits_size = 0;
 
     url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d", org, reponame, pr_number);
     ghcli_fetch(url, &json_buffer);
@@ -331,7 +483,13 @@ ghcli_inspect_pull(FILE *out, const char *org, const char *reponame, int pr_numb
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
     json_set_streaming(&stream, true);
 
-    // fwrite(json_buffer.data, 1, json_buffer.length, out);
     ghcli_pull_parse_inspection(&stream, &result);
+
+    url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d/commits", org, reponame, pr_number);
+    commits_size = ghcli_get_pull_commits(url, &commits);
+
     ghcli_print_pull_inspect_summary(out, &result);
+
+    fprintf(out, "\nCOMMITS\n");
+    ghcli_print_commits_table(out, commits, commits_size);
 }

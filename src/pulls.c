@@ -26,6 +26,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+#include <assert.h>
 #include <string.h>
 
 #include <sn/sn.h>
@@ -188,18 +190,148 @@ ghcli_print_pull_diff(FILE *stream, const char *org, const char *reponame, int p
     ghcli_curl(stream, url, "Accept: application/vnd.github.v3.diff");
 }
 
+static int
+get_int(json_stream *input)
+{
+    if (json_next(input) != JSON_NUMBER)
+        errx(1, "unexpected non-numeric field");
+
+    return json_get_number(input);
+}
+
+static const char *
+get_string(json_stream *input)
+{
+    if (json_next(input) != JSON_STRING)
+        errx(1, "unexpected non-string field");
+
+    size_t len;
+    const char *it = json_get_string(input, &len);
+    return sn_strndup(it, len);
+}
+
+static bool
+get_bool(json_stream *input)
+{
+    enum json_type value_type = json_next(input);
+    if (value_type == JSON_TRUE)
+        return true;
+    else if (value_type == JSON_FALSE)
+        return false;
+    else
+        errx(1, "unexpected non-boolean value");
+    assert(0 && "Not reached");
+}
+
+static void
+ghcli_pull_parse_inspection(json_stream *input, ghcli_pull_inspection *out)
+{
+    enum json_type key_type, value_type;
+    const char *key;
+
+    json_next(input);
+
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t len;
+        key = json_get_string(input, &len);
+
+        if (strncmp("title", key, len) == 0)
+            out->title = get_string(input);
+        else if (strncmp("state", key, len) == 0)
+            out->state = get_string(input);
+        else if (strncmp("body", key, len) == 0)
+            out->body = get_string(input);
+        else if (strncmp("created_at", key, len) == 0)
+            out->created_at = get_string(input);
+        else if (strncmp("number", key, len) == 0)
+            out->number = get_int(input);
+        else if (strncmp("id", key, len) == 0)
+            out->id = get_int(input);
+        else if (strncmp("commits", key, len) == 0)
+            out->commits = get_int(input);
+        else if (strncmp("comments", key, len) == 0)
+            out->comments = get_int(input);
+        else if (strncmp("additions", key, len) == 0)
+            out->additions = get_int(input);
+        else if (strncmp("deletions", key, len) == 0)
+            out->deletions = get_int(input);
+        else if (strncmp("changed_files", key, len) == 0)
+            out->changed_files = get_int(input);
+        else if (strncmp("merged", key, len) == 0)
+            out->merged = get_bool(input);
+        else if (strncmp("mergeable", key, len) == 0)
+            out->mergeable = get_bool(input);
+        else if (strncmp("draft", key, len) == 0)
+            out->draft = get_bool(input);
+        else if (strncmp("user", key, len) == 0) {
+            if (json_next(input) != JSON_OBJECT)
+                errx(1, "user field is not an object");
+
+            out->author = pull_get_user(input);
+        } else {
+            value_type = json_next(input);
+
+            switch (value_type) {
+            case JSON_ARRAY:
+                json_skip_until(input, JSON_ARRAY_END);
+                break;
+            case JSON_OBJECT:
+                json_skip_until(input, JSON_OBJECT_END);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    if (key_type != JSON_OBJECT_END)
+        errx(1, "Unexpected object key type");
+}
+
+static const char *
+yesno(bool x)
+{
+    return x ? "yes" : "no";
+}
+
+static void
+ghcli_print_pull_inspect_summary(FILE *out, ghcli_pull_inspection *it)
+{
+    fprintf(out,
+            "   NUMBER : %d\n"
+            "    TITLE : %s\n"
+            "  CREATED : %s\n"
+            "   AUTHOR : %s\n"
+            "    STATE : %s\n"
+            " COMMENTS : %d\n"
+            "  ADD:DEL : %d:%d\n"
+            "  COMMITS : %d\n"
+            "  CHANGED : %d\n"
+            "   MERGED : %s\n"
+            "MERGEABLE : %s\n"
+            "    DRAFT : %s\n",
+            it->number, it->title, it->created_at, it->author, it->state, it->comments,
+            it->additions, it->deletions, it->commits, it->changed_files,
+            yesno(it->merged),
+            yesno(it->mergeable),
+            yesno(it->draft));
+}
+
 void
 ghcli_inspect_pull(FILE *out, const char *org, const char *reponame, int pr_number)
 {
-    json_stream         stream      = {0};
-    ghcli_fetch_buffer  json_buffer = {0};
-    char               *url         = NULL;
+    json_stream            stream      = {0};
+    ghcli_fetch_buffer     json_buffer = {0};
+    char                  *url         = NULL;
+    ghcli_pull_inspection  result      = {0};
 
-    url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d?per_page=100", org, reponame, pr_number);
+    url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d", org, reponame, pr_number);
     ghcli_fetch(url, &json_buffer);
 
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
     json_set_streaming(&stream, true);
 
-    fwrite(json_buffer.data, 1, json_buffer.length, out);
+    // fwrite(json_buffer.data, 1, json_buffer.length, out);
+    ghcli_pull_parse_inspection(&stream, &result);
+    ghcli_print_pull_inspect_summary(out, &result);
 }

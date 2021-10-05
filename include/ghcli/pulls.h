@@ -33,12 +33,19 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-typedef struct ghcli_pull ghcli_pull;
+typedef struct ghcli_pull            ghcli_pull;
+typedef struct ghcli_pull_inspection ghcli_pull_inspection;
 
 struct ghcli_pull {
     const char *title, *state, *creator;
     int number, id;
     bool merged;
+};
+
+struct ghcli_pull_inspection {
+    const char *author, *state, *title, *body, *created_at;
+    int         id, number, comments, additions, deletions, commits, changed_files;
+    bool        merged, mergeable, draft;
 };
 
 int  ghcli_get_pulls(const char *org, const char *reponame, ghcli_pull **out);

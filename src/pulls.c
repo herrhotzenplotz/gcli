@@ -202,7 +202,11 @@ get_int(json_stream *input)
 static const char *
 get_string(json_stream *input)
 {
-    if (json_next(input) != JSON_STRING)
+    enum json_type type = json_next(input);
+    if (type == JSON_NULL)
+        return "<empty>";
+
+    if (type != JSON_STRING)
         errx(1, "unexpected non-string field");
 
     size_t len;
@@ -453,6 +457,22 @@ ghcli_get_pull_commits(const char *url, ghcli_commit **out)
     return count;
 }
 
+static char *
+cut_newline(const char *_it)
+{
+    char *it = strdup(_it);
+    char *foo = it;
+    while (*foo) {
+        if (*foo == '\n') {
+            *foo = 0;
+            break;
+        }
+        foo += 1;
+    }
+
+    return it;
+}
+
 static void
 ghcli_print_commits_table(FILE *stream, ghcli_commit *commits, int commits_size)
 {
@@ -463,7 +483,7 @@ ghcli_print_commits_table(FILE *stream, ghcli_commit *commits, int commits_size)
                 commits[i].author,
                 commits[i].date,
                 commits[i].email,
-                commits[i].message);
+                cut_newline(commits[i].message));
     }
 }
 

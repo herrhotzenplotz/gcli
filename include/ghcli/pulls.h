@@ -44,6 +44,6 @@ struct ghcli_pull {
 int  ghcli_get_pulls(const char *org, const char *reponame, ghcli_pull **out);
 void ghcli_print_pulls_table(FILE *stream, ghcli_pull *pulls, int pulls_size);
 void ghcli_print_pull_diff(FILE *stream, const char *org, const char *reponame, int pr_number);
-
+void ghcli_inspect_pull(FILE *stream, const char *org, const char *reponame, int pr_number);
 
 #endif /* PULLS_H */

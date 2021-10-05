@@ -187,3 +187,19 @@ ghcli_print_pull_diff(FILE *stream, const char *org, const char *reponame, int p
 
     ghcli_curl(stream, url, "Accept: application/vnd.github.v3.diff");
 }
+
+void
+ghcli_inspect_pull(FILE *out, const char *org, const char *reponame, int pr_number)
+{
+    json_stream         stream      = {0};
+    ghcli_fetch_buffer  json_buffer = {0};
+    char               *url         = NULL;
+
+    url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d?per_page=100", org, reponame, pr_number);
+    ghcli_fetch(url, &json_buffer);
+
+    json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+    json_set_streaming(&stream, true);
+
+    fwrite(json_buffer.data, 1, json_buffer.length, out);
+}

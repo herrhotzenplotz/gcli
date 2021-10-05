@@ -59,30 +59,43 @@ subcommand_pulls(int argc, char *argv[])
         return EXIT_SUCCESS;
     }
 
-    int diff = 0;
-    while (argc > 2) {
+    const char *org  = shift(&argc, &argv);
+    const char *repo = shift(&argc, &argv);
+
+    while (argc > 0) {
         const char *option = shift(&argc, &argv);
 
         if (strcmp(option, "--diff") == 0) {
 
-            if (diff)
-                errx(1, "--diff is specified multiple times");
-
             char *optarg = shift(&argc, &argv);
             char *endptr = NULL;
 
-            diff = strtoul(optarg, &endptr, 10);
+            int diff = strtoul(optarg, &endptr, 10);
             if (endptr != (optarg + strlen(optarg)))
                 err(1, "cannot parse pr number of --diff option");
 
             if (diff <= 0)
                 errx(1, "pr number is out of range");
+
+            ghcli_print_pull_diff(stdout, org, repo, diff);
+
+        } else if (strcmp(option, "--inspect") == 0) {
+
+            char *optarg = shift(&argc, &argv);
+            char *endptr = NULL;
+
+            int inspect = strtoul(optarg, &endptr, 10);
+            if (endptr != (optarg + strlen(optarg)))
+                err(1, "cannot parse pr number of --diff option");
+
+            if (inspect <= 0)
+                errx(1, "pr number is out of range");
+
+            ghcli_inspect_pull(stdout, org, repo, inspect);
         } else {
             errx(1, "unknown option %s", option);
         }
     }
-
-    ghcli_print_pull_diff(stdout, argv[0], argv[1], diff);
 
     return EXIT_SUCCESS;
 }

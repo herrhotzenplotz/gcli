@@ -61,7 +61,8 @@ parse_pull_entry(json_stream *input, ghcli_pull *it)
     if (json_next(input) != JSON_OBJECT)
         errx(1, "Expected Issue Object");
 
-    while (json_next(input) == JSON_STRING) {
+    enum json_type key_type;
+    while ((key_type = json_next(input)) == JSON_STRING) {
         size_t          len        = 0;
         const char     *key        = json_get_string(input, &len);
         enum json_type  value_type = 0;
@@ -92,6 +93,14 @@ parse_pull_entry(json_stream *input, ghcli_pull *it)
                 errx(1, "id-field is not a number");
 
             it->id = json_get_number(input);
+        } else if (strncmp("merged", key, len) == 0) {
+            value_type = json_next(input);
+            if (value_type == JSON_TRUE)
+                it->merged = true;
+            else if (value_type == JSON_FALSE)
+                it->merged = false;
+            else
+                errx(1, "merged field is not a boolean value");
         } else if (strncmp("user", key, len) == 0) {
             if (json_next(input) != JSON_OBJECT)
                 errx(1, "user field is not an object");
@@ -158,9 +167,14 @@ ghcli_get_pulls(const char *org, const char *reponame, ghcli_pull **out)
 void
 ghcli_print_pulls_table(FILE *stream, ghcli_pull *pulls, int pulls_size)
 {
-    fprintf(stream, "%5s  %7s  %10s  %-s\n", "NUMBER", "STATE", "CREATOR", "TITLE");
+    fprintf(stream,     "%6s  %6s  %6s  %20s  %-s\n", "NUMBER", "STATE", "MERGED", "CREATOR", "TITLE");
     for (int i = 0; i < pulls_size; ++i) {
-        fprintf(stream, "%5d  %7s  %10s  %-s\n", pulls[i].number, pulls[i].state, pulls[i].creator, pulls[i].title);
+        fprintf(stream, "%6d  %6s  %6s  %20s  %-s\n",
+                pulls[i].number,
+                pulls[i].state,
+                pulls[i].merged ? "yes" : "no",
+                pulls[i].creator,
+                pulls[i].title);
     }
 }
 

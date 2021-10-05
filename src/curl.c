@@ -57,13 +57,17 @@ ghcli_fetch(const char *url, ghcli_fetch_buffer *out)
         errx(1, "ghcli_fetch: out parameter is null");
 
     headers = NULL;
-    headers = curl_slist_append(headers, "Accept: application/vnd.github.v3+json");
+    headers = curl_slist_append(headers, "Accept: application/vnd.github.v3.full+json");
 
     session = curl_easy_init();
 
     curl_easy_setopt(session, CURLOPT_URL, url);
+    curl_easy_setopt(session, CURLOPT_BUFFERSIZE, 102400L);
+    curl_easy_setopt(session, CURLOPT_NOPROGRESS, 1L);
+    curl_easy_setopt(session, CURLOPT_MAXREDIRS, 50L);
+    curl_easy_setopt(session, CURLOPT_FTP_SKIP_PASV_IP, 1L);
     curl_easy_setopt(session, CURLOPT_HTTPHEADER, headers);
-    curl_easy_setopt(session, CURLOPT_USERAGENT, "urmomxd");
+    curl_easy_setopt(session, CURLOPT_USERAGENT, "curl/7.78.0");
     curl_easy_setopt(session, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
     curl_easy_setopt(session, CURLOPT_TCP_KEEPALIVE, 1L);
     curl_easy_setopt(session, CURLOPT_WRITEDATA, out);
@@ -75,6 +79,12 @@ ghcli_fetch(const char *url, ghcli_fetch_buffer *out)
 
     curl_easy_cleanup(session);
     curl_slist_free_all(headers);
+
+#if 0
+    FILE *f = fopen("foo.dat", "w");
+    fwrite(out->data, 1, out->length, f);
+    fclose(f);
+#endif
 
     return 0;
 }
@@ -93,7 +103,7 @@ ghcli_curl(FILE *stream, const char *url, const char *content_type)
 
     curl_easy_setopt(session, CURLOPT_URL, url);
     curl_easy_setopt(session, CURLOPT_HTTPHEADER, headers);
-    curl_easy_setopt(session, CURLOPT_USERAGENT, "urmomxd");
+    curl_easy_setopt(session, CURLOPT_USERAGENT, "curl/7.78.0");
     curl_easy_setopt(session, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
     curl_easy_setopt(session, CURLOPT_TCP_KEEPALIVE, 1L);
     curl_easy_setopt(session, CURLOPT_WRITEDATA, stream);

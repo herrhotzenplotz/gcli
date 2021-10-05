@@ -31,12 +31,14 @@
 #define PULLS_H
 
 #include <stdio.h>
+#include <stdbool.h>
 
 typedef struct ghcli_pull ghcli_pull;
 
 struct ghcli_pull {
     const char *title, *state, *creator;
     int number, id;
+    bool merged;
 };
 
 int  ghcli_get_pulls(const char *org, const char *reponame, ghcli_pull **out);

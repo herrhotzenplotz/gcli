@@ -313,12 +313,16 @@ ghcli_print_pull_inspect_summary(FILE *out, ghcli_pull_inspection *it)
             "  CHANGED : %d\n"
             "   MERGED : %s\n"
             "MERGEABLE : %s\n"
-            "    DRAFT : %s\n",
+            "    DRAFT : %s\n"
+            "\n"
+            "\n"
+            "%s\n",
             it->number, it->title, it->created_at, it->author, it->state, it->comments,
             it->additions, it->deletions, it->commits, it->changed_files,
             yesno(it->merged),
             yesno(it->mergeable),
-            yesno(it->draft));
+            yesno(it->draft),
+            it->body);
 }
 
 static void
@@ -395,6 +399,9 @@ parse_commit_commit_field(json_stream *input, ghcli_commit *it)
         errx(1, "Unexpected non-string object key");
 }
 
+/**
+ * Parse a single commit
+ */
 static void
 ghcli_parse_commit(json_stream *input, ghcli_commit *it)
 {
@@ -431,6 +438,10 @@ ghcli_parse_commit(json_stream *input, ghcli_commit *it)
         errx(1, "Unexpected non-string object key");
 }
 
+/**
+ * Fetch and extract a list of commits.
+ * Returns the number of extracted commits in out.
+ */
 static int
 ghcli_get_pull_commits(const char *url, ghcli_commit **out)
 {
@@ -457,6 +468,9 @@ ghcli_get_pull_commits(const char *url, ghcli_commit **out)
     return count;
 }
 
+/**
+ * Get a copy of the first line of the passed string.
+ */
 static char *
 cut_newline(const char *_it)
 {
@@ -476,9 +490,9 @@ cut_newline(const char *_it)
 static void
 ghcli_print_commits_table(FILE *stream, ghcli_commit *commits, int commits_size)
 {
-    fprintf(stream,     "%6.6s  %-15.15s  %-20.20s  %16.16s  %-s\n", "SHA", "AUTHOR", "EMAIL", "DATE", "MESSAGE");
+    fprintf(stream,     "%8.8s  %-15.15s  %-20.20s  %16.16s  %-s\n", "SHA", "AUTHOR", "EMAIL", "DATE", "MESSAGE");
     for (int i = 0; i < commits_size; ++i) {
-        fprintf(stream, "%6.6s  %-15.15s  %-20.20s  %16.16s  %-s\n",
+        fprintf(stream, "%8.8s  %-15.15s  %-20.20s  %16.16s  %-s\n",
                 commits[i].sha,
                 commits[i].author,
                 commits[i].date,
@@ -487,6 +501,9 @@ ghcli_print_commits_table(FILE *stream, ghcli_commit *commits, int commits_size)
     }
 }
 
+/**
+ * Fetch and print information about a Pull request.
+ */
 void
 ghcli_inspect_pull(FILE *out, const char *org, const char *reponame, int pr_number)
 {

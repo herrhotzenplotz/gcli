@@ -33,6 +33,7 @@
 
 #include <ghcli/issues.h>
 #include <ghcli/pulls.h>
+#include <ghcli/comments.h>
 
 #include <sn/sn.h>
 
@@ -81,6 +82,8 @@ subcommand_pulls(int argc, char *argv[])
             ghcli_print_pr_diff(stdout, org, repo, pr);
         else if (strcmp(operation, "summary") == 0)
             ghcli_pr_summary(stdout, org, repo, pr);
+        else if (strcmp(operation, "comments") == 0)
+            ghcli_pr_comments(stdout, org, repo, pr);
         else
             errx(1, "unknown operation %s", operation);
     }

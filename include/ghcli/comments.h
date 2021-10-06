@@ -27,24 +27,23 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * LibSN - things I reuse all the time.
- */
-
-#ifndef SN_H
-#define SN_H
+#ifndef COMMENTS_H
+#define COMMENTS_H
 
 #include <stdio.h>
+#include <stdlib.h>
 
-/* error functions */
-void errx(int code, const char *fmt, ...);
-void err(int code, const char *fmt, ...);
+typedef struct ghcli_comment ghcli_comment;
 
-/* string functions */
-char *sn_strndup (const char *it, size_t len);
-char *sn_asprintf(const char *fmt, ...);
+struct ghcli_comment {
+    const char *author;    /* Login name of the comment author */
+    const char *date;      /* Creation date of the comment     */
+    int         id;        /* id of the comment                */
+    const char *body;      /* Raw text of the comment          */
+};
 
-/* pretty functions */
-void pretty_print(const char *input, int indent, int maxlinelen, FILE *out);
+int  ghcli_get_comments(const char *url, ghcli_comment **comments);
+void ghcli_print_comment_list(FILE *stream, ghcli_comment *comments, size_t comments_size);
+void ghcli_pr_comments(FILE *stream, const char *org, const char *repo, int pr);
 
-#endif /* SN_H */
+#endif /* COMMENTS_H */

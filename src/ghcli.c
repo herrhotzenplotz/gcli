@@ -53,48 +53,36 @@ subcommand_pulls(int argc, char *argv[])
     int         pulls_size = 0;
 
     if (argc == 2) {
-        pulls_size = ghcli_get_pulls(argv[0], argv[1], &pulls);
-        ghcli_print_pulls_table(stdout, pulls, pulls_size);
+        pulls_size = ghcli_get_prs(argv[0], argv[1], &pulls);
+        ghcli_print_pr_table(stdout, pulls, pulls_size);
 
         return EXIT_SUCCESS;
     }
 
-    const char *org  = shift(&argc, &argv);
-    const char *repo = shift(&argc, &argv);
+    if (argc < 3)
+        errx(1, "Need org and repo name (and PR number) to operate on");
+
+    const char *org    = shift(&argc, &argv);
+    const char *repo   = shift(&argc, &argv);
+    const char *_pr    = shift(&argc, &argv);
+    char       *endptr = NULL;
+
+    int pr = strtoul(_pr, &endptr, 10);
+    if (endptr != (_pr + strlen(_pr)))
+        err(1, "cannot parse pr number »%s«", _pr);
+
+    if (pr <= 0)
+        errx(1, "pr number is out of range");
 
     while (argc > 0) {
-        const char *option = shift(&argc, &argv);
+        const char *operation = shift(&argc, &argv);
 
-        if (strcmp(option, "--diff") == 0) {
-
-            char *optarg = shift(&argc, &argv);
-            char *endptr = NULL;
-
-            int diff = strtoul(optarg, &endptr, 10);
-            if (endptr != (optarg + strlen(optarg)))
-                err(1, "cannot parse pr number of --diff option");
-
-            if (diff <= 0)
-                errx(1, "pr number is out of range");
-
-            ghcli_print_pull_diff(stdout, org, repo, diff);
-
-        } else if (strcmp(option, "--inspect") == 0) {
-
-            char *optarg = shift(&argc, &argv);
-            char *endptr = NULL;
-
-            int inspect = strtoul(optarg, &endptr, 10);
-            if (endptr != (optarg + strlen(optarg)))
-                err(1, "cannot parse pr number of --diff option");
-
-            if (inspect <= 0)
-                errx(1, "pr number is out of range");
-
-            ghcli_inspect_pull(stdout, org, repo, inspect);
-        } else {
-            errx(1, "unknown option %s", option);
-        }
+        if (strcmp(operation, "diff") == 0)
+            ghcli_print_pr_diff(stdout, org, repo, pr);
+        else if (strcmp(operation, "summary") == 0)
+            ghcli_pr_summary(stdout, org, repo, pr);
+        else
+            errx(1, "unknown operation %s", operation);
     }
 
     return EXIT_SUCCESS;

@@ -126,7 +126,7 @@ parse_pull_entry(json_stream *input, ghcli_pull *it)
 }
 
 int
-ghcli_get_pulls(const char *org, const char *reponame, ghcli_pull **out)
+ghcli_get_prs(const char *org, const char *reponame, ghcli_pull **out)
 {
     int                 count       = 0;
     json_stream         stream      = {0};
@@ -167,7 +167,7 @@ ghcli_get_pulls(const char *org, const char *reponame, ghcli_pull **out)
 }
 
 void
-ghcli_print_pulls_table(FILE *stream, ghcli_pull *pulls, int pulls_size)
+ghcli_print_pr_table(FILE *stream, ghcli_pull *pulls, int pulls_size)
 {
     fprintf(stream,     "%6s  %6s  %6s  %20s  %-s\n", "NUMBER", "STATE", "MERGED", "CREATOR", "TITLE");
     for (int i = 0; i < pulls_size; ++i) {
@@ -181,7 +181,7 @@ ghcli_print_pulls_table(FILE *stream, ghcli_pull *pulls, int pulls_size)
 }
 
 void
-ghcli_print_pull_diff(FILE *stream, const char *org, const char *reponame, int pr_number)
+ghcli_print_pr_diff(FILE *stream, const char *org, const char *reponame, int pr_number)
 {
     char *url = NULL;
 
@@ -228,7 +228,7 @@ get_bool(json_stream *input)
 }
 
 static void
-ghcli_pull_parse_inspection(json_stream *input, ghcli_pull_inspection *out)
+ghcli_pull_parse_inspection(json_stream *input, ghcli_pull_summary *out)
 {
     enum json_type key_type, value_type;
     const char *key;
@@ -299,7 +299,7 @@ yesno(bool x)
 }
 
 static void
-ghcli_print_pull_inspect_summary(FILE *out, ghcli_pull_inspection *it)
+ghcli_print_pr_summary(FILE *out, ghcli_pull_summary *it)
 {
     fprintf(out,
             "   NUMBER : %d\n"
@@ -505,14 +505,14 @@ ghcli_print_commits_table(FILE *stream, ghcli_commit *commits, int commits_size)
  * Fetch and print information about a Pull request.
  */
 void
-ghcli_inspect_pull(FILE *out, const char *org, const char *reponame, int pr_number)
+ghcli_pr_summary(FILE *out, const char *org, const char *reponame, int pr_number)
 {
-    json_stream            stream       = {0};
-    ghcli_fetch_buffer     json_buffer  = {0};
-    char                  *url          = NULL;
-    ghcli_pull_inspection  result       = {0};
-    ghcli_commit          *commits      = NULL;
-    int                    commits_size = 0;
+    json_stream         stream       = {0};
+    ghcli_fetch_buffer  json_buffer  = {0};
+    char               *url          = NULL;
+    ghcli_pull_summary  result       = {0};
+    ghcli_commit       *commits      = NULL;
+    int                 commits_size = 0;
 
     url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d", org, reponame, pr_number);
     ghcli_fetch(url, &json_buffer);
@@ -525,7 +525,7 @@ ghcli_inspect_pull(FILE *out, const char *org, const char *reponame, int pr_numb
     url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d/commits", org, reponame, pr_number);
     commits_size = ghcli_get_pull_commits(url, &commits);
 
-    ghcli_print_pull_inspect_summary(out, &result);
+    ghcli_print_pr_summary(out, &result);
 
     fprintf(out, "\nCOMMITS\n");
     ghcli_print_commits_table(out, commits, commits_size);

@@ -32,10 +32,10 @@
 
 #include <pdjson/pdjson.h>
 
-#define get_int(input)    get_int_(input, __FUNCTION__)
-#define get_bool(input)   get_bool_(input, __FUNCTION__)
-#define get_string(input) get_string_(input, __FUNCTION__)
-#define get_user(input)   get_user_(input, __FUNCTION__)
+#define get_int(input)    get_int_(input, __func__)
+#define get_bool(input)   get_bool_(input, __func__)
+#define get_string(input) get_string_(input, __func__)
+#define get_user(input)   get_user_(input, __func__)
 
 int         get_int_(json_stream *input, const char *function);
 bool        get_bool_(json_stream *input, const char *function);

@@ -6,9 +6,8 @@ CFLAGS				=	-std=iso9899:1999 \
 					-Ithirdparty/pdjson/ \
 					-Ithirdparty/ \
 					-Iinclude/
-CFLAGS_amd64-freebsd-clang	=	-pedantic -I/usr/local/include \
+CFLAGS_amd64-freebsd-clang	=	-pedantic \
 					-g -O0 -ggdb -Wall -Wextra
-LDFLAGS_amd64-freebsd-clang	=	-L/usr/local/lib -lcurl
 CFLAGS_sparc-sunos-sunstudio	=	-pedantic -I/opt/bw/include \
 					-g -xO0
 LDFLAGS_sparc-sunos-sunstudio	=	-L/opt/bw/lib -lcurl -R/opt/bw/lib

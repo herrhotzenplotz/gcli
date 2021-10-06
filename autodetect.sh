@@ -26,6 +26,11 @@ target_triplet() {
     HOSTOS=`uname | awk '{ print(tolower($0)) }'`
     HOSTCPU=`uname -p | awk '{ print(tolower($0)) }'`
 
+    # Because GNU messes with us
+    if [ "${HOSTCPU}" = "unknown" ]; then
+        HOSTCPU=`uname -m | awk '{ print(tolower($0)) }'`
+    fi
+
     c_compiler
 
     HOSTCC=${CC}
@@ -51,7 +56,7 @@ compiler_flags() {
             ;;
     esac
 
-    dump "COMPILE_FLAGS=${COMPILER_FLAGS}"
+    dump "COMPILE_FLAGS=${COMPILER_FLAGS} \${LIB_CFLAGS}"
     checking_result "ok"
 }
 
@@ -67,7 +72,7 @@ linker_flags() {
             ;;
     esac
 
-    dump "LINK_FLAGS=${LINK_FLAGS} \${LDFLAGS} \${LDFLAGS_${TARGET}}"
+    dump "LINK_FLAGS=${LINK_FLAGS} \${LDFLAGS} \${LDFLAGS_${TARGET}} \${LIB_LDFLAGS}"
     checking_result "ok"
 }
 
@@ -121,11 +126,29 @@ linker() {
     checking_result "${LD}"
 }
 
+libraries() {
+    PKG_CONFIG=${PKG_CONFIG-`which pkg-config 2>/dev/null`}
+    [ ${PKG_CONFIG} ] || return
+
+    checking "libcurl"
+
+    cflags_curl=`${PKG_CONFIG} --cflags libcurl`
+    ldflags_curl=`${PKG_CONFIG} --libs libcurl`
+
+    [ $? -eq 0 ] || die "Cannot find libcurl"
+
+    dump "LIB_CFLAGS+=${cflags_curl}"
+    dump "LIB_LDFLAGS+=${ldflags_curl}"
+
+    checking_result "found"
+}
+
 main() {
     target_triplet
     linker
     compiler_flags
     linker_flags
+    libraries
 }
 
 main

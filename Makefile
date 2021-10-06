@@ -23,7 +23,7 @@ ghcli_SRCS			=	src/ghcli.c \
 
 # Leave this undefined if you don't have any manpages that need to be
 # installed.
-# MAN				=	docs/foo.8
+MAN				=	docs/ghcli.1
 
 # Include the rules to build your program
 # Important: the autodetect.sh script needs to be in place

@@ -1,0 +1,69 @@
+.Dd $Mdocdate$
+.Dt GHCLI 1
+.Os
+.Sh NAME
+.Nm ghcli
+.Nd is a command-line utility to interact with GitHub without using a web-browser.
+.Sh SYNOPSIS
+
+.Nm
+.Cm issues Ar user-or-organization Ar repository
+
+.Nm
+.Cm pulls Ar user-or-organization Ar repository Op PR number ...
+
+.Sh DESCRIPTION
+The
+.Nm
+retrieves or submits data to the GitHub API to list issues and
+pull requests on specific
+.Xr git 1
+repositories hosted on GitHub.
+
+.Sh SUBCOMMANDS
+.Bl -tag -width indent
+
+.It Cm issues
+lists open issues on the given repository.
+
+.It Cm pulls
+lists open pull requests on the given repository.
+
+If a PR number is specified, you can append one or more of the
+following operations to perform on the given pull request:
+
+.Bl -tag -width indent
+.It Cm summary
+Print a summary.
+.It Cm diff
+Print the PR diff.
+.El
+
+.El
+
+.\" .Sh IMPLEMENTATION NOTES
+.\" Not used in OpenBSD.
+.\" .Sh ENVIRONMENT
+.\" For sections 1, 6, 7, and 8 only.
+.\" .Sh FILES
+.\" .Sh EXIT STATUS
+.\" For sections 1, 6, and 8 only.
+.\" .Sh EXAMPLES
+.\" .Sh DIAGNOSTICS
+.\" For sections 1, 4, 6, 7, 8, and 9 printf/stderr messages only.
+
+.Sh SEE ALSO
+.Xr git 1
+.\" .Sh STANDARDS
+.\" .Sh HISTORY
+.\" .Sh AUTHORS
+.\" .Sh CAVEATS
+
+.Sh BUGS
+Not yet finished.
+Error messages are poor.
+Man page is poor.
+
+.Sh SECURITY CONSIDERATIONS
+It is written in C. If it were written in Rust, it would have been
+much safer.

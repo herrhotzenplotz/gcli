@@ -34,23 +34,23 @@
 #include <string.h>
 
 int
-get_int(json_stream *input)
+get_int_(json_stream *input, const char *where)
 {
     if (json_next(input) != JSON_NUMBER)
-        errx(1, "unexpected non-numeric field");
+        errx(1, "%s: unexpected non-numeric field", where);
 
     return json_get_number(input);
 }
 
 const char *
-get_string(json_stream *input)
+get_string_(json_stream *input, const char *where)
 {
     enum json_type type = json_next(input);
     if (type == JSON_NULL)
         return "<empty>";
 
     if (type != JSON_STRING)
-        errx(1, "unexpected non-string field");
+        errx(1, "%s: unexpected non-string field", where);
 
     size_t len;
     const char *it = json_get_string(input, &len);
@@ -58,7 +58,7 @@ get_string(json_stream *input)
 }
 
 bool
-get_bool(json_stream *input)
+get_bool_(json_stream *input, const char *where)
 {
     enum json_type value_type = json_next(input);
     if (value_type == JSON_TRUE)
@@ -66,15 +66,17 @@ get_bool(json_stream *input)
     else if (value_type == JSON_FALSE)
         return false;
     else
-        errx(1, "unexpected non-boolean value");
-    assert(0 && "Not reached");
+        errx(1, "%s: unexpected non-boolean value", where);
+
+    errx(42, "%s: unreachable", where);
+    return false;
 }
 
 const char *
-get_user(json_stream *input)
+get_user_(json_stream *input, const char *where)
 {
     if (json_next(input) != JSON_OBJECT)
-        errx(1, "user field is not an object");
+        errx(1, "%s: user field is not an object", where);
 
     const char *result = NULL;
     while (json_next(input) == JSON_STRING) {
@@ -83,7 +85,7 @@ get_user(json_stream *input)
 
         if (strncmp("login", key, len) == 0) {
             if (json_next(input) != JSON_STRING)
-                errx(1, "login of the pull request creator is not a string");
+                errx(1, "%s: login of the pull request creator is not a string", where);
 
             result = json_get_string(input, &len);
             result = sn_strndup(result, len);

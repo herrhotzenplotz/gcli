@@ -50,7 +50,7 @@ ghcli_parse_comment(json_stream *input, ghcli_comment *it)
 
         if (strncmp("created_at", key, len) == 0)
             it->date = get_string(input);
-        else if (strncmp("body_text", key, len) == 0)
+        else if (strncmp("body", key, len) == 0)
             it->body = get_string(input);
         else if (strncmp("user", key, len) == 0)
             it->author = get_user(input);

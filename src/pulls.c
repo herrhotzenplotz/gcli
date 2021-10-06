@@ -227,14 +227,14 @@ ghcli_print_pr_summary(FILE *out, ghcli_pull_summary *it)
             "MERGEABLE : %s\n"
             "    DRAFT : %s\n"
             "\n"
-            "\n"
-            "%s\n",
+            "\n",
             it->number, it->title, it->created_at, it->author, it->state, it->comments,
             it->additions, it->deletions, it->commits, it->changed_files,
             yesno(it->merged),
             yesno(it->mergeable),
-            yesno(it->draft),
-            it->body);
+            yesno(it->draft));
+
+    pretty_print(it->body, 4, 80, out);
 }
 
 static void

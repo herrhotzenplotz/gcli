@@ -32,30 +32,9 @@
 
 #include <sn/sn.h>
 #include <ghcli/curl.h>
+#include <ghcli/json_util.h>
 #include <ghcli/pulls.h>
 #include <pdjson/pdjson.h>
-
-static const char *
-pull_get_user(json_stream *input)
-{
-    const char *result = NULL;
-    while (json_next(input) == JSON_STRING) {
-        size_t      len = 0;
-        const char *key = json_get_string(input, &len);
-
-        if (strncmp("login", key, len) == 0) {
-            if (json_next(input) != JSON_STRING)
-                errx(1, "login of the pull request creator is not a string");
-
-            result = json_get_string(input, &len);
-            result = sn_strndup(result, len);
-        } else {
-            json_next(input);
-        }
-    }
-
-    return result;
-}
 
 static void
 parse_pull_entry(json_stream *input, ghcli_pull *it)
@@ -69,46 +48,19 @@ parse_pull_entry(json_stream *input, ghcli_pull *it)
         const char     *key        = json_get_string(input, &len);
         enum json_type  value_type = 0;
 
-        if (strncmp("title", key, len) == 0) {
-            value_type = json_next(input);
-            if (value_type != JSON_STRING)
-                errx(1, "Title is not a string");
-
-            const char *title = json_get_string(input, &len);
-            it->title = sn_strndup(title, len);
-        } else if (strncmp("state", key, len) == 0) {
-            value_type = json_next(input);
-            if (value_type != JSON_STRING)
-                errx(1, "state is not a string");
-
-            const char *state = json_get_string(input, &len);
-            it->state = sn_strndup(state, len);
-        } else if (strncmp("number", key, len) == 0) {
-            value_type = json_next(input);
-            if (value_type != JSON_NUMBER)
-                errx(1, "number-field is not a number");
-
-            it->number = json_get_number(input);
-        } else if (strncmp("id", key, len) == 0) {
-            value_type = json_next(input);
-            if (value_type != JSON_NUMBER)
-                errx(1, "id-field is not a number");
-
-            it->id = json_get_number(input);
-        } else if (strncmp("merged", key, len) == 0) {
-            value_type = json_next(input);
-            if (value_type == JSON_TRUE)
-                it->merged = true;
-            else if (value_type == JSON_FALSE)
-                it->merged = false;
-            else
-                errx(1, "merged field is not a boolean value");
-        } else if (strncmp("user", key, len) == 0) {
-            if (json_next(input) != JSON_OBJECT)
-                errx(1, "user field is not an object");
-
-            it->creator = pull_get_user(input);
-        } else {
+        if (strncmp("title", key, len) == 0)
+            it->title = get_string(input);
+        else if (strncmp("state", key, len) == 0)
+            it->state = get_string(input);
+        else if (strncmp("number", key, len) == 0)
+            it->number = get_int(input);
+        else if (strncmp("id", key, len) == 0)
+            it->id = get_int(input);
+        else if (strncmp("merged", key, len) == 0)
+            it->merged = get_bool(input);
+        else if (strncmp("user", key, len) == 0)
+            it->creator = get_user(input);
+        else {
             value_type = json_next(input);
 
             switch (value_type) {
@@ -190,43 +142,6 @@ ghcli_print_pr_diff(FILE *stream, const char *org, const char *reponame, int pr_
     ghcli_curl(stream, url, "Accept: application/vnd.github.v3.diff");
 }
 
-static int
-get_int(json_stream *input)
-{
-    if (json_next(input) != JSON_NUMBER)
-        errx(1, "unexpected non-numeric field");
-
-    return json_get_number(input);
-}
-
-static const char *
-get_string(json_stream *input)
-{
-    enum json_type type = json_next(input);
-    if (type == JSON_NULL)
-        return "<empty>";
-
-    if (type != JSON_STRING)
-        errx(1, "unexpected non-string field");
-
-    size_t len;
-    const char *it = json_get_string(input, &len);
-    return sn_strndup(it, len);
-}
-
-static bool
-get_bool(json_stream *input)
-{
-    enum json_type value_type = json_next(input);
-    if (value_type == JSON_TRUE)
-        return true;
-    else if (value_type == JSON_FALSE)
-        return false;
-    else
-        errx(1, "unexpected non-boolean value");
-    assert(0 && "Not reached");
-}
-
 static void
 ghcli_pull_parse_inspection(json_stream *input, ghcli_pull_summary *out)
 {
@@ -267,12 +182,9 @@ ghcli_pull_parse_inspection(json_stream *input, ghcli_pull_summary *out)
             out->mergeable = get_bool(input);
         else if (strncmp("draft", key, len) == 0)
             out->draft = get_bool(input);
-        else if (strncmp("user", key, len) == 0) {
-            if (json_next(input) != JSON_OBJECT)
-                errx(1, "user field is not an object");
-
-            out->author = pull_get_user(input);
-        } else {
+        else if (strncmp("user", key, len) == 0)
+            out->author = get_user(input);
+        else {
             value_type = json_next(input);
 
             switch (value_type) {

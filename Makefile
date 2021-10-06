@@ -18,6 +18,7 @@ ghcli_SRCS			=	src/ghcli.c \
 					src/curl.c \
 					src/issues.c \
 					src/pulls.c \
+					src/json_util.c \
 					thirdparty/sn/sn.c \
 					thirdparty/pdjson/pdjson.c
 

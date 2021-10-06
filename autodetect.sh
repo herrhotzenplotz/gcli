@@ -137,8 +137,8 @@ libraries() {
 
     [ $? -eq 0 ] || die "Cannot find libcurl"
 
-    dump "LIB_CFLAGS+=${cflags_curl}"
-    dump "LIB_LDFLAGS+=${ldflags_curl}"
+    dump "LIB_CFLAGS	+=	${cflags_curl}"
+    dump "LIB_LDFLAGS	+=	${ldflags_curl}"
 
     checking_result "found"
 }

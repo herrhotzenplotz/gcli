@@ -31,5 +31,6 @@
 #define GITCONFIG_H
 
 const char *ghcli_find_gitconfig(void);
+void        ghcli_gitconfig_get_repo(const char *config_file_path, const char **org, const char **repo);
 
 #endif /* GITCONFIG_H */

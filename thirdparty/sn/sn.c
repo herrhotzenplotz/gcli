@@ -33,10 +33,14 @@
 
 #include <ctype.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include <sn/sn.h>
 
@@ -137,4 +141,75 @@ pretty_print(const char *input, int indent, int maxlinelen, FILE *out)
         } while (*it && (linelength < maxlinelen));
         fputc('\n', out);
     }
+}
+
+int
+sn_mmap_file(const char *path, void **buffer)
+{
+    struct stat stat_buf = {0};
+    int         fd       = 0;
+
+    if (access(path, R_OK) < 0)
+        err(1, "access");
+
+    if (stat(path, &stat_buf) < 0)
+        err(1, "stat");
+
+    if ((fd = open(path, O_RDONLY)) < 0)
+        err(1, "open");
+
+    *buffer = mmap(NULL, stat_buf.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    if (*buffer == MAP_FAILED)
+        err(1, "mmap");
+
+    return stat_buf.st_size;
+}
+
+sn_sv
+sn_sv_trim_front(sn_sv it)
+{
+    if (it.length == 0)
+        return it;
+
+    // TODO: not utf-8 aware
+    while (it.length > 0) {
+        if (!isspace(*it.data))
+            break;
+
+        it.data++;
+        it.length--;
+    }
+
+    return it;
+}
+
+sn_sv
+sn_sv_chop_until(sn_sv *it, char c)
+{
+    sn_sv result = *it;
+
+    result.length = 0;
+
+    while (it->length > 0) {
+
+        if (*it->data == c)
+            break;
+
+        it->data++;
+        it->length--;
+        result.length++;
+    }
+
+    return result;
+}
+
+bool
+sn_sv_has_prefix(sn_sv it, const char *prefix)
+{
+    size_t len = strlen(prefix);
+
+    if (it.length < len)
+        return false;
+
+    return strncmp(it.data, prefix, len) == 0;
 }

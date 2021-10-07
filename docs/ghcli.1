@@ -10,7 +10,9 @@
 .Cm issues Ar user-or-organization Ar repository
 
 .Nm
-.Cm pulls Ar user-or-organization Ar repository Op PR number ...
+.Cm pulls
+.Op Fl o Ar user-or-organization Fl r Ar repository
+.Op Fl p Ar #PR Ar ...
 
 .Sh DESCRIPTION
 The
@@ -28,6 +30,14 @@ lists open issues on the given repository.
 
 .It Cm pulls
 lists open pull requests on the given repository.
+
+The repository can be either specified through the
+.Fl o
+and
+.Fl r
+flags or, if unspecified,
+.Nm
+will try to autodetect the correct remote using the git config.
 
 If a PR number is specified, you can append one or more of the
 following operations to perform on the given pull request:
@@ -51,7 +61,7 @@ Print the PR diff.
 .Sh EXAMPLES
 Look at PR #78 in vim/colorschemes:
 
-ghcli pulls vim colorschemes 78 summary comments | less
+ghcli pulls -o vim -r colorschemes -p 78 summary comments | less
 
 .\" .Sh DIAGNOSTICS
 .\" For sections 1, 4, 6, 7, 8, and 9 printf/stderr messages only.

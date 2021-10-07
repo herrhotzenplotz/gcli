@@ -44,6 +44,8 @@ void err(int code, const char *fmt, ...);
 /* string functions */
 char *sn_strndup (const char *it, size_t len);
 char *sn_asprintf(const char *fmt, ...);
+// modifies the underlying string
+char *sn_strip_suffix(char *it, const char *suffix);
 
 /* pretty functions */
 void pretty_print(const char *input, int indent, int maxlinelen, FILE *out);

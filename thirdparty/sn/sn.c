@@ -213,3 +213,20 @@ sn_sv_has_prefix(sn_sv it, const char *prefix)
 
     return strncmp(it.data, prefix, len) == 0;
 }
+
+char *
+sn_strip_suffix(char *it, const char *suffix)
+{
+    int it_len = strlen(it);
+    int su_len = strlen(suffix);
+
+    if (su_len > it_len)
+        return it;
+
+    int off = it_len - su_len;
+
+    if (strncmp(it + off, suffix, su_len) == 0)
+        it[off] = '\0';
+
+    return it;
+}

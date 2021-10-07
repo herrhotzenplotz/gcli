@@ -194,7 +194,7 @@ gitconfig_url_extract_github_data(sn_sv url, const char **org, const char **repo
     url.length -= 1;
     url.data   += 1;
 
-    *repo = sn_strndup(url.data, url.length);
+    *repo = sn_strip_suffix(sn_strndup(url.data, url.length), ".git");
 
     return true;
 }

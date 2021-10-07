@@ -63,7 +63,7 @@ get_bool_(json_stream *input, const char *where)
     enum json_type value_type = json_next(input);
     if (value_type == JSON_TRUE)
         return true;
-    else if (value_type == JSON_FALSE)
+    else if (value_type == JSON_FALSE || value_type == JSON_NULL) // HACK
         return false;
     else
         errx(1, "%s: unexpected non-boolean value", where);

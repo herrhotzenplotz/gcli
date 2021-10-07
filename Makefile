@@ -18,6 +18,7 @@ ghcli_SRCS			=	src/ghcli.c \
 					src/curl.c \
 					src/issues.c \
 					src/comments.c \
+					src/gitconfig.c \
 					src/pulls.c \
 					src/json_util.c \
 					thirdparty/sn/sn.c \

@@ -34,6 +34,7 @@
 #include <ghcli/issues.h>
 #include <ghcli/pulls.h>
 #include <ghcli/comments.h>
+#include <ghcli/gitconfig.h>
 
 #include <sn/sn.h>
 
@@ -110,6 +111,8 @@ int
 main(int argc, char *argv[])
 {
     shift(&argc, &argv);
+
+    const char *foo = ghcli_find_gitconfig();
 
     const char *subcommand = shift(&argc, &argv);
 

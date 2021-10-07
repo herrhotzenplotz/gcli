@@ -44,7 +44,7 @@ ghcli_find_gitconfig(void)
     char          *dotgit      = NULL;
     char          *config_path = NULL;
 
-    curr_dir_path = getcwd(NULL, 0);
+    curr_dir_path = getcwd(NULL, 128);
     if (!curr_dir_path)
         err(1, "getcwd");
 
@@ -60,14 +60,14 @@ ghcli_find_gitconfig(void)
             if (strcmp(".", ent->d_name) == 0 || strcmp("..", ent->d_name) == 0)
                 continue;
 
-            if (strcmp(".git", ent->d_name) == 0 && ent->d_namlen == 4) {
+            if (strcmp(".git", ent->d_name) == 0) {
                 size_t len = strlen(curr_dir_path);
-                dotgit = malloc(len + ent->d_namlen + 2);
+                dotgit = malloc(len + strlen(ent->d_name) + 2);
                 memcpy(dotgit, curr_dir_path, len);
                 dotgit[len] = '/';
-                memcpy(dotgit + len + 1, ent->d_name, ent->d_namlen);
+                memcpy(dotgit + len + 1, ent->d_name, strlen(ent->d_name));
 
-                dotgit[len + 1 + ent->d_namlen] = 0;
+                dotgit[len + 1 + strlen(ent->d_name)] = 0;
 
                 break;
             }
@@ -108,7 +108,7 @@ ghcli_find_gitconfig(void)
             continue;
 
         // We found the config file, put together it's path and return that
-        if (strncmp("config", ent->d_name, ent->d_namlen) == 0) {
+        if (strcmp("config", ent->d_name) == 0) {
             int len = strlen(dotgit);
 
             config_path = malloc(len + 1 + sizeof("config"));
@@ -152,25 +152,38 @@ gitconfig_find_url_entry(sn_sv buffer, sn_sv *out)
 static bool
 gitconfig_url_extract_github_data(sn_sv url, const char **org, const char **repo)
 {
-    if (sn_sv_has_prefix(url, "https://"))
-        errx(1, "https extracting is not yet supported");
+    sn_sv foo;
 
-    sn_sv foo = sn_sv_chop_until(&url, '@');
-    if (url.length == 0)
-        return false;
-
+    foo         = sn_sv_chop_until(&url, '=');
     url.length -= 1;
     url.data   += 1;
+    url         = sn_sv_trim_front(url);
 
-    if (!sn_sv_has_prefix(url, "github.com"))
-        return false;
+    if (sn_sv_has_prefix(url, "https://")) {
+        if (!sn_sv_has_prefix(url, "https://github.com/"))
+            return false;
 
-    foo = sn_sv_chop_until(&url, ':');
-    if (url.length == 0)
-        return false;
+        url.data   += sizeof("https://github.com/") - 1;
+        url.length -= sizeof("https://github.com/") - 1;
+    } else {
+        // SSH
+        foo = sn_sv_chop_until(&url, '@');
+        if (url.length == 0)
+            return false;
 
-    url.length -= 1;
-    url.data   += 1;
+        url.length -= 1;
+        url.data   += 1;
+
+        if (!sn_sv_has_prefix(url, "github.com"))
+            return false;
+
+        foo = sn_sv_chop_until(&url, ':');
+        if (url.length == 0)
+            return false;
+
+        url.length -= 1;
+        url.data   += 1;
+    }
 
     foo = sn_sv_chop_until(&url, '/');
     if (url.length == 0)

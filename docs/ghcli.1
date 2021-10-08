@@ -9,10 +9,11 @@
 .Nm
 .Cm issues
 .Op Fl o Ar user-or-organization Fl r Ar repository
+.Op Fl a
 
 .Nm
 .Cm pulls
-.Op Fl o Ar user-or-organization Fl r Ar repository
+.Op Fl o Ar user-or-organization Fl r Ar repository Op Fl a
 .Op Fl p Ar #PR Ar ...
 
 .Sh DESCRIPTION
@@ -49,6 +50,30 @@ Print a summary.
 .It Cm diff
 Print the PR diff.
 .El
+
+.El
+
+.Sh OPTIONS
+.Bl -tag -width indent
+
+.It Fl a
+Fetch all data, including closed issues and closed/merged PRs.
+
+.It Fl o Ar org
+Operate on the given organization/user.
+Can only be used in combination with
+.Fl r .
+
+.It Fl r Ar repo
+Operate on the given repository.
+Can only be used in combination with
+.Fl o .
+
+.It Fl i Ar id
+Operate on the given issue number.
+
+.It Fl p Ar pr
+Operate on the given pull request.
 
 .El
 

@@ -53,7 +53,7 @@ struct ghcli_commit {
     const char *sha, *message, *date, *author, *email;
 };
 
-int  ghcli_get_prs(const char *org, const char *reponame, ghcli_pull **out);
+int  ghcli_get_prs(const char *org, const char *reponame, bool all, ghcli_pull **out);
 void ghcli_print_pr_table(FILE *stream, ghcli_pull *pulls, int pulls_size);
 void ghcli_print_pr_diff(FILE *stream, const char *org, const char *reponame, int pr_number);
 void ghcli_pr_summary(FILE *stream, const char *org, const char *reponame, int pr_number);

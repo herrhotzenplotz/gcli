@@ -59,9 +59,10 @@ subcommand_pulls(int argc, char *argv[])
     int         ch         = 0;
     int         pr         = -1;
     int         pulls_size = 0;
+    bool        all        = false;
 
     /* Parse commandline options */
-    while ((ch = getopt(argc, argv, "o:r:p:")) != -1) {
+    while ((ch = getopt(argc, argv, "o:r:p:a")) != -1) {
         switch (ch) {
         case 'o':
             org = optarg;
@@ -76,6 +77,9 @@ subcommand_pulls(int argc, char *argv[])
 
             if (pr <= 0)
                 errx(1, "pr number is out of range");
+        } break;
+        case 'a': {
+            all = true;
         } break;
         case '?':
         default:
@@ -98,11 +102,15 @@ subcommand_pulls(int argc, char *argv[])
     /* In case no explicit PR number was specified, list all
      * open PRs and exit */
     if (pr < 0) {
-        pulls_size = ghcli_get_prs(org, repo, &pulls);
+        pulls_size = ghcli_get_prs(org, repo, all, &pulls);
         ghcli_print_pr_table(stdout, pulls, pulls_size);
 
         return EXIT_SUCCESS;
     }
+
+    /* If a PR number was given, require -a to be unset */
+    if (all)
+        errx(1, "-a cannot be combined with operations on a PR");
 
     /* we have an explicit PR number, so execute all operations the
      * user has given */
@@ -132,9 +140,10 @@ subcommand_issues(int argc, char *argv[])
     char        *endptr      = NULL;
     int          ch          = 0;
     int          issue       = -1;
+    bool         all         = false;
 
     /* parse options */
-    while ((ch = getopt(argc, argv, "o:r:i:")) != -1) {
+    while ((ch = getopt(argc, argv, "o:r:i:a")) != -1) {
         switch (ch) {
         case 'o':
             org = optarg;
@@ -150,6 +159,9 @@ subcommand_issues(int argc, char *argv[])
             if (issue < 0)
                 errx(1, "issue number is out of range");
         } break;
+        case 'a':
+            all = true;
+            break;
         case '?':
         default:
             errx(1, "RTFM");
@@ -170,10 +182,14 @@ subcommand_issues(int argc, char *argv[])
 
     /* No issue number was given, so list all open issues */
     if (issue < 0) {
-        issues_size = ghcli_get_issues(org, repo, &issues);
+        issues_size = ghcli_get_issues(org, repo, all, &issues);
         ghcli_print_issues_table(stdout, issues, issues_size);
         return EXIT_SUCCESS;
     }
+
+    /* require -a to not be set */
+    if (all)
+        errx(1, "-a cannot be combined with operations on an issue");
 
     /* execute all operations on the given issue */
     while (argc > 0) {

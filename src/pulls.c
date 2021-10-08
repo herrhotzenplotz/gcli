@@ -78,14 +78,15 @@ parse_pull_entry(json_stream *input, ghcli_pull *it)
 }
 
 int
-ghcli_get_prs(const char *org, const char *reponame, ghcli_pull **out)
+ghcli_get_prs(const char *org, const char *reponame, bool all, ghcli_pull **out)
 {
     int                 count       = 0;
     json_stream         stream      = {0};
     ghcli_fetch_buffer  json_buffer = {0};
     char               *url         = NULL;
 
-    url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls?per_page=100", org, reponame);
+    url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls?per_page=100&state=%s",
+                      org, reponame, all ? "all" : "open");
     ghcli_fetch(url, &json_buffer);
 
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);

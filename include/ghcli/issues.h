@@ -31,6 +31,7 @@
 #define ISSUES_H
 
 #include <stdio.h>
+#include <stdbool.h>
 
 typedef struct ghcli_issue ghcli_issue;
 
@@ -41,7 +42,7 @@ struct ghcli_issue {
     int         id;
 };
 
-int  ghcli_get_issues(const char *org, const char *reponame, ghcli_issue **out);
+int  ghcli_get_issues(const char *org, const char *reponame, bool all, ghcli_issue **out);
 void ghcli_print_issues_table(FILE *stream, ghcli_issue *issues, int issues_size);
 
 #endif /* ISSUES_H */

@@ -4,5 +4,10 @@
    - [[file:src/curl.c::ghcli_fetch(const char *url, ghcli_fetch_buffer *out)][ghcli_fetch]]
    - [[file:src/curl.c::ghcli_curl(FILE *stream, const char *url, const char *content_type)][ghcli_curl]]
 ** TODO find a better way to pass the content type to ghcli_curl
-** TODO Man page
-** TODO fetch PR comments
+** DONE Man page
+** DONE fetch PR comments
+** TODO leaks of huge buffers [0%]
+   We don't care about the little strings we sometimes malloc. But the
+   huge buffers are annoying.
+   - [ ] Valgrind
+   - [ ] custom LD_PRELOAD hack

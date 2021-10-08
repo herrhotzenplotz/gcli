@@ -27,42 +27,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * LibSN - things I reuse all the time.
- */
+#ifndef GITCONFIG_H
+#define GITCONFIG_H
 
-#ifndef SN_H
-#define SN_H
+const char *ghcli_find_gitconfig(void);
+void        ghcli_gitconfig_get_repo(const char *config_file_path, const char **org, const char **repo);
 
-#include <stdio.h>
-#include <stdbool.h>
-
-/* error functions */
-void errx(int code, const char *fmt, ...);
-void err(int code, const char *fmt, ...);
-
-/* string functions */
-char *sn_strndup (const char *it, size_t len);
-char *sn_asprintf(const char *fmt, ...);
-// modifies the underlying string
-char *sn_strip_suffix(char *it, const char *suffix);
-
-/* pretty functions */
-void pretty_print(const char *input, int indent, int maxlinelen, FILE *out);
-
-/* io file mapping */
-int  sn_mmap_file(const char *path, void **buffer);
-
-/* stringview */
-typedef struct sn_sv sn_sv;
-
-struct sn_sv {
-    char   *data;
-    size_t  length;
-};
-
-sn_sv sn_sv_trim_front(sn_sv);
-sn_sv sn_sv_chop_until(sn_sv *, char);
-bool  sn_sv_has_prefix(sn_sv, const char *);
-
-#endif /* SN_H */
+#endif /* GITCONFIG_H */

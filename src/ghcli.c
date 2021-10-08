@@ -30,10 +30,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <ghcli/issues.h>
 #include <ghcli/pulls.h>
 #include <ghcli/comments.h>
+#include <ghcli/gitconfig.h>
 
 #include <sn/sn.h>
 
@@ -50,30 +52,53 @@ shift(int *argc, char ***argv)
 static int
 subcommand_pulls(int argc, char *argv[])
 {
+    char       *endptr     = NULL;
+    const char *org        = NULL;
+    const char *repo       = NULL;
     ghcli_pull *pulls      = NULL;
+    int         ch         = 0;
+    int         pr         = -1;
     int         pulls_size = 0;
 
-    if (argc == 2) {
-        pulls_size = ghcli_get_prs(argv[0], argv[1], &pulls);
+    while ((ch = getopt(argc, argv, "o:r:p:")) != -1) {
+        switch (ch) {
+        case 'o':
+            org = optarg;
+            break;
+        case 'r':
+            repo = optarg;
+            break;
+        case 'p': {
+            pr = strtoul(optarg, &endptr, 10);
+            if (endptr != (optarg + strlen(optarg)))
+                err(1, "cannot parse pr number »%s«", optarg);
+
+            if (pr <= 0)
+                errx(1, "pr number is out of range");
+        } break;
+        case '?':
+        default:
+            errx(1, "RTFM");
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    if ((org == NULL) != (repo == NULL))
+        errx(1, "missing either explicit org or repo");
+
+    if (org == NULL) {
+        const char *path = ghcli_find_gitconfig();
+        ghcli_gitconfig_get_repo(path, &org, &repo);
+    }
+
+    if (pr < 0) {
+        pulls_size = ghcli_get_prs(org, repo, &pulls);
         ghcli_print_pr_table(stdout, pulls, pulls_size);
 
         return EXIT_SUCCESS;
     }
-
-    if (argc < 3)
-        errx(1, "Need org and repo name (and PR number) to operate on");
-
-    const char *org    = shift(&argc, &argv);
-    const char *repo   = shift(&argc, &argv);
-    const char *_pr    = shift(&argc, &argv);
-    char       *endptr = NULL;
-
-    int pr = strtoul(_pr, &endptr, 10);
-    if (endptr != (_pr + strlen(_pr)))
-        err(1, "cannot parse pr number »%s«", _pr);
-
-    if (pr <= 0)
-        errx(1, "pr number is out of range");
 
     while (argc > 0) {
         const char *operation = shift(&argc, &argv);
@@ -96,10 +121,36 @@ subcommand_issues(int argc, char *argv[])
 {
     ghcli_issue *issues      = NULL;
     int          issues_size = 0;
+    const char  *org         = NULL;
+    const char  *repo        = NULL;
+    int          ch          = 0;
 
-    (void) argc;
+    while ((ch = getopt(argc, argv, "o:r:")) != -1) {
+        switch (ch) {
+        case 'o':
+            org = optarg;
+            break;
+        case 'r':
+            repo = optarg;
+            break;
+        case '?':
+        default:
+            errx(1, "RTFM");
+        }
+    }
 
-    issues_size = ghcli_get_issues(argv[0], argv[1], &issues);
+    argc -= optind;
+    argv += optind;
+
+    if ((org == NULL) != (repo == NULL))
+        errx(1, "missing either explicit org or repo");
+
+    if (org == NULL) {
+        const char *path = ghcli_find_gitconfig();
+        ghcli_gitconfig_get_repo(path, &org, &repo);
+    }
+
+    issues_size = ghcli_get_issues(org, repo, &issues);
 
     ghcli_print_issues_table(stdout, issues, issues_size);
 
@@ -111,14 +162,15 @@ main(int argc, char *argv[])
 {
     shift(&argc, &argv);
 
-    const char *subcommand = shift(&argc, &argv);
+    if (argc == 0)
+        errx(1, "missing subcommand");
 
-    if (strcmp(subcommand, "pulls") == 0)
+    if (strcmp(argv[0], "pulls") == 0)
         return subcommand_pulls(argc, argv);
-    else if (strcmp(subcommand, "issues") == 0)
+    else if (strcmp(argv[0], "issues") == 0)
         return subcommand_issues(argc, argv);
     else
-        errx(1, "unknown subcommand %s", subcommand);
+        errx(1, "unknown subcommand %s", argv[0]);
 
     return 42;
 }

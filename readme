@@ -12,8 +12,27 @@ people using Tor. This is, because the Go runtime circumvents the DNS
 resolution mechanisms of the Operating System entirely, thus at least
 leaking your IP to the DNS server.
 
+
+Support
+~~~~~~
+
+You can ask your local frenchman aka. neutaaaaan for emotional support
+when using this piece of software.
+
+
+Bugs and contributions
+~~~~~~~~~~~~~~~~~~~~~
+
+Please report bugs to nsonack@outlook.com .
+You can also submit patches this way using git-send-email.
+
+
 License
 ~~~~~~
 
 BSD-2 CLAUSE (aka. FreeBSD License). Please see the LICENSE file
 attached.
+
+
+                                     herrhotzenplotz aka. Nico Sonack
+                                                         October 2021

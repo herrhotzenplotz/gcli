@@ -99,6 +99,8 @@ ghcli_find_gitconfig(void)
         closedir(curr_dir);
     } while (dotgit == NULL);
 
+    free(curr_dir_path);
+
     curr_dir = opendir(dotgit);
     if (!curr_dir)
         err(1, "opendir");

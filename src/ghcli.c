@@ -121,10 +121,36 @@ subcommand_issues(int argc, char *argv[])
 {
     ghcli_issue *issues      = NULL;
     int          issues_size = 0;
+    const char  *org         = NULL;
+    const char  *repo        = NULL;
+    int          ch          = 0;
 
-    (void) argc;
+    while ((ch = getopt(argc, argv, "o:r:")) != -1) {
+        switch (ch) {
+        case 'o':
+            org = optarg;
+            break;
+        case 'r':
+            repo = optarg;
+            break;
+        case '?':
+        default:
+            errx(1, "RTFM");
+        }
+    }
 
-    issues_size = ghcli_get_issues(argv[0], argv[1], &issues);
+    argc -= optind;
+    argv += optind;
+
+    if ((org == NULL) != (repo == NULL))
+        errx(1, "missing either explicit org or repo");
+
+    if (org == NULL) {
+        const char *path = ghcli_find_gitconfig();
+        ghcli_gitconfig_get_repo(path, &org, &repo);
+    }
+
+    issues_size = ghcli_get_issues(org, repo, &issues);
 
     ghcli_print_issues_table(stdout, issues, issues_size);
 

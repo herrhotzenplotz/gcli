@@ -7,7 +7,8 @@
 .Sh SYNOPSIS
 
 .Nm
-.Cm issues Ar user-or-organization Ar repository
+.Cm issues
+.Op Fl o Ar user-or-organization Fl r Ar repository
 
 .Nm
 .Cm pulls
@@ -26,7 +27,7 @@ repositories hosted on GitHub.
 .Bl -tag -width indent
 
 .It Cm issues
-lists open issues on the given repository.
+lists open issues on the given or auto-detected repository.
 
 .It Cm pulls
 lists open pull requests on the given repository.
@@ -68,9 +69,23 @@ ghcli pulls -o vim -r colorschemes -p 78 summary comments | less
 
 .Sh SEE ALSO
 .Xr git 1
+
 .\" .Sh STANDARDS
-.\" .Sh HISTORY
-.\" .Sh AUTHORS
+.Sh HISTORY
+The idea for
+.Nm
+appeared during a long rant on IRC where the issue with the official
+tool written by GitHub became clear to be the manual dialing and DNS
+resolving by the Go runtime, circumventing almost the entirety of the
+OS TCP/IP stack and leaking sensitive information when using Tor.
+
+Implementation started in October 2021 with the goal of having a
+decent, sufficiently portable and secure version of a cli utility to
+interact with the GitHub world without using the horrible web
+interface.
+
+.Sh AUTHORS
+.An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@outlook.com
 .\" .Sh CAVEATS
 
 .Sh BUGS

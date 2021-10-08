@@ -41,7 +41,7 @@ fetch_write_callback(char *in, size_t size, size_t nmemb, void *data)
 
     out->data = realloc(out->data, out->length + size * nmemb);
     memcpy(&(out->data[out->length]), in, size * nmemb);
-    out->length += size + nmemb - 1; // <---- why? wtf?
+    out->length += size * nmemb;
 
     return size * nmemb;
 }

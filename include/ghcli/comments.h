@@ -44,6 +44,6 @@ struct ghcli_comment {
 
 int  ghcli_get_comments(const char *url, ghcli_comment **comments);
 void ghcli_print_comment_list(FILE *stream, ghcli_comment *comments, size_t comments_size);
-void ghcli_pr_comments(FILE *stream, const char *org, const char *repo, int pr);
+void ghcli_issue_comments(FILE *stream, const char *org, const char *repo, int issue);
 
 #endif /* COMMENTS_H */

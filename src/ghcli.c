@@ -60,6 +60,7 @@ subcommand_pulls(int argc, char *argv[])
     int         pr         = -1;
     int         pulls_size = 0;
 
+    /* Parse commandline options */
     while ((ch = getopt(argc, argv, "o:r:p:")) != -1) {
         switch (ch) {
         case 'o':
@@ -85,6 +86,7 @@ subcommand_pulls(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
+    /* If unset try to autodetect github remote */
     if ((org == NULL) != (repo == NULL))
         errx(1, "missing either explicit org or repo");
 
@@ -93,6 +95,8 @@ subcommand_pulls(int argc, char *argv[])
         ghcli_gitconfig_get_repo(path, &org, &repo);
     }
 
+    /* In case no explicit PR number was specified, list all
+     * open PRs and exit */
     if (pr < 0) {
         pulls_size = ghcli_get_prs(org, repo, &pulls);
         ghcli_print_pr_table(stdout, pulls, pulls_size);
@@ -100,6 +104,8 @@ subcommand_pulls(int argc, char *argv[])
         return EXIT_SUCCESS;
     }
 
+    /* we have an explicit PR number, so execute all operations the
+     * user has given */
     while (argc > 0) {
         const char *operation = shift(&argc, &argv);
 
@@ -108,7 +114,7 @@ subcommand_pulls(int argc, char *argv[])
         else if (strcmp(operation, "summary") == 0)
             ghcli_pr_summary(stdout, org, repo, pr);
         else if (strcmp(operation, "comments") == 0)
-            ghcli_pr_comments(stdout, org, repo, pr);
+            ghcli_issue_comments(stdout, org, repo, pr);
         else
             errx(1, "unknown operation %s", operation);
     }
@@ -123,9 +129,12 @@ subcommand_issues(int argc, char *argv[])
     int          issues_size = 0;
     const char  *org         = NULL;
     const char  *repo        = NULL;
+    char        *endptr      = NULL;
     int          ch          = 0;
+    int          issue       = -1;
 
-    while ((ch = getopt(argc, argv, "o:r:")) != -1) {
+    /* parse options */
+    while ((ch = getopt(argc, argv, "o:r:i:")) != -1) {
         switch (ch) {
         case 'o':
             org = optarg;
@@ -133,6 +142,14 @@ subcommand_issues(int argc, char *argv[])
         case 'r':
             repo = optarg;
             break;
+        case 'i': {
+            issue = strtol(optarg, &endptr, 10);
+            if (endptr != (optarg + strlen(optarg)))
+                err(1, "cannot parse issue number");
+
+            if (issue < 0)
+                errx(1, "issue number is out of range");
+        } break;
         case '?':
         default:
             errx(1, "RTFM");
@@ -142,6 +159,7 @@ subcommand_issues(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
+    /* If no remote was specified, try to autodetect */
     if ((org == NULL) != (repo == NULL))
         errx(1, "missing either explicit org or repo");
 
@@ -150,9 +168,22 @@ subcommand_issues(int argc, char *argv[])
         ghcli_gitconfig_get_repo(path, &org, &repo);
     }
 
-    issues_size = ghcli_get_issues(org, repo, &issues);
+    /* No issue number was given, so list all open issues */
+    if (issue < 0) {
+        issues_size = ghcli_get_issues(org, repo, &issues);
+        ghcli_print_issues_table(stdout, issues, issues_size);
+        return EXIT_SUCCESS;
+    }
 
-    ghcli_print_issues_table(stdout, issues, issues_size);
+    /* execute all operations on the given issue */
+    while (argc > 0) {
+        const char *operation = shift(&argc, &argv);
+
+        if (strcmp("comments", operation) == 0)
+            ghcli_issue_comments(stdout, org, repo, issue);
+        else
+            errx(1, "unknown operation %s", operation);
+    }
 
     return EXIT_SUCCESS;
 }
@@ -160,6 +191,7 @@ subcommand_issues(int argc, char *argv[])
 int
 main(int argc, char *argv[])
 {
+    /* discard program name */
     shift(&argc, &argv);
 
     if (argc == 0)

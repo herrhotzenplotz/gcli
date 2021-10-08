@@ -108,9 +108,9 @@ ghcli_print_comment_list(FILE *stream, ghcli_comment *comments, size_t comments_
 }
 
 void
-ghcli_pr_comments(FILE *stream, const char *org, const char *repo, int pr)
+ghcli_issue_comments(FILE *stream, const char *org, const char *repo, int issue)
 {
-    const char    *url      = sn_asprintf("https://api.github.com/repos/%s/%s/issues/%d/comments", org, repo, pr);
+    const char    *url      = sn_asprintf("https://api.github.com/repos/%s/%s/issues/%d/comments", org, repo, issue);
     ghcli_comment *comments = NULL;
     int            n        = ghcli_get_comments(url, &comments);
     ghcli_print_comment_list(stream, comments, (size_t)n);

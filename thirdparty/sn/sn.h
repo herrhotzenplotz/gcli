@@ -38,7 +38,9 @@
 #include <stdbool.h>
 
 /* error functions */
+/* print a formatted error message and exit with code */
 void errx(int code, const char *fmt, ...);
+/* print a formatted error message, the error retrieved from errno and exit with code */
 void err(int code, const char *fmt, ...);
 
 /* string functions */

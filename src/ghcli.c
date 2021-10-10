@@ -27,6 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -49,6 +50,54 @@ shift(int *argc, char ***argv)
     return *((*argv)++);
 }
 
+/**
+ * Create a pull request
+ */
+static int
+subcommand_pull_create(int argc, char *argv[])
+{
+    /* we'll use getopt_long here to parse the arguments */
+    int   is_draft = 0;
+    int   ch;
+    char *from = NULL, *to = NULL;
+
+    const struct option options[] = {
+        { .name = "from",  .has_arg = required_argument, .flag = NULL,      .val = 'f' },
+        { .name = "to",    .has_arg = required_argument, .flag = NULL,      .val = 't' },
+        { .name = "draft", .has_arg = no_argument,       .flag = &is_draft, .val = 1 },
+        {0},
+    };
+
+    while ((ch = getopt_long(argc, argv, "f:t:d", options, NULL)) != -1) {
+        switch (ch) {
+        case 'f':
+            from = optarg;
+            break;
+        case 't':
+            to = optarg;
+            break;
+        case 'd':
+            is_draft = 1;
+            break;
+        default:
+            errx(1, "RTFM");
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    if (!from)
+        errx(1, "PR head is missing. Please specify --from");
+
+    if (!to)
+        errx(1, "PR base is missing. Please specify --to");
+
+    ghcli_pr_submit(from, to, is_draft);
+
+    return EXIT_SUCCESS;
+}
+
 static int
 subcommand_pulls(int argc, char *argv[])
 {
@@ -60,6 +109,12 @@ subcommand_pulls(int argc, char *argv[])
     int         pr         = -1;
     int         pulls_size = 0;
     bool        all        = false;
+
+    /* detect whether we wanna create a PR */
+    if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
+        shift(&argc, &argv);
+        return subcommand_pull_create(argc, argv);
+    }
 
     /* Parse commandline options */
     while ((ch = getopt(argc, argv, "o:r:p:a")) != -1) {

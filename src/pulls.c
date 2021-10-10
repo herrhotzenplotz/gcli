@@ -443,3 +443,12 @@ ghcli_pr_summary(FILE *out, const char *org, const char *reponame, int pr_number
     fprintf(out, "\nCOMMITS\n");
     ghcli_print_commits_table(out, commits, commits_size);
 }
+
+void
+ghcli_pr_submit(const char *from, const char *to, int is_draft)
+{
+    (void) from;
+    (void) to;
+    (void) is_draft;
+    errx(1, "not yet implemented");
+}

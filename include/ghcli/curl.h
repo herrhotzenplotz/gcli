@@ -33,6 +33,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <ghcli/pulls.h>
+
 typedef struct ghcli_fetch_buffer ghcli_fetch_buffer;
 
 struct ghcli_fetch_buffer {
@@ -42,5 +44,7 @@ struct ghcli_fetch_buffer {
 
 int  ghcli_fetch(const char *url, ghcli_fetch_buffer *out);
 void ghcli_curl(FILE *stream, const char *url, const char *content_type);
+void ghcli_perform_submit_pr(ghcli_submit_pull_options opts);
+
 
 #endif /* CURL_H */

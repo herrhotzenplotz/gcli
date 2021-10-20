@@ -119,3 +119,39 @@ ghcli_curl(FILE *stream, const char *url, const char *content_type)
     curl_easy_cleanup(session);
     curl_slist_free_all(headers);
 }
+
+void
+ghcli_perform_submit_pr(ghcli_submit_pull_options opts)
+{
+    CURLcode ret;
+    CURL *session;
+    struct curl_slist *headers;
+
+    /* TODO : JSON Injection */
+    const char *post_fields = sn_asprintf("{\"head\":\"%s\",\"base\":\"%s\", \"title\": \"%s\" }", opts.from, opts.to, opts.title);
+    const char *url         = sn_asprintf("https://api.github.com/repos/%s/pulls", opts.in);
+    const char *auth_header = sn_asprintf("Authorization: token %s", opts.token);
+
+    headers = NULL;
+    headers = curl_slist_append(headers, "Accept: application/vnd.github.v3+json");
+    headers = curl_slist_append(headers, auth_header);
+
+    session = curl_easy_init();
+
+    curl_easy_setopt(session, CURLOPT_URL, url);
+    curl_easy_setopt(session, CURLOPT_POSTFIELDS, post_fields);
+    curl_easy_setopt(session, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(session, CURLOPT_USERAGENT, "curl/7.79.1");
+    curl_easy_setopt(session, CURLOPT_CUSTOMREQUEST, "POST");
+    curl_easy_setopt(session, CURLOPT_TCP_KEEPALIVE, 1L);
+
+    ret = curl_easy_perform(session);
+
+    if (ret != CURLE_OK)
+        errx(1, "Error performing POST request to GitHub api: %s", curl_easy_strerror(ret));
+
+    curl_easy_cleanup(session);
+    session = NULL;
+    curl_slist_free_all(headers);
+    headers = NULL;
+}

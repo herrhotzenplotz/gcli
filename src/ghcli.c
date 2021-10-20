@@ -57,27 +57,34 @@ static int
 subcommand_pull_create(int argc, char *argv[])
 {
     /* we'll use getopt_long here to parse the arguments */
-    int   is_draft = 0;
-    int   ch;
-    char *from = NULL, *to = NULL;
+    int                       ch;
+    ghcli_submit_pull_options opts = {0};
 
     const struct option options[] = {
-        { .name = "from",  .has_arg = required_argument, .flag = NULL,      .val = 'f' },
-        { .name = "to",    .has_arg = required_argument, .flag = NULL,      .val = 't' },
-        { .name = "draft", .has_arg = no_argument,       .flag = &is_draft, .val = 1 },
+        { .name = "from",  .has_arg = required_argument, .flag = NULL,        .val = 'f' },
+        { .name = "to",    .has_arg = required_argument, .flag = NULL,        .val = 't' },
+        { .name = "in",    .has_arg = required_argument, .flag = NULL,        .val = 'i' },
+        { .name = "token", .has_arg = required_argument, .flag = NULL,        .val = 'a' },
+        { .name = "draft", .has_arg = no_argument,       .flag = &opts.draft, .val = 1 },
         {0},
     };
 
-    while ((ch = getopt_long(argc, argv, "f:t:d", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "f:t:di:a:", options, NULL)) != -1) {
         switch (ch) {
         case 'f':
-            from = optarg;
+            opts.from  = optarg;
             break;
         case 't':
-            to = optarg;
+            opts.to    = optarg;
             break;
         case 'd':
-            is_draft = 1;
+            opts.draft = 1;
+            break;
+        case 'i':
+            opts.in    = optarg;
+            break;
+        case 'a':
+            opts.token = optarg;
             break;
         default:
             errx(1, "RTFM");
@@ -87,13 +94,18 @@ subcommand_pull_create(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    if (!from)
+    if (!opts.from)
         errx(1, "PR head is missing. Please specify --from");
 
-    if (!to)
+    if (!opts.to)
         errx(1, "PR base is missing. Please specify --to");
 
-    ghcli_pr_submit(from, to, is_draft);
+    if (argc != 1)
+        errx(1, "Missing title to PR");
+
+    opts.title = argv[0];
+
+    ghcli_pr_submit(opts);
 
     return EXIT_SUCCESS;
 }

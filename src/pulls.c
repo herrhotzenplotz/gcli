@@ -445,10 +445,7 @@ ghcli_pr_summary(FILE *out, const char *org, const char *reponame, int pr_number
 }
 
 void
-ghcli_pr_submit(const char *from, const char *to, int is_draft)
+ghcli_pr_submit(ghcli_submit_pull_options opts)
 {
-    (void) from;
-    (void) to;
-    (void) is_draft;
-    errx(1, "not yet implemented");
+    ghcli_perform_submit_pr(opts);
 }

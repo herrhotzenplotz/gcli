@@ -33,9 +33,10 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-typedef struct ghcli_pull         ghcli_pull;
-typedef struct ghcli_commit       ghcli_commit;
-typedef struct ghcli_pull_summary ghcli_pull_summary;
+typedef struct ghcli_pull                ghcli_pull;
+typedef struct ghcli_submit_pull_options ghcli_submit_pull_options;
+typedef struct ghcli_commit              ghcli_commit;
+typedef struct ghcli_pull_summary        ghcli_pull_summary;
 
 struct ghcli_pull {
     const char *title, *state, *creator;
@@ -53,10 +54,20 @@ struct ghcli_commit {
     const char *sha, *message, *date, *author, *email;
 };
 
+/* Options to submit to the gh api for creating a PR */
+struct ghcli_submit_pull_options {
+    const char *in;
+    const char *from;
+    const char *to;
+    const char *title;
+    const char *token;
+    int         draft;
+};
+
 int  ghcli_get_prs(const char *org, const char *reponame, bool all, ghcli_pull **out);
 void ghcli_print_pr_table(FILE *stream, ghcli_pull *pulls, int pulls_size);
 void ghcli_print_pr_diff(FILE *stream, const char *org, const char *reponame, int pr_number);
 void ghcli_pr_summary(FILE *stream, const char *org, const char *reponame, int pr_number);
-void ghcli_pr_submit(const char *from, const char *to, int in_draft);
+void ghcli_pr_submit(ghcli_submit_pull_options);
 
 #endif /* PULLS_H */

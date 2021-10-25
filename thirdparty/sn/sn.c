@@ -183,6 +183,21 @@ sn_sv_trim_front(sn_sv it)
     return it;
 }
 
+static sn_sv
+sn_sv_trim_end(sn_sv it)
+{
+    while (it.length > 0 && isspace(it.data[it.length - 1]))
+        it.length--;
+
+    return it;
+}
+
+sn_sv
+sn_sv_trim(sn_sv it)
+{
+    return sn_sv_trim_front(sn_sv_trim_end(it));
+}
+
 sn_sv
 sn_sv_chop_until(sn_sv *it, char c)
 {
@@ -214,6 +229,25 @@ sn_sv_has_prefix(sn_sv it, const char *prefix)
     return strncmp(it.data, prefix, len) == 0;
 }
 
+bool
+sn_sv_eq(sn_sv this, sn_sv that)
+{
+    if (this.length != that.length)
+        return false;
+
+    return strncmp(this.data, that.data, this.length) == 0;
+}
+
+bool
+sn_sv_eq_to(const sn_sv this, const char *that)
+{
+    size_t len = strlen(that);
+    if (len != this.length)
+        return false;
+
+    return strncmp(this.data, that, len) == 0;
+}
+
 char *
 sn_strip_suffix(char *it, const char *suffix)
 {
@@ -229,4 +263,24 @@ sn_strip_suffix(char *it, const char *suffix)
         it[off] = '\0';
 
     return it;
+}
+
+sn_sv
+sn_sv_fmt(const char *fmt, ...)
+{
+    char    tmp    = 0;
+    va_list vp;
+    sn_sv   result = {0};
+
+    va_start(vp, fmt);
+
+    result.length = vsnprintf(&tmp, 1, fmt, vp);
+    va_end(vp);
+    result.data = calloc(1, result.length + 1);
+
+    va_start(vp, fmt);
+    vsnprintf(result.data, result.length + 1, fmt, vp);
+    va_end(vp);
+
+    return result;
 }

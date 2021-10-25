@@ -128,9 +128,10 @@ ghcli_perform_submit_pr(ghcli_submit_pull_options opts)
     struct curl_slist *headers;
 
     /* TODO : JSON Injection */
-    const char *post_fields = sn_asprintf("{\"head\":\"%s\",\"base\":\"%s\", \"title\": \"%s\" }", opts.from, opts.to, opts.title);
-    const char *url         = sn_asprintf("https://api.github.com/repos/%s/pulls", opts.in);
-    const char *auth_header = sn_asprintf("Authorization: token %s", opts.token);
+    const char *post_fields = sn_asprintf("{\"head\":\""SV_FMT"\",\"base\":\""SV_FMT"\", \"title\": \""SV_FMT"\" }",
+                                          SV_ARGS(opts.from), SV_ARGS(opts.to), SV_ARGS(opts.title));
+    const char *url         = sn_asprintf("https://api.github.com/repos/"SV_FMT"/pulls", SV_ARGS(opts.in));
+    const char *auth_header = sn_asprintf("Authorization: token "SV_FMT"", SV_ARGS(opts.token));
 
     headers = NULL;
     headers = curl_slist_append(headers, "Accept: application/vnd.github.v3+json");

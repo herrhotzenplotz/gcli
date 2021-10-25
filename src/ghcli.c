@@ -33,12 +33,15 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <ghcli/comments.h>
+#include <ghcli/config.h>
+#include <ghcli/gitconfig.h>
 #include <ghcli/issues.h>
 #include <ghcli/pulls.h>
-#include <ghcli/comments.h>
-#include <ghcli/gitconfig.h>
 
 #include <sn/sn.h>
+
+static ghcli_config config;
 
 static char *
 shift(int *argc, char ***argv)
@@ -58,33 +61,33 @@ subcommand_pull_create(int argc, char *argv[])
 {
     /* we'll use getopt_long here to parse the arguments */
     int                       ch;
-    ghcli_submit_pull_options opts = {0};
+    ghcli_submit_pull_options opts   = {0};
 
     const struct option options[] = {
         { .name = "from",  .has_arg = required_argument, .flag = NULL,        .val = 'f' },
         { .name = "to",    .has_arg = required_argument, .flag = NULL,        .val = 't' },
         { .name = "in",    .has_arg = required_argument, .flag = NULL,        .val = 'i' },
         { .name = "token", .has_arg = required_argument, .flag = NULL,        .val = 'a' },
-        { .name = "draft", .has_arg = no_argument,       .flag = &opts.draft, .val = 1 },
+        { .name = "draft", .has_arg = no_argument,       .flag = &opts.draft, .val = 1   },
         {0},
     };
 
     while ((ch = getopt_long(argc, argv, "f:t:di:a:", options, NULL)) != -1) {
         switch (ch) {
         case 'f':
-            opts.from  = optarg;
+            opts.from  = SV(optarg);
             break;
         case 't':
-            opts.to    = optarg;
+            opts.to    = SV(optarg);
             break;
         case 'd':
             opts.draft = 1;
             break;
         case 'i':
-            opts.in    = optarg;
+            opts.in    = SV(optarg);
             break;
         case 'a':
-            opts.token = optarg;
+            opts.token = SV(optarg);
             break;
         default:
             errx(1, "RTFM");
@@ -94,16 +97,21 @@ subcommand_pull_create(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    if (!opts.from)
+    if (!opts.from.data)
         errx(1, "PR head is missing. Please specify --from");
 
-    if (!opts.to)
+    if (!opts.to.data)
         errx(1, "PR base is missing. Please specify --to");
 
     if (argc != 1)
         errx(1, "Missing title to PR");
 
-    opts.title = argv[0];
+    opts.title = SV(argv[0]);
+
+    if (!opts.token.data && config.api_token.data)
+        opts.token = config.api_token;
+    else if (!config.api_token.data)
+        errx(1, "No API token provided");
 
     ghcli_pr_submit(opts);
 
@@ -276,6 +284,9 @@ main(int argc, char *argv[])
 {
     /* discard program name */
     shift(&argc, &argv);
+
+    // TODO: accept arguments
+    ghcli_config_init(&config, NULL);
 
     if (argc == 0)
         errx(1, "missing subcommand");

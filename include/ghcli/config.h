@@ -27,49 +27,20 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PULLS_H
-#define PULLS_H
-
-#include <stdio.h>
-#include <stdbool.h>
+#ifndef CONFIG_H
+#define CONFIG_H
 
 #include <sn/sn.h>
 
-typedef struct ghcli_pull                ghcli_pull;
-typedef struct ghcli_submit_pull_options ghcli_submit_pull_options;
-typedef struct ghcli_commit              ghcli_commit;
-typedef struct ghcli_pull_summary        ghcli_pull_summary;
+typedef struct ghcli_config ghcli_config;
 
-struct ghcli_pull {
-    const char *title, *state, *creator;
-    int number, id;
-    bool merged;
+struct ghcli_config {
+    sn_sv api_token;
+
+    sn_sv buffer;
+    void *mmap_pointer;
 };
 
-struct ghcli_pull_summary {
-    const char *author, *state, *title, *body, *created_at, *commits_link;
-    int         id, number, comments, additions, deletions, commits, changed_files;
-    bool        merged, mergeable, draft;
-};
+void ghcli_config_init(ghcli_config *it, const char *file_path);
 
-struct ghcli_commit {
-    const char *sha, *message, *date, *author, *email;
-};
-
-/* Options to submit to the gh api for creating a PR */
-struct ghcli_submit_pull_options {
-    sn_sv in;
-    sn_sv from;
-    sn_sv to;
-    sn_sv title;
-    sn_sv token;
-    int   draft;
-};
-
-int  ghcli_get_prs(const char *org, const char *reponame, bool all, ghcli_pull **out);
-void ghcli_print_pr_table(FILE *stream, ghcli_pull *pulls, int pulls_size);
-void ghcli_print_pr_diff(FILE *stream, const char *org, const char *reponame, int pr_number);
-void ghcli_pr_summary(FILE *stream, const char *org, const char *reponame, int pr_number);
-void ghcli_pr_submit(ghcli_submit_pull_options);
-
-#endif /* PULLS_H */
+#endif /* CONFIG_H */

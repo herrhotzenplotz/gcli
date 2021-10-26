@@ -513,13 +513,13 @@ ghcli_pr_get_user_message(ghcli_submit_pull_options opts)
         if (buffer.length > 0) {
             buffer.length -= 1;
             buffer.data   += 1;
+            line.length   += 1;
         }
 
         if (line.length > 0 && line.data[0] == '#')
             continue;
 
         result = sv_append(result, line);
-        result = sv_append(result, SV("\\n"));
         buffer = sn_sv_trim_front(buffer);
     }
 
@@ -535,7 +535,9 @@ ghcli_pr_submit(ghcli_submit_pull_options opts)
     ghcli_fetch_buffer  json_buffer  = {0};
     enum json_type      next;
 
-    opts.comment = ghcli_pr_get_user_message(opts);
+    sn_sv body = ghcli_pr_get_user_message(opts);
+
+    opts.body = ghcli_json_escape(body);
 
     fprintf(stdout,
             "The following PR will be created:\n"
@@ -547,7 +549,7 @@ ghcli_pr_submit(ghcli_submit_pull_options opts)
             "MESSAGE :\n"SV_FMT"\n",
             SV_ARGS(opts.title), SV_ARGS(opts.from),
             SV_ARGS(opts.to), SV_ARGS(opts.in),
-            SV_ARGS(opts.comment));
+            SV_ARGS(body));
 
     fputc('\n', stdout);
 

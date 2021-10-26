@@ -130,7 +130,7 @@ ghcli_perform_submit_pr(ghcli_submit_pull_options opts, ghcli_fetch_buffer *out)
 
     /* TODO : JSON Injection */
     const char *post_fields = sn_asprintf("{\"head\":\""SV_FMT"\",\"base\":\""SV_FMT"\", \"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
-                                          SV_ARGS(opts.from), SV_ARGS(opts.to), SV_ARGS(opts.title), SV_ARGS(opts.comment));
+                                          SV_ARGS(opts.from), SV_ARGS(opts.to), SV_ARGS(opts.title), SV_ARGS(opts.body));
     const char *url         = sn_asprintf("https://api.github.com/repos/"SV_FMT"/pulls", SV_ARGS(opts.in));
     const char *auth_header = sn_asprintf("Authorization: token "SV_FMT"", SV_ARGS(ghcli_config_get_token()));
 

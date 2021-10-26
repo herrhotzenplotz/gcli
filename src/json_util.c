@@ -32,6 +32,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <stdlib.h>
 
 int
 get_int_(json_stream *input, const char *where)
@@ -91,6 +92,40 @@ get_user_(json_stream *input, const char *where)
             result = sn_strndup(result, len);
         } else {
             json_next(input);
+        }
+    }
+
+    return result;
+}
+
+sn_sv
+ghcli_json_escape(sn_sv it)
+{
+    // TODO: Improve performance of ghcli_json_escape
+    sn_sv result = {0};
+
+    for (size_t i = 0; i < it.length; ++i) {
+        switch (it.data[i]) {
+        case '\n': {
+            result.data = realloc(result.data, result.length + 2);
+            memcpy(result.data + result.length, "\\n", 2);
+            result.length += 2;
+        } break;
+        case '"': {
+            result.data = realloc(result.data, result.length + 2);
+            memcpy(result.data + result.length, "\\\"", 2);
+            result.length += 2;
+        } break;
+        case '\\': {
+            result.data = realloc(result.data, result.length + 2);
+            memcpy(result.data + result.length, "\\\\", 2);
+            result.length += 2;
+        } break;
+        default: {
+            result.data = realloc(result.data, result.length + 1);
+            memcpy(result.data + result.length, it.data + i, 1);
+            result.length += 1;
+        } break;
         }
     }
 

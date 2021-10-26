@@ -32,6 +32,8 @@
 
 #include <pdjson/pdjson.h>
 
+#include <sn/sn.h>
+
 #define get_int(input)    get_int_(input, __func__)
 #define get_bool(input)   get_bool_(input, __func__)
 #define get_string(input) get_string_(input, __func__)
@@ -41,5 +43,6 @@ int         get_int_(json_stream *input, const char *function);
 bool        get_bool_(json_stream *input, const char *function);
 const char *get_string_(json_stream *input, const char *function);
 const char *get_user_(json_stream *input, const char *function);
+sn_sv       ghcli_json_escape(sn_sv);
 
 #endif /* JSON_UTIL_H */

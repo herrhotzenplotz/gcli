@@ -41,8 +41,6 @@
 
 #include <sn/sn.h>
 
-static ghcli_config config;
-
 static char *
 shift(int *argc, char ***argv)
 {
@@ -67,12 +65,11 @@ subcommand_pull_create(int argc, char *argv[])
         { .name = "from",  .has_arg = required_argument, .flag = NULL,        .val = 'f' },
         { .name = "to",    .has_arg = required_argument, .flag = NULL,        .val = 't' },
         { .name = "in",    .has_arg = required_argument, .flag = NULL,        .val = 'i' },
-        { .name = "token", .has_arg = required_argument, .flag = NULL,        .val = 'a' },
         { .name = "draft", .has_arg = no_argument,       .flag = &opts.draft, .val = 1   },
         {0},
     };
 
-    while ((ch = getopt_long(argc, argv, "f:t:di:a:", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "f:t:di:", options, NULL)) != -1) {
         switch (ch) {
         case 'f':
             opts.from  = SV(optarg);
@@ -85,9 +82,6 @@ subcommand_pull_create(int argc, char *argv[])
             break;
         case 'i':
             opts.in    = SV(optarg);
-            break;
-        case 'a':
-            opts.token = SV(optarg);
             break;
         default:
             errx(1, "RTFM");
@@ -107,11 +101,6 @@ subcommand_pull_create(int argc, char *argv[])
         errx(1, "Missing title to PR");
 
     opts.title = SV(argv[0]);
-
-    if (!opts.token.data && config.api_token.data)
-        opts.token = config.api_token;
-    else if (!config.api_token.data)
-        errx(1, "No API token provided");
 
     ghcli_pr_submit(opts);
 
@@ -286,7 +275,7 @@ main(int argc, char *argv[])
     shift(&argc, &argv);
 
     // TODO: accept arguments
-    ghcli_config_init(&config, NULL);
+    ghcli_config_init(NULL);
 
     if (argc == 0)
         errx(1, "missing subcommand");

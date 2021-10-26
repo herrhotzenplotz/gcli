@@ -62,7 +62,7 @@ struct ghcli_submit_pull_options {
     sn_sv from;
     sn_sv to;
     sn_sv title;
-    sn_sv token;
+    sn_sv comment;
     int   draft;
 };
 

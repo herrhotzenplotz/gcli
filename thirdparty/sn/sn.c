@@ -284,3 +284,43 @@ sn_sv_fmt(const char *fmt, ...)
 
     return result;
 }
+
+char *
+sn_sv_to_cstr(sn_sv it)
+{
+    return sn_strndup(it.data, it.length);
+}
+
+bool
+sn_yesno(const char *fmt, ...)
+{
+    char    tmp    = 0;
+    va_list vp;
+    sn_sv   message = {0};
+
+    va_start(vp, fmt);
+
+    message.length = vsnprintf(&tmp, 1, fmt, vp);
+    va_end(vp);
+    message.data = calloc(1, message.length + 1);
+
+    va_start(vp, fmt);
+    vsnprintf(message.data, message.length + 1, fmt, vp);
+    va_end(vp);
+
+    do {
+        printf(SV_FMT" [yN] ", SV_ARGS(message));
+
+        char c = getchar();
+
+        if (c == 'y' || c == 'Y')
+            return true;
+        else if (c == '\n' || c == 'n' || c == 'N')
+            return false;
+
+        getchar(); // consume newline character
+
+    } while (!feof(stdin));
+
+    return false;
+}

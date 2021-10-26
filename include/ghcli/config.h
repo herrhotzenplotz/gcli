@@ -32,15 +32,8 @@
 
 #include <sn/sn.h>
 
-typedef struct ghcli_config ghcli_config;
-
-struct ghcli_config {
-    sn_sv api_token;
-
-    sn_sv buffer;
-    void *mmap_pointer;
-};
-
-void ghcli_config_init(ghcli_config *it, const char *file_path);
+void        ghcli_config_init(const char *file_path);
+const char *ghcli_config_get_editor(void);
+sn_sv       ghcli_config_get_token(void);
 
 #endif /* CONFIG_H */

@@ -31,8 +31,16 @@
 
 #include <stdlib.h>
 
+static struct ghcli_config {
+    sn_sv api_token;
+    sn_sv editor;
+
+    sn_sv buffer;
+    void *mmap_pointer;
+} config;
+
 void
-ghcli_config_init(ghcli_config *it, const char *file_path)
+ghcli_config_init(const char *file_path)
 {
     if (!file_path) {
         file_path = getenv("XDG_CONFIG_PATH");
@@ -47,16 +55,16 @@ ghcli_config_init(ghcli_config *it, const char *file_path)
         file_path = sn_asprintf("%s/ghcli/config", file_path);
     }
 
-    int len = sn_mmap_file(file_path, &it->mmap_pointer);
+    int len = sn_mmap_file(file_path, &config.mmap_pointer);
     if (len < 0)
         err(1, "Unable to open config file");
 
-    it->buffer = sn_sv_from_parts(it->mmap_pointer, len);
-    it->buffer = sn_sv_trim_front(it->buffer);
+    config.buffer = sn_sv_from_parts(config.mmap_pointer, len);
+    config.buffer = sn_sv_trim_front(config.buffer);
 
     int curr_line = 1;
-    while (it->buffer.length > 0) {
-        sn_sv line = sn_sv_chop_until(&it->buffer, '\n');
+    while (config.buffer.length > 0) {
+        sn_sv line = sn_sv_chop_until(&config.buffer, '\n');
 
         sn_sv key  = sn_sv_chop_until(&line, '=');
 
@@ -78,12 +86,29 @@ ghcli_config_init(ghcli_config *it, const char *file_path)
         sn_sv value = sn_sv_trim(line);
 
         if (sn_sv_eq_to(key, "api_token"))
-            it->api_token = value;
+            config.api_token = value;
+        else if (sn_sv_eq_to(key, "editor"))
+            config.editor = value;
         else
             errx(1, "%s:%d: unknown config entry '"SV_FMT"'",
                  file_path, curr_line, SV_ARGS(key));
 
-        it->buffer = sn_sv_trim_front(it->buffer);
+        config.buffer = sn_sv_trim_front(config.buffer);
         curr_line++;
     }
+}
+
+const char *
+ghcli_config_get_editor(void)
+{
+    if (config.editor.length)
+        return sn_sv_to_cstr(config.editor);
+    else
+        return NULL;
+}
+
+sn_sv
+ghcli_config_get_token(void)
+{
+    return config.api_token;
 }

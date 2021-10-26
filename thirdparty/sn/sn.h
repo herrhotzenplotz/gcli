@@ -81,12 +81,16 @@ sn_sv_from_parts(char *buf, size_t len)
     return (sn_sv) { .data = buf, .length = len };
 }
 
-sn_sv sn_sv_trim_front(sn_sv);
-sn_sv sn_sv_trim(sn_sv);
-sn_sv sn_sv_chop_until(sn_sv *, char);
-bool  sn_sv_has_prefix(sn_sv, const char *);
-bool  sn_sv_eq(const sn_sv, const sn_sv);
-bool  sn_sv_eq_to(const sn_sv, const char *);
-sn_sv sn_sv_fmt(const char *fmt, ...) PRINTF_FORMAT(1, 2);
+sn_sv  sn_sv_trim_front(sn_sv);
+sn_sv  sn_sv_trim(sn_sv);
+sn_sv  sn_sv_chop_until(sn_sv *, char);
+bool   sn_sv_has_prefix(sn_sv, const char *);
+bool   sn_sv_eq(const sn_sv, const sn_sv);
+bool   sn_sv_eq_to(const sn_sv, const char *);
+sn_sv  sn_sv_fmt(const char *fmt, ...) PRINTF_FORMAT(1, 2);
+char  *sn_sv_to_cstr(sn_sv);
+
+/* interactive user functions */
+bool   sn_yesno(const char *fmt, ...) PRINTF_FORMAT(1, 2);
 
 #endif /* SN_H */

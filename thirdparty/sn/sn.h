@@ -37,15 +37,22 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#if defined(__GNUC__) || defined(__clang__)
+// https://gcc.gnu.org/onlinedocs/gcc-4.7.2/gcc/Function-Attributes.html
+#define PRINTF_FORMAT(STRING_INDEX, FIRST_TO_CHECK) __attribute__ ((format (printf, STRING_INDEX, FIRST_TO_CHECK)))
+#else
+#define PRINTF_FORMAT(STRING_INDEX, FIRST_TO_CHECK)
+#endif
+
 /* error functions */
 /* print a formatted error message and exit with code */
-void errx(int code, const char *fmt, ...);
+void errx(int code, const char *fmt, ...) PRINTF_FORMAT(2, 3);
 /* print a formatted error message, the error retrieved from errno and exit with code */
-void err(int code, const char *fmt, ...);
+void err(int code, const char *fmt, ...) PRINTF_FORMAT(2, 3);
 
 /* string functions */
 char *sn_strndup (const char *it, size_t len);
-char *sn_asprintf(const char *fmt, ...);
+char *sn_asprintf(const char *fmt, ...) PRINTF_FORMAT(1, 2);
 // modifies the underlying string
 char *sn_strip_suffix(char *it, const char *suffix);
 
@@ -63,8 +70,27 @@ struct sn_sv {
     size_t  length;
 };
 
-sn_sv sn_sv_trim_front(sn_sv);
-sn_sv sn_sv_chop_until(sn_sv *, char);
-bool  sn_sv_has_prefix(sn_sv, const char *);
+#define SV(x) (sn_sv) { .data = x, .length = strlen(x) }
+#define SV_FMT "%.*s"
+#define SV_ARGS(x) (int)x.length, x.data
+#define SV_NULL (sn_sv) {0}
+
+static inline sn_sv
+sn_sv_from_parts(char *buf, size_t len)
+{
+    return (sn_sv) { .data = buf, .length = len };
+}
+
+sn_sv  sn_sv_trim_front(sn_sv);
+sn_sv  sn_sv_trim(sn_sv);
+sn_sv  sn_sv_chop_until(sn_sv *, char);
+bool   sn_sv_has_prefix(sn_sv, const char *);
+bool   sn_sv_eq(const sn_sv, const sn_sv);
+bool   sn_sv_eq_to(const sn_sv, const char *);
+sn_sv  sn_sv_fmt(const char *fmt, ...) PRINTF_FORMAT(1, 2);
+char  *sn_sv_to_cstr(sn_sv);
+
+/* interactive user functions */
+bool   sn_yesno(const char *fmt, ...) PRINTF_FORMAT(1, 2);
 
 #endif /* SN_H */

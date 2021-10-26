@@ -21,6 +21,7 @@ ghcli_SRCS			=	src/ghcli.c \
 					src/gitconfig.c \
 					src/pulls.c \
 					src/json_util.c \
+					src/config.c \
 					thirdparty/sn/sn.c \
 					thirdparty/pdjson/pdjson.c
 
@@ -31,3 +32,7 @@ MAN				=	docs/ghcli.1
 # Include the rules to build your program
 # Important: the autodetect.sh script needs to be in place
 include default.mk
+
+.PHONY: TAGS
+TAGS:
+	etags $(find . -type f -name \*.[ch])

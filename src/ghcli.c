@@ -27,15 +27,17 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
+#include <ghcli/comments.h>
+#include <ghcli/config.h>
+#include <ghcli/gitconfig.h>
 #include <ghcli/issues.h>
 #include <ghcli/pulls.h>
-#include <ghcli/comments.h>
-#include <ghcli/gitconfig.h>
 
 #include <sn/sn.h>
 
@@ -49,6 +51,62 @@ shift(int *argc, char ***argv)
     return *((*argv)++);
 }
 
+/**
+ * Create a pull request
+ */
+static int
+subcommand_pull_create(int argc, char *argv[])
+{
+    /* we'll use getopt_long here to parse the arguments */
+    int                       ch;
+    ghcli_submit_pull_options opts   = {0};
+
+    const struct option options[] = {
+        { .name = "from",  .has_arg = required_argument, .flag = NULL,        .val = 'f' },
+        { .name = "to",    .has_arg = required_argument, .flag = NULL,        .val = 't' },
+        { .name = "in",    .has_arg = required_argument, .flag = NULL,        .val = 'i' },
+        { .name = "draft", .has_arg = no_argument,       .flag = &opts.draft, .val = 1   },
+        {0},
+    };
+
+    while ((ch = getopt_long(argc, argv, "f:t:di:", options, NULL)) != -1) {
+        switch (ch) {
+        case 'f':
+            opts.from  = SV(optarg);
+            break;
+        case 't':
+            opts.to    = SV(optarg);
+            break;
+        case 'd':
+            opts.draft = 1;
+            break;
+        case 'i':
+            opts.in    = SV(optarg);
+            break;
+        default:
+            errx(1, "RTFM");
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    if (!opts.from.data)
+        errx(1, "PR head is missing. Please specify --from");
+
+    if (!opts.to.data)
+        errx(1, "PR base is missing. Please specify --to");
+
+    if (argc != 1)
+        errx(1, "Missing title to PR");
+
+    opts.title = SV(argv[0]);
+
+    ghcli_pr_submit(opts);
+
+    return EXIT_SUCCESS;
+}
+
 static int
 subcommand_pulls(int argc, char *argv[])
 {
@@ -60,6 +118,12 @@ subcommand_pulls(int argc, char *argv[])
     int         pr         = -1;
     int         pulls_size = 0;
     bool        all        = false;
+
+    /* detect whether we wanna create a PR */
+    if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
+        shift(&argc, &argv);
+        return subcommand_pull_create(argc, argv);
+    }
 
     /* Parse commandline options */
     while ((ch = getopt(argc, argv, "o:r:p:a")) != -1) {
@@ -209,6 +273,9 @@ main(int argc, char *argv[])
 {
     /* discard program name */
     shift(&argc, &argv);
+
+    // TODO: accept arguments
+    ghcli_config_init(NULL);
 
     if (argc == 0)
         errx(1, "missing subcommand");

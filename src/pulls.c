@@ -28,9 +28,15 @@
  */
 
 #include <assert.h>
+#include <fcntl.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include <sn/sn.h>
+#include <ghcli/config.h>
 #include <ghcli/curl.h>
 #include <ghcli/json_util.h>
 #include <ghcli/pulls.h>
@@ -442,4 +448,143 @@ ghcli_pr_summary(FILE *out, const char *org, const char *reponame, int pr_number
 
     fprintf(out, "\nCOMMITS\n");
     ghcli_print_commits_table(out, commits, commits_size);
+}
+
+static sn_sv
+sv_append(sn_sv this, sn_sv that)
+{
+    this.data = realloc(this.data, this.length + that.length);
+    memcpy(this.data + this.length, that.data, that.length);
+    this.length += that.length;
+
+    return this;
+}
+
+static sn_sv
+ghcli_pr_get_user_message(ghcli_submit_pull_options opts)
+{
+    const char *editor = getenv("EDITOR");
+    if (!editor) {
+        editor = ghcli_config_get_editor();
+        if (!editor)
+            errx(1, "No editor");
+    }
+
+    char   _filename[31] = "/tmp/ghcli_pr_message.XXXXXXX\0";
+    char * filename      = mktemp(_filename);
+
+    FILE *file = fopen(filename, "w");
+    fprintf(file, "# PR TITLE : "SV_FMT"\n", SV_ARGS(opts.title));
+    fprintf(file, "# Enter PR comments below. All lines starting with '#' will be discarded.\n");
+    fclose(file);
+
+    pid_t pid = fork();
+    if (pid == 0) {
+
+        char *const argp[] = { (char *const)editor, filename, NULL };
+        char *const envp[] = { NULL };
+
+        if (execve(editor, argp, envp) < 0)
+            err(1, "execve");
+    } else {
+        int status;
+        if (waitpid(pid, &status, 0) < 0)
+            err(1, "waitpid");
+
+        if (!(WIFEXITED(status)))
+            errx(1, "Editor child exited abnormally");
+
+        if (WEXITSTATUS(status) != 0)
+            errx(1, "Aborting PR. Editor command exited with code %d", WEXITSTATUS(status));
+    }
+
+    void *file_content = NULL;
+    int len = sn_mmap_file(filename, &file_content);
+    if (len < 0)
+        err(1, "mmap");
+
+    sn_sv result = {0};
+    sn_sv buffer = sn_sv_from_parts(file_content, (size_t)len);
+    buffer = sn_sv_trim_front(buffer);
+
+    while (buffer.length > 0) {
+        sn_sv line = sn_sv_chop_until(&buffer, '\n');
+
+        if (buffer.length > 0) {
+            buffer.length -= 1;
+            buffer.data   += 1;
+            line.length   += 1;
+        }
+
+        if (line.length > 0 && line.data[0] == '#')
+            continue;
+
+        result = sv_append(result, line);
+        buffer = sn_sv_trim_front(buffer);
+    }
+
+    munmap(file_content, len);
+
+    return result;
+}
+
+void
+ghcli_pr_submit(ghcli_submit_pull_options opts)
+{
+    json_stream         stream       = {0};
+    ghcli_fetch_buffer  json_buffer  = {0};
+    enum json_type      next;
+
+    sn_sv body = ghcli_pr_get_user_message(opts);
+
+    opts.body = ghcli_json_escape(body);
+
+    fprintf(stdout,
+            "The following PR will be created:\n"
+            "\n"
+            "TITLE   : "SV_FMT"\n"
+            "BASE    : "SV_FMT"\n"
+            "HEAD    : "SV_FMT"\n"
+            "IN      : "SV_FMT"\n"
+            "MESSAGE :\n"SV_FMT"\n",
+            SV_ARGS(opts.title), SV_ARGS(opts.from),
+            SV_ARGS(opts.to), SV_ARGS(opts.in),
+            SV_ARGS(body));
+
+    fputc('\n', stdout);
+
+    if (!sn_yesno("Do you want to continue?"))
+        errx(1, "PR aborted.");
+
+    ghcli_perform_submit_pr(opts, &json_buffer);
+
+    json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+    json_set_streaming(&stream, true);
+
+    next = json_next(&stream);
+
+    while ((next = json_next(&stream)) == JSON_STRING) {
+        size_t len;
+
+        const char *key = json_get_string(&stream, &len);
+        if (strncmp(key, "html_url", len) == 0) {
+            puts(get_string(&stream));
+        } else {
+            enum json_type value_type = json_next(&stream);
+
+            switch (value_type) {
+            case JSON_ARRAY:
+                json_skip_until(&stream, JSON_ARRAY_END);
+                break;
+            case JSON_OBJECT:
+                json_skip_until(&stream, JSON_OBJECT_END);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    if (next != JSON_OBJECT_END)
+        errx(1, "unexpected key type in json object");
 }

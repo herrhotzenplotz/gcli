@@ -30,6 +30,7 @@
 #include <ghcli/config.h>
 
 #include <stdlib.h>
+#include <unistd.h>
 
 static struct ghcli_config {
     sn_sv api_token;
@@ -54,6 +55,9 @@ ghcli_config_init(const char *file_path)
 
         file_path = sn_asprintf("%s/ghcli/config", file_path);
     }
+
+    if (access(file_path, R_OK) < 0)
+        err(1, "Cannot access config file at %s", file_path);
 
     int len = sn_mmap_file(file_path, &config.mmap_pointer);
     if (len < 0)

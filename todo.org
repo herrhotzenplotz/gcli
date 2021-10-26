@@ -14,3 +14,5 @@
 ** TODO issues comments doesn't print the first comment
    it seems to reside in the issue data itself
 ** TODO we don't handle pagination of the api results
+** TODO speed up json_escape
+** TODO repo-specific config file

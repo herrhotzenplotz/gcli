@@ -36,6 +36,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 #if defined(__GNUC__) || defined(__clang__)
 // https://gcc.gnu.org/onlinedocs/gcc-4.7.2/gcc/Function-Attributes.html
@@ -92,5 +93,12 @@ char  *sn_sv_to_cstr(sn_sv);
 
 /* interactive user functions */
 bool   sn_yesno(const char *fmt, ...) PRINTF_FORMAT(1, 2);
+
+static inline const char *
+yesno(bool x)
+{
+    return x ? "yes" : "no";
+}
+
 
 #endif /* SN_H */

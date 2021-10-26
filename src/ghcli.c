@@ -261,6 +261,8 @@ subcommand_issues(int argc, char *argv[])
 
         if (strcmp("comments", operation) == 0)
             ghcli_issue_comments(stdout, org, repo, issue);
+        else if (strcmp("summary", operation) == 0)
+            ghcli_issue_summary(stdout, org, repo, issue);
         else
             errx(1, "unknown operation %s", operation);
     }

@@ -211,12 +211,6 @@ ghcli_pull_parse_inspection(json_stream *input, ghcli_pull_summary *out)
         errx(1, "Unexpected object key type");
 }
 
-static const char *
-yesno(bool x)
-{
-    return x ? "yes" : "no";
-}
-
 static void
 ghcli_print_pr_summary(FILE *out, ghcli_pull_summary *it)
 {

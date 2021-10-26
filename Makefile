@@ -35,4 +35,4 @@ include default.mk
 
 .PHONY: TAGS
 TAGS:
-	etags $(find . -type f -name \*.[ch])
+	etags $$(find . -type f -name \*.[ch])

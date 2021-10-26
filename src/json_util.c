@@ -131,3 +131,19 @@ ghcli_json_escape(sn_sv it)
 
     return result;
 }
+
+sn_sv
+get_sv_(json_stream *input, const char *where)
+{
+    enum json_type type = json_next(input);
+    if (type == JSON_NULL)
+        return SV_NULL;
+
+    if (type != JSON_STRING)
+        errx(1, "%s: unexpected non-string field", where);
+
+    size_t len;
+    const char *it   = json_get_string(input, &len);
+    char       *copy = sn_strndup(it, len);
+    return SV(copy);
+}

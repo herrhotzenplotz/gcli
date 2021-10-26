@@ -31,6 +31,7 @@
 
 #include <sn/sn.h>
 #include <ghcli/curl.h>
+#include <ghcli/json_util.h>
 #include <ghcli/issues.h>
 #include <pdjson/pdjson.h>
 
@@ -46,31 +47,13 @@ parse_issue_entry(json_stream *input, ghcli_issue *it)
         enum json_type  value_type = 0;
 
         if (strncmp("title", key, len) == 0) {
-            value_type = json_next(input);
-            if (value_type != JSON_STRING)
-                errx(1, "Title is not a string");
-
-            const char *title = json_get_string(input, &len);
-            it->title = sn_strndup(title, len);
+            it->title = get_string(input);
         } else if (strncmp("state", key, len) == 0) {
-            value_type = json_next(input);
-            if (value_type != JSON_STRING)
-                errx(1, "state is not a string");
-
-            const char *state = json_get_string(input, &len);
-            it->state = sn_strndup(state, len);
+            it->state = get_string(input);
         } else if (strncmp("number", key, len) == 0) {
-            value_type = json_next(input);
-            if (value_type != JSON_NUMBER)
-                errx(1, "number-field is not a number");
-
-            it->number = json_get_number(input);
+            it->number = get_int(input);
         } else if (strncmp("id", key, len) == 0) {
-            value_type = json_next(input);
-            if (value_type != JSON_NUMBER)
-                errx(1, "id-field is not a number");
-
-            it->id = json_get_number(input);
+            it->id = get_int(input);
         } else {
             value_type = json_next(input);
 
@@ -137,4 +120,92 @@ ghcli_print_issues_table(FILE *stream, ghcli_issue *issues, int issues_size)
     for (int i = 0; i < issues_size; ++i) {
         fprintf(stream, "%5d  %7s  %s\n", issues[i].number, issues[i].state, issues[i].title);
     }
+}
+
+static void
+ghcli_parse_issue_details(json_stream *input, ghcli_issue_details *out)
+{
+    enum json_type key_type, value_type;
+    const char *key;
+
+    json_next(input);
+
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t len;
+        key = json_get_string(input, &len);
+
+        if (strncmp("title", key, len) == 0)
+            out->title = get_sv(input);
+        else if (strncmp("state", key, len) == 0)
+            out->state = get_sv(input);
+        else if (strncmp("body", key, len) == 0)
+            out->body = get_sv(input);
+        else if (strncmp("created_at", key, len) == 0)
+            out->created_at = get_sv(input);
+        else if (strncmp("number", key, len) == 0)
+            out->number = get_int(input);
+        else if (strncmp("comments", key, len) == 0)
+            out->comments = get_int(input);
+        else if (strncmp("user", key, len) == 0)
+            out->author = get_user_sv(input);
+        else if (strncmp("locked", key, len) == 0)
+            out->locked = get_bool(input);
+        else {
+            value_type = json_next(input);
+
+            switch (value_type) {
+            case JSON_ARRAY:
+                json_skip_until(input, JSON_ARRAY_END);
+                break;
+            case JSON_OBJECT:
+                json_skip_until(input, JSON_OBJECT_END);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    if (key_type != JSON_OBJECT_END)
+        errx(1, "Unexpected object key type");
+}
+
+static void
+ghcli_print_issue_summary(FILE *out, ghcli_issue_details *it)
+{
+    fprintf(out,
+            "   NUMBER : %d\n"
+            "    TITLE : "SV_FMT"\n"
+            "  CREATED : "SV_FMT"\n"
+            "   AUTHOR : "SV_FMT"\n"
+            "    STATE : "SV_FMT"\n"
+            " COMMENTS : %d\n"
+            "   LOCKED : %s\n"
+            "\n",
+            it->number,
+            SV_ARGS(it->title), SV_ARGS(it->created_at),
+            SV_ARGS(it->author), SV_ARGS(it->state),
+            it->comments, yesno(it->locked));
+
+    pretty_print(it->body.data, 4, 80, out);
+    fputc('\n', out);
+}
+
+void
+ghcli_issue_summary(FILE *stream, const char *org, const char *repo, int issue_number)
+{
+    const char          *url     = NULL;
+    ghcli_fetch_buffer   buffer  = {0};
+    json_stream          parser  = {0};
+    ghcli_issue_details  details = {0};
+
+    url = sn_asprintf("https://api.github.com/repos/%s/%s/issues/%d?per_page=100",
+                      org, repo, issue_number);
+    ghcli_fetch(url, &buffer);
+
+    json_open_buffer(&parser, buffer.data, buffer.length);
+    json_set_streaming(&parser, true);
+
+    ghcli_parse_issue_details(&parser, &details);
+    ghcli_print_issue_summary(stream, &details);
 }

@@ -34,6 +34,7 @@
 #include <stdbool.h>
 
 typedef struct ghcli_issue ghcli_issue;
+typedef struct ghcli_issue_details ghcli_issue_details;
 
 struct ghcli_issue {
     const char *title;
@@ -42,7 +43,19 @@ struct ghcli_issue {
     int         id;
 };
 
+struct ghcli_issue_details {
+    int   number;
+    sn_sv title;
+    sn_sv created_at;
+    sn_sv author;
+    sn_sv state;
+    int   comments;
+    bool  locked;
+    sn_sv body;
+};
+
 int  ghcli_get_issues(const char *org, const char *reponame, bool all, ghcli_issue **out);
 void ghcli_print_issues_table(FILE *stream, ghcli_issue *issues, int issues_size);
+void ghcli_issue_summary(FILE *stream, const char *org, const char *reponame, int issue_number);
 
 #endif /* ISSUES_H */

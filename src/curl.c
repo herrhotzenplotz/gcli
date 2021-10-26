@@ -121,7 +121,7 @@ ghcli_curl(FILE *stream, const char *url, const char *content_type)
 }
 
 void
-ghcli_perform_submit_pr(ghcli_submit_pull_options opts)
+ghcli_perform_submit_pr(ghcli_submit_pull_options opts, ghcli_fetch_buffer *out)
 {
     CURLcode ret;
     CURL *session;
@@ -145,6 +145,8 @@ ghcli_perform_submit_pr(ghcli_submit_pull_options opts)
     curl_easy_setopt(session, CURLOPT_USERAGENT, "curl/7.79.1");
     curl_easy_setopt(session, CURLOPT_CUSTOMREQUEST, "POST");
     curl_easy_setopt(session, CURLOPT_TCP_KEEPALIVE, 1L);
+    curl_easy_setopt(session, CURLOPT_WRITEDATA, out);
+    curl_easy_setopt(session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
 
     ret = curl_easy_perform(session);
 

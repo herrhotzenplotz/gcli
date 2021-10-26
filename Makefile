@@ -29,10 +29,10 @@ ghcli_SRCS			=	src/ghcli.c \
 # installed.
 MAN				=	docs/ghcli.1
 
-.PHONY: TAGS
-TAGS:
-	etags $(find . -type f -name \*.[ch])
-
 # Include the rules to build your program
 # Important: the autodetect.sh script needs to be in place
 include default.mk
+
+.PHONY: TAGS
+TAGS:
+	etags $(find . -type f -name \*.[ch])

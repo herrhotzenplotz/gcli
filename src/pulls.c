@@ -447,5 +447,38 @@ ghcli_pr_summary(FILE *out, const char *org, const char *reponame, int pr_number
 void
 ghcli_pr_submit(ghcli_submit_pull_options opts)
 {
-    ghcli_perform_submit_pr(opts);
+    json_stream         stream       = {0};
+    ghcli_fetch_buffer  json_buffer  = {0};
+    enum json_type      next;
+
+    ghcli_perform_submit_pr(opts, &json_buffer);
+    json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+    json_set_streaming(&stream, true);
+
+    next = json_next(&stream);
+
+    while ((next = json_next(&stream)) == JSON_STRING) {
+        size_t len;
+
+        const char *key = json_get_string(&stream, &len);
+        if (strncmp(key, "html_url", len) == 0) {
+            puts(get_string(&stream));
+        } else {
+            enum json_type value_type = json_next(&stream);
+
+            switch (value_type) {
+            case JSON_ARRAY:
+                json_skip_until(&stream, JSON_ARRAY_END);
+                break;
+            case JSON_OBJECT:
+                json_skip_until(&stream, JSON_OBJECT_END);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    if (next != JSON_OBJECT_END)
+        errx(1, "unexpected key type in json object");
 }

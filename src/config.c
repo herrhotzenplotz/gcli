@@ -83,6 +83,7 @@ ghcli_config_init(ghcli_config *it, const char *file_path)
             errx(1, "%s:%d: unknown config entry '"SV_FMT"'",
                  file_path, curr_line, SV_ARGS(key));
 
+        it->buffer = sn_sv_trim_front(it->buffer);
         curr_line++;
     }
 }

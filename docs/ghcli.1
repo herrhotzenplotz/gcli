@@ -8,8 +8,8 @@
 
 .Nm
 .Cm issues
-.Op Fl o Ar user-or-organization Fl r Ar repository
-.Op Fl a
+.Op Fl o Ar user-or-organization Fl r Ar repository Op Fl a
+.Op Fl i Ar issue
 
 .Nm
 .Cm pulls
@@ -29,6 +29,19 @@ repositories hosted on GitHub.
 
 .It Cm issues
 lists open issues on the given or auto-detected repository.
+If
+.Fl a
+was specified, all issues including closed ones, are listed.
+.Fl i
+can be used to fetch detailed information about a single issue.
+You can specify one or more operations:
+
+.Bl -tag -width indent
+.It Cm summary
+Print a summary.
+.It Cm comments
+Print the comment section of the issue.
+.El
 
 .It Cm pulls
 lists open pull requests on the given repository.
@@ -47,6 +60,8 @@ following operations to perform on the given pull request:
 .Bl -tag -width indent
 .It Cm summary
 Print a summary.
+.It Cm comments
+Print the comment section of the PR.
 .It Cm diff
 Print the PR diff.
 .El
@@ -81,7 +96,29 @@ Operate on the given pull request.
 .\" Not used in OpenBSD.
 .\" .Sh ENVIRONMENT
 .\" For sections 1, 6, 7, and 8 only.
-.\" .Sh FILES
+.Sh FILES
+.Bl -tag -width ${XDG_CONFIG_DIR}/ghcli/config -compact
+
+.It Pa ${XDG_CONFIG_DIR}/ghcli/config
+The config file for
+.Nm
+It shall contain the following data:
+
+.Bd -literal
+api_token=<valid github api token>
+editor=/path/to/gnoooo/emacs
+.Ed
+
+If editor is not set in the config file,
+.Nm
+will use
+.Ev EDITOR
+from the environment.
+
+.El
+
+
+
 .\" .Sh EXIT STATUS
 .\" For sections 1, 6, and 8 only.
 .Sh EXAMPLES

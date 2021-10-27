@@ -51,6 +51,26 @@ shift(int *argc, char ***argv)
     return *((*argv)++);
 }
 
+static sn_sv
+pr_try_derive_head(void)
+{
+    sn_sv account = {0};
+    sn_sv branch  = {0};
+
+    if (!(account = ghcli_config_get_account()).length)
+        errx(1,
+             "Cannot derive PR head. Please specify --from or set the "
+             "account in the users ghcli config file.");
+
+    if (!(branch = ghcli_gitconfig_get_current_branch()).length)
+        errx(1,
+             "Cannot derive PR head. Please specify --from or, if you are "
+             "in »detached HEAD« state, checkout the branch you want to "
+             "pull request.");
+
+    return sn_sv_fmt(SV_FMT":"SV_FMT, SV_ARGS(account), SV_ARGS(branch));
+}
+
 /**
  * Create a pull request
  */
@@ -92,7 +112,7 @@ subcommand_pull_create(int argc, char *argv[])
     argv += optind;
 
     if (!opts.from.length)
-        errx(1, "PR head is missing. Please specify --from");
+        opts.from = pr_try_derive_head();
 
     if (!opts.to.length) {
         if (!(opts.to = ghcli_config_get_base()).length)
@@ -157,10 +177,8 @@ subcommand_comment(int argc, char *argv[])
     if ((org == NULL) != (repo == NULL))
         errx(1, "missing either explicit org or repo");
 
-    if (org == NULL) {
-        const char *path = ghcli_find_gitconfig();
-        ghcli_gitconfig_get_repo(path, &org, &repo);
-    }
+    if (org == NULL)
+        ghcli_gitconfig_get_repo(&org, &repo);
 
     if (issue < 0)
         errx(1, "missing issue/PR number (use -i)");
@@ -220,10 +238,8 @@ subcommand_pulls(int argc, char *argv[])
     if ((org == NULL) != (repo == NULL))
         errx(1, "missing either explicit org or repo");
 
-    if (org == NULL) {
-        const char *path = ghcli_find_gitconfig();
-        ghcli_gitconfig_get_repo(path, &org, &repo);
-    }
+    if (org == NULL)
+        ghcli_gitconfig_get_repo(&org, &repo);
 
     /* In case no explicit PR number was specified, list all
      * open PRs and exit */
@@ -301,10 +317,8 @@ subcommand_issues(int argc, char *argv[])
     if ((org == NULL) != (repo == NULL))
         errx(1, "missing either explicit org or repo");
 
-    if (org == NULL) {
-        const char *path = ghcli_find_gitconfig();
-        ghcli_gitconfig_get_repo(path, &org, &repo);
-    }
+    if (org == NULL)
+        ghcli_gitconfig_get_repo(&org, &repo);
 
     /* No issue number was given, so list all open issues */
     if (issue < 0) {

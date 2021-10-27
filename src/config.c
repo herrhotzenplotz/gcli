@@ -36,6 +36,7 @@
 static struct ghcli_config {
     sn_sv api_token;
     sn_sv editor;
+    sn_sv account;
 
     sn_sv buffer;
     void *mmap_pointer;
@@ -239,6 +240,8 @@ ghcli_config_init(const char *file_path)
             config.api_token = value;
         else if (sn_sv_eq_to(key, "editor"))
             config.editor = value;
+        else if (sn_sv_eq_to(key, "account"))
+            config.account = value;
         else
             errx(1, "%s:%d: unknown config entry '"SV_FMT"'",
                  file_path, curr_line, SV_ARGS(key));
@@ -261,6 +264,12 @@ sn_sv
 ghcli_config_get_token(void)
 {
     return config.api_token;
+}
+
+sn_sv
+ghcli_config_get_account(void)
+{
+    return config.account;
 }
 
 sn_sv

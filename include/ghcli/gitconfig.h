@@ -30,7 +30,9 @@
 #ifndef GITCONFIG_H
 #define GITCONFIG_H
 
-const char *ghcli_find_gitconfig(void);
-void        ghcli_gitconfig_get_repo(const char *config_file_path, const char **org, const char **repo);
+#include <sn/sn.h>
+
+void        ghcli_gitconfig_get_repo(const char **org, const char **repo);
+sn_sv       ghcli_gitconfig_get_current_branch(void);
 
 #endif /* GITCONFIG_H */

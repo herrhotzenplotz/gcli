@@ -35,8 +35,8 @@
 #include <string.h>
 #include <unistd.h>
 
-const char *
-ghcli_find_gitconfig(void)
+static const char *
+find_file_in_dotgit(const char *fname)
 {
     DIR           *curr_dir    = NULL;
     struct dirent *ent;
@@ -110,15 +110,15 @@ ghcli_find_gitconfig(void)
             continue;
 
         // We found the config file, put together it's path and return that
-        if (strcmp("config", ent->d_name) == 0) {
+        if (strcmp(fname, ent->d_name) == 0) {
             int len = strlen(dotgit);
 
-            config_path = malloc(len + 1 + sizeof("config"));
+            config_path = malloc(len + 1 + sizeof(fname));
 
             memcpy(config_path, dotgit, len);
             config_path[len] = '/';
 
-            memcpy(config_path + len + 1, "config", sizeof("config"));
+            memcpy(config_path + len + 1, fname, strlen(fname) + 1);
 
             closedir(curr_dir);
             free(dotgit);
@@ -129,6 +129,19 @@ ghcli_find_gitconfig(void)
 
     errx(1, ".git without a config file");
     return NULL;
+}
+
+const char *
+ghcli_find_gitconfig(void)
+{
+    return find_file_in_dotgit("config");
+}
+
+sn_sv
+ghcli_gitconfig_get_current_branch(void)
+{
+    errx(1, "%s is not yet implemented", __func__);
+    return SV_NULL;
 }
 
 static bool
@@ -202,10 +215,13 @@ gitconfig_url_extract_github_data(sn_sv url, const char **org, const char **repo
 }
 
 void
-ghcli_gitconfig_get_repo(const char *path, const char **org, const char **repo)
+ghcli_gitconfig_get_repo(const char **org, const char **repo)
 {
-    sn_sv buffer = {0};
+    const char *path   = NULL;
+    sn_sv       buffer = {0};
 
+
+    path          = ghcli_find_gitconfig();
     buffer.length = sn_mmap_file(path, (void **)&buffer.data);
 
     while (buffer.length > 0) {

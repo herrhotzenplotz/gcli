@@ -71,5 +71,6 @@ void ghcli_print_pr_table(FILE *stream, ghcli_pull *pulls, int pulls_size);
 void ghcli_print_pr_diff(FILE *stream, const char *org, const char *reponame, int pr_number);
 void ghcli_pr_summary(FILE *stream, const char *org, const char *reponame, int pr_number);
 void ghcli_pr_submit(ghcli_submit_pull_options);
+void ghcli_pr_merge(FILE *stream, const char *org, const char *reponame, int pr_number);
 
 #endif /* PULLS_H */

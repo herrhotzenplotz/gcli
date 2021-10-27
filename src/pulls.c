@@ -487,3 +487,38 @@ ghcli_pr_submit(ghcli_submit_pull_options opts)
 
     ghcli_print_html_url(json_buffer);
 }
+
+void
+ghcli_pr_merge(FILE *out, const char *org, const char *reponame, int pr_number)
+{
+    json_stream         stream      = {0};
+    ghcli_fetch_buffer  json_buffer = {0};
+    const char         *url         = NULL;
+    const char         *data        = "{}";
+    enum json_type      next;
+    size_t              len;
+    const char         *message;
+    const char         *key;
+
+    url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d/merge", org, reponame, pr_number);
+    ghcli_curl_put(url, data, &json_buffer);
+    json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+    json_set_streaming(&stream, true);
+
+    next = json_next(&stream);
+
+    while ((next = json_next(&stream)) == JSON_STRING) {
+        key = json_get_string(&stream, &len);
+
+        if (strncmp(key, "message", len) == 0) {
+
+            next = json_next(&stream);
+            message  = json_get_string(&stream, &len);
+
+            fprintf(out, "%.*s\n", (int)len, message);
+            return;
+        } else {
+            next = json_next(&stream);
+        }
+    }
+}

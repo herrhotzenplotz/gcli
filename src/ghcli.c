@@ -107,6 +107,59 @@ subcommand_pull_create(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
+/**
+ * Create a comment
+ */
+static int
+subcommand_comment(int argc, char *argv[])
+{
+    int   ch, issue = -1;
+    const char *repo  = NULL, *org = NULL;
+
+    const struct option options[] = {
+        { .name = "repo",  .has_arg = required_argument, .flag = NULL,        .val = 'r' },
+        { .name = "org",   .has_arg = required_argument, .flag = NULL,        .val = 'o' },
+        { .name = "issue", .has_arg = required_argument, .flag = NULL,        .val = 'i' },
+        {0},
+    };
+
+    while ((ch = getopt_long(argc, argv, "r:o:i:", options, NULL)) != -1) {
+        switch (ch) {
+        case 'r':
+            repo = optarg;
+            break;
+        case 'o':
+            org = optarg;
+            break;
+        case 'i': {
+            char *endptr;
+            issue = strtoul(optarg, &endptr, 10);
+            if (endptr != optarg + strlen(optarg))
+                err(1, "Cannot parse issue number");
+        } break;
+        default:
+            errx(1, "RTFM");
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    if ((org == NULL) != (repo == NULL))
+        errx(1, "missing either explicit org or repo");
+
+    if (org == NULL) {
+        const char *path = ghcli_find_gitconfig();
+        ghcli_gitconfig_get_repo(path, &org, &repo);
+    }
+
+    if (issue < 0)
+        errx(1, "missing issue/PR number (use -i)");
+
+    ghcli_comment_submit((ghcli_submit_comment_opts) { .org = org, .repo = repo, .issue = issue });
+    return EXIT_SUCCESS;
+}
+
 static int
 subcommand_pulls(int argc, char *argv[])
 {
@@ -286,6 +339,8 @@ main(int argc, char *argv[])
         return subcommand_pulls(argc, argv);
     else if (strcmp(argv[0], "issues") == 0)
         return subcommand_issues(argc, argv);
+    else if (strcmp(argv[0], "comment") == 0)
+        return subcommand_comment(argc, argv);
     else
         errx(1, "unknown subcommand %s", argv[0]);
 

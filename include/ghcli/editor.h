@@ -27,33 +27,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef COMMENTS_H
-#define COMMENTS_H
-
-#include <stdio.h>
-#include <stdlib.h>
+#ifndef EDITOR_H
+#define EDITOR_H
 
 #include <sn/sn.h>
 
-typedef struct ghcli_comment ghcli_comment;
-typedef struct ghcli_submit_comment_opts ghcli_submit_comment_opts;
+sn_sv ghcli_editor_get_user_message(void (*initializer)(FILE *, void *), void *user_data);
 
-struct ghcli_comment {
-    const char *author;    /* Login name of the comment author */
-    const char *date;      /* Creation date of the comment     */
-    int         id;        /* id of the comment                */
-    const char *body;      /* Raw text of the comment          */
-};
-
-struct ghcli_submit_comment_opts {
-    const char *org, *repo;
-    int         issue;
-    sn_sv       message;
-};
-
-int  ghcli_get_comments(const char *url, ghcli_comment **comments);
-void ghcli_print_comment_list(FILE *stream, ghcli_comment *comments, size_t comments_size);
-void ghcli_issue_comments(FILE *stream, const char *org, const char *repo, int issue);
-void ghcli_comment_submit(ghcli_submit_comment_opts opts);
-
-#endif /* COMMENTS_H */
+#endif /* EDITOR_H */

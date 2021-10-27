@@ -95,7 +95,7 @@ char  *sn_sv_to_cstr(sn_sv);
 bool   sn_yesno(const char *fmt, ...) PRINTF_FORMAT(1, 2);
 
 static inline const char *
-yesno(bool x)
+sn_bool_yesno(bool x)
 {
     return x ? "yes" : "no";
 }

@@ -44,7 +44,7 @@ build: default.mk Makefile ${PROGS}
 	${CC} -c ${COMPILE_FLAGS} -o $@ $<
 
 ${PROGS}: ${OBJS}
-	${LD} ${LINK_FLAGS} -o ${@} ${${@}_SRCS:.c=.o}
+	${LD} -o ${@} ${${@}_SRCS:.c=.o} ${LINK_FLAGS}
 
 clean:
 	rm -f ${PROGS} ${OBJS} config.mk

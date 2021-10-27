@@ -185,8 +185,8 @@ ghcli_perform_submit_comment(ghcli_submit_comment_opts opts, ghcli_fetch_buffer 
     curl_easy_setopt(session, CURLOPT_USERAGENT, "curl/7.79.1");
     curl_easy_setopt(session, CURLOPT_CUSTOMREQUEST, "POST");
     curl_easy_setopt(session, CURLOPT_TCP_KEEPALIVE, 1L);
-    //curl_easy_setopt(session, CURLOPT_WRITEDATA, out);
-    //curl_easy_setopt(session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
+    curl_easy_setopt(session, CURLOPT_WRITEDATA, out);
+    curl_easy_setopt(session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
 
     ret = curl_easy_perform(session);
 

@@ -147,3 +147,39 @@ get_sv_(json_stream *input, const char *where)
     char       *copy = sn_strndup(it, len);
     return SV(copy);
 }
+
+void
+ghcli_print_html_url(ghcli_fetch_buffer buffer)
+{
+    json_stream stream = {0};
+
+    json_open_buffer(&stream, buffer.data, buffer.length);
+    json_set_streaming(&stream, true);
+
+    enum json_type next = json_next(&stream);
+
+    while ((next = json_next(&stream)) == JSON_STRING) {
+        size_t len;
+
+        const char *key = json_get_string(&stream, &len);
+        if (strncmp(key, "html_url", len) == 0) {
+            puts(get_string(&stream));
+        } else {
+            enum json_type value_type = json_next(&stream);
+
+            switch (value_type) {
+            case JSON_ARRAY:
+                json_skip_until(&stream, JSON_ARRAY_END);
+                break;
+            case JSON_OBJECT:
+                json_skip_until(&stream, JSON_OBJECT_END);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    if (next != JSON_OBJECT_END)
+        errx(1, "unexpected key type in json object");
+}

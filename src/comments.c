@@ -146,6 +146,7 @@ ghcli_comment_submit(ghcli_submit_comment_opts opts)
 
     if (sn_yesno("Is this okay?")) {
         ghcli_perform_submit_comment(opts, &buffer);
+        ghcli_print_html_url(buffer);
     } else {
         errx(1, "Aborted by user");
     }

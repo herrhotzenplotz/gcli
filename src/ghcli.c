@@ -267,6 +267,10 @@ subcommand_pulls(int argc, char *argv[])
             ghcli_issue_comments(stdout, org, repo, pr);
         else if (strcmp(operation, "merge") == 0)
             ghcli_pr_merge(stdout, org, repo, pr);
+        else if (strcmp(operation, "close") == 0)
+            ghcli_pr_close(org, repo, pr);
+        else if (strcmp(operation, "reopen") == 0)
+            ghcli_pr_reopen(org, repo, pr);
         else
             errx(1, "unknown operation %s", operation);
     }

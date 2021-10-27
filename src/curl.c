@@ -161,6 +161,41 @@ ghcli_perform_submit_pr(ghcli_submit_pull_options opts, ghcli_fetch_buffer *out)
 }
 
 void
+ghcli_curl_put(const char *url, const char *put_fields, ghcli_fetch_buffer *out)
+{
+    CURLcode ret;
+    CURL *session;
+    struct curl_slist *headers;
+
+    const char *auth_header = sn_asprintf("Authorization: token "SV_FMT"", SV_ARGS(ghcli_config_get_token()));
+
+    headers = NULL;
+    headers = curl_slist_append(headers, "Accept: application/vnd.github.v3+json");
+    headers = curl_slist_append(headers, auth_header);
+
+    session = curl_easy_init();
+
+    curl_easy_setopt(session, CURLOPT_URL, url);
+    curl_easy_setopt(session, CURLOPT_POSTFIELDS, put_fields);
+    curl_easy_setopt(session, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(session, CURLOPT_USERAGENT, "curl/7.79.1");
+    curl_easy_setopt(session, CURLOPT_CUSTOMREQUEST, "PUT");
+    curl_easy_setopt(session, CURLOPT_TCP_KEEPALIVE, 1L);
+    curl_easy_setopt(session, CURLOPT_WRITEDATA, out);
+    curl_easy_setopt(session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
+
+    ret = curl_easy_perform(session);
+
+    if (ret != CURLE_OK)
+        errx(1, "Error performing PUT request to GitHub api: %s", curl_easy_strerror(ret));
+
+    curl_easy_cleanup(session);
+    session = NULL;
+    curl_slist_free_all(headers);
+    headers = NULL;
+}
+
+void
 ghcli_perform_submit_comment(ghcli_submit_comment_opts opts, ghcli_fetch_buffer *out)
 {
     CURLcode ret;

@@ -18,3 +18,4 @@
 ** TODO speed up json_escape
 ** TODO repo-specific config file
 ** DONE comment under PR/Issue
+** TODO make the use of C strings and string views more consistent

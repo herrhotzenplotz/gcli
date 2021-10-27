@@ -11,7 +11,7 @@ CFLAGS_amd64-freebsd-clang	=	-pedantic \
 CFLAGS_sparc-sunos-sunstudio	=	-pedantic -I/opt/bw/include \
 					-g -xO0
 LDFLAGS_sparc-sunos-sunstudio	=	-L/opt/bw/lib -lcurl -R/opt/bw/lib
-CPPFLAGS			=	-D_XOPEN_SOURCE=600 -D_POSIX_C_SOURCE=200112L
+CPPFLAGS			=	-D_XOPEN_SOURCE=600
 
 # List the source files for each binary to be built
 ghcli_SRCS			=	src/ghcli.c \

@@ -63,8 +63,8 @@ parse_pull_entry(json_stream *input, ghcli_pull *it)
             it->number = get_int(input);
         else if (strncmp("id", key, len) == 0)
             it->id = get_int(input);
-        else if (strncmp("merged", key, len) == 0)
-            it->merged = get_bool(input);
+        else if (strncmp("merged_at", key, len) == 0)
+            it->merged = json_next(input) == JSON_STRING;
         else if (strncmp("user", key, len) == 0)
             it->creator = get_user(input);
         else {
@@ -132,11 +132,9 @@ ghcli_print_pr_table(FILE *stream, ghcli_pull *pulls, int pulls_size)
     fprintf(stream,     "%6s  %6s  %6s  %20s  %-s\n", "NUMBER", "STATE", "MERGED", "CREATOR", "TITLE");
     for (int i = 0; i < pulls_size; ++i) {
         fprintf(stream, "%6d  %6s  %6s  %20s  %-s\n",
-                pulls[i].number,
-                pulls[i].state,
-                pulls[i].merged ? "yes" : "no",
-                pulls[i].creator,
-                pulls[i].title);
+                pulls[i].number, pulls[i].state,
+                sn_bool_yesno(pulls[i].merged),
+                pulls[i].creator, pulls[i].title);
     }
 }
 

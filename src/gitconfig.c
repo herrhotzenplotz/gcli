@@ -35,6 +35,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <sys/mman.h>
+
 static const char *
 find_file_in_dotgit(const char *fname)
 {
@@ -140,8 +142,31 @@ ghcli_find_gitconfig(void)
 sn_sv
 ghcli_gitconfig_get_current_branch(void)
 {
-    errx(1, "%s is not yet implemented", __func__);
-    return SV_NULL;
+    const char *HEAD;
+    void       *mmap_pointer;
+    sn_sv       buffer;
+    char        prefix[] = "ref: refs/heads/";
+
+    HEAD = find_file_in_dotgit("HEAD");
+
+    if (!HEAD)
+        return SV_NULL;
+
+    int len = sn_mmap_file(HEAD, &mmap_pointer);
+    if (len < 0)
+        err(1, "mmap");
+
+    buffer = sn_sv_from_parts(mmap_pointer, len);
+
+    if (sn_sv_has_prefix(buffer, prefix)) {
+        buffer.data   += sizeof(prefix) - 1;
+        buffer.length -= sizeof(prefix) - 1;
+
+        return sn_sv_trim(buffer);
+    } else {
+        munmap(mmap_pointer, len);
+        return SV_NULL;
+    }
 }
 
 static bool
@@ -251,7 +276,6 @@ ghcli_gitconfig_get_repo(const char **org, const char **repo)
                 && gitconfig_url_extract_github_data(url, org, repo))
                 return;
         }
-
     }
 
     errx(1, "No GitHub remote found");

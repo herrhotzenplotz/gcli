@@ -476,8 +476,8 @@ ghcli_pr_submit(ghcli_submit_pull_options opts)
             "HEAD    : "SV_FMT"\n"
             "IN      : "SV_FMT"\n"
             "MESSAGE :\n"SV_FMT"\n",
-            SV_ARGS(opts.title), SV_ARGS(opts.from),
-            SV_ARGS(opts.to), SV_ARGS(opts.in),
+            SV_ARGS(opts.title),SV_ARGS(opts.to),
+            SV_ARGS(opts.from), SV_ARGS(opts.in),
             SV_ARGS(body));
 
     fputc('\n', stdout);

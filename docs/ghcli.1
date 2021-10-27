@@ -9,12 +9,24 @@
 .Nm
 .Cm issues
 .Op Fl o Ar user-or-organization Fl r Ar repository Op Fl a
-.Op Fl i Ar issue
+.Op Fl i Ar issue Ar ...
 
 .Nm
 .Cm pulls
 .Op Fl o Ar user-or-organization Fl r Ar repository Op Fl a
 .Op Fl p Ar #PR Ar ...
+
+.Nm
+.Cm pulls create
+.Op Fl -from Ar org:branch
+.Op Fl -to Ar trunk
+.Op Fl -in Ar upstream/repo
+.Ar PR-Title
+
+.Nm
+.Cm comment
+.Op Fl i Ar issue
+.Op Fl p Ar pr
 
 .Sh DESCRIPTION
 The
@@ -64,7 +76,23 @@ Print a summary.
 Print the comment section of the PR.
 .It Cm diff
 Print the PR diff.
+.It Cm merge
+Performs a merge of the PR and closes it.
+.It Cm close
+Sets the state of the PR to closed.
+.It Cm reopen
+Sets the state of the PR to open.
 .El
+
+.It Cm pulls create
+foobar
+
+.It Cm comment
+create a new comment under the issue specified by
+.Fl i
+or the PR specified by
+.Fl p .
+This will open an editor and ask for confirmation.
 
 .El
 
@@ -90,6 +118,36 @@ Operate on the given issue number.
 .It Fl p Ar pr
 Operate on the given pull request.
 
+.It Fl -from , Fl f Ar org:branch
+Create a pull request from the specified target as the head. You may
+omit this flag if you are currently on branch to be PRed and have the
+account field in your config file set. See
+.Sx FILES
+for more details.
+
+.It Fl -to , Fl t Ar branch
+Specifies the branch into which the merge of the PR is being
+requested. You may omit this flag if you have the base field set
+in the
+.Pa .ghcli
+file. See
+.Sx FILES
+for more details.
+
+.It Fl -in , Fl i Ar org/repo
+If a PR is created, it will be submitted to the given repository. You
+may omit this flag if you have the upstream field in the
+.Pa .ghcli
+file set. See
+.Sx FILES
+for more details.
+The
+.Fl i
+flag is only valid in the
+.Cm pulls create
+subcommand. It has a different meaning in all other contexts.
+
+
 .El
 
 .\" .Sh IMPLEMENTATION NOTES
@@ -101,12 +159,13 @@ Operate on the given pull request.
 
 .It Pa ${XDG_CONFIG_DIR}/ghcli/config
 The config file for
-.Nm
+.Nm .
 It shall contain the following data:
 
 .Bd -literal
 api_token=<valid github api token>
-editor=/path/to/gnoooo/emacs
+editor=/path/to/ganoooo/emacs
+account=herrhotzenplotz
 .Ed
 
 If editor is not set in the config file,
@@ -115,8 +174,20 @@ will use
 .Ev EDITOR
 from the environment.
 
-.El
+.It Pa .ghcli
+A repo-specific config file that may contain the following data:
+.Bd -literal
+upstream=herrhotzenplotz/ghcli
+base=trunk
+.Ed
 
+It is intended to be committed into the repo so that users don't have
+to manually specify all the options like
+.Fl -in ,
+.Fl -from ,
+.Fl -base etc.
+
+.El
 
 
 .\" .Sh EXIT STATUS
@@ -151,9 +222,9 @@ interface.
 .\" .Sh CAVEATS
 
 .Sh BUGS
-Not yet finished.
-Error messages are poor.
-Man page is poor.
+Yes. It is software.
+
+Please report issues preferably via e-mail or on GitHub.
 
 .Sh SECURITY CONSIDERATIONS
 It is written in C. If it were written in Rust, it would have been

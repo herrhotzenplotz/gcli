@@ -45,6 +45,7 @@ struct ghcli_fetch_buffer {
 
 int  ghcli_fetch(const char *url, ghcli_fetch_buffer *out);
 void ghcli_curl(FILE *stream, const char *url, const char *content_type);
+void ghcli_curl_put(const char *url, const char *data, ghcli_fetch_buffer *out);
 void ghcli_perform_submit_pr(ghcli_submit_pull_options opts, ghcli_fetch_buffer *out);
 void ghcli_perform_submit_comment(ghcli_submit_comment_opts opts, ghcli_fetch_buffer *out);
 

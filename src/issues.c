@@ -185,7 +185,7 @@ ghcli_print_issue_summary(FILE *out, ghcli_issue_details *it)
             it->number,
             SV_ARGS(it->title), SV_ARGS(it->created_at),
             SV_ARGS(it->author), SV_ARGS(it->state),
-            it->comments, yesno(it->locked));
+            it->comments, sn_bool_yesno(it->locked));
 
     pretty_print(it->body.data, 4, 80, out);
     fputc('\n', out);

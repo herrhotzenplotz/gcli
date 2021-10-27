@@ -29,6 +29,7 @@
 
 #include <ghcli/comments.h>
 #include <ghcli/curl.h>
+#include <ghcli/editor.h>
 #include <ghcli/json_util.h>
 #include <pdjson/pdjson.h>
 #include <sn/sn.h>
@@ -114,4 +115,39 @@ ghcli_issue_comments(FILE *stream, const char *org, const char *repo, int issue)
     ghcli_comment *comments = NULL;
     int            n        = ghcli_get_comments(url, &comments);
     ghcli_print_comment_list(stream, comments, (size_t)n);
+}
+
+static void
+comment_init(FILE *f, void *_data)
+{
+    ghcli_submit_comment_opts *info = _data;
+
+    fprintf(f, "# Enter your comment below, save and exit.\n");
+    fprintf(f, "# All lines with a leading '#' are discarded and will not\n");
+    fprintf(f, "# appear in your comment.\n");
+    fprintf(f, "# COMMENT IN : %s/%s #%d\n", info->org, info->repo, info->issue);
+}
+
+static sn_sv
+ghcli_comment_get_message(ghcli_submit_comment_opts *info)
+{
+    return ghcli_editor_get_user_message(comment_init, info);
+}
+
+void
+ghcli_comment_submit(ghcli_submit_comment_opts opts)
+{
+    ghcli_fetch_buffer buffer = {0};
+    sn_sv message = ghcli_comment_get_message(&opts);
+    opts.message  = ghcli_json_escape(message);
+
+    fprintf(stdout, "You will be commenting the following in %s/%s #%d:\n"SV_FMT"\n",
+            opts.org, opts.repo, opts.issue, SV_ARGS(message));
+
+    if (sn_yesno("Is this okay?")) {
+        ghcli_perform_submit_comment(opts, &buffer);
+        ghcli_print_html_url(buffer);
+    } else {
+        errx(1, "Aborted by user");
+    }
 }

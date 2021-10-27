@@ -30,6 +30,8 @@
 #ifndef JSON_UTIL_H
 #define JSON_UTIL_H
 
+#include <ghcli/curl.h>
+
 #include <pdjson/pdjson.h>
 
 #include <sn/sn.h>
@@ -46,6 +48,7 @@ const char *get_string_(json_stream *input, const char *function);
 sn_sv       get_sv_(json_stream *input, const char *function);
 const char *get_user_(json_stream *input, const char *function);
 sn_sv       ghcli_json_escape(sn_sv);
+void        ghcli_print_html_url(ghcli_fetch_buffer);
 
 static inline sn_sv
 get_user_sv(json_stream *input)

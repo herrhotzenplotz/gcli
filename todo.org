@@ -11,8 +11,10 @@
    huge buffers are annoying.
    - [ ] Valgrind
    - [ ] custom LD_PRELOAD hack
-** TODO issues comments doesn't print the first comment
+** DONE issues comments doesn't print the first comment
    it seems to reside in the issue data itself
+   - solved by printing issue summaries
 ** TODO we don't handle pagination of the api results
 ** TODO speed up json_escape
 ** TODO repo-specific config file
+** DONE comment under PR/Issue

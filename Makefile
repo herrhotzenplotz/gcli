@@ -16,6 +16,7 @@ CPPFLAGS			=	-D_XOPEN_SOURCE=600 -D_POSIX_C_SOURCE=200112L
 # List the source files for each binary to be built
 ghcli_SRCS			=	src/ghcli.c \
 					src/curl.c \
+					src/editor.c \
 					src/issues.c \
 					src/comments.c \
 					src/gitconfig.c \

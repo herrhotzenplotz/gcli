@@ -91,11 +91,18 @@ subcommand_pull_create(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    if (!opts.from.data)
+    if (!opts.from.length)
         errx(1, "PR head is missing. Please specify --from");
 
-    if (!opts.to.data)
-        errx(1, "PR base is missing. Please specify --to");
+    if (!opts.to.length) {
+        if (!(opts.to = ghcli_config_get_base()).length)
+            errx(1, "PR base is missing. Please either specify --to branch-name or set pr.base in .ghcli.");
+    }
+
+    if (!opts.in.length) {
+        if (!(opts.in = ghcli_config_get_upstream()).length)
+            errx(1, "PR target repo is missing. Please either specify --in org/repo or set pr.upstream in .ghcli.");
+    }
 
     if (argc != 1)
         errx(1, "Missing title to PR");
@@ -117,13 +124,14 @@ subcommand_comment(int argc, char *argv[])
     const char *repo  = NULL, *org = NULL;
 
     const struct option options[] = {
-        { .name = "repo",  .has_arg = required_argument, .flag = NULL,        .val = 'r' },
-        { .name = "org",   .has_arg = required_argument, .flag = NULL,        .val = 'o' },
-        { .name = "issue", .has_arg = required_argument, .flag = NULL,        .val = 'i' },
+        { .name = "repo",  .has_arg = required_argument, .flag = NULL, .val = 'r' },
+        { .name = "org",   .has_arg = required_argument, .flag = NULL, .val = 'o' },
+        { .name = "issue", .has_arg = required_argument, .flag = NULL, .val = 'i' },
+        { .name = "pull",  .has_arg = required_argument, .flag = NULL, .val = 'p' },
         {0},
     };
 
-    while ((ch = getopt_long(argc, argv, "r:o:i:", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "r:o:i:p:", options, NULL)) != -1) {
         switch (ch) {
         case 'r':
             repo = optarg;
@@ -131,11 +139,12 @@ subcommand_comment(int argc, char *argv[])
         case 'o':
             org = optarg;
             break;
+        case 'p':
         case 'i': {
             char *endptr;
             issue = strtoul(optarg, &endptr, 10);
             if (endptr != optarg + strlen(optarg))
-                err(1, "Cannot parse issue number");
+                err(1, "Cannot parse issue/PR number");
         } break;
         default:
             errx(1, "RTFM");

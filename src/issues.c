@@ -209,3 +209,29 @@ ghcli_issue_summary(FILE *stream, const char *org, const char *repo, int issue_n
     ghcli_parse_issue_details(&parser, &details);
     ghcli_print_issue_summary(stream, &details);
 }
+
+void
+ghcli_issue_close(const char *org, const char *repo, int issue_number)
+{
+    ghcli_fetch_buffer  json_buffer = {0};
+    const char         *url         = NULL;
+    const char         *data        = NULL;
+
+    url  = sn_asprintf("https://api.github.com/repos/%s/%s/issues/%d", org, repo, issue_number);
+    data = sn_asprintf("{ \"state\": \"close\"}");
+
+    ghcli_curl_with_method("PATCH", url, data, &json_buffer);
+}
+
+void
+ghcli_issue_reopen(const char *org, const char *repo, int issue_number)
+{
+    ghcli_fetch_buffer  json_buffer = {0};
+    const char         *url         = NULL;
+    const char         *data        = NULL;
+
+    url  = sn_asprintf("https://api.github.com/repos/%s/%s/issues/%d", org, repo, issue_number);
+    data = sn_asprintf("{ \"state\": \"open\"}");
+
+    ghcli_curl_with_method("PATCH", url, data, &json_buffer);
+}

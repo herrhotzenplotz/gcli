@@ -345,6 +345,10 @@ subcommand_issues(int argc, char *argv[])
             ghcli_issue_comments(stdout, org, repo, issue);
         else if (strcmp("summary", operation) == 0)
             ghcli_issue_summary(stdout, org, repo, issue);
+        else if (strcmp("close", operation) == 0)
+            ghcli_issue_close(org, repo, issue);
+        else if (strcmp("reopen", operation) == 0)
+            ghcli_issue_reopen(org, repo, issue);
         else
             errx(1, "unknown operation %s", operation);
     }

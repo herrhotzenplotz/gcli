@@ -57,5 +57,7 @@ struct ghcli_issue_details {
 int  ghcli_get_issues(const char *org, const char *reponame, bool all, ghcli_issue **out);
 void ghcli_print_issues_table(FILE *stream, ghcli_issue *issues, int issues_size);
 void ghcli_issue_summary(FILE *stream, const char *org, const char *reponame, int issue_number);
+void ghcli_issue_close(const char *org, const char *repo, int issue_number);
+void ghcli_issue_reopen(const char *org, const char *repo, int issue_number);
 
 #endif /* ISSUES_H */

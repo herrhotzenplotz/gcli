@@ -126,19 +126,19 @@ linker() {
     checking_result "${LD}"
 }
 
-libraries() {
-    PKG_CONFIG=${PKG_CONFIG-`which pkg-config 2>/dev/null`}
-    [ ${PKG_CONFIG} ] || return
+PKG_CONFIG=${PKG_CONFIG-`which pkg-config 2>/dev/null`}
+[ ${PKG_CONFIG} ] || die "Cannot find pkg-config"
 
-    checking "libcurl"
+check_library() {
+    checking "for ${1}"
 
-    cflags_curl=`${PKG_CONFIG} --cflags libcurl`
-    ldflags_curl=`${PKG_CONFIG} --libs libcurl`
+    cflags=`${PKG_CONFIG} --cflags ${1}`
+    ldflags=`${PKG_CONFIG} --libs ${1}`
 
-    [ $? -eq 0 ] || die "Cannot find libcurl"
+    [ $? -eq 0 ] || die "Cannot find ${1}"
 
-    dump "LIB_CFLAGS	+=	${cflags_curl}"
-    dump "LIB_LDFLAGS	+=	${ldflags_curl}"
+    dump "LIB_CFLAGS	+=	${cflags}"
+    dump "LIB_LDFLAGS	+=	${ldflags}"
 
     checking_result "found"
 }
@@ -148,7 +148,6 @@ main() {
     linker
     compiler_flags
     linker_flags
-    libraries
 }
 
 main

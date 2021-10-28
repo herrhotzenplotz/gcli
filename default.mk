@@ -27,7 +27,7 @@
 -include config.mk
 
 PROGS	?=	${PROG}
-SRCS	?=	${${PROGS:=_SRCS}}
+SRCS	?=	${${PROGS:=_SRCS}} ${${LIBS:=_SRCS}}
 OBJS	=	${SRCS:.c=.o}
 
 all: config.mk
@@ -38,7 +38,7 @@ config.mk: autodetect.sh
 	./autodetect.sh
 
 .PHONY: build clean install ${MAN:=-install}
-build: default.mk Makefile ${PROGS}
+build: default.mk Makefile ${PROGS} ${LIBS}
 
 .c.o:
 	${CC} -c ${COMPILE_FLAGS} -o $@ $<
@@ -46,20 +46,28 @@ build: default.mk Makefile ${PROGS}
 ${PROGS}: ${OBJS}
 	${LD} -o ${@} ${${@}_SRCS:.c=.o} ${LINK_FLAGS}
 
+${LIBS}: ${OBJS}
+	${AR} -rc ${@} ${${@}_SRCS:.c=.o}
+
 clean:
-	rm -f ${PROGS} ${OBJS} config.mk
+	rm -f ${PROGS} ${LIBS} ${OBJS} config.mk
 
 PREFIX	?=	/usr/local
 DESTDIR	?=	/
 BINDIR	?=	${DESTDIR}/${PREFIX}/bin
+LIBDIR	?=	${DESTDIR}/${PREFIX}/lib
 MANDIR	?=	${DESTDIR}/${PREFIX}/man
 
 ${PROGS:=-install}:
 	install -d ${BINDIR}
 	install ${@:-install=} ${BINDIR}
 
+${LIBS:=-install}:
+	install -d ${LIBDIR}
+	install ${@:-install=} ${LIBDIR}
+
 ${MAN:=-install}:
 	install -d ${MANDIR}/man`echo "${@:-install=}" | sed 's/.*\.\([1-9]\)$$/\1/g'`
 	gzip -c ${@:-install=} > ${MANDIR}/man`echo "${@:-install=}" | sed 's/.*\.\([1-9]\)$$/\1/g'`/`basename ${@:-install=}`.gz
 
-install: all ${PROGS:=-install} ${MAN:=-install}
+install: all ${PROGS:=-install} ${LIBS:=-install} ${MAN:=-install}

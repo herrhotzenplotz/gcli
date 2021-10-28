@@ -148,6 +148,7 @@ main() {
     linker
     compiler_flags
     linker_flags
+    check_library "libcurl"
 }
 
 main

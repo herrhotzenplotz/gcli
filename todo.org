@@ -15,6 +15,7 @@
    it seems to reside in the issue data itself
    - solved by printing issue summaries
 ** TODO we don't handle pagination of the api results
+   - [ ] See https://docs.github.com/en/rest/guides/getting-started-with-the-rest-api#pagination
 ** TODO speed up json_escape
 ** TODO repo-specific config file
 ** DONE comment under PR/Issue

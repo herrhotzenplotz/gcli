@@ -12,6 +12,11 @@
 .Op Fl i Ar issue Ar ...
 
 .Nm
+.Cm issues create
+.Op Fl -in Ar upstream/repo
+.Ar issue title
+
+.Nm
 .Cm pulls
 .Op Fl o Ar user-or-organization Fl r Ar repository Op Fl a
 .Op Fl p Ar #PR Ar ...
@@ -59,6 +64,18 @@ Close the issue.
 Reopen the issue.
 .El
 
+.It Cm issues create
+Create a new issue. The target of the issue will be inferred from the
+.Xr git 1
+config in case you have configured a GitHub remote. You can override
+the target repository of the issue with the
+.Fl -in
+flag.
+
+You will be prompted for confirmation before the issue is going to be
+submitted.
+
+
 .It Cm pulls
 lists open pull requests on the given repository.
 
@@ -88,8 +105,22 @@ Sets the state of the PR to closed.
 Sets the state of the PR to open.
 .El
 
+
 .It Cm pulls create
-foobar
+Create a new pull request. The target of the pull request will be
+inferred if both the pr.upstream and the pr.base field in the
+.Pa .ghcli
+file are set and if you have checked out the branch that you want to
+merge into the upstream trunk. You can override any of these with the
+options
+.Fl -in ,
+.Fl -to
+and
+.Fl -from .
+
+You will be prompted for confirmation before the Pull request is going
+to be submitted.
+
 
 .It Cm comment
 create a new comment under the issue specified by

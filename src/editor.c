@@ -58,10 +58,10 @@ ghcli_editor_get_user_message(void (*file_initializer)(FILE *, void *), void *us
             errx(1, "No editor");
     }
 
-    char   _filename[31] = "/tmp/ghcli_message.XXXXXXX\0";
-    char * filename      = mktemp(_filename);
+    char   filename[31] = "/tmp/ghcli_message.XXXXXXX\0";
+    int    fd           = mkstemp(filename);
 
-    FILE *file = fopen(filename, "w");
+    FILE *file = fdopen(fd, "w");
     file_initializer(file, user_data);
     fclose(file);
 

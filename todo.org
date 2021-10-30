@@ -20,7 +20,7 @@
 ** TODO repo-specific config file
 ** DONE comment under PR/Issue
 ** TODO make the use of C strings and string views more consistent
-** TODO get rid of mktemp cuz binutils ld bitches about it
+** DONE get rid of mktemp cuz binutils ld bitches about it
    #+begin_example
    src/editor.o: In function `ghcli_editor_get_user_message':
    editor.c:(.text+0x108): warning: the use of `mktemp' is

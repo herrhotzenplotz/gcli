@@ -1,6 +1,8 @@
 # Declare the list of programs
 PROGS				=	ghcli
 
+GHCLI_VERSION			=	0.1-alpha
+
 # These and LDFLAGS can be overwritten
 CFLAGS				=	-std=iso9899:1999 \
 					-Ithirdparty/pdjson/ \
@@ -11,7 +13,8 @@ CFLAGS_amd64-freebsd-clang	=	-pedantic \
 CFLAGS_sparc-sunos-sunstudio	=	-pedantic -I/opt/bw/include \
 					-g -xO0
 LDFLAGS_sparc-sunos-sunstudio	=	-L/opt/bw/lib -lcurl -R/opt/bw/lib
-CPPFLAGS			=	-D_XOPEN_SOURCE=600
+CPPFLAGS			=	-D_XOPEN_SOURCE=600 \
+					-DGHCLI_VERSION_STRING=\"${GHCLI_VERSION}\"
 
 # List the source files for each binary to be built
 ghcli_SRCS			=	src/ghcli.c \

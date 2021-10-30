@@ -45,10 +45,28 @@ static char *
 shift(int *argc, char ***argv)
 {
     if (*argc == 0)
-        errx(1, "Not enough arguments");
+        errx(1, "error: Not enough arguments");
 
     (*argc)--;
     return *((*argv)++);
+}
+
+static void
+version(void)
+{
+    fprintf(stderr,
+            "ghcli version "GHCLI_VERSION_STRING" - a command line utility to interact with GitHub\n"
+            "Copyright 2021 Nico Sonack <nsonack@outlook.com>\n"
+            "This program is licensed under the BSD2CLAUSE license. You should\n"
+            "received a copy of it with its distribution.\n");
+}
+
+static void
+usage(void)
+{
+    fprintf(stderr, "usage: ghcli [subcommand] [options] ...\n");
+    version();
+    exit(1);
 }
 
 static sn_sv
@@ -59,14 +77,14 @@ pr_try_derive_head(void)
 
     if (!(account = ghcli_config_get_account()).length)
         errx(1,
-             "Cannot derive PR head. Please specify --from or set the "
-             "account in the users ghcli config file.");
+             "error: Cannot derive PR head. Please specify --from or set the "
+             "       account in the users ghcli config file.");
 
     if (!(branch = ghcli_gitconfig_get_current_branch()).length)
         errx(1,
-             "Cannot derive PR head. Please specify --from or, if you are "
-             "in »detached HEAD« state, checkout the branch you want to "
-             "pull request.");
+             "error: Cannot derive PR head. Please specify --from or, if you are "
+             "       in »detached HEAD« state, checkout the branch you want to "
+             "       pull request.");
 
     return sn_sv_fmt(SV_FMT":"SV_FMT, SV_ARGS(account), SV_ARGS(branch));
 }
@@ -92,7 +110,7 @@ subcommand_issue_create(int argc, char *argv[])
             opts.in    = SV(optarg);
             break;
         default:
-            errx(1, "RTFM");
+            usage();
         }
     }
 
@@ -101,11 +119,11 @@ subcommand_issue_create(int argc, char *argv[])
 
     if (!opts.in.length) {
         if (!(opts.in = ghcli_config_get_upstream()).length)
-            errx(1, "Target repo for the issue to be created in is missing. Please either specify '--in org/repo' or set pr.upstream in .ghcli.");
+            errx(1, "error: Target repo for the issue to be created in is missing. Please either specify '--in org/repo' or set pr.upstream in .ghcli.");
     }
 
     if (argc != 1)
-        errx(1, "Expected one argument for issue title");
+        errx(1, "error: Expected one argument for issue title");
 
     opts.title = SV(argv[0]);
 
@@ -147,7 +165,7 @@ subcommand_pull_create(int argc, char *argv[])
             opts.in    = SV(optarg);
             break;
         default:
-            errx(1, "RTFM");
+            usage();
         }
     }
 
@@ -159,16 +177,16 @@ subcommand_pull_create(int argc, char *argv[])
 
     if (!opts.to.length) {
         if (!(opts.to = ghcli_config_get_base()).length)
-            errx(1, "PR base is missing. Please either specify --to branch-name or set pr.base in .ghcli.");
+            errx(1, "error: PR base is missing. Please either specify --to branch-name or set pr.base in .ghcli.");
     }
 
     if (!opts.in.length) {
         if (!(opts.in = ghcli_config_get_upstream()).length)
-            errx(1, "PR target repo is missing. Please either specify --in org/repo or set pr.upstream in .ghcli.");
+            errx(1, "error: PR target repo is missing. Please either specify --in org/repo or set pr.upstream in .ghcli.");
     }
 
     if (argc != 1)
-        errx(1, "Missing title to PR");
+        errx(1, "error: Missing title to PR");
 
     opts.title = SV(argv[0]);
 
@@ -207,10 +225,10 @@ subcommand_comment(int argc, char *argv[])
             char *endptr;
             issue = strtoul(optarg, &endptr, 10);
             if (endptr != optarg + strlen(optarg))
-                err(1, "Cannot parse issue/PR number");
+                err(1, "error: Cannot parse issue/PR number");
         } break;
         default:
-            errx(1, "RTFM");
+            usage();
         }
     }
 
@@ -218,13 +236,13 @@ subcommand_comment(int argc, char *argv[])
     argv += optind;
 
     if ((org == NULL) != (repo == NULL))
-        errx(1, "missing either explicit org or repo");
+        errx(1, "error: missing either explicit org or repo");
 
     if (org == NULL)
         ghcli_gitconfig_get_repo(&org, &repo);
 
     if (issue < 0)
-        errx(1, "missing issue/PR number (use -i)");
+        errx(1, "error: missing issue/PR number (use -i)");
 
     ghcli_comment_submit((ghcli_submit_comment_opts) { .org = org, .repo = repo, .issue = issue });
     return EXIT_SUCCESS;
@@ -260,17 +278,17 @@ subcommand_pulls(int argc, char *argv[])
         case 'p': {
             pr = strtoul(optarg, &endptr, 10);
             if (endptr != (optarg + strlen(optarg)))
-                err(1, "cannot parse pr number »%s«", optarg);
+                err(1, "error: cannot parse pr number »%s«", optarg);
 
             if (pr <= 0)
-                errx(1, "pr number is out of range");
+                errx(1, "error: pr number is out of range");
         } break;
         case 'a': {
             all = true;
         } break;
         case '?':
         default:
-            errx(1, "RTFM");
+            usage();
         }
     }
 
@@ -279,7 +297,7 @@ subcommand_pulls(int argc, char *argv[])
 
     /* If unset try to autodetect github remote */
     if ((org == NULL) != (repo == NULL))
-        errx(1, "missing either explicit org or repo");
+        errx(1, "error: missing either explicit org or repo");
 
     if (org == NULL)
         ghcli_gitconfig_get_repo(&org, &repo);
@@ -295,7 +313,7 @@ subcommand_pulls(int argc, char *argv[])
 
     /* If a PR number was given, require -a to be unset */
     if (all)
-        errx(1, "-a cannot be combined with operations on a PR");
+        errx(1, "error: -a cannot be combined with operations on a PR");
 
     /* we have an explicit PR number, so execute all operations the
      * user has given */
@@ -315,7 +333,7 @@ subcommand_pulls(int argc, char *argv[])
         else if (strcmp(operation, "reopen") == 0)
             ghcli_pr_reopen(org, repo, pr);
         else
-            errx(1, "unknown operation %s", operation);
+            errx(1, "error: unknown operation %s", operation);
     }
 
     return EXIT_SUCCESS;
@@ -351,17 +369,17 @@ subcommand_issues(int argc, char *argv[])
         case 'i': {
             issue = strtol(optarg, &endptr, 10);
             if (endptr != (optarg + strlen(optarg)))
-                err(1, "cannot parse issue number");
+                err(1, "error: cannot parse issue number");
 
             if (issue < 0)
-                errx(1, "issue number is out of range");
+                errx(1, "error: issue number is out of range");
         } break;
         case 'a':
             all = true;
             break;
         case '?':
         default:
-            errx(1, "RTFM");
+            usage();
         }
     }
 
@@ -370,7 +388,7 @@ subcommand_issues(int argc, char *argv[])
 
     /* If no remote was specified, try to autodetect */
     if ((org == NULL) != (repo == NULL))
-        errx(1, "missing either explicit org or repo");
+        errx(1, "error: missing either explicit org or repo");
 
     if (org == NULL)
         ghcli_gitconfig_get_repo(&org, &repo);
@@ -399,7 +417,7 @@ subcommand_issues(int argc, char *argv[])
         else if (strcmp("reopen", operation) == 0)
             ghcli_issue_reopen(org, repo, issue);
         else
-            errx(1, "unknown operation %s", operation);
+            errx(1, "error: unknown operation %s", operation);
     }
 
     return EXIT_SUCCESS;
@@ -415,16 +433,21 @@ main(int argc, char *argv[])
     ghcli_config_init(NULL);
 
     if (argc == 0)
-        errx(1, "missing subcommand");
+        errx(1, "error: missing subcommand");
 
-    if (strcmp(argv[0], "pulls") == 0)
+    if (strcmp(argv[0], "pulls") == 0) {
         return subcommand_pulls(argc, argv);
-    else if (strcmp(argv[0], "issues") == 0)
+    } else if (strcmp(argv[0], "issues") == 0) {
         return subcommand_issues(argc, argv);
-    else if (strcmp(argv[0], "comment") == 0)
+    } else if (strcmp(argv[0], "comment") == 0) {
         return subcommand_comment(argc, argv);
-    else
-        errx(1, "unknown subcommand %s", argv[0]);
+    } else if (strcmp(argv[0], "version") == 0) {
+        version();
+        return 0;
+    } else {
+        fprintf(stderr, "error: unknown subcommand %s\n", argv[0]);
+        usage();
+    }
 
     return 42;
 }

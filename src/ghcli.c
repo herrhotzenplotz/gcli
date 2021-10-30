@@ -75,6 +75,49 @@ pr_try_derive_head(void)
  * Create a pull request
  */
 static int
+subcommand_issue_create(int argc, char *argv[])
+{
+    /* we'll use getopt_long here to parse the arguments */
+    int                       ch;
+    ghcli_submit_issue_options opts   = {0};
+
+    const struct option options[] = {
+        { .name = "in", .has_arg = required_argument, .flag = NULL, .val = 'i' },
+        {0},
+    };
+
+    while ((ch = getopt_long(argc, argv, "i:", options, NULL)) != -1) {
+        switch (ch) {
+        case 'i':
+            opts.in    = SV(optarg);
+            break;
+        default:
+            errx(1, "RTFM");
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    if (!opts.in.length) {
+        if (!(opts.in = ghcli_config_get_upstream()).length)
+            errx(1, "Target repo for the issue to be created in is missing. Please either specify '--in org/repo' or set pr.upstream in .ghcli.");
+    }
+
+    if (argc != 1)
+        errx(1, "Expected one argument for issue title");
+
+    opts.title = SV(argv[0]);
+
+    ghcli_issue_submit(opts);
+
+    return EXIT_SUCCESS;
+}
+
+/**
+ * Create a pull request
+ */
+static int
 subcommand_pull_create(int argc, char *argv[])
 {
     /* we'll use getopt_long here to parse the arguments */
@@ -289,6 +332,12 @@ subcommand_issues(int argc, char *argv[])
     int          ch          = 0;
     int          issue       = -1;
     bool         all         = false;
+
+    /* detect whether we wanna create an issue */
+    if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
+        shift(&argc, &argv);
+        return subcommand_issue_create(argc, argv);
+    }
 
     /* parse options */
     while ((ch = getopt(argc, argv, "o:r:i:a")) != -1) {

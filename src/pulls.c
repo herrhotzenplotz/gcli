@@ -501,7 +501,7 @@ ghcli_pr_merge(FILE *out, const char *org, const char *reponame, int pr_number)
     const char         *key;
 
     url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d/merge", org, reponame, pr_number);
-    ghcli_curl_with_method("PUT", url, data, &json_buffer);
+    ghcli_fetch_with_method("PUT", url, data, &json_buffer);
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
     json_set_streaming(&stream, true);
 
@@ -533,7 +533,7 @@ ghcli_pr_close(const char *org, const char *reponame, int pr_number)
     url  = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d", org, reponame, pr_number);
     data = sn_asprintf("{ \"state\": \"closed\"}");
 
-    ghcli_curl_with_method("PATCH", url, data, &json_buffer);
+    ghcli_fetch_with_method("PATCH", url, data, &json_buffer);
 }
 
 void
@@ -546,5 +546,5 @@ ghcli_pr_reopen(const char *org, const char *reponame, int pr_number)
     url  = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d", org, reponame, pr_number);
     data = sn_asprintf("{ \"state\": \"open\"}");
 
-    ghcli_curl_with_method("PATCH", url, data, &json_buffer);
+    ghcli_fetch_with_method("PATCH", url, data, &json_buffer);
 }

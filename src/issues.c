@@ -31,6 +31,7 @@
 
 #include <sn/sn.h>
 #include <ghcli/curl.h>
+#include <ghcli/editor.h>
 #include <ghcli/json_util.h>
 #include <ghcli/issues.h>
 #include <pdjson/pdjson.h>
@@ -220,7 +221,7 @@ ghcli_issue_close(const char *org, const char *repo, int issue_number)
     url  = sn_asprintf("https://api.github.com/repos/%s/%s/issues/%d", org, repo, issue_number);
     data = sn_asprintf("{ \"state\": \"close\"}");
 
-    ghcli_curl_with_method("PATCH", url, data, &json_buffer);
+    ghcli_fetch_with_method("PATCH", url, data, &json_buffer);
 }
 
 void
@@ -233,5 +234,47 @@ ghcli_issue_reopen(const char *org, const char *repo, int issue_number)
     url  = sn_asprintf("https://api.github.com/repos/%s/%s/issues/%d", org, repo, issue_number);
     data = sn_asprintf("{ \"state\": \"open\"}");
 
-    ghcli_curl_with_method("PATCH", url, data, &json_buffer);
+    ghcli_fetch_with_method("PATCH", url, data, &json_buffer);
+}
+
+static void
+issue_init_user_file(FILE *stream, void *_opts)
+{
+    ghcli_submit_issue_options *opts = _opts;
+    fprintf(stream, "# ISSUE TITLE : "SV_FMT"\n", SV_ARGS(opts->title));
+    fprintf(stream, "# Enter issue description below. All lines starting with '#' will be discarded.\n");
+}
+
+static sn_sv
+ghcli_issue_get_user_message(ghcli_submit_issue_options *opts)
+{
+    return ghcli_editor_get_user_message(issue_init_user_file, opts);
+}
+
+void
+ghcli_issue_submit(ghcli_submit_issue_options opts)
+{
+    ghcli_fetch_buffer  json_buffer  = {0};
+
+    sn_sv body = ghcli_issue_get_user_message(&opts);
+
+    opts.body = ghcli_json_escape(body);
+
+    fprintf(stdout,
+            "The following issue will be created:\n"
+            "\n"
+            "TITLE   : "SV_FMT"\n"
+            "IN      : "SV_FMT"\n"
+            "MESSAGE :\n"SV_FMT"\n",
+            SV_ARGS(opts.title),SV_ARGS(opts.in),
+            SV_ARGS(body));
+
+    fputc('\n', stdout);
+
+    if (!sn_yesno("Do you want to continue?"))
+        errx(1, "Submission aborted.");
+
+    ghcli_perform_submit_issue(opts, &json_buffer);
+
+    ghcli_print_html_url(json_buffer);
 }

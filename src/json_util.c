@@ -34,11 +34,23 @@
 #include <string.h>
 #include <stdlib.h>
 
+static inline void
+barf(const char *message, const char *where)
+{
+    errx(1,
+         "error: %s.\n"
+         "       This might be an error on the GitHub api or the result of incorrect\n"
+         "       usage of cli flags. See ghcli(1) to make sure your flags are correct.\n"
+         "       If you are certain that all your options were correct, please submit\n"
+         "       a bug report including the command you invoked and the following\n"
+         "       information about the error location: file = %s", message, where);
+}
+
 int
 get_int_(json_stream *input, const char *where)
 {
     if (json_next(input) != JSON_NUMBER)
-        errx(1, "%s: unexpected non-numeric field", where);
+        barf("unexpected non-numeric field", where);
 
     return json_get_number(input);
 }
@@ -51,7 +63,7 @@ get_string_(json_stream *input, const char *where)
         return "<empty>";
 
     if (type != JSON_STRING)
-        errx(1, "%s: unexpected non-string field", where);
+        barf("unexpected non-string field", where);
 
     size_t len;
     const char *it = json_get_string(input, &len);
@@ -67,7 +79,7 @@ get_bool_(json_stream *input, const char *where)
     else if (value_type == JSON_FALSE || value_type == JSON_NULL) // HACK
         return false;
     else
-        errx(1, "%s: unexpected non-boolean value", where);
+        barf("unexpected non-boolean value", where);
 
     errx(42, "%s: unreachable", where);
     return false;
@@ -77,7 +89,7 @@ const char *
 get_user_(json_stream *input, const char *where)
 {
     if (json_next(input) != JSON_OBJECT)
-        errx(1, "%s: user field is not an object", where);
+        barf("user field is not an object", where);
 
     const char *result = NULL;
     while (json_next(input) == JSON_STRING) {
@@ -86,7 +98,7 @@ get_user_(json_stream *input, const char *where)
 
         if (strncmp("login", key, len) == 0) {
             if (json_next(input) != JSON_STRING)
-                errx(1, "%s: login of the pull request creator is not a string", where);
+                barf("login of the pull request creator is not a string", where);
 
             result = json_get_string(input, &len);
             result = sn_strndup(result, len);
@@ -140,7 +152,7 @@ get_sv_(json_stream *input, const char *where)
         return SV_NULL;
 
     if (type != JSON_STRING)
-        errx(1, "%s: unexpected non-string field", where);
+        barf("unexpected non-string field", where);
 
     size_t len;
     const char *it   = json_get_string(input, &len);
@@ -181,5 +193,5 @@ ghcli_print_html_url(ghcli_fetch_buffer buffer)
     }
 
     if (next != JSON_OBJECT_END)
-        errx(1, "unexpected key type in json object");
+        barf("unexpected key type in json object", __func__);
 }

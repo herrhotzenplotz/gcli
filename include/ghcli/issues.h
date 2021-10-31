@@ -46,14 +46,16 @@ struct ghcli_issue {
 };
 
 struct ghcli_issue_details {
-    int   number;
-    sn_sv title;
-    sn_sv created_at;
-    sn_sv author;
-    sn_sv state;
-    int   comments;
-    bool  locked;
-    sn_sv body;
+    int     number;
+    sn_sv   title;
+    sn_sv   created_at;
+    sn_sv   author;
+    sn_sv   state;
+    int     comments;
+    bool    locked;
+    sn_sv   body;
+    sn_sv  *labels;
+    size_t  labels_size;
 };
 
 struct ghcli_submit_issue_options {

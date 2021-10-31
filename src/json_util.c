@@ -195,3 +195,51 @@ ghcli_print_html_url(ghcli_fetch_buffer buffer)
     if (next != JSON_OBJECT_END)
         barf("unexpected key type in json object", __func__);
 }
+
+
+const char *
+get_label_(json_stream *input, const char *where)
+{
+    if (json_next(input) != JSON_OBJECT)
+        barf("label field is not an object", where);
+
+    const char *result = NULL;
+    while (json_next(input) == JSON_STRING) {
+        size_t      len = 0;
+        const char *key = json_get_string(input, &len);
+
+        if (strncmp("name", key, len) == 0) {
+            if (json_next(input) != JSON_STRING)
+                barf("name of the label is not a string", where);
+
+            result = json_get_string(input, &len);
+            result = sn_strndup(result, len);
+        } else {
+            json_next(input);
+        }
+    }
+
+    return result;
+}
+
+
+size_t
+ghcli_read_label_list(json_stream *stream, sn_sv **out)
+{
+    enum json_type next;
+    size_t         size;
+
+    size = 0;
+    next = json_next(stream);
+
+    if (next != JSON_ARRAY)
+        barf("expected array for label list", __func__);
+
+    do {
+        *out           = realloc(*out, sizeof(sn_sv) * (size + 1));
+        const char *l  = get_label(stream);
+        (*out)[size++] = SV((char *)l);
+    } while ((next = json_next(stream)) != JSON_ARRAY_END);
+
+    return size;
+}

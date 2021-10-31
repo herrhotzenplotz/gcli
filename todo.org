@@ -17,7 +17,7 @@
 ** TODO we don't handle pagination of the api results
    - [ ] See https://docs.github.com/en/rest/guides/getting-started-with-the-rest-api#pagination
 ** TODO speed up json_escape
-** TODO repo-specific config file
+** DONE repo-specific config file
 ** DONE comment under PR/Issue
 ** TODO make the use of C strings and string views more consistent
 ** DONE get rid of mktemp cuz binutils ld bitches about it

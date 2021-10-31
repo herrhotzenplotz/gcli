@@ -151,6 +151,8 @@ ghcli_parse_issue_details(json_stream *input, ghcli_issue_details *out)
             out->author = get_user_sv(input);
         else if (strncmp("locked", key, len) == 0)
             out->locked = get_bool(input);
+        else if (strncmp("labels", key, len) == 0)
+            out->labels_size = ghcli_read_label_list(input, &out->labels);
         else {
             value_type = json_next(input);
 
@@ -182,11 +184,21 @@ ghcli_print_issue_summary(FILE *out, ghcli_issue_details *it)
             "    STATE : "SV_FMT"\n"
             " COMMENTS : %d\n"
             "   LOCKED : %s\n"
-            "\n",
+            "   LABELS : ",
             it->number,
             SV_ARGS(it->title), SV_ARGS(it->created_at),
             SV_ARGS(it->author), SV_ARGS(it->state),
             it->comments, sn_bool_yesno(it->locked));
+
+    if (it->labels_size) {
+        fprintf(out, SV_FMT, SV_ARGS(it->labels[0]));
+
+        for (size_t i = 1; i < it->labels_size; ++i)
+            fprintf(out, ", "SV_FMT, SV_ARGS(it->labels[0]));
+    } else {
+        fprintf(out, "none");
+    }
+    fputs("\n\n", out);
 
     pretty_print(it->body.data, 4, 80, out);
     fputc('\n', out);

@@ -24,33 +24,55 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# WHY ARE THESE LINES SWAPPED?
+# To work around a bug in GNU make.
+-include ${DEPS}
 -include config.mk
+
+.SILENT:
+.DEFAULT_TARGET: all
 
 PROGS	?=	${PROG}
 SRCS	?=	${${PROGS:=_SRCS}} ${${LIBS:=_SRCS}}
 OBJS	=	${SRCS:.c=.o}
+DEPS	=	${SRCS:.c=.d}
 
-all: config.mk
-	${MAKE} -f Makefile build
+all: Makefile config.mk
+	${MAKE} -f Makefile depend
 
 config.mk: autodetect.sh
 	rm -f config.mk
+	@echo " ==> Performing autodetection of system variables"
 	./autodetect.sh
 
-.PHONY: build clean install ${MAN:=-install}
-build: default.mk Makefile ${PROGS} ${LIBS}
+.PHONY: build clean install depend ${MAN:=-install}
+build: default.mk ${PROGS} ${LIBS}
+	@echo " ==> Compilation finished"
+
+depend: ${DEPS}
+	@echo " ==> Starting build"
+	${MAKE} -f Makefile build
+
+.SUFFIXES: .c .d
+.c.d:
+	@echo " ==> Generating dependencies for $<"
+	${CC} ${MKDEPS_FLAGS} $< > $@
 
 .c.o:
+	@echo " ==> Compiling $<"
 	${CC} -c ${COMPILE_FLAGS} -o $@ $<
 
 ${PROGS}: ${OBJS}
+	@echo " ==> Linking $@"
 	${LD} -o ${@} ${${@}_SRCS:.c=.o} ${LINK_FLAGS}
 
 ${LIBS}: ${OBJS}
+	@echo " ==> Archiving $@"
 	${AR} -rc ${@} ${${@}_SRCS:.c=.o}
 
 clean:
-	rm -f ${PROGS} ${LIBS} ${OBJS} config.mk
+	@echo " ==> Cleaning"
+	rm -f ${PROGS} ${LIBS} ${OBJS} ${DEPS} config.mk
 
 PREFIX	?=	/usr/local
 DESTDIR	?=	/
@@ -59,15 +81,19 @@ LIBDIR	?=	${DESTDIR}/${PREFIX}/lib
 MANDIR	?=	${DESTDIR}/${PREFIX}/man
 
 ${PROGS:=-install}:
+	@echo " ==> Installing program ${@:-install=}"
 	install -d ${BINDIR}
 	install ${@:-install=} ${BINDIR}
 
 ${LIBS:=-install}:
+	@echo " ==> Installing library {@:-install=}"
 	install -d ${LIBDIR}
 	install ${@:-install=} ${LIBDIR}
 
 ${MAN:=-install}:
+	@echo " ==> Installing man page ${@:-install=}"
 	install -d ${MANDIR}/man`echo "${@:-install=}" | sed 's/.*\.\([1-9]\)$$/\1/g'`
 	gzip -c ${@:-install=} > ${MANDIR}/man`echo "${@:-install=}" | sed 's/.*\.\([1-9]\)$$/\1/g'`/`basename ${@:-install=}`.gz
 
 install: all ${PROGS:=-install} ${LIBS:=-install} ${MAN:=-install}
+	@echo " ==> Installation finished"

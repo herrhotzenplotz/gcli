@@ -15,7 +15,7 @@ dump() {
 }
 
 checking() {
-    printf -- "Checking $*..." 1>&2
+    printf -- "   > Checking $*..." 1>&2
 }
 
 checking_result() {
@@ -50,13 +50,16 @@ compiler_flags() {
     case "${CCNAME}" in
         sunstudio)
             COMPILER_FLAGS="\${CFLAGS} \${CFLAGS_${TARGET}} -errfmt=error -erroff=%none -errshort=full -xstrconst -xildoff -xmemalign=8s -xnolibmil -xcode=pic32 -xregs=no%appl -xlibmieee -ftrap=%none -xbuiltin=%none -xunroll=1 -Qy -xdebugformat=dwarf \${CPPFLAGS} -D_POSIX_PTHREAD_SEMANTICS -D_LARGEFILE64_SOURCE -D_TS_ERRNO -D_FILE_OFFSET_BITS=64 \${LDFLAGS} -m64"
+            MKDEPS_FLAGS="\${COMPILE_FLAGS} -xM1"
             ;;
         *)
             COMPILER_FLAGS="\${CFLAGS} \${CPPFLAGS} \${CFLAGS_${TARGET}}"
+            MKDEPS_FLAGS="\${COMPILE_FLAGS} -MM -MT \${@:.d=.o}"
             ;;
     esac
 
     dump "COMPILE_FLAGS=${COMPILER_FLAGS} \${LIB_CFLAGS}"
+    dump "MKDEPS_FLAGS=${MKDEPS_FLAGS}"
     checking_result "ok"
 }
 

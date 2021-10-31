@@ -149,7 +149,7 @@ ghcli_print_pr_diff(FILE *stream, const char *org, const char *reponame, int pr_
 }
 
 static void
-ghcli_pull_parse_inspection(json_stream *input, ghcli_pull_summary *out)
+ghcli_pull_parse_summary(json_stream *input, ghcli_pull_summary *out)
 {
     enum json_type key_type, value_type;
     const char *key;
@@ -174,6 +174,8 @@ ghcli_pull_parse_inspection(json_stream *input, ghcli_pull_summary *out)
             out->id = get_int(input);
         else if (strncmp("commits", key, len) == 0)
             out->commits = get_int(input);
+        else if (strncmp("labels", key, len) == 0)
+            out->labels_size = ghcli_read_label_list(input, &out->labels);
         else if (strncmp("comments", key, len) == 0)
             out->comments = get_int(input);
         else if (strncmp("additions", key, len) == 0)
@@ -226,13 +228,22 @@ ghcli_print_pr_summary(FILE *out, ghcli_pull_summary *it)
             "   MERGED : %s\n"
             "MERGEABLE : %s\n"
             "    DRAFT : %s\n"
-            "\n"
-            "\n",
+            "   LABELS : ",
             it->number, it->title, it->created_at, it->author, it->state, it->comments,
             it->additions, it->deletions, it->commits, it->changed_files,
             sn_bool_yesno(it->merged),
             sn_bool_yesno(it->mergeable),
             sn_bool_yesno(it->draft));
+
+    if (it->labels_size) {
+        fprintf(out, SV_FMT, SV_ARGS(it->labels[0]));
+
+        for (size_t i = 1; i < it->labels_size; ++i)
+            fprintf(out, ", "SV_FMT, SV_ARGS(it->labels[i]));
+    } else {
+        fputs("none", out);
+    }
+    fputs("\n\n", out);
 
     pretty_print(it->body, 4, 80, out);
 }
@@ -432,7 +443,7 @@ ghcli_pr_summary(FILE *out, const char *org, const char *reponame, int pr_number
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
     json_set_streaming(&stream, true);
 
-    ghcli_pull_parse_inspection(&stream, &result);
+    ghcli_pull_parse_summary(&stream, &result);
 
     url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d/commits", org, reponame, pr_number);
     commits_size = ghcli_get_pull_commits(url, &commits);

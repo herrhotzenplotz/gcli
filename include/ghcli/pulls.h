@@ -49,6 +49,8 @@ struct ghcli_pull {
 struct ghcli_pull_summary {
     const char *author, *state, *title, *body, *created_at, *commits_link;
     int         id, number, comments, additions, deletions, commits, changed_files;
+    sn_sv      *labels;
+    size_t      labels_size;
     bool        merged, mergeable, draft;
 };
 

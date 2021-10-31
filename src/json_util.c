@@ -229,17 +229,19 @@ ghcli_read_label_list(json_stream *stream, sn_sv **out)
     enum json_type next;
     size_t         size;
 
-    size = 0;
     next = json_next(stream);
-
     if (next != JSON_ARRAY)
-        barf("expected array for label list", __func__);
+        barf("expected begin of array in label list", __func__);
 
-    do {
+    size = 0;
+    while ((next = json_peek(stream)) != JSON_ARRAY_END) {
         *out           = realloc(*out, sizeof(sn_sv) * (size + 1));
         const char *l  = get_label(stream);
         (*out)[size++] = SV((char *)l);
-    } while ((next = json_next(stream)) != JSON_ARRAY_END);
+    }
+
+    if (json_next(stream) != JSON_ARRAY_END)
+        barf("expected end of array in label list", __func__);
 
     return size;
 }

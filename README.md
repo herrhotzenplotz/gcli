@@ -18,6 +18,10 @@ leaking your IP to the DNS server.
   - pkg-config
   - C99 Compiler and linker
   - make (bmake or smake is recommended)
+    + BUG WARNING: GNU make has two longstanding bugs in the include
+      directive. This may lead to it generating files in the incorrect
+      order and spitting out incorrect warnings or causing builds to
+      fail. You may want to use smake or bmake instead.
 
 In order to perform a build, do:
 ```console

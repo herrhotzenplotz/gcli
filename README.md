@@ -33,7 +33,11 @@ You may leave out `DESTDIR` and `PREFIX`. The above are the default
 values.
 
 In case any of this does not work, please either report a bug, or
-submit a patch in case you managed to fix it.
+submit a patch in case you managed to fix it. Please also try to do a
+`make snmk-update`, as I sometimes update my Makefile template without
+syncing it to this project. This target will pull the latest files and
+rebuild the project. You will need
+(cURL)[https://github.com/curl/curl] for this to work.
 
 Tested Operating Systems so far:
 - FreeBSD 13.0-RELEASE amd64 and arm64

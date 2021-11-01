@@ -40,6 +40,7 @@ Tested Operating Systems so far:
 - Solaris 10 sparc64
 - Devuan GNU/Linux Chimaera x86_64
 - Fedora 34 x86_64
+- Haiku x86_64
 
 ## Support
 

@@ -116,5 +116,6 @@ ghcli_review_print_review_table(FILE *out, ghcli_pr_review_header *headers, size
                 headers[i].date, headers[i].state);
 
         pretty_print(headers[i].body, 9, 80, out);
+        fputc('\n', out);
     }
 }

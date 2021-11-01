@@ -149,11 +149,24 @@ sn_mmap_file(const char *path, void **buffer)
     struct stat stat_buf = {0};
     int         fd       = 0;
 
+    /* Precautiously nullify the buffer, because it is better to have
+     * it point to null if the pointer variable passed here is
+     * allocated on the stack and not initialized. This will make
+     * debugging easier. */
+    *buffer = NULL;
+
     if (access(path, R_OK) < 0)
         err(1, "access");
 
     if (stat(path, &stat_buf) < 0)
         err(1, "stat");
+
+    /* we should not pass a size of 0 to mmap, as this will trigger an
+     * EINVAL. Thus we can also avoid calling open on the file and
+     * save a few resources. I discovered this error the hard way in a
+     * Haiku VM. */
+    if (stat_buf.st_size == 0)
+        return 0;
 
     if ((fd = open(path, O_RDONLY)) < 0)
         err(1, "open");

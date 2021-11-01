@@ -34,6 +34,14 @@
 
 typedef struct ghcli_pr_review_header ghcli_pr_review_header;
 
+struct ghcli_pr_review_header {
+    int   id;
+    const char *author;
+    const char *date;
+    const char *state;
+    const char *body;
+};
+
 size_t ghcli_review_get_reviews(const char *org, const char *repo, int pr, ghcli_pr_review_header **out);
 void   ghcli_review_print_review_table(FILE *, ghcli_pr_review_header *, size_t);
 

@@ -28,15 +28,83 @@
  */
 
 #include <ghcli/review.h>
+#include <ghcli/curl.h>
+#include <ghcli/json_util.h>
+
+#include <pdjson/pdjson.h>
+
+static void
+parse_review_header(json_stream *stream, ghcli_pr_review_header *it)
+{
+    if (json_next(stream) != JSON_OBJECT)
+        errx(1, "Expected review object");
+
+    enum json_type key_type;
+    while ((key_type = json_next(stream)) == JSON_STRING) {
+        size_t          len        = 0;
+        const char     *key        = json_get_string(stream, &len);
+        enum json_type  value_type = 0;
+
+        if (strncmp("body", key, len) == 0)
+            it->body = get_string(stream);
+        else if (strncmp("state", key, len) == 0)
+            it->state = get_string(stream);
+        else if (strncmp("id", key, len) == 0)
+            it->id = get_int(stream);
+        else if (strncmp("submitted_at", key, len) == 0)
+            it->date = get_string(stream);
+        else if (strncmp("user", key, len) == 0)
+            it->author = get_user(stream);
+        else {
+            value_type = json_next(stream);
+
+            switch (value_type) {
+            case JSON_ARRAY:
+                json_skip_until(stream, JSON_ARRAY_END);
+                break;
+            case JSON_OBJECT:
+                json_skip_until(stream, JSON_OBJECT_END);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+}
 
 size_t
 ghcli_review_get_reviews(const char *org, const char *repo, int pr, ghcli_pr_review_header **out)
 {
-    sn_unimplemented;
+    ghcli_fetch_buffer  buffer = {0};
+    const char         *url    = NULL;
+    struct json_stream  stream = {0};
+    enum   json_type    next   = JSON_NULL;
+    size_t              size   = 0;
+
+    url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d/reviews", org, repo, pr);
+    ghcli_fetch(url, &buffer);
+
+    json_open_buffer(&stream, buffer.data, buffer.length);
+    json_set_streaming(&stream, true);
+
+    next = json_next(&stream);
+    if (next != JSON_ARRAY)
+        errx(1, "error: expected json array for review list");
+
+    while ((next = json_peek(&stream)) == JSON_OBJECT) {
+        *out = realloc(*out, sizeof(ghcli_pr_review_header) * size);
+        parse_review_header(&stream, &(*out)[size]);
+        size++;
+    }
+
+    if (json_next(&stream) != JSON_ARRAY_END)
+        errx(1, "error: expected end of json array");
+
+    return size;
 }
 
 void
-ghcli_review_print_review_table(FILE *, ghcli_pr_review_header *, size_t)
+ghcli_review_print_review_table(FILE *out, ghcli_pr_review_header *headers, size_t headers_size)
 {
     sn_unimplemented;
 }

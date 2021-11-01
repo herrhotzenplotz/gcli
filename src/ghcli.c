@@ -466,12 +466,14 @@ subcommand_review(int argc, char *argv[])
     if (org == NULL)
         ghcli_gitconfig_get_repo(&org, &repo);
 
-    if (pr < 1) {
+    if (pr > 0) {
         /* list reviews */
         ghcli_pr_review_header *reviews      = NULL;
         size_t                  reviews_size = ghcli_review_get_reviews(org, repo, pr, &reviews);
         ghcli_review_print_review_table(stdout, reviews, reviews_size);
         return 0;
+    } else {
+        sn_unimplemented;
     }
 
     return 1;

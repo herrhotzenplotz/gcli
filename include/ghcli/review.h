@@ -27,12 +27,14 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GITCONFIG_H
-#define GITCONFIG_H
+#ifndef REVIEW_H
+#define REVIEW_H
 
 #include <sn/sn.h>
 
-void  ghcli_gitconfig_get_repo(const char **org, const char **repo);
-sn_sv ghcli_gitconfig_get_current_branch(void);
+typedef struct ghcli_pr_review_header ghcli_pr_review_header;
 
-#endif /* GITCONFIG_H */
+size_t ghcli_review_get_reviews(const char *org, const char *repo, int pr, ghcli_pr_review_header **out);
+void   ghcli_review_print_review_table(FILE *, ghcli_pr_review_header *, size_t);
+
+#endif /* REVIEW_H */

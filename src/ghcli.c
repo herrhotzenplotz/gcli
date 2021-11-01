@@ -38,6 +38,7 @@
 #include <ghcli/gitconfig.h>
 #include <ghcli/issues.h>
 #include <ghcli/pulls.h>
+#include <ghcli/review.h>
 
 #include <sn/sn.h>
 
@@ -423,6 +424,59 @@ subcommand_issues(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
+static int
+subcommand_review(int argc, char *argv[])
+{
+    int         ch   = 0;
+    int         pr   = -1;
+    const char *org  = NULL;
+    const char *repo = NULL;
+
+    /* parse options */
+    while ((ch = getopt(argc, argv, "p:o:r:")) != -1) {
+        switch (ch) {
+        case 'p': {
+            char *endptr = NULL;
+            pr = strtol(optarg, &endptr, 10);
+            if (endptr != (optarg + strlen(optarg)))
+                err(1, "error: cannot parse pr number");
+
+            if (pr < 0)
+                errx(1, "error: pr number is out of range");
+        } break;
+        case 'o':
+            org = optarg;
+            break;
+        case 'r':
+            repo = optarg;
+            break;
+        case '?':
+        default:
+            usage();
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    /* If no remote was specified, try to autodetect */
+    if ((org == NULL) != (repo == NULL))
+        errx(1, "error: missing either explicit org or repo");
+
+    if (org == NULL)
+        ghcli_gitconfig_get_repo(&org, &repo);
+
+    if (pr < 1) {
+        /* list reviews */
+        ghcli_pr_review_header *reviews      = NULL;
+        size_t                  reviews_size = ghcli_review_get_reviews(org, repo, pr, &reviews);
+        ghcli_review_print_review_table(stdout, reviews, reviews_size);
+        return 0;
+    }
+
+    return 1;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -441,6 +495,8 @@ main(int argc, char *argv[])
         return subcommand_issues(argc, argv);
     } else if (strcmp(argv[0], "comment") == 0) {
         return subcommand_comment(argc, argv);
+    } else if (strcmp(argv[0], "review") == 0) {
+        return subcommand_review(argc, argv);
     } else if (strcmp(argv[0], "version") == 0) {
         version();
         return 0;

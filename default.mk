@@ -43,7 +43,7 @@ all: Makefile config.mk
 config.mk: autodetect.sh
 	rm -f config.mk
 	@echo " ==> Performing autodetection of system variables"
-	./autodetect.sh
+	MAKE=${MAKE} ./autodetect.sh
 
 .PHONY: build clean install depend ${MAN:=-install}
 build: default.mk ${PROGS} ${LIBS}
@@ -62,7 +62,7 @@ depend: ${DEPS}
 	@echo " ==> Compiling $<"
 	${CC} -c ${COMPILE_FLAGS} -o $@ $<
 
-${PROGS}: ${OBJS}
+${PROGS}: ${OBJS} ${LIBS}
 	@echo " ==> Linking $@"
 	${LD} -o ${@} ${${@}_SRCS:.c=.o} ${LINK_FLAGS}
 
@@ -97,3 +97,6 @@ ${MAN:=-install}:
 
 install: all ${PROGS:=-install} ${LIBS:=-install} ${MAN:=-install}
 	@echo " ==> Installation finished"
+
+snmk-libdeps:
+	@echo ${LIBADD}

@@ -58,7 +58,7 @@ compiler_flags() {
             ;;
     esac
 
-    dump "COMPILE_FLAGS=${COMPILER_FLAGS} \${LIB_CFLAGS}"
+    dump "COMPILE_FLAGS=${COMPILER_FLAGS} \${\${@}_CFLAGS} \${LIB_CFLAGS}"
     dump "MKDEPS_FLAGS=${MKDEPS_FLAGS}"
     checking_result "ok"
 }
@@ -75,7 +75,7 @@ linker_flags() {
             ;;
     esac
 
-    dump "LINK_FLAGS=${LINK_FLAGS} \${LDFLAGS} \${LDFLAGS_${TARGET}} \${LIB_LDFLAGS}"
+    dump "LINK_FLAGS=${LINK_FLAGS} \${LDFLAGS} \${LDFLAGS_${TARGET}} \${LIB_LDFLAGS} \${\${@}_LDFLAGS}"
     checking_result "ok"
 }
 
@@ -151,7 +151,14 @@ main() {
     linker
     compiler_flags
     linker_flags
-    check_library "libcurl"
+
+    # Provide -s flag because GNU make is behaving abnormally yet
+    # again and prints out that it is going to do a recursion even tho
+    # the .SILENT target is defined...This does not break bmake and
+    # smake.
+    for lib in `${MAKE} -s snmk-libdeps`; do
+        check_library "${lib}"
+    done
 }
 
 main

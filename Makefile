@@ -29,6 +29,8 @@ ghcli_SRCS			=	src/ghcli.c \
 					thirdparty/sn/sn.c \
 					thirdparty/pdjson/pdjson.c
 
+LIBADD				=	libcurl
+
 # Leave this undefined if you don't have any manpages that need to be
 # installed.
 MAN				=	docs/ghcli.1

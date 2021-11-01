@@ -106,5 +106,15 @@ ghcli_review_get_reviews(const char *org, const char *repo, int pr, ghcli_pr_rev
 void
 ghcli_review_print_review_table(FILE *out, ghcli_pr_review_header *headers, size_t headers_size)
 {
-    sn_unimplemented;
+    for (size_t i = 0; i < headers_size; ++i) {
+        fprintf(out,
+                "ID     : %d\n"
+                "AUTHOR : %s\n"
+                "DATE   : %s\n"
+                "STATE  : %s\n",
+                headers[i].id, headers[i].author,
+                headers[i].date, headers[i].state);
+
+        pretty_print(headers[i].body, 9, 80, out);
+    }
 }

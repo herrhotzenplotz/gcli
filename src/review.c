@@ -92,13 +92,15 @@ ghcli_review_get_reviews(const char *org, const char *repo, int pr, ghcli_pr_rev
         errx(1, "error: expected json array for review list");
 
     while ((next = json_peek(&stream)) == JSON_OBJECT) {
-        *out = realloc(*out, sizeof(ghcli_pr_review_header) * size);
+        *out = realloc(*out, sizeof(ghcli_pr_review_header) * (size + 1));
         parse_review_header(&stream, &(*out)[size]);
         size++;
     }
 
     if (json_next(&stream) != JSON_ARRAY_END)
         errx(1, "error: expected end of json array");
+
+    free(buffer.data);
 
     return size;
 }

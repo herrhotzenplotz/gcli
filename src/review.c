@@ -121,3 +121,82 @@ ghcli_review_print_review_table(FILE *out, ghcli_pr_review_header *headers, size
         fputc('\n', out);
     }
 }
+
+static void
+parse_review_comment(json_stream *stream, ghcli_pr_review_comment *it)
+{
+    if (json_next(stream) != JSON_OBJECT)
+        errx(1, "Expected review comment object");
+
+    enum json_type key_type;
+    while ((key_type = json_next(stream)) == JSON_STRING) {
+        size_t          len        = 0;
+        const char     *key        = json_get_string(stream, &len);
+        enum json_type  value_type = 0;
+
+        if (strncmp("body", key, len) == 0)
+            it->body = get_string(stream);
+        else if (strncmp("id", key, len) == 0)
+            it->id = get_int(stream);
+        else if (strncmp("submitted_at", key, len) == 0)
+            it->date = get_string(stream);
+        else if (strncmp("user", key, len) == 0)
+            it->author = get_user(stream);
+        else if (strncmp("diff_hunk", key, len) == 0)
+            it->diff = get_string(stream);
+        else if (strncmp("path", key, len) == 0)
+            it->path = get_string(stream);
+        else {
+            value_type = json_next(stream);
+
+            switch (value_type) {
+            case JSON_ARRAY:
+                json_skip_until(stream, JSON_ARRAY_END);
+                break;
+            case JSON_OBJECT:
+                json_skip_until(stream, JSON_OBJECT_END);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+}
+
+size_t
+ghcli_review_get_review_comments(
+    const char               *org,
+    const char               *repo,
+    int                       pr,
+    int                       review_id,
+    ghcli_pr_review_comment **out)
+{
+    const char         *url    = NULL;
+    ghcli_fetch_buffer  buffer = {0};
+    struct json_stream  stream = {0};
+    enum json_type      next   = JSON_NULL;
+    size_t              size   = 0;
+
+    url = sn_asprintf("https://api.github.com/%s/%s/pulls/%d/reviews/%d/comments", org, repo, pr, review_id);
+    ghcli_fetch(url, &buffer);
+
+    json_open_buffer(&stream, buffer.data, buffer.length);
+    json_set_streaming(&stream, true);
+
+    next = json_next(&stream);
+    if (next != JSON_ARRAY)
+        errx(1, "error: expected json array for review comment list");
+
+    while ((next = json_peek(&stream)) == JSON_OBJECT) {
+        *out = realloc(*out, sizeof(ghcli_pr_review_comment) * (size + 1));
+        parse_review_comment(&stream, &(*out)[size]);
+        size++;
+    }
+
+    if (json_next(&stream) != JSON_ARRAY_END)
+        errx(1, "error: expected end of json array");
+
+    free(buffer.data);
+
+    return size;
+}

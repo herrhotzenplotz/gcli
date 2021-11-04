@@ -32,7 +32,8 @@
 
 #include <sn/sn.h>
 
-typedef struct ghcli_pr_review_header ghcli_pr_review_header;
+typedef struct ghcli_pr_review_header  ghcli_pr_review_header;
+typedef struct ghcli_pr_review_comment ghcli_pr_review_comment;
 
 struct ghcli_pr_review_header {
     int   id;
@@ -42,7 +43,17 @@ struct ghcli_pr_review_header {
     const char *body;
 };
 
+struct ghcli_pr_review_comment {
+    int id;
+    const char *author;
+    const char *date;
+    const char *diff;
+    const char *path;
+    const char *body;
+};
+
 size_t ghcli_review_get_reviews(const char *org, const char *repo, int pr, ghcli_pr_review_header **out);
+size_t ghcli_review_get_review_comments(const char *org, const char *repo, int pr, int review_id, ghcli_pr_review_comment **out);
 void   ghcli_review_print_review_table(FILE *, ghcli_pr_review_header *, size_t);
 
 #endif /* REVIEW_H */

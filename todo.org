@@ -26,7 +26,7 @@
    editor.c:(.text+0x108): warning: the use of `mktemp' is
                    dangerous, better use `mkstemp' or `mkdtemp'
    #+end_example
-
+** TODO Check for multiple Github remotes and choose the right one
 
 
 * On the review API

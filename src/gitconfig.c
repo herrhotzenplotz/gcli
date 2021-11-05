@@ -28,6 +28,7 @@
  */
 
 #include <ghcli/gitconfig.h>
+#include <ghcli/config.h>
 #include <sn/sn.h>
 
 #include <dirent.h>
@@ -242,9 +243,18 @@ gitconfig_url_extract_github_data(sn_sv url, const char **org, const char **repo
 void
 ghcli_gitconfig_get_repo(const char **org, const char **repo)
 {
-    const char *path   = NULL;
-    sn_sv       buffer = {0};
+    const char *path     = NULL;
+    sn_sv       buffer   = {0};
+    sn_sv       upstream = {0};
 
+    if ((upstream = ghcli_config_get_upstream()).length != 0) {
+        sn_sv org_sv   = sn_sv_chop_until(&upstream, '/');
+        sn_sv repo_sv  = sn_sv_from_parts(upstream.data + 1, upstream.length - 1);
+
+        *org  = sn_sv_to_cstr(org_sv);
+        *repo = sn_sv_to_cstr(repo_sv);
+        return;
+    }
 
     path          = ghcli_find_gitconfig();
     buffer.length = sn_mmap_file(path, (void **)&buffer.data);

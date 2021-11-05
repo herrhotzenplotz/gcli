@@ -26,7 +26,9 @@
    editor.c:(.text+0x108): warning: the use of `mktemp' is
                    dangerous, better use `mkstemp' or `mkdtemp'
    #+end_example
-** TODO Check for multiple Github remotes and choose the right one
+** DONE Check for multiple Github remotes and choose the right one
+   Solved in commit 4be0ca8. Leave it up to the user to point at the
+   right repo. Also, there are the -o and -r flags.
 
 
 * On the review API

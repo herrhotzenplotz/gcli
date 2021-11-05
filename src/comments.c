@@ -102,8 +102,10 @@ void
 ghcli_print_comment_list(FILE *stream, ghcli_comment *comments, size_t comments_size)
 {
     for (size_t i = 0; i < comments_size; ++i) {
-        fprintf(stream, "%s (%s): \n", comments[i].author, comments[i].date);
-        pretty_print(comments[i].body, 4, 80, stream);
+        fprintf(stream,
+                "AUTHOR : %s\n"
+                "DATE   : %s\n", comments[i].author, comments[i].date);
+        pretty_print(comments[i].body, 9, 80, stream);
         fputc('\n', stream);
     }
 }

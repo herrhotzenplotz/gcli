@@ -26,3 +26,13 @@
    editor.c:(.text+0x108): warning: the use of `mktemp' is
                    dangerous, better use `mkstemp' or `mkdtemp'
    #+end_example
+
+
+
+* On the review API
+  - A PR has got reviews (could be none, could be a thousand)
+    + https://api.github.com/repos/zorchenhimer/MovieNight/pulls/156/reviews
+  - A review may have a body and comments attached to it
+    + https://api.github.com/repos/zorchenhimer/MovieNight/pulls/156/reviews/611653998
+  - A review comment has got a diff hunk and a body attached to it.
+    + https://api.github.com/repos/zorchenhimer/MovieNight/pulls/156/reviews/611653998/comments

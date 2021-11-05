@@ -17,16 +17,17 @@ CPPFLAGS			=	-D_XOPEN_SOURCE=600 \
 					-DGHCLI_VERSION_STRING=\"${GHCLI_VERSION}\"
 
 # List the source files for each binary to be built
-ghcli_SRCS			=	src/ghcli.c \
-					src/curl.c \
-					src/editor.c \
-					src/issues.c \
-					src/comments.c \
-					src/gitconfig.c \
-					src/pulls.c \
-					src/json_util.c \
-					src/config.c \
-					thirdparty/sn/sn.c \
+ghcli_SRCS			=	src/ghcli.c			\
+					src/curl.c			\
+					src/editor.c			\
+					src/issues.c			\
+					src/comments.c			\
+					src/gitconfig.c			\
+					src/pulls.c			\
+					src/review.c			\
+					src/json_util.c			\
+					src/config.c			\
+					thirdparty/sn/sn.c		\
 					thirdparty/pdjson/pdjson.c
 
 LIBADD				=	libcurl

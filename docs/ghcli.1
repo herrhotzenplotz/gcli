@@ -33,6 +33,13 @@
 .Op Fl i Ar issue
 .Op Fl p Ar pr
 
+.Nm
+.Cm review
+.Op Fl o Ar org
+.Op Fl r Ar repo
+.Op Fl p Ar pr
+.Op Fl c Ar comment id
+
 .Sh DESCRIPTION
 The
 .Nm
@@ -129,6 +136,14 @@ or the PR specified by
 .Fl p .
 This will open an editor and ask for confirmation.
 
+.It Cm review
+list reviews under the pull request given in
+.Fl p .
+If
+.Fl c Ar rid
+has been specified, this will list comments under the review given by
+.Ar rid .
+
 .El
 
 .Sh OPTIONS
@@ -182,6 +197,11 @@ flag is only valid in the
 .Cm pulls create
 subcommand. It has a different meaning in all other contexts.
 
+.It Fl c Ar rid
+Print review comments given by
+.Ar rid .
+Can only be used in combination with
+.Fl p .
 
 .El
 

@@ -427,13 +427,14 @@ subcommand_issues(int argc, char *argv[])
 static int
 subcommand_review(int argc, char *argv[])
 {
-    int         ch     = 0;
-    int         pr     = -1;
-    const char *org    = NULL;
-    const char *repo   = NULL;
+    int         ch        = 0;
+    int         pr        = -1;
+    int         review_id = -1;
+    const char *org       = NULL;
+    const char *repo      = NULL;
 
     /* parse options */
-    while ((ch = getopt(argc, argv, "p:o:r:")) != -1) {
+    while ((ch = getopt(argc, argv, "p:o:r:c:")) != -1) {
         switch (ch) {
         case 'p': {
             char *endptr = NULL;
@@ -450,6 +451,13 @@ subcommand_review(int argc, char *argv[])
         case 'r':
             repo = optarg;
             break;
+        case 'c': {
+            char *endptr;
+            review_id = strtol(optarg, &endptr, 10);
+
+            if (optarg + strlen(optarg) != endptr)
+                err(1, "error: cannot parse comment id");
+        } break;
         case '?':
         default:
             usage();
@@ -466,24 +474,20 @@ subcommand_review(int argc, char *argv[])
     if (org == NULL)
         ghcli_gitconfig_get_repo(&org, &repo);
 
-    if (pr > 0 && argc == 0) {
-        /* list reviews */
-        ghcli_pr_review *reviews      = NULL;
-        size_t           reviews_size = ghcli_review_get_reviews(org, repo, pr, &reviews);
-        ghcli_review_print_review_table(stdout, reviews, reviews_size);
-        return 0;
-    } else if (pr > 0 && argc == 1) {
-        char *endptr;
-        int   review_id = strtol(argv[0], &endptr, 10);
-
-        if (argv[0] + strlen(argv[0]) != endptr)
-            err(1, "error: cannot parse review id");
-
+    if (pr > 0 && review_id > 0) {
+        /* print comments */
         ghcli_pr_review_comment *comments  = NULL;
         size_t                   comments_size =
             ghcli_review_get_review_comments(org, repo, pr, review_id, &comments);
 
         ghcli_review_print_comments(stdout, comments, comments_size);
+        return 0;
+    } else if (pr > 0) {
+        /* list reviews */
+        ghcli_pr_review *reviews      = NULL;
+        size_t           reviews_size = ghcli_review_get_reviews(org, repo, pr, &reviews);
+        ghcli_review_print_review_table(stdout, reviews, reviews_size);
+        return 0;
     } else {
         sn_unimplemented;
     }

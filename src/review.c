@@ -33,8 +33,10 @@
 
 #include <pdjson/pdjson.h>
 
+#include <limits.h>
+
 static void
-parse_review_header(json_stream *stream, ghcli_pr_review_header *it)
+parse_review_header(json_stream *stream, ghcli_pr_review *it)
 {
     if (json_next(stream) != JSON_OBJECT)
         errx(1, "Expected review object");
@@ -73,7 +75,7 @@ parse_review_header(json_stream *stream, ghcli_pr_review_header *it)
 }
 
 size_t
-ghcli_review_get_reviews(const char *org, const char *repo, int pr, ghcli_pr_review_header **out)
+ghcli_review_get_reviews(const char *org, const char *repo, int pr, ghcli_pr_review **out)
 {
     ghcli_fetch_buffer  buffer = {0};
     const char         *url    = NULL;
@@ -92,8 +94,11 @@ ghcli_review_get_reviews(const char *org, const char *repo, int pr, ghcli_pr_rev
         errx(1, "error: expected json array for review list");
 
     while ((next = json_peek(&stream)) == JSON_OBJECT) {
-        *out = realloc(*out, sizeof(ghcli_pr_review_header) * (size + 1));
-        parse_review_header(&stream, &(*out)[size]);
+        *out = realloc(*out, sizeof(ghcli_pr_review) * (size + 1));
+        ghcli_pr_review *it = &(*out)[size];
+
+        parse_review_header(&stream, it);
+
         size++;
     }
 
@@ -106,7 +111,7 @@ ghcli_review_get_reviews(const char *org, const char *repo, int pr, ghcli_pr_rev
 }
 
 void
-ghcli_review_print_review_table(FILE *out, ghcli_pr_review_header *headers, size_t headers_size)
+ghcli_review_print_review_table(FILE *out, ghcli_pr_review *headers, size_t headers_size)
 {
     for (size_t i = 0; i < headers_size; ++i) {
         fprintf(out,
@@ -119,6 +124,21 @@ ghcli_review_print_review_table(FILE *out, ghcli_pr_review_header *headers, size
 
         pretty_print(headers[i].body, 9, 80, out);
         fputc('\n', out);
+    }
+}
+
+void
+ghcli_review_print_comments(FILE *out, ghcli_pr_review_comment *comments, size_t comments_size)
+{
+    for (size_t i = 0; i < comments_size; ++i) {
+        fprintf(out,
+                "BODY : %s\n"
+                "PATH : %s\n"
+                "DIFF :\n",
+                comments[i].body,
+                comments[i].path);
+
+        pretty_print(comments[i].diff, 7, INT_MAX, out);
     }
 }
 
@@ -177,7 +197,7 @@ ghcli_review_get_review_comments(
     enum json_type      next   = JSON_NULL;
     size_t              size   = 0;
 
-    url = sn_asprintf("https://api.github.com/%s/%s/pulls/%d/reviews/%d/comments", org, repo, pr, review_id);
+    url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d/reviews/%d/comments", org, repo, pr, review_id);
     ghcli_fetch(url, &buffer);
 
     json_open_buffer(&stream, buffer.data, buffer.length);

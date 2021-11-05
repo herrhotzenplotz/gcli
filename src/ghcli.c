@@ -427,10 +427,10 @@ subcommand_issues(int argc, char *argv[])
 static int
 subcommand_review(int argc, char *argv[])
 {
-    int         ch   = 0;
-    int         pr   = -1;
-    const char *org  = NULL;
-    const char *repo = NULL;
+    int         ch     = 0;
+    int         pr     = -1;
+    const char *org    = NULL;
+    const char *repo   = NULL;
 
     /* parse options */
     while ((ch = getopt(argc, argv, "p:o:r:")) != -1) {
@@ -466,12 +466,24 @@ subcommand_review(int argc, char *argv[])
     if (org == NULL)
         ghcli_gitconfig_get_repo(&org, &repo);
 
-    if (pr > 0) {
+    if (pr > 0 && argc == 0) {
         /* list reviews */
-        ghcli_pr_review_header *reviews      = NULL;
-        size_t                  reviews_size = ghcli_review_get_reviews(org, repo, pr, &reviews);
+        ghcli_pr_review *reviews      = NULL;
+        size_t           reviews_size = ghcli_review_get_reviews(org, repo, pr, &reviews);
         ghcli_review_print_review_table(stdout, reviews, reviews_size);
         return 0;
+    } else if (pr > 0 && argc == 1) {
+        char *endptr;
+        int   review_id = strtol(argv[0], &endptr, 10);
+
+        if (argv[0] + strlen(argv[0]) != endptr)
+            err(1, "error: cannot parse review id");
+
+        ghcli_pr_review_comment *comments  = NULL;
+        size_t                   comments_size =
+            ghcli_review_get_review_comments(org, repo, pr, review_id, &comments);
+
+        ghcli_review_print_comments(stdout, comments, comments_size);
     } else {
         sn_unimplemented;
     }

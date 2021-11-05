@@ -132,13 +132,15 @@ ghcli_review_print_comments(FILE *out, ghcli_pr_review_comment *comments, size_t
 {
     for (size_t i = 0; i < comments_size; ++i) {
         fprintf(out,
-                "BODY : %s\n"
-                "PATH : %s\n"
-                "DIFF :\n",
+                "BODY              : %s\n"
+                "PATH              : %s\n"
+                "ORIGINAL POSITION : %d\n"
+                "DIFF              :\n",
                 comments[i].body,
-                comments[i].path);
+                comments[i].path,
+                comments[i].original_position);
 
-        pretty_print(comments[i].diff, 7, INT_MAX, out);
+        pretty_print(comments[i].diff, 20, INT_MAX, out);
     }
 }
 
@@ -166,6 +168,8 @@ parse_review_comment(json_stream *stream, ghcli_pr_review_comment *it)
             it->diff = get_string(stream);
         else if (strncmp("path", key, len) == 0)
             it->path = get_string(stream);
+        else if (strncmp("original_position", key, len) == 0)
+            it->original_position = get_int(stream);
         else {
             value_type = json_next(stream);
 

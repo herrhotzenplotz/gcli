@@ -207,6 +207,21 @@ ghcli_print_issue_summary(FILE *out, ghcli_issue_details *it)
     fputc('\n', out);
 }
 
+static void
+ghcli_issue_details_free(ghcli_issue_details *it)
+{
+    free(it->title.data);
+    free(it->created_at.data);
+    free(it->author.data);
+    free(it->state.data);
+    free(it->body.data);
+
+    for (size_t i = 0; i < it->labels_size; ++i)
+        free(it->labels[i].data);
+
+    free(it->labels);
+}
+
 void
 ghcli_issue_summary(FILE *stream, const char *org, const char *repo, int issue_number)
 {
@@ -224,6 +239,12 @@ ghcli_issue_summary(FILE *stream, const char *org, const char *repo, int issue_n
 
     ghcli_parse_issue_details(&parser, &details);
     ghcli_print_issue_summary(stream, &details);
+
+    json_close(&parser);
+
+    ghcli_issue_details_free(&details);
+    free((void *)url);
+    free(buffer.data);
 }
 
 void

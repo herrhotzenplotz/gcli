@@ -9,10 +9,10 @@
 ** TODO leaks of huge buffers [0%]
    We don't care about the little strings we sometimes malloc. But the
    huge buffers are annoying.
-   - [-] Valgrind
+   - [-] Valgrind [33%]
      - [X] issues
      - [ ] issues create
-     - [ ] pulls
+     - [X] pulls
      - [ ] pulls create
      - [ ] comment
      - [ ] reviews

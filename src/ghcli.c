@@ -310,6 +310,9 @@ subcommand_pulls(int argc, char *argv[])
         pulls_size = ghcli_get_prs(org, repo, all, &pulls);
         ghcli_print_pr_table(stdout, pulls, pulls_size);
 
+        ghcli_pulls_free(pulls, pulls_size);
+        free(pulls);
+
         return EXIT_SUCCESS;
     }
 

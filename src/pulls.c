@@ -580,6 +580,10 @@ ghcli_pr_merge(FILE *out, const char *org, const char *reponame, int pr_number)
             message  = json_get_string(&stream, &len);
 
             fprintf(out, "%.*s\n", (int)len, message);
+
+            json_close(&stream);
+            free(json_buffer.data);
+
             return;
         } else {
             next = json_next(&stream);
@@ -598,6 +602,10 @@ ghcli_pr_close(const char *org, const char *reponame, int pr_number)
     data = sn_asprintf("{ \"state\": \"closed\"}");
 
     ghcli_fetch_with_method("PATCH", url, data, &json_buffer);
+
+    free(json_buffer.data);
+    free((void *)url);
+    free((void *)data);
 }
 
 void
@@ -611,4 +619,8 @@ ghcli_pr_reopen(const char *org, const char *reponame, int pr_number)
     data = sn_asprintf("{ \"state\": \"open\"}");
 
     ghcli_fetch_with_method("PATCH", url, data, &json_buffer);
+
+    free(json_buffer.data);
+    free((void *)url);
+    free((void *)data);
 }

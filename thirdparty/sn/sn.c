@@ -310,6 +310,7 @@ sn_yesno(const char *fmt, ...)
     char    tmp    = 0;
     va_list vp;
     sn_sv   message = {0};
+    bool    result  = false;
 
     va_start(vp, fmt);
 
@@ -326,14 +327,17 @@ sn_yesno(const char *fmt, ...)
 
         char c = getchar();
 
-        if (c == 'y' || c == 'Y')
-            return true;
-        else if (c == '\n' || c == 'n' || c == 'N')
-            return false;
+        if (c == 'y' || c == 'Y') {
+             result = true;
+             break;
+        } else if (c == '\n' || c == 'n' || c == 'N') {
+            break;
+        }
 
         getchar(); // consume newline character
 
     } while (!feof(stdin));
 
-    return false;
+    free(message.data);
+    return result;
 }

@@ -95,7 +95,18 @@ ghcli_get_comments(const char *url, ghcli_comment **comments)
         count += 1;
     }
 
+    json_close(&stream);
+    free(json_buffer.data);
+
     return count;
+}
+
+static void
+ghcli_issue_comment_free(ghcli_comment *it)
+{
+    free((void *)it->author);
+    free((void *)it->date);
+    free((void *)it->body);
 }
 
 void
@@ -117,6 +128,12 @@ ghcli_issue_comments(FILE *stream, const char *org, const char *repo, int issue)
     ghcli_comment *comments = NULL;
     int            n        = ghcli_get_comments(url, &comments);
     ghcli_print_comment_list(stream, comments, (size_t)n);
+
+    for (int i = 0; i < n; ++i)
+        ghcli_issue_comment_free(&comments[i]);
+
+    free((void *)url);
+    free(comments);
 }
 
 static void
@@ -152,4 +169,8 @@ ghcli_comment_submit(ghcli_submit_comment_opts opts)
     } else {
         errx(1, "Aborted by user");
     }
+
+    free(buffer.data);
+    free(message.data);
+    free(opts.message.data);
 }

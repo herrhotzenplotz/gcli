@@ -185,22 +185,28 @@ init_local_config(void)
         local_config.buffer = sn_sv_trim_front(local_config.buffer);
         curr_line++;
     }
+
+    free((void *)path);
 }
 
 void
 ghcli_config_init(const char *file_path)
 {
+    const char *in_file_path = file_path;
+
     if (!file_path) {
         file_path = getenv("XDG_CONFIG_PATH");
         if (!file_path) {
             file_path = getenv("HOME");
             if (!file_path)
-                errx(1, "Neither XDG_CONFIG_PATH HOME nor set in env");
+                errx(1, "Neither XDG_CONFIG_PATH nor HOME set in env");
 
-            file_path = sn_asprintf("%s/.config/", file_path);
+            /*
+             * Code duplication to avoid leaking pointers */
+            file_path = sn_asprintf("%s/.config/ghcli/config", file_path);
+        } else {
+            file_path = sn_asprintf("%s/ghcli/config", file_path);
         }
-
-        file_path = sn_asprintf("%s/ghcli/config", file_path);
     }
 
     if (access(file_path, R_OK) < 0)
@@ -249,9 +255,12 @@ ghcli_config_init(const char *file_path)
         config.buffer = sn_sv_trim_front(config.buffer);
         curr_line++;
     }
+
+    if (file_path != in_file_path)
+        free((void *)file_path);
 }
 
-const char *
+char *
 ghcli_config_get_editor(void)
 {
     if (config.editor.length)

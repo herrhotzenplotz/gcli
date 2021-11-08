@@ -84,6 +84,16 @@ parse_pull_entry(json_stream *input, ghcli_pull *it)
     }
 }
 
+void
+ghcli_pulls_free(ghcli_pull *it, int n)
+{
+    for (int i = 0; i < n; ++i) {
+        free((void *)it[i].title);
+        free((void *)it[i].state);
+        free((void *)it[i].creator);
+    }
+}
+
 int
 ghcli_get_prs(const char *org, const char *reponame, bool all, ghcli_pull **out)
 {
@@ -122,6 +132,8 @@ ghcli_get_prs(const char *org, const char *reponame, bool all, ghcli_pull **out)
     }
 
     free(json_buffer.data);
+    free(url);
+    json_close(&stream);
 
     return count;
 }
@@ -142,10 +154,9 @@ void
 ghcli_print_pr_diff(FILE *stream, const char *org, const char *reponame, int pr_number)
 {
     char *url = NULL;
-
     url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d", org, reponame, pr_number);
-
     ghcli_curl(stream, url, "Accept: application/vnd.github.v3.diff");
+    free(url);
 }
 
 static void
@@ -388,6 +399,8 @@ ghcli_get_pull_commits(const char *url, ghcli_commit **out)
         count += 1;
     }
 
+    json_close(&stream);
+    free(json_buffer.data);
     return count;
 }
 
@@ -415,13 +428,43 @@ ghcli_print_commits_table(FILE *stream, ghcli_commit *commits, int commits_size)
 {
     fprintf(stream,     "%8.8s  %-15.15s  %-20.20s  %16.16s  %-s\n", "SHA", "AUTHOR", "EMAIL", "DATE", "MESSAGE");
     for (int i = 0; i < commits_size; ++i) {
+        char *message = cut_newline(commits[i].message);
         fprintf(stream, "%8.8s  %-15.15s  %-20.20s  %16.16s  %-s\n",
                 commits[i].sha,
                 commits[i].author,
                 commits[i].date,
                 commits[i].email,
-                cut_newline(commits[i].message));
+                message);
+        free(message);
     }
+}
+
+static void
+ghcli_commits_free(ghcli_commit *it, int size)
+{
+    for (int i = 0; i < size; ++i) {
+        free((void *)it[i].sha);
+        free((void *)it[i].message);
+        free((void *)it[i].date);
+        free((void *)it[i].author);
+        free((void *)it[i].email);
+    }
+
+    free(it);
+}
+
+void
+ghcli_pulls_summary_free(ghcli_pull_summary *it)
+{
+    free((void *)it->author);
+    free((void *)it->state);
+    free((void *)it->title);
+    free((void *)it->body);
+    free((void *)it->created_at);
+    free((void *)it->commits_link);
+
+    for (size_t i = 0; i < it->labels_size; ++i)
+        free(it->labels[i].data);
 }
 
 /**
@@ -437,6 +480,7 @@ ghcli_pr_summary(FILE *out, const char *org, const char *reponame, int pr_number
     ghcli_commit       *commits      = NULL;
     int                 commits_size = 0;
 
+    /* General info */
     url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d", org, reponame, pr_number);
     ghcli_fetch(url, &json_buffer);
 
@@ -445,13 +489,22 @@ ghcli_pr_summary(FILE *out, const char *org, const char *reponame, int pr_number
 
     ghcli_pull_parse_summary(&stream, &result);
 
+    json_close(&stream);
+    free(url);
+    free(json_buffer.data);
+
+    /* Commits */
     url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d/commits", org, reponame, pr_number);
     commits_size = ghcli_get_pull_commits(url, &commits);
 
     ghcli_print_pr_summary(out, &result);
+    ghcli_pulls_summary_free(&result);
 
     fprintf(out, "\nCOMMITS\n");
     ghcli_print_commits_table(out, commits, commits_size);
+
+    ghcli_commits_free(commits, commits_size);
+    free(url);
 }
 
 static void
@@ -474,7 +527,6 @@ ghcli_pr_submit(ghcli_submit_pull_options opts)
     ghcli_fetch_buffer  json_buffer  = {0};
 
     sn_sv body = ghcli_pr_get_user_message(&opts);
-
     opts.body = ghcli_json_escape(body);
 
     fprintf(stdout,
@@ -497,6 +549,10 @@ ghcli_pr_submit(ghcli_submit_pull_options opts)
     ghcli_perform_submit_pr(opts, &json_buffer);
 
     ghcli_print_html_url(json_buffer);
+
+    free(body.data);
+    free(opts.body.data);
+    free(json_buffer.data);
 }
 
 void
@@ -504,7 +560,7 @@ ghcli_pr_merge(FILE *out, const char *org, const char *reponame, int pr_number)
 {
     json_stream         stream      = {0};
     ghcli_fetch_buffer  json_buffer = {0};
-    const char         *url         = NULL;
+    char               *url         = NULL;
     const char         *data        = "{}";
     enum json_type      next;
     size_t              len;
@@ -527,6 +583,11 @@ ghcli_pr_merge(FILE *out, const char *org, const char *reponame, int pr_number)
             message  = json_get_string(&stream, &len);
 
             fprintf(out, "%.*s\n", (int)len, message);
+
+            json_close(&stream);
+            free(json_buffer.data);
+            free(url);
+
             return;
         } else {
             next = json_next(&stream);
@@ -545,6 +606,10 @@ ghcli_pr_close(const char *org, const char *reponame, int pr_number)
     data = sn_asprintf("{ \"state\": \"closed\"}");
 
     ghcli_fetch_with_method("PATCH", url, data, &json_buffer);
+
+    free(json_buffer.data);
+    free((void *)url);
+    free((void *)data);
 }
 
 void
@@ -558,4 +623,8 @@ ghcli_pr_reopen(const char *org, const char *reponame, int pr_number)
     data = sn_asprintf("{ \"state\": \"open\"}");
 
     ghcli_fetch_with_method("PATCH", url, data, &json_buffer);
+
+    free(json_buffer.data);
+    free((void *)url);
+    free((void *)data);
 }

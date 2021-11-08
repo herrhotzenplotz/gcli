@@ -72,6 +72,17 @@ parse_issue_entry(json_stream *input, ghcli_issue *it)
     }
 }
 
+void
+ghcli_issues_free(ghcli_issue *it, int size)
+{
+    for (int i = 0; i < size; ++i) {
+        free((void *)it[i].title);
+        free((void *)it[i].state);
+    }
+
+    free(it);
+}
+
 int
 ghcli_get_issues(const char *org, const char *reponame, bool all, ghcli_issue **out)
 {
@@ -83,6 +94,8 @@ ghcli_get_issues(const char *org, const char *reponame, bool all, ghcli_issue **
     url = sn_asprintf("https://api.github.com/repos/%s/%s/issues?per_page=100&state=%s", org, reponame,
                       all ? "all" : "open");
     ghcli_fetch(url, &json_buffer);
+
+    free(url);
 
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
     json_set_streaming(&stream, true);
@@ -110,6 +123,7 @@ ghcli_get_issues(const char *org, const char *reponame, bool all, ghcli_issue **
     }
 
     free(json_buffer.data);
+    json_close(&stream);
 
     return count;
 }
@@ -204,6 +218,21 @@ ghcli_print_issue_summary(FILE *out, ghcli_issue_details *it)
     fputc('\n', out);
 }
 
+static void
+ghcli_issue_details_free(ghcli_issue_details *it)
+{
+    free(it->title.data);
+    free(it->created_at.data);
+    free(it->author.data);
+    free(it->state.data);
+    free(it->body.data);
+
+    for (size_t i = 0; i < it->labels_size; ++i)
+        free(it->labels[i].data);
+
+    free(it->labels);
+}
+
 void
 ghcli_issue_summary(FILE *stream, const char *org, const char *repo, int issue_number)
 {
@@ -221,6 +250,12 @@ ghcli_issue_summary(FILE *stream, const char *org, const char *repo, int issue_n
 
     ghcli_parse_issue_details(&parser, &details);
     ghcli_print_issue_summary(stream, &details);
+
+    json_close(&parser);
+
+    ghcli_issue_details_free(&details);
+    free((void *)url);
+    free(buffer.data);
 }
 
 void
@@ -234,6 +269,10 @@ ghcli_issue_close(const char *org, const char *repo, int issue_number)
     data = sn_asprintf("{ \"state\": \"close\"}");
 
     ghcli_fetch_with_method("PATCH", url, data, &json_buffer);
+
+    free((void *)data);
+    free((void *)url);
+    free(json_buffer.data);
 }
 
 void
@@ -247,6 +286,10 @@ ghcli_issue_reopen(const char *org, const char *repo, int issue_number)
     data = sn_asprintf("{ \"state\": \"open\"}");
 
     ghcli_fetch_with_method("PATCH", url, data, &json_buffer);
+
+    free((void *)data);
+    free((void *)url);
+    free(json_buffer.data);
 }
 
 static void
@@ -289,4 +332,8 @@ ghcli_issue_submit(ghcli_submit_issue_options opts)
     ghcli_perform_submit_issue(opts, &json_buffer);
 
     ghcli_print_html_url(json_buffer);
+
+    free(body.data);
+    free(opts.body.data);
+    free(json_buffer.data);
 }

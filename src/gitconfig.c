@@ -190,6 +190,22 @@ gitconfig_find_url_entry(sn_sv buffer, sn_sv *out)
     return false;
 }
 
+static char *gitconfig_org, *gitconfig_repo;
+static bool  should_free_org_and_repo = 0;
+
+static void
+ghcli_gitconfig_atexit(void)
+{
+    if (should_free_org_and_repo) {
+        /*
+         * Prevent double free by setting to null */
+        free(gitconfig_org);
+        gitconfig_org = NULL;
+        free(gitconfig_repo);
+        gitconfig_repo = NULL;
+    }
+}
+
 static bool
 gitconfig_url_extract_github_data(sn_sv url, const char **org, const char **repo)
 {
@@ -230,12 +246,15 @@ gitconfig_url_extract_github_data(sn_sv url, const char **org, const char **repo
     if (url.length == 0)
         return false;
 
-    *org = sn_strndup(foo.data, foo.length);
+    *org = gitconfig_org = sn_strndup(foo.data, foo.length);
 
     url.length -= 1;
     url.data   += 1;
 
-    *repo = sn_strip_suffix(sn_strndup(url.data, url.length), ".git");
+    *repo = gitconfig_repo = sn_strip_suffix(sn_strndup(url.data, url.length), ".git");
+
+    should_free_org_and_repo = true;
+    atexit(ghcli_gitconfig_atexit);
 
     return true;
 }
@@ -247,12 +266,21 @@ ghcli_gitconfig_get_repo(const char **org, const char **repo)
     sn_sv       buffer   = {0};
     sn_sv       upstream = {0};
 
+    if (gitconfig_org && gitconfig_repo) {
+        *org  = gitconfig_org;
+        *repo = gitconfig_repo;
+    }
+
     if ((upstream = ghcli_config_get_upstream()).length != 0) {
         sn_sv org_sv   = sn_sv_chop_until(&upstream, '/');
         sn_sv repo_sv  = sn_sv_from_parts(upstream.data + 1, upstream.length - 1);
 
-        *org  = sn_sv_to_cstr(org_sv);
-        *repo = sn_sv_to_cstr(repo_sv);
+        *org  = gitconfig_org  = sn_sv_to_cstr(org_sv);
+        *repo = gitconfig_repo = sn_sv_to_cstr(repo_sv);
+
+        should_free_org_and_repo = true;
+        atexit(ghcli_gitconfig_atexit);
+
         return;
     }
 

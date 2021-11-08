@@ -55,7 +55,7 @@ get_int_(json_stream *input, const char *where)
     return json_get_number(input);
 }
 
-const char *
+char *
 get_string_(json_stream *input, const char *where)
 {
     enum json_type type = json_next(input);
@@ -85,13 +85,13 @@ get_bool_(json_stream *input, const char *where)
     return false;
 }
 
-const char *
+char *
 get_user_(json_stream *input, const char *where)
 {
     if (json_next(input) != JSON_OBJECT)
         barf("user field is not an object", where);
 
-    const char *result = NULL;
+    char *result = NULL;
     while (json_next(input) == JSON_STRING) {
         size_t      len = 0;
         const char *key = json_get_string(input, &len);
@@ -100,8 +100,8 @@ get_user_(json_stream *input, const char *where)
             if (json_next(input) != JSON_STRING)
                 barf("login of the pull request creator is not a string", where);
 
-            result = json_get_string(input, &len);
-            result = sn_strndup(result, len);
+            const char *tmp = json_get_string(input, &len);
+            result = sn_strndup(tmp, len);
         } else {
             json_next(input);
         }
@@ -175,7 +175,9 @@ ghcli_print_html_url(ghcli_fetch_buffer buffer)
 
         const char *key = json_get_string(&stream, &len);
         if (strncmp(key, "html_url", len) == 0) {
-            puts(get_string(&stream));
+            char *url = get_string(&stream);
+            puts(url);
+            free(url);
         } else {
             enum json_type value_type = json_next(&stream);
 
@@ -194,6 +196,8 @@ ghcli_print_html_url(ghcli_fetch_buffer buffer)
 
     if (next != JSON_OBJECT_END)
         barf("unexpected key type in json object", __func__);
+
+    json_close(&stream);
 }
 
 

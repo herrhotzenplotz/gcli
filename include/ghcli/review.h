@@ -36,23 +36,25 @@ typedef struct ghcli_pr_review         ghcli_pr_review;
 typedef struct ghcli_pr_review_comment ghcli_pr_review_comment;
 
 struct ghcli_pr_review {
-    int         id;
-    const char *author;
-    const char *date;
-    const char *state;
-    const char *body;
+    int   id;
+    char *author;
+    char *date;
+    char *state;
+    char *body;
 };
 
 struct ghcli_pr_review_comment {
-    int         id;
-    const char *author;
-    const char *date;
-    const char *diff;
-    const char *path;
-    const char *body;
-    int         original_position;
+    int   id;
+    char *author;
+    char *date;
+    char *diff;
+    char *path;
+    char *body;
+    int   original_position;
 };
 
+void   ghcli_review_reviews_free(ghcli_pr_review *it, size_t size);
+void   ghcli_review_comments_free(ghcli_pr_review_comment *it, size_t size);
 size_t ghcli_review_get_reviews(const char *org, const char *repo, int pr, ghcli_pr_review **out);
 size_t ghcli_review_get_review_comments(const char *org, const char *repo, int pr, int review_id, ghcli_pr_review_comment **out);
 void   ghcli_review_print_review_table(FILE *, ghcli_pr_review *, size_t);

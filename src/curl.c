@@ -124,8 +124,8 @@ ghcli_curl(FILE *stream, const char *url, const char *content_type)
 void
 ghcli_fetch_with_method(const char *method, const char *url, const char *data, ghcli_fetch_buffer *out)
 {
-    CURLcode ret;
-    CURL *session;
+    CURLcode           ret;
+    CURL              *session;
     struct curl_slist *headers;
 
     const char *auth_header = sn_asprintf("Authorization: token "SV_FMT"", SV_ARGS(ghcli_config_get_token()));
@@ -154,6 +154,8 @@ ghcli_fetch_with_method(const char *method, const char *url, const char *data, g
     session = NULL;
     curl_slist_free_all(headers);
     headers = NULL;
+
+    free((void *)auth_header);
 }
 
 
@@ -161,30 +163,36 @@ void
 ghcli_perform_submit_pr(ghcli_submit_pull_options opts, ghcli_fetch_buffer *out)
 {
     /* TODO : JSON Injection */
-    const char *post_fields = sn_asprintf("{\"head\":\""SV_FMT"\",\"base\":\""SV_FMT"\", \"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
-                                          SV_ARGS(opts.from), SV_ARGS(opts.to), SV_ARGS(opts.title), SV_ARGS(opts.body));
-    const char *url         = sn_asprintf("https://api.github.com/repos/"SV_FMT"/pulls", SV_ARGS(opts.in));
+    char *post_fields = sn_asprintf("{\"head\":\""SV_FMT"\",\"base\":\""SV_FMT"\", \"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
+                                    SV_ARGS(opts.from), SV_ARGS(opts.to), SV_ARGS(opts.title), SV_ARGS(opts.body));
+    char *url         = sn_asprintf("https://api.github.com/repos/"SV_FMT"/pulls", SV_ARGS(opts.in));
 
     ghcli_fetch_with_method("POST", url, post_fields, out);
+    free(post_fields);
+    free(url);
 }
 
 void
 ghcli_perform_submit_comment(ghcli_submit_comment_opts opts, ghcli_fetch_buffer *out)
 {
-    const char *post_fields = sn_asprintf("{ \"body\": \""SV_FMT"\" }",
-                                          SV_ARGS(opts.message));
-    const char *url         = sn_asprintf("https://api.github.com/repos/%s/%s/issues/%d/comments",
-                                          opts.org, opts.repo, opts.issue);
+    char *post_fields = sn_asprintf("{ \"body\": \""SV_FMT"\" }",
+                                    SV_ARGS(opts.message));
+    char *url         = sn_asprintf("https://api.github.com/repos/%s/%s/issues/%d/comments",
+                                    opts.org, opts.repo, opts.issue);
 
     ghcli_fetch_with_method("POST", url, post_fields, out);
+    free(post_fields);
+    free(url);
 }
 
 void
 ghcli_perform_submit_issue(ghcli_submit_issue_options opts, ghcli_fetch_buffer *out)
 {
-    const char *post_fields = sn_asprintf("{ \"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
-                                          SV_ARGS(opts.title), SV_ARGS(opts.body));
-    const char *url         = sn_asprintf("https://api.github.com/repos/"SV_FMT"/issues", SV_ARGS(opts.in));
+    char *post_fields = sn_asprintf("{ \"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
+                                    SV_ARGS(opts.title), SV_ARGS(opts.body));
+    char *url         = sn_asprintf("https://api.github.com/repos/"SV_FMT"/issues", SV_ARGS(opts.in));
 
     ghcli_fetch_with_method("POST", url, post_fields, out);
+    free(post_fields);
+    free(url);
 }

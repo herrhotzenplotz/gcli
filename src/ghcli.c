@@ -246,6 +246,7 @@ subcommand_comment(int argc, char *argv[])
         errx(1, "error: missing issue/PR number (use -i)");
 
     ghcli_comment_submit((ghcli_submit_comment_opts) { .org = org, .repo = repo, .issue = issue });
+
     return EXIT_SUCCESS;
 }
 
@@ -308,6 +309,9 @@ subcommand_pulls(int argc, char *argv[])
     if (pr < 0) {
         pulls_size = ghcli_get_prs(org, repo, all, &pulls);
         ghcli_print_pr_table(stdout, pulls, pulls_size);
+
+        ghcli_pulls_free(pulls, pulls_size);
+        free(pulls);
 
         return EXIT_SUCCESS;
     }
@@ -398,6 +402,8 @@ subcommand_issues(int argc, char *argv[])
     if (issue < 0) {
         issues_size = ghcli_get_issues(org, repo, all, &issues);
         ghcli_print_issues_table(stdout, issues, issues_size);
+
+        ghcli_issues_free(issues, issues_size);
         return EXIT_SUCCESS;
     }
 
@@ -481,12 +487,14 @@ subcommand_review(int argc, char *argv[])
             ghcli_review_get_review_comments(org, repo, pr, review_id, &comments);
 
         ghcli_review_print_comments(stdout, comments, comments_size);
+        ghcli_review_comments_free(comments, comments_size);
         return 0;
     } else if (pr > 0) {
         /* list reviews */
         ghcli_pr_review *reviews      = NULL;
         size_t           reviews_size = ghcli_review_get_reviews(org, repo, pr, &reviews);
         ghcli_review_print_review_table(stdout, reviews, reviews_size);
+        ghcli_review_reviews_free(reviews, reviews_size);
         return 0;
     } else {
         sn_unimplemented;

@@ -78,7 +78,7 @@ size_t
 ghcli_review_get_reviews(const char *org, const char *repo, int pr, ghcli_pr_review **out)
 {
     ghcli_fetch_buffer  buffer = {0};
-    const char         *url    = NULL;
+    char               *url    = NULL;
     struct json_stream  stream = {0};
     enum   json_type    next   = JSON_NULL;
     size_t              size   = 0;
@@ -106,6 +106,8 @@ ghcli_review_get_reviews(const char *org, const char *repo, int pr, ghcli_pr_rev
         errx(1, "error: expected end of json array");
 
     free(buffer.data);
+    free(url);
+    json_close(&stream);
 
     return size;
 }
@@ -187,6 +189,32 @@ parse_review_comment(json_stream *stream, ghcli_pr_review_comment *it)
     }
 }
 
+void
+ghcli_review_reviews_free(ghcli_pr_review *it, size_t size)
+{
+    for (size_t i = 0; i < size; ++i) {
+        free(it[i].author);
+        free(it[i].date);
+        free(it[i].state);
+        free(it[i].body);
+    }
+    free(it);
+}
+
+void
+ghcli_review_comments_free(ghcli_pr_review_comment *it, size_t size)
+{
+    for (size_t i = 0; i < size; ++i) {
+        free(it[i].author);
+        free(it[i].date);
+        free(it[i].diff);
+        free(it[i].path);
+        free(it[i].body);
+    }
+
+    free(it);
+}
+
 size_t
 ghcli_review_get_review_comments(
     const char               *org,
@@ -195,7 +223,7 @@ ghcli_review_get_review_comments(
     int                       review_id,
     ghcli_pr_review_comment **out)
 {
-    const char         *url    = NULL;
+    char               *url    = NULL;
     ghcli_fetch_buffer  buffer = {0};
     struct json_stream  stream = {0};
     enum json_type      next   = JSON_NULL;
@@ -213,6 +241,10 @@ ghcli_review_get_review_comments(
 
     while ((next = json_peek(&stream)) == JSON_OBJECT) {
         *out = realloc(*out, sizeof(ghcli_pr_review_comment) * (size + 1));
+
+        /* Make sure, that we don't have garbarge uninitialized string
+         * pointers in here */
+        (*out)[size] = (ghcli_pr_review_comment) {0};
         parse_review_comment(&stream, &(*out)[size]);
         size++;
     }
@@ -221,6 +253,8 @@ ghcli_review_get_review_comments(
         errx(1, "error: expected end of json array");
 
     free(buffer.data);
+    free(url);
+    json_close(&stream);
 
     return size;
 }

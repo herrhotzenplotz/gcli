@@ -487,6 +487,7 @@ subcommand_review(int argc, char *argv[])
             ghcli_review_get_review_comments(org, repo, pr, review_id, &comments);
 
         ghcli_review_print_comments(stdout, comments, comments_size);
+        ghcli_review_comments_free(comments, comments_size);
         return 0;
     } else if (pr > 0) {
         /* list reviews */

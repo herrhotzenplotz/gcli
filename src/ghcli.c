@@ -246,6 +246,7 @@ subcommand_comment(int argc, char *argv[])
         errx(1, "error: missing issue/PR number (use -i)");
 
     ghcli_comment_submit((ghcli_submit_comment_opts) { .org = org, .repo = repo, .issue = issue });
+
     return EXIT_SUCCESS;
 }
 
@@ -398,6 +399,12 @@ subcommand_issues(int argc, char *argv[])
     if (issue < 0) {
         issues_size = ghcli_get_issues(org, repo, all, &issues);
         ghcli_print_issues_table(stdout, issues, issues_size);
+
+        /*
+         * TODO: This does not free internal string pointers on the
+         * heap which we may wanna do at some point in time. */
+        free(issues);
+
         return EXIT_SUCCESS;
     }
 

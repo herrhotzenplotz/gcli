@@ -84,6 +84,8 @@ ghcli_get_issues(const char *org, const char *reponame, bool all, ghcli_issue **
                       all ? "all" : "open");
     ghcli_fetch(url, &json_buffer);
 
+    free(url);
+
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
     json_set_streaming(&stream, true);
 
@@ -110,6 +112,7 @@ ghcli_get_issues(const char *org, const char *reponame, bool all, ghcli_issue **
     }
 
     free(json_buffer.data);
+    json_close(&stream);
 
     return count;
 }

@@ -154,10 +154,9 @@ void
 ghcli_print_pr_diff(FILE *stream, const char *org, const char *reponame, int pr_number)
 {
     char *url = NULL;
-
     url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d", org, reponame, pr_number);
-
     ghcli_curl(stream, url, "Accept: application/vnd.github.v3.diff");
+    free(url);
 }
 
 static void

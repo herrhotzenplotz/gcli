@@ -258,6 +258,10 @@ ghcli_issue_close(const char *org, const char *repo, int issue_number)
     data = sn_asprintf("{ \"state\": \"close\"}");
 
     ghcli_fetch_with_method("PATCH", url, data, &json_buffer);
+
+    free((void *)data);
+    free((void *)url);
+    free(json_buffer.data);
 }
 
 void
@@ -271,6 +275,10 @@ ghcli_issue_reopen(const char *org, const char *repo, int issue_number)
     data = sn_asprintf("{ \"state\": \"open\"}");
 
     ghcli_fetch_with_method("PATCH", url, data, &json_buffer);
+
+    free((void *)data);
+    free((void *)url);
+    free(json_buffer.data);
 }
 
 static void

@@ -51,7 +51,8 @@ sv_append(sn_sv this, sn_sv that)
 sn_sv
 ghcli_editor_get_user_message(void (*file_initializer)(FILE *, void *), void *user_data)
 {
-    const char *editor = getenv("EDITOR");
+    char *editor     = getenv("EDITOR");
+    char *env_editor = editor;
     if (!editor) {
         editor = ghcli_config_get_editor();
         if (!editor)
@@ -84,6 +85,9 @@ ghcli_editor_get_user_message(void (*file_initializer)(FILE *, void *), void *us
         if (WEXITSTATUS(status) != 0)
             errx(1, "Aborting PR. Editor command exited with code %d", WEXITSTATUS(status));
     }
+
+    if (!env_editor)
+        free(editor);
 
     void *file_content = NULL;
     int len = sn_mmap_file(filename, &file_content);

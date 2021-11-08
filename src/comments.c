@@ -169,4 +169,8 @@ ghcli_comment_submit(ghcli_submit_comment_opts opts)
     } else {
         errx(1, "Aborted by user");
     }
+
+    free(buffer.data);
+    free(message.data);
+    free(opts.message.data);
 }

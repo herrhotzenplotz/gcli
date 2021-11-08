@@ -260,7 +260,7 @@ ghcli_config_init(const char *file_path)
         free((void *)file_path);
 }
 
-const char *
+char *
 ghcli_config_get_editor(void)
 {
     if (config.editor.length)

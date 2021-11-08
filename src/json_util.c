@@ -55,7 +55,7 @@ get_int_(json_stream *input, const char *where)
     return json_get_number(input);
 }
 
-const char *
+char *
 get_string_(json_stream *input, const char *where)
 {
     enum json_type type = json_next(input);
@@ -175,7 +175,9 @@ ghcli_print_html_url(ghcli_fetch_buffer buffer)
 
         const char *key = json_get_string(&stream, &len);
         if (strncmp(key, "html_url", len) == 0) {
-            puts(get_string(&stream));
+            char *url = get_string(&stream);
+            puts(url);
+            free(url);
         } else {
             enum json_type value_type = json_next(&stream);
 
@@ -194,6 +196,8 @@ ghcli_print_html_url(ghcli_fetch_buffer buffer)
 
     if (next != JSON_OBJECT_END)
         barf("unexpected key type in json object", __func__);
+
+    json_close(&stream);
 }
 
 

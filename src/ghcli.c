@@ -403,11 +403,7 @@ subcommand_issues(int argc, char *argv[])
         issues_size = ghcli_get_issues(org, repo, all, &issues);
         ghcli_print_issues_table(stdout, issues, issues_size);
 
-        /*
-         * TODO: This does not free internal string pointers on the
-         * heap which we may wanna do at some point in time. */
-        free(issues);
-
+        ghcli_issues_free(issues, issues_size);
         return EXIT_SUCCESS;
     }
 

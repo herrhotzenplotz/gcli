@@ -72,6 +72,17 @@ parse_issue_entry(json_stream *input, ghcli_issue *it)
     }
 }
 
+void
+ghcli_issues_free(ghcli_issue *it, int size)
+{
+    for (int i = 0; i < size; ++i) {
+        free((void *)it[i].title);
+        free((void *)it[i].state);
+    }
+
+    free(it);
+}
+
 int
 ghcli_get_issues(const char *org, const char *reponame, bool all, ghcli_issue **out)
 {

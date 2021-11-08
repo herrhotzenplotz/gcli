@@ -332,4 +332,8 @@ ghcli_issue_submit(ghcli_submit_issue_options opts)
     ghcli_perform_submit_issue(opts, &json_buffer);
 
     ghcli_print_html_url(json_buffer);
+
+    free(body.data);
+    free(opts.body.data);
+    free(json_buffer.data);
 }

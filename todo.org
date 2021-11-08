@@ -9,13 +9,13 @@
 ** TODO leaks of huge buffers [0%]
    We don't care about the little strings we sometimes malloc. But the
    huge buffers are annoying.
-   - [-] Valgrind [33%]
+   - [-] Valgrind [83%]
      - [X] issues
-     - [ ] issues create
+     - [X] issues create
      - [X] pulls
      - [ ] pulls create
-     - [ ] comment
-     - [ ] reviews
+     - [X] comment
+     - [X] reviews
    - [ ] custom LD_PRELOAD hack
 ** DONE issues comments doesn't print the first comment
    it seems to reside in the issue data itself

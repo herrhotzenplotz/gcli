@@ -85,13 +85,13 @@ get_bool_(json_stream *input, const char *where)
     return false;
 }
 
-const char *
+char *
 get_user_(json_stream *input, const char *where)
 {
     if (json_next(input) != JSON_OBJECT)
         barf("user field is not an object", where);
 
-    const char *result = NULL;
+    char *result = NULL;
     while (json_next(input) == JSON_STRING) {
         size_t      len = 0;
         const char *key = json_get_string(input, &len);
@@ -100,8 +100,8 @@ get_user_(json_stream *input, const char *where)
             if (json_next(input) != JSON_STRING)
                 barf("login of the pull request creator is not a string", where);
 
-            result = json_get_string(input, &len);
-            result = sn_strndup(result, len);
+            const char *tmp = json_get_string(input, &len);
+            result = sn_strndup(tmp, len);
         } else {
             json_next(input);
         }

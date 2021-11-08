@@ -493,6 +493,7 @@ subcommand_review(int argc, char *argv[])
         ghcli_pr_review *reviews      = NULL;
         size_t           reviews_size = ghcli_review_get_reviews(org, repo, pr, &reviews);
         ghcli_review_print_review_table(stdout, reviews, reviews_size);
+        ghcli_review_reviews_free(reviews, reviews_size);
         return 0;
     } else {
         sn_unimplemented;

@@ -47,7 +47,7 @@ int         get_int_(json_stream *input, const char *function);
 bool        get_bool_(json_stream *input, const char *function);
 char       *get_string_(json_stream *input, const char *function);
 sn_sv       get_sv_(json_stream *input, const char *function);
-const char *get_user_(json_stream *input, const char *function);
+char       *get_user_(json_stream *input, const char *function);
 const char *get_label_(json_stream *input, const char *function);
 sn_sv       ghcli_json_escape(sn_sv);
 void        ghcli_print_html_url(ghcli_fetch_buffer);

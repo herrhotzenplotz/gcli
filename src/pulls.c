@@ -527,7 +527,6 @@ ghcli_pr_submit(ghcli_submit_pull_options opts)
     ghcli_fetch_buffer  json_buffer  = {0};
 
     sn_sv body = ghcli_pr_get_user_message(&opts);
-
     opts.body = ghcli_json_escape(body);
 
     fprintf(stdout,
@@ -550,6 +549,10 @@ ghcli_pr_submit(ghcli_submit_pull_options opts)
     ghcli_perform_submit_pr(opts, &json_buffer);
 
     ghcli_print_html_url(json_buffer);
+
+    free(body.data);
+    free(opts.body.data);
+    free(json_buffer.data);
 }
 
 void
@@ -557,7 +560,7 @@ ghcli_pr_merge(FILE *out, const char *org, const char *reponame, int pr_number)
 {
     json_stream         stream      = {0};
     ghcli_fetch_buffer  json_buffer = {0};
-    const char         *url         = NULL;
+    char               *url         = NULL;
     const char         *data        = "{}";
     enum json_type      next;
     size_t              len;
@@ -583,6 +586,7 @@ ghcli_pr_merge(FILE *out, const char *org, const char *reponame, int pr_number)
 
             json_close(&stream);
             free(json_buffer.data);
+            free(url);
 
             return;
         } else {

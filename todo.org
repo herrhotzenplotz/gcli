@@ -6,14 +6,14 @@
 ** TODO find a better way to pass the content type to ghcli_curl
 ** DONE Man page
 ** DONE fetch PR comments
-** TODO leaks of huge buffers [0%]
+** TODO leaks of huge buffers [50%]
    We don't care about the little strings we sometimes malloc. But the
    huge buffers are annoying.
-   - [-] Valgrind [83%]
+   - [X] Valgrind [100%]
      - [X] issues
      - [X] issues create
      - [X] pulls
-     - [ ] pulls create
+     - [X] pulls create
      - [X] comment
      - [X] reviews
    - [ ] custom LD_PRELOAD hack

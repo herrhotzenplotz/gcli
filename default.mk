@@ -43,7 +43,7 @@ all: Makefile config.mk
 config.mk: autodetect.sh
 	rm -f config.mk
 	@echo " ==> Performing autodetection of system variables"
-	MAKE=${MAKE} ./autodetect.sh
+	./autodetect.sh "${MAKE}"
 
 .PHONY: build clean install depend ${MAN:=-install}
 build: default.mk ${PROGS} ${LIBS}

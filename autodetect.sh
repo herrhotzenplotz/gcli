@@ -161,4 +161,6 @@ main() {
     done
 }
 
+MAKE="${1}"
+
 main

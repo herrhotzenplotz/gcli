@@ -1,6 +1,6 @@
 #+TITLE: ghcli todos
 
-** TODO handle errors from the github api
+** DONE handle errors from the github api
    - [[file:src/curl.c::ghcli_fetch(const char *url, ghcli_fetch_buffer *out)][ghcli_fetch]]
    - [[file:src/curl.c::ghcli_curl(FILE *stream, const char *url, const char *content_type)][ghcli_curl]]
 ** TODO find a better way to pass the content type to ghcli_curl
@@ -21,7 +21,7 @@
    it seems to reside in the issue data itself
    - solved by printing issue summaries
 ** TODO we don't handle pagination of the api results
-   - [ ] See https://docs.github.com/en/rest/guides/getting-started-with-the-rest-api#pagination
+   - [ ] See https://docs.gipthub.com/en/rest/guides/getting-started-with-the-rest-api#pagination
 ** TODO speed up json_escape
 ** DONE repo-specific config file
 ** DONE comment under PR/Issue

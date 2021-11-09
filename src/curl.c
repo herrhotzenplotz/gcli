@@ -31,9 +31,61 @@
 
 #include <ghcli/curl.h>
 #include <ghcli/config.h>
+#include <ghcli/json_util.h>
 
 #include <curl/curl.h>
 #include <sn/sn.h>
+#include <pdjson/pdjson.h>
+
+const char *
+ghcli_api_error_string(ghcli_fetch_buffer *it)
+{
+    struct json_stream stream = {0};
+    enum json_type     next   = JSON_NULL;
+
+    if (!it->length)
+        return NULL;
+
+    json_open_buffer(&stream, it->data, it->length);
+    json_set_streaming(&stream, true);
+
+    while ((next = json_next(&stream)) != JSON_OBJECT_END) {
+        char *key = get_string(&stream);
+        if (strcmp(key, "message") == 0)
+            return get_string(&stream);
+
+        free(key);
+    }
+
+    return "<No message key in error response object>";
+}
+
+static void
+ghcli_curl_check_api_error(
+    CURL *curl,
+    CURLcode code,
+    const char *url,
+    ghcli_fetch_buffer *result)
+{
+    long status_code = 0;
+
+    if (code != CURLE_OK)
+        errx(1,
+             "error: request to %s failed\n"
+             "     : curl error: %s",
+             url,
+             curl_easy_strerror(code));
+
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status_code);
+
+    if (status_code >= 300L) {
+        errx(1,
+             "error: request to %s failed with code %ld\n"
+             "     : API error: %s",
+             url, status_code,
+             ghcli_api_error_string(result));
+    }
+}
 
 static size_t
 fetch_write_callback(char *in, size_t size, size_t nmemb, void *data)
@@ -69,15 +121,14 @@ ghcli_fetch(const char *url, ghcli_fetch_buffer *out)
     curl_easy_setopt(session, CURLOPT_FTP_SKIP_PASV_IP, 1L);
     curl_easy_setopt(session, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(session, CURLOPT_USERAGENT, "curl/7.78.0");
-    curl_easy_setopt(session, CURLOPT_FAILONERROR, 1L);
     curl_easy_setopt(session, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
     curl_easy_setopt(session, CURLOPT_TCP_KEEPALIVE, 1L);
     curl_easy_setopt(session, CURLOPT_WRITEDATA, out);
     curl_easy_setopt(session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
+    curl_easy_setopt(session, CURLOPT_FAILONERROR, 0L);
 
     ret = curl_easy_perform(session);
-    if (ret != CURLE_OK)
-        errx(1, "Unable to perform GET request to %s: %s", url, curl_easy_strerror(ret));
+    ghcli_curl_check_api_error(session, ret, url, out);
 
     curl_easy_cleanup(session);
     curl_slist_free_all(headers);
@@ -97,6 +148,7 @@ ghcli_curl(FILE *stream, const char *url, const char *content_type)
     CURLcode           ret;
     CURL              *session;
     struct curl_slist *headers;
+    ghcli_fetch_buffer buffer = {0};
 
     headers = NULL;
     headers = curl_slist_append(headers, content_type);
@@ -108,16 +160,19 @@ ghcli_curl(FILE *stream, const char *url, const char *content_type)
     curl_easy_setopt(session, CURLOPT_NOPROGRESS, 1L);
     curl_easy_setopt(session, CURLOPT_MAXREDIRS, 50L);
     curl_easy_setopt(session, CURLOPT_FTP_SKIP_PASV_IP, 1L);
-    curl_easy_setopt(session, CURLOPT_FAILONERROR, 1L);
     curl_easy_setopt(session, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(session, CURLOPT_USERAGENT, "curl/7.78.0");
     curl_easy_setopt(session, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
     curl_easy_setopt(session, CURLOPT_TCP_KEEPALIVE, 1L);
-    curl_easy_setopt(session, CURLOPT_WRITEDATA, stream);
+    curl_easy_setopt(session, CURLOPT_WRITEDATA, &buffer);
+    curl_easy_setopt(session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
+    curl_easy_setopt(session, CURLOPT_FAILONERROR, 0L);
 
     ret = curl_easy_perform(session);
-    if (ret != CURLE_OK)
-        errx(1, "Unable to perform GET request to %s: %s", url, curl_easy_strerror(ret));
+    ghcli_curl_check_api_error(session, ret, url, &buffer);
+
+    fwrite(buffer.data, 1, buffer.length, stream);
+    free(buffer.data);
 
     curl_easy_cleanup(session);
     curl_slist_free_all(headers);
@@ -142,16 +197,14 @@ ghcli_fetch_with_method(const char *method, const char *url, const char *data, g
     curl_easy_setopt(session, CURLOPT_POSTFIELDS, data);
     curl_easy_setopt(session, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(session, CURLOPT_USERAGENT, "curl/7.79.1");
-    curl_easy_setopt(session, CURLOPT_FAILONERROR, 1L);
     curl_easy_setopt(session, CURLOPT_CUSTOMREQUEST, method);
     curl_easy_setopt(session, CURLOPT_TCP_KEEPALIVE, 1L);
     curl_easy_setopt(session, CURLOPT_WRITEDATA, out);
     curl_easy_setopt(session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
+    curl_easy_setopt(session, CURLOPT_FAILONERROR, 0L);
 
     ret = curl_easy_perform(session);
-
-    if (ret != CURLE_OK)
-        errx(1, "Error performing %s request to GitHub api: %s", method, curl_easy_strerror(ret));
+    ghcli_curl_check_api_error(session, ret, url, out);
 
     curl_easy_cleanup(session);
     session = NULL;

@@ -69,6 +69,7 @@ ghcli_fetch(const char *url, ghcli_fetch_buffer *out)
     curl_easy_setopt(session, CURLOPT_FTP_SKIP_PASV_IP, 1L);
     curl_easy_setopt(session, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(session, CURLOPT_USERAGENT, "curl/7.78.0");
+    curl_easy_setopt(session, CURLOPT_FAILONERROR, 1L);
     curl_easy_setopt(session, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
     curl_easy_setopt(session, CURLOPT_TCP_KEEPALIVE, 1L);
     curl_easy_setopt(session, CURLOPT_WRITEDATA, out);
@@ -107,6 +108,7 @@ ghcli_curl(FILE *stream, const char *url, const char *content_type)
     curl_easy_setopt(session, CURLOPT_NOPROGRESS, 1L);
     curl_easy_setopt(session, CURLOPT_MAXREDIRS, 50L);
     curl_easy_setopt(session, CURLOPT_FTP_SKIP_PASV_IP, 1L);
+    curl_easy_setopt(session, CURLOPT_FAILONERROR, 1L);
     curl_easy_setopt(session, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(session, CURLOPT_USERAGENT, "curl/7.78.0");
     curl_easy_setopt(session, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
@@ -140,6 +142,7 @@ ghcli_fetch_with_method(const char *method, const char *url, const char *data, g
     curl_easy_setopt(session, CURLOPT_POSTFIELDS, data);
     curl_easy_setopt(session, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(session, CURLOPT_USERAGENT, "curl/7.79.1");
+    curl_easy_setopt(session, CURLOPT_FAILONERROR, 1L);
     curl_easy_setopt(session, CURLOPT_CUSTOMREQUEST, method);
     curl_easy_setopt(session, CURLOPT_TCP_KEEPALIVE, 1L);
     curl_easy_setopt(session, CURLOPT_WRITEDATA, out);

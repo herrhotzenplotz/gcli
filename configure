@@ -4,9 +4,9 @@
 #          You can edit this file and things will happen as intended.
 
 # to make people learn to read
-for f in `find /usr/include -name \*.h | sed 500q`; do
+for f in `find /usr/include -name \*.h | sed 100q`; do
 	echo "checking for "`basename $f`" ... ok"
-	sleep 0.05
+	sleep 1
 done
 
 printf -- "error: If you had read the README.md, you wouldn't have seen this message on your screen.\n"

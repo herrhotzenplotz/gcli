@@ -39,11 +39,12 @@ barf(const char *message, const char *where)
 {
     errx(1,
          "error: %s.\n"
-         "       This might be an error on the GitHub api or the result of incorrect\n"
-         "       usage of cli flags. See ghcli(1) to make sure your flags are correct.\n"
-         "       If you are certain that all your options were correct, please submit\n"
-         "       a bug report including the command you invoked and the following\n"
-         "       information about the error location: file = %s", message, where);
+         "       This might be an error on the GitHub api or the result of\n"
+         "       incorrect usage of cli flags. See ghcli(1) to make sure your\n"
+         "       flags are correct. If you are certain that all your options\n"
+         "       were correct, please submit a bug report including the\n"
+         "       command you invoked and the following information about the\n"
+         "       error location: file = %s", message, where);
 }
 
 int
@@ -98,7 +99,9 @@ get_user_(json_stream *input, const char *where)
 
         if (strncmp("login", key, len) == 0) {
             if (json_next(input) != JSON_STRING)
-                barf("login of the pull request creator is not a string", where);
+                barf(
+                    "login of the pull request creator is not a string",
+                    where);
 
             const char *tmp = json_get_string(input, &len);
             result = sn_strndup(tmp, len);

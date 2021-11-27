@@ -55,11 +55,13 @@ shift(int *argc, char ***argv)
 static void
 version(void)
 {
-    fprintf(stderr,
-            "ghcli version "GHCLI_VERSION_STRING" - a command line utility to interact with GitHub\n"
-            "Copyright 2021 Nico Sonack <nsonack@outlook.com>\n"
-            "This program is licensed under the BSD2CLAUSE license. You should\n"
-            "received a copy of it with its distribution.\n");
+    fprintf(
+        stderr,
+        "ghcli version "GHCLI_VERSION_STRING
+        " - a command line utility to interact with GitHub\n"
+        "Copyright 2021 Nico Sonack <nsonack@outlook.com>\n"
+        "This program is licensed under the BSD2CLAUSE license. You should\n"
+        "received a copy of it with its distribution.\n");
 }
 
 static void
@@ -78,14 +80,14 @@ pr_try_derive_head(void)
 
     if (!(account = ghcli_config_get_account()).length)
         errx(1,
-             "error: Cannot derive PR head. Please specify --from or set the "
+             "error: Cannot derive PR head. Please specify --from or set the\n"
              "       account in the users ghcli config file.");
 
     if (!(branch = ghcli_gitconfig_get_current_branch()).length)
         errx(1,
-             "error: Cannot derive PR head. Please specify --from or, if you are "
-             "       in »detached HEAD« state, checkout the branch you want to "
-             "       pull request.");
+             "error: Cannot derive PR head. Please specify --from or, if you\n"
+             "       are in »detached HEAD« state, checkout the branch you \n"
+             "       want to pull request.");
 
     return sn_sv_fmt(SV_FMT":"SV_FMT, SV_ARGS(account), SV_ARGS(branch));
 }
@@ -101,7 +103,12 @@ subcommand_issue_create(int argc, char *argv[])
     ghcli_submit_issue_options opts   = {0};
 
     const struct option options[] = {
-        { .name = "in", .has_arg = required_argument, .flag = NULL, .val = 'i' },
+        {
+            .name = "in",
+            .has_arg = required_argument,
+            .flag = NULL,
+            .val = 'i'
+        },
         {0},
     };
 
@@ -120,7 +127,10 @@ subcommand_issue_create(int argc, char *argv[])
 
     if (!opts.in.length) {
         if (!(opts.in = ghcli_config_get_upstream()).length)
-            errx(1, "error: Target repo for the issue to be created in is missing. Please either specify '--in org/repo' or set pr.upstream in .ghcli.");
+            errx(1,
+                 "error: Target repo for the issue to be created "
+                 "in is missing. Please either specify '--in org/repo'"
+                 " or set pr.upstream in .ghcli.");
     }
 
     if (argc != 1)
@@ -144,10 +154,22 @@ subcommand_pull_create(int argc, char *argv[])
     ghcli_submit_pull_options opts   = {0};
 
     const struct option options[] = {
-        { .name = "from",  .has_arg = required_argument, .flag = NULL,        .val = 'f' },
-        { .name = "to",    .has_arg = required_argument, .flag = NULL,        .val = 't' },
-        { .name = "in",    .has_arg = required_argument, .flag = NULL,        .val = 'i' },
-        { .name = "draft", .has_arg = no_argument,       .flag = &opts.draft, .val = 1   },
+        { .name = "from",
+          .has_arg = required_argument,
+          .flag = NULL,
+          .val = 'f' },
+        { .name = "to",
+          .has_arg = required_argument,
+          .flag = NULL,
+          .val = 't' },
+        { .name = "in",
+          .has_arg = required_argument,
+          .flag = NULL,
+          .val = 'i' },
+        { .name = "draft",
+          .has_arg = no_argument,
+          .flag = &opts.draft,
+          .val = 1   },
         {0},
     };
 
@@ -178,12 +200,15 @@ subcommand_pull_create(int argc, char *argv[])
 
     if (!opts.to.length) {
         if (!(opts.to = ghcli_config_get_base()).length)
-            errx(1, "error: PR base is missing. Please either specify --to branch-name or set pr.base in .ghcli.");
+            errx(1,
+                 "error: PR base is missing. Please either specify "
+                 "--to branch-name or set pr.base in .ghcli.");
     }
 
     if (!opts.in.length) {
         if (!(opts.in = ghcli_config_get_upstream()).length)
-            errx(1, "error: PR target repo is missing. Please either specify --in org/repo or set pr.upstream in .ghcli.");
+            errx(1, "error: PR target repo is missing. Please either "
+                 "specify --in org/repo or set pr.upstream in .ghcli.");
     }
 
     if (argc != 1)
@@ -206,10 +231,22 @@ subcommand_comment(int argc, char *argv[])
     const char *repo  = NULL, *org = NULL;
 
     const struct option options[] = {
-        { .name = "repo",  .has_arg = required_argument, .flag = NULL, .val = 'r' },
-        { .name = "org",   .has_arg = required_argument, .flag = NULL, .val = 'o' },
-        { .name = "issue", .has_arg = required_argument, .flag = NULL, .val = 'i' },
-        { .name = "pull",  .has_arg = required_argument, .flag = NULL, .val = 'p' },
+        { .name = "repo",
+          .has_arg = required_argument,
+          .flag = NULL,
+          .val = 'r' },
+        { .name = "org",
+          .has_arg = required_argument,
+          .flag = NULL,
+          .val = 'o' },
+        { .name = "issue",
+          .has_arg = required_argument,
+          .flag = NULL,
+          .val = 'i' },
+        { .name = "pull",
+          .has_arg = required_argument,
+          .flag = NULL,
+          .val = 'p' },
         {0},
     };
 
@@ -245,7 +282,11 @@ subcommand_comment(int argc, char *argv[])
     if (issue < 0)
         errx(1, "error: missing issue/PR number (use -i)");
 
-    ghcli_comment_submit((ghcli_submit_comment_opts) { .org = org, .repo = repo, .issue = issue });
+    ghcli_comment_submit((ghcli_submit_comment_opts) {
+            .org = org,
+            .repo = repo,
+            .issue = issue
+    });
 
     return EXIT_SUCCESS;
 }
@@ -484,7 +525,8 @@ subcommand_review(int argc, char *argv[])
         /* print comments */
         ghcli_pr_review_comment *comments  = NULL;
         size_t                   comments_size =
-            ghcli_review_get_review_comments(org, repo, pr, review_id, &comments);
+            ghcli_review_get_review_comments(
+                org, repo, pr, review_id, &comments);
 
         ghcli_review_print_comments(stdout, comments, comments_size);
         ghcli_review_comments_free(comments, comments_size);
@@ -492,7 +534,8 @@ subcommand_review(int argc, char *argv[])
     } else if (pr > 0) {
         /* list reviews */
         ghcli_pr_review *reviews      = NULL;
-        size_t           reviews_size = ghcli_review_get_reviews(org, repo, pr, &reviews);
+        size_t           reviews_size = ghcli_review_get_reviews(
+            org, repo, pr, &reviews);
         ghcli_review_print_review_table(stdout, reviews, reviews_size);
         ghcli_review_reviews_free(reviews, reviews_size);
         return 0;

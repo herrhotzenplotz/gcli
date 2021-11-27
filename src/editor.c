@@ -49,7 +49,9 @@ sv_append(sn_sv this, sn_sv that)
 }
 
 sn_sv
-ghcli_editor_get_user_message(void (*file_initializer)(FILE *, void *), void *user_data)
+ghcli_editor_get_user_message(
+    void (*file_initializer)(FILE *, void *),
+    void *user_data)
 {
     char *editor     = getenv("EDITOR");
     char *env_editor = editor;
@@ -83,7 +85,8 @@ ghcli_editor_get_user_message(void (*file_initializer)(FILE *, void *), void *us
             errx(1, "Editor child exited abnormally");
 
         if (WEXITSTATUS(status) != 0)
-            errx(1, "Aborting PR. Editor command exited with code %d", WEXITSTATUS(status));
+            errx(1, "Aborting PR. Editor command exited with code %d",
+                 WEXITSTATUS(status));
     }
 
     if (!env_editor)

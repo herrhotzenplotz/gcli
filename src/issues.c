@@ -84,15 +84,21 @@ ghcli_issues_free(ghcli_issue *it, int size)
 }
 
 int
-ghcli_get_issues(const char *org, const char *reponame, bool all, ghcli_issue **out)
+ghcli_get_issues(
+    const char *org,
+    const char *reponame,
+    bool all,
+    ghcli_issue **out)
 {
     int                 count       = 0;
     json_stream         stream      = {0};
     ghcli_fetch_buffer  json_buffer = {0};
     char               *url         = NULL;
 
-    url = sn_asprintf("https://api.github.com/repos/%s/%s/issues?per_page=100&state=%s", org, reponame,
-                      all ? "all" : "open");
+    url = sn_asprintf(
+        "https://api.github.com/repos/%s/%s/issues?per_page=100&state=%s",
+        org, reponame,
+        all ? "all" : "open");
     ghcli_fetch(url, &json_buffer);
 
     free(url);
@@ -133,7 +139,11 @@ ghcli_print_issues_table(FILE *stream, ghcli_issue *issues, int issues_size)
 {
     fprintf(stream, "%5s  %7s  %s\n", "NUMBER", "STATE", "TITLE");
     for (int i = 0; i < issues_size; ++i) {
-        fprintf(stream, "%5d  %7s  %s\n", issues[i].number, issues[i].state, issues[i].title);
+        fprintf(
+            stream, "%5d  %7s  %s\n",
+            issues[i].number,
+            issues[i].state,
+            issues[i].title);
     }
 }
 
@@ -234,15 +244,21 @@ ghcli_issue_details_free(ghcli_issue_details *it)
 }
 
 void
-ghcli_issue_summary(FILE *stream, const char *org, const char *repo, int issue_number)
+ghcli_issue_summary(
+    FILE *stream,
+    const char *org,
+    const char *repo,
+    int issue_number)
 {
     const char          *url     = NULL;
     ghcli_fetch_buffer   buffer  = {0};
     json_stream          parser  = {0};
     ghcli_issue_details  details = {0};
 
-    url = sn_asprintf("https://api.github.com/repos/%s/%s/issues/%d?per_page=100",
-                      org, repo, issue_number);
+    url = sn_asprintf(
+        "https://api.github.com/repos/%s/%s/issues/%d?per_page=100",
+        org, repo,
+        issue_number);
     ghcli_fetch(url, &buffer);
 
     json_open_buffer(&parser, buffer.data, buffer.length);
@@ -265,7 +281,10 @@ ghcli_issue_close(const char *org, const char *repo, int issue_number)
     const char         *url         = NULL;
     const char         *data        = NULL;
 
-    url  = sn_asprintf("https://api.github.com/repos/%s/%s/issues/%d", org, repo, issue_number);
+    url  = sn_asprintf(
+        "https://api.github.com/repos/%s/%s/issues/%d",
+        org, repo,
+        issue_number);
     data = sn_asprintf("{ \"state\": \"close\"}");
 
     ghcli_fetch_with_method("PATCH", url, data, &json_buffer);
@@ -282,7 +301,10 @@ ghcli_issue_reopen(const char *org, const char *repo, int issue_number)
     const char         *url         = NULL;
     const char         *data        = NULL;
 
-    url  = sn_asprintf("https://api.github.com/repos/%s/%s/issues/%d", org, repo, issue_number);
+    url  = sn_asprintf(
+        "https://api.github.com/repos/%s/%s/issues/%d",
+        org, repo,
+        issue_number);
     data = sn_asprintf("{ \"state\": \"open\"}");
 
     ghcli_fetch_with_method("PATCH", url, data, &json_buffer);
@@ -296,8 +318,12 @@ static void
 issue_init_user_file(FILE *stream, void *_opts)
 {
     ghcli_submit_issue_options *opts = _opts;
-    fprintf(stream, "# ISSUE TITLE : "SV_FMT"\n", SV_ARGS(opts->title));
-    fprintf(stream, "# Enter issue description below. All lines starting with '#' will be discarded.\n");
+    fprintf(
+        stream,
+        "# ISSUE TITLE : "SV_FMT"\n"
+        "# Enter issue description below.\n"
+        "# All lines starting with '#' will be discarded.\n",
+        SV_ARGS(opts->title));
 }
 
 static sn_sv

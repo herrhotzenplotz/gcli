@@ -75,7 +75,11 @@ parse_review_header(json_stream *stream, ghcli_pr_review *it)
 }
 
 size_t
-ghcli_review_get_reviews(const char *org, const char *repo, int pr, ghcli_pr_review **out)
+ghcli_review_get_reviews(
+    const char *org,
+    const char *repo,
+    int pr,
+    ghcli_pr_review **out)
 {
     ghcli_fetch_buffer  buffer = {0};
     char               *url    = NULL;
@@ -83,7 +87,9 @@ ghcli_review_get_reviews(const char *org, const char *repo, int pr, ghcli_pr_rev
     enum   json_type    next   = JSON_NULL;
     size_t              size   = 0;
 
-    url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d/reviews", org, repo, pr);
+    url = sn_asprintf(
+        "https://api.github.com/repos/%s/%s/pulls/%d/reviews",
+        org, repo, pr);
     ghcli_fetch(url, &buffer);
 
     json_open_buffer(&stream, buffer.data, buffer.length);
@@ -113,7 +119,10 @@ ghcli_review_get_reviews(const char *org, const char *repo, int pr, ghcli_pr_rev
 }
 
 void
-ghcli_review_print_review_table(FILE *out, ghcli_pr_review *headers, size_t headers_size)
+ghcli_review_print_review_table(
+    FILE *out,
+    ghcli_pr_review *headers,
+    size_t headers_size)
 {
     for (size_t i = 0; i < headers_size; ++i) {
         fprintf(out,
@@ -130,7 +139,10 @@ ghcli_review_print_review_table(FILE *out, ghcli_pr_review *headers, size_t head
 }
 
 void
-ghcli_review_print_comments(FILE *out, ghcli_pr_review_comment *comments, size_t comments_size)
+ghcli_review_print_comments(
+    FILE *out,
+    ghcli_pr_review_comment *comments,
+    size_t comments_size)
 {
     for (size_t i = 0; i < comments_size; ++i) {
         fprintf(out,
@@ -229,7 +241,9 @@ ghcli_review_get_review_comments(
     enum json_type      next   = JSON_NULL;
     size_t              size   = 0;
 
-    url = sn_asprintf("https://api.github.com/repos/%s/%s/pulls/%d/reviews/%d/comments", org, repo, pr, review_id);
+    url = sn_asprintf(
+        "https://api.github.com/repos/%s/%s/pulls/%d/reviews/%d/comments",
+        org, repo, pr, review_id);
     ghcli_fetch(url, &buffer);
 
     json_open_buffer(&stream, buffer.data, buffer.length);

@@ -37,7 +37,7 @@
 #include <ghcli/config.h>
 #include <ghcli/gitconfig.h>
 #include <ghcli/issues.h>
-#include <ghcli/fork.h>
+#include <ghcli/forks.h>
 #include <ghcli/pulls.h>
 #include <ghcli/review.h>
 
@@ -553,11 +553,36 @@ subcommand_forks(int argc, char *argv[])
     ghcli_fork *forks      = NULL;
     const char *org        = NULL, *repo = NULL;
     int         forks_size = 0;
+    int         ch         = 0;
 
-    ghcli_gitconfig_get_repo(&org, &repo);
+    while ((ch = getopt(argc, argv, "o:r:")) != -1) {
+        switch (ch) {
+        case 'o':
+            org = optarg;
+            break;
+        case 'r':
+            repo = optarg;
+            break;
+        case '?':
+        default:
+            usage();
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    /* If no remote was specified, try to autodetect */
+    if ((org == NULL) != (repo == NULL))
+        errx(1, "error: missing either explicit org or repo");
+
+    if (org == NULL)
+        ghcli_gitconfig_get_repo(&org, &repo);
 
     forks_size = ghcli_get_forks(org, repo, &forks);
     ghcli_print_forks(stdout, forks, forks_size);
+
+    return EXIT_SUCCESS;
 }
 
 int

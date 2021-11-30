@@ -37,6 +37,7 @@
 #include <ghcli/config.h>
 #include <ghcli/gitconfig.h>
 #include <ghcli/issues.h>
+#include <ghcli/fork.h>
 #include <ghcli/pulls.h>
 #include <ghcli/review.h>
 
@@ -546,6 +547,19 @@ subcommand_review(int argc, char *argv[])
     return 1;
 }
 
+static int
+subcommand_forks(int argc, char *argv[])
+{
+    ghcli_fork *forks      = NULL;
+    const char *org        = NULL, *repo = NULL;
+    int         forks_size = 0;
+
+    ghcli_gitconfig_get_repo(&org, &repo);
+
+    forks_size = ghcli_get_forks(org, repo, &forks);
+    ghcli_print_forks(stdout, forks, forks_size);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -566,6 +580,8 @@ main(int argc, char *argv[])
         return subcommand_comment(argc, argv);
     } else if (strcmp(argv[0], "review") == 0) {
         return subcommand_review(argc, argv);
+    } else if (strcmp(argv[0], "forks") == 0) {
+        return subcommand_forks(argc, argv);
     } else if (strcmp(argv[0], "version") == 0) {
         version();
         return 0;

@@ -142,10 +142,16 @@ ghcli_get_prs(const char *org, const char *reponame, bool all, ghcli_pull **out)
 void
 ghcli_print_pr_table(FILE *stream, ghcli_pull *pulls, int pulls_size)
 {
+    if (pulls_size == 0) {
+        fprintf(stream, "No Pull Requests\n");
+        return;
+    }
+
     fprintf(
         stream,
         "%6s  %6s  %6s  %20s  %-s\n",
         "NUMBER", "STATE", "MERGED", "CREATOR", "TITLE");
+
     for (int i = 0; i < pulls_size; ++i) {
         fprintf(stream, "%6d  %6s  %6s  %20s  %-s\n",
                 pulls[i].number, pulls[i].state,
@@ -438,10 +444,16 @@ cut_newline(const char *_it)
 static void
 ghcli_print_commits_table(FILE *stream, ghcli_commit *commits, int commits_size)
 {
+    if (commits_size == 0) {
+        fprintf(stream, "No commits\n");
+        return;
+    }
+
     fprintf(
         stream,
         "%8.8s  %-15.15s  %-20.20s  %16.16s  %-s\n",
         "SHA", "AUTHOR", "EMAIL", "DATE", "MESSAGE");
+
     for (int i = 0; i < commits_size; ++i) {
         char *message = cut_newline(commits[i].message);
         fprintf(stream, "%8.8s  %-15.15s  %-20.20s  %16.16s  %-s\n",

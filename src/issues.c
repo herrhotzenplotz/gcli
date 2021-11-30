@@ -137,6 +137,11 @@ ghcli_get_issues(
 void
 ghcli_print_issues_table(FILE *stream, ghcli_issue *issues, int issues_size)
 {
+    if (issues_size == 0) {
+        fprintf(stream, "No issues\n");
+        return;
+    }
+
     fprintf(stream, "%5s  %7s  %s\n", "NUMBER", "STATE", "TITLE");
     for (int i = 0; i < issues_size; ++i) {
         fprintf(

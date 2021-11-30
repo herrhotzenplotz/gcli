@@ -73,6 +73,17 @@ usage(void)
     exit(1);
 }
 
+static void
+check_org_and_repo(const char **org, const char **repo)
+{
+    /* If no remote was specified, try to autodetect */
+    if ((*org == NULL) != (*repo == NULL))
+        errx(1, "error: missing either explicit org or repo");
+
+    if (*org == NULL)
+        ghcli_gitconfig_get_repo(org, repo);
+}
+
 static sn_sv
 pr_try_derive_head(void)
 {
@@ -274,11 +285,7 @@ subcommand_comment(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    if ((org == NULL) != (repo == NULL))
-        errx(1, "error: missing either explicit org or repo");
-
-    if (org == NULL)
-        ghcli_gitconfig_get_repo(&org, &repo);
+    check_org_and_repo(&org, &repo);
 
     if (issue < 0)
         errx(1, "error: missing issue/PR number (use -i)");
@@ -339,12 +346,7 @@ subcommand_pulls(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    /* If unset try to autodetect github remote */
-    if ((org == NULL) != (repo == NULL))
-        errx(1, "error: missing either explicit org or repo");
-
-    if (org == NULL)
-        ghcli_gitconfig_get_repo(&org, &repo);
+    check_org_and_repo(&org, &repo);
 
     /* In case no explicit PR number was specified, list all
      * open PRs and exit */
@@ -433,12 +435,8 @@ subcommand_issues(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    /* If no remote was specified, try to autodetect */
-    if ((org == NULL) != (repo == NULL))
-        errx(1, "error: missing either explicit org or repo");
 
-    if (org == NULL)
-        ghcli_gitconfig_get_repo(&org, &repo);
+    check_org_and_repo(&org, &repo);
 
     /* No issue number was given, so list all open issues */
     if (issue < 0) {
@@ -515,12 +513,7 @@ subcommand_review(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    /* If no remote was specified, try to autodetect */
-    if ((org == NULL) != (repo == NULL))
-        errx(1, "error: missing either explicit org or repo");
-
-    if (org == NULL)
-        ghcli_gitconfig_get_repo(&org, &repo);
+    check_org_and_repo(&org, &repo);
 
     if (pr > 0 && review_id > 0) {
         /* print comments */
@@ -548,12 +541,50 @@ subcommand_review(int argc, char *argv[])
 }
 
 static int
+subcommand_forks_create(int argc, char *argv[])
+{
+    int ch;
+    const char *org = NULL, *repo = NULL, *in = NULL;
+    while ((ch = getopt(argc, argv, "o:r:i:")) != -1) {
+        switch (ch) {
+        case 'o':
+            org = optarg;
+            break;
+        case 'r':
+            repo = optarg;
+            break;
+        case 'i':
+            in = optarg;
+            break;
+        case '?':
+        default:
+            usage();
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    check_org_and_repo(&org, &repo);
+
+    ghcli_fork_create(org, repo, in);
+
+    return EXIT_SUCCESS;
+}
+
+static int
 subcommand_forks(int argc, char *argv[])
 {
     ghcli_fork *forks      = NULL;
     const char *org        = NULL, *repo = NULL;
     int         forks_size = 0;
     int         ch         = 0;
+
+    /* detect whether we wanna create a fork */
+    if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
+        shift(&argc, &argv);
+        return subcommand_forks_create(argc, argv);
+    }
 
     while ((ch = getopt(argc, argv, "o:r:")) != -1) {
         switch (ch) {
@@ -572,12 +603,7 @@ subcommand_forks(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    /* If no remote was specified, try to autodetect */
-    if ((org == NULL) != (repo == NULL))
-        errx(1, "error: missing either explicit org or repo");
-
-    if (org == NULL)
-        ghcli_gitconfig_get_repo(&org, &repo);
+    check_org_and_repo(&org, &repo);
 
     forks_size = ghcli_get_forks(org, repo, &forks);
     ghcli_print_forks(stdout, forks, forks_size);

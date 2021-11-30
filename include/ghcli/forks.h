@@ -42,6 +42,7 @@ struct ghcli_fork {
 };
 
 int  ghcli_get_forks(const char *org, const char *reponame, ghcli_fork **out);
+void ghcli_fork_create(const char *org, const char *repo, const char *in);
 void ghcli_print_forks(FILE *stream, ghcli_fork *forks, size_t forks_size);
 
 #endif /* FORK_H */

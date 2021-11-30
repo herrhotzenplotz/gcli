@@ -90,6 +90,8 @@ ghcli_get_forks(const char *org, const char *reponame, ghcli_fork **out)
     url = sn_asprintf("https://api.github.com/repos/%s/%s/forks", org, reponame);
     ghcli_fetch(url, &buffer);
 
+    free(url);
+
     json_open_buffer(&stream, buffer.data, buffer.length);
     json_set_streaming(&stream, 1);
 
@@ -102,6 +104,8 @@ ghcli_get_forks(const char *org, const char *reponame, ghcli_fork **out)
         ghcli_fork *it = &(*out)[size++];
         parse_fork(&stream, it);
     }
+
+    free(buffer.data);
 
     return size;
 }
@@ -123,4 +127,27 @@ ghcli_print_forks(FILE *stream, ghcli_fork *forks, size_t forks_size)
             forks[i].forks,
             forks[i].full_name.data);
     }
+}
+
+void
+ghcli_fork_create(const char *org, const char *repo, const char *_in)
+{
+    char               *url       = NULL;
+    char               *post_data = NULL;
+    sn_sv               in        = SV_NULL;
+    ghcli_fetch_buffer  buffer    = {0};
+
+    url = sn_asprintf("https://api.github.com/repos/%s/%s/forks", org, repo);
+    if (_in) {
+        in        = ghcli_json_escape(SV((char *)_in));
+        post_data = sn_asprintf("{\"organization\":\""SV_FMT"\"}",
+                                SV_ARGS(in));
+    }
+
+    ghcli_fetch_with_method("POST", url, post_data, &buffer);
+    ghcli_print_html_url(buffer);
+
+    free(in.data);
+    free(url);
+    free(post_data);
 }

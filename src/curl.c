@@ -206,7 +206,10 @@ ghcli_fetch_with_method(
     session = curl_easy_init();
 
     curl_easy_setopt(session, CURLOPT_URL, url);
-    curl_easy_setopt(session, CURLOPT_POSTFIELDS, data);
+
+    if (data)
+        curl_easy_setopt(session, CURLOPT_POSTFIELDS, data);
+
     curl_easy_setopt(session, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(session, CURLOPT_USERAGENT, "curl/7.79.1");
     curl_easy_setopt(session, CURLOPT_CUSTOMREQUEST, method);

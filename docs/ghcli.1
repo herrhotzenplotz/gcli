@@ -40,6 +40,15 @@
 .Op Fl p Ar pr
 .Op Fl c Ar comment id
 
+.Nm
+.Cm forks
+.Op Fl o Ar user-or-organization Fl r Ar repository
+
+.Nm
+.Cm forks create
+.Op Fl o Ar user-or-organization Fl r Ar repository
+.Op Fl i Ar organization
+
 .Sh DESCRIPTION
 The
 .Nm
@@ -128,6 +137,17 @@ and
 You will be prompted for confirmation before the Pull request is going
 to be submitted.
 
+.It Cm forks
+List forks of the upstream repository.
+
+.It Cm forks create
+Fork a repository, either automatically detected or directly specified
+through
+.Fl o
+and
+.Fl r
+into your own account or an organization given by
+.Fl i .
 
 .It Cm comment
 create a new comment under the issue specified by

@@ -267,7 +267,8 @@ ghcli_print_pr_summary(FILE *out, ghcli_pull_summary *it)
     }
     fputs("\n\n", out);
 
-    pretty_print(it->body, 4, 80, out);
+    if (it->body)
+        pretty_print(it->body, 4, 80, out);
 }
 
 static void

@@ -224,8 +224,12 @@ ghcli_print_issue_summary(FILE *out, ghcli_issue_details *it)
     }
     fputs("\n\n", out);
 
-    pretty_print(it->body.data, 4, 80, out);
-    fputc('\n', out);
+    /* The API may not return a body if the user didn't put in any
+     * comment */
+    if (it->body.data) {
+        pretty_print(it->body.data, 4, 80, out);
+        fputc('\n', out);
+    }
 }
 
 static void

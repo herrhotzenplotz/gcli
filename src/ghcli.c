@@ -35,10 +35,11 @@
 
 #include <ghcli/comments.h>
 #include <ghcli/config.h>
+#include <ghcli/forks.h>
 #include <ghcli/gitconfig.h>
 #include <ghcli/issues.h>
-#include <ghcli/forks.h>
 #include <ghcli/pulls.h>
+#include <ghcli/repos.h>
 #include <ghcli/review.h>
 
 #include <sn/sn.h>
@@ -608,6 +609,36 @@ delete_repo(bool always_yes, const char *org, const char *repo)
 }
 
 static int
+subcommand_repos(int argc, char *argv[])
+{
+    int ch, repos_size;
+    const char *org = NULL;
+    ghcli_repo *repos = NULL;
+
+    while ((ch = getopt(argc, argv, "o:")) != -1) {
+        switch (ch) {
+        case 'o':
+            org = optarg;
+            break;
+        case '?':
+        default:
+            usage();
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    if (!org)
+        org = sn_sv_to_cstr(ghcli_config_get_account());
+
+    repos_size = ghcli_get_repos(org, &repos);
+    ghcli_print_repos_table(stdout, repos, (size_t)repos_size);
+
+    return EXIT_SUCCESS;
+}
+
+static int
 subcommand_forks(int argc, char *argv[])
 {
     ghcli_fork *forks      = NULL;
@@ -663,6 +694,28 @@ subcommand_forks(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
+static int
+subcommand_version(int argc, char *argv[])
+{
+    (void) argc;
+    (void) argv;
+    version();
+    return 0;
+}
+
+static struct subcommand {
+    const char *cmd_name;
+    int (*fn)(int, char **);
+} subcommands[] = {
+    { .cmd_name = "pulls",   .fn = subcommand_pulls   },
+    { .cmd_name = "issues",  .fn = subcommand_issues  },
+    { .cmd_name = "repos",   .fn = subcommand_repos   },
+    { .cmd_name = "comment", .fn = subcommand_comment },
+    { .cmd_name = "review",  .fn = subcommand_review  },
+    { .cmd_name = "forks",   .fn = subcommand_forks   },
+    { .cmd_name = "version", .fn = subcommand_version },
+};
+
 int
 main(int argc, char *argv[])
 {
@@ -675,23 +728,14 @@ main(int argc, char *argv[])
     if (argc == 0)
         errx(1, "error: missing subcommand");
 
-    if (strcmp(argv[0], "pulls") == 0) {
-        return subcommand_pulls(argc, argv);
-    } else if (strcmp(argv[0], "issues") == 0) {
-        return subcommand_issues(argc, argv);
-    } else if (strcmp(argv[0], "comment") == 0) {
-        return subcommand_comment(argc, argv);
-    } else if (strcmp(argv[0], "review") == 0) {
-        return subcommand_review(argc, argv);
-    } else if (strcmp(argv[0], "forks") == 0) {
-        return subcommand_forks(argc, argv);
-    } else if (strcmp(argv[0], "version") == 0) {
-        version();
-        return 0;
-    } else {
-        fprintf(stderr, "error: unknown subcommand %s\n", argv[0]);
-        usage();
+    for (size_t i = 0; i < ARRAY_SIZE(subcommands); ++i) {
+        if (strcmp(subcommands[i].cmd_name, argv[0]) == 0)
+            return subcommands[i].fn(argc, argv);
     }
+
+    /* No subcommand matched */
+    fprintf(stderr, "error: unknown subcommand %s\n", argv[0]);
+    usage();
 
     return 42;
 }

@@ -25,6 +25,7 @@ ghcli_SRCS			=	src/ghcli.c			\
 					src/gitconfig.c			\
 					src/pulls.c			\
 					src/forks.c			\
+					src/repos.c			\
 					src/review.c			\
 					src/json_util.c			\
 					src/config.c			\

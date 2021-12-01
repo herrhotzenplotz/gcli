@@ -104,5 +104,8 @@ sn_bool_yesno(bool x)
     return x ? "yes" : "no";
 }
 
+#ifndef ARRAY_SIZE
+#    define ARRAY_SIZE(xs) (sizeof(xs) / sizeof(xs[0]))
+#endif /* ARRAY_SIZE */
 
 #endif /* SN_H */

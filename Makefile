@@ -19,12 +19,12 @@ CPPFLAGS			=	-D_XOPEN_SOURCE=600 \
 					-DGHCLI_VERSION_STRING=\"${GHCLI_VERSION}\"
 
 # List the source files for each binary to be built
-ghcli_SRCS			=	src/ghcli.c
+ghcli_SRCS			=	src/ghcli.c			\
+					src/editor.c
 
 libghcli.a_SRCS			=	src/comments.c			\
 					src/config.c			\
 					src/curl.c			\
-					src/editor.c			\
 					src/forges.c			\
 					src/forks.c			\
 					src/gists.c			\

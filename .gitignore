@@ -63,3 +63,4 @@
 /tests/json_escape/json_escape
 /tests/json_escape/json_escape.o
 /tests/test.mk~
+/ghcli-qt/build/

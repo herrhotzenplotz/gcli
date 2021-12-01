@@ -643,9 +643,10 @@ subcommand_repos(int argc, char *argv[])
             errx(1, "repos: no actions specified");
 
         if (!org)
-            org = sn_sv_to_cstr(ghcli_config_get_account());
+            repos_size = ghcli_get_own_repos(&repos);
+        else
+            repos_size = ghcli_get_repos(org, &repos);
 
-        repos_size = ghcli_get_repos(org, &repos);
         ghcli_print_repos_table(stdout, repos, (size_t)repos_size);
         ghcli_repos_free(repos, repos_size);
     } else {

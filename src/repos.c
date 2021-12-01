@@ -178,3 +178,36 @@ ghcli_repo_delete(const char *org, const char *repo)
     free(buffer.data);
     free(url);
 }
+
+int
+ghcli_get_own_repos(ghcli_repo **out)
+{
+    const char         *url    = "https://api.github.com/user/repos";
+    ghcli_fetch_buffer  buffer = {0};
+    struct json_stream  stream = {0};
+    enum  json_type     next   = JSON_NULL;
+    int                 size   = 0;
+
+    /* HACK: ghcli_fetch does not authenticate */
+    ghcli_fetch_with_method("GET", url, NULL, &buffer);
+
+    json_open_buffer(&stream, buffer.data, buffer.length);
+    json_set_streaming(&stream, 1);
+
+    // TODO: Poor error message
+    if ((next = json_next(&stream)) != JSON_ARRAY)
+        errx(1,
+             "Expected array in response from API "
+             "but got something else instead");
+
+    while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
+        *out = realloc(*out, sizeof(**out) * (size + 1));
+        ghcli_repo *it = &(*out)[size++];
+        parse_repo(&stream, it);
+    }
+
+    free(buffer.data);
+    json_close(&stream);
+
+    return size;
+}

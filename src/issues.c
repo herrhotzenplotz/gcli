@@ -361,8 +361,10 @@ ghcli_issue_submit(ghcli_submit_issue_options opts)
 
     fputc('\n', stdout);
 
-    if (!sn_yesno("Do you want to continue?"))
-        errx(1, "Submission aborted.");
+    if (!opts.always_yes) {
+        if (!sn_yesno("Do you want to continue?"))
+            errx(1, "Submission aborted.");
+    }
 
     ghcli_perform_submit_issue(opts, &json_buffer);
 

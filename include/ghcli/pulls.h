@@ -66,6 +66,7 @@ struct ghcli_submit_pull_options {
     sn_sv title;
     sn_sv body;
     int   draft;
+    bool  always_yes;
 };
 
 int  ghcli_get_prs(const char *org, const char *reponame, bool all, ghcli_pull **out);

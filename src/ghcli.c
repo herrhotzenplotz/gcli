@@ -115,12 +115,14 @@ subcommand_issue_create(int argc, char *argv[])
     ghcli_submit_issue_options opts   = {0};
 
     const struct option options[] = {
-        {
-            .name = "in",
-            .has_arg = required_argument,
-            .flag = NULL,
-            .val = 'i'
-        },
+        { .name    = "in",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'i' },
+        { .name    = "yes",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'y' },
         {0},
     };
 
@@ -129,6 +131,8 @@ subcommand_issue_create(int argc, char *argv[])
         case 'i':
             opts.in    = SV(optarg);
             break;
+        case 'y':
+            opts.always_yes = true;
         default:
             usage();
         }
@@ -185,7 +189,7 @@ subcommand_pull_create(int argc, char *argv[])
         {0},
     };
 
-    while ((ch = getopt_long(argc, argv, "f:t:di:", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "yf:t:di:", options, NULL)) != -1) {
         switch (ch) {
         case 'f':
             opts.from  = SV(optarg);
@@ -198,6 +202,9 @@ subcommand_pull_create(int argc, char *argv[])
             break;
         case 'i':
             opts.in    = SV(optarg);
+            break;
+        case 'y':
+            opts.always_yes = true;
             break;
         default:
             usage();
@@ -241,28 +248,33 @@ subcommand_comment(int argc, char *argv[])
 {
     int   ch, issue = -1;
     const char *repo  = NULL, *org = NULL;
+    bool  always_yes = false;
 
     const struct option options[] = {
-        { .name = "repo",
+        { .name    = "yes",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'y' },
+        { .name    = "repo",
           .has_arg = required_argument,
-          .flag = NULL,
-          .val = 'r' },
-        { .name = "org",
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "org",
           .has_arg = required_argument,
-          .flag = NULL,
-          .val = 'o' },
-        { .name = "issue",
+          .flag    = NULL,
+          .val     = 'o' },
+        { .name    = "issue",
           .has_arg = required_argument,
-          .flag = NULL,
-          .val = 'i' },
-        { .name = "pull",
+          .flag    = NULL,
+          .val     = 'i' },
+        { .name    = "pull",
           .has_arg = required_argument,
-          .flag = NULL,
-          .val = 'p' },
+          .flag    = NULL,
+          .val     = 'p' },
         {0},
     };
 
-    while ((ch = getopt_long(argc, argv, "r:o:i:p:", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "yr:o:i:p:", options, NULL)) != -1) {
         switch (ch) {
         case 'r':
             repo = optarg;
@@ -277,6 +289,9 @@ subcommand_comment(int argc, char *argv[])
             if (endptr != optarg + strlen(optarg))
                 err(1, "error: Cannot parse issue/PR number");
         } break;
+        case 'y':
+            always_yes = true;
+            break;
         default:
             usage();
         }
@@ -291,9 +306,10 @@ subcommand_comment(int argc, char *argv[])
         errx(1, "error: missing issue/PR number (use -i)");
 
     ghcli_comment_submit((ghcli_submit_comment_opts) {
-            .org = org,
-            .repo = repo,
-            .issue = issue
+            .org        = org,
+            .repo       = repo,
+            .issue      = issue,
+            .always_yes = always_yes,
     });
 
     return EXIT_SUCCESS;

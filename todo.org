@@ -36,6 +36,7 @@
    Solved in commit 4be0ca8. Leave it up to the user to point at the
    right repo. Also, there are the -o and -r flags.
 ** TODO Valgrind the new fork stuff
+** TODO Ask the user if they want to add a git remote if a fork is created
 
 
 * On the review API

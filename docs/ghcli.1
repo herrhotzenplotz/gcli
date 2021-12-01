@@ -13,6 +13,7 @@
 
 .Nm
 .Cm issues create
+.Op Fl y
 .Op Fl -in Ar upstream/repo
 .Ar issue title
 
@@ -23,6 +24,7 @@
 
 .Nm
 .Cm pulls create
+.Op Fl y
 .Op Fl -from Ar org:branch
 .Op Fl -to Ar trunk
 .Op Fl -in Ar upstream/repo
@@ -30,6 +32,7 @@
 
 .Nm
 .Cm comment
+.Op Fl y
 .Op Fl i Ar issue
 .Op Fl p Ar pr
 
@@ -42,7 +45,9 @@
 
 .Nm
 .Cm forks
+.Op Fl y
 .Op Fl o Ar user-or-organization Fl r Ar repository
+.Op Ar action
 
 .Nm
 .Cm forks create
@@ -138,7 +143,13 @@ You will be prompted for confirmation before the Pull request is going
 to be submitted.
 
 .It Cm forks
-List forks of the upstream repository.
+If no action is provided, list forks of the upstream
+repository. Otherwise perform one of the following actions:
+
+.Bl -tag -width indent
+.It Ar delete
+Delete the fork
+.El
 
 .It Cm forks create
 Fork a repository, either automatically detected or directly specified
@@ -222,6 +233,9 @@ Print review comments given by
 .Ar rid .
 Can only be used in combination with
 .Fl p .
+
+.It Fl y , Fl -yes
+Don't ask for confirmation. Assume yes.
 
 .El
 

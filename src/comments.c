@@ -173,12 +173,13 @@ ghcli_comment_submit(ghcli_submit_comment_opts opts)
         "You will be commenting the following in %s/%s #%d:\n"SV_FMT"\n",
         opts.org, opts.repo, opts.issue, SV_ARGS(message));
 
-    if (sn_yesno("Is this okay?")) {
-        ghcli_perform_submit_comment(opts, &buffer);
-        ghcli_print_html_url(buffer);
-    } else {
-        errx(1, "Aborted by user");
+    if (!opts.always_yes) {
+        if (!sn_yesno("Is this okay?"))
+            errx(1, "Aborted by user");
     }
+
+    ghcli_perform_submit_comment(opts, &buffer);
+    ghcli_print_html_url(buffer);
 
     free(buffer.data);
     free(message.data);

@@ -583,8 +583,9 @@ ghcli_pr_submit(ghcli_submit_pull_options opts)
 
     fputc('\n', stdout);
 
-    if (!sn_yesno("Do you want to continue?"))
-        errx(1, "PR aborted.");
+    if (!opts.always_yes)
+        if (!sn_yesno("Do you want to continue?"))
+            errx(1, "PR aborted.");
 
     ghcli_perform_submit_pr(opts, &json_buffer);
 

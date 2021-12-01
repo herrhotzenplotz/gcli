@@ -49,6 +49,7 @@ struct ghcli_submit_comment_opts {
     const char *org, *repo;
     int         issue;
     sn_sv       message;
+    bool        always_yes;
 };
 
 int  ghcli_get_comments(const char *url, ghcli_comment **comments);

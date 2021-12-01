@@ -62,6 +62,7 @@ struct ghcli_submit_issue_options {
     sn_sv in;
     sn_sv title;
     sn_sv body;
+    bool  always_yes;
 };
 
 

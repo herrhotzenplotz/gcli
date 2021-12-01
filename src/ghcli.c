@@ -659,8 +659,9 @@ subcommand_review(int argc, char *argv[])
 static int
 subcommand_forks_create(int argc, char *argv[])
 {
-    int ch;
-    const char *owner = NULL, *repo = NULL, *in = NULL;
+    int         ch;
+    const char *owner      = NULL, *repo = NULL, *in = NULL;
+    bool        always_yes = false;
 
     const struct option options[] = {
         { .name    = "repo",
@@ -675,10 +676,14 @@ subcommand_forks_create(int argc, char *argv[])
           .has_arg = required_argument,
           .flag    = NULL,
           .val     = 'i' },
+        { .name    = "yes",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'y' },
         {0},
     };
 
-    while ((ch = getopt_long(argc, argv, "o:r:i:", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "yo:r:i:", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -688,6 +693,9 @@ subcommand_forks_create(int argc, char *argv[])
             break;
         case 'i':
             in = optarg;
+            break;
+        case 'y':
+            always_yes = true;
             break;
         case '?':
         default:
@@ -701,6 +709,16 @@ subcommand_forks_create(int argc, char *argv[])
     check_owner_and_repo(&owner, &repo);
 
     ghcli_fork_create(owner, repo, in);
+
+    if (!always_yes) {
+        if (!sn_yesno("Do you want to add a remote for the fork?"))
+            return EXIT_SUCCESS;
+    }
+
+    if (!in)
+        in = sn_sv_to_cstr(ghcli_config_get_account());
+
+    ghcli_gitconfig_add_fork_remote(in, repo);
 
     return EXIT_SUCCESS;
 }

@@ -31,10 +31,13 @@
 #include <ghcli/config.h>
 #include <sn/sn.h>
 
+#include <stdio.h>
+#include <sys/wait.h>
 #include <dirent.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include <sys/mman.h>
 
@@ -324,4 +327,61 @@ ghcli_gitconfig_get_repo(const char **owner, const char **repo)
     }
 
     errx(1, "No GitHub remote found");
+}
+
+void
+ghcli_gitconfig_add_fork_remote(const char *org, const char *repo)
+{
+    char  remote[64]  = {0};
+    FILE *remote_list = popen("git remote", "r");
+
+    if (!remote_list)
+        err(1, "popen");
+
+    /* TODO: Output informational messages */
+    /* Rename possibly existing origin remote to point at the
+     * upstream */
+    while (fgets(remote, sizeof(remote), remote_list)) {
+        if (strcmp(remote, "origin\n") == 0) {
+
+            pid_t pid = 0;
+            if ((pid = fork()) == 0) {
+                printf("[INFO] git remote rename origin upstream\n");
+                execlp("git", "git", "remote",
+                       "rename", "origin", "upstream", NULL);
+            } else if (pid > 0) {
+                int status = 0;
+                waitpid(pid, &status, WEXITED);
+
+                if (!(WIFEXITED(status) && (WEXITSTATUS(status) == 0)))
+                    errx(1, "git child process failed");
+            } else {
+                err(1, "fork");
+            }
+
+            break;
+        }
+    }
+
+    pclose(remote_list);
+
+    /* Add new remote */
+    {
+        pid_t pid = 0;
+        if ((pid = fork()) == 0) {
+            const char *remote_url = sn_asprintf(
+                "git@github.com:%s/%s",
+                org, repo);
+            printf("[INFO] git remote add origin %s\n", remote_url);
+            execlp("git", "git", "remote", "add", "origin", remote_url, NULL);
+        } else if (pid > 0) {
+            int status = 0;
+            waitpid(pid, &status, WEXITED);
+
+            if (!(WIFEXITED(status) && (WEXITSTATUS(status) == 0)))
+                errx(1, "git child process failed");
+        } else {
+            err(1, "fork");
+        }
+    }
 }

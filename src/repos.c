@@ -108,6 +108,8 @@ ghcli_get_repos(const char *org, ghcli_repo **out)
     }
 
     free(url);
+    free(buffer.data);
+    json_close(&stream);
 
     return size;
 }
@@ -134,4 +136,18 @@ ghcli_print_repos_table(FILE *stream, ghcli_repo *repos, size_t repos_size)
             repos[i].date.data,
             repos[i].full_name.data);
     }
+}
+
+void
+ghcli_repos_free(ghcli_repo *repos, size_t repos_size)
+{
+    for (size_t i = 0; i < repos_size; ++i) {
+        free(repos[i].full_name.data);
+        free(repos[i].name.data);
+        free(repos[i].owner.data);
+        free(repos[i].date.data);
+        free(repos[i].visibility.data);
+    }
+
+    free(repos);
 }

@@ -634,6 +634,7 @@ subcommand_repos(int argc, char *argv[])
 
     repos_size = ghcli_get_repos(org, &repos);
     ghcli_print_repos_table(stdout, repos, (size_t)repos_size);
+    ghcli_repos_free(repos, repos_size);
 
     return EXIT_SUCCESS;
 }

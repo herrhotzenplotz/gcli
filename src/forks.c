@@ -87,7 +87,9 @@ ghcli_get_forks(const char *org, const char *reponame, ghcli_fork **out)
 
     *out = NULL;
 
-    url = sn_asprintf("https://api.github.com/repos/%s/%s/forks", org, reponame);
+    url = sn_asprintf(
+        "https://api.github.com/repos/%s/%s/forks",
+        org, reponame);
     ghcli_fetch(url, &buffer);
 
     free(url);
@@ -97,7 +99,9 @@ ghcli_get_forks(const char *org, const char *reponame, ghcli_fork **out)
 
     // TODO: Poor error message
     if ((next = json_next(&stream)) != JSON_ARRAY)
-        errx(1, "Expected array in response from API but got something else instead");
+        errx(1,
+             "Expected array in response from API "
+             "but got something else instead");
 
     while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
         *out = realloc(*out, sizeof(ghcli_fork) * (size + 1));
@@ -118,7 +122,10 @@ ghcli_print_forks(FILE *stream, ghcli_fork *forks, size_t forks_size)
         return;
     }
 
-    fprintf(stream, "%-20.20s  %-20.20s  %-5.5s  %s\n", "OWNER", "DATE", "FORKS", "FULLNAME");
+    fprintf(
+        stream,
+        "%-20.20s  %-20.20s  %-5.5s  %s\n",
+        "OWNER", "DATE", "FORKS", "FULLNAME");
     for (size_t i = 0; i < forks_size; ++i) {
         fprintf(
             stream, "%-20.20s  %-20.20s  %5d  %s\n",

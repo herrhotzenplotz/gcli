@@ -3,9 +3,16 @@ QT          +=  core network widgets
 TARGET  =       ghcli-qt
 
 SOURCES =       src/main.cc \
-                src/mainwindow.cc
-HEADERS =       include/ghcli-qt/mainwindow.hh
+                src/mainwindow.cc \
+                src/issuemodel.cc \
+                src/issueview.cc
 
-INCLUDEPATH +=  include ../include
+HEADERS =       include/ghcli-qt/mainwindow.hh \
+                include/ghcli-qt/issuemodel.hh \
+                include/ghcli-qt/issueview.hh
 
-LIBS += -L../../ -lghcli
+INCLUDEPATH +=  include
+INCLUDEPATH +=  ../include
+INCLUDEPATH +=  ../../thirdparty
+
+LIBS += -L../../ -lghcli -L/usr/local/lib -lcurl

@@ -34,6 +34,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <ghcli/issues.h>
+#include <ghcli/pulls.h>
+#include <ghcli/comments.h>
+
+SN_BEGIN_DECLS
+
 typedef struct ghcli_fetch_buffer ghcli_fetch_buffer;
 
 struct ghcli_fetch_buffer {
@@ -63,5 +69,7 @@ void ghcli_post_upload(
     ghcli_fetch_buffer *out);
 bool ghcli_curl_test_success(
     const char *url);
+
+SN_END_DECLS
 
 #endif /* CURL_H */

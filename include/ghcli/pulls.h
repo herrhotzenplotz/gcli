@@ -36,6 +36,8 @@
 #include <sn/sn.h>
 #include <ghcli/ghcli.h>
 
+SN_BEGIN_DECLS
+
 typedef struct ghcli_pull                ghcli_pull;
 typedef struct ghcli_submit_pull_options ghcli_submit_pull_options;
 typedef struct ghcli_commit              ghcli_commit;
@@ -111,5 +113,7 @@ void ghcli_pr_reopen(
     const char *owner,
     const char *reponame,
     int         pr_number);
+
+SN_END_DECLS
 
 #endif /* PULLS_H */

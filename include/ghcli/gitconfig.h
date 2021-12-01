@@ -32,9 +32,13 @@
 
 #include <sn/sn.h>
 
-void  ghcli_gitconfig_get_repo(const char **owner, const char **repo);
+SN_BEGIN_DECLS
+
+void  ghcli_gitconfig_get_repo(const char **org, const char **repo);
 sn_sv ghcli_gitconfig_get_current_branch(void);
 void  ghcli_gitconfig_add_fork_remote(const char *org, const char *repo);
 int   ghcli_gitconfig_get_forgetype(void);
+
+SN_END_DECLS
 
 #endif /* GITCONFIG_H */

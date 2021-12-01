@@ -33,6 +33,8 @@
 #include <sn/sn.h>
 #include <ghcli/ghcli.h>
 
+SN_BEGIN_DECLS
+
 typedef struct ghcli_repo ghcli_repo;
 
 struct ghcli_repo {
@@ -54,5 +56,7 @@ void ghcli_print_repos_table(
     ghcli_repo              *repos,
     size_t                   repos_size);
 void ghcli_repo_delete(const char *owner, const char *repo);
+
+SN_END_DECLS
 
 #endif /* REPOS_H */

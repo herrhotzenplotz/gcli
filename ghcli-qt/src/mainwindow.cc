@@ -28,3 +28,13 @@
  */
 
 #include <ghcli-qt/mainwindow.hh>
+
+namespace ghcli
+{
+    MainWindow::MainWindow()
+        : QMainWindow()
+        , m_issues(new IssueView {"herrhotzenplotz", "ghcli", this, true})
+    {
+        this->setCentralWidget(this->m_issues);
+    }
+}

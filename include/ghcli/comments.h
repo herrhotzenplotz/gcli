@@ -35,6 +35,8 @@
 
 #include <sn/sn.h>
 
+SN_BEGIN_DECLS
+
 typedef struct ghcli_comment ghcli_comment;
 typedef struct ghcli_submit_comment_opts ghcli_submit_comment_opts;
 
@@ -69,5 +71,7 @@ void ghcli_pull_comments(
     int issue);
 void ghcli_comment_submit(
     ghcli_submit_comment_opts opts);
+
+SN_END_DECLS
 
 #endif /* COMMENTS_H */

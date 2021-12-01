@@ -33,6 +33,8 @@
 #include <sn/sn.h>
 #include <ghcli/ghcli.h>
 
+SN_BEGIN_DECLS
+
 typedef struct ghcli_gist      ghcli_gist;
 typedef struct ghcli_gist_file ghcli_gist_file;
 typedef struct ghcli_new_gist  ghcli_new_gist;
@@ -78,5 +80,7 @@ void ghcli_create_gist(
 void ghcli_delete_gist(
     const char *gist_id,
     bool        always_yes);
+
+SN_BEGIN_DECLS
 
 #endif /* GISTS_H */

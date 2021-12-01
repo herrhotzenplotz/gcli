@@ -33,6 +33,8 @@
 #include <sn/sn.h>
 #include <ghcli/ghcli.h>
 
+SN_BEGIN_DECLS
+
 typedef struct ghcli_fork ghcli_fork;
 
 struct ghcli_fork {
@@ -59,5 +61,7 @@ void ghcli_print_forks(
 void ghcli_fork_delete(
     const char *owner,
     const char *repo);
+
+SN_END_DECLS
 
 #endif /* FORK_H */

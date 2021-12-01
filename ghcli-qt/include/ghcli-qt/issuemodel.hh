@@ -29,20 +29,30 @@
 
 #pragma once
 
-#include <QMainWindow>
+#include <QAbstractTableModel>
 
-#include <ghcli-qt/issueview.hh>
+#include <ghcli/issues.h>
 
-namespace ghcli {
+namespace ghcli
+{
 
-class MainWindow : public QMainWindow {
+class IssueModel : public QAbstractTableModel {
     Q_OBJECT
 
 public:
-    MainWindow();
+    explicit IssueModel(ghcli_issue *issues, size_t issues_size);
+    ~IssueModel();
+
+    QVariant data(const QModelIndex &index, int role) const override;
+    //Qt::ItemFlags flags(const QModelIndex &index) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
 private:
-    IssueView *m_issues;
+    ghcli_issue *m_issues;
+    size_t       m_issues_size;
 };
 
-}
+} // ghcli

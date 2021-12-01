@@ -33,6 +33,8 @@
 #include <sn/sn.h>
 #include <ghcli/ghcli.h>
 
+SN_BEGIN_DECLS
+
 void ghcli_config_init(
     int          *argc,
     char       ***argv,
@@ -52,5 +54,7 @@ sn_sv             ghcli_config_get_account(void);
 sn_sv             ghcli_config_get_upstream(void);
 sn_sv             ghcli_config_get_base(void);
 ghcli_forge_type  ghcli_config_get_forge_type(void);
+
+SN_END_DECLS
 
 #endif /* CONFIG_H */

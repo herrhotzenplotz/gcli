@@ -35,6 +35,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+SN_BEGIN_DECLS
+
 typedef struct ghcli_issue ghcli_issue;
 typedef struct ghcli_issue_details ghcli_issue_details;
 typedef struct ghcli_submit_issue_options ghcli_submit_issue_options;
@@ -97,5 +99,7 @@ void ghcli_issue_reopen(
     const char *repo,
     int         issue_number);
 void ghcli_issue_submit(ghcli_submit_issue_options);
+
+SN_END_DECLS
 
 #endif /* ISSUES_H */

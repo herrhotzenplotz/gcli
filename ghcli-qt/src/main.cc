@@ -29,6 +29,7 @@
 
 #include <QApplication>
 #include <ghcli-qt/mainwindow.hh>
+#include <ghcli/config.h>
 
 int
 main(int argc, char *argv[])
@@ -37,6 +38,8 @@ main(int argc, char *argv[])
     QCoreApplication::setApplicationName("ghcli-qt");
 
     QApplication app { argc, argv };
+
+    ghcli_config_init(&argc, &argv, NULL);
 
     ghcli::MainWindow mainwindow;
     mainwindow.show();

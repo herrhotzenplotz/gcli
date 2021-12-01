@@ -27,22 +27,26 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include <QMainWindow>
-
 #include <ghcli-qt/issueview.hh>
 
-namespace ghcli {
+namespace ghcli
+{
 
-class MainWindow : public QMainWindow {
-    Q_OBJECT
+    IssueView::IssueView(const char *org, const char *repo, QWidget *parent, bool all)
+        : QTreeView(parent)
+        , m_model(nullptr)
+    {
+        ghcli_issue *issues = nullptr;
+        int issues_size = ghcli_get_issues(org, repo, all, -1, &issues);
+        this->m_model = new IssueModel(issues, issues_size);
 
-public:
-    MainWindow();
+        this->setModel(this->m_model);
+    }
 
-private:
-    IssueView *m_issues;
-};
+    IssueView::~IssueView()
+    {
+        if (this->m_model)
+            delete this->m_model;
+    }
 
-}
+} // ghcli

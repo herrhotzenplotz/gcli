@@ -29,20 +29,20 @@
 
 #pragma once
 
-#include <QMainWindow>
+#include <QTreeView>
+#include <ghcli-qt/issuemodel.hh>
 
-#include <ghcli-qt/issueview.hh>
+namespace ghcli
+{
+    class IssueView : public QTreeView
+    {
+        Q_OBJECT
 
-namespace ghcli {
+    public:
+        explicit IssueView(const char *org, const char *repo, QWidget *parent = nullptr, bool all = false);
+        ~IssueView();
 
-class MainWindow : public QMainWindow {
-    Q_OBJECT
-
-public:
-    MainWindow();
-
-private:
-    IssueView *m_issues;
-};
-
-}
+    private:
+        IssueModel *m_model;
+    };
+} // ghcli

@@ -32,6 +32,10 @@
 
 #include <sn/sn.h>
 
+SN_BEGIN_DECLS
+
 sn_sv ghcli_editor_get_user_message(void (*initializer)(FILE *, void *), void *user_data);
+
+SN_END_DECLS
 
 #endif /* EDITOR_H */

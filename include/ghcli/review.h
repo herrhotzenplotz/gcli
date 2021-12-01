@@ -32,6 +32,8 @@
 
 #include <sn/sn.h>
 
+SN_BEGIN_DECLS
+
 typedef struct ghcli_pr_review         ghcli_pr_review;
 typedef struct ghcli_pr_review_comment ghcli_pr_review_comment;
 
@@ -78,5 +80,7 @@ void ghcli_review_print_comments(
     FILE *out,
     ghcli_pr_review_comment *comments,
     size_t comments_size);
+
+SN_END_DECLS
 
 #endif /* REVIEW_H */

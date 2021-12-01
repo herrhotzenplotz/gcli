@@ -34,9 +34,27 @@
 #ifndef SN_H
 #define SN_H
 
+#ifndef SN_BEGIN_DECLS
+#    ifdef __cplusplus
+#        define SN_BEGIN_DECLS extern "C" {
+#    else
+#        define SN_BEGIN_DECLS
+#    endif /* __cplusplus */
+#endif /* SN_BEGIN_DECLS */
+
+#ifndef SN_END_DECLS
+#    ifdef __cplusplus
+#        define SN_END_DECLS }
+#    else
+#        define SN_END_DECLS
+#    endif /* __cplusplus */
+#endif /* SN_END_DECLS */
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+
+SN_BEGIN_DECLS
 
 #if defined(__GNUC__) || defined(__clang__)
 // https://gcc.gnu.org/onlinedocs/gcc-4.7.2/gcc/Function-Attributes.html
@@ -114,5 +132,7 @@ sn_bool_yesno(bool x)
 #ifndef ARRAY_SIZE
 #    define ARRAY_SIZE(xs) (sizeof(xs) / sizeof(xs[0]))
 #endif /* ARRAY_SIZE */
+
+SN_END_DECLS
 
 #endif /* SN_H */

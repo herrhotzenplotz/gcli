@@ -35,9 +35,9 @@
 ** DONE Check for multiple Github remotes and choose the right one
    Solved in commit 4be0ca8. Leave it up to the user to point at the
    right repo. Also, there are the -o and -r flags.
-** TODO Valgrind the new fork stuff
+** DONE Valgrind the new fork stuff
 ** TODO Ask the user if they want to add a git remote if a fork is created
-
+** TODO repos subcommand fails if -o is a user
 
 * On the review API
   - A PR has got reviews (could be none, could be a thousand)

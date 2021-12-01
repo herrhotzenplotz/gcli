@@ -151,3 +151,18 @@ ghcli_repos_free(ghcli_repo *repos, size_t repos_size)
 
     free(repos);
 }
+
+void
+ghcli_repo_delete(const char *org, const char *repo)
+{
+    char               *url    = NULL;
+    ghcli_fetch_buffer  buffer = {0};
+
+    url = sn_asprintf("https://api.github.com/repos/%s/%s",
+                      org, repo);
+
+    ghcli_fetch_with_method("DELETE", url, NULL, &buffer);
+
+    free(buffer.data);
+    free(url);
+}

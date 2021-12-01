@@ -603,7 +603,7 @@ delete_repo(bool always_yes, const char *org, const char *repo)
     }
 
     if (delete)
-        ghcli_fork_delete(org, repo);
+        ghcli_repo_delete(org, repo);
     else
         errx(1, "Operation aborted");
 }
@@ -611,14 +611,22 @@ delete_repo(bool always_yes, const char *org, const char *repo)
 static int
 subcommand_repos(int argc, char *argv[])
 {
-    int ch, repos_size;
-    const char *org = NULL;
-    ghcli_repo *repos = NULL;
+    int         ch, repos_size;
+    const char *org        = NULL;
+    const char *repo       = NULL;
+    ghcli_repo *repos      = NULL;
+    bool        always_yes = false;
 
-    while ((ch = getopt(argc, argv, "o:")) != -1) {
+    while ((ch = getopt(argc, argv, "o:r:y")) != -1) {
         switch (ch) {
         case 'o':
             org = optarg;
+            break;
+        case 'r':
+            repo = optarg;
+            break;
+        case 'y':
+            always_yes = true;
             break;
         case '?':
         default:
@@ -629,12 +637,30 @@ subcommand_repos(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    if (!org)
-        org = sn_sv_to_cstr(ghcli_config_get_account());
+    /* List repos of the user/org */
+    if (argc == 0) {
+        if (repo)
+            errx(1, "repos: no actions specified");
 
-    repos_size = ghcli_get_repos(org, &repos);
-    ghcli_print_repos_table(stdout, repos, (size_t)repos_size);
-    ghcli_repos_free(repos, repos_size);
+        if (!org)
+            org = sn_sv_to_cstr(ghcli_config_get_account());
+
+        repos_size = ghcli_get_repos(org, &repos);
+        ghcli_print_repos_table(stdout, repos, (size_t)repos_size);
+        ghcli_repos_free(repos, repos_size);
+    } else {
+        check_org_and_repo(&org, &repo);
+
+        for (size_t i = 0; i < argc; ++i) {
+            const char *action = argv[i];
+
+            if (strcmp(action, "delete") == 0) {
+                delete_repo(always_yes, org, repo);
+            } else {
+                errx(1, "repos: unknown action '%s'", action);
+            }
+        }
+    }
 
     return EXIT_SUCCESS;
 }

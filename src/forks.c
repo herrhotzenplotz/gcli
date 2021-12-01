@@ -159,18 +159,3 @@ ghcli_fork_create(const char *org, const char *repo, const char *_in)
     free(post_data);
     free(buffer.data);
 }
-
-void
-ghcli_fork_delete(const char *org, const char *repo)
-{
-    char               *url    = NULL;
-    ghcli_fetch_buffer  buffer = {0};
-
-    url = sn_asprintf("https://api.github.com/repos/%s/%s",
-                      org, repo);
-
-    ghcli_fetch_with_method("DELETE", url, NULL, &buffer);
-
-    free(buffer.data);
-    free(url);
-}

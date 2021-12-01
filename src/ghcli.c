@@ -572,6 +572,25 @@ subcommand_forks_create(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
+static void
+delete_repo(bool always_yes, const char *org, const char *repo)
+{
+    bool delete = false;
+
+    if (!always_yes) {
+        delete = sn_yesno(
+            "Are you sure you want to delete %s/%s?",
+            org, repo);
+    } else {
+        delete = true;
+    }
+
+    if (delete)
+        ghcli_fork_delete(org, repo);
+    else
+        errx(1, "Operation aborted");
+}
+
 static int
 subcommand_forks(int argc, char *argv[])
 {
@@ -579,6 +598,7 @@ subcommand_forks(int argc, char *argv[])
     const char *org        = NULL, *repo = NULL;
     int         forks_size = 0;
     int         ch         = 0;
+    bool        always_yes = false;
 
     /* detect whether we wanna create a fork */
     if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
@@ -586,13 +606,16 @@ subcommand_forks(int argc, char *argv[])
         return subcommand_forks_create(argc, argv);
     }
 
-    while ((ch = getopt(argc, argv, "o:r:")) != -1) {
+    while ((ch = getopt(argc, argv, "o:r:y")) != -1) {
         switch (ch) {
         case 'o':
             org = optarg;
             break;
         case 'r':
             repo = optarg;
+            break;
+        case 'y':
+            always_yes = true;
             break;
         case '?':
         default:
@@ -605,8 +628,21 @@ subcommand_forks(int argc, char *argv[])
 
     check_org_and_repo(&org, &repo);
 
-    forks_size = ghcli_get_forks(org, repo, &forks);
-    ghcli_print_forks(stdout, forks, forks_size);
+    if (argc == 0) {
+        forks_size = ghcli_get_forks(org, repo, &forks);
+        ghcli_print_forks(stdout, forks, forks_size);
+        return EXIT_SUCCESS;
+    }
+
+    for (size_t i = 0; i < (size_t)argc; ++i) {
+        const char *action = argv[i];
+
+        if (strcmp(action, "delete") == 0) {
+            delete_repo(always_yes, org, repo);
+        } else {
+            errx(1, "forks: unknown action '%s'", action);
+        }
+    }
 
     return EXIT_SUCCESS;
 }

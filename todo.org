@@ -35,6 +35,7 @@
 ** DONE Check for multiple Github remotes and choose the right one
    Solved in commit 4be0ca8. Leave it up to the user to point at the
    right repo. Also, there are the -o and -r flags.
+** TODO Valgrind the new fork stuff
 
 
 * On the review API

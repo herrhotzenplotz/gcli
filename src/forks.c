@@ -157,6 +157,7 @@ ghcli_fork_create(const char *org, const char *repo, const char *_in)
     free(in.data);
     free(url);
     free(post_data);
+    free(buffer.data);
 }
 
 void

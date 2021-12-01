@@ -54,6 +54,12 @@
 .Op Fl o Ar user-or-organization Fl r Ar repository
 .Op Fl i Ar organization
 
+.Nm
+.Cm repos
+.Op Fl y
+.Op Fl o Ar user-or-organization Fl r Ar repository
+.Op Ar action
+
 .Sh DESCRIPTION
 The
 .Nm
@@ -159,6 +165,15 @@ and
 .Fl r
 into your own account or an organization given by
 .Fl i .
+
+.It Cm repos
+If no action is provided, list repos of the given
+organization. Otherwise perform one of the following actions:
+
+.Bl -tag -width indent
+.It Ar delete
+Delete the repos
+.El
 
 .It Cm comment
 create a new comment under the issue specified by

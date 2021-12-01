@@ -145,6 +145,47 @@ ghcli_fetch(const char *url, ghcli_fetch_buffer *out)
     return 0;
 }
 
+bool
+ghcli_curl_test_success(const char *url)
+{
+    CURLcode           ret;
+    CURL              *session;
+    ghcli_fetch_buffer buffer = {0};
+    long               status_code;
+    bool               is_success = true;
+
+    session = curl_easy_init();
+
+    curl_easy_setopt(session, CURLOPT_URL, url);
+    curl_easy_setopt(session, CURLOPT_BUFFERSIZE, 102400L);
+    curl_easy_setopt(session, CURLOPT_NOPROGRESS, 1L);
+    curl_easy_setopt(session, CURLOPT_MAXREDIRS, 50L);
+    curl_easy_setopt(session, CURLOPT_FTP_SKIP_PASV_IP, 1L);
+    curl_easy_setopt(session, CURLOPT_USERAGENT, "curl/7.78.0");
+    curl_easy_setopt(
+        session, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
+    curl_easy_setopt(session, CURLOPT_TCP_KEEPALIVE, 1L);
+    curl_easy_setopt(session, CURLOPT_WRITEDATA, &buffer);
+    curl_easy_setopt(session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
+    curl_easy_setopt(session, CURLOPT_FAILONERROR, 0L);
+
+    ret = curl_easy_perform(session);
+
+    if (ret != CURLE_OK) {
+        is_success = false;
+    } else {
+        curl_easy_getinfo(session, CURLINFO_RESPONSE_CODE, &status_code);
+
+        if (status_code >= 300L)
+            is_success = false;
+    }
+
+    free(buffer.data);
+    curl_easy_cleanup(session);
+
+    return is_success;
+}
+
 void
 ghcli_curl(FILE *stream, const char *url, const char *content_type)
 {

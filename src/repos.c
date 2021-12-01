@@ -88,7 +88,19 @@ ghcli_get_repos(const char *org, ghcli_repo **out)
     enum  json_type     next   = JSON_NULL;
     int                 size   = 0;
 
-    url = sn_asprintf("https://api.github.com/orgs/%s/repos", org);
+    /* Github is a little stupid in that it distinguishes
+     * organizations and users. Thus, we have to find out, whether the
+     * <org> param is a user or an actual organization. */
+    url = sn_asprintf("https://api.github.com/users/%s", org);
+    if (ghcli_curl_test_success(url)) {
+        /* it is a user */
+        free(url);
+        url = sn_asprintf("https://api.github.com/users/%s/repos", org);
+    } else {
+        /* this is an actual organization */
+        free(url);
+        url = sn_asprintf("https://api.github.com/orgs/%s/repos", org);
+    }
 
     ghcli_fetch(url, &buffer);
 

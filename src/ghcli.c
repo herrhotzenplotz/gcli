@@ -651,7 +651,7 @@ subcommand_repos(int argc, char *argv[])
     } else {
         check_org_and_repo(&org, &repo);
 
-        for (size_t i = 0; i < argc; ++i) {
+        for (size_t i = 0; i < (size_t)argc; ++i) {
             const char *action = argv[i];
 
             if (strcmp(action, "delete") == 0) {

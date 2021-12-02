@@ -39,10 +39,12 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    MainWindow();
+    explicit MainWindow();
+    ~MainWindow();
 
 private:
-    IssueView *m_issues;
+    QTabWidget *m_tabwidget;
+    IssueView  *m_issues;
 };
 
 }

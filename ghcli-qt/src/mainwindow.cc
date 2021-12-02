@@ -33,8 +33,16 @@ namespace ghcli
 {
     MainWindow::MainWindow()
         : QMainWindow()
+        , m_tabwidget(new QTabWidget {this})
         , m_issues(new IssueView {"herrhotzenplotz", "ghcli", this, true})
     {
-        this->setCentralWidget(this->m_issues);
+        this->m_tabwidget->addTab(this->m_issues, "Issues");
+        this->setCentralWidget(this->m_tabwidget);
+    }
+
+    MainWindow::~MainWindow()
+    {
+        delete this->m_tabwidget;
+        delete this->m_issues;
     }
 }

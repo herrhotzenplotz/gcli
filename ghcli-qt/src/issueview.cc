@@ -29,11 +29,13 @@
 
 #include <ghcli-qt/issueview.hh>
 
+#include <QtWidgets>
+
 namespace ghcli
 {
 
     IssueView::IssueView(const char *org, const char *repo, QWidget *parent, bool all)
-        : QTreeView(parent)
+        : QTableView(parent)
         , m_model(nullptr)
     {
         ghcli_issue *issues = nullptr;
@@ -41,6 +43,7 @@ namespace ghcli
         this->m_model = new IssueModel(issues, issues_size);
 
         this->setModel(this->m_model);
+        this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     }
 
     IssueView::~IssueView()

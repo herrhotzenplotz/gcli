@@ -32,6 +32,7 @@
 #include <QMainWindow>
 
 #include <ghcli-qt/issueview.hh>
+#include <ghcli-qt/pullsview.hh>
 
 namespace ghcli {
 
@@ -45,6 +46,7 @@ public:
 private:
     QTabWidget *m_tabwidget;
     IssueView  *m_issues;
+    PullsView  *m_pulls;
 };
 
 }

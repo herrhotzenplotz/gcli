@@ -27,33 +27,29 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli-qt/mainwindow.hh>
+#include <ghcli-qt/pullsview.hh>
 
-#include <ghcli/gitconfig.h>
+#include <QtWidgets>
 
 namespace ghcli
 {
-    MainWindow::MainWindow()
-        : QMainWindow()
-        , m_tabwidget(new QTabWidget {this})
-        , m_issues(nullptr)
-        , m_pulls(nullptr)
+
+    PullsView::PullsView(const char *org, const char *repo, QWidget *parent, bool all)
+        : QTableView(parent)
+        , m_model(nullptr)
     {
-        const char *org, *repo;
-        ghcli_gitconfig_get_repo(&org, &repo);
+        ghcli_pull *pulls = nullptr;
+        int pulls_size = ghcli_get_prs(org, repo, all, &pulls);
+        this->m_model = new PullsModel(pulls, pulls_size);
 
-        this->m_pulls  = new PullsView {org, repo, this, true};
-        this->m_issues = new IssueView {org, repo, this, true};
-
-        this->m_tabwidget->addTab(this->m_issues, "Issues");
-        this->m_tabwidget->addTab(this->m_pulls, "PRs");
-
-        this->setCentralWidget(this->m_tabwidget);
+        this->setModel(this->m_model);
+        this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     }
 
-    MainWindow::~MainWindow()
+    PullsView::~PullsView()
     {
-        if (this->m_tabwidget)
-            delete this->m_tabwidget;
+        if (this->m_model)
+            delete this->m_model;
     }
-}
+
+} // ghcli

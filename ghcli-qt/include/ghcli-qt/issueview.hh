@@ -29,12 +29,12 @@
 
 #pragma once
 
-#include <QTreeView>
+#include <QTableWidget>
 #include <ghcli-qt/issuemodel.hh>
 
 namespace ghcli
 {
-    class IssueView : public QTreeView
+    class IssueView : public QTableView
     {
         Q_OBJECT
 

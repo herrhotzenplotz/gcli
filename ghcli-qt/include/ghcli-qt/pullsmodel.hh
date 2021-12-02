@@ -27,33 +27,32 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli-qt/mainwindow.hh>
+#pragma once
 
-#include <ghcli/gitconfig.h>
+#include <QAbstractTableModel>
+
+#include <ghcli/pulls.h>
 
 namespace ghcli
 {
-    MainWindow::MainWindow()
-        : QMainWindow()
-        , m_tabwidget(new QTabWidget {this})
-        , m_issues(nullptr)
-        , m_pulls(nullptr)
+
+    class PullsModel : public QAbstractTableModel
     {
-        const char *org, *repo;
-        ghcli_gitconfig_get_repo(&org, &repo);
+        Q_OBJECT
 
-        this->m_pulls  = new PullsView {org, repo, this, true};
-        this->m_issues = new IssueView {org, repo, this, true};
+    public:
+        explicit PullsModel(ghcli_pull *pulls, size_t pulls_size);
+        ~PullsModel();
 
-        this->m_tabwidget->addTab(this->m_issues, "Issues");
-        this->m_tabwidget->addTab(this->m_pulls, "PRs");
+        QVariant data(const QModelIndex &index, int role) const override;
+        QVariant headerData(int section, Qt::Orientation orientation,
+                            int role = Qt::DisplayRole) const override;
+        int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+        int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
-        this->setCentralWidget(this->m_tabwidget);
-    }
+    private:
+        ghcli_pull *m_pulls;
+        size_t      m_pulls_size;
+    };
 
-    MainWindow::~MainWindow()
-    {
-        if (this->m_tabwidget)
-            delete this->m_tabwidget;
-    }
-}
+} // ghcli

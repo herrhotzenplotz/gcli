@@ -10,7 +10,7 @@
  *
  * 2. Redistributions in binary form must reproduce the above
  * copyright notice, this list of conditions and the following
- * disclaimer in the documentation and/or other materials provided
+n * disclaimer in the documentation and/or other materials provided
  * with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -27,33 +27,22 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli-qt/mainwindow.hh>
+#pragma once
 
-#include <ghcli/gitconfig.h>
+#include <QTableWidget>
+#include <ghcli-qt/pullsmodel.hh>
 
 namespace ghcli
 {
-    MainWindow::MainWindow()
-        : QMainWindow()
-        , m_tabwidget(new QTabWidget {this})
-        , m_issues(nullptr)
-        , m_pulls(nullptr)
+    class PullsView : public QTableView
     {
-        const char *org, *repo;
-        ghcli_gitconfig_get_repo(&org, &repo);
+        Q_OBJECT
 
-        this->m_pulls  = new PullsView {org, repo, this, true};
-        this->m_issues = new IssueView {org, repo, this, true};
+    public:
+        explicit PullsView(const char *org, const char *repo, QWidget *parent = nullptr, bool all = false);
+        ~PullsView();
 
-        this->m_tabwidget->addTab(this->m_issues, "Issues");
-        this->m_tabwidget->addTab(this->m_pulls, "PRs");
-
-        this->setCentralWidget(this->m_tabwidget);
-    }
-
-    MainWindow::~MainWindow()
-    {
-        if (this->m_tabwidget)
-            delete this->m_tabwidget;
-    }
-}
+    private:
+        PullsModel *m_model;
+    };
+} // ghcli

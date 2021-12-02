@@ -60,6 +60,15 @@
 .Op Fl o Ar user-or-organization Fl r Ar repository
 .Op Ar action
 
+.Nm
+.Cm gists
+.Op Cm subcommand
+.Op Fl y
+.Op Fl u Ar user
+.Op Fl f Pa file.txt
+.Op Fl d Ar description
+.Op Ar Gist-Name
+
 .Sh DESCRIPTION
 The
 .Nm
@@ -166,13 +175,55 @@ and
 into your own account or an organization given by
 .Fl i .
 
+
+.It Cm gists
+List gists.
+You can specify
+.Fl u
+to list gists of a particular luser. If the flag is omitted, your own
+gists are being listed.
+
+
+.It Cm gists create
+Paste a new gist. You can use the flags
+.Fl f
+and
+.Fl d
+to specify the description and a file to read from. If
+.Fl f
+is omitted,
+.Nm
+will read the content from the standard input.
+
+
+.It Cm gists get Ar gist-id Ar filename
+
+Print the file
+.Pa filename
+from the gist with id
+.Ar gist-id
+to standard output. If the standard output is a tty device, output of
+more than 4 MiB worth of data will be refused.
+
+
+.It Cm gists delete Ar gist-id
+
+Delete gist with id
+.Ar gist-id .
+You can specify the flag
+.Fl y
+to prevent
+.Nm
+from asking for confirmation to delete the gist.
+
+
 .It Cm repos
 If no action is provided, list repos of the given
 organization. Otherwise perform one of the following actions:
 
 .Bl -tag -width indent
 .It Ar delete
-Delete the repos
+Delete the repo
 .El
 
 .It Cm comment
@@ -197,6 +248,15 @@ has been specified, this will list comments under the review given by
 
 .It Fl a
 Fetch all data, including closed issues and closed/merged PRs.
+
+.It Fl d Ar description
+Description of a gist.
+
+.It Fl f Ar file
+Read gist content from the specified file.
+
+.It Fl u Ar user
+Fetch the specified users public gists.
 
 .It Fl o Ar org
 Operate on the given organization/user.

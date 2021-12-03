@@ -61,7 +61,7 @@ get_string_(json_stream *input, const char *where)
 {
     enum json_type type = json_next(input);
     if (type == JSON_NULL)
-        return "<empty>";
+        return strdup("<empty>");
 
     if (type != JSON_STRING)
         barf("unexpected non-string field", where);

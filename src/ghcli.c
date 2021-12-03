@@ -35,7 +35,9 @@
 
 #include <ghcli/comments.h>
 #include <ghcli/config.h>
+#include <ghcli/curl.h>
 #include <ghcli/forks.h>
+#include <ghcli/gists.h>
 #include <ghcli/gitconfig.h>
 #include <ghcli/issues.h>
 #include <ghcli/pulls.h>
@@ -667,6 +669,154 @@ subcommand_repos(int argc, char *argv[])
 }
 
 static int
+subcommand_gist_get(int argc, char *argv[])
+{
+    shift(&argc, &argv); /* Discard the *get* */
+
+    const char      *gist_id   = shift(&argc, &argv);
+    const char      *file_name = shift(&argc, &argv);
+    ghcli_gist      *gist      = NULL;
+    ghcli_gist_file *file      = NULL;
+
+    gist = ghcli_get_gist(gist_id);
+
+    for (size_t f = 0; f < gist->files_size; ++f) {
+        if (sn_sv_eq_to(gist->files[f].filename, file_name)) {
+            file = &gist->files[f];
+            goto file_found;
+        }
+    }
+
+    errx(1, "gists get: %s: no such file in gist with id %s",
+         file_name, gist_id);
+
+file_found:
+    /* TODO: check if tty when file is large */
+    /* TODO: HACK */
+
+    if (isatty(STDOUT_FILENO) && (file->size >= 4 * 1024 * 1024))
+        errx(1, "File is bigger than 4 MiB, refusing to print to stdout.");
+
+    ghcli_curl(stdout, file->url.data, file->type.data);
+    return EXIT_SUCCESS;
+}
+
+static int
+subcommand_gist_create(int argc, char *argv[])
+{
+    int             ch;
+    ghcli_new_gist  opts = {0};
+    const char     *file = NULL;
+
+    while ((ch = getopt(argc, argv, "f:d:")) != -1) {
+        switch (ch) {
+        case 'f':
+            file = optarg;
+            break;
+        case 'd':
+            opts.gist_description = optarg;
+            break;
+        case '?':
+        default:
+            usage();
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    if (argc != 1)
+        errx(1, "gists create: missing file name for gist");
+
+    opts.file_name = shift(&argc, &argv);
+
+    if (file) {
+        if ((opts.file = fopen(file, "r")) == NULL)
+            err(1, "gists create: cannot open file");
+    } else {
+        opts.file = stdin;
+    }
+
+    if (!opts.gist_description)
+        opts.gist_description = "ghcli paste";
+
+    ghcli_create_gist(opts);
+
+    return EXIT_SUCCESS;
+}
+
+static int
+subcommand_gist_delete(int argc, char *argv[])
+{
+    int         ch;
+    bool        always_yes = false;
+    const char *gist_id    = NULL;
+
+    while ((ch = getopt(argc, argv, "y")) != -1) {
+        switch (ch) {
+        case 'y':
+            always_yes = true;
+            break;
+        case '?':
+        default:
+            usage();
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    gist_id = shift(&argc, &argv);
+    ghcli_delete_gist(gist_id, always_yes);
+
+    return EXIT_SUCCESS;
+}
+
+static struct {
+    const char *name;
+    int (*fn)(int, char **);
+} gist_subcommands[] = {
+    { .name = "get",    .fn = subcommand_gist_get    },
+    { .name = "create", .fn = subcommand_gist_create },
+    { .name = "delete", .fn = subcommand_gist_delete },
+};
+
+static int
+subcommand_gists(int argc, char *argv[])
+{
+    int         ch;
+    const char *user       = NULL;
+    ghcli_gist *gists      = NULL;
+    int         gists_size = 0;
+
+    for (size_t i = 0; i < ARRAY_SIZE(gist_subcommands); ++i) {
+        if (argc > 1 && strcmp(argv[1], gist_subcommands[i].name) == 0) {
+            argc -= 1;
+            argv += 1;
+            return gist_subcommands[i].fn(argc, argv);
+        }
+    }
+
+    while ((ch = getopt(argc, argv, "u:")) != -1) {
+        switch (ch) {
+        case 'u':
+            user = optarg;
+            break;
+        case '?':
+        default:
+            usage();
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    gists_size = ghcli_get_gists(user, &gists);
+    ghcli_print_gists_table(stdout, gists, gists_size);
+    return EXIT_SUCCESS;
+}
+
+static int
 subcommand_forks(int argc, char *argv[])
 {
     ghcli_fork *forks      = NULL;
@@ -741,6 +891,7 @@ static struct subcommand {
     { .cmd_name = "comment", .fn = subcommand_comment },
     { .cmd_name = "review",  .fn = subcommand_review  },
     { .cmd_name = "forks",   .fn = subcommand_forks   },
+    { .cmd_name = "gists",   .fn = subcommand_gists   },
     { .cmd_name = "version", .fn = subcommand_version },
 };
 

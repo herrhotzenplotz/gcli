@@ -113,6 +113,16 @@ get_user_(json_stream *input, const char *where)
     return result;
 }
 
+static struct {
+    char        c;
+    const char *with;
+} json_escape_table[] = {
+    { .c = '\n', .with = "\\n"  },
+    { .c = '\t', .with = "\\t"  },
+    { .c = '\\', .with = "\\\\" },
+    { .c = '"' , .with = "\\\"" },
+};
+
 sn_sv
 ghcli_json_escape(sn_sv it)
 {
@@ -120,28 +130,23 @@ ghcli_json_escape(sn_sv it)
     sn_sv result = {0};
 
     for (size_t i = 0; i < it.length; ++i) {
-        switch (it.data[i]) {
-        case '\n': {
-            result.data = realloc(result.data, result.length + 2);
-            memcpy(result.data + result.length, "\\n", 2);
-            result.length += 2;
-        } break;
-        case '"': {
-            result.data = realloc(result.data, result.length + 2);
-            memcpy(result.data + result.length, "\\\"", 2);
-            result.length += 2;
-        } break;
-        case '\\': {
-            result.data = realloc(result.data, result.length + 2);
-            memcpy(result.data + result.length, "\\\\", 2);
-            result.length += 2;
-        } break;
-        default: {
-            result.data = realloc(result.data, result.length + 1);
-            memcpy(result.data + result.length, it.data + i, 1);
-            result.length += 1;
-        } break;
+        for (size_t c = 0; c < ARRAY_SIZE(json_escape_table); ++c) {
+            if (json_escape_table[c].c == it.data[i]) {
+                size_t len     = strlen(json_escape_table[c].with);
+                result.data    = realloc(result.data, result.length + len);
+                memcpy(result.data + result.length,
+                       json_escape_table[c].with,
+                       len);
+                result.length += len;
+                goto next;
+            }
         }
+
+        result.data = realloc(result.data, result.length + 1);
+        memcpy(result.data + result.length, it.data + i, 1);
+        result.length += 1;
+    next:
+        continue;
     }
 
     return result;

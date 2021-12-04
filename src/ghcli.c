@@ -43,6 +43,7 @@
 #include <ghcli/pulls.h>
 #include <ghcli/repos.h>
 #include <ghcli/review.h>
+#include <ghcli/releases.h>
 
 #include <sn/sn.h>
 
@@ -873,6 +874,40 @@ subcommand_forks(int argc, char *argv[])
 }
 
 static int
+subcommand_releases(int argc, char *argv[])
+{
+    int            ch, releases_size;
+    const char    *org      = NULL;
+    const char    *repo     = NULL;
+    ghcli_release *releases = NULL;
+
+    while ((ch = getopt(argc, argv, "o:r:")) != -1) {
+        switch (ch) {
+        case 'o':
+            org = optarg;
+            break;
+        case 'r':
+            repo = optarg;
+            break;
+        case '?':
+        default:
+            usage();
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    check_org_and_repo(&org, &repo);
+
+    releases_size = ghcli_get_releases(org, repo, &releases);
+    ghcli_print_releases(stdout, releases, releases_size);
+    ghcli_free_releases(releases, releases_size);
+
+    return EXIT_SUCCESS;
+}
+
+static int
 subcommand_version(int argc, char *argv[])
 {
     (void) argc;
@@ -885,14 +920,15 @@ static struct subcommand {
     const char *cmd_name;
     int (*fn)(int, char **);
 } subcommands[] = {
-    { .cmd_name = "pulls",   .fn = subcommand_pulls   },
-    { .cmd_name = "issues",  .fn = subcommand_issues  },
-    { .cmd_name = "repos",   .fn = subcommand_repos   },
-    { .cmd_name = "comment", .fn = subcommand_comment },
-    { .cmd_name = "review",  .fn = subcommand_review  },
-    { .cmd_name = "forks",   .fn = subcommand_forks   },
-    { .cmd_name = "gists",   .fn = subcommand_gists   },
-    { .cmd_name = "version", .fn = subcommand_version },
+    { .cmd_name = "pulls",    .fn = subcommand_pulls    },
+    { .cmd_name = "issues",   .fn = subcommand_issues   },
+    { .cmd_name = "repos",    .fn = subcommand_repos    },
+    { .cmd_name = "comment",  .fn = subcommand_comment  },
+    { .cmd_name = "review",   .fn = subcommand_review   },
+    { .cmd_name = "forks",    .fn = subcommand_forks    },
+    { .cmd_name = "gists",    .fn = subcommand_gists    },
+    { .cmd_name = "releases", .fn = subcommand_releases },
+    { .cmd_name = "version",  .fn = subcommand_version  },
 };
 
 int

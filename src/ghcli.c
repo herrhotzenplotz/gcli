@@ -36,6 +36,7 @@
 #include <ghcli/comments.h>
 #include <ghcli/config.h>
 #include <ghcli/curl.h>
+#include <ghcli/editor.h>
 #include <ghcli/forks.h>
 #include <ghcli/gists.h>
 #include <ghcli/gitconfig.h>
@@ -43,6 +44,7 @@
 #include <ghcli/pulls.h>
 #include <ghcli/repos.h>
 #include <ghcli/review.h>
+#include <ghcli/releases.h>
 
 #include <sn/sn.h>
 
@@ -872,6 +874,245 @@ subcommand_forks(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
+static void
+releasemsg_init(FILE *f, void *_data)
+{
+    const ghcli_new_release *info = _data;
+
+    fprintf(
+        f,
+        "# Enter your release notes below, save and exit.\n"
+        "# All lines with a leading '#' are discarded and will not\n"
+        "# appear in the final release note.\n"
+        "#       IN : %s/%s\n"
+        "# TAG NAME : %s\n"
+        "#     NAME : %s\n",
+        info->owner, info->repo, info->tag, info->name);
+}
+
+static sn_sv
+get_release_message(const ghcli_new_release *info)
+{
+    return ghcli_editor_get_user_message(releasemsg_init, (void *)info);
+}
+
+static int
+subcommand_releases_create(int argc, char *argv[])
+{
+    ghcli_new_release release     = {0};
+    int               ch;
+
+    const struct option options[] = {
+        { .name    = "draft",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'd' },
+        { .name    = "prerelease",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'p' },
+        { .name    = "name",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'n' },
+        { .name    = "tag",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 't' },
+        { .name    = "commitish",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'c' },
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "owner",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        { .name    = "asset",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'a' },
+        {0},
+    };
+
+    while ((ch = getopt_long(argc, argv, "dpn:t:c:r:o:a:",
+                             options, NULL)) != -1) {
+        switch (ch) {
+        case 'd':
+            release.draft = true;
+            break;
+        case 'p':
+            release.prerelease = true;
+            break;
+        case 'n':
+            release.name = optarg;
+            break;
+        case 't':
+            release.tag = optarg;
+            break;
+        case 'c':
+            release.commitish = optarg;
+            break;
+        case 'r':
+            release.repo = optarg;
+            break;
+        case 'o':
+            release.owner = optarg;
+            break;
+        case 'a': {
+            ghcli_release_asset asset = {
+                .path  = optarg,
+                .name  = optarg,
+                .label = "unused",
+            };
+            ghcli_release_push_asset(&release, asset);
+        } break;
+        default:
+            usage();
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    check_org_and_repo(&release.owner, &release.repo);
+
+    if (!release.tag)
+        errx(1, "releases create: missing tag name");
+
+    release.body = get_release_message(&release);
+
+    if (!sn_yesno("Do you want to create this release?"))
+        errx(1, "Aborted by user");
+
+    ghcli_create_release(&release);
+
+    return EXIT_SUCCESS;
+}
+
+static int
+subcommand_releases_delete(int argc, char *argv[])
+{
+    int         ch;
+    const char *owner      = NULL, *repo = NULL;
+    bool        always_yes = false;
+
+    const struct option options[] = {
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "owner",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        { .name    = "yes",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'y' },
+        {0}
+    };
+
+    while ((ch = getopt_long(argc, argv, "yo:r:", options, NULL)) != -1) {
+        switch (ch) {
+        case 'o':
+            owner = optarg;
+            break;
+        case 'r':
+            repo = optarg;
+            break;
+        case 'y':
+            always_yes = true;
+            break;
+        case '?':
+        default:
+            usage();
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    check_org_and_repo(&owner, &repo);
+
+    if (argc != 1)
+        errx(1, "releases delete: missing release id");
+
+    if (!always_yes)
+        if (!sn_yesno("Are you sure you want to delete this release?"))
+            errx(1, "Aborted by user");
+
+    ghcli_delete_release(owner, repo, argv[0]);
+
+    return EXIT_SUCCESS;
+}
+
+static struct {
+    const char *name;
+    int (*fn)(int, char **);
+} releases_subcommands[] = {
+    { .name = "delete", .fn = subcommand_releases_delete },
+    { .name = "create", .fn = subcommand_releases_create },
+};
+
+static int
+subcommand_releases(int argc, char *argv[])
+{
+    int            ch, releases_size;
+    const char    *org        = NULL;
+    const char    *repo       = NULL;
+    ghcli_release *releases   = NULL;
+
+    if (argc > 1) {
+        for (size_t i = 0; i < ARRAY_SIZE(releases_subcommands); ++i) {
+            if (strcmp(releases_subcommands[i].name, argv[1]) == 0)
+                return releases_subcommands[i].fn(argc - 1, argv + 1);
+        }
+    }
+
+    /* List releases if none of the subcommands matched */
+
+    const struct option options[] = {
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "owner",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        {0}
+    };
+
+    while ((ch = getopt_long(argc, argv, "o:r:", options, NULL)) != -1) {
+        switch (ch) {
+        case 'o':
+            org = optarg;
+            break;
+        case 'r':
+            repo = optarg;
+            break;
+        case '?':
+        default:
+            usage();
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    check_org_and_repo(&org, &repo);
+
+    releases_size = ghcli_get_releases(org, repo, &releases);
+    ghcli_print_releases(stdout, releases, releases_size);
+    ghcli_free_releases(releases, releases_size);
+
+    return EXIT_SUCCESS;
+}
+
 static int
 subcommand_version(int argc, char *argv[])
 {
@@ -885,14 +1126,15 @@ static struct subcommand {
     const char *cmd_name;
     int (*fn)(int, char **);
 } subcommands[] = {
-    { .cmd_name = "pulls",   .fn = subcommand_pulls   },
-    { .cmd_name = "issues",  .fn = subcommand_issues  },
-    { .cmd_name = "repos",   .fn = subcommand_repos   },
-    { .cmd_name = "comment", .fn = subcommand_comment },
-    { .cmd_name = "review",  .fn = subcommand_review  },
-    { .cmd_name = "forks",   .fn = subcommand_forks   },
-    { .cmd_name = "gists",   .fn = subcommand_gists   },
-    { .cmd_name = "version", .fn = subcommand_version },
+    { .cmd_name = "pulls",    .fn = subcommand_pulls    },
+    { .cmd_name = "issues",   .fn = subcommand_issues   },
+    { .cmd_name = "repos",    .fn = subcommand_repos    },
+    { .cmd_name = "comment",  .fn = subcommand_comment  },
+    { .cmd_name = "review",   .fn = subcommand_review   },
+    { .cmd_name = "forks",    .fn = subcommand_forks    },
+    { .cmd_name = "gists",    .fn = subcommand_gists    },
+    { .cmd_name = "releases", .fn = subcommand_releases },
+    { .cmd_name = "version",  .fn = subcommand_version  },
 };
 
 int

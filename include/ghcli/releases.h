@@ -27,43 +27,56 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef JSON_UTIL_H
-#define JSON_UTIL_H
-
-#include <ghcli/curl.h>
-
-#include <pdjson/pdjson.h>
+#ifndef RELEASES_H
+#define RELEASES_H
 
 #include <sn/sn.h>
 
-#define get_int(input)     get_int_(input, __func__)
-#define get_bool(input)    get_bool_(input, __func__)
-#define get_string(input)  get_string_(input, __func__)
-#define get_sv(input)      get_sv_(input, __func__)
-#define get_user(input)    get_user_(input, __func__)
-#define get_label(input)   get_label_(input, __func__)
+typedef struct ghcli_release       ghcli_release;
+typedef struct ghcli_new_release   ghcli_new_release;
+typedef struct ghcli_release_asset ghcli_release_asset;
 
-int         get_int_(json_stream *input, const char *function);
-bool        get_bool_(json_stream *input, const char *function);
-char       *get_string_(json_stream *input, const char *function);
-sn_sv       get_sv_(json_stream *input, const char *function);
-char       *get_user_(json_stream *input, const char *function);
-const char *get_label_(json_stream *input, const char *function);
-sn_sv       ghcli_json_escape(sn_sv);
-void        ghcli_print_html_url(ghcli_fetch_buffer);
-size_t      ghcli_read_label_list(json_stream *, sn_sv **);
+struct ghcli_release {
+    int   id;
+    sn_sv tarball_url;
+    sn_sv name;
+    sn_sv body;
+    sn_sv author;
+    sn_sv date;
+    sn_sv upload_url;
+    sn_sv html_url;
+    bool  draft;
+    bool  prerelease;
+};
 
-static inline sn_sv
-get_user_sv(json_stream *input)
-{
-    char *user_str = (char *)get_user(input);
-    return SV(user_str);
-}
+struct ghcli_release_asset {
+    char *label;
+    char *name;
+    char *path;
+};
 
-static inline const char *
-ghcli_json_bool(bool it)
-{
-    return it ? "true" : "false";
-}
+#define GHCLI_RELEASE_MAX_ASSETS 16
+struct ghcli_new_release {
+    const char          *owner;
+    const char          *repo;
+    const char          *tag;
+    const char          *name;
+    sn_sv                body;
+    const char          *commitish;
+    bool                 draft;
+    bool                 prerelease;
+    ghcli_release_asset  assets[GHCLI_RELEASE_MAX_ASSETS];
+    size_t               assets_size;
+};
 
-#endif /* JSON_UTIL_H */
+int ghcli_get_releases(
+    const char     *owner,
+    const char     *repo,
+    ghcli_release **out);
+void ghcli_print_releases(FILE *, ghcli_release *, int);
+void ghcli_free_releases(ghcli_release *, int);
+void ghcli_create_release(const ghcli_new_release *);
+void ghcli_release_push_asset(ghcli_new_release *, ghcli_release_asset);
+void ghcli_delete_release(const char *owner, const char *repo, const char *id);
+
+#endif /* RELEASES_H */

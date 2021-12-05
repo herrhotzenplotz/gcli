@@ -56,6 +56,12 @@ void ghcli_fetch_with_method(
     const char *url,
     const char *data,
     ghcli_fetch_buffer *out);
+void ghcli_post_upload(
+    const char         *url,
+    const char         *content_type,
+    void               *buffer,
+    size_t              buffer_size,
+    ghcli_fetch_buffer *out);
 void ghcli_perform_submit_pr(
     ghcli_submit_pull_options opts,
     ghcli_fetch_buffer *out);

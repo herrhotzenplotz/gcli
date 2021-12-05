@@ -28,6 +28,7 @@ ghcli_SRCS			=	src/ghcli.c			\
 					src/repos.c			\
 					src/gists.c			\
 					src/review.c			\
+					src/releases.c			\
 					src/json_util.c			\
 					src/config.c			\
 					thirdparty/sn/sn.c		\

@@ -49,6 +49,8 @@ parse_release(struct json_stream *stream, ghcli_release *out)
 
         if (strncmp("name", key, len) == 0) {
             out->name = get_sv(stream);
+        } else if (strncmp("id", key, len) == 0) {
+            out->id = get_int(stream);
         } else if (strncmp("body", key, len) == 0) {
             out->body = get_sv(stream);
         } else if (strncmp("tarball_url", key, len) == 0) {
@@ -100,7 +102,7 @@ ghcli_get_releases(const char *owner, const char *repo, ghcli_release **out)
         "https://api.github.com/repos/%s/%s/releases",
         owner, repo);
 
-    ghcli_fetch(url, &buffer);
+    ghcli_fetch_with_method("GET", url, NULL, &buffer);
 
     json_open_buffer(&stream, buffer.data, buffer.length);
     json_set_streaming(&stream, 1);
@@ -125,12 +127,13 @@ void
 ghcli_print_releases(FILE *stream, ghcli_release *releases, int releases_size)
 {
     if (releases_size == 0) {
-        fprintf(stream, "No releases");
+        fprintf(stream, "No releases\n");
         return;
     }
 
     for (int i = 0; i < releases_size; ++i) {
         fprintf(stream,
+                "        ID : %d\n"
                 "      NAME : "SV_FMT"\n"
                 "    AUTHOR : "SV_FMT"\n"
                 "      DATE : "SV_FMT"\n"
@@ -138,6 +141,7 @@ ghcli_print_releases(FILE *stream, ghcli_release *releases, int releases_size)
                 "PRERELEASE : %s\n"
                 "   TARBALL : "SV_FMT"\n"
                 "      BODY :\n",
+                releases[i].id,
                 SV_ARGS(releases[i].name),
                 SV_ARGS(releases[i].author),
                 SV_ARGS(releases[i].date),
@@ -154,7 +158,8 @@ ghcli_print_releases(FILE *stream, ghcli_release *releases, int releases_size)
 void
 ghcli_free_releases(ghcli_release *releases, int releases_size)
 {
-    assert(releases);
+    if (!releases)
+        return;
 
     for (int i = 0; i < releases_size; ++i) {
         free(releases[i].tarball_url.data);
@@ -290,4 +295,20 @@ ghcli_release_push_asset(ghcli_new_release *release, ghcli_release_asset asset)
         errx(1, "Too many assets");
 
     release->assets[release->assets_size++] = asset;
+}
+
+void
+ghcli_delete_release(const char *owner, const char *repo, const char *id)
+{
+    char               *url    = NULL;
+    ghcli_fetch_buffer  buffer = {0};
+
+    url = sn_asprintf(
+        "https://api.github.com/repos/%s/%s/releases/%s",
+        owner, repo, id);
+
+    ghcli_fetch_with_method("DELETE", url, NULL, &buffer);
+
+    free(url);
+    free(buffer.data);
 }

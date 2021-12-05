@@ -897,7 +897,7 @@ get_release_message(const ghcli_new_release *info)
 }
 
 static int
-subcommand_create_release(int argc, char *argv[])
+subcommand_releases_create(int argc, char *argv[])
 {
     ghcli_new_release release     = {0};
     int               ch;
@@ -994,17 +994,100 @@ subcommand_create_release(int argc, char *argv[])
 }
 
 static int
+subcommand_releases_delete(int argc, char *argv[])
+{
+    int         ch;
+    const char *owner      = NULL, *repo = NULL;
+    bool        always_yes = false;
+
+    const struct option options[] = {
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "owner",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        { .name    = "yes",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'y' },
+        {0}
+    };
+
+    while ((ch = getopt_long(argc, argv, "yo:r:", options, NULL)) != -1) {
+        switch (ch) {
+        case 'o':
+            owner = optarg;
+            break;
+        case 'r':
+            repo = optarg;
+            break;
+        case 'y':
+            always_yes = true;
+            break;
+        case '?':
+        default:
+            usage();
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    check_org_and_repo(&owner, &repo);
+
+    if (argc != 1)
+        errx(1, "releases delete: missing release id");
+
+    if (!always_yes)
+        if (!sn_yesno("Are you sure you want to delete this release?"))
+            errx(1, "Aborted by user");
+
+    ghcli_delete_release(owner, repo, argv[0]);
+
+    return EXIT_SUCCESS;
+}
+
+static struct {
+    const char *name;
+    int (*fn)(int, char **);
+} releases_subcommands[] = {
+    { .name = "delete", .fn = subcommand_releases_delete },
+    { .name = "create", .fn = subcommand_releases_create },
+};
+
+static int
 subcommand_releases(int argc, char *argv[])
 {
     int            ch, releases_size;
-    const char    *org      = NULL;
-    const char    *repo     = NULL;
-    ghcli_release *releases = NULL;
+    const char    *org        = NULL;
+    const char    *repo       = NULL;
+    ghcli_release *releases   = NULL;
 
-    if (argc > 1 && strcmp("create", argv[1]) == 0)
-        return subcommand_create_release(argc - 1, argv + 1);
+    if (argc > 1) {
+        for (size_t i = 0; i < ARRAY_SIZE(releases_subcommands); ++i) {
+            if (strcmp(releases_subcommands[i].name, argv[1]) == 0)
+                return releases_subcommands[i].fn(argc - 1, argv + 1);
+        }
+    }
 
-    while ((ch = getopt(argc, argv, "o:r:")) != -1) {
+    /* List releases if none of the subcommands matched */
+
+    const struct option options[] = {
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "owner",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        {0}
+    };
+
+    while ((ch = getopt_long(argc, argv, "o:r:", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             org = optarg;

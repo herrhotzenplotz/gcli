@@ -37,6 +37,7 @@ typedef struct ghcli_new_release   ghcli_new_release;
 typedef struct ghcli_release_asset ghcli_release_asset;
 
 struct ghcli_release {
+    int   id;
     sn_sv tarball_url;
     sn_sv name;
     sn_sv body;
@@ -76,5 +77,6 @@ void ghcli_print_releases(FILE *, ghcli_release *, int);
 void ghcli_free_releases(ghcli_release *, int);
 void ghcli_create_release(const ghcli_new_release *);
 void ghcli_release_push_asset(ghcli_new_release *, ghcli_release_asset);
+void ghcli_delete_release(const char *owner, const char *repo, const char *id);
 
 #endif /* RELEASES_H */

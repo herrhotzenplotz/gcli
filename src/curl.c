@@ -270,7 +270,70 @@ ghcli_fetch_with_method(
     free((void *)auth_header);
 }
 
+void
+ghcli_post_upload(
+    const char         *url,
+    const char         *content_type,
+    void               *buffer,
+    size_t              buffer_size,
+    ghcli_fetch_buffer *out)
+{
+    CURLcode              ret;
+    CURL                 *session;
+    struct curl_slist    *headers;
 
+    char *auth_header = sn_asprintf(
+        "Authorization: token "SV_FMT"",
+        SV_ARGS(ghcli_config_get_token()));
+    char *contenttype_header = sn_asprintf(
+        "Content-Type: %s",
+        content_type);
+    char *contentsize_header = sn_asprintf(
+        "Content-Length: %zu",
+        buffer_size);
+
+    headers = NULL;
+    headers = curl_slist_append(
+        headers,
+        "Accept: application/vnd.github.v3+json");
+    headers = curl_slist_append(headers, auth_header);
+    headers = curl_slist_append(headers, contenttype_header);
+    headers = curl_slist_append(headers, contentsize_header);
+
+    session = curl_easy_init();
+
+    curl_easy_setopt(session, CURLOPT_URL, url);
+    curl_easy_setopt(session, CURLOPT_POST, 1L);
+    curl_easy_setopt(session, CURLOPT_POSTFIELDS, buffer);
+    curl_easy_setopt(session, CURLOPT_POSTFIELDSIZE, (long)buffer_size);
+
+    curl_easy_setopt(session, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(session, CURLOPT_USERAGENT, "curl/7.79.1");
+    curl_easy_setopt(session, CURLOPT_WRITEDATA, out);
+    curl_easy_setopt(session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
+
+/*
+      curl_easy_setopt(session, CURLOPT_PROTOCOLS,
+                     CURLPROTO_HTTP | CURLPROTO_HTTPS);
+    curl_easy_setopt(session, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+*/
+
+
+    ret = curl_easy_perform(session);
+    ghcli_curl_check_api_error(session, ret, url, out);
+
+    curl_easy_cleanup(session);
+    session = NULL;
+    curl_slist_free_all(headers);
+    headers = NULL;
+
+    free(auth_header);
+    free(contentsize_header);
+    free(contenttype_header);
+}
+
+
+/* TODO: Move these out of here */
 void
 ghcli_perform_submit_pr(ghcli_submit_pull_options opts, ghcli_fetch_buffer *out)
 {

@@ -32,8 +32,9 @@
 
 #include <sn/sn.h>
 
-typedef struct ghcli_release     ghcli_release;
-typedef struct ghcli_new_release ghcli_new_release;
+typedef struct ghcli_release       ghcli_release;
+typedef struct ghcli_new_release   ghcli_new_release;
+typedef struct ghcli_release_asset ghcli_release_asset;
 
 struct ghcli_release {
     sn_sv tarball_url;
@@ -41,27 +42,39 @@ struct ghcli_release {
     sn_sv body;
     sn_sv author;
     sn_sv date;
+    sn_sv upload_url;
+    sn_sv html_url;
     bool  draft;
     bool  prerelease;
 };
 
+struct ghcli_release_asset {
+    char *label;
+    char *name;
+    char *path;
+};
+
+#define GHCLI_RELEASE_MAX_ASSETS 16
 struct ghcli_new_release {
-    const char *owner;
-    const char *repo;
-    const char *tag;
-    const char *name;
-    sn_sv       body;
-    const char *commitish;
-    bool        draft;
-    bool        prerelease;
+    const char          *owner;
+    const char          *repo;
+    const char          *tag;
+    const char          *name;
+    sn_sv                body;
+    const char          *commitish;
+    bool                 draft;
+    bool                 prerelease;
+    ghcli_release_asset  assets[GHCLI_RELEASE_MAX_ASSETS];
+    size_t               assets_size;
 };
 
 int ghcli_get_releases(
-    const char *owner,
-    const char *repo,
+    const char     *owner,
+    const char     *repo,
     ghcli_release **out);
 void ghcli_print_releases(FILE *, ghcli_release *, int);
 void ghcli_free_releases(ghcli_release *, int);
 void ghcli_create_release(const ghcli_new_release *);
+void ghcli_release_push_asset(ghcli_new_release *, ghcli_release_asset);
 
 #endif /* RELEASES_H */

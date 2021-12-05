@@ -42,11 +42,11 @@
 ** TODO add flags for sorting
    - [ ] gists
    - [ ] releases
-** TODO Creating releases
-   - [ ] body
-   - [ ] choose a git tag
+** TODO Creating releases [75%]
+   - [X] body
+   - [X] choose a git tag
    - [ ] attach files to release (aka assets)
-   - [ ] mark as prerelease or draft
+   - [X] mark as prerelease or draft
 
 * On the review API
   - A PR has got reviews (could be none, could be a thousand)

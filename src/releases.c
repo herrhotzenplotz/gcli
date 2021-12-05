@@ -61,6 +61,10 @@ parse_release(struct json_stream *stream, ghcli_release *out)
             out->draft = get_bool(stream);
         } else if (strncmp("prerelease", key, len) == 0) {
             out->prerelease = get_bool(stream);
+        } else if (strncmp("upload_url", key, len) == 0) {
+            out->upload_url = get_sv(stream);
+        } else if (strncmp("html_url", key, len) == 0) {
+            out->html_url = get_sv(stream);
         } else {
             value_type = json_next(stream);
 
@@ -163,15 +167,64 @@ ghcli_free_releases(ghcli_release *releases, int releases_size)
     free(releases);
 }
 
+static void
+parse_single_release(ghcli_fetch_buffer buffer, ghcli_release *out)
+{
+    struct json_stream stream  = {0};
+
+    json_open_buffer(&stream, buffer.data, buffer.length);
+    json_set_streaming(&stream, 1);
+    parse_release(&stream, out);
+    json_close(&stream);
+}
+
+static char *
+get_upload_url(ghcli_release *it)
+{
+    char *delim = strchr(it->upload_url.data, '{');
+    if (delim == NULL)
+        errx(1, "GitHub API returned an invalid upload url");
+
+    size_t len = delim - it->upload_url.data;
+    return sn_strndup(it->upload_url.data, len);
+}
+
+static void
+upload_release_asset(const char *url, ghcli_release_asset asset)
+{
+    char               *req           = NULL;
+    sn_sv               file_content  = {0};
+    ghcli_fetch_buffer  buffer        = {0};
+
+    file_content.length = sn_mmap_file(asset.path, (void **)&file_content.data);
+    if (file_content.length == 0)
+        errx(1, "Trying to upload an empty file");
+
+    /* TODO: URL escape this */
+    req = sn_asprintf("%s?name=%s", url, asset.name);
+
+    ghcli_post_upload(
+        req,
+        "application/octet-stream", /* HACK */
+        file_content.data,
+        file_content.length,
+        &buffer);
+
+    free(req);
+    free(buffer.data);
+}
+
 void
 ghcli_create_release(const ghcli_new_release *release)
 {
     char               *url            = NULL;
+    char               *upload_url     = NULL;
     char               *post_data      = NULL;
     char               *name_json      = NULL;
     char               *commitish_json = NULL;
     sn_sv               escaped_body   = {0};
     ghcli_fetch_buffer  buffer         = {0};
+    ghcli_release       response       = {0};
 
     assert(release);
 
@@ -210,12 +263,31 @@ ghcli_create_release(const ghcli_new_release *release)
         name_json ? name_json : "");
 
     ghcli_fetch_with_method("POST", url, post_data, &buffer);
-    ghcli_print_html_url(buffer);
+    parse_single_release(buffer, &response);
 
+    printf("INFO : Release at "SV_FMT"\n", SV_ARGS(response.html_url));
+
+    upload_url = get_upload_url(&response);
+
+    for (size_t i = 0; i < release->assets_size; ++i) {
+        printf("INFO : Uploading asset %s...\n", release->assets[i].path);
+        upload_release_asset(upload_url, release->assets[i]);
+    }
+
+    free(upload_url);
     free(buffer.data);
     free(url);
     free(post_data);
     free(escaped_body.data);
     free(name_json);
     free(commitish_json);
+}
+
+void
+ghcli_release_push_asset(ghcli_new_release *release, ghcli_release_asset asset)
+{
+    if (release->assets_size == GHCLI_RELEASE_MAX_ASSETS)
+        errx(1, "Too many assets");
+
+    release->assets[release->assets_size++] = asset;
 }

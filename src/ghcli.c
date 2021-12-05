@@ -931,10 +931,14 @@ subcommand_create_release(int argc, char *argv[])
           .has_arg = required_argument,
           .flag    = NULL,
           .val     = 'o' },
+        { .name    = "asset",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'a' },
         {0},
     };
 
-    while ((ch = getopt_long(argc, argv, "dpn:t:c:r:o:",
+    while ((ch = getopt_long(argc, argv, "dpn:t:c:r:o:a:",
                              options, NULL)) != -1) {
         switch (ch) {
         case 'd':
@@ -958,6 +962,14 @@ subcommand_create_release(int argc, char *argv[])
         case 'o':
             release.owner = optarg;
             break;
+        case 'a': {
+            ghcli_release_asset asset = {
+                .path  = optarg,
+                .name  = optarg,
+                .label = "unused",
+            };
+            ghcli_release_push_asset(&release, asset);
+        } break;
         default:
             usage();
         }

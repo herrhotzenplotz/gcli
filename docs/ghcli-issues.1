@@ -72,6 +72,11 @@ Report a new issue in the current project:
 .Bd -literal -offset indent
 $ ghcli create issues "summary here"
 .Ed
+
+Print both a summary and comments of issue 1 in herrhotzenplotz/ghcli:
+.Bd -literal -offset indent
+$ ghcli issues -o herrhotzenplotz -r ghcli -i 1 summary comments
+.Ed
 .Sh SEE ALSO
 .Xr git 1 ,
 .Xr ghcli 1

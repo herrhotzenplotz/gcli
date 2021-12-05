@@ -190,14 +190,14 @@ ghcli_create_release(const ghcli_new_release *release)
 
     if (release->name)
         name_json = sn_asprintf(
-            ",\"name\": \"%s\",",
+            ",\"name\": \"%s\"",
             release->name);
 
     post_data = sn_asprintf(
         "{"
         "    \"tag_name\": \"%s\","
-        "    \"draft\": \"%s\","
-        "    \"prerelease\": \"%s\","
+        "    \"draft\": %s,"
+        "    \"prerelease\": %s,"
         "    \"body\": \""SV_FMT"\""
         "    %s"
         "    %s"

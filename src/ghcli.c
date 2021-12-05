@@ -36,6 +36,7 @@
 #include <ghcli/comments.h>
 #include <ghcli/config.h>
 #include <ghcli/curl.h>
+#include <ghcli/editor.h>
 #include <ghcli/forks.h>
 #include <ghcli/gists.h>
 #include <ghcli/gitconfig.h>
@@ -873,6 +874,28 @@ subcommand_forks(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
+static void
+releasemsg_init(FILE *f, void *_data)
+{
+    const ghcli_new_release *info = _data;
+
+    fprintf(
+        f,
+        "# Enter your release notes below, save and exit.\n"
+        "# All lines with a leading '#' are discarded and will not\n"
+        "# appear in the final release note.\n"
+        "#       IN : %s/%s\n"
+        "# TAG NAME : %s\n"
+        "#     NAME : %s\n",
+        info->owner, info->repo, info->tag, info->name);
+}
+
+static sn_sv
+get_release_message(const ghcli_new_release *info)
+{
+    return ghcli_editor_get_user_message(releasemsg_init, (void *)info);
+}
+
 static int
 subcommand_create_release(int argc, char *argv[])
 {
@@ -947,6 +970,8 @@ subcommand_create_release(int argc, char *argv[])
 
     if (!release.tag)
         errx(1, "releases create: missing tag name");
+
+    release.body = get_release_message(&release);
 
     if (!sn_yesno("Do you want to create this release?"))
         errx(1, "Aborted by user");

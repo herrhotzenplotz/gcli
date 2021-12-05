@@ -60,4 +60,10 @@ get_user_sv(json_stream *input)
     return SV(user_str);
 }
 
+static inline const char *
+ghcli_json_bool(bool it)
+{
+    return it ? "true" : "false";
+}
+
 #endif /* JSON_UTIL_H */

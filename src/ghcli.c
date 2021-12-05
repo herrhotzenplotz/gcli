@@ -874,12 +874,96 @@ subcommand_forks(int argc, char *argv[])
 }
 
 static int
+subcommand_create_release(int argc, char *argv[])
+{
+    ghcli_new_release release     = {0};
+    int               ch;
+
+    const struct option options[] = {
+        { .name    = "draft",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'd' },
+        { .name    = "prerelease",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'p' },
+        { .name    = "name",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'n' },
+        { .name    = "tag",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 't' },
+        { .name    = "commitish",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'c' },
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "owner",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        {0},
+    };
+
+    while ((ch = getopt_long(argc, argv, "dpn:t:c:r:o:",
+                             options, NULL)) != -1) {
+        switch (ch) {
+        case 'd':
+            release.draft = true;
+            break;
+        case 'p':
+            release.prerelease = true;
+            break;
+        case 'n':
+            release.name = optarg;
+            break;
+        case 't':
+            release.tag = optarg;
+            break;
+        case 'c':
+            release.commitish = optarg;
+            break;
+        case 'r':
+            release.repo = optarg;
+            break;
+        case 'o':
+            release.owner = optarg;
+            break;
+        default:
+            usage();
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    check_org_and_repo(&release.owner, &release.repo);
+
+    if (!release.tag)
+        errx(1, "releases create: missing tag name");
+
+    if (!sn_yesno("Do you want to create this release?"))
+        errx(1, "Aborted by user");
+
+    return EXIT_SUCCESS;
+}
+
+static int
 subcommand_releases(int argc, char *argv[])
 {
     int            ch, releases_size;
     const char    *org      = NULL;
     const char    *repo     = NULL;
     ghcli_release *releases = NULL;
+
+    if (argc > 1 && strcmp("create", argv[1]) == 0)
+        return subcommand_create_release(argc - 1, argv + 1);
 
     while ((ch = getopt(argc, argv, "o:r:")) != -1) {
         switch (ch) {

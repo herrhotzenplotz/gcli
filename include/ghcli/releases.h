@@ -32,7 +32,8 @@
 
 #include <sn/sn.h>
 
-typedef struct ghcli_release ghcli_release;
+typedef struct ghcli_release     ghcli_release;
+typedef struct ghcli_new_release ghcli_new_release;
 
 struct ghcli_release {
     sn_sv tarball_url;
@@ -44,11 +45,23 @@ struct ghcli_release {
     bool  prerelease;
 };
 
+struct ghcli_new_release {
+    const char *owner;
+    const char *repo;
+    const char *tag;
+    const char *name;
+    sn_sv       body;
+    const char *commitish;
+    bool        draft;
+    bool        prerelease;
+};
+
 int ghcli_get_releases(
     const char *owner,
     const char *repo,
     ghcli_release **out);
 void ghcli_print_releases(FILE *, ghcli_release *, int);
 void ghcli_free_releases(ghcli_release *, int);
+void ghcli_create_release(const ghcli_new_release *);
 
 #endif /* RELEASES_H */

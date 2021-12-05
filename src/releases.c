@@ -31,6 +31,8 @@
 #include <ghcli/json_util.h>
 #include <pdjson/pdjson.h>
 
+#include <assert.h>
+
 static void
 parse_release(struct json_stream *stream, ghcli_release *out)
 {
@@ -148,6 +150,8 @@ ghcli_print_releases(FILE *stream, ghcli_release *releases, int releases_size)
 void
 ghcli_free_releases(ghcli_release *releases, int releases_size)
 {
+    assert(releases);
+
     for (int i = 0; i < releases_size; ++i) {
         free(releases[i].tarball_url.data);
         free(releases[i].name.data);
@@ -157,4 +161,47 @@ ghcli_free_releases(ghcli_release *releases, int releases_size)
     }
 
     free(releases);
+}
+
+void
+ghcli_create_release(const ghcli_new_release *release)
+{
+    char               *url          = NULL;
+    char               *post_data    = NULL;
+    sn_sv               escaped_body = {0};
+    ghcli_fetch_buffer  buffer       = {0};
+
+    assert(release);
+
+    /* https://docs.github.com/en/rest/reference/repos#create-a-release */
+    url = sn_asprintf(
+        "https://api.github.com/repos/%s/%s/releases",
+        release->owner,
+        release->repo);
+
+    escaped_body = ghcli_json_escape(release->body);
+
+    post_data = sn_asprintf(
+        "{"
+        "    \"tag_name\": \"%s\","
+        "    \"target_commitish\": \"%s\","
+        "    \"name\": \"%s\","
+        "    \"draft\": \"%s\","
+        "    \"prerelease\": \"%s\","
+        "    \"body\": \""SV_FMT"\","
+        "}",
+        release->tag,
+        release->commitish ? release->commitish : "",
+        release->name,
+        ghcli_json_bool(release->draft),
+        ghcli_json_bool(release->prerelease),
+        SV_ARGS(escaped_body));
+
+    ghcli_fetch_with_method("POST", url, post_data, &buffer);
+    ghcli_print_html_url(buffer);
+
+    free(buffer.data);
+    free(url);
+    free(post_data);
+    free(escaped_body.data);
 }

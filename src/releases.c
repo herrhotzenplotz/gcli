@@ -166,10 +166,12 @@ ghcli_free_releases(ghcli_release *releases, int releases_size)
 void
 ghcli_create_release(const ghcli_new_release *release)
 {
-    char               *url          = NULL;
-    char               *post_data    = NULL;
-    sn_sv               escaped_body = {0};
-    ghcli_fetch_buffer  buffer       = {0};
+    char               *url            = NULL;
+    char               *post_data      = NULL;
+    char               *name_json      = NULL;
+    char               *commitish_json = NULL;
+    sn_sv               escaped_body   = {0};
+    ghcli_fetch_buffer  buffer         = {0};
 
     assert(release);
 
@@ -181,21 +183,31 @@ ghcli_create_release(const ghcli_new_release *release)
 
     escaped_body = ghcli_json_escape(release->body);
 
+    if (release->commitish)
+        commitish_json = sn_asprintf(
+            ",\"target_commitish\": \"%s\"",
+            release->commitish);
+
+    if (release->name)
+        name_json = sn_asprintf(
+            ",\"name\": \"%s\",",
+            release->name);
+
     post_data = sn_asprintf(
         "{"
         "    \"tag_name\": \"%s\","
-        "    \"target_commitish\": \"%s\","
-        "    \"name\": \"%s\","
         "    \"draft\": \"%s\","
         "    \"prerelease\": \"%s\","
-        "    \"body\": \""SV_FMT"\","
+        "    \"body\": \""SV_FMT"\""
+        "    %s"
+        "    %s"
         "}",
         release->tag,
-        release->commitish ? release->commitish : "",
-        release->name,
         ghcli_json_bool(release->draft),
         ghcli_json_bool(release->prerelease),
-        SV_ARGS(escaped_body));
+        SV_ARGS(escaped_body),
+        commitish_json ? commitish_json : "",
+        name_json ? name_json : "");
 
     ghcli_fetch_with_method("POST", url, post_data, &buffer);
     ghcli_print_html_url(buffer);
@@ -204,4 +216,6 @@ ghcli_create_release(const ghcli_new_release *release)
     free(url);
     free(post_data);
     free(escaped_body.data);
+    free(name_json);
+    free(commitish_json);
 }

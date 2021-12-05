@@ -38,7 +38,8 @@ LIBADD				=	libcurl
 
 # Leave this undefined if you don't have any manpages that need to be
 # installed.
-MAN				=	docs/ghcli.1
+MAN				=	docs/ghcli.1 \
+					docs/ghcli-releases.1
 
 # Include the rules to build your program
 # Important: the autodetect.sh script needs to be in place

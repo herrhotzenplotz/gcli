@@ -951,6 +951,8 @@ subcommand_create_release(int argc, char *argv[])
     if (!sn_yesno("Do you want to create this release?"))
         errx(1, "Aborted by user");
 
+    ghcli_create_release(&release);
+
     return EXIT_SUCCESS;
 }
 

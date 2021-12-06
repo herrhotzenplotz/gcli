@@ -39,6 +39,7 @@ LIBADD				=	libcurl
 # Leave this undefined if you don't have any manpages that need to be
 # installed.
 MAN				=	docs/ghcli.1 \
+					docs/ghcli-repos.1 \
 					docs/ghcli-releases.1 \
 					docs/ghcli-issues.1 \
 					docs/ghcli-pulls.1 \

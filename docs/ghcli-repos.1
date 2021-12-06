@@ -1,0 +1,83 @@
+.Dd $Mdocdate$
+.Dt GHCLI-REPOS 1
+.Os
+.Sh NAME
+.Nm ghcli repos
+.Nd Manage GitHub repositories
+.Sh SYNOPSIS
+.Nm
+.Op Fl o Ar owner
+.Nm
+.Op Fl y
+.Op Fl o Ar owner Fl r Ar repo
+.Ar actions...
+.Sh DESCRIPTION
+.Nm
+can be used to list or manage your own or an organization's
+repositories on Github.
+With no actions given,
+.Nm
+will list repositories, either of the through
+.Fl o
+specified owner or, if omitted, your own. Otherwise the given actions
+are executed on the specified or autodetected repository. See
+.Sx ACTIONS .
+.Sh OPTIONS
+.Bl -tag -width indent
+.It Fl o , -owner Ar owner
+Operate on the repository of the given owner. This option can only be
+used in combination with
+.Fl r .
+.It Fl r , -repo Ar repo
+Operate on the given repository. This option can only be used in
+combination with
+.Fl r o
+.It Fl y , -yes
+Do not ask for confirmation. Assume yes.
+.El
+.El
+.Sh ACTIONS
+.Ar actions...
+may be one or more of the following:
+.Bl -tag -width indent
+.It Cm delete
+Delete the repository. You will be asked for confirmation unless you set
+.Fl y .
+
+The following flags can be specified:
+.Bl -tag -width indent
+.It Fl r , -repo
+See
+.Sx OPTIONS
+.It Fl o , -owner
+See
+.Sx OPTIONS
+.It Fl y , -yes
+Do not ask for confirmation before deleting the repository. See
+.Sx OPTIONS .
+.El
+.El
+.Sh EXAMPLES
+List your own repos:
+.Bd -literal -offset indent
+$ ghcli repos
+.Ed
+
+List neutaaaaan's repositories:
+.Bd -literal -offset indent
+$ ghcli repos -o neutaaaaan
+.Ed
+
+Delete vim/vim without confirmation:
+.Bd -literal -offset indent
+$ ghcli repos -o vim -r vim -y delete
+.Ed
+.Sh SEE ALSO
+.Xr git 1 ,
+.Xr ghcli 1 ,
+.Xr emacs 1
+.Sh AUTHORS
+.An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@outlook.com
+.Sh BUGS
+It is impossible to create repos with this subcommand. Please report
+issues preferably via e-mail or on GitHub.

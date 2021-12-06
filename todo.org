@@ -21,7 +21,7 @@
    it seems to reside in the issue data itself
    - solved by printing issue summaries
 ** TODO we don't handle pagination of the api results
-   - [ ] See https://docs.gipthub.com/en/rest/guides/getting-started-with-the-rest-api#pagination
+   - [ ] See https://docs.github.com/en/rest/guides/getting-started-with-the-rest-api#pagination
 ** TODO speed up json_escape
 ** DONE repo-specific config file
 ** DONE comment under PR/Issue
@@ -42,12 +42,12 @@
 ** TODO add flags for sorting
    - [ ] gists
    - [ ] releases
-** TODO Creating releases [75%]
+** DONE Creating releases [100%]
    - [X] body
    - [X] choose a git tag
-   - [ ] attach files to release (aka assets)
+   - [X] attach files to release (aka assets)
    - [X] mark as prerelease or draft
-** TODO pulls commit table header is weird
+** DONE pulls commit table header is weird
 
 * On the review API
   - A PR has got reviews (could be none, could be a thousand)

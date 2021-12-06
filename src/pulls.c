@@ -43,6 +43,27 @@
 #include <ghcli/pulls.h>
 #include <pdjson/pdjson.h>
 
+/* TODO: Move these out of here */
+static void
+perform_submit_pr(ghcli_submit_pull_options opts, ghcli_fetch_buffer *out)
+{
+    /* TODO : JSON Injection */
+    char *post_fields = sn_asprintf(
+        "{\"head\":\""SV_FMT"\",\"base\":\""SV_FMT"\", "
+        "\"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
+        SV_ARGS(opts.from),
+        SV_ARGS(opts.to),
+        SV_ARGS(opts.title),
+        SV_ARGS(opts.body));
+    char *url         = sn_asprintf(
+        "https://api.github.com/repos/"SV_FMT"/pulls",
+        SV_ARGS(opts.in));
+
+    ghcli_fetch_with_method("POST", url, post_fields, out);
+    free(post_fields);
+    free(url);
+}
+
 static void
 parse_pull_entry(json_stream *input, ghcli_pull *it)
 {
@@ -587,7 +608,7 @@ ghcli_pr_submit(ghcli_submit_pull_options opts)
         if (!sn_yesno("Do you want to continue?"))
             errx(1, "PR aborted.");
 
-    ghcli_perform_submit_pr(opts, &json_buffer);
+    perform_submit_pr(opts, &json_buffer);
 
     ghcli_print_html_url(json_buffer);
 

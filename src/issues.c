@@ -37,6 +37,23 @@
 #include <pdjson/pdjson.h>
 
 static void
+perform_submit_issue(
+    ghcli_submit_issue_options opts,
+    ghcli_fetch_buffer *out)
+{
+    char *post_fields = sn_asprintf(
+        "{ \"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
+        SV_ARGS(opts.title), SV_ARGS(opts.body));
+    char *url         = sn_asprintf(
+        "https://api.github.com/repos/"SV_FMT"/issues",
+        SV_ARGS(opts.in));
+
+    ghcli_fetch_with_method("POST", url, post_fields, out);
+    free(post_fields);
+    free(url);
+}
+
+static void
 parse_issue_entry(json_stream *input, ghcli_issue *it)
 {
     if (json_next(input) != JSON_OBJECT)
@@ -366,8 +383,7 @@ ghcli_issue_submit(ghcli_submit_issue_options opts)
             errx(1, "Submission aborted.");
     }
 
-    ghcli_perform_submit_issue(opts, &json_buffer);
-
+    perform_submit_issue(opts, &json_buffer);
     ghcli_print_html_url(json_buffer);
 
     free(body.data);

@@ -37,6 +37,24 @@
 #include <ctype.h>
 #include <string.h>
 
+
+static void
+perform_submit_comment(
+    ghcli_submit_comment_opts opts,
+    ghcli_fetch_buffer *out)
+{
+    char *post_fields = sn_asprintf(
+        "{ \"body\": \""SV_FMT"\" }",
+        SV_ARGS(opts.message));
+    char *url         = sn_asprintf(
+        "https://api.github.com/repos/%s/%s/issues/%d/comments",
+        opts.owner, opts.repo, opts.issue);
+
+    ghcli_fetch_with_method("POST", url, post_fields, out);
+    free(post_fields);
+    free(url);
+}
+
 static void
 ghcli_parse_comment(json_stream *input, ghcli_comment *it)
 {
@@ -178,7 +196,7 @@ ghcli_comment_submit(ghcli_submit_comment_opts opts)
             errx(1, "Aborted by user");
     }
 
-    ghcli_perform_submit_comment(opts, &buffer);
+    perform_submit_comment(opts, &buffer);
     ghcli_print_html_url(buffer);
 
     free(buffer.data);

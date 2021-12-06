@@ -30,12 +30,9 @@
 #ifndef CURL_H
 #define CURL_H
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#include <ghcli/issues.h>
-#include <ghcli/pulls.h>
-#include <ghcli/comments.h>
 
 typedef struct ghcli_fetch_buffer ghcli_fetch_buffer;
 
@@ -44,7 +41,7 @@ struct ghcli_fetch_buffer {
     size_t  length;
 };
 
-int ghcli_fetch(
+void ghcli_fetch(
     const char *url,
     ghcli_fetch_buffer *out);
 void ghcli_curl(
@@ -62,17 +59,7 @@ void ghcli_post_upload(
     void               *buffer,
     size_t              buffer_size,
     ghcli_fetch_buffer *out);
-void ghcli_perform_submit_pr(
-    ghcli_submit_pull_options opts,
-    ghcli_fetch_buffer *out);
-void ghcli_perform_submit_issue(
-    ghcli_submit_issue_options opts,
-    ghcli_fetch_buffer *out);
-void ghcli_perform_submit_comment(
-    ghcli_submit_comment_opts opts,
-    ghcli_fetch_buffer *out);
 bool ghcli_curl_test_success(
     const char *url);
-
 
 #endif /* CURL_H */

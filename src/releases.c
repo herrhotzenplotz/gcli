@@ -102,7 +102,7 @@ ghcli_get_releases(const char *owner, const char *repo, ghcli_release **out)
         "https://api.github.com/repos/%s/%s/releases",
         owner, repo);
 
-    ghcli_fetch_with_method("GET", url, NULL, &buffer);
+    ghcli_fetch(url, &buffer);
 
     json_open_buffer(&stream, buffer.data, buffer.length);
     json_set_streaming(&stream, 1);

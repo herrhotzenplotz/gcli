@@ -183,6 +183,27 @@ ghcli_curl(FILE *stream, const char *url, const char *content_type)
     curl_slist_free_all(headers);
 }
 
+static size_t
+fetch_header_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
+{
+    char **out = userdata;
+
+    size_t sz          = size * nmemb;
+    sn_sv  buffer      = sn_sv_from_parts(ptr, sz);
+    sn_sv  header_name = sn_sv_chop_until(&buffer, ':');
+
+    /* Despite what the documentation says, this header is called
+     * "link" not "Link". Webdev ftw /sarc */
+    if (sn_sv_eq_to(header_name, "link")) {
+        buffer.data   += 1;
+        buffer.length -= 1;
+        buffer         = sn_sv_trim_front(buffer);
+        *out           = sn_strndup(buffer.data, buffer.length);
+    }
+
+    return sz;
+}
+
 void
 ghcli_fetch_with_method(
     const char *method,
@@ -193,6 +214,7 @@ ghcli_fetch_with_method(
     CURLcode           ret;
     CURL              *session;
     struct curl_slist *headers;
+    char              *link_header = NULL;
 
     const char *auth_header = sn_asprintf(
         "Authorization: token "SV_FMT"",
@@ -218,6 +240,8 @@ ghcli_fetch_with_method(
     curl_easy_setopt(session, CURLOPT_WRITEDATA, out);
     curl_easy_setopt(session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
     curl_easy_setopt(session, CURLOPT_FAILONERROR, 0L);
+    curl_easy_setopt(session, CURLOPT_HEADERFUNCTION, fetch_header_callback);
+    curl_easy_setopt(session, CURLOPT_HEADERDATA, &link_header);
 
     ret = curl_easy_perform(session);
     ghcli_curl_check_api_error(session, ret, url, out);

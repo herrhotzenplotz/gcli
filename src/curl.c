@@ -99,50 +99,10 @@ fetch_write_callback(char *in, size_t size, size_t nmemb, void *data)
     return size * nmemb;
 }
 
-int
+void
 ghcli_fetch(const char *url, ghcli_fetch_buffer *out)
 {
-    CURLcode           ret;
-    CURL              *session;
-    struct curl_slist *headers;
-
-    if (!out)
-        errx(1, "ghcli_fetch: out parameter is null");
-
-    headers = NULL;
-    headers = curl_slist_append(
-        headers,
-        "Accept: application/vnd.github.v3.full+json");
-
-    session = curl_easy_init();
-
-    curl_easy_setopt(session, CURLOPT_URL, url);
-    curl_easy_setopt(session, CURLOPT_BUFFERSIZE, 102400L);
-    curl_easy_setopt(session, CURLOPT_NOPROGRESS, 1L);
-    curl_easy_setopt(session, CURLOPT_MAXREDIRS, 50L);
-    curl_easy_setopt(session, CURLOPT_FTP_SKIP_PASV_IP, 1L);
-    curl_easy_setopt(session, CURLOPT_HTTPHEADER, headers);
-    curl_easy_setopt(session, CURLOPT_USERAGENT, "curl/7.78.0");
-    curl_easy_setopt(
-        session, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
-    curl_easy_setopt(session, CURLOPT_TCP_KEEPALIVE, 1L);
-    curl_easy_setopt(session, CURLOPT_WRITEDATA, out);
-    curl_easy_setopt(session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
-    curl_easy_setopt(session, CURLOPT_FAILONERROR, 0L);
-
-    ret = curl_easy_perform(session);
-    ghcli_curl_check_api_error(session, ret, url, out);
-
-    curl_easy_cleanup(session);
-    curl_slist_free_all(headers);
-
-#if 0
-    FILE *f = fopen("foo.dat", "w");
-    fwrite(out->data, 1, out->length, f);
-    fclose(f);
-#endif
-
-    return 0;
+    ghcli_fetch_with_method("GET", url, NULL, out);
 }
 
 bool

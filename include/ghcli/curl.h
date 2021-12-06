@@ -44,7 +44,7 @@ struct ghcli_fetch_buffer {
     size_t  length;
 };
 
-int ghcli_fetch(
+void ghcli_fetch(
     const char *url,
     ghcli_fetch_buffer *out);
 void ghcli_curl(

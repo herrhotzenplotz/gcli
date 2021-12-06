@@ -142,10 +142,10 @@ ghcli_print_issues_table(FILE *stream, ghcli_issue *issues, int issues_size)
         return;
     }
 
-    fprintf(stream, "%5s  %7s  %s\n", "NUMBER", "STATE", "TITLE");
+    fprintf(stream, "%6.6s  %7.7s  %-s\n", "NUMBER", "STATE", "TITLE");
     for (int i = 0; i < issues_size; ++i) {
         fprintf(
-            stream, "%5d  %7s  %s\n",
+            stream, "%6d  %7.7s  %-s\n",
             issues[i].number,
             issues[i].state,
             issues[i].title);

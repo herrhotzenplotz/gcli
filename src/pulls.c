@@ -95,7 +95,7 @@ ghcli_pulls_free(ghcli_pull *it, int n)
 }
 
 int
-ghcli_get_prs(const char *org, const char *reponame, bool all, ghcli_pull **out)
+ghcli_get_prs(const char *owner, const char *reponame, bool all, ghcli_pull **out)
 {
     int                 count       = 0;
     json_stream         stream      = {0};
@@ -104,7 +104,7 @@ ghcli_get_prs(const char *org, const char *reponame, bool all, ghcli_pull **out)
 
     url = sn_asprintf(
         "https://api.github.com/repos/%s/%s/pulls?per_page=100&state=%s",
-        org, reponame, all ? "all" : "open");
+        owner, reponame, all ? "all" : "open");
     ghcli_fetch(url, &json_buffer);
 
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
@@ -163,14 +163,14 @@ ghcli_print_pr_table(FILE *stream, ghcli_pull *pulls, int pulls_size)
 void
 ghcli_print_pr_diff(
     FILE *stream,
-    const char *org,
+    const char *owner,
     const char *reponame,
     int pr_number)
 {
     char *url = NULL;
     url = sn_asprintf(
         "https://api.github.com/repos/%s/%s/pulls/%d",
-        org, reponame, pr_number);
+        owner, reponame, pr_number);
     ghcli_curl(stream, url, "Accept: application/vnd.github.v3.diff");
     free(url);
 }
@@ -500,7 +500,7 @@ ghcli_pulls_summary_free(ghcli_pull_summary *it)
 void
 ghcli_pr_summary(
     FILE *out,
-    const char *org,
+    const char *owner,
     const char *reponame,
     int pr_number)
 {
@@ -514,7 +514,7 @@ ghcli_pr_summary(
     /* General info */
     url = sn_asprintf(
         "https://api.github.com/repos/%s/%s/pulls/%d",
-        org, reponame, pr_number);
+        owner, reponame, pr_number);
     ghcli_fetch(url, &json_buffer);
 
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
@@ -529,7 +529,7 @@ ghcli_pr_summary(
     /* Commits */
     url = sn_asprintf(
         "https://api.github.com/repos/%s/%s/pulls/%d/commits",
-        org, reponame, pr_number);
+        owner, reponame, pr_number);
     commits_size = ghcli_get_pull_commits(url, &commits);
 
     ghcli_print_pr_summary(out, &result);
@@ -597,7 +597,7 @@ ghcli_pr_submit(ghcli_submit_pull_options opts)
 }
 
 void
-ghcli_pr_merge(FILE *out, const char *org, const char *reponame, int pr_number)
+ghcli_pr_merge(FILE *out, const char *owner, const char *reponame, int pr_number)
 {
     json_stream         stream      = {0};
     ghcli_fetch_buffer  json_buffer = {0};
@@ -610,7 +610,7 @@ ghcli_pr_merge(FILE *out, const char *org, const char *reponame, int pr_number)
 
     url = sn_asprintf(
         "https://api.github.com/repos/%s/%s/pulls/%d/merge",
-        org, reponame, pr_number);
+        owner, reponame, pr_number);
     ghcli_fetch_with_method("PUT", url, data, &json_buffer);
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
     json_set_streaming(&stream, true);
@@ -639,7 +639,7 @@ ghcli_pr_merge(FILE *out, const char *org, const char *reponame, int pr_number)
 }
 
 void
-ghcli_pr_close(const char *org, const char *reponame, int pr_number)
+ghcli_pr_close(const char *owner, const char *reponame, int pr_number)
 {
     ghcli_fetch_buffer  json_buffer = {0};
     const char         *url         = NULL;
@@ -647,7 +647,7 @@ ghcli_pr_close(const char *org, const char *reponame, int pr_number)
 
     url  = sn_asprintf(
         "https://api.github.com/repos/%s/%s/pulls/%d",
-        org, reponame, pr_number);
+        owner, reponame, pr_number);
     data = sn_asprintf("{ \"state\": \"closed\"}");
 
     ghcli_fetch_with_method("PATCH", url, data, &json_buffer);
@@ -658,7 +658,7 @@ ghcli_pr_close(const char *org, const char *reponame, int pr_number)
 }
 
 void
-ghcli_pr_reopen(const char *org, const char *reponame, int pr_number)
+ghcli_pr_reopen(const char *owner, const char *reponame, int pr_number)
 {
     ghcli_fetch_buffer  json_buffer = {0};
     const char         *url         = NULL;
@@ -666,7 +666,7 @@ ghcli_pr_reopen(const char *org, const char *reponame, int pr_number)
 
     url  = sn_asprintf(
         "https://api.github.com/repos/%s/%s/pulls/%d",
-        org, reponame, pr_number);
+        owner, reponame, pr_number);
     data = sn_asprintf("{ \"state\": \"open\"}");
 
     ghcli_fetch_with_method("PATCH", url, data, &json_buffer);

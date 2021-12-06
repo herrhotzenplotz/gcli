@@ -190,17 +190,17 @@ gitconfig_find_url_entry(sn_sv buffer, sn_sv *out)
     return false;
 }
 
-static char *gitconfig_org, *gitconfig_repo;
-static bool  should_free_org_and_repo = 0;
+static char *gitconfig_owner, *gitconfig_repo;
+static bool  should_free_owner_and_repo = 0;
 
 static void
 ghcli_gitconfig_atexit(void)
 {
-    if (should_free_org_and_repo) {
+    if (should_free_owner_and_repo) {
         /*
          * Prevent double free by setting to null */
-        free(gitconfig_org);
-        gitconfig_org = NULL;
+        free(gitconfig_owner);
+        gitconfig_owner = NULL;
         free(gitconfig_repo);
         gitconfig_repo = NULL;
     }
@@ -209,7 +209,7 @@ ghcli_gitconfig_atexit(void)
 static bool
 gitconfig_url_extract_github_data(
     sn_sv url,
-    const char **org,
+    const char **owner,
     const char **repo)
 {
     sn_sv foo;
@@ -249,7 +249,7 @@ gitconfig_url_extract_github_data(
     if (url.length == 0)
         return false;
 
-    *org = gitconfig_org = sn_strndup(foo.data, foo.length);
+    *owner = gitconfig_owner = sn_strndup(foo.data, foo.length);
 
     url.length -= 1;
     url.data   += 1;
@@ -258,34 +258,34 @@ gitconfig_url_extract_github_data(
         sn_strndup(url.data, url.length),
         ".git");
 
-    should_free_org_and_repo = true;
+    should_free_owner_and_repo = true;
     atexit(ghcli_gitconfig_atexit);
 
     return true;
 }
 
 void
-ghcli_gitconfig_get_repo(const char **org, const char **repo)
+ghcli_gitconfig_get_repo(const char **owner, const char **repo)
 {
     const char *path     = NULL;
     sn_sv       buffer   = {0};
     sn_sv       upstream = {0};
 
-    if (gitconfig_org && gitconfig_repo) {
-        *org  = gitconfig_org;
+    if (gitconfig_owner && gitconfig_repo) {
+        *owner  = gitconfig_owner;
         *repo = gitconfig_repo;
     }
 
     if ((upstream = ghcli_config_get_upstream()).length != 0) {
-        sn_sv org_sv   = sn_sv_chop_until(&upstream, '/');
+        sn_sv owner_sv = sn_sv_chop_until(&upstream, '/');
         sn_sv repo_sv  = sn_sv_from_parts(
             upstream.data + 1,
             upstream.length - 1);
 
-        *org  = gitconfig_org  = sn_sv_to_cstr(org_sv);
-        *repo = gitconfig_repo = sn_sv_to_cstr(repo_sv);
+        *owner = gitconfig_owner = sn_sv_to_cstr(owner_sv);
+        *repo  = gitconfig_repo  = sn_sv_to_cstr(repo_sv);
 
-        should_free_org_and_repo = true;
+        should_free_owner_and_repo = true;
         atexit(ghcli_gitconfig_atexit);
 
         return;
@@ -318,7 +318,7 @@ ghcli_gitconfig_get_repo(const char **org, const char **repo)
             sn_sv url = {0};
 
             if (gitconfig_find_url_entry(entry, &url)
-                && gitconfig_url_extract_github_data(url, org, repo))
+                && gitconfig_url_extract_github_data(url, owner, repo))
                 return;
         }
     }

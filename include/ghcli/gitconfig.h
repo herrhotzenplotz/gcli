@@ -32,7 +32,7 @@
 
 #include <sn/sn.h>
 
-void  ghcli_gitconfig_get_repo(const char **org, const char **repo);
+void  ghcli_gitconfig_get_repo(const char **owner, const char **repo);
 sn_sv ghcli_gitconfig_get_current_branch(void);
 
 #endif /* GITCONFIG_H */

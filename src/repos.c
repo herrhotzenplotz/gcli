@@ -80,7 +80,7 @@ parse_repo(json_stream *input, ghcli_repo *out)
 }
 
 int
-ghcli_get_repos(const char *org, ghcli_repo **out)
+ghcli_get_repos(const char *owner, ghcli_repo **out)
 {
     char               *url    = NULL;
     ghcli_fetch_buffer  buffer = {0};
@@ -91,15 +91,15 @@ ghcli_get_repos(const char *org, ghcli_repo **out)
     /* Github is a little stupid in that it distinguishes
      * organizations and users. Thus, we have to find out, whether the
      * <org> param is a user or an actual organization. */
-    url = sn_asprintf("https://api.github.com/users/%s", org);
+    url = sn_asprintf("https://api.github.com/users/%s", owner);
     if (ghcli_curl_test_success(url)) {
         /* it is a user */
         free(url);
-        url = sn_asprintf("https://api.github.com/users/%s/repos", org);
+        url = sn_asprintf("https://api.github.com/users/%s/repos", owner);
     } else {
         /* this is an actual organization */
         free(url);
-        url = sn_asprintf("https://api.github.com/orgs/%s/repos", org);
+        url = sn_asprintf("https://api.github.com/orgs/%s/repos", owner);
     }
 
     ghcli_fetch(url, &buffer);
@@ -165,13 +165,13 @@ ghcli_repos_free(ghcli_repo *repos, size_t repos_size)
 }
 
 void
-ghcli_repo_delete(const char *org, const char *repo)
+ghcli_repo_delete(const char *owner, const char *repo)
 {
     char               *url    = NULL;
     ghcli_fetch_buffer  buffer = {0};
 
     url = sn_asprintf("https://api.github.com/repos/%s/%s",
-                      org, repo);
+                      owner, repo);
 
     ghcli_fetch_with_method("DELETE", url, NULL, &buffer);
 

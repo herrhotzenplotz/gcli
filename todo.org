@@ -47,6 +47,7 @@
    - [X] choose a git tag
    - [ ] attach files to release (aka assets)
    - [X] mark as prerelease or draft
+** TODO pulls commit table header is weird
 
 * On the review API
   - A PR has got reviews (could be none, could be a thousand)

@@ -364,7 +364,7 @@ ghcli_perform_submit_comment(
         SV_ARGS(opts.message));
     char *url         = sn_asprintf(
         "https://api.github.com/repos/%s/%s/issues/%d/comments",
-        opts.org, opts.repo, opts.issue);
+        opts.owner, opts.repo, opts.issue);
 
     ghcli_fetch_with_method("POST", url, post_fields, out);
     free(post_fields);

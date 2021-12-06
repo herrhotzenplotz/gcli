@@ -284,20 +284,3 @@ ghcli_post_upload(
     free(contentsize_header);
     free(contenttype_header);
 }
-
-void
-ghcli_perform_submit_comment(
-    ghcli_submit_comment_opts opts,
-    ghcli_fetch_buffer *out)
-{
-    char *post_fields = sn_asprintf(
-        "{ \"body\": \""SV_FMT"\" }",
-        SV_ARGS(opts.message));
-    char *url         = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/issues/%d/comments",
-        opts.owner, opts.repo, opts.issue);
-
-    ghcli_fetch_with_method("POST", url, post_fields, out);
-    free(post_fields);
-    free(url);
-}

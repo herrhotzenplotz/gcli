@@ -301,20 +301,3 @@ ghcli_perform_submit_comment(
     free(post_fields);
     free(url);
 }
-
-void
-ghcli_perform_submit_issue(
-    ghcli_submit_issue_options opts,
-    ghcli_fetch_buffer *out)
-{
-    char *post_fields = sn_asprintf(
-        "{ \"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
-        SV_ARGS(opts.title), SV_ARGS(opts.body));
-    char *url         = sn_asprintf(
-        "https://api.github.com/repos/"SV_FMT"/issues",
-        SV_ARGS(opts.in));
-
-    ghcli_fetch_with_method("POST", url, post_fields, out);
-    free(post_fields);
-    free(url);
-}

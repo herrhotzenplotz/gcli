@@ -285,28 +285,6 @@ ghcli_post_upload(
     free(contenttype_header);
 }
 
-
-/* TODO: Move these out of here */
-void
-ghcli_perform_submit_pr(ghcli_submit_pull_options opts, ghcli_fetch_buffer *out)
-{
-    /* TODO : JSON Injection */
-    char *post_fields = sn_asprintf(
-        "{\"head\":\""SV_FMT"\",\"base\":\""SV_FMT"\", "
-        "\"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
-        SV_ARGS(opts.from),
-        SV_ARGS(opts.to),
-        SV_ARGS(opts.title),
-        SV_ARGS(opts.body));
-    char *url         = sn_asprintf(
-        "https://api.github.com/repos/"SV_FMT"/pulls",
-        SV_ARGS(opts.in));
-
-    ghcli_fetch_with_method("POST", url, post_fields, out);
-    free(post_fields);
-    free(url);
-}
-
 void
 ghcli_perform_submit_comment(
     ghcli_submit_comment_opts opts,

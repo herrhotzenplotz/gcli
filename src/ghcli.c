@@ -338,8 +338,28 @@ subcommand_pulls(int argc, char *argv[])
         return subcommand_pull_create(argc, argv);
     }
 
+    const struct option options[] = {
+        { .name    = "all",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'a' },
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "owner",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        { .name    = "pull",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'p' },
+        {0},
+    };
+
     /* Parse commandline options */
-    while ((ch = getopt(argc, argv, "o:r:p:a")) != -1) {
+    while ((ch = getopt_long(argc, argv, "o:r:p:a", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -427,8 +447,28 @@ subcommand_issues(int argc, char *argv[])
         return subcommand_issue_create(argc, argv);
     }
 
+    const struct option options[] = {
+        { .name    = "all",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'a' },
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "owner",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        { .name    = "issue",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'i' },
+        {0},
+    };
+
     /* parse options */
-    while ((ch = getopt(argc, argv, "o:r:i:a")) != -1) {
+    while ((ch = getopt_long(argc, argv, "o:r:i:a", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -500,8 +540,28 @@ subcommand_review(int argc, char *argv[])
     const char *owner     = NULL;
     const char *repo      = NULL;
 
+    const struct option options[] = {
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "owner",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        { .name    = "pull",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'p' },
+        { .name    = "comment",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'c' },
+        {0},
+    };
+
     /* parse options */
-    while ((ch = getopt(argc, argv, "p:o:r:c:")) != -1) {
+    while ((ch = getopt_long(argc, argv, "p:o:r:c:", options, NULL)) != -1) {
         switch (ch) {
         case 'p': {
             char *endptr = NULL;
@@ -566,7 +626,24 @@ subcommand_forks_create(int argc, char *argv[])
 {
     int ch;
     const char *owner = NULL, *repo = NULL, *in = NULL;
-    while ((ch = getopt(argc, argv, "o:r:i:")) != -1) {
+
+    const struct option options[] = {
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "owner",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        { .name    = "into",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'i' },
+        {0},
+    };
+
+    while ((ch = getopt_long(argc, argv, "o:r:i:", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -621,7 +698,23 @@ subcommand_repos(int argc, char *argv[])
     ghcli_repo *repos      = NULL;
     bool        always_yes = false;
 
-    while ((ch = getopt(argc, argv, "o:r:y")) != -1) {
+    const struct option options[] = {
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "owner",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        { .name    = "yes",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'y' },
+        {0},
+    };
+
+    while ((ch = getopt_long(argc, argv, "o:r:y", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -710,7 +803,19 @@ subcommand_gist_create(int argc, char *argv[])
     ghcli_new_gist  opts = {0};
     const char     *file = NULL;
 
-    while ((ch = getopt(argc, argv, "f:d:")) != -1) {
+    const struct option options[] = {
+        { .name    = "file",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "description",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        {0},
+    };
+
+    while ((ch = getopt_long(argc, argv, "f:d:", options, NULL)) != -1) {
         switch (ch) {
         case 'f':
             file = optarg;
@@ -754,7 +859,15 @@ subcommand_gist_delete(int argc, char *argv[])
     bool        always_yes = false;
     const char *gist_id    = NULL;
 
-    while ((ch = getopt(argc, argv, "y")) != -1) {
+    const struct option options[] = {
+        { .name    = "yes",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'y' },
+        {0},
+    };
+
+    while ((ch = getopt_long(argc, argv, "y", options, NULL)) != -1) {
         switch (ch) {
         case 'y':
             always_yes = true;
@@ -799,7 +912,15 @@ subcommand_gists(int argc, char *argv[])
         }
     }
 
-    while ((ch = getopt(argc, argv, "u:")) != -1) {
+    const struct option options[] = {
+        { .name    = "user",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'u' },
+        {0},
+    };
+
+    while ((ch = getopt_long(argc, argv, "u:", options, NULL)) != -1) {
         switch (ch) {
         case 'u':
             user = optarg;
@@ -833,7 +954,23 @@ subcommand_forks(int argc, char *argv[])
         return subcommand_forks_create(argc, argv);
     }
 
-    while ((ch = getopt(argc, argv, "o:r:y")) != -1) {
+    const struct option options[] = {
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "owner",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        { .name    = "yes",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'y' },
+        {0},
+    };
+
+    while ((ch = getopt_long(argc, argv, "o:r:y", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;

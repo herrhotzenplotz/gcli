@@ -85,7 +85,7 @@ ghcli_issues_free(ghcli_issue *it, int size)
 
 int
 ghcli_get_issues(
-    const char *org,
+    const char *owner,
     const char *reponame,
     bool all,
     ghcli_issue **out)
@@ -97,7 +97,7 @@ ghcli_get_issues(
 
     url = sn_asprintf(
         "https://api.github.com/repos/%s/%s/issues?per_page=100&state=%s",
-        org, reponame,
+        owner, reponame,
         all ? "all" : "open");
     ghcli_fetch(url, &json_buffer);
 
@@ -255,7 +255,7 @@ ghcli_issue_details_free(ghcli_issue_details *it)
 void
 ghcli_issue_summary(
     FILE *stream,
-    const char *org,
+    const char *owner,
     const char *repo,
     int issue_number)
 {
@@ -266,7 +266,7 @@ ghcli_issue_summary(
 
     url = sn_asprintf(
         "https://api.github.com/repos/%s/%s/issues/%d?per_page=100",
-        org, repo,
+        owner, repo,
         issue_number);
     ghcli_fetch(url, &buffer);
 
@@ -284,7 +284,7 @@ ghcli_issue_summary(
 }
 
 void
-ghcli_issue_close(const char *org, const char *repo, int issue_number)
+ghcli_issue_close(const char *owner, const char *repo, int issue_number)
 {
     ghcli_fetch_buffer  json_buffer = {0};
     const char         *url         = NULL;
@@ -292,7 +292,7 @@ ghcli_issue_close(const char *org, const char *repo, int issue_number)
 
     url  = sn_asprintf(
         "https://api.github.com/repos/%s/%s/issues/%d",
-        org, repo,
+        owner, repo,
         issue_number);
     data = sn_asprintf("{ \"state\": \"close\"}");
 
@@ -304,7 +304,7 @@ ghcli_issue_close(const char *org, const char *repo, int issue_number)
 }
 
 void
-ghcli_issue_reopen(const char *org, const char *repo, int issue_number)
+ghcli_issue_reopen(const char *owner, const char *repo, int issue_number)
 {
     ghcli_fetch_buffer  json_buffer = {0};
     const char         *url         = NULL;
@@ -312,7 +312,7 @@ ghcli_issue_reopen(const char *org, const char *repo, int issue_number)
 
     url  = sn_asprintf(
         "https://api.github.com/repos/%s/%s/issues/%d",
-        org, repo,
+        owner, repo,
         issue_number);
     data = sn_asprintf("{ \"state\": \"open\"}");
 

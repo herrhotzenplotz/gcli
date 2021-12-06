@@ -125,11 +125,11 @@ ghcli_print_comment_list(
 }
 
 void
-ghcli_issue_comments(FILE *stream, const char *org, const char *repo, int issue)
+ghcli_issue_comments(FILE *stream, const char *owner, const char *repo, int issue)
 {
     const char    *url      = sn_asprintf(
         "https://api.github.com/repos/%s/%s/issues/%d/comments",
-        org, repo, issue);
+        owner, repo, issue);
     ghcli_comment *comments = NULL;
     int            n        = ghcli_get_comments(url, &comments);
     ghcli_print_comment_list(stream, comments, (size_t)n);
@@ -152,7 +152,7 @@ comment_init(FILE *f, void *_data)
         "# All lines with a leading '#' are discarded and will not\n"
         "# appear in your comment.\n"
         "# COMMENT IN : %s/%s #%d\n",
-        info->org, info->repo, info->issue);
+        info->owner, info->repo, info->issue);
 }
 
 static sn_sv
@@ -171,7 +171,7 @@ ghcli_comment_submit(ghcli_submit_comment_opts opts)
     fprintf(
         stdout,
         "You will be commenting the following in %s/%s #%d:\n"SV_FMT"\n",
-        opts.org, opts.repo, opts.issue, SV_ARGS(message));
+        opts.owner, opts.repo, opts.issue, SV_ARGS(message));
 
     if (!opts.always_yes) {
         if (!sn_yesno("Is this okay?"))

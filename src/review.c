@@ -76,7 +76,7 @@ parse_review_header(json_stream *stream, ghcli_pr_review *it)
 
 size_t
 ghcli_review_get_reviews(
-    const char *org,
+    const char *owner,
     const char *repo,
     int pr,
     ghcli_pr_review **out)
@@ -89,7 +89,7 @@ ghcli_review_get_reviews(
 
     url = sn_asprintf(
         "https://api.github.com/repos/%s/%s/pulls/%d/reviews",
-        org, repo, pr);
+        owner, repo, pr);
     ghcli_fetch(url, &buffer);
 
     json_open_buffer(&stream, buffer.data, buffer.length);
@@ -229,7 +229,7 @@ ghcli_review_comments_free(ghcli_pr_review_comment *it, size_t size)
 
 size_t
 ghcli_review_get_review_comments(
-    const char               *org,
+    const char               *owner,
     const char               *repo,
     int                       pr,
     int                       review_id,
@@ -243,7 +243,7 @@ ghcli_review_get_review_comments(
 
     url = sn_asprintf(
         "https://api.github.com/repos/%s/%s/pulls/%d/reviews/%d/comments",
-        org, repo, pr, review_id);
+        owner, repo, pr, review_id);
     ghcli_fetch(url, &buffer);
 
     json_open_buffer(&stream, buffer.data, buffer.length);

@@ -79,14 +79,14 @@ usage(void)
 }
 
 static void
-check_org_and_repo(const char **org, const char **repo)
+check_owner_and_repo(const char **owner, const char **repo)
 {
     /* If no remote was specified, try to autodetect */
-    if ((*org == NULL) != (*repo == NULL))
-        errx(1, "error: missing either explicit org or repo");
+    if ((*owner == NULL) != (*repo == NULL))
+        errx(1, "error: missing either explicit owner or repo");
 
-    if (*org == NULL)
-        ghcli_gitconfig_get_repo(org, repo);
+    if (*owner == NULL)
+        ghcli_gitconfig_get_repo(owner, repo);
 }
 
 static sn_sv
@@ -150,7 +150,7 @@ subcommand_issue_create(int argc, char *argv[])
         if (!(opts.in = ghcli_config_get_upstream()).length)
             errx(1,
                  "error: Target repo for the issue to be created "
-                 "in is missing. Please either specify '--in org/repo'"
+                 "in is missing. Please either specify '--in owner/repo'"
                  " or set pr.upstream in .ghcli.");
     }
 
@@ -232,7 +232,7 @@ subcommand_pull_create(int argc, char *argv[])
     if (!opts.in.length) {
         if (!(opts.in = ghcli_config_get_upstream()).length)
             errx(1, "error: PR target repo is missing. Please either "
-                 "specify --in org/repo or set pr.upstream in .ghcli.");
+                 "specify --in owner/repo or set pr.upstream in .ghcli.");
     }
 
     if (argc != 1)
@@ -251,9 +251,9 @@ subcommand_pull_create(int argc, char *argv[])
 static int
 subcommand_comment(int argc, char *argv[])
 {
-    int   ch, issue = -1;
-    const char *repo  = NULL, *org = NULL;
-    bool  always_yes = false;
+    int         ch, issue  = -1;
+    const char *repo       = NULL, *owner = NULL;
+    bool        always_yes = false;
 
     const struct option options[] = {
         { .name    = "yes",
@@ -264,7 +264,7 @@ subcommand_comment(int argc, char *argv[])
           .has_arg = required_argument,
           .flag    = NULL,
           .val     = 'r' },
-        { .name    = "org",
+        { .name    = "owner",
           .has_arg = required_argument,
           .flag    = NULL,
           .val     = 'o' },
@@ -285,7 +285,7 @@ subcommand_comment(int argc, char *argv[])
             repo = optarg;
             break;
         case 'o':
-            org = optarg;
+            owner = optarg;
             break;
         case 'p':
         case 'i': {
@@ -305,13 +305,13 @@ subcommand_comment(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    check_org_and_repo(&org, &repo);
+    check_owner_and_repo(&owner, &repo);
 
     if (issue < 0)
         errx(1, "error: missing issue/PR number (use -i)");
 
     ghcli_comment_submit((ghcli_submit_comment_opts) {
-            .org        = org,
+            .owner      = owner,
             .repo       = repo,
             .issue      = issue,
             .always_yes = always_yes,
@@ -324,7 +324,7 @@ static int
 subcommand_pulls(int argc, char *argv[])
 {
     char       *endptr     = NULL;
-    const char *org        = NULL;
+    const char *owner      = NULL;
     const char *repo       = NULL;
     ghcli_pull *pulls      = NULL;
     int         ch         = 0;
@@ -338,11 +338,31 @@ subcommand_pulls(int argc, char *argv[])
         return subcommand_pull_create(argc, argv);
     }
 
+    const struct option options[] = {
+        { .name    = "all",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'a' },
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "owner",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        { .name    = "pull",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'p' },
+        {0},
+    };
+
     /* Parse commandline options */
-    while ((ch = getopt(argc, argv, "o:r:p:a")) != -1) {
+    while ((ch = getopt_long(argc, argv, "o:r:p:a", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
-            org = optarg;
+            owner = optarg;
             break;
         case 'r':
             repo = optarg;
@@ -367,12 +387,12 @@ subcommand_pulls(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    check_org_and_repo(&org, &repo);
+    check_owner_and_repo(&owner, &repo);
 
     /* In case no explicit PR number was specified, list all
      * open PRs and exit */
     if (pr < 0) {
-        pulls_size = ghcli_get_prs(org, repo, all, &pulls);
+        pulls_size = ghcli_get_prs(owner, repo, all, &pulls);
         ghcli_print_pr_table(stdout, pulls, pulls_size);
 
         ghcli_pulls_free(pulls, pulls_size);
@@ -391,17 +411,17 @@ subcommand_pulls(int argc, char *argv[])
         const char *operation = shift(&argc, &argv);
 
         if (strcmp(operation, "diff") == 0)
-            ghcli_print_pr_diff(stdout, org, repo, pr);
+            ghcli_print_pr_diff(stdout, owner, repo, pr);
         else if (strcmp(operation, "summary") == 0)
-            ghcli_pr_summary(stdout, org, repo, pr);
+            ghcli_pr_summary(stdout, owner, repo, pr);
         else if (strcmp(operation, "comments") == 0)
-            ghcli_issue_comments(stdout, org, repo, pr);
+            ghcli_issue_comments(stdout, owner, repo, pr);
         else if (strcmp(operation, "merge") == 0)
-            ghcli_pr_merge(stdout, org, repo, pr);
+            ghcli_pr_merge(stdout, owner, repo, pr);
         else if (strcmp(operation, "close") == 0)
-            ghcli_pr_close(org, repo, pr);
+            ghcli_pr_close(owner, repo, pr);
         else if (strcmp(operation, "reopen") == 0)
-            ghcli_pr_reopen(org, repo, pr);
+            ghcli_pr_reopen(owner, repo, pr);
         else
             errx(1, "error: unknown operation %s", operation);
     }
@@ -414,7 +434,7 @@ subcommand_issues(int argc, char *argv[])
 {
     ghcli_issue *issues      = NULL;
     int          issues_size = 0;
-    const char  *org         = NULL;
+    const char  *owner       = NULL;
     const char  *repo        = NULL;
     char        *endptr      = NULL;
     int          ch          = 0;
@@ -427,11 +447,31 @@ subcommand_issues(int argc, char *argv[])
         return subcommand_issue_create(argc, argv);
     }
 
+    const struct option options[] = {
+        { .name    = "all",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'a' },
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "owner",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        { .name    = "issue",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'i' },
+        {0},
+    };
+
     /* parse options */
-    while ((ch = getopt(argc, argv, "o:r:i:a")) != -1) {
+    while ((ch = getopt_long(argc, argv, "o:r:i:a", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
-            org = optarg;
+            owner = optarg;
             break;
         case 'r':
             repo = optarg;
@@ -457,11 +497,11 @@ subcommand_issues(int argc, char *argv[])
     argv += optind;
 
 
-    check_org_and_repo(&org, &repo);
+    check_owner_and_repo(&owner, &repo);
 
     /* No issue number was given, so list all open issues */
     if (issue < 0) {
-        issues_size = ghcli_get_issues(org, repo, all, &issues);
+        issues_size = ghcli_get_issues(owner, repo, all, &issues);
         ghcli_print_issues_table(stdout, issues, issues_size);
 
         ghcli_issues_free(issues, issues_size);
@@ -477,13 +517,13 @@ subcommand_issues(int argc, char *argv[])
         const char *operation = shift(&argc, &argv);
 
         if (strcmp("comments", operation) == 0)
-            ghcli_issue_comments(stdout, org, repo, issue);
+            ghcli_issue_comments(stdout, owner, repo, issue);
         else if (strcmp("summary", operation) == 0)
-            ghcli_issue_summary(stdout, org, repo, issue);
+            ghcli_issue_summary(stdout, owner, repo, issue);
         else if (strcmp("close", operation) == 0)
-            ghcli_issue_close(org, repo, issue);
+            ghcli_issue_close(owner, repo, issue);
         else if (strcmp("reopen", operation) == 0)
-            ghcli_issue_reopen(org, repo, issue);
+            ghcli_issue_reopen(owner, repo, issue);
         else
             errx(1, "error: unknown operation %s", operation);
     }
@@ -497,11 +537,31 @@ subcommand_review(int argc, char *argv[])
     int         ch        = 0;
     int         pr        = -1;
     int         review_id = -1;
-    const char *org       = NULL;
+    const char *owner     = NULL;
     const char *repo      = NULL;
 
+    const struct option options[] = {
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "owner",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        { .name    = "pull",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'p' },
+        { .name    = "comment",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'c' },
+        {0},
+    };
+
     /* parse options */
-    while ((ch = getopt(argc, argv, "p:o:r:c:")) != -1) {
+    while ((ch = getopt_long(argc, argv, "p:o:r:c:", options, NULL)) != -1) {
         switch (ch) {
         case 'p': {
             char *endptr = NULL;
@@ -513,7 +573,7 @@ subcommand_review(int argc, char *argv[])
                 errx(1, "error: pr number is out of range");
         } break;
         case 'o':
-            org = optarg;
+            owner = optarg;
             break;
         case 'r':
             repo = optarg;
@@ -534,14 +594,14 @@ subcommand_review(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    check_org_and_repo(&org, &repo);
+    check_owner_and_repo(&owner, &repo);
 
     if (pr > 0 && review_id > 0) {
         /* print comments */
         ghcli_pr_review_comment *comments  = NULL;
         size_t                   comments_size =
             ghcli_review_get_review_comments(
-                org, repo, pr, review_id, &comments);
+                owner, repo, pr, review_id, &comments);
 
         ghcli_review_print_comments(stdout, comments, comments_size);
         ghcli_review_comments_free(comments, comments_size);
@@ -550,7 +610,7 @@ subcommand_review(int argc, char *argv[])
         /* list reviews */
         ghcli_pr_review *reviews      = NULL;
         size_t           reviews_size = ghcli_review_get_reviews(
-            org, repo, pr, &reviews);
+            owner, repo, pr, &reviews);
         ghcli_review_print_review_table(stdout, reviews, reviews_size);
         ghcli_review_reviews_free(reviews, reviews_size);
         return 0;
@@ -565,11 +625,28 @@ static int
 subcommand_forks_create(int argc, char *argv[])
 {
     int ch;
-    const char *org = NULL, *repo = NULL, *in = NULL;
-    while ((ch = getopt(argc, argv, "o:r:i:")) != -1) {
+    const char *owner = NULL, *repo = NULL, *in = NULL;
+
+    const struct option options[] = {
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "owner",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        { .name    = "into",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'i' },
+        {0},
+    };
+
+    while ((ch = getopt_long(argc, argv, "o:r:i:", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
-            org = optarg;
+            owner = optarg;
             break;
         case 'r':
             repo = optarg;
@@ -586,28 +663,28 @@ subcommand_forks_create(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    check_org_and_repo(&org, &repo);
+    check_owner_and_repo(&owner, &repo);
 
-    ghcli_fork_create(org, repo, in);
+    ghcli_fork_create(owner, repo, in);
 
     return EXIT_SUCCESS;
 }
 
 static void
-delete_repo(bool always_yes, const char *org, const char *repo)
+delete_repo(bool always_yes, const char *owner, const char *repo)
 {
     bool delete = false;
 
     if (!always_yes) {
         delete = sn_yesno(
             "Are you sure you want to delete %s/%s?",
-            org, repo);
+            owner, repo);
     } else {
         delete = true;
     }
 
     if (delete)
-        ghcli_repo_delete(org, repo);
+        ghcli_repo_delete(owner, repo);
     else
         errx(1, "Operation aborted");
 }
@@ -616,15 +693,31 @@ static int
 subcommand_repos(int argc, char *argv[])
 {
     int         ch, repos_size;
-    const char *org        = NULL;
+    const char *owner      = NULL;
     const char *repo       = NULL;
     ghcli_repo *repos      = NULL;
     bool        always_yes = false;
 
-    while ((ch = getopt(argc, argv, "o:r:y")) != -1) {
+    const struct option options[] = {
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "owner",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        { .name    = "yes",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'y' },
+        {0},
+    };
+
+    while ((ch = getopt_long(argc, argv, "o:r:y", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
-            org = optarg;
+            owner = optarg;
             break;
         case 'r':
             repo = optarg;
@@ -641,26 +734,26 @@ subcommand_repos(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    /* List repos of the user/org */
+    /* List repos of the owner */
     if (argc == 0) {
         if (repo)
             errx(1, "repos: no actions specified");
 
-        if (!org)
+        if (!owner)
             repos_size = ghcli_get_own_repos(&repos);
         else
-            repos_size = ghcli_get_repos(org, &repos);
+            repos_size = ghcli_get_repos(owner, &repos);
 
         ghcli_print_repos_table(stdout, repos, (size_t)repos_size);
         ghcli_repos_free(repos, repos_size);
     } else {
-        check_org_and_repo(&org, &repo);
+        check_owner_and_repo(&owner, &repo);
 
         for (size_t i = 0; i < (size_t)argc; ++i) {
             const char *action = argv[i];
 
             if (strcmp(action, "delete") == 0) {
-                delete_repo(always_yes, org, repo);
+                delete_repo(always_yes, owner, repo);
             } else {
                 errx(1, "repos: unknown action '%s'", action);
             }
@@ -710,7 +803,19 @@ subcommand_gist_create(int argc, char *argv[])
     ghcli_new_gist  opts = {0};
     const char     *file = NULL;
 
-    while ((ch = getopt(argc, argv, "f:d:")) != -1) {
+    const struct option options[] = {
+        { .name    = "file",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "description",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        {0},
+    };
+
+    while ((ch = getopt_long(argc, argv, "f:d:", options, NULL)) != -1) {
         switch (ch) {
         case 'f':
             file = optarg;
@@ -754,7 +859,15 @@ subcommand_gist_delete(int argc, char *argv[])
     bool        always_yes = false;
     const char *gist_id    = NULL;
 
-    while ((ch = getopt(argc, argv, "y")) != -1) {
+    const struct option options[] = {
+        { .name    = "yes",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'y' },
+        {0},
+    };
+
+    while ((ch = getopt_long(argc, argv, "y", options, NULL)) != -1) {
         switch (ch) {
         case 'y':
             always_yes = true;
@@ -799,7 +912,15 @@ subcommand_gists(int argc, char *argv[])
         }
     }
 
-    while ((ch = getopt(argc, argv, "u:")) != -1) {
+    const struct option options[] = {
+        { .name    = "user",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'u' },
+        {0},
+    };
+
+    while ((ch = getopt_long(argc, argv, "u:", options, NULL)) != -1) {
         switch (ch) {
         case 'u':
             user = optarg;
@@ -822,7 +943,7 @@ static int
 subcommand_forks(int argc, char *argv[])
 {
     ghcli_fork *forks      = NULL;
-    const char *org        = NULL, *repo = NULL;
+    const char *owner      = NULL, *repo = NULL;
     int         forks_size = 0;
     int         ch         = 0;
     bool        always_yes = false;
@@ -833,10 +954,26 @@ subcommand_forks(int argc, char *argv[])
         return subcommand_forks_create(argc, argv);
     }
 
-    while ((ch = getopt(argc, argv, "o:r:y")) != -1) {
+    const struct option options[] = {
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "owner",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        { .name    = "yes",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'y' },
+        {0},
+    };
+
+    while ((ch = getopt_long(argc, argv, "o:r:y", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
-            org = optarg;
+            owner = optarg;
             break;
         case 'r':
             repo = optarg;
@@ -853,10 +990,10 @@ subcommand_forks(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    check_org_and_repo(&org, &repo);
+    check_owner_and_repo(&owner, &repo);
 
     if (argc == 0) {
-        forks_size = ghcli_get_forks(org, repo, &forks);
+        forks_size = ghcli_get_forks(owner, repo, &forks);
         ghcli_print_forks(stdout, forks, forks_size);
         return EXIT_SUCCESS;
     }
@@ -865,7 +1002,7 @@ subcommand_forks(int argc, char *argv[])
         const char *action = argv[i];
 
         if (strcmp(action, "delete") == 0) {
-            delete_repo(always_yes, org, repo);
+            delete_repo(always_yes, owner, repo);
         } else {
             errx(1, "forks: unknown action '%s'", action);
         }
@@ -978,7 +1115,7 @@ subcommand_releases_create(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    check_org_and_repo(&release.owner, &release.repo);
+    check_owner_and_repo(&release.owner, &release.repo);
 
     if (!release.tag)
         errx(1, "releases create: missing tag name");
@@ -1036,7 +1173,7 @@ subcommand_releases_delete(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    check_org_and_repo(&owner, &repo);
+    check_owner_and_repo(&owner, &repo);
 
     if (argc != 1)
         errx(1, "releases delete: missing release id");
@@ -1062,9 +1199,9 @@ static int
 subcommand_releases(int argc, char *argv[])
 {
     int            ch, releases_size;
-    const char    *org        = NULL;
-    const char    *repo       = NULL;
-    ghcli_release *releases   = NULL;
+    const char    *owner    = NULL;
+    const char    *repo     = NULL;
+    ghcli_release *releases = NULL;
 
     if (argc > 1) {
         for (size_t i = 0; i < ARRAY_SIZE(releases_subcommands); ++i) {
@@ -1090,7 +1227,7 @@ subcommand_releases(int argc, char *argv[])
     while ((ch = getopt_long(argc, argv, "o:r:", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
-            org = optarg;
+            owner = optarg;
             break;
         case 'r':
             repo = optarg;
@@ -1104,9 +1241,9 @@ subcommand_releases(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    check_org_and_repo(&org, &repo);
+    check_owner_and_repo(&owner, &repo);
 
-    releases_size = ghcli_get_releases(org, repo, &releases);
+    releases_size = ghcli_get_releases(owner, repo, &releases);
     ghcli_print_releases(stdout, releases, releases_size);
     ghcli_free_releases(releases, releases_size);
 

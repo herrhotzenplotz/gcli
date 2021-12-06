@@ -77,7 +77,7 @@ parse_fork(struct json_stream *input, ghcli_fork *out)
 }
 
 int
-ghcli_get_forks(const char *org, const char *reponame, ghcli_fork **out)
+ghcli_get_forks(const char *owner, const char *reponame, ghcli_fork **out)
 {
     ghcli_fetch_buffer  buffer = {0};
     char               *url    = NULL;
@@ -89,7 +89,7 @@ ghcli_get_forks(const char *org, const char *reponame, ghcli_fork **out)
 
     url = sn_asprintf(
         "https://api.github.com/repos/%s/%s/forks",
-        org, reponame);
+        owner, reponame);
     ghcli_fetch(url, &buffer);
 
     free(url);
@@ -137,14 +137,14 @@ ghcli_print_forks(FILE *stream, ghcli_fork *forks, size_t forks_size)
 }
 
 void
-ghcli_fork_create(const char *org, const char *repo, const char *_in)
+ghcli_fork_create(const char *owner, const char *repo, const char *_in)
 {
     char               *url       = NULL;
     char               *post_data = NULL;
     sn_sv               in        = SV_NULL;
     ghcli_fetch_buffer  buffer    = {0};
 
-    url = sn_asprintf("https://api.github.com/repos/%s/%s/forks", org, repo);
+    url = sn_asprintf("https://api.github.com/repos/%s/%s/forks", owner, repo);
     if (_in) {
         in        = ghcli_json_escape(SV((char *)_in));
         post_data = sn_asprintf("{\"organization\":\""SV_FMT"\"}",

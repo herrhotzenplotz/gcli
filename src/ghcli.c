@@ -1038,8 +1038,13 @@ subcommand_releases_create(int argc, char *argv[])
 {
     ghcli_new_release release     = {0};
     int               ch;
+    bool              always_yes  = false;
 
     const struct option options[] = {
+        { .name    = "yes",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'y' },
         { .name    = "draft",
           .has_arg = no_argument,
           .flag    = NULL,
@@ -1075,7 +1080,7 @@ subcommand_releases_create(int argc, char *argv[])
         {0},
     };
 
-    while ((ch = getopt_long(argc, argv, "dpn:t:c:r:o:a:",
+    while ((ch = getopt_long(argc, argv, "ydpn:t:c:r:o:a:",
                              options, NULL)) != -1) {
         switch (ch) {
         case 'd':
@@ -1107,6 +1112,9 @@ subcommand_releases_create(int argc, char *argv[])
             };
             ghcli_release_push_asset(&release, asset);
         } break;
+        case 'y': {
+            always_yes = true;
+        } break;
         default:
             usage();
         }
@@ -1122,8 +1130,9 @@ subcommand_releases_create(int argc, char *argv[])
 
     release.body = get_release_message(&release);
 
-    if (!sn_yesno("Do you want to create this release?"))
-        errx(1, "Aborted by user");
+    if (!always_yes)
+        if (!sn_yesno("Do you want to create this release?"))
+            errx(1, "Aborted by user");
 
     ghcli_create_release(&release);
 

@@ -204,6 +204,38 @@ fetch_header_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
     return sz;
 }
 
+static char *
+parse_link_header(char *_header)
+{
+    sn_sv header = SV(_header);
+    sn_sv entry  = {0};
+
+    /* Iterate through the comma-separated list of link relations */
+    while ((entry = sn_sv_chop_until(&header, ',')).length > 0) {
+        entry = sn_sv_trim(entry);
+
+        /* the entries have semicolon-separated fields like so:
+         * <url>; rel=\"next\"
+         *
+         * This chops off the url and then looks at the rest.
+         *
+         * We're making lots of assumptions about the input data here
+         * without sanity checking it. If it fails, we will know. Most
+         * likely a segfault. */
+        sn_sv almost_url = sn_sv_chop_until(&entry, ';');
+
+        if (sn_sv_eq_to(entry, "; rel=\"next\"")) {
+            /* Skip the triangle brackets around the url */
+            almost_url.data   += 1;
+            almost_url.length -= 2;
+            almost_url         = sn_sv_trim(almost_url);
+            return sn_sv_to_cstr(almost_url);
+        }
+    }
+
+    return NULL;
+}
+
 void
 ghcli_fetch_with_method(
     const char *method,
@@ -245,6 +277,8 @@ ghcli_fetch_with_method(
 
     ret = curl_easy_perform(session);
     ghcli_curl_check_api_error(session, ret, url, out);
+
+    char *foo = parse_link_header(link_header);
 
     curl_easy_cleanup(session);
     session = NULL;

@@ -272,13 +272,6 @@ ghcli_post_upload(
     curl_easy_setopt(session, CURLOPT_WRITEDATA, out);
     curl_easy_setopt(session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
 
-/*
-      curl_easy_setopt(session, CURLOPT_PROTOCOLS,
-                     CURLPROTO_HTTP | CURLPROTO_HTTPS);
-    curl_easy_setopt(session, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-*/
-
-
     ret = curl_easy_perform(session);
     ghcli_curl_check_api_error(session, ret, url, out);
 

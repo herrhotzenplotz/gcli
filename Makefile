@@ -42,6 +42,7 @@ MAN				=	docs/ghcli.1 \
 					docs/ghcli-releases.1 \
 					docs/ghcli-issues.1 \
 					docs/ghcli-pulls.1 \
+					docs/ghcli-comment.1 \
 					docs/ghcli-gists.1
 
 # Include the rules to build your program

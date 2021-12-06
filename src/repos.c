@@ -188,8 +188,7 @@ ghcli_get_own_repos(ghcli_repo **out)
     enum  json_type     next   = JSON_NULL;
     int                 size   = 0;
 
-    /* HACK: ghcli_fetch does not authenticate */
-    ghcli_fetch_with_method("GET", url, NULL, &buffer);
+    ghcli_fetch(url, &buffer);
 
     json_open_buffer(&stream, buffer.data, buffer.length);
     json_set_streaming(&stream, 1);

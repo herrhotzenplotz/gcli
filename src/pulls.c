@@ -451,12 +451,12 @@ ghcli_print_commits_table(FILE *stream, ghcli_commit *commits, int commits_size)
 
     fprintf(
         stream,
-        "%8.8s  %-15.15s  %-20.20s  %16.16s  %-s\n",
+        "%-8.8s  %-15.15s  %-20.20s  %-16.16s  %-s\n",
         "SHA", "AUTHOR", "EMAIL", "DATE", "MESSAGE");
 
     for (int i = 0; i < commits_size; ++i) {
         char *message = cut_newline(commits[i].message);
-        fprintf(stream, "%8.8s  %-15.15s  %-20.20s  %16.16s  %-s\n",
+        fprintf(stream, "%-8.8s  %-15.15s  %-20.20s  %-16.16s  %-s\n",
                 commits[i].sha,
                 commits[i].author,
                 commits[i].date,

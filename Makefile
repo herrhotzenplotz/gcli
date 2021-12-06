@@ -40,6 +40,7 @@ LIBADD				=	libcurl
 # installed.
 MAN				=	docs/ghcli.1 \
 					docs/ghcli-repos.1 \
+					docs/ghcli-forks.1 \
 					docs/ghcli-releases.1 \
 					docs/ghcli-issues.1 \
 					docs/ghcli-pulls.1 \

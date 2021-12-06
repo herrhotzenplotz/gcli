@@ -1,0 +1,82 @@
+.Dd $Mdocdate$
+.Dt GHCLI-FORKS 1
+.Os
+.Sh NAME
+.Nm ghcli forks
+.Nd Manage GitHub repositories forks
+.Sh SYNOPSIS
+.Nm
+.Op Fl y
+.Op Fl o Ar owner Fl r Ar repo
+.Ar actions...
+.Nm
+.Cm create
+.Op Fl o Ar owner Fl r Ar repo
+.Fl i Ar target-owner
+.Sh DESCRIPTION
+Use
+.Nm
+to manage forks of other repositories on GitHub.
+.Sh OPTIONS
+.Bl -tag -width indent
+.It Fl o , -owner Ar owner
+Operate on the repository of the given owner. This option can only be
+used in combination with
+.Fl r .
+.It Fl r , -repo Ar repo
+Operate on the given repository. This option can only be used in
+combination with
+.Fl r o
+.It Fl y , -yes
+Do not ask for confirmation. Assume yes.
+.It Fl i , -into Ar target-owner
+When forking a repository, this is the organization or user the
+repository is forked into.
+.El
+.El
+.Sh ACTIONS
+.Ar actions...
+may be one or more of the following:
+.Bl -tag -width indent
+.It Cm delete
+Delete the fork. You will be asked for confirmation unless you set
+.Fl y .
+
+The following flags can be specified:
+.Bl -tag -width indent
+.It Fl r , -repo
+See
+.Sx OPTIONS
+.It Fl o , -owner
+See
+.Sx OPTIONS
+.It Fl y , -yes
+Do not ask for confirmation before deleting the fork. See
+.Sx OPTIONS .
+.El
+.El
+.Sh EXAMPLES
+Clone vim/vim and fork it into your account:
+.Bd -literal -offset indent
+$ git clone git@github.com:vim/vim
+$ git remote rename origin upstream
+$ ghcli forks create --into <myaccount>
+$ get remote add origin git@github.com:myaccount/vim
+.Ed
+
+You may also want to setup a .ghcli file at the same time:
+.Bd -literal -offset indent
+$ printf -- "pr.upstream=vim/vim\\npr.base=trunk\\n" >> .ghcli
+.Ed
+
+Delete your fork of the current repository without confirmation:
+.Bd -literal -offset indent
+$ ghcli forks -y delete
+.Ed
+.Sh SEE ALSO
+.Xr git 1 ,
+.Xr ghcli 1
+.Sh AUTHORS
+.An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@outlook.com
+.Sh BUGS
+Please report issues preferably via e-mail or on GitHub.

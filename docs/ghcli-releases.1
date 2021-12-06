@@ -1,0 +1,156 @@
+.Dd $Mdocdate$
+.Dt GHCLI-RELEASES 1
+.Os
+.Sh NAME
+.Nm ghcli releases
+.Nd manage releases on GitHub
+.Sh SYNOPSIS
+
+.Nm
+.Op Fl o Ar owner Fl r Ar repo
+
+.Nm
+.Cm create
+.Fl t Ar tagname
+.Op Fl n Ar name
+.Op Fl c Ar commitish
+.Op Fl a Pa asset
+.Op Fl o Ar owner Fl r Ar repo
+.Op Fl d
+.Op Fl p
+
+.Nm
+.Cm delete
+.Fl t Ar tagname
+.Op Fl o Ar owner Fl r Ar repo
+.Op Fl y
+.Ar release-id
+
+.Sh DESCRIPTION
+Use
+.Nm
+to list, create or delete releases for repositories on GitHub.
+Without a subcommand specified,
+.Nm
+will list releases in the given or autodetected repository. If you are
+the owner of that repo, you will also see draft releases. You will not
+see those if you are not the owner of that particular repository.
+
+.Sh OPTIONS
+.Bl -tag -width indent
+.It Fl o , -owner Ar owner
+List releases in the repo of the given owner. This option can only be
+used in combination with
+.Fl r .
+
+.It Fl r , -repo Ar repo
+List releases in the given repo. This option can only be used in
+combination with
+.Fl r .
+
+.El
+
+.Sh SUBCOMMANDS
+.Bl -tag -width indent
+
+.It Cm create
+Create a new release on the given or autodetected repository. The
+editor will come up and ask you to enter a message for the release.
+
+The following flags can be specified:
+
+.Bl -tag -width indent
+.It Fl t , -tag Ar tagname
+Specify a tag to be used or to be created for the release. This option
+is mandatory. See
+.Fl c
+for how to specify from what the tag should be created.
+
+.It Fl n , -name Ar name
+Name of the release.
+
+.It Fl c , -commitish Ar commitish
+When a new tag is to be created, this specifies what the tag is based
+on. It can be either a branch or a commit hash. Unused if the tag
+already exists. Otherwise this defaults to the default branch from
+.Xr git 1 .
+
+.It Fl o , -owner Ar owner
+Operate on the repository of the specified owner. This option can only
+be used in combination with
+.Fl r .
+Use this if you want to e.g. create the release in an organization and
+not your own account.
+
+.It Fl r , -repo Ar repo
+Create the release in the given repository. This option can only be
+used in combination with
+.Fl o .
+
+.It Fl a , -asset Pa asset
+Attach the given asset to the release. It will be uploaded to Github
+and be made available for download. You can specify this option
+multiple times to attach more than one asset to the release.
+
+.El
+
+.It Cm delete
+Delete a release.
+
+The following options can be specified:
+.Bl -tag -width indent
+
+.It Fl r , -repo Ar repo
+Delete the release in the given repository. This option can only be
+used in combination with
+.Fl o .
+
+.It Fl o , -owner Ar owner
+Delete the release in the repository of the given owner. This option
+can only be used in combination with
+.Fl r .
+Use this if you want to delete a release in a given organization and
+not your own account.
+
+.It Fl y , -yes
+Do not ask for confirmation before deleting the repository. Assume
+yes.
+
+.El
+
+.Sh EXAMPLES
+
+Delete release with ID 54656866 in herrhotzenplotz/ghcli-playground
+without asking for confirmation:
+
+.Bd -literal -offset indent
+$ ghcli releases delete --owner herrhotzenplotz \\
+  --repo ghcli-playground --yes 54656866
+.Ed
+
+Create a new release named Foobar in herrhotzenplotz/ghcli-playground.
+Create a new tag called banana based on the commit with the hash
+0fed3c9 and upload
+.Pa foobar.tar.xz , barfoo.tar.gz
+and
+.Pa CHANGELOG
+as assets to the release.
+
+.Bd -literal -offset indent
+$ ghcli releases create --owner herrhotzenplotz \\
+  --repo ghcli-playground --tag banana --name Foobar \\
+  --commitish 0fed3c9 --asset foobar.tar.xz \\
+  --asset barfoo.tar.gz --asset CHANGELOG
+.Ed
+
+.Sh SEE ALSO
+.Xr git 1 ,
+.Xr ghcli 1
+
+.Sh AUTHORS
+.An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@outlook.com
+
+.Sh BUGS
+Yes. It is software.
+
+Please report issues preferably via e-mail or on GitHub.

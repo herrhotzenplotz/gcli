@@ -1,0 +1,87 @@
+.Dd $Mdocdate$
+.Dt GHCLI-ISSUES 1
+.Os
+.Sh NAME
+.Nm ghcli issues
+.Nd Manage GitHub issues
+.Sh SYNOPSIS
+.Nm
+.Op Fl a
+.Op Fl o Ar owner Fl r Ar repo
+.Op Ar actions...
+.Nm
+.Cm create
+.Op Fl i Ar owner/repo
+.Op Fl y
+.Sh DESCRIPTION
+Use
+.Nm
+to list, create, edit or delete issues in repositories on GitHub.
+Without any action specified,
+.Nm
+will list issues in the given or autodetected repository.
+.Sh OPTIONS
+.Bl -tag -width indent
+.It Fl o , -owner Ar owner
+List issues in the repository of the given owner. This option can only
+be used in combination with
+.Fl r .
+.It Fl r , -repo Ar repo
+List issues in the given repository. This option can only be used in
+combination with
+.Fl r .
+.It Fl a
+List all issues, including closed ones. Cannot be combined with
+actions.
+.El
+
+.Sh SUBCOMMANDS
+.Bl -tag -width indent
+.It Cm create
+Create a new issues in the given or autodetected repository. The
+editor will come up and ask you to enter an issue message.
+
+The following flags can be specified:
+.Bl -tag -width indent
+.It Fl i , -in Ar owner/repo
+Specify in which repository the issue is to be created.
+.It Fl y , -yes
+Do not ask for confirmation before creating the issue. Assume yes.
+.El
+.El
+.Sh ACTIONS
+.Ar actions...
+may be one or more of the following:
+.Bl -tag -width indent
+.It Cm comments
+Print a list of comments under the issue.
+.It Cm summary
+Print a short summary of the issue.
+.It Cm close
+Close the issue.
+.It Cm reopen
+Reopen a closed issue.
+.El
+.Sh EXAMPLES
+Print a list of issues in the current project:
+.Bd -literal -offset indent
+$ ghcli issues
+.Ed
+
+Report a new issue in the current project:
+.Bd -literal -offset indent
+$ ghcli create issues "summary here"
+.Ed
+
+Print both a summary and comments of issue 1 in herrhotzenplotz/ghcli:
+.Bd -literal -offset indent
+$ ghcli issues -o herrhotzenplotz -r ghcli -i 1 summary comments
+.Ed
+.Sh SEE ALSO
+.Xr git 1 ,
+.Xr ghcli 1
+.Sh AUTHORS
+.An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@outlook.com
+.Sh BUGS
+It is impossible to manage labels of issues with this subcommand.
+Please report issues preferably via e-mail or on GitHub.

@@ -186,33 +186,41 @@ ghcli_repo_delete(const char *owner, const char *repo)
 }
 
 int
-ghcli_get_own_repos(ghcli_repo **out)
+ghcli_get_own_repos(int max, ghcli_repo **out)
 {
-    const char         *url    = "https://api.github.com/user/repos";
-    ghcli_fetch_buffer  buffer = {0};
-    struct json_stream  stream = {0};
-    enum  json_type     next   = JSON_NULL;
-    int                 size   = 0;
+    /* force the url to be heap-allocated */
+    char               *url      = strdup("https://api.github.com/user/repos");
+    char               *next_url = NULL;
+    ghcli_fetch_buffer  buffer   = {0};
+    struct json_stream  stream   = {0};
+    enum  json_type     next     = JSON_NULL;
+    int                 size     = 0;
 
-    ghcli_fetch(url, NULL, &buffer);
+    do {
+        memset(&buffer, 0, sizeof(buffer));
+        ghcli_fetch(url, &next_url, &buffer);
 
-    json_open_buffer(&stream, buffer.data, buffer.length);
-    json_set_streaming(&stream, 1);
+        json_open_buffer(&stream, buffer.data, buffer.length);
+        json_set_streaming(&stream, 1);
 
-    // TODO: Poor error message
-    if ((next = json_next(&stream)) != JSON_ARRAY)
-        errx(1,
-             "Expected array in response from API "
-             "but got something else instead");
+        // TODO: Poor error message
+        if ((next = json_next(&stream)) != JSON_ARRAY)
+            errx(1,
+                 "Expected array in response from API "
+                 "but got something else instead");
 
-    while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
-        *out = realloc(*out, sizeof(**out) * (size + 1));
-        ghcli_repo *it = &(*out)[size++];
-        parse_repo(&stream, it);
-    }
+        while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
+            *out = realloc(*out, sizeof(**out) * (size + 1));
+            ghcli_repo *it = &(*out)[size++];
+            parse_repo(&stream, it);
+        }
 
-    free(buffer.data);
-    json_close(&stream);
+        free(buffer.data);
+        json_close(&stream);
+        free(url);
+    } while ((url = next_url) && (max == -1 || size < max));
+
+    free(next_url);
 
     return size;
 }

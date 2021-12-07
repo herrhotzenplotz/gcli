@@ -777,7 +777,7 @@ subcommand_repos(int argc, char *argv[])
             errx(1, "repos: no actions specified");
 
         if (!owner)
-            repos_size = ghcli_get_own_repos(&repos);
+            repos_size = ghcli_get_own_repos(n, &repos);
         else
             repos_size = ghcli_get_repos(owner, n, &repos);
 

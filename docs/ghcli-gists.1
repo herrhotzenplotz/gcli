@@ -6,6 +6,7 @@
 .Nd manage Github Gists
 .Sh SYNOPSIS
 .Nm
+.Op Fl n Ar n
 .Op Fl u Ar user
 .Nm
 .Cm create
@@ -31,6 +32,14 @@ will list Gists of the given or autodetected user account.
 .Bl -tag -width indent
 .It Fl u , -user Ar owner
 List Gists of the given user.
+.It Fl n , -count Ar n
+Fetch at least
+.Ar n
+gists. Setting
+.Ar n
+to -1 will fetch all gists. Default: 30. Note that on users with many
+gists fetching all gists can take a considerable amount of time and
+may result in rate limiting by the GitHub API.
 .El
 .Sh SUBCOMMANDS
 .Bl -tag -width indent

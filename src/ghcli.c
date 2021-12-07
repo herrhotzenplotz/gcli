@@ -120,10 +120,14 @@ subcommand_issue_create(int argc, char *argv[])
     ghcli_submit_issue_options opts   = {0};
 
     const struct option options[] = {
-        { .name    = "in",
+        { .name    = "owner",
           .has_arg = required_argument,
           .flag    = NULL,
-          .val     = 'i' },
+          .val     = 'o' },
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
         { .name    = "yes",
           .has_arg = no_argument,
           .flag    = NULL,
@@ -131,10 +135,13 @@ subcommand_issue_create(int argc, char *argv[])
         {0},
     };
 
-    while ((ch = getopt_long(argc, argv, "i:", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "o:r:", options, NULL)) != -1) {
         switch (ch) {
-        case 'i':
-            opts.in    = SV(optarg);
+        case 'o':
+            opts.owner = SV(optarg);
+            break;
+        case 'r':
+            opts.repo = SV(optarg);
             break;
         case 'y':
             opts.always_yes = true;
@@ -146,12 +153,13 @@ subcommand_issue_create(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    if (!opts.in.length) {
-        if (!(opts.in = ghcli_config_get_upstream()).length)
+    if (!opts.owner.length || !opts.repo.length) {
+        ghcli_config_get_upstream_parts(&opts.owner, &opts.repo);
+        if (!opts.owner.length || !opts.repo.length)
             errx(1,
                  "error: Target repo for the issue to be created "
-                 "in is missing. Please either specify '--in owner/repo'"
-                 " or set pr.upstream in .ghcli.");
+                 "in is missing. Please either specify '-o owner' "
+                 "and '-r repo' or set pr.upstream in .ghcli.");
     }
 
     if (argc != 1)

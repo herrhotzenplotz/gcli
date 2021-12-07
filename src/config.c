@@ -301,6 +301,17 @@ ghcli_config_get_upstream(void)
     return local_config.upstream;
 }
 
+void
+ghcli_config_get_upstream_parts(sn_sv *owner, sn_sv *repo)
+{
+    sn_sv upstream   = ghcli_config_get_upstream();
+    *owner           = sn_sv_chop_until(&upstream, '/');
+    /* TODO: Sanity check */
+    upstream.data   += 1;
+    upstream.length -= 1;
+    *repo            = upstream;
+}
+
 sn_sv
 ghcli_config_get_base(void)
 {

@@ -59,7 +59,8 @@ struct ghcli_issue_details {
 };
 
 struct ghcli_submit_issue_options {
-    sn_sv in;
+    sn_sv owner;
+    sn_sv repo;
     sn_sv title;
     sn_sv body;
     bool  always_yes;

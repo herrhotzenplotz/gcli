@@ -46,9 +46,10 @@ perform_submit_issue(
         "{ \"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
         SV_ARGS(opts.title), SV_ARGS(opts.body));
     char *url         = sn_asprintf(
-        "%s/repos/"SV_FMT"/issues",
+        "%s/repos/"SV_FMT"/"SV_FMT"/issues",
         ghcli_config_get_apibase(),
-        SV_ARGS(opts.in));
+        SV_ARGS(opts.owner),
+        SV_ARGS(opts.repo));
 
     ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
     free(post_fields);
@@ -388,10 +389,11 @@ ghcli_issue_submit(ghcli_submit_issue_options opts)
             "The following issue will be created:\n"
             "\n"
             "TITLE   : "SV_FMT"\n"
-            "IN      : "SV_FMT"\n"
+            "OWNER   : "SV_FMT"\n"
+            "REPO    : "SV_FMT"\n"
             "MESSAGE :\n"SV_FMT"\n",
-            SV_ARGS(opts.title),SV_ARGS(opts.in),
-            SV_ARGS(body));
+            SV_ARGS(opts.title), SV_ARGS(opts.owner),
+            SV_ARGS(opts.repo), SV_ARGS(body));
 
     fputc('\n', stdout);
 

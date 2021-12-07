@@ -38,6 +38,7 @@ char  *ghcli_config_get_apibase(void);
 sn_sv  ghcli_config_get_token(void);
 sn_sv  ghcli_config_get_account(void);
 sn_sv  ghcli_config_get_upstream(void);
+void   ghcli_config_get_upstream_parts(sn_sv *owner, sn_sv *repo);
 sn_sv  ghcli_config_get_base(void);
 
 #endif /* CONFIG_H */

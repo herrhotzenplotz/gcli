@@ -7,6 +7,7 @@
 .Sh SYNOPSIS
 .Nm
 .Op Fl a
+.Op Fl n Ar n
 .Op Fl o Ar owner Fl r Ar repo
 .Op Ar actions...
 .Nm
@@ -32,7 +33,17 @@ combination with
 .Fl r .
 .It Fl a
 List all PRs, including closed and merged ones. Cannot be combined
-with actions.
+with actions. This does not affect the
+.Fl n
+option.
+.It Fl n , -count Ar n
+Fetch at least
+.Ar n
+pull requests. Default: 30. If
+.Ar n
+is set to -1 this will fetch all pull requests. Note that on large
+repositories fetching all pull requests can take a considerable amount
+of time and may result in rate limiting by the GitHub API.
 .El
 
 .Sh SUBCOMMANDS

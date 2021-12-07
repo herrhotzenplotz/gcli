@@ -39,8 +39,8 @@
 
 static void
 perform_submit_issue(
-    ghcli_submit_issue_options opts,
-    ghcli_fetch_buffer *out)
+    ghcli_submit_issue_options  opts,
+    ghcli_fetch_buffer         *out)
 {
     char *post_fields = sn_asprintf(
         "{ \"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",

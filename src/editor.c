@@ -114,7 +114,6 @@ ghcli_editor_get_user_message(
             continue;
 
         result = sv_append(result, line);
-        buffer = sn_sv_trim_front(buffer);
     }
 
     munmap(file_content, len);

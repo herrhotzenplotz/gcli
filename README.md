@@ -45,6 +45,7 @@ Tested Operating Systems so far:
 - Devuan GNU/Linux Chimaera x86_64
 - Fedora 34 x86_64
 - Haiku x86_64
+- Minix 3.4.0 (GENERIC) i386
 
 ## Support
 

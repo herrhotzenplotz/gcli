@@ -940,6 +940,7 @@ subcommand_gists(int argc, char *argv[])
     const char *user       = NULL;
     ghcli_gist *gists      = NULL;
     int         gists_size = 0;
+    int         count      = 30;
 
     for (size_t i = 0; i < ARRAY_SIZE(gist_subcommands); ++i) {
         if (argc > 1 && strcmp(argv[1], gist_subcommands[i].name) == 0) {
@@ -954,14 +955,24 @@ subcommand_gists(int argc, char *argv[])
           .has_arg = no_argument,
           .flag    = NULL,
           .val     = 'u' },
+        { .name    = "count",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'n' },
         {0},
     };
 
-    while ((ch = getopt_long(argc, argv, "u:", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "n:u:", options, NULL)) != -1) {
         switch (ch) {
         case 'u':
             user = optarg;
             break;
+        case 'n': {
+            char *endptr = NULL;
+            count        = strtol(optarg, &endptr, 10);
+            if (endptr != (optarg + strlen(optarg)))
+                err(1, "gists: cannot parse gists count");
+        } break;
         case '?':
         default:
             usage();
@@ -971,7 +982,7 @@ subcommand_gists(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    gists_size = ghcli_get_gists(user, &gists);
+    gists_size = ghcli_get_gists(user, count, &gists);
     ghcli_print_gists_table(stdout, gists, gists_size);
     return EXIT_SUCCESS;
 }

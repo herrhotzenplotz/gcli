@@ -35,13 +35,13 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include <sn/sn.h>
 #include <ghcli/config.h>
-#include <ghcli/editor.h>
 #include <ghcli/curl.h>
+#include <ghcli/editor.h>
 #include <ghcli/json_util.h>
 #include <ghcli/pulls.h>
 #include <pdjson/pdjson.h>
+#include <sn/sn.h>
 
 /* TODO: Move these out of here */
 static void
@@ -56,7 +56,8 @@ perform_submit_pr(ghcli_submit_pull_options opts, ghcli_fetch_buffer *out)
         SV_ARGS(opts.title),
         SV_ARGS(opts.body));
     char *url         = sn_asprintf(
-        "https://api.github.com/repos/"SV_FMT"/pulls",
+        "%s/repos/"SV_FMT"/pulls",
+        ghcli_config_get_apibase(),
         SV_ARGS(opts.in));
 
     ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
@@ -130,7 +131,8 @@ ghcli_get_prs(
     char               *next_url    = NULL;
 
     url = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/pulls?state=%s",
+        "%s/repos/%s/%s/pulls?state=%s",
+        ghcli_config_get_apibase(),
         owner, reponame, all ? "all" : "open");
 
     do {
@@ -203,7 +205,8 @@ ghcli_print_pr_diff(
 {
     char *url = NULL;
     url = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/pulls/%d",
+        "%s/repos/%s/%s/pulls/%d",
+        ghcli_config_get_apibase(),
         owner, reponame, pr_number);
     ghcli_curl(stream, url, "Accept: application/vnd.github.v3.diff");
     free(url);
@@ -547,7 +550,8 @@ ghcli_pr_summary(
 
     /* General info */
     url = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/pulls/%d",
+        "%s/repos/%s/%s/pulls/%d",
+        ghcli_config_get_apibase(),
         owner, reponame, pr_number);
     ghcli_fetch(url, NULL, &json_buffer);
 
@@ -562,7 +566,8 @@ ghcli_pr_summary(
 
     /* Commits */
     url = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/pulls/%d/commits",
+        "%s/repos/%s/%s/pulls/%d/commits",
+        ghcli_config_get_apibase(),
         owner, reponame, pr_number);
     commits_size = ghcli_get_pull_commits(url, &commits);
 
@@ -643,7 +648,8 @@ ghcli_pr_merge(FILE *out, const char *owner, const char *reponame, int pr_number
     const char         *key;
 
     url = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/pulls/%d/merge",
+        "%s/repos/%s/%s/pulls/%d/merge",
+        ghcli_config_get_apibase(),
         owner, reponame, pr_number);
     ghcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
@@ -680,7 +686,8 @@ ghcli_pr_close(const char *owner, const char *reponame, int pr_number)
     const char         *data        = NULL;
 
     url  = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/pulls/%d",
+        "%s/repos/%s/%s/pulls/%d",
+        ghcli_config_get_apibase(),
         owner, reponame, pr_number);
     data = sn_asprintf("{ \"state\": \"closed\"}");
 
@@ -699,7 +706,8 @@ ghcli_pr_reopen(const char *owner, const char *reponame, int pr_number)
     const char         *data        = NULL;
 
     url  = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/pulls/%d",
+        "%s/repos/%s/%s/pulls/%d",
+        ghcli_config_get_apibase(),
         owner, reponame, pr_number);
     data = sn_asprintf("{ \"state\": \"open\"}");
 

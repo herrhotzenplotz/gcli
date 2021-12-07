@@ -29,12 +29,13 @@
 
 #include <string.h>
 
-#include <sn/sn.h>
+#include <ghcli/config.h>
 #include <ghcli/curl.h>
 #include <ghcli/editor.h>
-#include <ghcli/json_util.h>
 #include <ghcli/issues.h>
+#include <ghcli/json_util.h>
 #include <pdjson/pdjson.h>
+#include <sn/sn.h>
 
 static void
 perform_submit_issue(
@@ -45,7 +46,8 @@ perform_submit_issue(
         "{ \"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
         SV_ARGS(opts.title), SV_ARGS(opts.body));
     char *url         = sn_asprintf(
-        "https://api.github.com/repos/"SV_FMT"/issues",
+        "%s/repos/"SV_FMT"/issues",
+        ghcli_config_get_apibase(),
         SV_ARGS(opts.in));
 
     ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
@@ -115,7 +117,8 @@ ghcli_get_issues(
     char               *next_url    = NULL;
 
     url = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/issues?state=%s",
+        "%s/repos/%s/%s/issues?state=%s",
+        ghcli_config_get_apibase(),
         owner, reponame,
         all ? "all" : "open");
 
@@ -293,7 +296,8 @@ ghcli_issue_summary(
     ghcli_issue_details  details = {0};
 
     url = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/issues/%d?per_page=100",
+        "%s/repos/%s/%s/issues/%d",
+        ghcli_config_get_apibase(),
         owner, repo,
         issue_number);
     ghcli_fetch(url, NULL, &buffer);
@@ -319,7 +323,8 @@ ghcli_issue_close(const char *owner, const char *repo, int issue_number)
     const char         *data        = NULL;
 
     url  = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/issues/%d",
+        "%s/repos/%s/%s/issues/%d",
+        ghcli_config_get_apibase(),
         owner, repo,
         issue_number);
     data = sn_asprintf("{ \"state\": \"close\"}");
@@ -339,7 +344,8 @@ ghcli_issue_reopen(const char *owner, const char *repo, int issue_number)
     const char         *data        = NULL;
 
     url  = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/issues/%d",
+        "%s/repos/%s/%s/issues/%d",
+        ghcli_config_get_apibase(),
         owner, repo,
         issue_number);
     data = sn_asprintf("{ \"state\": \"open\"}");

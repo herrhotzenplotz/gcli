@@ -27,9 +27,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <ghcli/config.h>
+#include <ghcli/curl.h>
 #include <ghcli/forks.h>
 #include <ghcli/json_util.h>
-#include <ghcli/curl.h>
 
 #include <pdjson/pdjson.h>
 
@@ -93,7 +94,8 @@ ghcli_get_forks(
     *out = NULL;
 
     url = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/forks",
+        "%s/repos/%s/%s/forks",
+        ghcli_config_get_apibase(),
         owner, reponame);
 
     do {
@@ -157,7 +159,10 @@ ghcli_fork_create(const char *owner, const char *repo, const char *_in)
     sn_sv               in        = SV_NULL;
     ghcli_fetch_buffer  buffer    = {0};
 
-    url = sn_asprintf("https://api.github.com/repos/%s/%s/forks", owner, repo);
+    url = sn_asprintf(
+        "%s/repos/%s/%s/forks",
+        ghcli_config_get_apibase(),
+        owner, repo);
     if (_in) {
         in        = ghcli_json_escape(SV((char *)_in));
         post_data = sn_asprintf("{\"organization\":\""SV_FMT"\"}",

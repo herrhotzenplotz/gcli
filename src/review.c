@@ -27,9 +27,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/review.h>
+#include <ghcli/config.h>
 #include <ghcli/curl.h>
 #include <ghcli/json_util.h>
+#include <ghcli/review.h>
 
 #include <pdjson/pdjson.h>
 
@@ -88,7 +89,8 @@ ghcli_review_get_reviews(
     size_t              size   = 0;
 
     url = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/pulls/%d/reviews",
+        "%s/repos/%s/%s/pulls/%d/reviews",
+        ghcli_config_get_apibase(),
         owner, repo, pr);
     ghcli_fetch(url, NULL, &buffer);
 
@@ -242,7 +244,8 @@ ghcli_review_get_review_comments(
     size_t              size   = 0;
 
     url = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/pulls/%d/reviews/%d/comments",
+        "%s/repos/%s/%s/pulls/%d/reviews/%d/comments",
+        ghcli_config_get_apibase(),
         owner, repo, pr, review_id);
     ghcli_fetch(url, NULL, &buffer);
 

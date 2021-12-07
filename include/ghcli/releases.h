@@ -72,11 +72,23 @@ struct ghcli_new_release {
 int ghcli_get_releases(
     const char     *owner,
     const char     *repo,
+    int             max,
     ghcli_release **out);
-void ghcli_print_releases(FILE *, ghcli_release *, int);
-void ghcli_free_releases(ghcli_release *, int);
-void ghcli_create_release(const ghcli_new_release *);
-void ghcli_release_push_asset(ghcli_new_release *, ghcli_release_asset);
-void ghcli_delete_release(const char *owner, const char *repo, const char *id);
+void ghcli_print_releases(
+    FILE *,
+    ghcli_release *,
+    int);
+void ghcli_free_releases(
+    ghcli_release *,
+    int);
+void ghcli_create_release(
+    const ghcli_new_release *);
+void ghcli_release_push_asset(
+    ghcli_new_release *,
+    ghcli_release_asset);
+void ghcli_delete_release(
+    const char *owner,
+    const char *repo,
+    const char *id);
 
 #endif /* RELEASES_H */

@@ -1266,7 +1266,9 @@ static struct {
 static int
 subcommand_releases(int argc, char *argv[])
 {
-    int            ch, releases_size;
+    int            ch;
+    int            releases_size;
+    int            count    = 30;
     const char    *owner    = NULL;
     const char    *repo     = NULL;
     ghcli_release *releases = NULL;
@@ -1289,10 +1291,14 @@ subcommand_releases(int argc, char *argv[])
           .has_arg = required_argument,
           .flag    = NULL,
           .val     = 'o' },
+        { .name    = "count",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'n' },
         {0}
     };
 
-    while ((ch = getopt_long(argc, argv, "o:r:", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "n:o:r:", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -1300,6 +1306,12 @@ subcommand_releases(int argc, char *argv[])
         case 'r':
             repo = optarg;
             break;
+        case 'n': {
+            char *endptr = NULL;
+            count        = strtol(optarg, &endptr, 10);
+            if (endptr != (optarg + strlen(optarg)))
+                err(1, "releases: cannot parse release count");
+        } break;
         case '?':
         default:
             usage();
@@ -1311,7 +1323,7 @@ subcommand_releases(int argc, char *argv[])
 
     check_owner_and_repo(&owner, &repo);
 
-    releases_size = ghcli_get_releases(owner, repo, &releases);
+    releases_size = ghcli_get_releases(owner, repo, count, &releases);
     ghcli_print_releases(stdout, releases, releases_size);
     ghcli_free_releases(releases, releases_size);
 

@@ -88,13 +88,18 @@ parse_release(struct json_stream *stream, ghcli_release *out)
 }
 
 int
-ghcli_get_releases(const char *owner, const char *repo, ghcli_release **out)
+ghcli_get_releases(
+    const char     *owner,
+    const char     *repo,
+    int             max,
+    ghcli_release **out)
 {
-    char               *url    = NULL;
-    ghcli_fetch_buffer  buffer = {0};
-    struct json_stream  stream = {0};
-    enum json_type      next   = JSON_NULL;
-    int                 size   = 0;
+    char               *url      = NULL;
+    char               *next_url = NULL;
+    ghcli_fetch_buffer  buffer   = {0};
+    struct json_stream  stream   = {0};
+    enum json_type      next     = JSON_NULL;
+    int                 size     = 0;
 
     *out = NULL;
 
@@ -102,23 +107,29 @@ ghcli_get_releases(const char *owner, const char *repo, ghcli_release **out)
         "https://api.github.com/repos/%s/%s/releases",
         owner, repo);
 
-    ghcli_fetch(url, NULL, &buffer);
+    do {
+        memset(&buffer, 0, sizeof(buffer));
 
-    json_open_buffer(&stream, buffer.data, buffer.length);
-    json_set_streaming(&stream, 1);
+        ghcli_fetch(url, &next_url, &buffer);
 
-    if ((next = json_next(&stream)) != JSON_ARRAY)
-        errx(1, "Expected array of releses");
+        json_open_buffer(&stream, buffer.data, buffer.length);
+        json_set_streaming(&stream, 1);
 
-    while ((next = json_peek(&stream)) == JSON_OBJECT) {
-        *out = realloc(*out, sizeof(**out) * (size + 1));
-        ghcli_release *it = &(*out)[size++];
-        parse_release(&stream, it);
-    }
+        if ((next = json_next(&stream)) != JSON_ARRAY)
+            errx(1, "Expected array of releses");
 
-    json_close(&stream);
-    free(url);
-    free(buffer.data);
+        while ((next = json_peek(&stream)) == JSON_OBJECT) {
+            *out = realloc(*out, sizeof(**out) * (size + 1));
+            ghcli_release *it = &(*out)[size++];
+            parse_release(&stream, it);
+        }
+
+        json_close(&stream);
+        free(url);
+        free(buffer.data);
+    } while ((url = next_url) && (max == -1 || size < max));
+
+    free(next_url);
 
     return size;
 }

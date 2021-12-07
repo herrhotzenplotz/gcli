@@ -43,7 +43,7 @@ struct ghcli_repo {
     bool  is_fork;
 };
 
-int  ghcli_get_repos(const char *owner, ghcli_repo **out);
+int  ghcli_get_repos(const char *owner, int max, ghcli_repo **out);
 int  ghcli_get_own_repos(ghcli_repo **out);
 void ghcli_repos_free(ghcli_repo *, size_t);
 void ghcli_print_repos_table(FILE *, ghcli_repo *, size_t);

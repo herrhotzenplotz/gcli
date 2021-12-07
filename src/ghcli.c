@@ -719,13 +719,17 @@ delete_repo(bool always_yes, const char *owner, const char *repo)
 static int
 subcommand_repos(int argc, char *argv[])
 {
-    int         ch, repos_size;
+    int         ch, repos_size, n = 30;
     const char *owner      = NULL;
     const char *repo       = NULL;
     ghcli_repo *repos      = NULL;
     bool        always_yes = false;
 
     const struct option options[] = {
+        { .name    = "count",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'n' },
         { .name    = "repo",
           .has_arg = required_argument,
           .flag    = NULL,
@@ -741,7 +745,7 @@ subcommand_repos(int argc, char *argv[])
         {0},
     };
 
-    while ((ch = getopt_long(argc, argv, "o:r:y", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "n:o:r:y", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -752,6 +756,12 @@ subcommand_repos(int argc, char *argv[])
         case 'y':
             always_yes = true;
             break;
+        case 'n': {
+            char *endptr = NULL;
+            n = strtol(optarg, &endptr, 10);
+            if (endptr != (optarg + strlen(optarg)))
+                err(1, "repos: cannot parse repo count");
+        } break;
         case '?':
         default:
             usage();
@@ -769,7 +779,7 @@ subcommand_repos(int argc, char *argv[])
         if (!owner)
             repos_size = ghcli_get_own_repos(&repos);
         else
-            repos_size = ghcli_get_repos(owner, &repos);
+            repos_size = ghcli_get_repos(owner, n, &repos);
 
         ghcli_print_repos_table(stdout, repos, (size_t)repos_size);
         ghcli_repos_free(repos, repos_size);

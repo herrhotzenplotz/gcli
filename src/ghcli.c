@@ -439,6 +439,7 @@ subcommand_issues(int argc, char *argv[])
     char        *endptr      = NULL;
     int          ch          = 0;
     int          issue       = -1;
+    int          n           = 30;
     bool         all         = false;
 
     /* detect whether we wanna create an issue */
@@ -464,6 +465,11 @@ subcommand_issues(int argc, char *argv[])
           .has_arg = required_argument,
           .flag    = NULL,
           .val     = 'i' },
+        { .name    = "count",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'n'
+        },
         {0},
     };
 
@@ -484,6 +490,14 @@ subcommand_issues(int argc, char *argv[])
             if (issue < 0)
                 errx(1, "error: issue number is out of range");
         } break;
+        case 'n': {
+            n = strtol(optarg, &endptr, 10);
+            if (endptr != (optarg + strlen(optarg)))
+                err(1, "error: cannot parse issue count");
+
+            if (n < -1)
+                errx(1, "error: issue count is out of range");
+        } break;
         case 'a':
             all = true;
             break;
@@ -501,10 +515,7 @@ subcommand_issues(int argc, char *argv[])
 
     /* No issue number was given, so list all open issues */
     if (issue < 0) {
-        issues_size = ghcli_get_issues(
-            owner, repo,
-            all, all ? -1 : 100,
-            &issues);
+        issues_size = ghcli_get_issues(owner, repo, all, n, &issues);
         ghcli_print_issues_table(stdout, issues, issues_size);
 
         ghcli_issues_free(issues, issues_size);

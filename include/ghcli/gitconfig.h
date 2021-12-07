@@ -34,5 +34,6 @@
 
 void  ghcli_gitconfig_get_repo(const char **owner, const char **repo);
 sn_sv ghcli_gitconfig_get_current_branch(void);
+void  ghcli_gitconfig_add_fork_remote(const char *org, const char *repo);
 
 #endif /* GITCONFIG_H */

@@ -179,6 +179,9 @@ ghcli_get_gists(const char *user, int max, ghcli_gist **out)
             *out = realloc(*out, sizeof(ghcli_gist) * (size + 1));
             ghcli_gist *it = &(*out)[size++];
             parse_gist(&stream, it);
+
+            if (size == max)
+                break;
         }
 
         if ((next = json_next(&stream)) != JSON_ARRAY_END)

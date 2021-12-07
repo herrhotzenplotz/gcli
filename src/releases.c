@@ -120,6 +120,9 @@ ghcli_get_releases(
             *out = realloc(*out, sizeof(**out) * (size + 1));
             ghcli_release *it = &(*out)[size++];
             parse_release(&stream, it);
+
+            if (size == max)
+                break;
         }
 
         json_close(&stream);

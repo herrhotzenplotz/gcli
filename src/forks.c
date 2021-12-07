@@ -112,6 +112,9 @@ ghcli_get_forks(
             *out = realloc(*out, sizeof(ghcli_fork) * (size + 1));
             ghcli_fork *it = &(*out)[size++];
             parse_fork(&stream, it);
+
+            if (size == max)
+                break;
         }
 
         json_close(&stream);

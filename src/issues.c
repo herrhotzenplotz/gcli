@@ -128,7 +128,6 @@ ghcli_get_issues(
         enum json_type next_token = json_next(&stream);
 
         while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
-
             switch (next_token) {
             case JSON_ERROR:
                 errx(1, "Parser error: %s", json_get_error(&stream));
@@ -145,11 +144,14 @@ ghcli_get_issues(
                 break;
             }
 
+            if (count == max)
+                break;
         }
 
         free(json_buffer.data);
         free(url);
         json_close(&stream);
+
     } while ((url = next_url) && (max == -1 || count < max));
     /* continue iterating if we have both a next_url and we are
      * supposed to fetch more issues (either max is -1 thus all issues

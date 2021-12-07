@@ -487,7 +487,7 @@ subcommand_issues(int argc, char *argv[])
     };
 
     /* parse options */
-    while ((ch = getopt_long(argc, argv, "o:r:i:a", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "n:o:r:i:a", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;

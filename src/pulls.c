@@ -159,6 +159,8 @@ ghcli_get_prs(
                 break;
             }
 
+            if (count == max)
+                break;
         }
 
         free(json_buffer.data);

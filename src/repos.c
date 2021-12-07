@@ -119,6 +119,9 @@ ghcli_get_repos(const char *owner, int max, ghcli_repo **out)
             *out = realloc(*out, sizeof(**out) * (size + 1));
             ghcli_repo *it = &(*out)[size++];
             parse_repo(&stream, it);
+
+            if (size == max)
+                break;
         }
 
         free(url);
@@ -212,6 +215,9 @@ ghcli_get_own_repos(int max, ghcli_repo **out)
             *out = realloc(*out, sizeof(**out) * (size + 1));
             ghcli_repo *it = &(*out)[size++];
             parse_repo(&stream, it);
+
+            if (size == max)
+                break;
         }
 
         free(buffer.data);

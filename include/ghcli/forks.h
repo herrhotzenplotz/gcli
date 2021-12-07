@@ -41,9 +41,21 @@ struct ghcli_fork {
     int   forks;
 };
 
-int  ghcli_get_forks(const char *owner, const char *reponame, ghcli_fork **out);
-void ghcli_fork_create(const char *owner, const char *repo, const char *in);
-void ghcli_print_forks(FILE *stream, ghcli_fork *forks, size_t forks_size);
-void ghcli_fork_delete(const char *owner, const char *repo);
+int ghcli_get_forks(
+    const char  *owner,
+    const char  *reponame,
+    int          max,
+    ghcli_fork **out);
+void ghcli_fork_create(
+    const char *owner,
+    const char *repo,
+    const char *in);
+void ghcli_print_forks(
+    FILE       *stream,
+    ghcli_fork *forks,
+    size_t      forks_size);
+void ghcli_fork_delete(
+    const char *owner,
+    const char *repo);
 
 #endif /* FORK_H */

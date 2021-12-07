@@ -994,6 +994,7 @@ subcommand_forks(int argc, char *argv[])
     const char *owner      = NULL, *repo = NULL;
     int         forks_size = 0;
     int         ch         = 0;
+    int         count      = 30;
     bool        always_yes = false;
 
     /* detect whether we wanna create a fork */
@@ -1011,6 +1012,10 @@ subcommand_forks(int argc, char *argv[])
           .has_arg = required_argument,
           .flag    = NULL,
           .val     = 'o' },
+        { .name    = "count",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'n' },
         { .name    = "yes",
           .has_arg = no_argument,
           .flag    = NULL,
@@ -1018,7 +1023,7 @@ subcommand_forks(int argc, char *argv[])
         {0},
     };
 
-    while ((ch = getopt_long(argc, argv, "o:r:y", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "n:o:r:y", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -1029,6 +1034,12 @@ subcommand_forks(int argc, char *argv[])
         case 'y':
             always_yes = true;
             break;
+        case 'n': {
+            char *endptr = NULL;
+            count        = strtol(optarg, &endptr, 10);
+            if (endptr != (optarg + strlen(optarg)))
+                err(1, "forks: unable to parse forks count argument");
+        } break;
         case '?':
         default:
             usage();
@@ -1041,7 +1052,7 @@ subcommand_forks(int argc, char *argv[])
     check_owner_and_repo(&owner, &repo);
 
     if (argc == 0) {
-        forks_size = ghcli_get_forks(owner, repo, &forks);
+        forks_size = ghcli_get_forks(owner, repo, count, &forks);
         ghcli_print_forks(stdout, forks, forks_size);
         return EXIT_SUCCESS;
     }

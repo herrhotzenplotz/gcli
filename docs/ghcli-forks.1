@@ -6,6 +6,7 @@
 .Nd Manage GitHub repositories forks
 .Sh SYNOPSIS
 .Nm
+.Op Fl n Ar n
 .Op Fl y
 .Op Fl o Ar owner Fl r Ar repo
 .Ar actions...
@@ -32,6 +33,14 @@ Do not ask for confirmation. Assume yes.
 .It Fl i , -into Ar target-owner
 When forking a repository, this is the organization or user the
 repository is forked into.
+.It Fl n , -count Ar n
+Fetch at least
+.Ar n
+forks. Setting
+.Ar n
+to -1 will fetch all forks. Default: 30. Note that on repositories
+with many forks fetching all forks can take a considerable amount of
+time and may result in rate limiting by the GitHub API.
 .El
 .El
 .Sh ACTIONS

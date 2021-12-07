@@ -7,6 +7,7 @@
 .Sh SYNOPSIS
 
 .Nm
+.Op Fl n Ar n
 .Op Fl o Ar owner Fl r Ar repo
 
 .Nm
@@ -47,7 +48,14 @@ used in combination with
 List releases in the given repo. This option can only be used in
 combination with
 .Fl r .
-
+.It Fl n , -count Ar n
+Fetch at least
+.Ar n
+releases. Setting
+.Ar n
+to -1 will fetch all releases. Default: 30. Note that on repositories
+with many releases fetching all releases can take a considerable
+amount of time and may result in rate limiting by the GitHub API.
 .El
 
 .Sh SUBCOMMANDS

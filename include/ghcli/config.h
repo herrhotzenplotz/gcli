@@ -34,6 +34,7 @@
 
 void   ghcli_config_init(const char *file_path);
 char  *ghcli_config_get_editor(void);
+char  *ghcli_config_get_apibase(void);
 sn_sv  ghcli_config_get_token(void);
 sn_sv  ghcli_config_get_account(void);
 sn_sv  ghcli_config_get_upstream(void);

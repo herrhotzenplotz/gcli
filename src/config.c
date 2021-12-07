@@ -35,6 +35,7 @@
 
 static struct ghcli_config {
     sn_sv api_token;
+    sn_sv api_base;
     sn_sv editor;
     sn_sv account;
 
@@ -244,6 +245,8 @@ ghcli_config_init(const char *file_path)
 
         if (sn_sv_eq_to(key, "api_token"))
             config.api_token = value;
+        else if (sn_sv_eq_to(key, "api_base"))
+            config.api_base = value;
         else if (sn_sv_eq_to(key, "editor"))
             config.editor = value;
         else if (sn_sv_eq_to(key, "account"))
@@ -267,6 +270,15 @@ ghcli_config_get_editor(void)
         return sn_sv_to_cstr(config.editor);
     else
         return NULL;
+}
+
+char *
+ghcli_config_get_apibase(void)
+{
+    if (config.api_base.length)
+        return sn_sv_to_cstr(config.api_base);
+    else
+        return "https://api.github.com";
 }
 
 sn_sv

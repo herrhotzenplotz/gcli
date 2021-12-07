@@ -28,6 +28,7 @@
  */
 
 #include <ghcli/comments.h>
+#include <ghcli/config.h>
 #include <ghcli/curl.h>
 #include <ghcli/editor.h>
 #include <ghcli/json_util.h>
@@ -47,7 +48,8 @@ perform_submit_comment(
         "{ \"body\": \""SV_FMT"\" }",
         SV_ARGS(opts.message));
     char *url         = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/issues/%d/comments",
+        "%s/repos/%s/%s/issues/%d/comments",
+        ghcli_config_get_apibase(),
         opts.owner, opts.repo, opts.issue);
 
     ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
@@ -146,7 +148,8 @@ void
 ghcli_issue_comments(FILE *stream, const char *owner, const char *repo, int issue)
 {
     const char    *url      = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/issues/%d/comments",
+        "%s/repos/%s/%s/issues/%d/comments",
+        ghcli_config_get_apibase(),
         owner, repo, issue);
     ghcli_comment *comments = NULL;
     int            n        = ghcli_get_comments(url, &comments);

@@ -27,9 +27,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/repos.h>
-
+#include <ghcli/config.h>
 #include <ghcli/json_util.h>
+#include <ghcli/repos.h>
 
 static void
 parse_repo(json_stream *input, ghcli_repo *out)
@@ -92,15 +92,19 @@ ghcli_get_repos(const char *owner, int max, ghcli_repo **out)
     /* Github is a little stupid in that it distinguishes
      * organizations and users. Thus, we have to find out, whether the
      * <org> param is a user or an actual organization. */
-    url = sn_asprintf("https://api.github.com/users/%s", owner);
+    url = sn_asprintf("%s/users/%s", ghcli_config_get_apibase(), owner);
     if (ghcli_curl_test_success(url)) {
         /* it is a user */
         free(url);
-        url = sn_asprintf("https://api.github.com/users/%s/repos", owner);
+        url = sn_asprintf("%s/users/%s/repos",
+                          ghcli_config_get_apibase(),
+                          owner);
     } else {
         /* this is an actual organization */
         free(url);
-        url = sn_asprintf("https://api.github.com/orgs/%s/repos", owner);
+        url = sn_asprintf("%s/orgs/%s/repos",
+                          ghcli_config_get_apibase(),
+                          owner);
     }
 
     do {
@@ -178,7 +182,8 @@ ghcli_repo_delete(const char *owner, const char *repo)
     char               *url    = NULL;
     ghcli_fetch_buffer  buffer = {0};
 
-    url = sn_asprintf("https://api.github.com/repos/%s/%s",
+    url = sn_asprintf("%s/repos/%s/%s",
+                      ghcli_config_get_apibase(),
                       owner, repo);
 
     ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
@@ -190,8 +195,8 @@ ghcli_repo_delete(const char *owner, const char *repo)
 int
 ghcli_get_own_repos(int max, ghcli_repo **out)
 {
-    /* force the url to be heap-allocated */
-    char               *url      = strdup("https://api.github.com/user/repos");
+    char               *url      = sn_asprintf("%s/user/repos",
+                                               ghcli_config_get_apibase());
     char               *next_url = NULL;
     ghcli_fetch_buffer  buffer   = {0};
     struct json_stream  stream   = {0};

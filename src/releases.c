@@ -27,8 +27,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/releases.h>
+#include <ghcli/config.h>
 #include <ghcli/json_util.h>
+#include <ghcli/releases.h>
 #include <pdjson/pdjson.h>
 
 #include <assert.h>
@@ -104,7 +105,8 @@ ghcli_get_releases(
     *out = NULL;
 
     url = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/releases",
+        "%s/repos/%s/%s/releases",
+        ghcli_config_get_apibase(),
         owner, repo);
 
     do {
@@ -247,7 +249,8 @@ ghcli_create_release(const ghcli_new_release *release)
 
     /* https://docs.github.com/en/rest/reference/repos#create-a-release */
     url = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/releases",
+        "%s/repos/%s/%s/releases",
+        ghcli_config_get_apibase(),
         release->owner,
         release->repo);
 
@@ -316,7 +319,8 @@ ghcli_delete_release(const char *owner, const char *repo, const char *id)
     ghcli_fetch_buffer  buffer = {0};
 
     url = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/releases/%s",
+        "%s/repos/%s/%s/releases/%s",
+        ghcli_config_get_apibase(),
         owner, repo, id);
 
     ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);

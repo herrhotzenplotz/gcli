@@ -152,39 +152,44 @@ parse_gist(struct json_stream *stream, ghcli_gist *out)
 }
 
 int
-ghcli_get_gists(const char *user, ghcli_gist **out)
+ghcli_get_gists(const char *user, int max, ghcli_gist **out)
 {
-    char               *url    = NULL;
-    ghcli_fetch_buffer  buffer = {0};
-    struct json_stream  stream = {0};
-    enum   json_type    next   = JSON_NULL;
-    int                 size   = 0;
+    char               *url      = NULL;
+    char               *next_url = NULL;
+    ghcli_fetch_buffer  buffer   = {0};
+    struct json_stream  stream   = {0};
+    enum   json_type    next     = JSON_NULL;
+    int                 size     = 0;
 
     if (user)
         url = sn_asprintf("https://api.github.com/users/%s/gists", user);
     else
         url = sn_asprintf("https://api.github.com/gists");
 
-    ghcli_fetch(url, &buffer);
+    do {
+        ghcli_fetch(url, &next_url, &buffer);
 
-    json_open_buffer(&stream, buffer.data, buffer.length);
-    json_set_streaming(&stream, 1);
+        json_open_buffer(&stream, buffer.data, buffer.length);
+        json_set_streaming(&stream, 1);
 
-    if ((next = json_next(&stream)) != JSON_ARRAY)
-        errx(1, "Expected array in response");
+        if ((next = json_next(&stream)) != JSON_ARRAY)
+            errx(1, "Expected array in response");
 
-    while ((next = json_peek(&stream)) == JSON_OBJECT) {
-        *out = realloc(*out, sizeof(ghcli_gist) * (size + 1));
-        ghcli_gist *it = &(*out)[size++];
-        parse_gist(&stream, it);
-    }
+        while ((next = json_peek(&stream)) == JSON_OBJECT) {
+            *out = realloc(*out, sizeof(ghcli_gist) * (size + 1));
+            ghcli_gist *it = &(*out)[size++];
+            parse_gist(&stream, it);
+        }
 
-    if ((next = json_next(&stream)) != JSON_ARRAY_END)
-        errx(1, "Expected end of array in response");
+        if ((next = json_next(&stream)) != JSON_ARRAY_END)
+            errx(1, "Expected end of array in response");
 
-    json_close(&stream);
-    free(buffer.data);
-    free(url);
+        json_close(&stream);
+        free(buffer.data);
+        free(url);
+    } while ((url = next_url) && (max == -1 || size < max));
+
+    free(next_url);
 
     return size;
 }
@@ -284,7 +289,7 @@ ghcli_get_gist(const char *gist_id)
 
     url = sn_asprintf("https://api.github.com/gists/%s", gist_id);
 
-    ghcli_fetch(url, &buffer);
+    ghcli_fetch(url, NULL, &buffer);
 
     json_open_buffer(&stream, buffer.data, buffer.length);
     json_set_streaming(&stream, 1);
@@ -357,7 +362,7 @@ ghcli_create_gist(ghcli_new_gist opts)
         opts.file_name,
         SV_ARGS(content));
 
-    ghcli_fetch_with_method("POST", url, post_data, &fetch_buffer);
+    ghcli_fetch_with_method("POST", url, post_data, NULL, &fetch_buffer);
     ghcli_print_html_url(fetch_buffer);
 
     free(read_buffer.data);
@@ -379,7 +384,7 @@ ghcli_delete_gist(const char *gist_id, bool always_yes)
     if (!always_yes && !sn_yesno("Are you sure you want to delete this gist?"))
         errx(1, "Aborted by user");
 
-    ghcli_fetch_with_method("DELETE", url, NULL, &buffer);
+    ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
     free(buffer.data);
     free(url);

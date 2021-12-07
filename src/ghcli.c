@@ -330,6 +330,7 @@ subcommand_pulls(int argc, char *argv[])
     int         ch         = 0;
     int         pr         = -1;
     int         pulls_size = 0;
+    int         n          = 30;     /* how many prs to fetch at least */
     bool        all        = false;
 
     /* detect whether we wanna create a PR */
@@ -343,6 +344,10 @@ subcommand_pulls(int argc, char *argv[])
           .has_arg = no_argument,
           .flag    = NULL,
           .val     = 'a' },
+        { .name    = "count",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'n' },
         { .name    = "repo",
           .has_arg = required_argument,
           .flag    = NULL,
@@ -359,7 +364,7 @@ subcommand_pulls(int argc, char *argv[])
     };
 
     /* Parse commandline options */
-    while ((ch = getopt_long(argc, argv, "o:r:p:a", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "n:o:r:p:a", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -374,6 +379,14 @@ subcommand_pulls(int argc, char *argv[])
 
             if (pr <= 0)
                 errx(1, "error: pr number is out of range");
+        } break;
+        case 'n': {
+            n = strtoul(optarg, &endptr, 10);
+            if (endptr != (optarg + strlen(optarg)))
+                err(1, "error: cannot parse pr count »%s«", optarg);
+
+            if (n < -1)
+                errx(1, "error: pr count is out of range");
         } break;
         case 'a': {
             all = true;
@@ -392,7 +405,7 @@ subcommand_pulls(int argc, char *argv[])
     /* In case no explicit PR number was specified, list all
      * open PRs and exit */
     if (pr < 0) {
-        pulls_size = ghcli_get_prs(owner, repo, all, &pulls);
+        pulls_size = ghcli_get_prs(owner, repo, all, n, &pulls);
         ghcli_print_pr_table(stdout, pulls, pulls_size);
 
         ghcli_pulls_free(pulls, pulls_size);
@@ -439,6 +452,7 @@ subcommand_issues(int argc, char *argv[])
     char        *endptr      = NULL;
     int          ch          = 0;
     int          issue       = -1;
+    int          n           = 30;
     bool         all         = false;
 
     /* detect whether we wanna create an issue */
@@ -464,6 +478,11 @@ subcommand_issues(int argc, char *argv[])
           .has_arg = required_argument,
           .flag    = NULL,
           .val     = 'i' },
+        { .name    = "count",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'n'
+        },
         {0},
     };
 
@@ -484,6 +503,14 @@ subcommand_issues(int argc, char *argv[])
             if (issue < 0)
                 errx(1, "error: issue number is out of range");
         } break;
+        case 'n': {
+            n = strtol(optarg, &endptr, 10);
+            if (endptr != (optarg + strlen(optarg)))
+                err(1, "error: cannot parse issue count");
+
+            if (n < -1)
+                errx(1, "error: issue count is out of range");
+        } break;
         case 'a':
             all = true;
             break;
@@ -501,7 +528,7 @@ subcommand_issues(int argc, char *argv[])
 
     /* No issue number was given, so list all open issues */
     if (issue < 0) {
-        issues_size = ghcli_get_issues(owner, repo, all, &issues);
+        issues_size = ghcli_get_issues(owner, repo, all, n, &issues);
         ghcli_print_issues_table(stdout, issues, issues_size);
 
         ghcli_issues_free(issues, issues_size);
@@ -692,13 +719,17 @@ delete_repo(bool always_yes, const char *owner, const char *repo)
 static int
 subcommand_repos(int argc, char *argv[])
 {
-    int         ch, repos_size;
+    int         ch, repos_size, n = 30;
     const char *owner      = NULL;
     const char *repo       = NULL;
     ghcli_repo *repos      = NULL;
     bool        always_yes = false;
 
     const struct option options[] = {
+        { .name    = "count",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'n' },
         { .name    = "repo",
           .has_arg = required_argument,
           .flag    = NULL,
@@ -714,7 +745,7 @@ subcommand_repos(int argc, char *argv[])
         {0},
     };
 
-    while ((ch = getopt_long(argc, argv, "o:r:y", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "n:o:r:y", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -725,6 +756,12 @@ subcommand_repos(int argc, char *argv[])
         case 'y':
             always_yes = true;
             break;
+        case 'n': {
+            char *endptr = NULL;
+            n = strtol(optarg, &endptr, 10);
+            if (endptr != (optarg + strlen(optarg)))
+                err(1, "repos: cannot parse repo count");
+        } break;
         case '?':
         default:
             usage();
@@ -740,9 +777,9 @@ subcommand_repos(int argc, char *argv[])
             errx(1, "repos: no actions specified");
 
         if (!owner)
-            repos_size = ghcli_get_own_repos(&repos);
+            repos_size = ghcli_get_own_repos(n, &repos);
         else
-            repos_size = ghcli_get_repos(owner, &repos);
+            repos_size = ghcli_get_repos(owner, n, &repos);
 
         ghcli_print_repos_table(stdout, repos, (size_t)repos_size);
         ghcli_repos_free(repos, repos_size);
@@ -903,6 +940,7 @@ subcommand_gists(int argc, char *argv[])
     const char *user       = NULL;
     ghcli_gist *gists      = NULL;
     int         gists_size = 0;
+    int         count      = 30;
 
     for (size_t i = 0; i < ARRAY_SIZE(gist_subcommands); ++i) {
         if (argc > 1 && strcmp(argv[1], gist_subcommands[i].name) == 0) {
@@ -917,14 +955,24 @@ subcommand_gists(int argc, char *argv[])
           .has_arg = no_argument,
           .flag    = NULL,
           .val     = 'u' },
+        { .name    = "count",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'n' },
         {0},
     };
 
-    while ((ch = getopt_long(argc, argv, "u:", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "n:u:", options, NULL)) != -1) {
         switch (ch) {
         case 'u':
             user = optarg;
             break;
+        case 'n': {
+            char *endptr = NULL;
+            count        = strtol(optarg, &endptr, 10);
+            if (endptr != (optarg + strlen(optarg)))
+                err(1, "gists: cannot parse gists count");
+        } break;
         case '?':
         default:
             usage();
@@ -934,7 +982,7 @@ subcommand_gists(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    gists_size = ghcli_get_gists(user, &gists);
+    gists_size = ghcli_get_gists(user, count, &gists);
     ghcli_print_gists_table(stdout, gists, gists_size);
     return EXIT_SUCCESS;
 }
@@ -946,6 +994,7 @@ subcommand_forks(int argc, char *argv[])
     const char *owner      = NULL, *repo = NULL;
     int         forks_size = 0;
     int         ch         = 0;
+    int         count      = 30;
     bool        always_yes = false;
 
     /* detect whether we wanna create a fork */
@@ -963,6 +1012,10 @@ subcommand_forks(int argc, char *argv[])
           .has_arg = required_argument,
           .flag    = NULL,
           .val     = 'o' },
+        { .name    = "count",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'n' },
         { .name    = "yes",
           .has_arg = no_argument,
           .flag    = NULL,
@@ -970,7 +1023,7 @@ subcommand_forks(int argc, char *argv[])
         {0},
     };
 
-    while ((ch = getopt_long(argc, argv, "o:r:y", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "n:o:r:y", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -981,6 +1034,12 @@ subcommand_forks(int argc, char *argv[])
         case 'y':
             always_yes = true;
             break;
+        case 'n': {
+            char *endptr = NULL;
+            count        = strtol(optarg, &endptr, 10);
+            if (endptr != (optarg + strlen(optarg)))
+                err(1, "forks: unable to parse forks count argument");
+        } break;
         case '?':
         default:
             usage();
@@ -993,7 +1052,7 @@ subcommand_forks(int argc, char *argv[])
     check_owner_and_repo(&owner, &repo);
 
     if (argc == 0) {
-        forks_size = ghcli_get_forks(owner, repo, &forks);
+        forks_size = ghcli_get_forks(owner, repo, count, &forks);
         ghcli_print_forks(stdout, forks, forks_size);
         return EXIT_SUCCESS;
     }
@@ -1207,7 +1266,9 @@ static struct {
 static int
 subcommand_releases(int argc, char *argv[])
 {
-    int            ch, releases_size;
+    int            ch;
+    int            releases_size;
+    int            count    = 30;
     const char    *owner    = NULL;
     const char    *repo     = NULL;
     ghcli_release *releases = NULL;
@@ -1230,10 +1291,14 @@ subcommand_releases(int argc, char *argv[])
           .has_arg = required_argument,
           .flag    = NULL,
           .val     = 'o' },
+        { .name    = "count",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'n' },
         {0}
     };
 
-    while ((ch = getopt_long(argc, argv, "o:r:", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "n:o:r:", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -1241,6 +1306,12 @@ subcommand_releases(int argc, char *argv[])
         case 'r':
             repo = optarg;
             break;
+        case 'n': {
+            char *endptr = NULL;
+            count        = strtol(optarg, &endptr, 10);
+            if (endptr != (optarg + strlen(optarg)))
+                err(1, "releases: cannot parse release count");
+        } break;
         case '?':
         default:
             usage();
@@ -1252,7 +1323,7 @@ subcommand_releases(int argc, char *argv[])
 
     check_owner_and_repo(&owner, &repo);
 
-    releases_size = ghcli_get_releases(owner, repo, &releases);
+    releases_size = ghcli_get_releases(owner, repo, count, &releases);
     ghcli_print_releases(stdout, releases, releases_size);
     ghcli_free_releases(releases, releases_size);
 

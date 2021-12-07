@@ -70,6 +70,15 @@ Print version and exit.
 .Sh OPTIONS
 Common options across almost all of the subcommands are:
 .Bl -tag -width indent
+.It Fl n , -count Ar n
+Fetch multiple pages of data. The default is usually 30 items, but
+this parameter allows to fetch more than that. Setting
+.Ar n
+to -1 will result in all pages being queried and all items being read.
+However, be careful with that, since if there is a lot of data to be
+fetched, it may result in rate limiting by the Github API, aside from
+the fact that it may also take a considerable amount of time to
+process.
 .It Fl a , -all
 Fetch all data, including closed issues and closed/merged PRs.
 .It Fl y , -yes

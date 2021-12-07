@@ -88,13 +88,18 @@ parse_release(struct json_stream *stream, ghcli_release *out)
 }
 
 int
-ghcli_get_releases(const char *owner, const char *repo, ghcli_release **out)
+ghcli_get_releases(
+    const char     *owner,
+    const char     *repo,
+    int             max,
+    ghcli_release **out)
 {
-    char               *url    = NULL;
-    ghcli_fetch_buffer  buffer = {0};
-    struct json_stream  stream = {0};
-    enum json_type      next   = JSON_NULL;
-    int                 size   = 0;
+    char               *url      = NULL;
+    char               *next_url = NULL;
+    ghcli_fetch_buffer  buffer   = {0};
+    struct json_stream  stream   = {0};
+    enum json_type      next     = JSON_NULL;
+    int                 size     = 0;
 
     *out = NULL;
 
@@ -102,23 +107,27 @@ ghcli_get_releases(const char *owner, const char *repo, ghcli_release **out)
         "https://api.github.com/repos/%s/%s/releases",
         owner, repo);
 
-    ghcli_fetch(url, &buffer);
+    do {
+        ghcli_fetch(url, &next_url, &buffer);
 
-    json_open_buffer(&stream, buffer.data, buffer.length);
-    json_set_streaming(&stream, 1);
+        json_open_buffer(&stream, buffer.data, buffer.length);
+        json_set_streaming(&stream, 1);
 
-    if ((next = json_next(&stream)) != JSON_ARRAY)
-        errx(1, "Expected array of releses");
+        if ((next = json_next(&stream)) != JSON_ARRAY)
+            errx(1, "Expected array of releses");
 
-    while ((next = json_peek(&stream)) == JSON_OBJECT) {
-        *out = realloc(*out, sizeof(**out) * (size + 1));
-        ghcli_release *it = &(*out)[size++];
-        parse_release(&stream, it);
-    }
+        while ((next = json_peek(&stream)) == JSON_OBJECT) {
+            *out = realloc(*out, sizeof(**out) * (size + 1));
+            ghcli_release *it = &(*out)[size++];
+            parse_release(&stream, it);
+        }
 
-    json_close(&stream);
-    free(url);
-    free(buffer.data);
+        json_close(&stream);
+        free(url);
+        free(buffer.data);
+    } while ((url = next_url) && (max == -1 || size < max));
+
+    free(next_url);
 
     return size;
 }
@@ -267,7 +276,7 @@ ghcli_create_release(const ghcli_new_release *release)
         commitish_json ? commitish_json : "",
         name_json ? name_json : "");
 
-    ghcli_fetch_with_method("POST", url, post_data, &buffer);
+    ghcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
     parse_single_release(buffer, &response);
 
     printf("INFO : Release at "SV_FMT"\n", SV_ARGS(response.html_url));
@@ -307,7 +316,7 @@ ghcli_delete_release(const char *owner, const char *repo, const char *id)
         "https://api.github.com/repos/%s/%s/releases/%s",
         owner, repo, id);
 
-    ghcli_fetch_with_method("DELETE", url, NULL, &buffer);
+    ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
     free(url);
     free(buffer.data);

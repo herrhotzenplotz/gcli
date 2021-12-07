@@ -6,6 +6,7 @@
 .Nd Manage GitHub repositories
 .Sh SYNOPSIS
 .Nm
+.Op Fl n Ar n
 .Op Fl o Ar owner
 .Nm
 .Op Fl y
@@ -31,9 +32,17 @@ used in combination with
 .It Fl r , -repo Ar repo
 Operate on the given repository. This option can only be used in
 combination with
-.Fl r o
+.Fl o .
 .It Fl y , -yes
 Do not ask for confirmation. Assume yes.
+.It Fl n , -count Ar n
+Fetch at least
+.Ar n
+repositories. Setting
+.Ar n
+to -1 will fetch all repositories. Default: 30. Note that on owners
+with many repositories fetching all of them can take a considerable
+amount of time and may result in rate limiting by the GitHub API.
 .El
 .El
 .Sh ACTIONS

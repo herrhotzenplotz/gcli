@@ -100,9 +100,12 @@ fetch_write_callback(char *in, size_t size, size_t nmemb, void *data)
 }
 
 void
-ghcli_fetch(const char *url, ghcli_fetch_buffer *out)
+ghcli_fetch(
+    const char *url,
+    char **pagination_next,
+    ghcli_fetch_buffer *out)
 {
-    ghcli_fetch_with_method("GET", url, NULL, out);
+    ghcli_fetch_with_method("GET", url, NULL, pagination_next, out);
 }
 
 bool
@@ -183,16 +186,77 @@ ghcli_curl(FILE *stream, const char *url, const char *content_type)
     curl_slist_free_all(headers);
 }
 
+static size_t
+fetch_header_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
+{
+    char **out = userdata;
+
+    size_t sz          = size * nmemb;
+    sn_sv  buffer      = sn_sv_from_parts(ptr, sz);
+    sn_sv  header_name = sn_sv_chop_until(&buffer, ':');
+
+    /* Despite what the documentation says, this header is called
+     * "link" not "Link". Webdev ftw /sarc */
+    if (sn_sv_eq_to(header_name, "link")) {
+        buffer.data   += 1;
+        buffer.length -= 1;
+        buffer         = sn_sv_trim_front(buffer);
+        *out           = sn_strndup(buffer.data, buffer.length);
+    }
+
+    return sz;
+}
+
+static char *
+parse_link_header(char *_header)
+{
+    sn_sv header = SV(_header);
+    sn_sv entry  = {0};
+
+    /* Iterate through the comma-separated list of link relations */
+    while ((entry = sn_sv_chop_until(&header, ',')).length > 0) {
+        entry = sn_sv_trim(entry);
+
+        /* the entries have semicolon-separated fields like so:
+         * <url>; rel=\"next\"
+         *
+         * This chops off the url and then looks at the rest.
+         *
+         * We're making lots of assumptions about the input data here
+         * without sanity checking it. If it fails, we will know. Most
+         * likely a segfault. */
+        sn_sv almost_url = sn_sv_chop_until(&entry, ';');
+
+        if (sn_sv_eq_to(entry, "; rel=\"next\"")) {
+            /* Skip the triangle brackets around the url */
+            almost_url.data   += 1;
+            almost_url.length -= 2;
+            almost_url         = sn_sv_trim(almost_url);
+            return sn_sv_to_cstr(almost_url);
+        }
+
+        /* skip the comma if we have enough data */
+        if (header.length > 0) {
+            header.length -= 1;
+            header.data   += 1;
+        }
+    }
+
+    return NULL;
+}
+
 void
 ghcli_fetch_with_method(
-    const char *method,
-    const char *url,
-    const char *data,
+    const char  *method,
+    const char  *url,
+    const char  *data,
+    char       **pagination_next,
     ghcli_fetch_buffer *out)
 {
     CURLcode           ret;
     CURL              *session;
     struct curl_slist *headers;
+    char              *link_header = NULL;
 
     const char *auth_header = sn_asprintf(
         "Authorization: token "SV_FMT"",
@@ -203,6 +267,8 @@ ghcli_fetch_with_method(
         headers,
         "Accept: application/vnd.github.v3+json");
     headers = curl_slist_append(headers, auth_header);
+
+    *out = (ghcli_fetch_buffer) {0};
 
     session = curl_easy_init();
 
@@ -218,9 +284,16 @@ ghcli_fetch_with_method(
     curl_easy_setopt(session, CURLOPT_WRITEDATA, out);
     curl_easy_setopt(session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
     curl_easy_setopt(session, CURLOPT_FAILONERROR, 0L);
+    curl_easy_setopt(session, CURLOPT_HEADERFUNCTION, fetch_header_callback);
+    curl_easy_setopt(session, CURLOPT_HEADERDATA, &link_header);
 
     ret = curl_easy_perform(session);
     ghcli_curl_check_api_error(session, ret, url, out);
+
+    if (link_header && pagination_next)
+        *pagination_next = parse_link_header(link_header);
+
+    free(link_header);
 
     curl_easy_cleanup(session);
     session = NULL;

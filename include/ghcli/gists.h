@@ -61,13 +61,20 @@ struct ghcli_new_gist {
     const char *gist_description;
 };
 
-int         ghcli_get_gists(const char *user, ghcli_gist **out);
-ghcli_gist *ghcli_get_gist(const char *gist_id);
-void        ghcli_print_gists_table(
+int ghcli_get_gists(
+    const char *user,
+    int max,
+    ghcli_gist **out);
+ghcli_gist *ghcli_get_gist(
+    const char *gist_id);
+void ghcli_print_gists_table(
     FILE *stream,
     ghcli_gist *gists,
     int gists_size);
-void        ghcli_create_gist(ghcli_new_gist);
-void        ghcli_delete_gist(const char *gist_id, bool always_yes);
+void ghcli_create_gist(
+    ghcli_new_gist);
+void ghcli_delete_gist(
+    const char *gist_id,
+    bool always_yes);
 
 #endif /* GISTS_H */

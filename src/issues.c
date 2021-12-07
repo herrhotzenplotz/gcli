@@ -48,7 +48,7 @@ perform_submit_issue(
         "https://api.github.com/repos/"SV_FMT"/issues",
         SV_ARGS(opts.in));
 
-    ghcli_fetch_with_method("POST", url, post_fields, out);
+    ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
     free(post_fields);
     free(url);
 }
@@ -105,48 +105,57 @@ ghcli_get_issues(
     const char *owner,
     const char *reponame,
     bool all,
+    int  max,
     ghcli_issue **out)
 {
     int                 count       = 0;
     json_stream         stream      = {0};
     ghcli_fetch_buffer  json_buffer = {0};
     char               *url         = NULL;
+    char               *next_url    = NULL;
 
     url = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/issues?per_page=100&state=%s",
+        "https://api.github.com/repos/%s/%s/issues?state=%s",
         owner, reponame,
         all ? "all" : "open");
-    ghcli_fetch(url, &json_buffer);
 
-    free(url);
+    do {
+        ghcli_fetch(url, &next_url, &json_buffer);
 
-    json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-    json_set_streaming(&stream, true);
+        json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+        json_set_streaming(&stream, true);
 
-    enum json_type next_token = json_next(&stream);
+        enum json_type next_token = json_next(&stream);
 
-    while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
+        while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
 
-        switch (next_token) {
-        case JSON_ERROR:
-            errx(1, "Parser error: %s", json_get_error(&stream));
-            break;
-        case JSON_OBJECT: {
-            *out = realloc(*out, sizeof(ghcli_issue) * (count + 1));
-            ghcli_issue *it = &(*out)[count];
-            memset(it, 0, sizeof(ghcli_issue));
-            parse_issue_entry(&stream, it);
-            count += 1;
-        } break;
-        default:
-            errx(1, "Unexpected json type in response");
-            break;
+            switch (next_token) {
+            case JSON_ERROR:
+                errx(1, "Parser error: %s", json_get_error(&stream));
+                break;
+            case JSON_OBJECT: {
+                *out = realloc(*out, sizeof(ghcli_issue) * (count + 1));
+                ghcli_issue *it = &(*out)[count];
+                memset(it, 0, sizeof(ghcli_issue));
+                parse_issue_entry(&stream, it);
+                count += 1;
+            } break;
+            default:
+                errx(1, "Unexpected json type in response");
+                break;
+            }
+
         }
 
-    }
+        free(json_buffer.data);
+        free(url);
+        json_close(&stream);
+    } while ((url = next_url) && (max == -1 || count < max));
+    /* continue iterating if we have both a next_url and we are
+     * supposed to fetch more issues (either max is -1 thus all issues
+     * or we haven't fetched enough yet). */
 
-    free(json_buffer.data);
-    json_close(&stream);
+    free(next_url);
 
     return count;
 }
@@ -285,7 +294,7 @@ ghcli_issue_summary(
         "https://api.github.com/repos/%s/%s/issues/%d?per_page=100",
         owner, repo,
         issue_number);
-    ghcli_fetch(url, &buffer);
+    ghcli_fetch(url, NULL, &buffer);
 
     json_open_buffer(&parser, buffer.data, buffer.length);
     json_set_streaming(&parser, true);
@@ -313,7 +322,7 @@ ghcli_issue_close(const char *owner, const char *repo, int issue_number)
         issue_number);
     data = sn_asprintf("{ \"state\": \"close\"}");
 
-    ghcli_fetch_with_method("PATCH", url, data, &json_buffer);
+    ghcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
 
     free((void *)data);
     free((void *)url);
@@ -333,7 +342,7 @@ ghcli_issue_reopen(const char *owner, const char *repo, int issue_number)
         issue_number);
     data = sn_asprintf("{ \"state\": \"open\"}");
 
-    ghcli_fetch_with_method("PATCH", url, data, &json_buffer);
+    ghcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
 
     free((void *)data);
     free((void *)url);

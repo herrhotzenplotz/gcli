@@ -77,39 +77,49 @@ parse_fork(struct json_stream *input, ghcli_fork *out)
 }
 
 int
-ghcli_get_forks(const char *owner, const char *reponame, ghcli_fork **out)
+ghcli_get_forks(
+    const char  *owner,
+    const char  *reponame,
+    int          max,
+    ghcli_fork **out)
 {
-    ghcli_fetch_buffer  buffer = {0};
-    char               *url    = NULL;
-    enum   json_type    next   = JSON_NULL;
-    struct json_stream  stream = {0};
-    int                 size   = 0;
+    ghcli_fetch_buffer  buffer   = {0};
+    char               *url      = NULL;
+    char               *next_url = NULL;
+    enum   json_type    next     = JSON_NULL;
+    struct json_stream  stream   = {0};
+    int                 size     = 0;
 
     *out = NULL;
 
     url = sn_asprintf(
         "https://api.github.com/repos/%s/%s/forks",
         owner, reponame);
-    ghcli_fetch(url, &buffer);
 
-    free(url);
+    do {
+        ghcli_fetch(url, &next_url, &buffer);
 
-    json_open_buffer(&stream, buffer.data, buffer.length);
-    json_set_streaming(&stream, 1);
+        json_open_buffer(&stream, buffer.data, buffer.length);
+        json_set_streaming(&stream, 1);
 
-    // TODO: Poor error message
-    if ((next = json_next(&stream)) != JSON_ARRAY)
-        errx(1,
-             "Expected array in response from API "
-             "but got something else instead");
+        // TODO: Poor error message
+        if ((next = json_next(&stream)) != JSON_ARRAY)
+            errx(1,
+                 "Expected array in response from API "
+                 "but got something else instead");
 
-    while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
-        *out = realloc(*out, sizeof(ghcli_fork) * (size + 1));
-        ghcli_fork *it = &(*out)[size++];
-        parse_fork(&stream, it);
-    }
+        while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
+            *out = realloc(*out, sizeof(ghcli_fork) * (size + 1));
+            ghcli_fork *it = &(*out)[size++];
+            parse_fork(&stream, it);
+        }
 
-    free(buffer.data);
+        json_close(&stream);
+        free(buffer.data);
+        free(url);
+    } while ((url = next_url) && (max == -1 || size < max));
+
+    free(next_url);
 
     return size;
 }
@@ -151,7 +161,7 @@ ghcli_fork_create(const char *owner, const char *repo, const char *_in)
                                 SV_ARGS(in));
     }
 
-    ghcli_fetch_with_method("POST", url, post_data, &buffer);
+    ghcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
     ghcli_print_html_url(buffer);
 
     free(in.data);

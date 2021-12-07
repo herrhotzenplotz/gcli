@@ -90,7 +90,7 @@ ghcli_review_get_reviews(
     url = sn_asprintf(
         "https://api.github.com/repos/%s/%s/pulls/%d/reviews",
         owner, repo, pr);
-    ghcli_fetch(url, &buffer);
+    ghcli_fetch(url, NULL, &buffer);
 
     json_open_buffer(&stream, buffer.data, buffer.length);
     json_set_streaming(&stream, true);
@@ -244,7 +244,7 @@ ghcli_review_get_review_comments(
     url = sn_asprintf(
         "https://api.github.com/repos/%s/%s/pulls/%d/reviews/%d/comments",
         owner, repo, pr, review_id);
-    ghcli_fetch(url, &buffer);
+    ghcli_fetch(url, NULL, &buffer);
 
     json_open_buffer(&stream, buffer.data, buffer.length);
     json_set_streaming(&stream, true);

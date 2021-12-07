@@ -80,13 +80,14 @@ parse_repo(json_stream *input, ghcli_repo *out)
 }
 
 int
-ghcli_get_repos(const char *owner, ghcli_repo **out)
+ghcli_get_repos(const char *owner, int max, ghcli_repo **out)
 {
-    char               *url    = NULL;
-    ghcli_fetch_buffer  buffer = {0};
-    struct json_stream  stream = {0};
-    enum  json_type     next   = JSON_NULL;
-    int                 size   = 0;
+    char               *url      = NULL;
+    char               *next_url = NULL;
+    ghcli_fetch_buffer  buffer   = {0};
+    struct json_stream  stream   = {0};
+    enum  json_type     next     = JSON_NULL;
+    int                 size     = 0;
 
     /* Github is a little stupid in that it distinguishes
      * organizations and users. Thus, we have to find out, whether the
@@ -102,26 +103,30 @@ ghcli_get_repos(const char *owner, ghcli_repo **out)
         url = sn_asprintf("https://api.github.com/orgs/%s/repos", owner);
     }
 
-    ghcli_fetch(url, &buffer);
+    do {
+        ghcli_fetch(url, &next_url, &buffer);
 
-    json_open_buffer(&stream, buffer.data, buffer.length);
-    json_set_streaming(&stream, 1);
+        json_open_buffer(&stream, buffer.data, buffer.length);
+        json_set_streaming(&stream, 1);
 
-    // TODO: Poor error message
-    if ((next = json_next(&stream)) != JSON_ARRAY)
-        errx(1,
-             "Expected array in response from API "
-             "but got something else instead");
+        // TODO: Poor error message
+        if ((next = json_next(&stream)) != JSON_ARRAY)
+            errx(1,
+                 "Expected array in response from API "
+                 "but got something else instead");
 
-    while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
-        *out = realloc(*out, sizeof(**out) * (size + 1));
-        ghcli_repo *it = &(*out)[size++];
-        parse_repo(&stream, it);
-    }
+        while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
+            *out = realloc(*out, sizeof(**out) * (size + 1));
+            ghcli_repo *it = &(*out)[size++];
+            parse_repo(&stream, it);
+        }
+
+        free(url);
+        free(buffer.data);
+        json_close(&stream);
+    } while ((url = next_url) && (max == -1 || size < max));
 
     free(url);
-    free(buffer.data);
-    json_close(&stream);
 
     return size;
 }
@@ -173,40 +178,48 @@ ghcli_repo_delete(const char *owner, const char *repo)
     url = sn_asprintf("https://api.github.com/repos/%s/%s",
                       owner, repo);
 
-    ghcli_fetch_with_method("DELETE", url, NULL, &buffer);
+    ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
     free(buffer.data);
     free(url);
 }
 
 int
-ghcli_get_own_repos(ghcli_repo **out)
+ghcli_get_own_repos(int max, ghcli_repo **out)
 {
-    const char         *url    = "https://api.github.com/user/repos";
-    ghcli_fetch_buffer  buffer = {0};
-    struct json_stream  stream = {0};
-    enum  json_type     next   = JSON_NULL;
-    int                 size   = 0;
+    /* force the url to be heap-allocated */
+    char               *url      = strdup("https://api.github.com/user/repos");
+    char               *next_url = NULL;
+    ghcli_fetch_buffer  buffer   = {0};
+    struct json_stream  stream   = {0};
+    enum  json_type     next     = JSON_NULL;
+    int                 size     = 0;
 
-    ghcli_fetch(url, &buffer);
+    do {
+        buffer.length = 0;
+        ghcli_fetch(url, &next_url, &buffer);
 
-    json_open_buffer(&stream, buffer.data, buffer.length);
-    json_set_streaming(&stream, 1);
+        json_open_buffer(&stream, buffer.data, buffer.length);
+        json_set_streaming(&stream, 1);
 
-    // TODO: Poor error message
-    if ((next = json_next(&stream)) != JSON_ARRAY)
-        errx(1,
-             "Expected array in response from API "
-             "but got something else instead");
+        // TODO: Poor error message
+        if ((next = json_next(&stream)) != JSON_ARRAY)
+            errx(1,
+                 "Expected array in response from API "
+                 "but got something else instead");
 
-    while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
-        *out = realloc(*out, sizeof(**out) * (size + 1));
-        ghcli_repo *it = &(*out)[size++];
-        parse_repo(&stream, it);
-    }
+        while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
+            *out = realloc(*out, sizeof(**out) * (size + 1));
+            ghcli_repo *it = &(*out)[size++];
+            parse_repo(&stream, it);
+        }
 
-    free(buffer.data);
-    json_close(&stream);
+        free(buffer.data);
+        json_close(&stream);
+        free(url);
+    } while ((url = next_url) && (max == -1 || size < max));
+
+    free(next_url);
 
     return size;
 }

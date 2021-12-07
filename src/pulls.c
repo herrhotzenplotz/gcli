@@ -134,8 +134,6 @@ ghcli_get_prs(
         owner, reponame, all ? "all" : "open");
 
     do {
-        memset(&json_buffer, 0, sizeof(json_buffer));
-
         ghcli_fetch(url, &next_url, &json_buffer);
 
         json_open_buffer(&stream, json_buffer.data, json_buffer.length);

@@ -104,7 +104,6 @@ ghcli_get_repos(const char *owner, int max, ghcli_repo **out)
     }
 
     do {
-        memset(&buffer, 0, sizeof(buffer));
         ghcli_fetch(url, &next_url, &buffer);
 
         json_open_buffer(&stream, buffer.data, buffer.length);
@@ -197,7 +196,7 @@ ghcli_get_own_repos(int max, ghcli_repo **out)
     int                 size     = 0;
 
     do {
-        memset(&buffer, 0, sizeof(buffer));
+        buffer.length = 0;
         ghcli_fetch(url, &next_url, &buffer);
 
         json_open_buffer(&stream, buffer.data, buffer.length);

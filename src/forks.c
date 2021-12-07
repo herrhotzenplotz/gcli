@@ -97,8 +97,6 @@ ghcli_get_forks(
         owner, reponame);
 
     do {
-        memset(&buffer, 0, sizeof(buffer));
-
         ghcli_fetch(url, &next_url, &buffer);
 
         json_open_buffer(&stream, buffer.data, buffer.length);

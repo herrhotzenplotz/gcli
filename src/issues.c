@@ -120,9 +120,7 @@ ghcli_get_issues(
         all ? "all" : "open");
 
     do {
-        next_url = NULL;
         ghcli_fetch(url, &next_url, &json_buffer);
-        free(url);
 
         json_open_buffer(&stream, json_buffer.data, json_buffer.length);
         json_set_streaming(&stream, true);
@@ -150,6 +148,7 @@ ghcli_get_issues(
         }
 
         free(json_buffer.data);
+        free(url);
         json_close(&stream);
     } while ((url = next_url) && (max == -1 || count < max));
     /* continue iterating if we have both a next_url and we are

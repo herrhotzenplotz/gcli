@@ -167,8 +167,6 @@ ghcli_get_gists(const char *user, int max, ghcli_gist **out)
         url = sn_asprintf("https://api.github.com/gists");
 
     do {
-        memset(&buffer, 0, sizeof(buffer));
-
         ghcli_fetch(url, &next_url, &buffer);
 
         json_open_buffer(&stream, buffer.data, buffer.length);

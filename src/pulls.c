@@ -59,7 +59,7 @@ perform_submit_pr(ghcli_submit_pull_options opts, ghcli_fetch_buffer *out)
         "https://api.github.com/repos/"SV_FMT"/pulls",
         SV_ARGS(opts.in));
 
-    ghcli_fetch_with_method("POST", url, post_fields, out);
+    ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
     free(post_fields);
     free(url);
 }
@@ -116,7 +116,11 @@ ghcli_pulls_free(ghcli_pull *it, int n)
 }
 
 int
-ghcli_get_prs(const char *owner, const char *reponame, bool all, ghcli_pull **out)
+ghcli_get_prs(
+    const char *owner,
+    const char *reponame,
+    bool all,
+    ghcli_pull **out)
 {
     int                 count       = 0;
     json_stream         stream      = {0};
@@ -126,7 +130,7 @@ ghcli_get_prs(const char *owner, const char *reponame, bool all, ghcli_pull **ou
     url = sn_asprintf(
         "https://api.github.com/repos/%s/%s/pulls?per_page=100&state=%s",
         owner, reponame, all ? "all" : "open");
-    ghcli_fetch(url, &json_buffer);
+    ghcli_fetch(url, NULL, &json_buffer);
 
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
     json_set_streaming(&stream, true);
@@ -422,7 +426,7 @@ ghcli_get_pull_commits(const char *url, ghcli_commit **out)
     json_stream        stream      = {0};
     ghcli_fetch_buffer json_buffer = {0};
 
-    ghcli_fetch(url, &json_buffer);
+    ghcli_fetch(url, NULL, &json_buffer);
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
     json_set_streaming(&stream, true);
 
@@ -536,7 +540,7 @@ ghcli_pr_summary(
     url = sn_asprintf(
         "https://api.github.com/repos/%s/%s/pulls/%d",
         owner, reponame, pr_number);
-    ghcli_fetch(url, &json_buffer);
+    ghcli_fetch(url, NULL, &json_buffer);
 
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
     json_set_streaming(&stream, true);
@@ -632,7 +636,7 @@ ghcli_pr_merge(FILE *out, const char *owner, const char *reponame, int pr_number
     url = sn_asprintf(
         "https://api.github.com/repos/%s/%s/pulls/%d/merge",
         owner, reponame, pr_number);
-    ghcli_fetch_with_method("PUT", url, data, &json_buffer);
+    ghcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
     json_set_streaming(&stream, true);
 
@@ -671,7 +675,7 @@ ghcli_pr_close(const char *owner, const char *reponame, int pr_number)
         owner, reponame, pr_number);
     data = sn_asprintf("{ \"state\": \"closed\"}");
 
-    ghcli_fetch_with_method("PATCH", url, data, &json_buffer);
+    ghcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
 
     free(json_buffer.data);
     free((void *)url);
@@ -690,7 +694,7 @@ ghcli_pr_reopen(const char *owner, const char *reponame, int pr_number)
         owner, reponame, pr_number);
     data = sn_asprintf("{ \"state\": \"open\"}");
 
-    ghcli_fetch_with_method("PATCH", url, data, &json_buffer);
+    ghcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
 
     free(json_buffer.data);
     free((void *)url);

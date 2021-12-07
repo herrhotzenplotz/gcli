@@ -42,16 +42,18 @@ struct ghcli_fetch_buffer {
 };
 
 void ghcli_fetch(
-    const char *url,
-    ghcli_fetch_buffer *out);
+    const char          *url,
+    char               **pagination_next,
+    ghcli_fetch_buffer  *out);
 void ghcli_curl(
     FILE *stream,
     const char *url,
     const char *content_type);
 void ghcli_fetch_with_method(
-    const char *method,
-    const char *url,
-    const char *data,
+    const char  *method,
+    const char  *url,
+    const char  *data,
+    char       **pagination_next,
     ghcli_fetch_buffer *out);
 void ghcli_post_upload(
     const char         *url,

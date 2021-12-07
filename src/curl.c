@@ -100,9 +100,12 @@ fetch_write_callback(char *in, size_t size, size_t nmemb, void *data)
 }
 
 void
-ghcli_fetch(const char *url, ghcli_fetch_buffer *out)
+ghcli_fetch(
+    const char *url,
+    char **pagination_next,
+    ghcli_fetch_buffer *out)
 {
-    ghcli_fetch_with_method("GET", url, NULL, out);
+    ghcli_fetch_with_method("GET", url, NULL, pagination_next, out);
 }
 
 bool
@@ -231,6 +234,12 @@ parse_link_header(char *_header)
             almost_url         = sn_sv_trim(almost_url);
             return sn_sv_to_cstr(almost_url);
         }
+
+        /* skip the comma if we have enough data */
+        if (header.length > 0) {
+            header.length -= 1;
+            header.data   += 1;
+        }
     }
 
     return NULL;
@@ -238,9 +247,10 @@ parse_link_header(char *_header)
 
 void
 ghcli_fetch_with_method(
-    const char *method,
-    const char *url,
-    const char *data,
+    const char  *method,
+    const char  *url,
+    const char  *data,
+    char       **pagination_next,
     ghcli_fetch_buffer *out)
 {
     CURLcode           ret;
@@ -257,6 +267,8 @@ ghcli_fetch_with_method(
         headers,
         "Accept: application/vnd.github.v3+json");
     headers = curl_slist_append(headers, auth_header);
+
+    *out = (ghcli_fetch_buffer) {0};
 
     session = curl_easy_init();
 
@@ -278,7 +290,10 @@ ghcli_fetch_with_method(
     ret = curl_easy_perform(session);
     ghcli_curl_check_api_error(session, ret, url, out);
 
-    char *foo = parse_link_header(link_header);
+    if (link_header && pagination_next)
+        *pagination_next = parse_link_header(link_header);
+
+    free(link_header);
 
     curl_easy_cleanup(session);
     session = NULL;

@@ -102,7 +102,7 @@ ghcli_get_repos(const char *owner, ghcli_repo **out)
         url = sn_asprintf("https://api.github.com/orgs/%s/repos", owner);
     }
 
-    ghcli_fetch(url, &buffer);
+    ghcli_fetch(url, NULL, &buffer);
 
     json_open_buffer(&stream, buffer.data, buffer.length);
     json_set_streaming(&stream, 1);
@@ -173,7 +173,7 @@ ghcli_repo_delete(const char *owner, const char *repo)
     url = sn_asprintf("https://api.github.com/repos/%s/%s",
                       owner, repo);
 
-    ghcli_fetch_with_method("DELETE", url, NULL, &buffer);
+    ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
     free(buffer.data);
     free(url);
@@ -188,7 +188,7 @@ ghcli_get_own_repos(ghcli_repo **out)
     enum  json_type     next   = JSON_NULL;
     int                 size   = 0;
 
-    ghcli_fetch(url, &buffer);
+    ghcli_fetch(url, NULL, &buffer);
 
     json_open_buffer(&stream, buffer.data, buffer.length);
     json_set_streaming(&stream, 1);

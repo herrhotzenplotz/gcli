@@ -165,7 +165,7 @@ ghcli_get_gists(const char *user, ghcli_gist **out)
     else
         url = sn_asprintf("https://api.github.com/gists");
 
-    ghcli_fetch(url, &buffer);
+    ghcli_fetch(url, NULL, &buffer);
 
     json_open_buffer(&stream, buffer.data, buffer.length);
     json_set_streaming(&stream, 1);
@@ -284,7 +284,7 @@ ghcli_get_gist(const char *gist_id)
 
     url = sn_asprintf("https://api.github.com/gists/%s", gist_id);
 
-    ghcli_fetch(url, &buffer);
+    ghcli_fetch(url, NULL, &buffer);
 
     json_open_buffer(&stream, buffer.data, buffer.length);
     json_set_streaming(&stream, 1);
@@ -357,7 +357,7 @@ ghcli_create_gist(ghcli_new_gist opts)
         opts.file_name,
         SV_ARGS(content));
 
-    ghcli_fetch_with_method("POST", url, post_data, &fetch_buffer);
+    ghcli_fetch_with_method("POST", url, post_data, NULL, &fetch_buffer);
     ghcli_print_html_url(fetch_buffer);
 
     free(read_buffer.data);
@@ -379,7 +379,7 @@ ghcli_delete_gist(const char *gist_id, bool always_yes)
     if (!always_yes && !sn_yesno("Are you sure you want to delete this gist?"))
         errx(1, "Aborted by user");
 
-    ghcli_fetch_with_method("DELETE", url, NULL, &buffer);
+    ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
     free(buffer.data);
     free(url);

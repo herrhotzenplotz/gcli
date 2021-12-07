@@ -50,7 +50,7 @@ perform_submit_comment(
         "https://api.github.com/repos/%s/%s/issues/%d/comments",
         opts.owner, opts.repo, opts.issue);
 
-    ghcli_fetch_with_method("POST", url, post_fields, out);
+    ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
     free(post_fields);
     free(url);
 }
@@ -97,7 +97,7 @@ ghcli_get_comments(const char *url, ghcli_comment **comments)
     json_stream        stream      = {0};
     ghcli_fetch_buffer json_buffer = {0};
 
-    ghcli_fetch(url, &json_buffer);
+    ghcli_fetch(url, NULL, &json_buffer);
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
     json_set_streaming(&stream, true);
 

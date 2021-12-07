@@ -90,7 +90,7 @@ ghcli_get_forks(const char *owner, const char *reponame, ghcli_fork **out)
     url = sn_asprintf(
         "https://api.github.com/repos/%s/%s/forks",
         owner, reponame);
-    ghcli_fetch(url, &buffer);
+    ghcli_fetch(url, NULL, &buffer);
 
     free(url);
 
@@ -151,7 +151,7 @@ ghcli_fork_create(const char *owner, const char *repo, const char *_in)
                                 SV_ARGS(in));
     }
 
-    ghcli_fetch_with_method("POST", url, post_data, &buffer);
+    ghcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
     ghcli_print_html_url(buffer);
 
     free(in.data);

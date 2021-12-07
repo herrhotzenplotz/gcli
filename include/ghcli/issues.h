@@ -70,6 +70,7 @@ int  ghcli_get_issues(
     const char *owner,
     const char *reponame,
     bool all,
+    int max,
     ghcli_issue **out);
 void ghcli_issues_free(
     ghcli_issue *it,

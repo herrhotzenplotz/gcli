@@ -102,7 +102,7 @@ ghcli_get_releases(const char *owner, const char *repo, ghcli_release **out)
         "https://api.github.com/repos/%s/%s/releases",
         owner, repo);
 
-    ghcli_fetch(url, &buffer);
+    ghcli_fetch(url, NULL, &buffer);
 
     json_open_buffer(&stream, buffer.data, buffer.length);
     json_set_streaming(&stream, 1);
@@ -267,7 +267,7 @@ ghcli_create_release(const ghcli_new_release *release)
         commitish_json ? commitish_json : "",
         name_json ? name_json : "");
 
-    ghcli_fetch_with_method("POST", url, post_data, &buffer);
+    ghcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
     parse_single_release(buffer, &response);
 
     printf("INFO : Release at "SV_FMT"\n", SV_ARGS(response.html_url));
@@ -307,7 +307,7 @@ ghcli_delete_release(const char *owner, const char *repo, const char *id)
         "https://api.github.com/repos/%s/%s/releases/%s",
         owner, repo, id);
 
-    ghcli_fetch_with_method("DELETE", url, NULL, &buffer);
+    ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
     free(url);
     free(buffer.data);

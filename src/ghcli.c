@@ -501,7 +501,10 @@ subcommand_issues(int argc, char *argv[])
 
     /* No issue number was given, so list all open issues */
     if (issue < 0) {
-        issues_size = ghcli_get_issues(owner, repo, all, &issues);
+        issues_size = ghcli_get_issues(
+            owner, repo,
+            all, all ? -1 : 100,
+            &issues);
         ghcli_print_issues_table(stdout, issues, issues_size);
 
         ghcli_issues_free(issues, issues_size);

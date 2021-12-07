@@ -71,11 +71,8 @@ ghcli_editor_get_user_message(
     pid_t pid = fork();
     if (pid == 0) {
 
-        char *const argp[] = { (char *const)editor, filename, NULL };
-        char *const envp[] = { NULL };
-
-        if (execve(editor, argp, envp) < 0)
-            err(1, "execve");
+        if (execlp(editor, editor, filename, NULL) < 0)
+            err(1, "execlp");
     } else {
         int status;
         if (waitpid(pid, &status, 0) < 0)

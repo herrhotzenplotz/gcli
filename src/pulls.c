@@ -120,46 +120,55 @@ ghcli_get_prs(
     const char *owner,
     const char *reponame,
     bool all,
+    int max,
     ghcli_pull **out)
 {
     int                 count       = 0;
     json_stream         stream      = {0};
     ghcli_fetch_buffer  json_buffer = {0};
     char               *url         = NULL;
+    char               *next_url    = NULL;
 
     url = sn_asprintf(
-        "https://api.github.com/repos/%s/%s/pulls?per_page=100&state=%s",
+        "https://api.github.com/repos/%s/%s/pulls?state=%s",
         owner, reponame, all ? "all" : "open");
-    ghcli_fetch(url, NULL, &json_buffer);
 
-    json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-    json_set_streaming(&stream, true);
+    do {
+        memset(&json_buffer, 0, sizeof(json_buffer));
 
-    enum json_type next_token = json_next(&stream);
+        ghcli_fetch(url, &next_url, &json_buffer);
 
-    while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
+        json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+        json_set_streaming(&stream, true);
 
-        switch (next_token) {
-        case JSON_ERROR:
-            errx(1, "Parser error: %s", json_get_error(&stream));
-            break;
-        case JSON_OBJECT: {
-            *out = realloc(*out, sizeof(ghcli_pull) * (count + 1));
-            ghcli_pull *it = &(*out)[count];
-            memset(it, 0, sizeof(ghcli_pull));
-            parse_pull_entry(&stream, it);
-            count += 1;
-        } break;
-        default:
-            errx(1, "Unexpected json type in response");
-            break;
+        enum json_type next_token = json_next(&stream);
+
+        while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
+
+            switch (next_token) {
+            case JSON_ERROR:
+                errx(1, "Parser error: %s", json_get_error(&stream));
+                break;
+            case JSON_OBJECT: {
+                *out = realloc(*out, sizeof(ghcli_pull) * (count + 1));
+                ghcli_pull *it = &(*out)[count];
+                memset(it, 0, sizeof(ghcli_pull));
+                parse_pull_entry(&stream, it);
+                count += 1;
+            } break;
+            default:
+                errx(1, "Unexpected json type in response");
+                break;
+            }
+
         }
 
-    }
+        free(json_buffer.data);
+        free(url);
+        json_close(&stream);
+    } while ((url = next_url) && (max == -1 || count < max));
 
-    free(json_buffer.data);
     free(url);
-    json_close(&stream);
 
     return count;
 }

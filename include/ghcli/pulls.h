@@ -69,15 +69,45 @@ struct ghcli_submit_pull_options {
     bool  always_yes;
 };
 
-int  ghcli_get_prs(const char *owner, const char *reponame, bool all, ghcli_pull **out);
-void ghcli_pulls_free(ghcli_pull *it, int n);
-void ghcli_pulls_summary_free(ghcli_pull_summary *it);
-void ghcli_print_pr_table(FILE *stream, ghcli_pull *pulls, int pulls_size);
-void ghcli_print_pr_diff(FILE *stream, const char *owner, const char *reponame, int pr_number);
-void ghcli_pr_summary(FILE *stream, const char *owner, const char *reponame, int pr_number);
-void ghcli_pr_submit(ghcli_submit_pull_options);
-void ghcli_pr_merge(FILE *stream, const char *owner, const char *reponame, int pr_number);
-void ghcli_pr_close(const char *owner, const char *reponame, int pr_number);
-void ghcli_pr_reopen(const char *owner, const char *reponame, int pr_number);
+int ghcli_get_prs(
+    const char  *owner,
+    const char  *reponame,
+    bool         all,
+    int          max,
+    ghcli_pull **out);
+void ghcli_pulls_free(
+    ghcli_pull *it,
+    int         n);
+void ghcli_pulls_summary_free(
+    ghcli_pull_summary *it);
+void ghcli_print_pr_table(
+    FILE       *stream,
+    ghcli_pull *pulls,
+    int         pulls_size);
+void ghcli_print_pr_diff(
+    FILE       *stream,
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
+void ghcli_pr_summary(
+    FILE       *stream,
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
+void ghcli_pr_submit(
+    ghcli_submit_pull_options);
+void ghcli_pr_merge(
+    FILE       *stream,
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
+void ghcli_pr_close(
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
+void ghcli_pr_reopen(
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
 
 #endif /* PULLS_H */

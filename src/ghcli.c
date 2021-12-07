@@ -330,6 +330,7 @@ subcommand_pulls(int argc, char *argv[])
     int         ch         = 0;
     int         pr         = -1;
     int         pulls_size = 0;
+    int         n          = 30;     /* how many prs to fetch at least */
     bool        all        = false;
 
     /* detect whether we wanna create a PR */
@@ -343,6 +344,10 @@ subcommand_pulls(int argc, char *argv[])
           .has_arg = no_argument,
           .flag    = NULL,
           .val     = 'a' },
+        { .name    = "count",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'n' },
         { .name    = "repo",
           .has_arg = required_argument,
           .flag    = NULL,
@@ -359,7 +364,7 @@ subcommand_pulls(int argc, char *argv[])
     };
 
     /* Parse commandline options */
-    while ((ch = getopt_long(argc, argv, "o:r:p:a", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "n:o:r:p:a", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -374,6 +379,14 @@ subcommand_pulls(int argc, char *argv[])
 
             if (pr <= 0)
                 errx(1, "error: pr number is out of range");
+        } break;
+        case 'n': {
+            n = strtoul(optarg, &endptr, 10);
+            if (endptr != (optarg + strlen(optarg)))
+                err(1, "error: cannot parse pr count »%s«", optarg);
+
+            if (n < -1)
+                errx(1, "error: pr count is out of range");
         } break;
         case 'a': {
             all = true;
@@ -392,7 +405,7 @@ subcommand_pulls(int argc, char *argv[])
     /* In case no explicit PR number was specified, list all
      * open PRs and exit */
     if (pr < 0) {
-        pulls_size = ghcli_get_prs(owner, repo, all, &pulls);
+        pulls_size = ghcli_get_prs(owner, repo, all, n, &pulls);
         ghcli_print_pr_table(stdout, pulls, pulls_size);
 
         ghcli_pulls_free(pulls, pulls_size);

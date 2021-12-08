@@ -56,6 +56,8 @@ struct ghcli_issue_details {
     sn_sv   body;
     sn_sv  *labels;
     size_t  labels_size;
+    sn_sv  *assignees;
+    size_t  assignees_size;
 };
 
 struct ghcli_submit_issue_options {

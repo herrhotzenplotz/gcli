@@ -184,6 +184,25 @@ ghcli_print_issues_table(FILE *stream, ghcli_issue *issues, int issues_size)
     }
 }
 
+static size_t
+read_user_list(json_stream *input, sn_sv **out)
+{
+    size_t n = 0;
+
+    if (json_next(input) != JSON_ARRAY)
+        errx(1, "Expected array for assignee list");
+
+    while (json_peek(input) == JSON_OBJECT) {
+        *out = realloc(*out, sizeof(**out) * (n + 1));
+        (*out)[n++] = get_user_sv(input);
+    }
+
+    if (json_next(input) != JSON_ARRAY_END)
+        errx(1, "Expected end of array for assignee list");
+
+    return n;
+}
+
 static void
 ghcli_parse_issue_details(json_stream *input, ghcli_issue_details *out)
 {
@@ -214,6 +233,8 @@ ghcli_parse_issue_details(json_stream *input, ghcli_issue_details *out)
             out->locked = get_bool(input);
         else if (strncmp("labels", key, len) == 0)
             out->labels_size = ghcli_read_label_list(input, &out->labels);
+        else if (strncmp("assignees", key, len) == 0)
+            out->assignees_size = read_user_list(input, &out->assignees);
         else {
             value_type = json_next(input);
 
@@ -259,7 +280,16 @@ ghcli_print_issue_summary(FILE *out, ghcli_issue_details *it)
     } else {
         fprintf(out, "none");
     }
-    fputs("\n\n", out);
+
+    fputc('\n', out);
+
+    if (it->assignees_size) {
+        fprintf(out, "ASSIGNEES : "SV_FMT, SV_ARGS(it->assignees[0]));
+        for (size_t i = 1; i < it->assignees_size; ++i)
+            fprintf(out, ", "SV_FMT, SV_ARGS(it->assignees[i]));
+    }
+
+    fputc('\n', out);
 
     /* The API may not return a body if the user didn't put in any
      * comment */

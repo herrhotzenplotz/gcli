@@ -1024,12 +1024,13 @@ subcommand_gists(int argc, char *argv[])
 static int
 subcommand_forks(int argc, char *argv[])
 {
-    ghcli_fork *forks      = NULL;
-    const char *owner      = NULL, *repo = NULL;
-    int         forks_size = 0;
-    int         ch         = 0;
-    int         count      = 30;
-    bool        always_yes = false;
+    ghcli_fork              *forks      = NULL;
+    const char              *owner      = NULL, *repo = NULL;
+    int                      forks_size = 0;
+    int                      ch         = 0;
+    int                      count      = 30;
+    bool                     always_yes = false;
+    enum ghcli_output_order  order      = OUTPUT_ORDER_UNSORTED;
 
     /* detect whether we wanna create a fork */
     if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
@@ -1054,10 +1055,14 @@ subcommand_forks(int argc, char *argv[])
           .has_arg = no_argument,
           .flag    = NULL,
           .val     = 'y' },
+        { .name    = "sorted",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 's' },
         {0},
     };
 
-    while ((ch = getopt_long(argc, argv, "n:o:r:y", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "n:o:r:ys", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -1074,6 +1079,9 @@ subcommand_forks(int argc, char *argv[])
             if (endptr != (optarg + strlen(optarg)))
                 err(1, "forks: unable to parse forks count argument");
         } break;
+        case 's':
+            order = OUTPUT_ORDER_SORTED;
+            break;
         case '?':
         default:
             usage();
@@ -1087,7 +1095,7 @@ subcommand_forks(int argc, char *argv[])
 
     if (argc == 0) {
         forks_size = ghcli_get_forks(owner, repo, count, &forks);
-        ghcli_print_forks(stdout, forks, forks_size);
+        ghcli_print_forks(stdout, order, forks, forks_size);
         return EXIT_SUCCESS;
     }
 

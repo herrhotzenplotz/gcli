@@ -31,6 +31,7 @@
 #define FORK_H
 
 #include <sn/sn.h>
+#include <ghcli/ghcli.h>
 
 typedef struct ghcli_fork ghcli_fork;
 
@@ -51,9 +52,10 @@ void ghcli_fork_create(
     const char *repo,
     const char *in);
 void ghcli_print_forks(
-    FILE       *stream,
-    ghcli_fork *forks,
-    size_t      forks_size);
+    FILE                    *stream,
+    enum ghcli_output_order  order,
+    ghcli_fork              *forks,
+    size_t                   forks_size);
 void ghcli_fork_delete(
     const char *owner,
     const char *repo);

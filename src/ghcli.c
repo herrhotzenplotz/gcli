@@ -1324,12 +1324,13 @@ static struct {
 static int
 subcommand_releases(int argc, char *argv[])
 {
-    int            ch;
-    int            releases_size;
-    int            count    = 30;
-    const char    *owner    = NULL;
-    const char    *repo     = NULL;
-    ghcli_release *releases = NULL;
+    int                      ch;
+    int                      releases_size;
+    int                      count    = 30;
+    const char              *owner    = NULL;
+    const char              *repo     = NULL;
+    ghcli_release           *releases = NULL;
+    enum ghcli_output_order  order    = OUTPUT_ORDER_UNSORTED;
 
     if (argc > 1) {
         for (size_t i = 0; i < ARRAY_SIZE(releases_subcommands); ++i) {
@@ -1353,10 +1354,14 @@ subcommand_releases(int argc, char *argv[])
           .has_arg = required_argument,
           .flag    = NULL,
           .val     = 'n' },
+        { .name    = "sorted",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 's' },
         {0}
     };
 
-    while ((ch = getopt_long(argc, argv, "n:o:r:", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "sn:o:r:", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -1370,6 +1375,9 @@ subcommand_releases(int argc, char *argv[])
             if (endptr != (optarg + strlen(optarg)))
                 err(1, "releases: cannot parse release count");
         } break;
+        case 's':
+            order = OUTPUT_ORDER_SORTED;
+            break;
         case '?':
         default:
             usage();
@@ -1382,7 +1390,7 @@ subcommand_releases(int argc, char *argv[])
     check_owner_and_repo(&owner, &repo);
 
     releases_size = ghcli_get_releases(owner, repo, count, &releases);
-    ghcli_print_releases(stdout, releases, releases_size);
+    ghcli_print_releases(stdout, order, releases, releases_size);
     ghcli_free_releases(releases, releases_size);
 
     return EXIT_SUCCESS;

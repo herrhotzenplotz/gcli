@@ -137,15 +137,9 @@ ghcli_get_releases(
     return size;
 }
 
-void
-ghcli_print_releases(FILE *stream, ghcli_release *releases, int releases_size)
+static void
+ghcli_print_release(FILE *stream, ghcli_release *it)
 {
-    if (releases_size == 0) {
-        fprintf(stream, "No releases\n");
-        return;
-    }
-
-    for (int i = 0; i < releases_size; ++i) {
         fprintf(stream,
                 "        ID : %d\n"
                 "      NAME : "SV_FMT"\n"
@@ -155,17 +149,37 @@ ghcli_print_releases(FILE *stream, ghcli_release *releases, int releases_size)
                 "PRERELEASE : %s\n"
                 "   TARBALL : "SV_FMT"\n"
                 "      BODY :\n",
-                releases[i].id,
-                SV_ARGS(releases[i].name),
-                SV_ARGS(releases[i].author),
-                SV_ARGS(releases[i].date),
-                sn_bool_yesno(releases[i].draft),
-                sn_bool_yesno(releases[i].prerelease),
-                SV_ARGS(releases[i].tarball_url));
+                it->id,
+                SV_ARGS(it->name),
+                SV_ARGS(it->author),
+                SV_ARGS(it->date),
+                sn_bool_yesno(it->draft),
+                sn_bool_yesno(it->prerelease),
+                SV_ARGS(it->tarball_url));
 
-        pretty_print(releases[i].body.data, 13, 80, stream);
+        pretty_print(it->body.data, 13, 80, stream);
 
         fputc('\n', stream);
+}
+
+void
+ghcli_print_releases(
+    FILE                    *stream,
+    enum ghcli_output_order  order,
+    ghcli_release           *releases,
+    int                      releases_size)
+{
+    if (releases_size == 0) {
+        fprintf(stream, "No releases\n");
+        return;
+    }
+
+    if (order == OUTPUT_ORDER_SORTED) {
+        for (int i = releases_size; i > 0; --i)
+            ghcli_print_release(stream, &releases[i - 1]);
+    } else {
+        for (int i = 0; i < releases_size; ++i)
+            ghcli_print_release(stream, &releases[i]);
     }
 }
 

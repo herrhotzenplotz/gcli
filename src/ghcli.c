@@ -331,15 +331,16 @@ subcommand_comment(int argc, char *argv[])
 static int
 subcommand_pulls(int argc, char *argv[])
 {
-    char       *endptr     = NULL;
-    const char *owner      = NULL;
-    const char *repo       = NULL;
-    ghcli_pull *pulls      = NULL;
-    int         ch         = 0;
-    int         pr         = -1;
-    int         pulls_size = 0;
-    int         n          = 30;     /* how many prs to fetch at least */
-    bool        all        = false;
+    char                    *endptr     = NULL;
+    const char              *owner      = NULL;
+    const char              *repo       = NULL;
+    ghcli_pull              *pulls      = NULL;
+    int                      ch         = 0;
+    int                      pr         = -1;
+    int                      pulls_size = 0;
+    int                      n          = 30; /* how many prs to fetch at least */
+    bool                     all        = false;
+    enum ghcli_output_order  order      = OUTPUT_ORDER_UNSORTED;
 
     /* detect whether we wanna create a PR */
     if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
@@ -352,6 +353,10 @@ subcommand_pulls(int argc, char *argv[])
           .has_arg = no_argument,
           .flag    = NULL,
           .val     = 'a' },
+        { .name    = "sorted",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 's' },
         { .name    = "count",
           .has_arg = required_argument,
           .flag    = NULL,
@@ -372,7 +377,7 @@ subcommand_pulls(int argc, char *argv[])
     };
 
     /* Parse commandline options */
-    while ((ch = getopt_long(argc, argv, "n:o:r:p:a", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "n:o:r:p:as", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -399,6 +404,9 @@ subcommand_pulls(int argc, char *argv[])
         case 'a': {
             all = true;
         } break;
+        case 's': {
+            order = OUTPUT_ORDER_SORTED;
+        } break;
         case '?':
         default:
             usage();
@@ -414,7 +422,7 @@ subcommand_pulls(int argc, char *argv[])
      * open PRs and exit */
     if (pr < 0) {
         pulls_size = ghcli_get_prs(owner, repo, all, n, &pulls);
-        ghcli_print_pr_table(stdout, pulls, pulls_size);
+        ghcli_print_pr_table(stdout, order, pulls, pulls_size);
 
         ghcli_pulls_free(pulls, pulls_size);
         free(pulls);

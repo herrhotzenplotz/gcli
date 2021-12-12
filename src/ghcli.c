@@ -978,11 +978,11 @@ subcommand_gists(int argc, char *argv[])
 
     const struct option options[] = {
         { .name    = "user",
-          .has_arg = no_argument,
+          .has_arg = required_argument,
           .flag    = NULL,
           .val     = 'u' },
         { .name    = "count",
-          .has_arg = no_argument,
+          .has_arg = required_argument,
           .flag    = NULL,
           .val     = 'n' },
         {0},

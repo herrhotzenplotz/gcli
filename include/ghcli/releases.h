@@ -31,6 +31,7 @@
 #define RELEASES_H
 
 #include <sn/sn.h>
+#include <ghcli/ghcli.h>
 
 typedef struct ghcli_release       ghcli_release;
 typedef struct ghcli_new_release   ghcli_new_release;
@@ -75,9 +76,10 @@ int ghcli_get_releases(
     int             max,
     ghcli_release **out);
 void ghcli_print_releases(
-    FILE *,
-    ghcli_release *,
-    int);
+    FILE                    *stream,
+    enum ghcli_output_order  order,
+    ghcli_release           *releases,
+    int                      releases_size);
 void ghcli_free_releases(
     ghcli_release *,
     int);

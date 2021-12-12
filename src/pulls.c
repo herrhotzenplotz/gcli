@@ -176,7 +176,11 @@ ghcli_get_prs(
 }
 
 void
-ghcli_print_pr_table(FILE *stream, ghcli_pull *pulls, int pulls_size)
+ghcli_print_pr_table(
+    FILE                    *stream,
+    enum ghcli_output_order  order,
+    ghcli_pull              *pulls,
+    int                      pulls_size)
 {
     if (pulls_size == 0) {
         fprintf(stream, "No Pull Requests\n");
@@ -188,11 +192,24 @@ ghcli_print_pr_table(FILE *stream, ghcli_pull *pulls, int pulls_size)
         "%-6.6s  %6.6s  %6.6s  %20.20s  %-s\n",
         "NUMBER", "STATE", "MERGED", "CREATOR", "TITLE");
 
-    for (int i = 0; i < pulls_size; ++i) {
-        fprintf(stream, "%6d  %6.6s  %6.6s  %20.20s  %-s\n",
-                pulls[i].number, pulls[i].state,
-                sn_bool_yesno(pulls[i].merged),
-                pulls[i].creator, pulls[i].title);
+    if (order == OUTPUT_ORDER_SORTED) {
+        for (int i = pulls_size; i > 0; --i) {
+            fprintf(stream, "%6d  %6.6s  %6.6s  %20.20s  %-s\n",
+                    pulls[i - 1].number,
+                    pulls[i - 1].state,
+                    sn_bool_yesno(pulls[i - 1].merged),
+                    pulls[i - 1].creator,
+                    pulls[i - 1].title);
+        }
+    } else {
+        for (int i = 0; i < pulls_size; ++i) {
+            fprintf(stream, "%6d  %6.6s  %6.6s  %20.20s  %-s\n",
+                    pulls[i].number,
+                    pulls[i].state,
+                    sn_bool_yesno(pulls[i].merged),
+                    pulls[i].creator,
+                    pulls[i].title);
+        }
     }
 }
 

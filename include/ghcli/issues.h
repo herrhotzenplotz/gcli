@@ -31,6 +31,7 @@
 #define ISSUES_H
 
 #include <sn/sn.h>
+#include <ghcli/ghcli.h>
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -68,25 +69,25 @@ struct ghcli_submit_issue_options {
     bool  always_yes;
 };
 
-
 int  ghcli_get_issues(
-    const char *owner,
-    const char *reponame,
-    bool all,
-    int max,
+    const char   *owner,
+    const char   *reponame,
+    bool          all,
+    int           max,
     ghcli_issue **out);
 void ghcli_issues_free(
     ghcli_issue *it,
-    int size);
+    int          size);
 void ghcli_print_issues_table(
-    FILE *stream,
-    ghcli_issue *issues,
-    int issues_size);
+    FILE                    *stream,
+    enum ghcli_output_order  order,
+    ghcli_issue             *issues,
+    int                      issues_size);
 void ghcli_issue_summary(
-    FILE *stream,
+    FILE       *stream,
     const char *owner,
     const char *reponame,
-    int issue_number);
+    int         issue_number);
 void ghcli_issue_close(
     const char *owner,
     const char *repo,
@@ -94,7 +95,7 @@ void ghcli_issue_close(
 void ghcli_issue_reopen(
     const char *owner,
     const char *repo,
-    int issue_number);
+    int         issue_number);
 void ghcli_issue_submit(ghcli_submit_issue_options);
 
 #endif /* ISSUES_H */

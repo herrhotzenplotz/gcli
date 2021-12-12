@@ -130,7 +130,11 @@ ghcli_get_forks(
 }
 
 void
-ghcli_print_forks(FILE *stream, ghcli_fork *forks, size_t forks_size)
+ghcli_print_forks(
+    FILE                    *stream,
+    enum ghcli_output_order  order,
+    ghcli_fork              *forks,
+    size_t                   forks_size)
 {
     if (forks_size == 0) {
         fprintf(stream, "No forks\n");
@@ -141,13 +145,25 @@ ghcli_print_forks(FILE *stream, ghcli_fork *forks, size_t forks_size)
         stream,
         "%-20.20s  %-20.20s  %-5.5s  %s\n",
         "OWNER", "DATE", "FORKS", "FULLNAME");
-    for (size_t i = 0; i < forks_size; ++i) {
-        fprintf(
-            stream, "%-20.20s  %-20.20s  %5d  %s\n",
-            forks[i].owner.data,
-            forks[i].date.data,
-            forks[i].forks,
-            forks[i].full_name.data);
+
+    if (order == OUTPUT_ORDER_SORTED) {
+        for (size_t i = forks_size; i > 0; --i) {
+            fprintf(
+                stream, "%-20.20s  %-20.20s  %5d  %s\n",
+                forks[i - 1].owner.data,
+                forks[i - 1].date.data,
+                forks[i - 1].forks,
+                forks[i - 1].full_name.data);
+        }
+    } else {
+        for (size_t i = 0; i < forks_size; ++i) {
+            fprintf(
+                stream, "%-20.20s  %-20.20s  %5d  %s\n",
+                forks[i].owner.data,
+                forks[i].date.data,
+                forks[i].forks,
+                forks[i].full_name.data);
+        }
     }
 }
 

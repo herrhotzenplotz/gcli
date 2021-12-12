@@ -6,6 +6,7 @@
 .Nd manage Github Gists
 .Sh SYNOPSIS
 .Nm
+.Op Fl s
 .Op Fl n Ar n
 .Op Fl u Ar user
 .Nm
@@ -30,6 +31,8 @@ Without a subcommand specified,
 will list Gists of the given or autodetected user account.
 .Sh OPTIONS
 .Bl -tag -width indent
+.It Fl s , -sorted
+Reverse the output such that most recent items appear at the bottom.
 .It Fl u , -user Ar owner
 List Gists of the given user.
 .It Fl n , -count Ar n

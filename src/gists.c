@@ -273,16 +273,28 @@ print_gist(FILE *stream, ghcli_gist *gist)
 }
 
 void
-ghcli_print_gists_table(FILE *stream, ghcli_gist *gists, int gists_size)
+ghcli_print_gists_table(
+    FILE                    *stream,
+    enum ghcli_output_order  order,
+    ghcli_gist              *gists,
+    int                      gists_size)
 {
     if (gists_size == 0) {
         fprintf(stream, "No Gists\n");
         return;
     }
 
-    for (int i = 0; i < gists_size; ++i) {
-        print_gist(stream, &gists[i]);
-        fputc('\n', stream);
+    /* output in reverse order if the sorted flag was enabled */
+    if (order == OUTPUT_ORDER_SORTED) {
+        for (int i = gists_size; i > 0; --i) {
+            print_gist(stream, &gists[i - 1]);
+            fputc('\n', stream);
+        }
+    } else {
+        for (int i = 0; i < gists_size; ++i) {
+            print_gist(stream, &gists[i]);
+            fputc('\n', stream);
+        }
     }
 }
 

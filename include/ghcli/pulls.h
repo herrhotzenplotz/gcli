@@ -34,6 +34,7 @@
 #include <stdbool.h>
 
 #include <sn/sn.h>
+#include <ghcli/ghcli.h>
 
 typedef struct ghcli_pull                ghcli_pull;
 typedef struct ghcli_submit_pull_options ghcli_submit_pull_options;
@@ -81,9 +82,10 @@ void ghcli_pulls_free(
 void ghcli_pulls_summary_free(
     ghcli_pull_summary *it);
 void ghcli_print_pr_table(
-    FILE       *stream,
-    ghcli_pull *pulls,
-    int         pulls_size);
+    FILE                    *stream,
+    enum ghcli_output_order  order,
+    ghcli_pull              *pulls,
+    int                      pulls_size);
 void ghcli_print_pr_diff(
     FILE       *stream,
     const char *owner,

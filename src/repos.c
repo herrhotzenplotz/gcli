@@ -138,8 +138,24 @@ ghcli_get_repos(const char *owner, int max, ghcli_repo **out)
     return size;
 }
 
+static void
+ghcli_print_repo(FILE *stream, ghcli_repo *repo)
+{
+    fprintf(
+        stream,
+        "%-4.4s  %-10.10s  %-16.16s  %-s\n",
+        sn_bool_yesno(repo->is_fork),
+        repo->visibility.data,
+        repo->date.data,
+        repo->full_name.data);
+}
+
 void
-ghcli_print_repos_table(FILE *stream, ghcli_repo *repos, size_t repos_size)
+ghcli_print_repos_table(
+    FILE                    *stream,
+    enum ghcli_output_order  order,
+    ghcli_repo              *repos,
+    size_t                   repos_size)
 {
     if (repos_size == 0) {
         fprintf(stream, "No repos\n");
@@ -151,14 +167,12 @@ ghcli_print_repos_table(FILE *stream, ghcli_repo *repos, size_t repos_size)
         "%-4.4s  %-10.10s  %-16.16s  %-s\n",
         "FORK", "VISBLTY", "DATE", "FULLNAME");
 
-    for (size_t i = 0; i < repos_size; ++i) {
-        fprintf(
-            stream,
-            "%-4.4s  %-10.10s  %-16.16s  %-s\n",
-            sn_bool_yesno(repos[i].is_fork),
-            repos[i].visibility.data,
-            repos[i].date.data,
-            repos[i].full_name.data);
+    if (order == OUTPUT_ORDER_SORTED) {
+        for (size_t i = repos_size; i > 0; --i)
+            ghcli_print_repo(stream, &repos[i - 1]);
+    } else {
+        for (size_t i = 0; i < repos_size; ++i)
+            ghcli_print_repo(stream, &repos[i]);
     }
 }
 

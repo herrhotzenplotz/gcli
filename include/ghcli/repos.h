@@ -31,6 +31,7 @@
 #define REPOS_H
 
 #include <sn/sn.h>
+#include <ghcli/ghcli.h>
 
 typedef struct ghcli_repo ghcli_repo;
 
@@ -46,7 +47,11 @@ struct ghcli_repo {
 int  ghcli_get_repos(const char *owner, int max, ghcli_repo **out);
 int  ghcli_get_own_repos(int max, ghcli_repo **out);
 void ghcli_repos_free(ghcli_repo *, size_t);
-void ghcli_print_repos_table(FILE *, ghcli_repo *, size_t);
+void ghcli_print_repos_table(
+    FILE                    *stream,
+    enum ghcli_output_order  order,
+    ghcli_repo              *repos,
+    size_t                   repos_size);
 void ghcli_repo_delete(const char *owner, const char *repo);
 
 #endif /* REPOS_H */

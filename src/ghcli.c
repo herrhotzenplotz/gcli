@@ -967,6 +967,7 @@ subcommand_gists(int argc, char *argv[])
     ghcli_gist *gists      = NULL;
     int         gists_size = 0;
     int         count      = 30;
+    bool        sorted     = false;
 
     for (size_t i = 0; i < ARRAY_SIZE(gist_subcommands); ++i) {
         if (argc > 1 && strcmp(argv[1], gist_subcommands[i].name) == 0) {
@@ -985,6 +986,10 @@ subcommand_gists(int argc, char *argv[])
           .has_arg = required_argument,
           .flag    = NULL,
           .val     = 'n' },
+        { .name    = "sorted",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 's' },
         {0},
     };
 
@@ -999,6 +1004,9 @@ subcommand_gists(int argc, char *argv[])
             if (endptr != (optarg + strlen(optarg)))
                 err(1, "gists: cannot parse gists count");
         } break;
+        case 's':
+            sorted = true;
+            break;
         case '?':
         default:
             usage();
@@ -1009,7 +1017,7 @@ subcommand_gists(int argc, char *argv[])
     argv += optind;
 
     gists_size = ghcli_get_gists(user, count, &gists);
-    ghcli_print_gists_table(stdout, gists, gists_size);
+    ghcli_print_gists_table(stdout, sorted, gists, gists_size);
     return EXIT_SUCCESS;
 }
 

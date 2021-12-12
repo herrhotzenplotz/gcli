@@ -68,13 +68,14 @@ int ghcli_get_gists(
 ghcli_gist *ghcli_get_gist(
     const char *gist_id);
 void ghcli_print_gists_table(
-    FILE *stream,
+    FILE       *stream,
+    bool        sorted,
     ghcli_gist *gists,
-    int gists_size);
+    int         gists_size);
 void ghcli_create_gist(
     ghcli_new_gist);
 void ghcli_delete_gist(
     const char *gist_id,
-    bool always_yes);
+    bool        always_yes);
 
 #endif /* GISTS_H */

@@ -453,15 +453,16 @@ subcommand_pulls(int argc, char *argv[])
 static int
 subcommand_issues(int argc, char *argv[])
 {
-    ghcli_issue *issues      = NULL;
-    int          issues_size = 0;
-    const char  *owner       = NULL;
-    const char  *repo        = NULL;
-    char        *endptr      = NULL;
-    int          ch          = 0;
-    int          issue       = -1;
-    int          n           = 30;
-    bool         all         = false;
+    ghcli_issue             *issues      = NULL;
+    int                      issues_size = 0;
+    const char              *owner       = NULL;
+    const char              *repo        = NULL;
+    char                    *endptr      = NULL;
+    int                      ch          = 0;
+    int                      issue       = -1;
+    int                      n           = 30;
+    bool                     all         = false;
+    enum ghcli_output_order  order       = OUTPUT_ORDER_UNSORTED;
 
     /* detect whether we wanna create an issue */
     if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
@@ -474,6 +475,10 @@ subcommand_issues(int argc, char *argv[])
           .has_arg = no_argument,
           .flag    = NULL,
           .val     = 'a' },
+        { .name    = "sorted",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 's' },
         { .name    = "repo",
           .has_arg = required_argument,
           .flag    = NULL,
@@ -495,7 +500,7 @@ subcommand_issues(int argc, char *argv[])
     };
 
     /* parse options */
-    while ((ch = getopt_long(argc, argv, "n:o:r:i:a", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "sn:o:r:i:a", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -522,6 +527,9 @@ subcommand_issues(int argc, char *argv[])
         case 'a':
             all = true;
             break;
+        case 's':
+            order = OUTPUT_ORDER_SORTED;
+            break;
         case '?':
         default:
             usage();
@@ -537,7 +545,7 @@ subcommand_issues(int argc, char *argv[])
     /* No issue number was given, so list all open issues */
     if (issue < 0) {
         issues_size = ghcli_get_issues(owner, repo, all, n, &issues);
-        ghcli_print_issues_table(stdout, issues, issues_size);
+        ghcli_print_issues_table(stdout, order, issues, issues_size);
 
         ghcli_issues_free(issues, issues_size);
         return EXIT_SUCCESS;

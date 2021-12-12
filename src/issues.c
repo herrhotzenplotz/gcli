@@ -167,7 +167,11 @@ ghcli_get_issues(
 }
 
 void
-ghcli_print_issues_table(FILE *stream, ghcli_issue *issues, int issues_size)
+ghcli_print_issues_table(
+    FILE                    *stream,
+    enum ghcli_output_order  order,
+    ghcli_issue             *issues,
+    int                      issues_size)
 {
     if (issues_size == 0) {
         fprintf(stream, "No issues\n");
@@ -175,12 +179,23 @@ ghcli_print_issues_table(FILE *stream, ghcli_issue *issues, int issues_size)
     }
 
     fprintf(stream, "%6.6s  %7.7s  %-s\n", "NUMBER", "STATE", "TITLE");
-    for (int i = 0; i < issues_size; ++i) {
-        fprintf(
-            stream, "%6d  %7.7s  %-s\n",
-            issues[i].number,
-            issues[i].state,
-            issues[i].title);
+
+    if (order == OUTPUT_ORDER_SORTED) {
+        for (int i = issues_size; i > 0; --i) {
+            fprintf(
+                stream, "%6d  %7.7s  %-s\n",
+                issues[i - 1].number,
+                issues[i - 1].state,
+                issues[i - 1].title);
+        }
+    } else {
+        for (int i = 0; i < issues_size; ++i) {
+            fprintf(
+                stream, "%6d  %7.7s  %-s\n",
+                issues[i].number,
+                issues[i].state,
+                issues[i].title);
+        }
     }
 }
 

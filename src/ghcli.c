@@ -761,11 +761,12 @@ delete_repo(bool always_yes, const char *owner, const char *repo)
 static int
 subcommand_repos(int argc, char *argv[])
 {
-    int         ch, repos_size, n = 30;
-    const char *owner      = NULL;
-    const char *repo       = NULL;
-    ghcli_repo *repos      = NULL;
-    bool        always_yes = false;
+    int                      ch, repos_size, n = 30;
+    const char              *owner             = NULL;
+    const char              *repo              = NULL;
+    ghcli_repo              *repos             = NULL;
+    bool                     always_yes        = false;
+    enum ghcli_output_order  order             = OUTPUT_ORDER_UNSORTED;
 
     const struct option options[] = {
         { .name    = "count",
@@ -784,10 +785,14 @@ subcommand_repos(int argc, char *argv[])
           .has_arg = no_argument,
           .flag    = NULL,
           .val     = 'y' },
+        { .name    = "sorted",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 's' },
         {0},
     };
 
-    while ((ch = getopt_long(argc, argv, "n:o:r:y", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "n:o:r:ys", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -797,6 +802,9 @@ subcommand_repos(int argc, char *argv[])
             break;
         case 'y':
             always_yes = true;
+            break;
+        case 's':
+            order = OUTPUT_ORDER_SORTED;
             break;
         case 'n': {
             char *endptr = NULL;
@@ -823,7 +831,7 @@ subcommand_repos(int argc, char *argv[])
         else
             repos_size = ghcli_get_repos(owner, n, &repos);
 
-        ghcli_print_repos_table(stdout, repos, (size_t)repos_size);
+        ghcli_print_repos_table(stdout, order, repos, (size_t)repos_size);
         ghcli_repos_free(repos, repos_size);
     } else {
         check_owner_and_repo(&owner, &repo);

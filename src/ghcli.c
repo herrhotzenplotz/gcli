@@ -962,12 +962,12 @@ static struct {
 static int
 subcommand_gists(int argc, char *argv[])
 {
-    int         ch;
-    const char *user       = NULL;
-    ghcli_gist *gists      = NULL;
-    int         gists_size = 0;
-    int         count      = 30;
-    bool        sorted     = false;
+    int                      ch;
+    const char              *user       = NULL;
+    ghcli_gist              *gists      = NULL;
+    int                      gists_size = 0;
+    int                      count      = 30;
+    enum ghcli_output_order  order      = OUTPUT_ORDER_UNSORTED;
 
     for (size_t i = 0; i < ARRAY_SIZE(gist_subcommands); ++i) {
         if (argc > 1 && strcmp(argv[1], gist_subcommands[i].name) == 0) {
@@ -993,7 +993,7 @@ subcommand_gists(int argc, char *argv[])
         {0},
     };
 
-    while ((ch = getopt_long(argc, argv, "n:u:", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "sn:u:", options, NULL)) != -1) {
         switch (ch) {
         case 'u':
             user = optarg;
@@ -1005,7 +1005,7 @@ subcommand_gists(int argc, char *argv[])
                 err(1, "gists: cannot parse gists count");
         } break;
         case 's':
-            sorted = true;
+            order = OUTPUT_ORDER_SORTED;
             break;
         case '?':
         default:
@@ -1017,7 +1017,7 @@ subcommand_gists(int argc, char *argv[])
     argv += optind;
 
     gists_size = ghcli_get_gists(user, count, &gists);
-    ghcli_print_gists_table(stdout, sorted, gists, gists_size);
+    ghcli_print_gists_table(stdout, order, gists, gists_size);
     return EXIT_SUCCESS;
 }
 

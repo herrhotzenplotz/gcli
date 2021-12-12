@@ -274,10 +274,10 @@ print_gist(FILE *stream, ghcli_gist *gist)
 
 void
 ghcli_print_gists_table(
-    FILE       *stream,
-    bool        sorted,
-    ghcli_gist *gists,
-    int         gists_size)
+    FILE                    *stream,
+    enum ghcli_output_order  order,
+    ghcli_gist              *gists,
+    int                      gists_size)
 {
     if (gists_size == 0) {
         fprintf(stream, "No Gists\n");
@@ -285,7 +285,7 @@ ghcli_print_gists_table(
     }
 
     /* output in reverse order if the sorted flag was enabled */
-    if (sorted) {
+    if (order == OUTPUT_ORDER_SORTED) {
         for (int i = gists_size; i > 0; --i) {
             print_gist(stream, &gists[i - 1]);
             fputc('\n', stream);

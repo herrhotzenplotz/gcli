@@ -7,6 +7,7 @@
 .Sh SYNOPSIS
 .Nm
 .Op Fl a
+.Op Fl s
 .Op Fl n Ar n
 .Op Fl o Ar owner Fl r Ar repo
 .Op Ar actions...
@@ -23,6 +24,8 @@ GitHub. Without any action specified,
 will list open PRs in the given or autodetected repository.
 .Sh OPTIONS
 .Bl -tag -width indent
+.It Fl s , -sorted
+Reverse the output such that most recent items appear at the bottom.
 .It Fl o , -owner Ar owner
 List PRs in the repository of the given owner. This option can only
 be used in combination with

@@ -8,6 +8,7 @@
 .Nm
 .Op Fl n Ar n
 .Op Fl y
+.Op Fl s
 .Op Fl o Ar owner Fl r Ar repo
 .Ar actions...
 .Nm
@@ -30,6 +31,8 @@ combination with
 .Fl r o
 .It Fl y , -yes
 Do not ask for confirmation. Assume yes.
+.It Fl s , -sorted
+Reverse the output such that most recent items appear at the bottom.
 .It Fl i , -into Ar target-owner
 When forking a repository, this is the organization or user the
 repository is forked into.

@@ -8,3 +8,6 @@
 /include/ghcli/github/repos.h~
 /src/github/repos.c~
 /src/github/repos.o
+/include/ghcli/github/comments.h~
+/src/github/comments.c~
+/src/github/comments.o

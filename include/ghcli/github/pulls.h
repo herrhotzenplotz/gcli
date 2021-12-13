@@ -39,4 +39,26 @@ int github_get_prs(
     int          max,
     ghcli_pull **out);
 
+void github_print_pr_diff(
+    FILE       *stream,
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
+
+void github_pr_merge(
+    FILE       *out,
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
+
+void github_pr_reopen(
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
+
+void github_pr_close(
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
+
 #endif /* GITHUB_PULLS_H */

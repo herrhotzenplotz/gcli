@@ -133,3 +133,106 @@ github_get_prs(
 
     return count;
 }
+
+void
+github_print_pr_diff(
+    FILE       *stream,
+    const char *owner,
+    const char *reponame,
+    int         pr_number)
+{
+    char *url = NULL;
+    url = sn_asprintf(
+        "%s/repos/%s/%s/pulls/%d",
+        ghcli_config_get_apibase(),
+        owner, reponame, pr_number);
+    ghcli_curl(stream, url, "Accept: application/vnd.github.v3.diff");
+    free(url);
+}
+
+void
+github_pr_merge(
+    FILE       *out,
+    const char *owner,
+    const char *reponame,
+    int         pr_number)
+{
+    json_stream         stream      = {0};
+    ghcli_fetch_buffer  json_buffer = {0};
+    char               *url         = NULL;
+    const char         *data        = "{}";
+    enum json_type      next;
+    size_t              len;
+    const char         *message;
+    const char         *key;
+
+    url = sn_asprintf(
+        "%s/repos/%s/%s/pulls/%d/merge",
+        ghcli_config_get_apibase(),
+        owner, reponame, pr_number);
+    ghcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
+    json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+    json_set_streaming(&stream, true);
+
+    next = json_next(&stream);
+
+    while ((next = json_next(&stream)) == JSON_STRING) {
+        key = json_get_string(&stream, &len);
+
+        if (strncmp(key, "message", len) == 0) {
+
+            next = json_next(&stream);
+            message  = json_get_string(&stream, &len);
+
+            fprintf(out, "%.*s\n", (int)len, message);
+
+            json_close(&stream);
+            free(json_buffer.data);
+            free(url);
+
+            return;
+        } else {
+            next = json_next(&stream);
+        }
+    }
+}
+
+void
+github_pr_close(const char *owner, const char *reponame, int pr_number)
+{
+    ghcli_fetch_buffer  json_buffer = {0};
+    const char         *url         = NULL;
+    const char         *data        = NULL;
+
+    url  = sn_asprintf(
+        "%s/repos/%s/%s/pulls/%d",
+        ghcli_config_get_apibase(),
+        owner, reponame, pr_number);
+    data = sn_asprintf("{ \"state\": \"closed\"}");
+
+    ghcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
+
+    free(json_buffer.data);
+    free((void *)url);
+    free((void *)data);
+}
+
+void
+github_pr_reopen(const char *owner, const char *reponame, int pr_number)
+{
+    ghcli_fetch_buffer  json_buffer = {0};
+    const char         *url         = NULL;
+    const char         *data        = NULL;
+
+    url  = sn_asprintf(
+        "%s/repos/%s/%s/pulls/%d",
+        ghcli_config_get_apibase(),
+        owner, reponame, pr_number);
+    data = sn_asprintf("{ \"state\": \"open\"}");
+
+    ghcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
+
+    free(json_buffer.data);
+    free((void *)url);
+    free((void *)data);
+}

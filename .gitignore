@@ -11,3 +11,6 @@
 /include/ghcli/github/comments.h~
 /src/github/comments.c~
 /src/github/comments.o
+/include/ghcli/github/forks.h~
+/src/github/forks.c~
+/src/github/forks.o

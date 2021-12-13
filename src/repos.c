@@ -30,113 +30,21 @@
 #include <ghcli/config.h>
 #include <ghcli/json_util.h>
 #include <ghcli/repos.h>
-
-static void
-parse_repo(json_stream *input, ghcli_repo *out)
-{
-    enum json_type  next       = JSON_NULL;
-    enum json_type  key_type   = JSON_NULL;
-    enum json_type  value_type = JSON_NULL;
-    const char     *key        = NULL;
-
-    if ((next = json_next(input)) != JSON_OBJECT)
-        errx(1, "Expected an object for a repo");
-
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t len;
-        key = json_get_string(input, &len);
-
-        if (strncmp("full_name", key, len) == 0) {
-            out->full_name = get_sv(input);
-        } else if (strncmp("name", key, len) == 0) {
-            out->name = get_sv(input);
-        } else if (strncmp("owner", key, len) == 0) {
-            char *user = get_user(input);
-            out->owner = SV(user);
-        } else if (strncmp("created_at", key, len) == 0) {
-            out->date = get_sv(input);
-        } else if (strncmp("visibility", key, len) == 0) {
-            out->visibility = get_sv(input);
-        } else if (strncmp("fork", key, len) == 0) {
-            out->is_fork = get_bool(input);
-        } else {
-            value_type = json_next(input);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(input, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(input, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
-    }
-
-    if (key_type != JSON_OBJECT_END)
-        errx(1, "Repo object not closed");
-}
+#include <ghcli/github/repos.h>
 
 int
 ghcli_get_repos(const char *owner, int max, ghcli_repo **out)
 {
-    char               *url      = NULL;
-    char               *next_url = NULL;
-    ghcli_fetch_buffer  buffer   = {0};
-    struct json_stream  stream   = {0};
-    enum  json_type     next     = JSON_NULL;
-    int                 size     = 0;
-
-    /* Github is a little stupid in that it distinguishes
-     * organizations and users. Thus, we have to find out, whether the
-     * <org> param is a user or an actual organization. */
-    url = sn_asprintf("%s/users/%s", ghcli_config_get_apibase(), owner);
-    if (ghcli_curl_test_success(url)) {
-        /* it is a user */
-        free(url);
-        url = sn_asprintf("%s/users/%s/repos",
-                          ghcli_config_get_apibase(),
-                          owner);
-    } else {
-        /* this is an actual organization */
-        free(url);
-        url = sn_asprintf("%s/orgs/%s/repos",
-                          ghcli_config_get_apibase(),
-                          owner);
+    switch (ghcli_config_get_forge_type()) {
+    case GHCLI_FORGE_GITHUB:
+        return github_get_repos(owner, max, out);
+    default:
+        sn_unimplemented;
     }
 
-    do {
-        ghcli_fetch(url, &next_url, &buffer);
-
-        json_open_buffer(&stream, buffer.data, buffer.length);
-        json_set_streaming(&stream, 1);
-
-        // TODO: Poor error message
-        if ((next = json_next(&stream)) != JSON_ARRAY)
-            errx(1,
-                 "Expected array in response from API "
-                 "but got something else instead");
-
-        while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
-            *out = realloc(*out, sizeof(**out) * (size + 1));
-            ghcli_repo *it = &(*out)[size++];
-            parse_repo(&stream, it);
-
-            if (size == max)
-                break;
-        }
-
-        free(url);
-        free(buffer.data);
-        json_close(&stream);
-    } while ((url = next_url) && (max == -1 || size < max));
-
-    free(url);
-
-    return size;
+    return -1;
 }
+
 
 static void
 ghcli_print_repo(FILE *stream, ghcli_repo *repo)
@@ -190,61 +98,27 @@ ghcli_repos_free(ghcli_repo *repos, size_t repos_size)
     free(repos);
 }
 
-void
-ghcli_repo_delete(const char *owner, const char *repo)
-{
-    char               *url    = NULL;
-    ghcli_fetch_buffer  buffer = {0};
-
-    url = sn_asprintf("%s/repos/%s/%s",
-                      ghcli_config_get_apibase(),
-                      owner, repo);
-
-    ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
-
-    free(buffer.data);
-    free(url);
-}
-
 int
 ghcli_get_own_repos(int max, ghcli_repo **out)
 {
-    char               *url      = sn_asprintf("%s/user/repos",
-                                               ghcli_config_get_apibase());
-    char               *next_url = NULL;
-    ghcli_fetch_buffer  buffer   = {0};
-    struct json_stream  stream   = {0};
-    enum  json_type     next     = JSON_NULL;
-    int                 size     = 0;
+    switch (ghcli_config_get_forge_type()) {
+    case GHCLI_FORGE_GITHUB:
+        return github_get_own_repos(max, out);
+    default:
+        sn_unimplemented;
+    }
 
-    do {
-        buffer.length = 0;
-        ghcli_fetch(url, &next_url, &buffer);
+    return -1;
+}
 
-        json_open_buffer(&stream, buffer.data, buffer.length);
-        json_set_streaming(&stream, 1);
-
-        // TODO: Poor error message
-        if ((next = json_next(&stream)) != JSON_ARRAY)
-            errx(1,
-                 "Expected array in response from API "
-                 "but got something else instead");
-
-        while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
-            *out = realloc(*out, sizeof(**out) * (size + 1));
-            ghcli_repo *it = &(*out)[size++];
-            parse_repo(&stream, it);
-
-            if (size == max)
-                break;
-        }
-
-        free(buffer.data);
-        json_close(&stream);
-        free(url);
-    } while ((url = next_url) && (max == -1 || size < max));
-
-    free(next_url);
-
-    return size;
+void
+ghcli_repo_delete(const char *owner, const char *repo)
+{
+    switch (ghcli_config_get_forge_type()) {
+    case GHCLI_FORGE_GITHUB:
+        github_repo_delete(owner, repo);
+        break;
+    default:
+        sn_unimplemented;
+    }
 }

@@ -319,3 +319,9 @@ ghcli_config_get_base(void)
 
     return local_config.base;
 }
+
+ghcli_forge_type
+ghcli_config_get_forge_type(void)
+{
+    return GHCLI_FORGE_GITHUB;
+}

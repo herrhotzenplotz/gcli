@@ -5,3 +5,6 @@
 /thirdparty/sn/sn.o
 /TAGS
 *.d
+/include/ghcli/github/repos.h~
+/src/github/repos.c~
+/src/github/repos.o

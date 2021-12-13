@@ -14,3 +14,6 @@
 /include/ghcli/github/forks.h~
 /src/github/forks.c~
 /src/github/forks.o
+/include/ghcli/github/pulls.h~
+/src/github/pulls.c~
+/src/github/pulls.o

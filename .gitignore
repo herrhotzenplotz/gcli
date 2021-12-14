@@ -17,3 +17,6 @@
 /include/ghcli/github/pulls.h~
 /src/github/pulls.c~
 /src/github/pulls.o
+/include/ghcli/github/issues.h~
+/src/github/issues.c~
+/src/github/issues.o

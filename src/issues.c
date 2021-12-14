@@ -32,6 +32,7 @@
 #include <ghcli/config.h>
 #include <ghcli/curl.h>
 #include <ghcli/editor.h>
+#include <ghcli/github/issues.h>
 #include <ghcli/issues.h>
 #include <ghcli/json_util.h>
 #include <pdjson/pdjson.h>
@@ -42,53 +43,13 @@ perform_submit_issue(
     ghcli_submit_issue_options  opts,
     ghcli_fetch_buffer         *out)
 {
-    char *post_fields = sn_asprintf(
-        "{ \"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
-        SV_ARGS(opts.title), SV_ARGS(opts.body));
-    char *url         = sn_asprintf(
-        "%s/repos/"SV_FMT"/"SV_FMT"/issues",
-        ghcli_config_get_apibase(),
-        SV_ARGS(opts.owner),
-        SV_ARGS(opts.repo));
-
-    ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
-    free(post_fields);
-    free(url);
-}
-
-static void
-parse_issue_entry(json_stream *input, ghcli_issue *it)
-{
-    if (json_next(input) != JSON_OBJECT)
-        errx(1, "Expected Issue Object");
-
-    while (json_next(input) == JSON_STRING) {
-        size_t          len        = 0;
-        const char     *key        = json_get_string(input, &len);
-        enum json_type  value_type = 0;
-
-        if (strncmp("title", key, len) == 0) {
-            it->title = get_string(input);
-        } else if (strncmp("state", key, len) == 0) {
-            it->state = get_string(input);
-        } else if (strncmp("number", key, len) == 0) {
-            it->number = get_int(input);
-        } else if (strncmp("id", key, len) == 0) {
-            it->id = get_int(input);
-        } else {
-            value_type = json_next(input);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(input, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(input, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+    switch (ghcli_config_get_forge_type()) {
+    case GHCLI_FORGE_GITHUB:
+        github_perform_submit_issue(opts, out);
+        break;
+    default:
+        sn_unimplemented;
+        break;
     }
 }
 
@@ -105,65 +66,19 @@ ghcli_issues_free(ghcli_issue *it, int size)
 
 int
 ghcli_get_issues(
-    const char *owner,
-    const char *reponame,
-    bool all,
-    int  max,
+    const char   *owner,
+    const char   *repo,
+    bool          all,
+    int           max,
     ghcli_issue **out)
 {
-    int                 count       = 0;
-    json_stream         stream      = {0};
-    ghcli_fetch_buffer  json_buffer = {0};
-    char               *url         = NULL;
-    char               *next_url    = NULL;
-
-    url = sn_asprintf(
-        "%s/repos/%s/%s/issues?state=%s",
-        ghcli_config_get_apibase(),
-        owner, reponame,
-        all ? "all" : "open");
-
-    do {
-        ghcli_fetch(url, &next_url, &json_buffer);
-
-        json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-        json_set_streaming(&stream, true);
-
-        enum json_type next_token = json_next(&stream);
-
-        while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
-            switch (next_token) {
-            case JSON_ERROR:
-                errx(1, "Parser error: %s", json_get_error(&stream));
-                break;
-            case JSON_OBJECT: {
-                *out = realloc(*out, sizeof(ghcli_issue) * (count + 1));
-                ghcli_issue *it = &(*out)[count];
-                memset(it, 0, sizeof(ghcli_issue));
-                parse_issue_entry(&stream, it);
-                count += 1;
-            } break;
-            default:
-                errx(1, "Unexpected json type in response");
-                break;
-            }
-
-            if (count == max)
-                break;
-        }
-
-        free(json_buffer.data);
-        free(url);
-        json_close(&stream);
-
-    } while ((url = next_url) && (max == -1 || count < max));
-    /* continue iterating if we have both a next_url and we are
-     * supposed to fetch more issues (either max is -1 thus all issues
-     * or we haven't fetched enough yet). */
-
-    free(next_url);
-
-    return count;
+    switch (ghcli_config_get_forge_type()) {
+    case GHCLI_FORGE_GITHUB:
+        return github_get_issues(owner, repo, all, max, out);
+    default:
+        sn_unimplemented;
+    }
+    return -1;
 }
 
 void
@@ -197,77 +112,6 @@ ghcli_print_issues_table(
                 issues[i].title);
         }
     }
-}
-
-static size_t
-read_user_list(json_stream *input, sn_sv **out)
-{
-    size_t n = 0;
-
-    if (json_next(input) != JSON_ARRAY)
-        errx(1, "Expected array for assignee list");
-
-    while (json_peek(input) == JSON_OBJECT) {
-        *out = realloc(*out, sizeof(**out) * (n + 1));
-        (*out)[n++] = get_user_sv(input);
-    }
-
-    if (json_next(input) != JSON_ARRAY_END)
-        errx(1, "Expected end of array for assignee list");
-
-    return n;
-}
-
-static void
-ghcli_parse_issue_details(json_stream *input, ghcli_issue_details *out)
-{
-    enum json_type key_type, value_type;
-    const char *key;
-
-    json_next(input);
-
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t len;
-        key = json_get_string(input, &len);
-
-        if (strncmp("title", key, len) == 0)
-            out->title = get_sv(input);
-        else if (strncmp("state", key, len) == 0)
-            out->state = get_sv(input);
-        else if (strncmp("body", key, len) == 0)
-            out->body = get_sv(input);
-        else if (strncmp("created_at", key, len) == 0)
-            out->created_at = get_sv(input);
-        else if (strncmp("number", key, len) == 0)
-            out->number = get_int(input);
-        else if (strncmp("comments", key, len) == 0)
-            out->comments = get_int(input);
-        else if (strncmp("user", key, len) == 0)
-            out->author = get_user_sv(input);
-        else if (strncmp("locked", key, len) == 0)
-            out->locked = get_bool(input);
-        else if (strncmp("labels", key, len) == 0)
-            out->labels_size = ghcli_read_label_list(input, &out->labels);
-        else if (strncmp("assignees", key, len) == 0)
-            out->assignees_size = read_user_list(input, &out->assignees);
-        else {
-            value_type = json_next(input);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(input, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(input, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
-    }
-
-    if (key_type != JSON_OBJECT_END)
-        errx(1, "Unexpected object key type");
 }
 
 static void
@@ -329,78 +173,61 @@ ghcli_issue_details_free(ghcli_issue_details *it)
     free(it->labels);
 }
 
+static void
+ghcli_get_issue_summary(
+    const char          *owner,
+    const char          *repo,
+    int                  issue_number,
+    ghcli_issue_details *out)
+{
+    switch (ghcli_config_get_forge_type()) {
+    case GHCLI_FORGE_GITHUB: {
+        github_get_issue_summary(owner, repo, issue_number, out);
+    } break;
+    default: {
+        sn_unimplemented;
+    } break;
+    }
+}
+
 void
 ghcli_issue_summary(
-    FILE *stream,
+    FILE       *stream,
     const char *owner,
     const char *repo,
-    int issue_number)
+    int         issue_number)
 {
-    const char          *url     = NULL;
-    ghcli_fetch_buffer   buffer  = {0};
-    json_stream          parser  = {0};
     ghcli_issue_details  details = {0};
 
-    url = sn_asprintf(
-        "%s/repos/%s/%s/issues/%d",
-        ghcli_config_get_apibase(),
-        owner, repo,
-        issue_number);
-    ghcli_fetch(url, NULL, &buffer);
-
-    json_open_buffer(&parser, buffer.data, buffer.length);
-    json_set_streaming(&parser, true);
-
-    ghcli_parse_issue_details(&parser, &details);
+    ghcli_get_issue_summary(owner, repo, issue_number, &details);
     ghcli_print_issue_summary(stream, &details);
-
-    json_close(&parser);
-
     ghcli_issue_details_free(&details);
-    free((void *)url);
-    free(buffer.data);
 }
 
 void
 ghcli_issue_close(const char *owner, const char *repo, int issue_number)
 {
-    ghcli_fetch_buffer  json_buffer = {0};
-    const char         *url         = NULL;
-    const char         *data        = NULL;
-
-    url  = sn_asprintf(
-        "%s/repos/%s/%s/issues/%d",
-        ghcli_config_get_apibase(),
-        owner, repo,
-        issue_number);
-    data = sn_asprintf("{ \"state\": \"close\"}");
-
-    ghcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
-
-    free((void *)data);
-    free((void *)url);
-    free(json_buffer.data);
+    switch (ghcli_config_get_forge_type()) {
+    case GHCLI_FORGE_GITHUB: {
+        github_issue_close(owner, repo, issue_number);
+    } break;
+    default: {
+        sn_unimplemented;
+    } break;
+    }
 }
 
 void
 ghcli_issue_reopen(const char *owner, const char *repo, int issue_number)
 {
-    ghcli_fetch_buffer  json_buffer = {0};
-    const char         *url         = NULL;
-    const char         *data        = NULL;
-
-    url  = sn_asprintf(
-        "%s/repos/%s/%s/issues/%d",
-        ghcli_config_get_apibase(),
-        owner, repo,
-        issue_number);
-    data = sn_asprintf("{ \"state\": \"open\"}");
-
-    ghcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
-
-    free((void *)data);
-    free((void *)url);
-    free(json_buffer.data);
+    switch (ghcli_config_get_forge_type()) {
+    case GHCLI_FORGE_GITHUB: {
+        github_issue_reopen(owner, repo, issue_number);
+    } break;
+    default: {
+        sn_unimplemented;
+    } break;
+    }
 }
 
 static void

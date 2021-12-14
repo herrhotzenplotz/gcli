@@ -61,4 +61,12 @@ void github_pr_close(
     const char *reponame,
     int         pr_number);
 
+void github_perform_submit_pr(
+    ghcli_submit_pull_options  opts,
+    ghcli_fetch_buffer        *out);
+
+int github_get_pull_commits(
+    const char    *url,
+    ghcli_commit **out);
+
 #endif /* GITHUB_PULLS_H */

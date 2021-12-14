@@ -75,10 +75,9 @@ clean:
 	rm -f ${PROGS} ${LIBS} ${OBJS} ${DEPS} config.mk
 
 PREFIX	?=	/usr/local
-DESTDIR	?=	/
-BINDIR	?=	${DESTDIR}/${PREFIX}/bin
-LIBDIR	?=	${DESTDIR}/${PREFIX}/lib
-MANDIR	?=	${DESTDIR}/${PREFIX}/man
+BINDIR	?=	${DESTDIR}${PREFIX}/bin
+LIBDIR	?=	${DESTDIR}${PREFIX}/lib
+MANDIR	?=	${DESTDIR}${PREFIX}/man
 
 ${PROGS:=-install}:
 	@echo " ==> Installing program ${@:-install=}"

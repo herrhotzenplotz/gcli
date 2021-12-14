@@ -29,6 +29,7 @@
 
 #include <ghcli/config.h>
 #include <ghcli/curl.h>
+#include <ghcli/gitlab/config.h>
 #include <ghcli/gitlab/issues.h>
 #include <ghcli/json_util.h>
 #include <pdjson/pdjson.h>
@@ -84,7 +85,8 @@ gitlab_get_issues(
     char               *next_url    = NULL;
 
     url = sn_asprintf(
-        "https://gitlab.com/api/v4/projects/%s%%2F%s/issues%s",
+        "%s/projects/%s%%2F%s/issues%s",
+        gitlab_get_apibase(),
         owner, repo,
         all ? "" : "?state=opened");
 

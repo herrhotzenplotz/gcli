@@ -162,19 +162,25 @@ init_local_config(void)
     while (local_config.buffer.length > 0) {
         sn_sv line = sn_sv_chop_until(&local_config.buffer, '\n');
 
-        sn_sv key  = sn_sv_chop_until(&line, '=');
-
-        key = sn_sv_trim(key);
+        line = sn_sv_trim(line);
 
         if (line.length == 0)
             errx(1, "%s:%d: Unexpected end of line",
                  path, curr_line);
 
         // Comments
-        if (key.data[0] == '#') {
+        if (line.data[0] == '#') {
+            local_config.buffer = sn_sv_trim_front(local_config.buffer);
             curr_line++;
             continue;
         }
+
+        sn_sv key  = sn_sv_chop_until(&line, '=');
+
+        key = sn_sv_trim(key);
+
+        if (key.length == 0)
+            errx(1, "%s:%d: empty key", path, curr_line);
 
         line.data   += 1;
         line.length -= 1;
@@ -226,19 +232,25 @@ ghcli_config_init(const char *file_path)
     while (config.buffer.length > 0) {
         sn_sv line = sn_sv_chop_until(&config.buffer, '\n');
 
-        sn_sv key  = sn_sv_chop_until(&line, '=');
-
-        key = sn_sv_trim(key);
+        line = sn_sv_trim(line);
 
         if (line.length == 0)
             errx(1, "%s:%d: Unexpected end of line",
                  file_path, curr_line);
 
         // Comments
-        if (key.data[0] == '#') {
+        if (line.data[0] == '#') {
+            config.buffer = sn_sv_trim_front(config.buffer);
             curr_line++;
             continue;
         }
+
+        sn_sv key  = sn_sv_chop_until(&line, '=');
+
+        key = sn_sv_trim(key);
+
+        if (key.length == 0)
+            errx(1, "%s:%d: empty key", file_path, curr_line);
 
         line.data   += 1;
         line.length -= 1;

@@ -212,3 +212,22 @@ gitlab_get_issue_summary(
     free(url);
     free(buffer.data);
 }
+
+void
+gitlab_perform_submit_issue(
+    ghcli_submit_issue_options  opts,
+    ghcli_fetch_buffer         *out)
+{
+    char *post_fields = sn_asprintf(
+        "{ \"title\": \""SV_FMT"\", \"description\": \""SV_FMT"\" }",
+        SV_ARGS(opts.title), SV_ARGS(opts.body));
+    char *url         = sn_asprintf(
+        "%s/projects/"SV_FMT"%%2F"SV_FMT"/issues",
+        gitlab_get_apibase(),
+        SV_ARGS(opts.owner),
+        SV_ARGS(opts.repo));
+
+    ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
+    free(post_fields);
+    free(url);
+}

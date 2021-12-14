@@ -213,6 +213,49 @@ gitlab_get_issue_summary(
     free(buffer.data);
 }
 
+
+void
+gitlab_issue_close(const char *owner, const char *repo, int issue_number)
+{
+    ghcli_fetch_buffer  json_buffer = {0};
+    const char         *url         = NULL;
+    const char         *data        = NULL;
+
+    url  = sn_asprintf(
+        "%s/projects/%s%%2F%s/issues/%d",
+        gitlab_get_apibase(),
+        owner, repo,
+        issue_number);
+    data = sn_asprintf("{ \"state_event\": \"close\"}");
+
+    ghcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
+
+    free((void *)data);
+    free((void *)url);
+    free(json_buffer.data);
+}
+
+void
+gitlab_issue_reopen(const char *owner, const char *repo, int issue_number)
+{
+    ghcli_fetch_buffer  json_buffer = {0};
+    const char         *url         = NULL;
+    const char         *data        = NULL;
+
+    url  = sn_asprintf(
+        "%s/projects/%s%%2F%s/issues/%d",
+        gitlab_get_apibase(),
+        owner, repo,
+        issue_number);
+    data = sn_asprintf("{ \"state_event\": \"reopen\"}");
+
+    ghcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
+
+    free((void *)data);
+    free((void *)url);
+    free(json_buffer.data);
+}
+
 void
 gitlab_perform_submit_issue(
     ghcli_submit_issue_options  opts,

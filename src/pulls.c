@@ -282,9 +282,6 @@ ghcli_get_pull_summary(
     }
 }
 
-/**
- * Fetch and print information about a Pull request.
- */
 void
 ghcli_pr_summary(
     FILE       *out,

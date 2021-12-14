@@ -217,6 +217,11 @@ struct ghcli_forge_descriptor {
     /**
      * Get the user account name */
     sn_sv (*get_account)(void);
+
+    /**
+     * A key in the user json object sent by the API that represents
+     * the user name */
+    const char *user_object_key;
 };
 
 const ghcli_forge_descriptor *ghcli_forge(void);

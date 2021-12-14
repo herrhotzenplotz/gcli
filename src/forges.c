@@ -70,6 +70,7 @@ github_forge_descriptor =
     .get_own_repos          = github_get_own_repos,
     .repo_delete            = github_repo_delete,
     .get_authheader         = github_get_authheader,
+    .user_object_key        = "login",
 };
 
 static ghcli_forge_descriptor
@@ -80,7 +81,7 @@ gitlab_forge_descriptor =
     /* .get_forks              = gitlab_get_forks, */
     /* .fork_create            = gitlab_fork_create, */
     .get_issues             = gitlab_get_issues,
-    /* .get_issue_summary      = gitlab_get_issue_summary, */
+    .get_issue_summary      = gitlab_get_issue_summary,
     /* .issue_close            = gitlab_issue_close, */
     /* .issue_reopen           = gitlab_issue_reopen, */
     /* .perform_submit_issue   = gitlab_perform_submit_issue, */
@@ -99,6 +100,7 @@ gitlab_forge_descriptor =
     /* .get_own_repos          = gitlab_get_own_repos, */
     /* .repo_delete            = gitlab_repo_delete, */
     .get_authheader         = gitlab_get_authheader,
+    .user_object_key        = "username",
 };
 
 const ghcli_forge_descriptor *

@@ -133,25 +133,6 @@ github_get_issues(
     return count;
 }
 
-static size_t
-github_read_user_list(json_stream *input, sn_sv **out)
-{
-    size_t n = 0;
-
-    if (json_next(input) != JSON_ARRAY)
-        errx(1, "Expected array for assignee list");
-
-    while (json_peek(input) == JSON_OBJECT) {
-        *out = realloc(*out, sizeof(**out) * (n + 1));
-        (*out)[n++] = get_user_sv(input);
-    }
-
-    if (json_next(input) != JSON_ARRAY_END)
-        errx(1, "Expected end of array for assignee list");
-
-    return n;
-}
-
 static void
 github_parse_issue_details(json_stream *input, ghcli_issue_details *out)
 {
@@ -183,7 +164,7 @@ github_parse_issue_details(json_stream *input, ghcli_issue_details *out)
         else if (strncmp("labels", key, len) == 0)
             out->labels_size = ghcli_read_label_list(input, &out->labels);
         else if (strncmp("assignees", key, len) == 0)
-            out->assignees_size = github_read_user_list(input, &out->assignees);
+            out->assignees_size = ghcli_read_user_list(input, &out->assignees);
         else {
             value_type = json_next(input);
 

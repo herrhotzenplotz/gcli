@@ -28,6 +28,7 @@
  */
 
 #include <ghcli/json_util.h>
+#include <ghcli/forges.h>
 #include <sn/sn.h>
 
 #include <assert.h>
@@ -92,12 +93,14 @@ get_user_(json_stream *input, const char *where)
     if (json_next(input) != JSON_OBJECT)
         barf("user field is not an object", where);
 
+    const char *expected_key = ghcli_forge()->user_object_key;
+
     char *result = NULL;
     while (json_next(input) == JSON_STRING) {
         size_t      len = 0;
         const char *key = json_get_string(input, &len);
 
-        if (strncmp("login", key, len) == 0) {
+        if (strncmp(expected_key, key, len) == 0) {
             if (json_next(input) != JSON_STRING)
                 barf(
                     "login of the pull request creator is not a string",
@@ -256,4 +259,23 @@ ghcli_read_label_list(json_stream *stream, sn_sv **out)
         barf("expected end of array in label list", __func__);
 
     return size;
+}
+
+size_t
+ghcli_read_user_list(json_stream *input, sn_sv **out)
+{
+    size_t n = 0;
+
+    if (json_next(input) != JSON_ARRAY)
+        errx(1, "Expected array for user list");
+
+    while (json_peek(input) == JSON_OBJECT) {
+        *out = realloc(*out, sizeof(**out) * (n + 1));
+        (*out)[n++] = get_user_sv(input);
+    }
+
+    if (json_next(input) != JSON_ARRAY_END)
+        errx(1, "Expected end of array for user list");
+
+    return n;
 }

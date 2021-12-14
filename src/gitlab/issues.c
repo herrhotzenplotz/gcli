@@ -132,3 +132,83 @@ gitlab_get_issues(
 
     return count;
 }
+
+static void
+gitlab_parse_issue_details(json_stream *input, ghcli_issue_details *out)
+{
+    enum json_type key_type, value_type;
+    const char *key;
+
+    json_next(input);
+
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t len;
+        key = json_get_string(input, &len);
+
+        if (strncmp("title", key, len) == 0)
+            out->title = get_sv(input);
+        else if (strncmp("state", key, len) == 0)
+            out->state = get_sv(input);
+        else if (strncmp("description", key, len) == 0)
+            out->body = get_sv(input);
+        else if (strncmp("created_at", key, len) == 0)
+            out->created_at = get_sv(input);
+        else if (strncmp("iid", key, len) == 0)
+            out->number = get_int(input);
+        else if (strncmp("user_notes_count", key, len) == 0)
+            out->comments = get_int(input);
+        else if (strncmp("author", key, len) == 0)
+            out->author = get_user_sv(input);
+        else if (strncmp("discussion_locked", key, len) == 0)
+            out->locked = get_bool(input);
+        else if (strncmp("labels", key, len) == 0)
+            out->labels_size = ghcli_read_label_list(input, &out->labels);
+        else if (strncmp("assignees", key, len) == 0)
+            out->assignees_size = ghcli_read_user_list(input, &out->assignees);
+        else {
+            value_type = json_next(input);
+
+            switch (value_type) {
+            case JSON_ARRAY:
+                json_skip_until(input, JSON_ARRAY_END);
+                break;
+            case JSON_OBJECT:
+                json_skip_until(input, JSON_OBJECT_END);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    if (key_type != JSON_OBJECT_END)
+        errx(1, "Unexpected object key type");
+}
+
+void
+gitlab_get_issue_summary(
+    const char          *owner,
+    const char          *repo,
+    int                  issue_number,
+    ghcli_issue_details *out)
+{
+    char               *url    = NULL;
+    ghcli_fetch_buffer  buffer = {0};
+    json_stream         parser = {0};
+
+    url = sn_asprintf(
+        "%s/projects/%s%%2F%s/issues/%d",
+        gitlab_get_apibase(),
+        owner, repo,
+        issue_number);
+    ghcli_fetch(url, NULL, &buffer);
+
+    json_open_buffer(&parser, buffer.data, buffer.length);
+    json_set_streaming(&parser, true);
+
+    gitlab_parse_issue_details(&parser, out);
+
+    json_close(&parser);
+    free(url);
+    free(buffer.data);
+}

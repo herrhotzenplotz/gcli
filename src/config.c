@@ -47,8 +47,11 @@ static struct ghcli_config {
 } config;
 
 static struct ghcli_dotghcli {
-    sn_sv  upstream;
-    sn_sv  base;
+    struct ghcli_local_config_entry {
+        sn_sv key;
+        sn_sv value;
+    } entries[128];
+    size_t entries_size;
 
     sn_sv  buffer;
     void  *mmap_pointer;
@@ -178,9 +181,9 @@ init_local_config(void)
 
         sn_sv value = sn_sv_trim(line);
 
-        config.entries[config.entries_size].key   = key;
-        config.entries[config.entries_size].value = value;
-        config.entries_size++;
+        local_config.entries[local_config.entries_size].key   = key;
+        local_config.entries[local_config.entries_size].value = value;
+        local_config.entries_size++;
 
         local_config.buffer = sn_sv_trim_front(local_config.buffer);
         curr_line++;
@@ -263,6 +266,15 @@ ghcli_config_find_by_key(const char *key)
     return SV_NULL;
 }
 
+static sn_sv
+ghcli_local_config_find_by_key(const char *key)
+{
+    for (size_t i = 0; i < local_config.entries_size; ++i)
+        if (sn_sv_eq_to(local_config.entries[i].key, key))
+            return local_config.entries[i].value;
+    return SV_NULL;
+}
+
 char *
 ghcli_config_get_editor(void)
 {
@@ -286,7 +298,7 @@ ghcli_config_get_upstream(void)
 {
     init_local_config();
 
-    return local_config.upstream;
+    return ghcli_local_config_find_by_key("pr.upstream");
 }
 
 void
@@ -305,13 +317,13 @@ ghcli_config_get_base(void)
 {
     init_local_config();
 
-    return local_config.base;
+    return ghcli_local_config_find_by_key("pr.base");
 }
 
 ghcli_forge_type
 ghcli_config_get_forge_type(void)
 {
-    sn_sv entry = ghcli_config_find_by_key("forge-type");
+    sn_sv entry = ghcli_local_config_find_by_key("forge-type");
     if (entry.length >= 0) {
         if (sn_sv_eq_to(entry, "github"))
             return GHCLI_FORGE_GITHUB;

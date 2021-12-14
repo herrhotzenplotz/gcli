@@ -20,3 +20,6 @@
 /include/ghcli/github/issues.h~
 /src/github/issues.c~
 /src/github/issues.o
+/include/ghcli/github/releases.h~
+/src/github/releases.c~
+/src/github/releases.o

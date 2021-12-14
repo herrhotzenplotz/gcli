@@ -27,24 +27,12 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/config.h>
 #include <ghcli/editor.h>
+#include <ghcli/forges.h>
 #include <ghcli/github/pulls.h>
 #include <ghcli/json_util.h>
 #include <ghcli/pulls.h>
 #include <sn/sn.h>
-
-static void
-perform_submit_pr(ghcli_submit_pull_options opts, ghcli_fetch_buffer *out)
-{
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB: {
-        github_perform_submit_pr(opts, out);
-    } break;
-    default:
-        sn_unimplemented;
-    }
-}
 
 void
 ghcli_pulls_free(ghcli_pull *it, int n)
@@ -64,14 +52,7 @@ ghcli_get_prs(
     int          max,
     ghcli_pull **out)
 {
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB:
-        return github_get_prs(owner, repo, all, max, out);
-    default:
-        sn_unimplemented;
-        break;
-    }
-    return -1;
+    return ghcli_forge()->get_prs(owner, repo, all, max, out);
 }
 
 void
@@ -119,14 +100,7 @@ ghcli_print_pr_diff(
     const char *reponame,
     int         pr_number)
 {
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB: {
-        github_print_pr_diff(stream, owner, reponame, pr_number);
-    } break;
-    default: {
-        sn_unimplemented;
-    } break;
-    }
+    ghcli_forge()->print_pr_diff(stream, owner, reponame, pr_number);
 }
 
 static void
@@ -174,13 +148,7 @@ ghcli_get_pull_commits(
     int            pr_number,
     ghcli_commit **out)
 {
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB:
-        return github_get_pull_commits(owner, repo, pr_number, out);
-    default:
-        sn_unimplemented;
-    }
-    return -1;
+    return ghcli_forge()->get_pull_commits(owner, repo, pr_number, out);
 }
 
 /**
@@ -262,14 +230,7 @@ ghcli_get_pull_summary(
     int                 pr_number,
     ghcli_pull_summary *out)
 {
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB:
-        github_get_pull_summary(owner, repo, pr_number, out);
-        break;
-    default:
-        sn_unimplemented;
-        break;
-    }
+    ghcli_forge()->get_pull_summary(owner, repo, pr_number, out);
 }
 
 void
@@ -341,7 +302,7 @@ ghcli_pr_submit(ghcli_submit_pull_options opts)
         if (!sn_yesno("Do you want to continue?"))
             errx(1, "PR aborted.");
 
-    perform_submit_pr(opts, &json_buffer);
+    ghcli_forge()->perform_submit_pr(opts, &json_buffer);
 
     ghcli_print_html_url(json_buffer);
 
@@ -357,38 +318,17 @@ ghcli_pr_merge(
     const char *reponame,
     int         pr_number)
 {
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB: {
-        github_pr_merge(out, owner, reponame, pr_number);
-    } break;
-    default: {
-        sn_unimplemented;
-    } break;
-    }
+    ghcli_forge()->pr_merge(out, owner, reponame, pr_number);
 }
 
 void
 ghcli_pr_close(const char *owner, const char *reponame, int pr_number)
 {
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB: {
-        github_pr_close(owner, reponame, pr_number);
-    } break;
-    default: {
-        sn_unimplemented;
-    } break;
-    }
+    ghcli_forge()->pr_close(owner, reponame, pr_number);
 }
 
 void
 ghcli_pr_reopen(const char *owner, const char *reponame, int pr_number)
 {
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB: {
-        github_pr_reopen(owner, reponame, pr_number);
-    } break;
-    default: {
-        sn_unimplemented;
-    } break;
-    }
+    ghcli_forge()->pr_reopen(owner, reponame, pr_number);
 }

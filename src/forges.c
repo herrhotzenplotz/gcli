@@ -71,6 +71,7 @@ github_forge_descriptor =
     .repo_delete            = github_repo_delete,
     .get_authheader         = github_get_authheader,
     .user_object_key        = "login",
+    .html_url_key           = "html_url",
 };
 
 static ghcli_forge_descriptor
@@ -101,6 +102,7 @@ gitlab_forge_descriptor =
     /* .repo_delete            = gitlab_repo_delete, */
     .get_authheader         = gitlab_get_authheader,
     .user_object_key        = "username",
+    .html_url_key           = "web_url",
 };
 
 const ghcli_forge_descriptor *

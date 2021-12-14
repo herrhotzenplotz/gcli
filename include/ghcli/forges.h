@@ -222,6 +222,11 @@ struct ghcli_forge_descriptor {
      * A key in the user json object sent by the API that represents
      * the user name */
     const char *user_object_key;
+
+    /**
+     * A key in responses by the API that represents the URL for the
+     * object being operated on */
+    const char *html_url_key;
 };
 
 const ghcli_forge_descriptor *ghcli_forge(void);

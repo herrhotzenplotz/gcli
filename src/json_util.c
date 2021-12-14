@@ -179,13 +179,14 @@ ghcli_print_html_url(ghcli_fetch_buffer buffer)
     json_open_buffer(&stream, buffer.data, buffer.length);
     json_set_streaming(&stream, true);
 
-    enum json_type next = json_next(&stream);
+    enum json_type  next         = json_next(&stream);
+    const char     *expected_key = ghcli_forge()->html_url_key;
 
     while ((next = json_next(&stream)) == JSON_STRING) {
         size_t len;
 
         const char *key = json_get_string(&stream, &len);
-        if (strncmp(key, "html_url", len) == 0) {
+        if (strncmp(key, expected_key, len) == 0) {
             char *url = get_string(&stream);
             puts(url);
             free(url);

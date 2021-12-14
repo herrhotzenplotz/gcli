@@ -369,11 +369,21 @@ github_parse_commit(json_stream *input, ghcli_commit *it)
 }
 
 int
-github_get_pull_commits(const char *url, ghcli_commit **out)
+github_get_pull_commits(
+    const char    *owner,
+    const char    *repo,
+    int            pr_number,
+    ghcli_commit **out)
 {
+    char              *url         = NULL;
     int                count       = 0;
     json_stream        stream      = {0};
     ghcli_fetch_buffer json_buffer = {0};
+
+    url = sn_asprintf(
+        "%s/repos/%s/%s/pulls/%d/commits",
+        ghcli_config_get_apibase(),
+        owner, repo, pr_number);
 
     ghcli_fetch(url, NULL, &json_buffer);
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
@@ -392,6 +402,98 @@ github_get_pull_commits(const char *url, ghcli_commit **out)
     }
 
     json_close(&stream);
+    free(url);
     free(json_buffer.data);
     return count;
+}
+
+static void
+github_pull_parse_summary(json_stream *input, ghcli_pull_summary *out)
+{
+    enum json_type key_type, value_type;
+    const char *key;
+
+    json_next(input);
+
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t len;
+        key = json_get_string(input, &len);
+
+        if (strncmp("title", key, len) == 0)
+            out->title = get_string(input);
+        else if (strncmp("state", key, len) == 0)
+            out->state = get_string(input);
+        else if (strncmp("body", key, len) == 0)
+            out->body = get_string(input);
+        else if (strncmp("created_at", key, len) == 0)
+            out->created_at = get_string(input);
+        else if (strncmp("number", key, len) == 0)
+            out->number = get_int(input);
+        else if (strncmp("id", key, len) == 0)
+            out->id = get_int(input);
+        else if (strncmp("commits", key, len) == 0)
+            out->commits = get_int(input);
+        else if (strncmp("labels", key, len) == 0)
+            out->labels_size = ghcli_read_label_list(input, &out->labels);
+        else if (strncmp("comments", key, len) == 0)
+            out->comments = get_int(input);
+        else if (strncmp("additions", key, len) == 0)
+            out->additions = get_int(input);
+        else if (strncmp("deletions", key, len) == 0)
+            out->deletions = get_int(input);
+        else if (strncmp("changed_files", key, len) == 0)
+            out->changed_files = get_int(input);
+        else if (strncmp("merged", key, len) == 0)
+            out->merged = get_bool(input);
+        else if (strncmp("mergeable", key, len) == 0)
+            out->mergeable = get_bool(input);
+        else if (strncmp("draft", key, len) == 0)
+            out->draft = get_bool(input);
+        else if (strncmp("user", key, len) == 0)
+            out->author = get_user(input);
+        else {
+            value_type = json_next(input);
+
+            switch (value_type) {
+            case JSON_ARRAY:
+                json_skip_until(input, JSON_ARRAY_END);
+                break;
+            case JSON_OBJECT:
+                json_skip_until(input, JSON_OBJECT_END);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    if (key_type != JSON_OBJECT_END)
+        errx(1, "Unexpected object key type");
+}
+
+void
+github_get_pull_summary(
+    const char         *owner,
+    const char         *repo,
+    int                 pr_number,
+    ghcli_pull_summary *out)
+{
+    json_stream         stream       = {0};
+    ghcli_fetch_buffer  json_buffer  = {0};
+    char               *url          = NULL;
+
+    /* General info */
+    url = sn_asprintf(
+        "%s/repos/%s/%s/pulls/%d",
+        ghcli_config_get_apibase(),
+        owner, repo, pr_number);
+    ghcli_fetch(url, NULL, &json_buffer);
+
+    json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+    json_set_streaming(&stream, true);
+
+    github_pull_parse_summary(&stream, out);
+    json_close(&stream);
+    free(url);
+    free(json_buffer.data);
 }

@@ -140,70 +140,6 @@ ghcli_print_pr_diff(
 }
 
 static void
-ghcli_pull_parse_summary(json_stream *input, ghcli_pull_summary *out)
-{
-    enum json_type key_type, value_type;
-    const char *key;
-
-    json_next(input);
-
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t len;
-        key = json_get_string(input, &len);
-
-        if (strncmp("title", key, len) == 0)
-            out->title = get_string(input);
-        else if (strncmp("state", key, len) == 0)
-            out->state = get_string(input);
-        else if (strncmp("body", key, len) == 0)
-            out->body = get_string(input);
-        else if (strncmp("created_at", key, len) == 0)
-            out->created_at = get_string(input);
-        else if (strncmp("number", key, len) == 0)
-            out->number = get_int(input);
-        else if (strncmp("id", key, len) == 0)
-            out->id = get_int(input);
-        else if (strncmp("commits", key, len) == 0)
-            out->commits = get_int(input);
-        else if (strncmp("labels", key, len) == 0)
-            out->labels_size = ghcli_read_label_list(input, &out->labels);
-        else if (strncmp("comments", key, len) == 0)
-            out->comments = get_int(input);
-        else if (strncmp("additions", key, len) == 0)
-            out->additions = get_int(input);
-        else if (strncmp("deletions", key, len) == 0)
-            out->deletions = get_int(input);
-        else if (strncmp("changed_files", key, len) == 0)
-            out->changed_files = get_int(input);
-        else if (strncmp("merged", key, len) == 0)
-            out->merged = get_bool(input);
-        else if (strncmp("mergeable", key, len) == 0)
-            out->mergeable = get_bool(input);
-        else if (strncmp("draft", key, len) == 0)
-            out->draft = get_bool(input);
-        else if (strncmp("user", key, len) == 0)
-            out->author = get_user(input);
-        else {
-            value_type = json_next(input);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(input, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(input, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
-    }
-
-    if (key_type != JSON_OBJECT_END)
-        errx(1, "Unexpected object key type");
-}
-
-static void
 ghcli_print_pr_summary(FILE *out, ghcli_pull_summary *it)
 {
     fprintf(out,
@@ -241,16 +177,16 @@ ghcli_print_pr_summary(FILE *out, ghcli_pull_summary *it)
         pretty_print(it->body, 4, 80, out);
 }
 
-/**
- * Fetch and extract a list of commits.
- * Returns the number of extracted commits in out.
- */
 static int
-ghcli_get_pull_commits(const char *url, ghcli_commit **out)
+ghcli_get_pull_commits(
+    const char    *owner,
+    const char    *repo,
+    int            pr_number,
+    ghcli_commit **out)
 {
     switch (ghcli_config_get_forge_type()) {
     case GHCLI_FORGE_GITHUB:
-        return github_get_pull_commits(url, out);
+        return github_get_pull_commits(owner, repo, pr_number, out);
     default:
         sn_unimplemented;
     }
@@ -329,54 +265,48 @@ ghcli_pulls_summary_free(ghcli_pull_summary *it)
         free(it->labels[i].data);
 }
 
+static void
+ghcli_get_pull_summary(
+    const char         *owner,
+    const char         *repo,
+    int                 pr_number,
+    ghcli_pull_summary *out)
+{
+    switch (ghcli_config_get_forge_type()) {
+    case GHCLI_FORGE_GITHUB:
+        github_get_pull_summary(owner, repo, pr_number, out);
+        break;
+    default:
+        sn_unimplemented;
+        break;
+    }
+}
+
 /**
  * Fetch and print information about a Pull request.
  */
 void
 ghcli_pr_summary(
-    FILE *out,
+    FILE       *out,
     const char *owner,
-    const char *reponame,
-    int pr_number)
+    const char *repo,
+    int         pr_number)
 {
-    json_stream         stream       = {0};
-    ghcli_fetch_buffer  json_buffer  = {0};
-    char               *url          = NULL;
-    ghcli_pull_summary  result       = {0};
+    ghcli_pull_summary  summary      = {0};
     ghcli_commit       *commits      = NULL;
     int                 commits_size = 0;
 
-    /* General info */
-    url = sn_asprintf(
-        "%s/repos/%s/%s/pulls/%d",
-        ghcli_config_get_apibase(),
-        owner, reponame, pr_number);
-    ghcli_fetch(url, NULL, &json_buffer);
-
-    json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-    json_set_streaming(&stream, true);
-
-    ghcli_pull_parse_summary(&stream, &result);
-
-    json_close(&stream);
-    free(url);
-    free(json_buffer.data);
+    ghcli_get_pull_summary(owner, repo, pr_number, &summary);
+    ghcli_print_pr_summary(out, &summary);
+    ghcli_pulls_summary_free(&summary);
 
     /* Commits */
-    url = sn_asprintf(
-        "%s/repos/%s/%s/pulls/%d/commits",
-        ghcli_config_get_apibase(),
-        owner, reponame, pr_number);
-    commits_size = ghcli_get_pull_commits(url, &commits);
-
-    ghcli_print_pr_summary(out, &result);
-    ghcli_pulls_summary_free(&result);
+    commits_size = ghcli_get_pull_commits(owner, repo, pr_number, &commits);
 
     fprintf(out, "\nCOMMITS\n");
     ghcli_print_commits_table(out, commits, commits_size);
 
     ghcli_commits_free(commits, commits_size);
-    free(url);
 }
 
 static void

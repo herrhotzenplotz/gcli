@@ -29,15 +29,10 @@
 
 #include <ghcli/comments.h>
 #include <ghcli/config.h>
-#include <ghcli/curl.h>
 #include <ghcli/editor.h>
 #include <ghcli/github/comments.h>
 #include <ghcli/json_util.h>
-#include <pdjson/pdjson.h>
 #include <sn/sn.h>
-
-#include <ctype.h>
-#include <string.h>
 
 static void
 perform_submit_comment(

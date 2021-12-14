@@ -30,6 +30,7 @@
 #ifndef GHCLI_ISSUES_H
 #define GHCLI_ISSUES_H
 
+#include <ghcli/curl.h>
 #include <ghcli/issues.h>
 
 int github_get_issues(

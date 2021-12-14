@@ -29,11 +29,10 @@
 
 #include <ghcli/config.h>
 #include <ghcli/github/releases.h>
-#include <ghcli/json_util.h>
 #include <ghcli/releases.h>
-#include <pdjson/pdjson.h>
 
 #include <assert.h>
+#include <stdlib.h>
 
 int
 ghcli_get_releases(

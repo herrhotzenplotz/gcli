@@ -28,9 +28,10 @@
  */
 
 #include <ghcli/config.h>
-#include <ghcli/json_util.h>
 #include <ghcli/repos.h>
 #include <ghcli/github/repos.h>
+
+#include <stdlib.h>
 
 int
 ghcli_get_repos(const char *owner, int max, ghcli_repo **out)

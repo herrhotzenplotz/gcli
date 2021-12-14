@@ -28,12 +28,8 @@
  */
 
 #include <ghcli/config.h>
-#include <ghcli/curl.h>
 #include <ghcli/forks.h>
 #include <ghcli/github/forks.h>
-#include <ghcli/json_util.h>
-
-#include <pdjson/pdjson.h>
 
 int
 ghcli_get_forks(

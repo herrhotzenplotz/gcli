@@ -30,6 +30,7 @@
 #ifndef GITHUB_PULLS_H
 #define GITHUB_PULLS_H
 
+#include <ghcli/curl.h>
 #include <ghcli/pulls.h>
 
 int github_get_prs(

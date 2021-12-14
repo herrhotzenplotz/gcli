@@ -27,21 +27,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <assert.h>
-#include <fcntl.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/mman.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-
 #include <ghcli/config.h>
-#include <ghcli/curl.h>
 #include <ghcli/editor.h>
 #include <ghcli/github/pulls.h>
 #include <ghcli/json_util.h>
 #include <ghcli/pulls.h>
-#include <pdjson/pdjson.h>
 #include <sn/sn.h>
 
 static void

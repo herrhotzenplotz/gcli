@@ -27,15 +27,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string.h>
-
 #include <ghcli/config.h>
-#include <ghcli/curl.h>
 #include <ghcli/editor.h>
 #include <ghcli/github/issues.h>
 #include <ghcli/issues.h>
 #include <ghcli/json_util.h>
-#include <pdjson/pdjson.h>
 #include <sn/sn.h>
 
 static void

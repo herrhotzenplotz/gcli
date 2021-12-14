@@ -25,3 +25,11 @@
 /src/github/releases.o
 /include/ghcli/forges.h~
 /src/forges.c~
+/include/ghcli/gitlab/config.h~
+/include/ghcli/gitlab/issues.h~
+/src/github/config.c~
+/src/github/config.o
+/src/gitlab/config.c~
+/src/gitlab/config.o
+/src/gitlab/issues.c~
+/src/gitlab/issues.o

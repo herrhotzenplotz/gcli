@@ -40,6 +40,7 @@
 #include <ghcli/github/releases.h>
 #include <ghcli/github/repos.h>
 
+#include <ghcli/gitlab/config.h>
 #include <ghcli/gitlab/issues.h>
 
 static ghcli_forge_descriptor
@@ -97,6 +98,7 @@ gitlab_forge_descriptor =
     /* .get_repos              = gitlab_get_repos, */
     /* .get_own_repos          = gitlab_get_own_repos, */
     /* .repo_delete            = gitlab_repo_delete, */
+    .get_authheader         = gitlab_get_authheader,
 };
 
 const ghcli_forge_descriptor *

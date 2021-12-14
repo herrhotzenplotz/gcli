@@ -27,20 +27,37 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef GHCLI_ISSUES_H
+#define GHCLI_ISSUES_H
 
-#include <sn/sn.h>
-#include <ghcli/ghcli.h>
+#include <ghcli/curl.h>
+#include <ghcli/issues.h>
 
-void              ghcli_config_init(const char *file_path);
-char             *ghcli_config_get_editor(void);
-char             *ghcli_config_get_apibase(void);
-sn_sv             ghcli_config_get_token(void);
-sn_sv             ghcli_config_get_account(void);
-sn_sv             ghcli_config_get_upstream(void);
-void              ghcli_config_get_upstream_parts(sn_sv *owner, sn_sv *repo);
-sn_sv             ghcli_config_get_base(void);
-ghcli_forge_type  ghcli_config_get_forge_type(void);
+int github_get_issues(
+    const char   *owner,
+    const char   *repo,
+    bool          all,
+    int           max,
+    ghcli_issue **out);
 
-#endif /* CONFIG_H */
+void github_get_issue_summary(
+    const char          *owner,
+    const char          *repo,
+    int                  issue_number,
+    ghcli_issue_details *out);
+
+void github_issue_close(
+    const char *owner,
+    const char *repo,
+    int         issue_number);
+
+void github_issue_reopen(
+    const char *owner,
+    const char *repo,
+    int         issue_number);
+
+void github_perform_submit_issue(
+    ghcli_submit_issue_options  opts,
+    ghcli_fetch_buffer         *out);
+
+#endif /* GHCLI_ISSUES_H */

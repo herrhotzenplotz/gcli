@@ -29,96 +29,23 @@
 
 #include <ghcli/comments.h>
 #include <ghcli/config.h>
-#include <ghcli/curl.h>
 #include <ghcli/editor.h>
+#include <ghcli/github/comments.h>
 #include <ghcli/json_util.h>
-#include <pdjson/pdjson.h>
 #include <sn/sn.h>
-
-#include <ctype.h>
-#include <string.h>
-
 
 static void
 perform_submit_comment(
-    ghcli_submit_comment_opts opts,
-    ghcli_fetch_buffer *out)
+    ghcli_submit_comment_opts  opts,
+    ghcli_fetch_buffer        *out)
 {
-    char *post_fields = sn_asprintf(
-        "{ \"body\": \""SV_FMT"\" }",
-        SV_ARGS(opts.message));
-    char *url         = sn_asprintf(
-        "%s/repos/%s/%s/issues/%d/comments",
-        ghcli_config_get_apibase(),
-        opts.owner, opts.repo, opts.issue);
-
-    ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
-    free(post_fields);
-    free(url);
-}
-
-static void
-ghcli_parse_comment(json_stream *input, ghcli_comment *it)
-{
-    if (json_next(input) != JSON_OBJECT)
-        errx(1, "Expected Comment Object");
-
-    enum json_type key_type;
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t          len        = 0;
-        const char     *key        = json_get_string(input, &len);
-        enum json_type  value_type = 0;
-
-        if (strncmp("created_at", key, len) == 0)
-            it->date = get_string(input);
-        else if (strncmp("body", key, len) == 0)
-            it->body = get_string(input);
-        else if (strncmp("user", key, len) == 0)
-            it->author = get_user(input);
-        else {
-            value_type = json_next(input);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(input, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(input, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+    switch (ghcli_config_get_forge_type()) {
+    case GHCLI_FORGE_GITHUB:
+        github_perform_submit_comment(opts, out);
+        break;
+    default:
+        sn_unimplemented;
     }
-}
-
-int
-ghcli_get_comments(const char *url, ghcli_comment **comments)
-{
-    int                count       = 0;
-    json_stream        stream      = {0};
-    ghcli_fetch_buffer json_buffer = {0};
-
-    ghcli_fetch(url, NULL, &json_buffer);
-    json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-    json_set_streaming(&stream, true);
-
-    enum json_type next_token = json_next(&stream);
-
-    while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
-        if (next_token != JSON_OBJECT)
-            errx(1, "Unexpected non-object in comment list");
-
-        *comments = realloc(*comments, (count + 1) * sizeof(ghcli_comment));
-        ghcli_comment *it = &(*comments)[count];
-        ghcli_parse_comment(&stream, it);
-        count += 1;
-    }
-
-    json_close(&stream);
-    free(json_buffer.data);
-
-    return count;
 }
 
 static void
@@ -144,21 +71,41 @@ ghcli_print_comment_list(
     }
 }
 
-void
-ghcli_issue_comments(FILE *stream, const char *owner, const char *repo, int issue)
+static int
+ghcli_get_issue_comments(
+    const char     *owner,
+    const char     *repo,
+    int             issue,
+    ghcli_comment **out)
 {
-    const char    *url      = sn_asprintf(
-        "%s/repos/%s/%s/issues/%d/comments",
-        ghcli_config_get_apibase(),
-        owner, repo, issue);
+    switch (ghcli_config_get_forge_type()) {
+    case GHCLI_FORGE_GITHUB: {
+        return github_get_issue_comments(owner, repo, issue, out);
+    } break;
+    default: {
+        sn_unimplemented;
+    } break;
+    }
+
+    return -1;
+}
+
+void
+ghcli_issue_comments(
+    FILE       *stream,
+    const char *owner,
+    const char *repo,
+    int         issue)
+{
     ghcli_comment *comments = NULL;
-    int            n        = ghcli_get_comments(url, &comments);
+    int            n        = -1;
+
+    n = ghcli_get_issue_comments(owner, repo, issue, &comments);
     ghcli_print_comment_list(stream, comments, (size_t)n);
 
     for (int i = 0; i < n; ++i)
         ghcli_issue_comment_free(&comments[i]);
 
-    free((void *)url);
     free(comments);
 }
 

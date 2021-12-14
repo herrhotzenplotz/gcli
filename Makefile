@@ -31,6 +31,12 @@ ghcli_SRCS			=	src/ghcli.c			\
 					src/releases.c			\
 					src/json_util.c			\
 					src/config.c			\
+					src/github/repos.c		\
+					src/github/comments.c		\
+					src/github/forks.c		\
+					src/github/pulls.c		\
+					src/github/issues.c		\
+					src/github/releases.c		\
 					thirdparty/sn/sn.c		\
 					thirdparty/pdjson/pdjson.c
 

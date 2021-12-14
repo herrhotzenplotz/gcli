@@ -27,20 +27,23 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef GITHUB_RELEASES_H
+#define GITHUB_RELEASES_H
 
-#include <sn/sn.h>
-#include <ghcli/ghcli.h>
+#include <ghcli/releases.h>
 
-void              ghcli_config_init(const char *file_path);
-char             *ghcli_config_get_editor(void);
-char             *ghcli_config_get_apibase(void);
-sn_sv             ghcli_config_get_token(void);
-sn_sv             ghcli_config_get_account(void);
-sn_sv             ghcli_config_get_upstream(void);
-void              ghcli_config_get_upstream_parts(sn_sv *owner, sn_sv *repo);
-sn_sv             ghcli_config_get_base(void);
-ghcli_forge_type  ghcli_config_get_forge_type(void);
+int github_get_releases(
+    const char     *owner,
+    const char     *repo,
+    int             max,
+    ghcli_release **out);
 
-#endif /* CONFIG_H */
+void github_create_release(
+    const ghcli_new_release *release);
+
+void github_delete_release(
+    const char *owner,
+    const char *repo,
+    const char *id);
+
+#endif /* GITHUB_RELEASES_H */

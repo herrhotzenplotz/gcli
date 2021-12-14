@@ -27,20 +27,55 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef GITHUB_PULLS_H
+#define GITHUB_PULLS_H
 
-#include <sn/sn.h>
-#include <ghcli/ghcli.h>
+#include <ghcli/curl.h>
+#include <ghcli/pulls.h>
 
-void              ghcli_config_init(const char *file_path);
-char             *ghcli_config_get_editor(void);
-char             *ghcli_config_get_apibase(void);
-sn_sv             ghcli_config_get_token(void);
-sn_sv             ghcli_config_get_account(void);
-sn_sv             ghcli_config_get_upstream(void);
-void              ghcli_config_get_upstream_parts(sn_sv *owner, sn_sv *repo);
-sn_sv             ghcli_config_get_base(void);
-ghcli_forge_type  ghcli_config_get_forge_type(void);
+int github_get_prs(
+    const char  *owner,
+    const char  *reponame,
+    bool         all,
+    int          max,
+    ghcli_pull **out);
 
-#endif /* CONFIG_H */
+void github_print_pr_diff(
+    FILE       *stream,
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
+
+void github_pr_merge(
+    FILE       *out,
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
+
+void github_pr_reopen(
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
+
+void github_pr_close(
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
+
+void github_perform_submit_pr(
+    ghcli_submit_pull_options  opts,
+    ghcli_fetch_buffer        *out);
+
+int github_get_pull_commits(
+    const char    *owner,
+    const char    *repo,
+    int            pr_number,
+    ghcli_commit **out);
+
+void github_get_pull_summary(
+    const char         *owner,
+    const char         *repo,
+    int                 pr_number,
+    ghcli_pull_summary *out);
+
+#endif /* GITHUB_PULLS_H */

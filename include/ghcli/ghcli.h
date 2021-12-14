@@ -32,4 +32,9 @@
 
 enum ghcli_output_order { OUTPUT_ORDER_UNSORTED, OUTPUT_ORDER_SORTED };
 
+typedef enum ghcli_forge_type {
+    GHCLI_FORGE_GITHUB,
+    GHCLI_FORGE_GITLAB,
+} ghcli_forge_type;
+
 #endif /* GHCLI_H */

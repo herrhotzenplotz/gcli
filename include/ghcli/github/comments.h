@@ -27,20 +27,26 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef GITHUB_COMMENTS_H
+#define GITHUB_COMMENTS_H
 
-#include <sn/sn.h>
-#include <ghcli/ghcli.h>
+#include <ghcli/comments.h>
+#include <ghcli/curl.h>
 
-void              ghcli_config_init(const char *file_path);
-char             *ghcli_config_get_editor(void);
-char             *ghcli_config_get_apibase(void);
-sn_sv             ghcli_config_get_token(void);
-sn_sv             ghcli_config_get_account(void);
-sn_sv             ghcli_config_get_upstream(void);
-void              ghcli_config_get_upstream_parts(sn_sv *owner, sn_sv *repo);
-sn_sv             ghcli_config_get_base(void);
-ghcli_forge_type  ghcli_config_get_forge_type(void);
+void github_perform_submit_comment(
+    ghcli_submit_comment_opts  opts,
+    ghcli_fetch_buffer        *out);
 
-#endif /* CONFIG_H */
+void github_issue_comments(
+    FILE       *stream,
+    const char *owner,
+    const char *repo,
+    int         issue);
+
+int github_get_issue_comments(
+    const char     *owner,
+    const char     *repo,
+    int             issue,
+    ghcli_comment **out);
+
+#endif /* GITHUB_COMMENTS_H */

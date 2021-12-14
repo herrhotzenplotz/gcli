@@ -27,20 +27,22 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef GITHUB_REPOS_H
+#define GITHUB_REPOS_H
 
-#include <sn/sn.h>
-#include <ghcli/ghcli.h>
+#include <ghcli/repos.h>
 
-void              ghcli_config_init(const char *file_path);
-char             *ghcli_config_get_editor(void);
-char             *ghcli_config_get_apibase(void);
-sn_sv             ghcli_config_get_token(void);
-sn_sv             ghcli_config_get_account(void);
-sn_sv             ghcli_config_get_upstream(void);
-void              ghcli_config_get_upstream_parts(sn_sv *owner, sn_sv *repo);
-sn_sv             ghcli_config_get_base(void);
-ghcli_forge_type  ghcli_config_get_forge_type(void);
+int github_get_repos(
+    const char  *owner,
+    int          max,
+    ghcli_repo **out);
 
-#endif /* CONFIG_H */
+int github_get_own_repos(
+    int          max,
+    ghcli_repo **out);
+
+void github_repo_delete(
+    const char *owner,
+    const char *repo);
+
+#endif /* GITHUB_REPOS_H */

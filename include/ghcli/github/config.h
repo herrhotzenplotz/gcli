@@ -32,7 +32,7 @@
 
 #include <sn/sn.h>
 
-char  *github_get_apibase(void);
-sn_sv  github_get_token(void);
+char *github_get_apibase(void);
+char *github_get_authheader(void);
 
 #endif /* GITHUB_CONFIG_H */

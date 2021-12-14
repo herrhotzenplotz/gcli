@@ -68,7 +68,7 @@ github_forge_descriptor =
     .get_repos              = github_get_repos,
     .get_own_repos          = github_get_own_repos,
     .repo_delete            = github_repo_delete,
-    .get_token              = github_get_token,
+    .get_authheader         = github_get_authheader,
 };
 
 static ghcli_forge_descriptor

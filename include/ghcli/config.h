@@ -35,7 +35,7 @@
 
 void              ghcli_config_init(const char *file_path);
 char             *ghcli_config_get_editor(void);
-sn_sv             ghcli_config_get_token(void);
+char             *ghcli_config_get_authheader(void);
 sn_sv             ghcli_config_get_account(void);
 sn_sv             ghcli_config_get_upstream(void);
 void              ghcli_config_get_upstream_parts(sn_sv *owner, sn_sv *repo);

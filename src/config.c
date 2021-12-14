@@ -269,10 +269,10 @@ ghcli_config_get_editor(void)
     return sn_sv_to_cstr(ghcli_config_find_by_key("editor"));
 }
 
-sn_sv
-ghcli_config_get_token(void)
+char *
+ghcli_config_get_authheader(void)
 {
-    return ghcli_forge()->get_token();
+    return ghcli_forge()->get_authheader();
 }
 
 sn_sv

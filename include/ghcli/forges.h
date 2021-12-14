@@ -211,8 +211,8 @@ struct ghcli_forge_descriptor {
         const char *repo);
 
     /**
-     * Get an api token for use by curl */
-    sn_sv (*get_token)(void);
+     * Get an the http authentication header for use by curl */
+    char *(*get_authheader)(void);
 
     /**
      * Get the user account name */

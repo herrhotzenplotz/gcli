@@ -42,8 +42,11 @@ github_get_apibase(void)
         return "https://api.github.com";
 }
 
-sn_sv
-github_get_token(void)
+char *
+github_get_authheader(void)
 {
-    return ghcli_config_find_by_key("github.token");
+    sn_sv token = ghcli_config_find_by_key("github.token");;
+    if (!token.length)
+        errx(1, "Missing Github token");
+    return sn_asprintf("Authorization: token "SV_FMT, SV_ARGS(token));
 }

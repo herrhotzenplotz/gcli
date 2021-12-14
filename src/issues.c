@@ -27,27 +27,12 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/config.h>
+#include <ghcli/forges.h>
 #include <ghcli/editor.h>
 #include <ghcli/github/issues.h>
 #include <ghcli/issues.h>
 #include <ghcli/json_util.h>
 #include <sn/sn.h>
-
-static void
-perform_submit_issue(
-    ghcli_submit_issue_options  opts,
-    ghcli_fetch_buffer         *out)
-{
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB:
-        github_perform_submit_issue(opts, out);
-        break;
-    default:
-        sn_unimplemented;
-        break;
-    }
-}
 
 void
 ghcli_issues_free(ghcli_issue *it, int size)
@@ -68,13 +53,7 @@ ghcli_get_issues(
     int           max,
     ghcli_issue **out)
 {
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB:
-        return github_get_issues(owner, repo, all, max, out);
-    default:
-        sn_unimplemented;
-    }
-    return -1;
+    return ghcli_forge()->get_issues(owner, repo, all, max, out);
 }
 
 void
@@ -169,23 +148,6 @@ ghcli_issue_details_free(ghcli_issue_details *it)
     free(it->labels);
 }
 
-static void
-ghcli_get_issue_summary(
-    const char          *owner,
-    const char          *repo,
-    int                  issue_number,
-    ghcli_issue_details *out)
-{
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB: {
-        github_get_issue_summary(owner, repo, issue_number, out);
-    } break;
-    default: {
-        sn_unimplemented;
-    } break;
-    }
-}
-
 void
 ghcli_issue_summary(
     FILE       *stream,
@@ -195,7 +157,7 @@ ghcli_issue_summary(
 {
     ghcli_issue_details  details = {0};
 
-    ghcli_get_issue_summary(owner, repo, issue_number, &details);
+    ghcli_forge()->get_issue_summary(owner, repo, issue_number, &details);
     ghcli_print_issue_summary(stream, &details);
     ghcli_issue_details_free(&details);
 }
@@ -203,27 +165,13 @@ ghcli_issue_summary(
 void
 ghcli_issue_close(const char *owner, const char *repo, int issue_number)
 {
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB: {
-        github_issue_close(owner, repo, issue_number);
-    } break;
-    default: {
-        sn_unimplemented;
-    } break;
-    }
+    ghcli_forge()->issue_close(owner, repo, issue_number);
 }
 
 void
 ghcli_issue_reopen(const char *owner, const char *repo, int issue_number)
 {
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB: {
-        github_issue_reopen(owner, repo, issue_number);
-    } break;
-    default: {
-        sn_unimplemented;
-    } break;
-    }
+    ghcli_forge()->issue_reopen(owner, repo, issue_number);
 }
 
 static void
@@ -270,7 +218,7 @@ ghcli_issue_submit(ghcli_submit_issue_options opts)
             errx(1, "Submission aborted.");
     }
 
-    perform_submit_issue(opts, &json_buffer);
+    ghcli_forge()->perform_submit_issue(opts, &json_buffer);
     ghcli_print_html_url(json_buffer);
 
     free(body.data);

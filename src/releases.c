@@ -27,7 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/config.h>
+#include <ghcli/forges.h>
 #include <ghcli/github/releases.h>
 #include <ghcli/releases.h>
 
@@ -41,13 +41,7 @@ ghcli_get_releases(
     int             max,
     ghcli_release **out)
 {
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB:
-        return github_get_releases(owner, repo, max, out);
-    default:
-        sn_unimplemented;
-    }
-    return -1;
+    return ghcli_forge()->get_releases(owner, repo, max, out);
 }
 
 static void
@@ -116,14 +110,7 @@ ghcli_free_releases(ghcli_release *releases, int releases_size)
 void
 ghcli_create_release(const ghcli_new_release *release)
 {
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB:
-        github_create_release(release);
-        break;
-    default:
-        sn_unimplemented;
-        break;
-    }
+    ghcli_forge()->create_release(release);
 }
 
 void
@@ -138,12 +125,5 @@ ghcli_release_push_asset(ghcli_new_release *release, ghcli_release_asset asset)
 void
 ghcli_delete_release(const char *owner, const char *repo, const char *id)
 {
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB:
-        github_delete_release(owner, repo, id);
-        break;
-    default:
-        sn_unimplemented;
-        break;
-    }
+    ghcli_forge()->delete_release(owner, repo, id);
 }

@@ -23,3 +23,5 @@
 /include/ghcli/github/releases.h~
 /src/github/releases.c~
 /src/github/releases.o
+/include/ghcli/forges.h~
+/src/forges.c~

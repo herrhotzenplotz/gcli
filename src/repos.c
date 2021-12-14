@@ -27,23 +27,16 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/config.h>
-#include <ghcli/repos.h>
+#include <ghcli/forges.h>
 #include <ghcli/github/repos.h>
+#include <ghcli/repos.h>
 
 #include <stdlib.h>
 
 int
 ghcli_get_repos(const char *owner, int max, ghcli_repo **out)
 {
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB:
-        return github_get_repos(owner, max, out);
-    default:
-        sn_unimplemented;
-    }
-
-    return -1;
+    return ghcli_forge()->get_repos(owner, max, out);
 }
 
 
@@ -102,24 +95,11 @@ ghcli_repos_free(ghcli_repo *repos, size_t repos_size)
 int
 ghcli_get_own_repos(int max, ghcli_repo **out)
 {
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB:
-        return github_get_own_repos(max, out);
-    default:
-        sn_unimplemented;
-    }
-
-    return -1;
+    return ghcli_forge()->get_own_repos(max, out);
 }
 
 void
 ghcli_repo_delete(const char *owner, const char *repo)
 {
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB:
-        github_repo_delete(owner, repo);
-        break;
-    default:
-        sn_unimplemented;
-    }
+    ghcli_forge()->repo_delete(owner, repo);
 }

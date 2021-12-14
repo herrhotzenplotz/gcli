@@ -50,3 +50,12 @@ github_get_authheader(void)
         errx(1, "Missing Github token");
     return sn_asprintf("Authorization: token "SV_FMT, SV_ARGS(token));
 }
+
+sn_sv
+github_get_account(void)
+{
+    sn_sv account = ghcli_config_find_by_key("github.account");;
+    if (!account.length)
+        errx(1, "Missing Github account");
+    return account;
+}

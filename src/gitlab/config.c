@@ -51,3 +51,12 @@ gitlab_get_authheader(void)
         errx(1, "Missing GitLab token");
     return sn_asprintf("PRIVATE-TOKEN: "SV_FMT, SV_ARGS(token));
 }
+
+sn_sv
+gitlab_get_account(void)
+{
+    sn_sv account = ghcli_config_find_by_key("gitlab.account");;
+    if (!account.length)
+        errx(1, "Missing GitLab account");
+    return account;
+}

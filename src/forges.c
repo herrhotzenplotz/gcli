@@ -70,6 +70,7 @@ github_forge_descriptor =
     .get_own_repos          = github_get_own_repos,
     .repo_delete            = github_repo_delete,
     .get_authheader         = github_get_authheader,
+    .get_account            = github_get_account,
     .user_object_key        = "login",
     .html_url_key           = "html_url",
 };
@@ -101,6 +102,7 @@ gitlab_forge_descriptor =
     /* .get_own_repos          = gitlab_get_own_repos, */
     /* .repo_delete            = gitlab_repo_delete, */
     .get_authheader         = gitlab_get_authheader,
+    .get_account            = gitlab_get_account,
     .user_object_key        = "username",
     .html_url_key           = "web_url",
 };

@@ -30,8 +30,8 @@
 #ifndef GITLAB_CONFIG_H
 #define GITLAB_CONFIG_H
 
-char *gitlab_get_apibase(void);
-char *gitlab_get_authheader(void);
-
+char  *gitlab_get_apibase(void);
+char  *gitlab_get_authheader(void);
+sn_sv  gitlab_get_account(void);
 
 #endif /* GITLAB_CONFIG_H */

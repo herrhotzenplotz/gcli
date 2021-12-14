@@ -209,6 +209,24 @@ struct ghcli_forge_descriptor {
     void (*repo_delete)(
         const char *owner,
         const char *repo);
+
+    /**
+     * Get an the http authentication header for use by curl */
+    char *(*get_authheader)(void);
+
+    /**
+     * Get the user account name */
+    sn_sv (*get_account)(void);
+
+    /**
+     * A key in the user json object sent by the API that represents
+     * the user name */
+    const char *user_object_key;
+
+    /**
+     * A key in responses by the API that represents the URL for the
+     * object being operated on */
+    const char *html_url_key;
 };
 
 const ghcli_forge_descriptor *ghcli_forge(void);

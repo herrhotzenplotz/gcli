@@ -29,13 +29,13 @@
 
 #include <ghcli/config.h>
 #include <ghcli/curl.h>
-#include <ghcli/github/config.h>
-#include <ghcli/github/issues.h>
+#include <ghcli/gitlab/config.h>
+#include <ghcli/gitlab/issues.h>
 #include <ghcli/json_util.h>
 #include <pdjson/pdjson.h>
 
 static void
-github_parse_issue_entry(json_stream *input, ghcli_issue *it)
+gitlab_parse_issue_entry(json_stream *input, ghcli_issue *it)
 {
     if (json_next(input) != JSON_OBJECT)
         errx(1, "Expected Issue Object");
@@ -49,7 +49,7 @@ github_parse_issue_entry(json_stream *input, ghcli_issue *it)
             it->title = get_string(input);
         } else if (strncmp("state", key, len) == 0) {
             it->state = get_string(input);
-        } else if (strncmp("number", key, len) == 0) {
+        } else if (strncmp("iid", key, len) == 0) {
             it->number = get_int(input);
         } else if (strncmp("id", key, len) == 0) {
             it->id = get_int(input);
@@ -71,7 +71,7 @@ github_parse_issue_entry(json_stream *input, ghcli_issue *it)
 }
 
 int
-github_get_issues(
+gitlab_get_issues(
     const char   *owner,
     const char   *repo,
     bool          all,
@@ -85,10 +85,10 @@ github_get_issues(
     char               *next_url    = NULL;
 
     url = sn_asprintf(
-        "%s/repos/%s/%s/issues?state=%s",
-        github_get_apibase(),
+        "%s/projects/%s%%2F%s/issues%s",
+        gitlab_get_apibase(),
         owner, repo,
-        all ? "all" : "open");
+        all ? "" : "?state=opened");
 
     do {
         ghcli_fetch(url, &next_url, &json_buffer);
@@ -107,7 +107,7 @@ github_get_issues(
                 *out = realloc(*out, sizeof(ghcli_issue) * (count + 1));
                 ghcli_issue *it = &(*out)[count];
                 memset(it, 0, sizeof(ghcli_issue));
-                github_parse_issue_entry(&stream, it);
+                gitlab_parse_issue_entry(&stream, it);
                 count += 1;
             } break;
             default:
@@ -134,7 +134,7 @@ github_get_issues(
 }
 
 static void
-github_parse_issue_details(json_stream *input, ghcli_issue_details *out)
+gitlab_parse_issue_details(json_stream *input, ghcli_issue_details *out)
 {
     enum json_type key_type, value_type;
     const char *key;
@@ -149,17 +149,17 @@ github_parse_issue_details(json_stream *input, ghcli_issue_details *out)
             out->title = get_sv(input);
         else if (strncmp("state", key, len) == 0)
             out->state = get_sv(input);
-        else if (strncmp("body", key, len) == 0)
+        else if (strncmp("description", key, len) == 0)
             out->body = get_sv(input);
         else if (strncmp("created_at", key, len) == 0)
             out->created_at = get_sv(input);
-        else if (strncmp("number", key, len) == 0)
+        else if (strncmp("iid", key, len) == 0)
             out->number = get_int(input);
-        else if (strncmp("comments", key, len) == 0)
+        else if (strncmp("user_notes_count", key, len) == 0)
             out->comments = get_int(input);
-        else if (strncmp("user", key, len) == 0)
+        else if (strncmp("author", key, len) == 0)
             out->author = get_user_sv(input);
-        else if (strncmp("locked", key, len) == 0)
+        else if (strncmp("discussion_locked", key, len) == 0)
             out->locked = get_bool(input);
         else if (strncmp("labels", key, len) == 0)
             out->labels_size = ghcli_read_label_list(input, &out->labels);
@@ -186,7 +186,7 @@ github_parse_issue_details(json_stream *input, ghcli_issue_details *out)
 }
 
 void
-github_get_issue_summary(
+gitlab_get_issue_summary(
     const char          *owner,
     const char          *repo,
     int                  issue_number,
@@ -197,8 +197,8 @@ github_get_issue_summary(
     json_stream         parser = {0};
 
     url = sn_asprintf(
-        "%s/repos/%s/%s/issues/%d",
-        github_get_apibase(),
+        "%s/projects/%s%%2F%s/issues/%d",
+        gitlab_get_apibase(),
         owner, repo,
         issue_number);
     ghcli_fetch(url, NULL, &buffer);
@@ -206,28 +206,29 @@ github_get_issue_summary(
     json_open_buffer(&parser, buffer.data, buffer.length);
     json_set_streaming(&parser, true);
 
-    github_parse_issue_details(&parser, out);
+    gitlab_parse_issue_details(&parser, out);
 
     json_close(&parser);
     free(url);
     free(buffer.data);
 }
 
+
 void
-github_issue_close(const char *owner, const char *repo, int issue_number)
+gitlab_issue_close(const char *owner, const char *repo, int issue_number)
 {
     ghcli_fetch_buffer  json_buffer = {0};
     const char         *url         = NULL;
     const char         *data        = NULL;
 
     url  = sn_asprintf(
-        "%s/repos/%s/%s/issues/%d",
-        github_get_apibase(),
+        "%s/projects/%s%%2F%s/issues/%d",
+        gitlab_get_apibase(),
         owner, repo,
         issue_number);
-    data = sn_asprintf("{ \"state\": \"close\"}");
+    data = sn_asprintf("{ \"state_event\": \"close\"}");
 
-    ghcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
+    ghcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
 
     free((void *)data);
     free((void *)url);
@@ -235,20 +236,20 @@ github_issue_close(const char *owner, const char *repo, int issue_number)
 }
 
 void
-github_issue_reopen(const char *owner, const char *repo, int issue_number)
+gitlab_issue_reopen(const char *owner, const char *repo, int issue_number)
 {
     ghcli_fetch_buffer  json_buffer = {0};
     const char         *url         = NULL;
     const char         *data        = NULL;
 
     url  = sn_asprintf(
-        "%s/repos/%s/%s/issues/%d",
-        github_get_apibase(),
+        "%s/projects/%s%%2F%s/issues/%d",
+        gitlab_get_apibase(),
         owner, repo,
         issue_number);
-    data = sn_asprintf("{ \"state\": \"open\"}");
+    data = sn_asprintf("{ \"state_event\": \"reopen\"}");
 
-    ghcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
+    ghcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
 
     free((void *)data);
     free((void *)url);
@@ -256,16 +257,16 @@ github_issue_reopen(const char *owner, const char *repo, int issue_number)
 }
 
 void
-github_perform_submit_issue(
+gitlab_perform_submit_issue(
     ghcli_submit_issue_options  opts,
     ghcli_fetch_buffer         *out)
 {
     char *post_fields = sn_asprintf(
-        "{ \"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
+        "{ \"title\": \""SV_FMT"\", \"description\": \""SV_FMT"\" }",
         SV_ARGS(opts.title), SV_ARGS(opts.body));
     char *url         = sn_asprintf(
-        "%s/repos/"SV_FMT"/"SV_FMT"/issues",
-        github_get_apibase(),
+        "%s/projects/"SV_FMT"%%2F"SV_FMT"/issues",
+        gitlab_get_apibase(),
         SV_ARGS(opts.owner),
         SV_ARGS(opts.repo));
 

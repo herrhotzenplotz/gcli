@@ -27,14 +27,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GITCONFIG_H
-#define GITCONFIG_H
+#ifndef GITLAB_CONFIG_H
+#define GITLAB_CONFIG_H
 
-#include <sn/sn.h>
+char  *gitlab_get_apibase(void);
+char  *gitlab_get_authheader(void);
+sn_sv  gitlab_get_account(void);
 
-void  ghcli_gitconfig_get_repo(const char **owner, const char **repo);
-sn_sv ghcli_gitconfig_get_current_branch(void);
-void  ghcli_gitconfig_add_fork_remote(const char *org, const char *repo);
-int   ghcli_gitconfig_get_forgetype(void);
-
-#endif /* GITCONFIG_H */
+#endif /* GITLAB_CONFIG_H */

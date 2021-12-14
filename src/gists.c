@@ -32,6 +32,8 @@
 #include <ghcli/curl.h>
 #include <ghcli/json_util.h>
 
+#include <ghcli/github/config.h>
+
 #include <pdjson/pdjson.h>
 
 static void
@@ -165,10 +167,10 @@ ghcli_get_gists(const char *user, int max, ghcli_gist **out)
     if (user)
         url = sn_asprintf(
             "%s/users/%s/gists",
-            ghcli_config_get_apibase(),
+            github_get_apibase(),
             user);
     else
-        url = sn_asprintf("%s/gists", ghcli_config_get_apibase());
+        url = sn_asprintf("%s/gists", github_get_apibase());
 
     do {
         ghcli_fetch(url, &next_url, &buffer);
@@ -306,7 +308,7 @@ ghcli_get_gist(const char *gist_id)
     struct json_stream  stream = {0};
     ghcli_gist         *it     = NULL;
 
-    url = sn_asprintf("%s/gists/%s", ghcli_config_get_apibase(), gist_id);
+    url = sn_asprintf("%s/gists/%s", github_get_apibase(), gist_id);
 
     ghcli_fetch(url, NULL, &buffer);
 
@@ -373,7 +375,7 @@ ghcli_create_gist(ghcli_new_gist opts)
      */
 
     /* TODO: Escape gist_description and file_name */
-    url = sn_asprintf("%s/gists", ghcli_config_get_apibase());
+    url = sn_asprintf("%s/gists", github_get_apibase());
     post_data = sn_asprintf(
         "{\"description\":\"%s\",\"public\":true,\"files\":"
         "{\"%s\": {\"content\":\""SV_FMT"\"}}}",
@@ -398,7 +400,7 @@ ghcli_delete_gist(const char *gist_id, bool always_yes)
 
     url = sn_asprintf(
         "%s/gists/%s",
-        ghcli_config_get_apibase(),
+        github_get_apibase(),
         gist_id);
 
     if (!always_yes && !sn_yesno("Are you sure you want to delete this gist?"))

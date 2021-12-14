@@ -27,14 +27,36 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GITCONFIG_H
-#define GITCONFIG_H
+#include <ghcli/config.h>
+#include <ghcli/gitlab/config.h>
 
 #include <sn/sn.h>
 
-void  ghcli_gitconfig_get_repo(const char **owner, const char **repo);
-sn_sv ghcli_gitconfig_get_current_branch(void);
-void  ghcli_gitconfig_add_fork_remote(const char *org, const char *repo);
-int   ghcli_gitconfig_get_forgetype(void);
+char *
+gitlab_get_apibase(void)
+{
+    sn_sv api_base = ghcli_config_find_by_key("gitlab.apibase");
 
-#endif /* GITCONFIG_H */
+    if (api_base.length)
+        return sn_sv_to_cstr(api_base);
+    else
+        return "https://gitlab.com/api/v4";
+}
+
+char *
+gitlab_get_authheader(void)
+{
+    sn_sv token = ghcli_config_find_by_key("gitlab.token");;
+    if (!token.length)
+        errx(1, "Missing GitLab token");
+    return sn_asprintf("PRIVATE-TOKEN: "SV_FMT, SV_ARGS(token));
+}
+
+sn_sv
+gitlab_get_account(void)
+{
+    sn_sv account = ghcli_config_find_by_key("gitlab.account");;
+    if (!account.length)
+        errx(1, "Missing GitLab account");
+    return account;
+}

@@ -27,14 +27,37 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GITCONFIG_H
-#define GITCONFIG_H
+#ifndef GITLAB_ISSUES_H
+#define GITLAB_ISSUES_H
 
-#include <sn/sn.h>
+#include <ghcli/curl.h>
+#include <ghcli/issues.h>
 
-void  ghcli_gitconfig_get_repo(const char **owner, const char **repo);
-sn_sv ghcli_gitconfig_get_current_branch(void);
-void  ghcli_gitconfig_add_fork_remote(const char *org, const char *repo);
-int   ghcli_gitconfig_get_forgetype(void);
+int gitlab_get_issues(
+    const char   *owner,
+    const char   *repo,
+    bool          all,
+    int           max,
+    ghcli_issue **out);
 
-#endif /* GITCONFIG_H */
+void gitlab_get_issue_summary(
+    const char          *owner,
+    const char          *repo,
+    int                  issue_number,
+    ghcli_issue_details *out);
+
+void gitlab_issue_close(
+    const char *owner,
+    const char *repo,
+    int         issue_number);
+
+void gitlab_issue_reopen(
+    const char *owner,
+    const char *repo,
+    int         issue_number);
+
+void gitlab_perform_submit_issue(
+    ghcli_submit_issue_options  opts,
+    ghcli_fetch_buffer         *out);
+
+#endif /* GITLAB_ISSUES_H */

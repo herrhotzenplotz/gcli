@@ -52,6 +52,8 @@ const char *get_label_(json_stream *input, const char *function);
 sn_sv       ghcli_json_escape(sn_sv);
 void        ghcli_print_html_url(ghcli_fetch_buffer);
 size_t      ghcli_read_label_list(json_stream *, sn_sv **);
+size_t      ghcli_read_user_list(json_stream *input, sn_sv **out);
+
 
 static inline sn_sv
 get_user_sv(json_stream *input)

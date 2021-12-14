@@ -28,24 +28,30 @@
  */
 
 #include <ghcli/config.h>
+#include <ghcli/gitconfig.h>
+#include <ghcli/forges.h>
 
 #include <dirent.h>
 #include <stdlib.h>
 #include <unistd.h>
 
 static struct ghcli_config {
-    sn_sv api_token;
-    sn_sv api_base;
-    sn_sv editor;
-    sn_sv account;
+    struct ghcli_config_entry {
+        sn_sv key;
+        sn_sv value;
+    } entries[128];
+    size_t entries_size;
 
     sn_sv buffer;
     void *mmap_pointer;
 } config;
 
 static struct ghcli_dotghcli {
-    sn_sv  upstream;
-    sn_sv  base;
+    struct ghcli_local_config_entry {
+        sn_sv key;
+        sn_sv value;
+    } entries[128];
+    size_t entries_size;
 
     sn_sv  buffer;
     void  *mmap_pointer;
@@ -175,13 +181,9 @@ init_local_config(void)
 
         sn_sv value = sn_sv_trim(line);
 
-        if (sn_sv_eq_to(key, "pr.upstream"))
-            local_config.upstream = value;
-        else if (sn_sv_eq_to(key, "pr.base"))
-            local_config.base = value;
-        else
-            errx(1, "%s:%d: unknown config entry '"SV_FMT"'",
-                 path, curr_line, SV_ARGS(key));
+        local_config.entries[local_config.entries_size].key   = key;
+        local_config.entries[local_config.entries_size].value = value;
+        local_config.entries_size++;
 
         local_config.buffer = sn_sv_trim_front(local_config.buffer);
         curr_line++;
@@ -243,17 +245,9 @@ ghcli_config_init(const char *file_path)
 
         sn_sv value = sn_sv_trim(line);
 
-        if (sn_sv_eq_to(key, "api_token"))
-            config.api_token = value;
-        else if (sn_sv_eq_to(key, "api_base"))
-            config.api_base = value;
-        else if (sn_sv_eq_to(key, "editor"))
-            config.editor = value;
-        else if (sn_sv_eq_to(key, "account"))
-            config.account = value;
-        else
-            errx(1, "%s:%d: unknown config entry '"SV_FMT"'",
-                 file_path, curr_line, SV_ARGS(key));
+        config.entries[config.entries_size].key   = key;
+        config.entries[config.entries_size].value = value;
+        config.entries_size++;
 
         config.buffer = sn_sv_trim_front(config.buffer);
         curr_line++;
@@ -263,34 +257,40 @@ ghcli_config_init(const char *file_path)
         free((void *)file_path);
 }
 
+sn_sv
+ghcli_config_find_by_key(const char *key)
+{
+    for (size_t i = 0; i < config.entries_size; ++i)
+        if (sn_sv_eq_to(config.entries[i].key, key))
+            return config.entries[i].value;
+    return SV_NULL;
+}
+
+static sn_sv
+ghcli_local_config_find_by_key(const char *key)
+{
+    for (size_t i = 0; i < local_config.entries_size; ++i)
+        if (sn_sv_eq_to(local_config.entries[i].key, key))
+            return local_config.entries[i].value;
+    return SV_NULL;
+}
+
 char *
 ghcli_config_get_editor(void)
 {
-    if (config.editor.length)
-        return sn_sv_to_cstr(config.editor);
-    else
-        return NULL;
+    return sn_sv_to_cstr(ghcli_config_find_by_key("editor"));
 }
 
 char *
-ghcli_config_get_apibase(void)
+ghcli_config_get_authheader(void)
 {
-    if (config.api_base.length)
-        return sn_sv_to_cstr(config.api_base);
-    else
-        return "https://api.github.com";
-}
-
-sn_sv
-ghcli_config_get_token(void)
-{
-    return config.api_token;
+    return ghcli_forge()->get_authheader();
 }
 
 sn_sv
 ghcli_config_get_account(void)
 {
-    return config.account;
+    return ghcli_forge()->get_account();
 }
 
 sn_sv
@@ -298,7 +298,7 @@ ghcli_config_get_upstream(void)
 {
     init_local_config();
 
-    return local_config.upstream;
+    return ghcli_local_config_find_by_key("pr.upstream");
 }
 
 void
@@ -317,11 +317,28 @@ ghcli_config_get_base(void)
 {
     init_local_config();
 
-    return local_config.base;
+    return ghcli_local_config_find_by_key("pr.base");
 }
 
 ghcli_forge_type
 ghcli_config_get_forge_type(void)
 {
-    return GHCLI_FORGE_GITHUB;
+    init_local_config();
+
+    sn_sv entry = ghcli_local_config_find_by_key("forge-type");
+    if (entry.length >= 0) {
+        if (sn_sv_eq_to(entry, "github"))
+            return GHCLI_FORGE_GITHUB;
+        else if (sn_sv_eq_to(entry, "gitlab"))
+            return GHCLI_FORGE_GITLAB;
+        else
+            errx(1, "Unknown forge type "SV_FMT, SV_ARGS(entry));
+    }
+
+    int guessed_from_gitconfig = ghcli_gitconfig_get_forgetype();
+    if (guessed_from_gitconfig >= 0)
+        return (ghcli_forge_type)(guessed_from_gitconfig);
+    else
+        sn_notreached;
+    return -1;
 }

@@ -28,8 +28,9 @@
  */
 
 #include <ghcli/config.h>
-#include <ghcli/json_util.h>
 #include <ghcli/github/comments.h>
+#include <ghcli/github/config.h>
+#include <ghcli/json_util.h>
 
 #include <pdjson/pdjson.h>
 
@@ -78,7 +79,7 @@ github_perform_submit_comment(
         SV_ARGS(opts.message));
     char *url         = sn_asprintf(
         "%s/repos/%s/%s/issues/%d/comments",
-        ghcli_config_get_apibase(),
+        github_get_apibase(),
         opts.owner, opts.repo, opts.issue);
 
     ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
@@ -124,7 +125,7 @@ github_get_issue_comments(
 {
     const char *url = sn_asprintf(
         "%s/repos/%s/%s/issues/%d/comments",
-        ghcli_config_get_apibase(),
+        github_get_apibase(),
         owner, repo, issue);
     int n = github_get_comments(url, out);
     free((void *)url);

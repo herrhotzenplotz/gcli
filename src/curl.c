@@ -258,14 +258,15 @@ ghcli_fetch_with_method(
     struct curl_slist *headers;
     char              *link_header = NULL;
 
-    const char *auth_header = sn_asprintf(
-        "Authorization: token "SV_FMT"",
-        SV_ARGS(ghcli_config_get_token()));
+    char *auth_header = ghcli_config_get_authheader();
 
     headers = NULL;
     headers = curl_slist_append(
         headers,
         "Accept: application/vnd.github.v3+json");
+    headers = curl_slist_append(
+        headers,
+        "Content-Type: application/json");
     headers = curl_slist_append(headers, auth_header);
 
     *out = (ghcli_fetch_buffer) {0};
@@ -300,7 +301,7 @@ ghcli_fetch_with_method(
     curl_slist_free_all(headers);
     headers = NULL;
 
-    free((void *)auth_header);
+    free(auth_header);
 }
 
 void
@@ -315,9 +316,7 @@ ghcli_post_upload(
     CURL                 *session;
     struct curl_slist    *headers;
 
-    char *auth_header = sn_asprintf(
-        "Authorization: token "SV_FMT"",
-        SV_ARGS(ghcli_config_get_token()));
+    char *auth_header = ghcli_config_get_authheader();
     char *contenttype_header = sn_asprintf(
         "Content-Type: %s",
         content_type);

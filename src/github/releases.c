@@ -29,6 +29,7 @@
 
 #include <ghcli/config.h>
 #include <ghcli/curl.h>
+#include <ghcli/github/config.h>
 #include <ghcli/github/releases.h>
 #include <ghcli/json_util.h>
 #include <pdjson/pdjson.h>
@@ -107,7 +108,7 @@ github_get_releases(
 
     url = sn_asprintf(
         "%s/repos/%s/%s/releases",
-        ghcli_config_get_apibase(),
+        github_get_apibase(),
         owner, repo);
 
     do {
@@ -202,7 +203,7 @@ github_create_release(const ghcli_new_release *release)
     /* https://docs.github.com/en/rest/reference/repos#create-a-release */
     url = sn_asprintf(
         "%s/repos/%s/%s/releases",
-        ghcli_config_get_apibase(),
+        github_get_apibase(),
         release->owner,
         release->repo);
 
@@ -263,7 +264,7 @@ github_delete_release(const char *owner, const char *repo, const char *id)
 
     url = sn_asprintf(
         "%s/repos/%s/%s/releases/%s",
-        ghcli_config_get_apibase(),
+        github_get_apibase(),
         owner, repo, id);
 
     ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);

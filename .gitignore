@@ -33,3 +33,8 @@
 /src/gitlab/config.o
 /src/gitlab/issues.c~
 /src/gitlab/issues.o
+/ghcli.core
+/include/ghcli/gitlab/merge_requests.h~
+/src/gitlab/merge_requests.c~
+/src/gitlab/merge_requests.o
+/src/gitlab/repos.o

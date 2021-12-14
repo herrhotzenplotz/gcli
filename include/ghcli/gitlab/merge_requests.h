@@ -27,13 +27,54 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GITLAB_CONFIG_H
-#define GITLAB_CONFIG_H
+#ifndef GITLAB_MERGE_REQUESTS_H
+#define GITLAB_MERGE_REQUESTS_H
 
-#include <sn/sn.h>
+#include <ghcli/pulls.h>
 
-char  *gitlab_get_apibase(void);
-char  *gitlab_get_authheader(void);
-sn_sv  gitlab_get_account(void);
+int gitlab_get_mrs(
+    const char  *owner,
+    const char  *reponame,
+    bool         all,
+    int          max,
+    ghcli_pull **out);
 
-#endif /* GITLAB_CONFIG_H */
+void gitlab_print_pr_diff(
+    FILE       *stream,
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
+
+void gitlab_mr_merge(
+    FILE       *out,
+    const char *owner,
+    const char *reponame,
+    int         mr_number);
+
+void gitlab_mr_close(
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
+
+void gitlab_mr_reopen(
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
+
+void gitlab_get_pull_summary(
+    const char         *owner,
+    const char         *repo,
+    int                 pr_number,
+    ghcli_pull_summary *out);
+
+int gitlab_get_pull_commits(
+    const char    *owner,
+    const char    *repo,
+    int            pr_number,
+    ghcli_commit **out);
+
+void gitlab_perform_submit_mr(
+    ghcli_submit_pull_options  opts,
+    ghcli_fetch_buffer        *out);
+
+#endif /* GITLAB_MERGE_REQUESTS_H */

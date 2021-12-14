@@ -151,6 +151,9 @@ init_local_config(void)
         return;
     }
 
+    local_config.has_been_searched_for = true;
+    local_config.has_been_found        = true;
+
     int len = sn_mmap_file(path, &local_config.mmap_pointer);
     if (len < 0)
         err(1, "Unable to open config file");

@@ -38,6 +38,7 @@
 #include <ghcli/curl.h>
 #include <ghcli/editor.h>
 #include <ghcli/forks.h>
+#include <ghcli/forges.h>
 #include <ghcli/gists.h>
 #include <ghcli/gitconfig.h>
 #include <ghcli/issues.h>

@@ -27,13 +27,14 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GITLAB_CONFIG_H
-#define GITLAB_CONFIG_H
+#ifndef GITLAB_REPOS_H
+#define GITLAB_REPOS_H
 
-#include <sn/sn.h>
+#include <ghcli/repos.h>
 
-char  *gitlab_get_apibase(void);
-char  *gitlab_get_authheader(void);
-sn_sv  gitlab_get_account(void);
+void gitlab_get_repo(
+    sn_sv       owner,
+    sn_sv       repo,
+    ghcli_repo *out);
 
-#endif /* GITLAB_CONFIG_H */
+#endif /* GITLAB_REPOS_H */

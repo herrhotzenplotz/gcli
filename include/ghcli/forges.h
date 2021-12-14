@@ -52,7 +52,7 @@ struct ghcli_forge_descriptor {
 
     /**
      * List comments on the given issue */
-    int (*issue_comments)(
+    int (*get_issue_comments)(
         const char     *owner,
         const char     *repo,
         int             issue,

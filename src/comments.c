@@ -28,25 +28,11 @@
  */
 
 #include <ghcli/comments.h>
-#include <ghcli/config.h>
 #include <ghcli/editor.h>
+#include <ghcli/forges.h>
 #include <ghcli/github/comments.h>
 #include <ghcli/json_util.h>
 #include <sn/sn.h>
-
-static void
-perform_submit_comment(
-    ghcli_submit_comment_opts  opts,
-    ghcli_fetch_buffer        *out)
-{
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB:
-        github_perform_submit_comment(opts, out);
-        break;
-    default:
-        sn_unimplemented;
-    }
-}
 
 static void
 ghcli_issue_comment_free(ghcli_comment *it)
@@ -71,25 +57,6 @@ ghcli_print_comment_list(
     }
 }
 
-static int
-ghcli_get_issue_comments(
-    const char     *owner,
-    const char     *repo,
-    int             issue,
-    ghcli_comment **out)
-{
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB: {
-        return github_get_issue_comments(owner, repo, issue, out);
-    } break;
-    default: {
-        sn_unimplemented;
-    } break;
-    }
-
-    return -1;
-}
-
 void
 ghcli_issue_comments(
     FILE       *stream,
@@ -100,7 +67,7 @@ ghcli_issue_comments(
     ghcli_comment *comments = NULL;
     int            n        = -1;
 
-    n = ghcli_get_issue_comments(owner, repo, issue, &comments);
+    n = ghcli_forge()->get_issue_comments(owner, repo, issue, &comments);
     ghcli_print_comment_list(stream, comments, (size_t)n);
 
     for (int i = 0; i < n; ++i)
@@ -146,7 +113,7 @@ ghcli_comment_submit(ghcli_submit_comment_opts opts)
             errx(1, "Aborted by user");
     }
 
-    perform_submit_comment(opts, &buffer);
+    ghcli_forge()->perform_submit_comment(opts, &buffer);
     ghcli_print_html_url(buffer);
 
     free(buffer.data);

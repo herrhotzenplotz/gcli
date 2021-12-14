@@ -43,7 +43,7 @@ static ghcli_forge_descriptor
 github_forge_descriptor =
 {
     .perform_submit_comment = github_perform_submit_comment,
-    .issue_comments         = github_get_issue_comments,
+    .get_issue_comments     = github_get_issue_comments,
     .get_forks              = github_get_forks,
     .fork_create            = github_fork_create,
     .get_issues             = github_get_issues,

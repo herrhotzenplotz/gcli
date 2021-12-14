@@ -27,7 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/config.h>
+#include <ghcli/forges.h>
 #include <ghcli/forks.h>
 #include <ghcli/github/forks.h>
 
@@ -38,13 +38,7 @@ ghcli_get_forks(
     int          max,
     ghcli_fork **out)
 {
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB:
-        return github_get_forks(owner, repo, max, out);
-    default:
-        sn_unimplemented;
-    }
-    return -1;
+    return ghcli_forge()->get_forks(owner, repo, max, out);
 }
 
 void
@@ -88,12 +82,5 @@ ghcli_print_forks(
 void
 ghcli_fork_create(const char *owner, const char *repo, const char *_in)
 {
-    switch (ghcli_config_get_forge_type()) {
-    case GHCLI_FORGE_GITHUB:
-        github_fork_create(owner, repo, _in);
-        break;
-    default:
-        sn_unimplemented;
-        break;
-    }
+    ghcli_forge()->fork_create(owner, repo, _in);
 }

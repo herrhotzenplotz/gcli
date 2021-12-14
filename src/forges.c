@@ -33,11 +33,14 @@
 #include <ghcli/forges.h>
 
 #include <ghcli/github/comments.h>
+#include <ghcli/github/config.h>
 #include <ghcli/github/forks.h>
 #include <ghcli/github/issues.h>
 #include <ghcli/github/pulls.h>
 #include <ghcli/github/releases.h>
 #include <ghcli/github/repos.h>
+
+#include <ghcli/gitlab/issues.h>
 
 static ghcli_forge_descriptor
 github_forge_descriptor =
@@ -65,6 +68,35 @@ github_forge_descriptor =
     .get_repos              = github_get_repos,
     .get_own_repos          = github_get_own_repos,
     .repo_delete            = github_repo_delete,
+    .get_token              = github_get_token,
+};
+
+static ghcli_forge_descriptor
+gitlab_forge_descriptor =
+{
+    /* .perform_submit_comment = gitlab_perform_submit_comment, */
+    /* .get_issue_comments     = gitlab_get_issue_comments, */
+    /* .get_forks              = gitlab_get_forks, */
+    /* .fork_create            = gitlab_fork_create, */
+    .get_issues             = gitlab_get_issues,
+    /* .get_issue_summary      = gitlab_get_issue_summary, */
+    /* .issue_close            = gitlab_issue_close, */
+    /* .issue_reopen           = gitlab_issue_reopen, */
+    /* .perform_submit_issue   = gitlab_perform_submit_issue, */
+    /* .get_prs                = gitlab_get_prs, */
+    /* .print_pr_diff          = gitlab_print_pr_diff, */
+    /* .pr_merge               = gitlab_pr_merge, */
+    /* .pr_reopen              = gitlab_pr_reopen, */
+    /* .pr_close               = gitlab_pr_close, */
+    /* .perform_submit_pr      = gitlab_perform_submit_pr, */
+    /* .get_pull_commits       = gitlab_get_pull_commits, */
+    /* .get_pull_summary       = gitlab_get_pull_summary, */
+    /* .get_releases           = gitlab_get_releases, */
+    /* .create_release         = gitlab_create_release, */
+    /* .delete_release         = gitlab_delete_release, */
+    /* .get_repos              = gitlab_get_repos, */
+    /* .get_own_repos          = gitlab_get_own_repos, */
+    /* .repo_delete            = gitlab_repo_delete, */
 };
 
 const ghcli_forge_descriptor *
@@ -73,6 +105,8 @@ ghcli_forge(void)
     switch (ghcli_config_get_forge_type()) {
     case GHCLI_FORGE_GITHUB:
         return &github_forge_descriptor;
+    case GHCLI_FORGE_GITLAB:
+        return &gitlab_forge_descriptor;
     default:
         sn_unimplemented;
     }

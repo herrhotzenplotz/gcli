@@ -27,14 +27,23 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GITCONFIG_H
-#define GITCONFIG_H
-
+#include <ghcli/github/config.h>
+#include <ghcli/config.h>
 #include <sn/sn.h>
 
-void  ghcli_gitconfig_get_repo(const char **owner, const char **repo);
-sn_sv ghcli_gitconfig_get_current_branch(void);
-void  ghcli_gitconfig_add_fork_remote(const char *org, const char *repo);
-int   ghcli_gitconfig_get_forgetype(void);
+char *
+github_get_apibase(void)
+{
+    sn_sv api_base = ghcli_config_find_by_key("github.apibase");
 
-#endif /* GITCONFIG_H */
+    if (api_base.length)
+        return sn_sv_to_cstr(api_base);
+    else
+        return "https://api.github.com";
+}
+
+sn_sv
+github_get_token(void)
+{
+    return ghcli_config_find_by_key("github.token");
+}

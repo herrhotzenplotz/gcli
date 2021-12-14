@@ -26,12 +26,14 @@ ghcli_SRCS			=	src/comments.c			\
 					src/ghcli.c			\
 					src/gists.c			\
 					src/gitconfig.c			\
+					src/github/config.c		\
 					src/github/comments.c		\
 					src/github/forks.c		\
 					src/github/issues.c		\
 					src/github/pulls.c		\
 					src/github/releases.c		\
 					src/github/repos.c		\
+					src/gitlab/issues.c		\
 					src/issues.c			\
 					src/json_util.c			\
 					src/pulls.c			\

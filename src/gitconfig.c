@@ -27,8 +27,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/gitconfig.h>
 #include <ghcli/config.h>
+#include <ghcli/ghcli.h>
+#include <ghcli/gitconfig.h>
 #include <sn/sn.h>
 
 #include <stdio.h>
@@ -195,6 +196,7 @@ gitconfig_find_url_entry(sn_sv buffer, sn_sv *out)
 
 static char *gitconfig_owner, *gitconfig_repo;
 static bool  should_free_owner_and_repo = 0;
+static int   gitconfig_forgetype = -1;          /* initially unknown */
 
 static void
 ghcli_gitconfig_atexit(void)
@@ -223,11 +225,17 @@ gitconfig_url_extract_github_data(
     url         = sn_sv_trim_front(url);
 
     if (sn_sv_has_prefix(url, "https://")) {
-        if (!sn_sv_has_prefix(url, "https://github.com/"))
+        if (sn_sv_has_prefix(url, "https://github.com/")) {
+            url.data   += sizeof("https://github.com/") - 1;
+            url.length -= sizeof("https://github.com/") - 1;
+            gitconfig_forgetype = GHCLI_FORGE_GITHUB;
+        } else if (sn_sv_has_prefix(url, "https://gitlab.com/")) {
+            url.data   += sizeof("https://gitlab.com/") - 1;
+            url.length -= sizeof("https://gitlab.com/") - 1;
+            gitconfig_forgetype = GHCLI_FORGE_GITLAB;
+        } else {
             return false;
-
-        url.data   += sizeof("https://github.com/") - 1;
-        url.length -= sizeof("https://github.com/") - 1;
+        }
     } else {
         // SSH
         foo = sn_sv_chop_until(&url, '@');
@@ -237,8 +245,14 @@ gitconfig_url_extract_github_data(
         url.length -= 1;
         url.data   += 1;
 
-        if (!sn_sv_has_prefix(url, "github.com"))
+        // Try to give the config.c CU a hint
+        if (sn_sv_has_prefix(url, "github.com")) {
+            gitconfig_forgetype = GHCLI_FORGE_GITHUB;
+        } else if (sn_sv_has_prefix(url, "gitlab.com")) {
+            gitconfig_forgetype = GHCLI_FORGE_GITLAB;
+        } else {
             return false;
+        }
 
         foo = sn_sv_chop_until(&url, ':');
         if (url.length == 0)
@@ -277,6 +291,7 @@ ghcli_gitconfig_get_repo(const char **owner, const char **repo)
     if (gitconfig_owner && gitconfig_repo) {
         *owner  = gitconfig_owner;
         *repo = gitconfig_repo;
+        return;
     }
 
     if ((upstream = ghcli_config_get_upstream()).length != 0) {
@@ -384,4 +399,12 @@ ghcli_gitconfig_add_fork_remote(const char *org, const char *repo)
             err(1, "fork");
         }
     }
+}
+
+/**
+ * Return the ghcli_forge_type or -1 if unknown */
+int
+ghcli_gitconfig_get_forgetype(void)
+{
+    return gitconfig_forgetype;
 }

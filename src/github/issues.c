@@ -29,6 +29,7 @@
 
 #include <ghcli/config.h>
 #include <ghcli/curl.h>
+#include <ghcli/github/config.h>
 #include <ghcli/github/issues.h>
 #include <ghcli/json_util.h>
 #include <pdjson/pdjson.h>
@@ -85,7 +86,7 @@ github_get_issues(
 
     url = sn_asprintf(
         "%s/repos/%s/%s/issues?state=%s",
-        ghcli_config_get_apibase(),
+        github_get_apibase(),
         owner, repo,
         all ? "all" : "open");
 
@@ -216,7 +217,7 @@ github_get_issue_summary(
 
     url = sn_asprintf(
         "%s/repos/%s/%s/issues/%d",
-        ghcli_config_get_apibase(),
+        github_get_apibase(),
         owner, repo,
         issue_number);
     ghcli_fetch(url, NULL, &buffer);
@@ -240,7 +241,7 @@ github_issue_close(const char *owner, const char *repo, int issue_number)
 
     url  = sn_asprintf(
         "%s/repos/%s/%s/issues/%d",
-        ghcli_config_get_apibase(),
+        github_get_apibase(),
         owner, repo,
         issue_number);
     data = sn_asprintf("{ \"state\": \"close\"}");
@@ -261,7 +262,7 @@ github_issue_reopen(const char *owner, const char *repo, int issue_number)
 
     url  = sn_asprintf(
         "%s/repos/%s/%s/issues/%d",
-        ghcli_config_get_apibase(),
+        github_get_apibase(),
         owner, repo,
         issue_number);
     data = sn_asprintf("{ \"state\": \"open\"}");
@@ -283,7 +284,7 @@ github_perform_submit_issue(
         SV_ARGS(opts.title), SV_ARGS(opts.body));
     char *url         = sn_asprintf(
         "%s/repos/"SV_FMT"/"SV_FMT"/issues",
-        ghcli_config_get_apibase(),
+        github_get_apibase(),
         SV_ARGS(opts.owner),
         SV_ARGS(opts.repo));
 

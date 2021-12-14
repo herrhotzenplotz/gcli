@@ -29,6 +29,7 @@
 
 #include <ghcli/config.h>
 #include <ghcli/curl.h>
+#include <ghcli/github/config.h>
 #include <ghcli/json_util.h>
 #include <ghcli/review.h>
 
@@ -90,7 +91,7 @@ ghcli_review_get_reviews(
 
     url = sn_asprintf(
         "%s/repos/%s/%s/pulls/%d/reviews",
-        ghcli_config_get_apibase(),
+        github_get_apibase(),
         owner, repo, pr);
     ghcli_fetch(url, NULL, &buffer);
 
@@ -245,7 +246,7 @@ ghcli_review_get_review_comments(
 
     url = sn_asprintf(
         "%s/repos/%s/%s/pulls/%d/reviews/%d/comments",
-        ghcli_config_get_apibase(),
+        github_get_apibase(),
         owner, repo, pr, review_id);
     ghcli_fetch(url, NULL, &buffer);
 

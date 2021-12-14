@@ -27,14 +27,12 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GITCONFIG_H
-#define GITCONFIG_H
+#ifndef GITHUB_CONFIG_H
+#define GITHUB_CONFIG_H
 
 #include <sn/sn.h>
 
-void  ghcli_gitconfig_get_repo(const char **owner, const char **repo);
-sn_sv ghcli_gitconfig_get_current_branch(void);
-void  ghcli_gitconfig_add_fork_remote(const char *org, const char *repo);
-int   ghcli_gitconfig_get_forgetype(void);
+char  *github_get_apibase(void);
+sn_sv  github_get_token(void);
 
-#endif /* GITCONFIG_H */
+#endif /* GITHUB_CONFIG_H */

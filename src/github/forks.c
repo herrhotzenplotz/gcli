@@ -29,6 +29,7 @@
 
 #include <ghcli/config.h>
 #include <ghcli/curl.h>
+#include <ghcli/github/config.h>
 #include <ghcli/github/forks.h>
 #include <ghcli/json_util.h>
 
@@ -95,7 +96,7 @@ github_get_forks(
 
     url = sn_asprintf(
         "%s/repos/%s/%s/forks",
-        ghcli_config_get_apibase(),
+        github_get_apibase(),
         owner, repo);
 
     do {
@@ -139,7 +140,7 @@ github_fork_create(const char *owner, const char *repo, const char *_in)
 
     url = sn_asprintf(
         "%s/repos/%s/%s/forks",
-        ghcli_config_get_apibase(),
+        github_get_apibase(),
         owner, repo);
     if (_in) {
         in        = ghcli_json_escape(SV((char *)_in));

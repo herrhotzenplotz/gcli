@@ -264,6 +264,9 @@ ghcli_fetch_with_method(
     headers = curl_slist_append(
         headers,
         "Accept: application/vnd.github.v3+json");
+    headers = curl_slist_append(
+        headers,
+        "Content-Type: application/json");
     headers = curl_slist_append(headers, auth_header);
 
     *out = (ghcli_fetch_buffer) {0};

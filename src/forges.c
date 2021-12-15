@@ -42,6 +42,7 @@
 
 #include <ghcli/gitlab/config.h>
 #include <ghcli/gitlab/issues.h>
+#include <ghcli/gitlab/merge_requests.h>
 
 static ghcli_forge_descriptor
 github_forge_descriptor =
@@ -87,14 +88,14 @@ gitlab_forge_descriptor =
     .issue_close            = gitlab_issue_close,
     .issue_reopen           = gitlab_issue_reopen,
     .perform_submit_issue   = gitlab_perform_submit_issue,
-    /* .get_prs                = gitlab_get_prs, */
-    /* .print_pr_diff          = gitlab_print_pr_diff, */
-    /* .pr_merge               = gitlab_pr_merge, */
-    /* .pr_reopen              = gitlab_pr_reopen, */
-    /* .pr_close               = gitlab_pr_close, */
-    /* .perform_submit_pr      = gitlab_perform_submit_pr, */
-    /* .get_pull_commits       = gitlab_get_pull_commits, */
-    /* .get_pull_summary       = gitlab_get_pull_summary, */
+    .get_prs                = gitlab_get_mrs,
+    .print_pr_diff          = gitlab_print_pr_diff,
+    .pr_merge               = gitlab_mr_merge,
+    .pr_reopen              = gitlab_mr_reopen,
+    .pr_close               = gitlab_mr_close,
+    .perform_submit_pr      = gitlab_perform_submit_mr,
+    .get_pull_commits       = gitlab_get_pull_commits,
+    .get_pull_summary       = gitlab_get_pull_summary,
     /* .get_releases           = gitlab_get_releases, */
     /* .create_release         = gitlab_create_release, */
     /* .delete_release         = gitlab_delete_release, */

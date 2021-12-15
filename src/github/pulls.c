@@ -29,6 +29,7 @@
 
 #include <ghcli/config.h>
 #include <ghcli/curl.h>
+#include <ghcli/gitconfig.h>
 #include <ghcli/github/config.h>
 #include <ghcli/github/pulls.h>
 #include <ghcli/json_util.h>
@@ -239,7 +240,9 @@ github_pr_reopen(const char *owner, const char *reponame, int pr_number)
 }
 
 void
-github_perform_submit_pr(ghcli_submit_pull_options opts, ghcli_fetch_buffer *out)
+github_perform_submit_pr(
+    ghcli_submit_pull_options  opts,
+    ghcli_fetch_buffer        *out)
 {
     /* TODO : JSON Injection */
     char *post_fields = sn_asprintf(
@@ -273,9 +276,9 @@ github_parse_commit_author_field(json_stream *input, ghcli_commit *it)
 
         if (strncmp(key, "name", len) == 0)
             it->author = get_string(input);
-        else if (strncmp(key, "email", len))
+        else if (strncmp(key, "email", len) == 0)
             it->email = get_string(input);
-        else if (strncmp(key, "date", len))
+        else if (strncmp(key, "date", len) == 0)
             it->date = get_string(input);
         else {
             value_type = json_next(input);

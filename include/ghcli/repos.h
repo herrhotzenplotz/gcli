@@ -36,6 +36,7 @@
 typedef struct ghcli_repo ghcli_repo;
 
 struct ghcli_repo {
+    int   id;
     sn_sv full_name;
     sn_sv name;
     sn_sv owner;

@@ -188,8 +188,8 @@ ghcli_print_commits_table(FILE *stream, ghcli_commit *commits, int commits_size)
         fprintf(stream, "%-8.8s  %-15.15s  %-20.20s  %-16.16s  %-s\n",
                 commits[i].sha,
                 commits[i].author,
-                commits[i].date,
                 commits[i].email,
+                commits[i].date,
                 message);
         free(message);
     }

@@ -78,4 +78,6 @@ void github_get_pull_summary(
     int                 pr_number,
     ghcli_pull_summary *out);
 
+sn_sv github_pull_try_derive_head(void);
+
 #endif /* GITHUB_PULLS_H */

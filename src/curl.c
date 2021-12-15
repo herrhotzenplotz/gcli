@@ -29,36 +29,14 @@
 
 #include <string.h>
 
-#include <ghcli/curl.h>
 #include <ghcli/config.h>
+#include <ghcli/curl.h>
+#include <ghcli/forges.h>
 #include <ghcli/json_util.h>
 
 #include <curl/curl.h>
 #include <sn/sn.h>
 #include <pdjson/pdjson.h>
-
-const char *
-ghcli_api_error_string(ghcli_fetch_buffer *it)
-{
-    struct json_stream stream = {0};
-    enum json_type     next   = JSON_NULL;
-
-    if (!it->length)
-        return NULL;
-
-    json_open_buffer(&stream, it->data, it->length);
-    json_set_streaming(&stream, true);
-
-    while ((next = json_next(&stream)) != JSON_OBJECT_END) {
-        char *key = get_string(&stream);
-        if (strcmp(key, "message") == 0)
-            return get_string(&stream);
-
-        free(key);
-    }
-
-    return "<No message key in error response object>";
-}
 
 static void
 ghcli_curl_check_api_error(
@@ -83,7 +61,7 @@ ghcli_curl_check_api_error(
              "error: request to %s failed with code %ld\n"
              "     : API error: %s",
              url, status_code,
-             ghcli_api_error_string(result));
+             ghcli_forge()->get_api_error_string(result));
     }
 }
 

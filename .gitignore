@@ -38,3 +38,5 @@
 /src/gitlab/merge_requests.c~
 /src/gitlab/merge_requests.o
 /src/gitlab/repos.o
+/src/github/api.o
+/src/gitlab/api.o

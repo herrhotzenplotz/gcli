@@ -32,6 +32,7 @@
 #include <ghcli/config.h>
 #include <ghcli/forges.h>
 
+#include <ghcli/github/api.h>
 #include <ghcli/github/comments.h>
 #include <ghcli/github/config.h>
 #include <ghcli/github/forks.h>
@@ -40,6 +41,7 @@
 #include <ghcli/github/releases.h>
 #include <ghcli/github/repos.h>
 
+#include <ghcli/gitlab/api.h>
 #include <ghcli/gitlab/config.h>
 #include <ghcli/gitlab/issues.h>
 #include <ghcli/gitlab/merge_requests.h>
@@ -72,6 +74,7 @@ github_forge_descriptor =
     .repo_delete            = github_repo_delete,
     .get_authheader         = github_get_authheader,
     .get_account            = github_get_account,
+    .get_api_error_string   = github_api_error_string,
     .user_object_key        = "login",
     .html_url_key           = "html_url",
 };
@@ -104,6 +107,7 @@ gitlab_forge_descriptor =
     /* .repo_delete            = gitlab_repo_delete, */
     .get_authheader         = gitlab_get_authheader,
     .get_account            = gitlab_get_account,
+    .get_api_error_string   = gitlab_api_error_string,
     .user_object_key        = "username",
     .html_url_key           = "web_url",
 };

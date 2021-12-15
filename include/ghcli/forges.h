@@ -219,6 +219,10 @@ struct ghcli_forge_descriptor {
     sn_sv (*get_account)(void);
 
     /**
+     * Get the error string from the API */
+    const char *(*get_api_error_string)(ghcli_fetch_buffer *);
+
+    /**
      * A key in the user json object sent by the API that represents
      * the user name */
     const char *user_object_key;

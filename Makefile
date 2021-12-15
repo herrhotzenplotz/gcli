@@ -26,6 +26,7 @@ ghcli_SRCS			=	src/comments.c			\
 					src/ghcli.c			\
 					src/gists.c			\
 					src/gitconfig.c			\
+					src/github/api.c		\
 					src/github/config.c		\
 					src/github/comments.c		\
 					src/github/forks.c		\
@@ -33,6 +34,7 @@ ghcli_SRCS			=	src/comments.c			\
 					src/github/pulls.c		\
 					src/github/releases.c		\
 					src/github/repos.c		\
+					src/gitlab/api.c		\
 					src/gitlab/config.c		\
 					src/gitlab/issues.c		\
 					src/gitlab/merge_requests.c	\

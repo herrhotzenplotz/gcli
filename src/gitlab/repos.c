@@ -176,3 +176,21 @@ gitlab_get_own_repos(
 
     return n;
 }
+
+void
+gitlab_repo_delete(
+    const char *owner,
+    const char *repo)
+{
+    char               *url    = NULL;
+    ghcli_fetch_buffer  buffer = {0};
+
+    url = sn_asprintf("%s/projects/%s%%2F%s",
+                      gitlab_get_apibase(),
+                      owner, repo);
+
+    ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+
+    free(buffer.data);
+    free(url);
+}

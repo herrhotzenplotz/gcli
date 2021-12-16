@@ -45,6 +45,7 @@
 #include <ghcli/gitlab/config.h>
 #include <ghcli/gitlab/issues.h>
 #include <ghcli/gitlab/merge_requests.h>
+#include <ghcli/gitlab/repos.h>
 
 static ghcli_forge_descriptor
 github_forge_descriptor =
@@ -102,8 +103,8 @@ gitlab_forge_descriptor =
     /* .get_releases           = gitlab_get_releases, */
     /* .create_release         = gitlab_create_release, */
     /* .delete_release         = gitlab_delete_release, */
-    /* .get_repos              = gitlab_get_repos, */
-    /* .get_own_repos          = gitlab_get_own_repos, */
+    .get_repos              = gitlab_get_repos,
+    .get_own_repos          = gitlab_get_own_repos,
     /* .repo_delete            = gitlab_repo_delete, */
     .get_authheader         = gitlab_get_authheader,
     .get_account            = gitlab_get_account,

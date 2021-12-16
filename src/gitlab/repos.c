@@ -108,3 +108,71 @@ gitlab_get_repo(
     free(buffer.data);
     free(url);
 }
+
+int
+gitlab_get_repos(
+    const char  *owner,
+    int          max,
+    ghcli_repo **out)
+{
+    char               *url      = NULL;
+    char               *next_url = NULL;
+    ghcli_fetch_buffer  buffer   = {0};
+    struct json_stream  stream   = {0};
+    enum  json_type     next     = JSON_NULL;
+    int                 size     = 0;
+
+    url = sn_asprintf("%s/users/%s/projects", gitlab_get_apibase(), owner);
+
+    do {
+        ghcli_fetch(url, &next_url, &buffer);
+
+        json_open_buffer(&stream, buffer.data, buffer.length);
+        json_set_streaming(&stream, 1);
+
+        // TODO: Poor error message
+        if ((next = json_next(&stream)) != JSON_ARRAY)
+            errx(1,
+                 "Expected array in response from API "
+                 "but got something else instead");
+
+        while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
+            *out = realloc(*out, sizeof(**out) * (size + 1));
+            ghcli_repo *it = &(*out)[size++];
+            gitlab_parse_repo(&stream, it);
+
+            if (size == max)
+                break;
+        }
+
+        free(url);
+        free(buffer.data);
+        json_close(&stream);
+    } while ((url = next_url) && (max == -1 || size < max));
+
+    free(url);
+
+    return size;
+}
+
+int
+gitlab_get_own_repos(
+    int          max,
+    ghcli_repo **out)
+{
+    char  *_account = NULL;
+    sn_sv  account  = {0};
+    int    n;
+
+    account = gitlab_get_account();
+    if (!account.length)
+        errx(1, "error: gitlab.account is not set");
+
+    _account = sn_sv_to_cstr(account);
+
+    n = gitlab_get_repos(_account, max, out);
+
+    free(_account);
+
+    return n;
+}

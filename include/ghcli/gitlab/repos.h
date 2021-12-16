@@ -37,4 +37,13 @@ void gitlab_get_repo(
     sn_sv       repo,
     ghcli_repo *out);
 
+int gitlab_get_repos(
+    const char  *owner,
+    int          max,
+    ghcli_repo **out);
+
+int gitlab_get_own_repos(
+    int          max,
+    ghcli_repo **out);
+
 #endif /* GITLAB_REPOS_H */

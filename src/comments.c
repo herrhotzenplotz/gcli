@@ -77,6 +77,25 @@ ghcli_issue_comments(
     free(comments);
 }
 
+void
+ghcli_pull_comments(
+    FILE       *stream,
+    const char *owner,
+    const char *repo,
+    int         issue)
+{
+    ghcli_comment *comments = NULL;
+    int            n        = -1;
+
+    n = ghcli_forge()->get_pull_comments(owner, repo, issue, &comments);
+    ghcli_print_comment_list(stream, comments, (size_t)n);
+
+    for (int i = 0; i < n; ++i)
+        ghcli_issue_comment_free(&comments[i]);
+
+    free(comments);
+}
+
 static void
 comment_init(FILE *f, void *_data)
 {

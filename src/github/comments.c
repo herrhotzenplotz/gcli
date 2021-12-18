@@ -88,7 +88,7 @@ github_perform_submit_comment(
 }
 
 static int
-github_get_comments(const char *url, ghcli_comment **comments)
+github_perform_get_comments(const char *url, ghcli_comment **comments)
 {
     int                count       = 0;
     json_stream        stream      = {0};
@@ -117,7 +117,7 @@ github_get_comments(const char *url, ghcli_comment **comments)
 }
 
 int
-github_get_issue_comments(
+github_get_comments(
     const char     *owner,
     const char     *repo,
     int             issue,
@@ -127,7 +127,7 @@ github_get_issue_comments(
         "%s/repos/%s/%s/issues/%d/comments",
         github_get_apibase(),
         owner, repo, issue);
-    int n = github_get_comments(url, out);
+    int n = github_perform_get_comments(url, out);
     free((void *)url);
     return n;
 }

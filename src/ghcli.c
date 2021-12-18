@@ -451,7 +451,7 @@ subcommand_pulls(int argc, char *argv[])
         else if (strcmp(operation, "summary") == 0)
             ghcli_pr_summary(stdout, owner, repo, pr);
         else if (strcmp(operation, "comments") == 0)
-            ghcli_issue_comments(stdout, owner, repo, pr);
+            ghcli_pull_comments(stdout, owner, repo, pr);
         else if (strcmp(operation, "merge") == 0)
             ghcli_pr_merge(stdout, owner, repo, pr);
         else if (strcmp(operation, "close") == 0)

@@ -52,7 +52,8 @@ static ghcli_forge_descriptor
 github_forge_descriptor =
 {
     .perform_submit_comment = github_perform_submit_comment,
-    .get_issue_comments     = github_get_issue_comments,
+    .get_issue_comments     = github_get_comments,
+    .get_pull_comments      = github_get_comments,
     .get_forks              = github_get_forks,
     .fork_create            = github_fork_create,
     .get_issues             = github_get_issues,
@@ -85,7 +86,8 @@ static ghcli_forge_descriptor
 gitlab_forge_descriptor =
 {
     .perform_submit_comment = gitlab_perform_submit_comment,
-    /* .get_issue_comments     = gitlab_get_issue_comments, */
+    .get_issue_comments     = gitlab_get_issue_comments,
+    .get_pull_comments     = gitlab_get_mr_comments,
     /* .get_forks              = gitlab_get_forks, */
     /* .fork_create            = gitlab_fork_create, */
     .get_issues             = gitlab_get_issues,

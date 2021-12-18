@@ -42,6 +42,7 @@
 #include <ghcli/github/repos.h>
 
 #include <ghcli/gitlab/api.h>
+#include <ghcli/gitlab/comments.h>
 #include <ghcli/gitlab/config.h>
 #include <ghcli/gitlab/issues.h>
 #include <ghcli/gitlab/merge_requests.h>
@@ -83,7 +84,7 @@ github_forge_descriptor =
 static ghcli_forge_descriptor
 gitlab_forge_descriptor =
 {
-    /* .perform_submit_comment = gitlab_perform_submit_comment, */
+    .perform_submit_comment = gitlab_perform_submit_comment,
     /* .get_issue_comments     = gitlab_get_issue_comments, */
     /* .get_forks              = gitlab_get_forks, */
     /* .fork_create            = gitlab_fork_create, */

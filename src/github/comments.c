@@ -80,7 +80,7 @@ github_perform_submit_comment(
     char *url         = sn_asprintf(
         "%s/repos/%s/%s/issues/%d/comments",
         github_get_apibase(),
-        opts.owner, opts.repo, opts.issue);
+        opts.owner, opts.repo, opts.target_id);
 
     ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
     free(post_fields);

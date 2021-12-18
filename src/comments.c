@@ -27,6 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <ghcli/config.h>
 #include <ghcli/comments.h>
 #include <ghcli/editor.h>
 #include <ghcli/forges.h>
@@ -79,15 +80,32 @@ ghcli_issue_comments(
 static void
 comment_init(FILE *f, void *_data)
 {
-    ghcli_submit_comment_opts *info = _data;
+    ghcli_submit_comment_opts *info        = _data;
+    const char                *target_type = NULL;
+
+    switch (info->target_type) {
+    case ISSUE_COMMENT:
+        target_type = "issue";
+        break;
+    case PR_COMMENT: {
+        switch (ghcli_config_get_forge_type()) {
+        case GHCLI_FORGE_GITHUB:
+            target_type = "Pull Request";
+            break;
+        case GHCLI_FORGE_GITLAB:
+            target_type = "Merge Request";
+            break;
+        }
+    } break;
+    }
 
     fprintf(
         f,
         "# Enter your comment below, save and exit.\n"
         "# All lines with a leading '#' are discarded and will not\n"
         "# appear in your comment.\n"
-        "# COMMENT IN : %s/%s #%d\n",
-        info->owner, info->repo, info->issue);
+        "# COMMENT IN : %s/%s %s #%d\n",
+        info->owner, info->repo, target_type, info->target_id);
 }
 
 static sn_sv
@@ -106,7 +124,7 @@ ghcli_comment_submit(ghcli_submit_comment_opts opts)
     fprintf(
         stdout,
         "You will be commenting the following in %s/%s #%d:\n"SV_FMT"\n",
-        opts.owner, opts.repo, opts.issue, SV_ARGS(message));
+        opts.owner, opts.repo, opts.target_id, SV_ARGS(message));
 
     if (!opts.always_yes) {
         if (!sn_yesno("Is this okay?"))

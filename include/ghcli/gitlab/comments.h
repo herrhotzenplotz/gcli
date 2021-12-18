@@ -27,47 +27,26 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef COMMENTS_H
-#define COMMENTS_H
+#ifndef GITLAB_COMMENTS_H
+#define GITLAB_COMMENTS_H
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <ghcli/comments.h>
+#include <ghcli/curl.h>
 
-#include <sn/sn.h>
+void gitlab_perform_submit_comment(
+    ghcli_submit_comment_opts  opts,
+    ghcli_fetch_buffer        *out);
 
-typedef struct ghcli_comment ghcli_comment;
-typedef struct ghcli_submit_comment_opts ghcli_submit_comment_opts;
+int gitlab_get_issue_comments(
+    const char     *owner,
+    const char     *repo,
+    int             issue,
+    ghcli_comment **out);
 
-struct ghcli_comment {
-    const char *author;    /* Login name of the comment author */
-    const char *date;      /* Creation date of the comment     */
-    int         id;        /* id of the comment                */
-    const char *body;      /* Raw text of the comment          */
-};
+int gitlab_get_mr_comments(
+    const char     *owner,
+    const char     *repo,
+    int             issue,
+    ghcli_comment **out);
 
-struct ghcli_submit_comment_opts {
-    enum comment_target_type { ISSUE_COMMENT, PR_COMMENT }  target_type;
-    const char                                             *owner, *repo;
-    int                                                     target_id;
-    sn_sv                                                   message;
-    bool                                                    always_yes;
-};
-
-void ghcli_print_comment_list(
-    FILE *stream,
-    ghcli_comment *comments,
-    size_t comments_size);
-void ghcli_issue_comments(
-    FILE *stream,
-    const char *owner,
-    const char *repo,
-    int issue);
-void ghcli_pull_comments(
-    FILE *stream,
-    const char *owner,
-    const char *repo,
-    int issue);
-void ghcli_comment_submit(
-    ghcli_submit_comment_opts opts);
-
-#endif /* COMMENTS_H */
+#endif /* GITLAB_COMMENTS_H */

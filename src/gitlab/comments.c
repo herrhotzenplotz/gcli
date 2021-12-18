@@ -29,6 +29,7 @@
 
 #include <ghcli/gitlab/comments.h>
 #include <ghcli/gitlab/config.h>
+#include <ghcli/json_util.h>
 
 void
 gitlab_perform_submit_comment(
@@ -57,4 +58,100 @@ gitlab_perform_submit_comment(
     ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
     free(post_fields);
     free(url);
+}
+
+static void
+gitlab_parse_comment(json_stream *input, ghcli_comment *it)
+{
+    if (json_next(input) != JSON_OBJECT)
+        errx(1, "Expected Comment Object");
+
+    enum json_type key_type;
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t          len        = 0;
+        const char     *key        = json_get_string(input, &len);
+        enum json_type  value_type = 0;
+
+        if (strncmp("created_at", key, len) == 0)
+            it->date = get_string(input);
+        else if (strncmp("body", key, len) == 0)
+            it->body = get_string(input);
+        else if (strncmp("author", key, len) == 0)
+            it->author = get_user(input);
+        else {
+            value_type = json_next(input);
+
+            switch (value_type) {
+            case JSON_ARRAY:
+                json_skip_until(input, JSON_ARRAY_END);
+                break;
+            case JSON_OBJECT:
+                json_skip_until(input, JSON_OBJECT_END);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+}
+
+static int
+gitlab_perform_get_comments(const char *url, ghcli_comment **comments)
+{
+    int                count       = 0;
+    json_stream        stream      = {0};
+    ghcli_fetch_buffer json_buffer = {0};
+
+    ghcli_fetch(url, NULL, &json_buffer);
+    json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+    json_set_streaming(&stream, true);
+
+    enum json_type next_token = json_next(&stream);
+
+    while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
+        if (next_token != JSON_OBJECT)
+            errx(1, "Unexpected non-object in comment list");
+
+        *comments = realloc(*comments, (count + 1) * sizeof(ghcli_comment));
+        ghcli_comment *it = &(*comments)[count];
+        gitlab_parse_comment(&stream, it);
+        count += 1;
+    }
+
+    json_close(&stream);
+    free(json_buffer.data);
+
+    return count;
+}
+
+int
+gitlab_get_mr_comments(
+    const char     *owner,
+    const char     *repo,
+    int             mr,
+    ghcli_comment **out)
+{
+    const char *url = sn_asprintf(
+        "%s/projects/%s%%2F%s/merge_requests/%d/notes",
+        gitlab_get_apibase(),
+        owner, repo, mr);
+    int n = gitlab_perform_get_comments(url, out);
+    free((void *)url);
+    return n;
+}
+
+int
+gitlab_get_issue_comments(
+    const char     *owner,
+    const char     *repo,
+    int             issue,
+    ghcli_comment **out)
+{
+    const char *url = sn_asprintf(
+        "%s/projects/%s%%2F%s/issues/%d/notes",
+        gitlab_get_apibase(),
+        owner, repo, issue);
+    int n = gitlab_perform_get_comments(url, out);
+    free((void *)url);
+    return n;
 }

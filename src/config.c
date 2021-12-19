@@ -341,7 +341,7 @@ ghcli_config_get_forge_type(void)
     init_local_config();
 
     sn_sv entry = ghcli_local_config_find_by_key("forge-type");
-    if (entry.length >= 0) {
+    if (entry.length > 0) {
         if (sn_sv_eq_to(entry, "github"))
             return GHCLI_FORGE_GITHUB;
         else if (sn_sv_eq_to(entry, "gitlab"))

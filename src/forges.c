@@ -88,7 +88,7 @@ gitlab_forge_descriptor =
 {
     .perform_submit_comment = gitlab_perform_submit_comment,
     .get_issue_comments     = gitlab_get_issue_comments,
-    .get_pull_comments     = gitlab_get_mr_comments,
+    .get_pull_comments      = gitlab_get_mr_comments,
     .get_forks              = gitlab_get_forks,
     .fork_create            = gitlab_fork_create,
     .get_issues             = gitlab_get_issues,

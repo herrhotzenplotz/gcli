@@ -237,3 +237,83 @@ gitlab_get_releases(
 
     return size;
 }
+
+void
+gitlab_create_release(const ghcli_new_release *release)
+{
+    char               *url            = NULL;
+    char               *upload_url     = NULL;
+    char               *post_data      = NULL;
+    char               *name_json      = NULL;
+    char               *commitish_json = NULL;
+    sn_sv               escaped_body   = {0};
+    ghcli_fetch_buffer  buffer         = {0};
+
+    /* https://docs.github.com/en/rest/reference/repos#create-a-release */
+    url = sn_asprintf(
+        "%s/projects/%s%%2F%s/releases",
+        gitlab_get_apibase(),
+        release->owner,
+        release->repo);
+
+    escaped_body = ghcli_json_escape(release->body);
+
+    if (release->commitish)
+        commitish_json = sn_asprintf(
+            ",\"ref\": \"%s\"",
+            release->commitish);
+
+    if (release->name)
+        name_json = sn_asprintf(
+            ",\"name\": \"%s\"",
+            release->name);
+
+    /* Warnings because unsupported on gitlab */
+    if (release->prerelease)
+        warnx("prereleases are not supported on GitLab, option ignored");
+
+    if (release->draft)
+        warnx("draft releases are not supported on GitLab, option ignored");
+
+    post_data = sn_asprintf(
+        "{"
+        "    \"tag_name\": \"%s\","
+        "    \"body\": \""SV_FMT"\""
+        "    %s"
+        "    %s"
+        "}",
+        release->tag,
+        SV_ARGS(escaped_body),
+        commitish_json ? commitish_json : "",
+        name_json ? name_json : "");
+
+    ghcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
+
+    if (release->assets_size)
+        warnx("GitLab release asset uploads are not yet supported");
+
+    free(upload_url);
+    free(buffer.data);
+    free(url);
+    free(post_data);
+    free(escaped_body.data);
+    free(name_json);
+    free(commitish_json);
+}
+
+void
+gitlab_delete_release(const char *owner, const char *repo, const char *id)
+{
+    char               *url    = NULL;
+    ghcli_fetch_buffer  buffer = {0};
+
+    url = sn_asprintf(
+        "%s/projects/%s%%2F%s/releases/%s",
+        gitlab_get_apibase(),
+        owner, repo, id);
+
+    ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+
+    free(url);
+    free(buffer.data);
+}

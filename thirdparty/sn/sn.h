@@ -50,6 +50,7 @@
 void errx(int code, const char *fmt, ...) PRINTF_FORMAT(2, 3);
 /* print a formatted error message, the error retrieved from errno and exit with code */
 void err(int code, const char *fmt, ...) PRINTF_FORMAT(2, 3);
+void warnx(const char *fmt, ...) PRINTF_FORMAT(1, 2);
 
 /* for convenience */
 #define sn_unimplemented errx(42, "%s: unimplemented", __func__)

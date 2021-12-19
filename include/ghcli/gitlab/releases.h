@@ -38,4 +38,12 @@ int gitlab_get_releases(
     int             max,
     ghcli_release **out);
 
+void gitlab_create_release(
+    const ghcli_new_release *release);
+
+void gitlab_delete_release(
+    const char *owner,
+    const char *repo,
+    const char *id);
+
 #endif /* GITLAB_RELEASES_H */

@@ -48,7 +48,7 @@ static void
 ghcli_print_release(FILE *stream, ghcli_release *it)
 {
         fprintf(stream,
-                "        ID : %d\n"
+                "        ID : "SV_FMT"\n"
                 "      NAME : "SV_FMT"\n"
                 "    AUTHOR : "SV_FMT"\n"
                 "      DATE : "SV_FMT"\n"
@@ -56,7 +56,7 @@ ghcli_print_release(FILE *stream, ghcli_release *it)
                 "PRERELEASE : %s\n"
                 "   TARBALL : "SV_FMT"\n"
                 "      BODY :\n",
-                it->id,
+                SV_ARGS(it->id),
                 SV_ARGS(it->name),
                 SV_ARGS(it->author),
                 SV_ARGS(it->date),

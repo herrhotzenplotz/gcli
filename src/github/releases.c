@@ -53,7 +53,8 @@ github_parse_release(struct json_stream *stream, ghcli_release *out)
         if (strncmp("name", key, len) == 0) {
             out->name = get_sv(stream);
         } else if (strncmp("id", key, len) == 0) {
-            out->id = get_int(stream);
+            int id = get_int(stream);
+            out->id = sn_sv_fmt("%d", id);
         } else if (strncmp("body", key, len) == 0) {
             out->body = get_sv(stream);
         } else if (strncmp("tarball_url", key, len) == 0) {

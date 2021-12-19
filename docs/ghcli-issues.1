@@ -3,7 +3,7 @@
 .Os
 .Sh NAME
 .Nm ghcli issues
-.Nd Manage GitHub issues
+.Nd Manage GitHub and GitLab issues
 .Sh SYNOPSIS
 .Nm
 .Op Fl n Ar n
@@ -18,8 +18,8 @@
 .Sh DESCRIPTION
 Use
 .Nm
-to list, create, edit or delete issues in repositories on GitHub.
-Without any action specified,
+to list, create, edit or delete issues in repositories on both GitHub
+and GitLab. Without any action specified,
 .Nm
 will list issues in the given or autodetected repository.
 .Sh OPTIONS
@@ -33,7 +33,7 @@ be used in combination with
 .It Fl r , -repo Ar repo
 List issues in the given repository. This option can only be used in
 combination with
-.Fl r .
+.Fl o .
 .It Fl a
 List all issues, including closed ones. Cannot be combined with
 actions. This does not affect the
@@ -46,7 +46,7 @@ issues. Setting
 .Ar n
 to -1 will fetch all issues. Default: 30. Note that
 on large repositories fetching all issues can take a considerable
-amount of time and may result in rate limiting by the GitHub API.
+amount of time and may result in rate limiting by the GitHub/GitLab API.
 .El
 
 .Sh SUBCOMMANDS

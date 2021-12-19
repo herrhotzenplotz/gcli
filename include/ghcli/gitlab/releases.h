@@ -27,70 +27,23 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RELEASES_H
-#define RELEASES_H
+#ifndef GITLAB_RELEASES_H
+#define GITLAB_RELEASES_H
 
-#include <sn/sn.h>
-#include <ghcli/ghcli.h>
+#include <ghcli/releases.h>
 
-typedef struct ghcli_release       ghcli_release;
-typedef struct ghcli_new_release   ghcli_new_release;
-typedef struct ghcli_release_asset ghcli_release_asset;
-
-struct ghcli_release {
-    sn_sv id;          /* Probably shouldn't be called id */
-    sn_sv tarball_url;
-    sn_sv name;
-    sn_sv body;
-    sn_sv author;
-    sn_sv date;
-    sn_sv upload_url;
-    sn_sv html_url;
-    bool  draft;
-    bool  prerelease;
-};
-
-struct ghcli_release_asset {
-    char *label;
-    char *name;
-    char *path;
-};
-
-#define GHCLI_RELEASE_MAX_ASSETS 16
-struct ghcli_new_release {
-    const char          *owner;
-    const char          *repo;
-    const char          *tag;
-    const char          *name;
-    sn_sv                body;
-    const char          *commitish;
-    bool                 draft;
-    bool                 prerelease;
-    ghcli_release_asset  assets[GHCLI_RELEASE_MAX_ASSETS];
-    size_t               assets_size;
-};
-
-int ghcli_get_releases(
+int gitlab_get_releases(
     const char     *owner,
     const char     *repo,
     int             max,
     ghcli_release **out);
-void ghcli_print_releases(
-    FILE                    *stream,
-    enum ghcli_output_order  order,
-    ghcli_release           *releases,
-    int                      releases_size);
-void ghcli_free_releases(
-    ghcli_release *,
-    int);
-void ghcli_create_release(
-    const ghcli_new_release *);
-void ghcli_release_push_asset(
-    ghcli_new_release *,
-    ghcli_release_asset);
-void ghcli_delete_release(
+
+void gitlab_create_release(
+    const ghcli_new_release *release);
+
+void gitlab_delete_release(
     const char *owner,
     const char *repo,
     const char *id);
 
-#endif /* RELEASES_H */
+#endif /* GITLAB_RELEASES_H */

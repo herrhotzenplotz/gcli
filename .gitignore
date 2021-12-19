@@ -46,3 +46,6 @@
 /include/ghcli/gitlab/forks.h~
 /src/gitlab/forks.c~
 /src/gitlab/forks.o
+/include/ghcli/gitlab/releases.h~
+/src/gitlab/releases.c~
+/src/gitlab/releases.o

@@ -43,3 +43,6 @@
 /include/ghcli/gitlab/comments.h~
 /src/gitlab/comments.c~
 /src/gitlab/comments.o
+/include/ghcli/gitlab/forks.h~
+/src/gitlab/forks.c~
+/src/gitlab/forks.o

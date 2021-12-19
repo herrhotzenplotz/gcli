@@ -152,3 +152,30 @@ gitlab_get_forks(
 
     return size;
 }
+
+void
+gitlab_fork_create(const char *owner, const char *repo, const char *_in)
+{
+    char               *url       = NULL;
+    char               *post_data = NULL;
+    sn_sv               in        = SV_NULL;
+    ghcli_fetch_buffer  buffer    = {0};
+
+    url = sn_asprintf(
+        "%s/projects/%s%%2F%s/fork",
+        gitlab_get_apibase(),
+        owner, repo);
+    if (_in) {
+        in        = ghcli_json_escape(SV((char *)_in));
+        post_data = sn_asprintf("{\"namespace_path\":\""SV_FMT"\"}",
+                                SV_ARGS(in));
+    }
+
+    ghcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
+    ghcli_print_html_url(buffer);
+
+    free(in.data);
+    free(url);
+    free(post_data);
+    free(buffer.data);
+}

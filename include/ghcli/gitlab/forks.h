@@ -38,4 +38,9 @@ int gitlab_get_forks(
     int          max,
     ghcli_fork **out);
 
+void gitlab_fork_create(
+    const char *owner,
+    const char *repo,
+    const char *_in);
+
 #endif /* GITLAB_FORKS_H */

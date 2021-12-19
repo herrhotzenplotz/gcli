@@ -3,7 +3,7 @@
 .Os
 .Sh NAME
 .Nm ghcli pulls
-.Nd Manage GitHub Pull Requests
+.Nd Manage GitHub Pull Requests and GitLab Merge Requests
 .Sh SYNOPSIS
 .Nm
 .Op Fl a
@@ -19,7 +19,7 @@
 Use
 .Nm
 to list, create, edit or delete Pull Requests (PRs) in repositories on
-GitHub. Without any action specified,
+GitHub or GitLab. Without any action specified,
 .Nm
 will list open PRs in the given or autodetected repository.
 .Sh OPTIONS
@@ -33,7 +33,7 @@ be used in combination with
 .It Fl r , -repo Ar repo
 List PRs in the given repository. This option can only be used in
 combination with
-.Fl r .
+.Fl o .
 .It Fl a
 List all PRs, including closed and merged ones. Cannot be combined
 with actions. This does not affect the
@@ -46,7 +46,7 @@ pull requests. Default: 30. If
 .Ar n
 is set to -1 this will fetch all pull requests. Note that on large
 repositories fetching all pull requests can take a considerable amount
-of time and may result in rate limiting by the GitHub API.
+of time and may result in rate limiting by the GitHub/GitLab API.
 .El
 
 .Sh SUBCOMMANDS

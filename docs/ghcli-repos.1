@@ -3,7 +3,7 @@
 .Os
 .Sh NAME
 .Nm ghcli repos
-.Nd Manage GitHub repositories
+.Nd Manage repositories on GitLab and GitHub
 .Sh SYNOPSIS
 .Nm
 .Op Fl s
@@ -16,7 +16,7 @@
 .Sh DESCRIPTION
 .Nm
 can be used to list or manage your own or an organization's
-repositories on Github.
+repositories on Github and GitLab.
 With no actions given,
 .Nm
 will list repositories, either of the through
@@ -45,7 +45,8 @@ repositories. Setting
 .Ar n
 to -1 will fetch all repositories. Default: 30. Note that on owners
 with many repositories fetching all of them can take a considerable
-amount of time and may result in rate limiting by the GitHub API.
+amount of time and may result in rate limiting by the GitHub/GitLab
+API.
 .El
 .El
 .Sh ACTIONS

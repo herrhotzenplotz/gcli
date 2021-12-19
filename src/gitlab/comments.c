@@ -27,15 +27,41 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/config.h>
-#include <ghcli/github/comments.h>
-#include <ghcli/github/config.h>
+#include <ghcli/gitlab/comments.h>
+#include <ghcli/gitlab/config.h>
 #include <ghcli/json_util.h>
 
-#include <pdjson/pdjson.h>
+void
+gitlab_perform_submit_comment(
+    ghcli_submit_comment_opts  opts,
+    ghcli_fetch_buffer        *out)
+{
+    const char *type  = NULL;
+
+    switch (opts.target_type) {
+    case ISSUE_COMMENT:
+        type = "issues";
+        break;
+    case PR_COMMENT:
+        type = "merge_requests";
+        break;
+    }
+
+    char *post_fields = sn_asprintf(
+        "{ \"body\": \""SV_FMT"\" }",
+        SV_ARGS(opts.message));
+    char *url         = sn_asprintf(
+        "%s/projects/%s%%2F%s/%s/%d/notes",
+        gitlab_get_apibase(),
+        opts.owner, opts.repo, type, opts.target_id);
+
+    ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
+    free(post_fields);
+    free(url);
+}
 
 static void
-github_parse_comment(json_stream *input, ghcli_comment *it)
+gitlab_parse_comment(json_stream *input, ghcli_comment *it)
 {
     if (json_next(input) != JSON_OBJECT)
         errx(1, "Expected Comment Object");
@@ -50,7 +76,7 @@ github_parse_comment(json_stream *input, ghcli_comment *it)
             it->date = get_string(input);
         else if (strncmp("body", key, len) == 0)
             it->body = get_string(input);
-        else if (strncmp("user", key, len) == 0)
+        else if (strncmp("author", key, len) == 0)
             it->author = get_user(input);
         else {
             value_type = json_next(input);
@@ -69,26 +95,8 @@ github_parse_comment(json_stream *input, ghcli_comment *it)
     }
 }
 
-void
-github_perform_submit_comment(
-    ghcli_submit_comment_opts  opts,
-    ghcli_fetch_buffer        *out)
-{
-    char *post_fields = sn_asprintf(
-        "{ \"body\": \""SV_FMT"\" }",
-        SV_ARGS(opts.message));
-    char *url         = sn_asprintf(
-        "%s/repos/%s/%s/issues/%d/comments",
-        github_get_apibase(),
-        opts.owner, opts.repo, opts.target_id);
-
-    ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
-    free(post_fields);
-    free(url);
-}
-
 static int
-github_perform_get_comments(const char *url, ghcli_comment **comments)
+gitlab_perform_get_comments(const char *url, ghcli_comment **comments)
 {
     int                count       = 0;
     json_stream        stream      = {0};
@@ -106,7 +114,7 @@ github_perform_get_comments(const char *url, ghcli_comment **comments)
 
         *comments = realloc(*comments, (count + 1) * sizeof(ghcli_comment));
         ghcli_comment *it = &(*comments)[count];
-        github_parse_comment(&stream, it);
+        gitlab_parse_comment(&stream, it);
         count += 1;
     }
 
@@ -117,17 +125,33 @@ github_perform_get_comments(const char *url, ghcli_comment **comments)
 }
 
 int
-github_get_comments(
+gitlab_get_mr_comments(
+    const char     *owner,
+    const char     *repo,
+    int             mr,
+    ghcli_comment **out)
+{
+    const char *url = sn_asprintf(
+        "%s/projects/%s%%2F%s/merge_requests/%d/notes",
+        gitlab_get_apibase(),
+        owner, repo, mr);
+    int n = gitlab_perform_get_comments(url, out);
+    free((void *)url);
+    return n;
+}
+
+int
+gitlab_get_issue_comments(
     const char     *owner,
     const char     *repo,
     int             issue,
     ghcli_comment **out)
 {
     const char *url = sn_asprintf(
-        "%s/repos/%s/%s/issues/%d/comments",
-        github_get_apibase(),
+        "%s/projects/%s%%2F%s/issues/%d/notes",
+        gitlab_get_apibase(),
         owner, repo, issue);
-    int n = github_perform_get_comments(url, out);
+    int n = gitlab_perform_get_comments(url, out);
     free((void *)url);
     return n;
 }

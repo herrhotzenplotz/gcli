@@ -38,7 +38,7 @@ typedef struct ghcli_new_release   ghcli_new_release;
 typedef struct ghcli_release_asset ghcli_release_asset;
 
 struct ghcli_release {
-    int   id;
+    sn_sv id;          /* Probably shouldn't be called id */
     sn_sv tarball_url;
     sn_sv name;
     sn_sv body;

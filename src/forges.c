@@ -42,15 +42,20 @@
 #include <ghcli/github/repos.h>
 
 #include <ghcli/gitlab/api.h>
+#include <ghcli/gitlab/comments.h>
 #include <ghcli/gitlab/config.h>
+#include <ghcli/gitlab/forks.h>
 #include <ghcli/gitlab/issues.h>
 #include <ghcli/gitlab/merge_requests.h>
+#include <ghcli/gitlab/releases.h>
+#include <ghcli/gitlab/repos.h>
 
 static ghcli_forge_descriptor
 github_forge_descriptor =
 {
     .perform_submit_comment = github_perform_submit_comment,
-    .get_issue_comments     = github_get_issue_comments,
+    .get_issue_comments     = github_get_comments,
+    .get_pull_comments      = github_get_comments,
     .get_forks              = github_get_forks,
     .fork_create            = github_fork_create,
     .get_issues             = github_get_issues,
@@ -82,10 +87,11 @@ github_forge_descriptor =
 static ghcli_forge_descriptor
 gitlab_forge_descriptor =
 {
-    /* .perform_submit_comment = gitlab_perform_submit_comment, */
-    /* .get_issue_comments     = gitlab_get_issue_comments, */
-    /* .get_forks              = gitlab_get_forks, */
-    /* .fork_create            = gitlab_fork_create, */
+    .perform_submit_comment = gitlab_perform_submit_comment,
+    .get_issue_comments     = gitlab_get_issue_comments,
+    .get_pull_comments      = gitlab_get_mr_comments,
+    .get_forks              = gitlab_get_forks,
+    .fork_create            = gitlab_fork_create,
     .get_issues             = gitlab_get_issues,
     .get_issue_summary      = gitlab_get_issue_summary,
     .issue_close            = gitlab_issue_close,
@@ -99,12 +105,12 @@ gitlab_forge_descriptor =
     .perform_submit_pr      = gitlab_perform_submit_mr,
     .get_pull_commits       = gitlab_get_pull_commits,
     .get_pull_summary       = gitlab_get_pull_summary,
-    /* .get_releases           = gitlab_get_releases, */
-    /* .create_release         = gitlab_create_release, */
-    /* .delete_release         = gitlab_delete_release, */
-    /* .get_repos              = gitlab_get_repos, */
-    /* .get_own_repos          = gitlab_get_own_repos, */
-    /* .repo_delete            = gitlab_repo_delete, */
+    .get_releases           = gitlab_get_releases,
+    .create_release         = gitlab_create_release,
+    .delete_release         = gitlab_delete_release,
+    .get_repos              = gitlab_get_repos,
+    .get_own_repos          = gitlab_get_own_repos,
+    .repo_delete            = gitlab_repo_delete,
     .get_authheader         = gitlab_get_authheader,
     .get_account            = gitlab_get_account,
     .get_api_error_string   = gitlab_api_error_string,

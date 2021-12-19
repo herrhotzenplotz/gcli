@@ -27,27 +27,26 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GITLAB_REPOS_H
-#define GITLAB_REPOS_H
+#ifndef GITLAB_COMMENTS_H
+#define GITLAB_COMMENTS_H
 
-#include <ghcli/repos.h>
+#include <ghcli/comments.h>
+#include <ghcli/curl.h>
 
-void gitlab_get_repo(
-    sn_sv       owner,
-    sn_sv       repo,
-    ghcli_repo *out);
+void gitlab_perform_submit_comment(
+    ghcli_submit_comment_opts  opts,
+    ghcli_fetch_buffer        *out);
 
-int gitlab_get_repos(
-    const char  *owner,
-    int          max,
-    ghcli_repo **out);
+int gitlab_get_issue_comments(
+    const char     *owner,
+    const char     *repo,
+    int             issue,
+    ghcli_comment **out);
 
-int gitlab_get_own_repos(
-    int          max,
-    ghcli_repo **out);
+int gitlab_get_mr_comments(
+    const char     *owner,
+    const char     *repo,
+    int             issue,
+    ghcli_comment **out);
 
-void gitlab_repo_delete(
-    const char *owner,
-    const char *repo);
-
-#endif /* GITLAB_REPOS_H */
+#endif /* GITLAB_COMMENTS_H */

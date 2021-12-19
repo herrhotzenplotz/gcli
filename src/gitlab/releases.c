@@ -27,50 +27,36 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/config.h>
 #include <ghcli/curl.h>
-#include <ghcli/github/config.h>
-#include <ghcli/github/releases.h>
+#include <ghcli/gitlab/config.h>
+#include <ghcli/gitlab/releases.h>
 #include <ghcli/json_util.h>
+
 #include <pdjson/pdjson.h>
 
-#include <assert.h>
-
 static void
-github_parse_release(struct json_stream *stream, ghcli_release *out)
+gitlab_parse_assets_source(struct json_stream *stream, ghcli_release *out)
 {
     enum json_type  next       = JSON_NULL;
     enum json_type  value_type = JSON_NULL;
     const char     *key;
+    sn_sv           url        = {0};
+    bool            is_tarball = false;
 
     if ((next = json_next(stream)) != JSON_OBJECT)
-        errx(1, "Expected Release Object");
+        errx(1, "expected asset source object");
 
     while ((next = json_next(stream)) == JSON_STRING) {
         size_t len;
         key = json_get_string(stream, &len);
 
-        if (strncmp("name", key, len) == 0) {
-            out->name = get_sv(stream);
-        } else if (strncmp("id", key, len) == 0) {
-            int id = get_int(stream);
-            out->id = sn_sv_fmt("%d", id);
-        } else if (strncmp("body", key, len) == 0) {
-            out->body = get_sv(stream);
-        } else if (strncmp("tarball_url", key, len) == 0) {
-            out->tarball_url = get_sv(stream);
-        } else if (strncmp("author", key, len) == 0) {
-            out->author = get_user_sv(stream);
-        } else if (strncmp("created_at", key, len) == 0) {
-            out->date = get_sv(stream);
-        } else if (strncmp("draft", key, len) == 0) {
-            out->draft = get_bool(stream);
-        } else if (strncmp("prerelease", key, len) == 0) {
-            out->prerelease = get_bool(stream);
-        } else if (strncmp("upload_url", key, len) == 0) {
-            out->upload_url = get_sv(stream);
-        } else if (strncmp("html_url", key, len) == 0) {
-            out->html_url = get_sv(stream);
+        if (strncmp(key, "format", len) == 0) {
+            sn_sv format_name = get_sv(stream);
+            if (sn_sv_eq_to(format_name, "tar.bz2"))
+                is_tarball = true;
+            free(format_name.data);
+        } else if (strncmp(key, "url", len) == 0) {
+            url = get_sv(stream);
         } else {
             value_type = json_next(stream);
 
@@ -88,11 +74,123 @@ github_parse_release(struct json_stream *stream, ghcli_release *out)
     }
 
     if (next != JSON_OBJECT_END)
-        errx(1, "Unclosed Release Object");
+        errx(1, "unclosed asset source object");
+
+    if (is_tarball) {
+        out->tarball_url = url;
+    } else {
+        free(url.data);
+    }
+}
+
+static void
+gitlab_parse_asset_sources(struct json_stream *stream, ghcli_release *out)
+{
+    enum json_type next = JSON_NULL;
+
+    if ((next = json_next(stream)) != JSON_ARRAY)
+        errx(1, "expected release assets sources array");
+
+    while ((next = json_peek(stream)) == JSON_OBJECT) {
+        gitlab_parse_assets_source(stream, out);
+    }
+
+    if (json_next(stream) != JSON_ARRAY_END)
+        errx(1, "unclosed release assets sources array");
+}
+
+static void
+gitlab_parse_assets(struct json_stream *stream, ghcli_release *out)
+{
+    enum json_type  next       = JSON_NULL;
+    enum json_type  value_type = JSON_NULL;
+    const char     *key;
+
+    if ((next = json_next(stream)) != JSON_OBJECT)
+        errx(1, "expected release assets object");
+
+    while ((next = json_next(stream)) == JSON_STRING) {
+        size_t len;
+        key = json_get_string(stream, &len);
+
+        if (strncmp(key, "sources", len) == 0) {
+            gitlab_parse_asset_sources(stream, out);
+        } else {
+            value_type = json_next(stream);
+
+            switch (value_type) {
+            case JSON_ARRAY:
+                json_skip_until(stream, JSON_ARRAY_END);
+                break;
+            case JSON_OBJECT:
+                json_skip_until(stream, JSON_OBJECT_END);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    if (next != JSON_OBJECT_END)
+        errx(1, "unclosed release assets object");
+}
+
+static void
+gitlab_parse_release(struct json_stream *stream, ghcli_release *out)
+{
+    enum json_type  next       = JSON_NULL;
+    enum json_type  value_type = JSON_NULL;
+    const char     *key;
+
+    if ((next = json_next(stream)) != JSON_OBJECT)
+        errx(1, "expected release object");
+
+    while ((next = json_next(stream)) == JSON_STRING) {
+        size_t len;
+        key = json_get_string(stream, &len);
+
+        if (strncmp("name", key, len) == 0) {
+            out->name = get_sv(stream);
+        } else if (strncmp("tag_name", key, len) == 0) {
+            out->id = get_sv(stream);
+        } else if (strncmp("description", key, len) == 0) {
+            out->body = get_sv(stream);
+        } else if (strncmp("assets", key, len) == 0) {
+            gitlab_parse_assets(stream, out);
+        } else if (strncmp("author", key, len) == 0) {
+            out->author = get_user_sv(stream);
+        } else if (strncmp("created_at", key, len) == 0) {
+            out->date = get_sv(stream);
+        } else if (strncmp("draft", key, len) == 0) {
+            // Does not exist on gitlab
+        } else if (strncmp("prerelease", key, len) == 0) {
+            // check the released_at field
+        } else if (strncmp("upload_url", key, len) == 0) {
+            // doesn't exist on gitlab
+        } else if (strncmp("html_url", key, len) == 0) {
+            // good luck
+        } else {
+            value_type = json_next(stream);
+
+            switch (value_type) {
+            case JSON_ARRAY:
+                json_skip_until(stream, JSON_ARRAY_END);
+                break;
+            case JSON_OBJECT:
+                json_skip_until(stream, JSON_OBJECT_END);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    if (next != JSON_OBJECT_END)
+        errx(1, "unclosed release object");
 }
 
 int
-github_get_releases(
+gitlab_get_releases(
     const char     *owner,
     const char     *repo,
     int             max,
@@ -108,8 +206,8 @@ github_get_releases(
     *out = NULL;
 
     url = sn_asprintf(
-        "%s/repos/%s/%s/releases",
-        github_get_apibase(),
+        "%s/projects/%s%%2F%s/releases",
+        gitlab_get_apibase(),
         owner, repo);
 
     do {
@@ -119,12 +217,12 @@ github_get_releases(
         json_set_streaming(&stream, 1);
 
         if ((next = json_next(&stream)) != JSON_ARRAY)
-            errx(1, "Expected array of releses");
+            errx(1, "expected array of releases");
 
         while ((next = json_peek(&stream)) == JSON_OBJECT) {
             *out = realloc(*out, sizeof(**out) * (size + 1));
             ghcli_release *it = &(*out)[size++];
-            github_parse_release(&stream, it);
+            gitlab_parse_release(&stream, it);
 
             if (size == max)
                 break;
@@ -140,55 +238,8 @@ github_get_releases(
     return size;
 }
 
-static void
-github_parse_single_release(ghcli_fetch_buffer buffer, ghcli_release *out)
-{
-    struct json_stream stream  = {0};
-
-    json_open_buffer(&stream, buffer.data, buffer.length);
-    json_set_streaming(&stream, 1);
-    github_parse_release(&stream, out);
-    json_close(&stream);
-}
-
-static char *
-github_get_upload_url(ghcli_release *it)
-{
-    char *delim = strchr(it->upload_url.data, '{');
-    if (delim == NULL)
-        errx(1, "GitHub API returned an invalid upload url");
-
-    size_t len = delim - it->upload_url.data;
-    return sn_strndup(it->upload_url.data, len);
-}
-
-static void
-github_upload_release_asset(const char *url, ghcli_release_asset asset)
-{
-    char               *req           = NULL;
-    sn_sv               file_content  = {0};
-    ghcli_fetch_buffer  buffer        = {0};
-
-    file_content.length = sn_mmap_file(asset.path, (void **)&file_content.data);
-    if (file_content.length == 0)
-        errx(1, "Trying to upload an empty file");
-
-    /* TODO: URL escape this */
-    req = sn_asprintf("%s?name=%s", url, asset.name);
-
-    ghcli_post_upload(
-        req,
-        "application/octet-stream", /* HACK */
-        file_content.data,
-        file_content.length,
-        &buffer);
-
-    free(req);
-    free(buffer.data);
-}
-
 void
-github_create_release(const ghcli_new_release *release)
+gitlab_create_release(const ghcli_new_release *release)
 {
     char               *url            = NULL;
     char               *upload_url     = NULL;
@@ -197,14 +248,11 @@ github_create_release(const ghcli_new_release *release)
     char               *commitish_json = NULL;
     sn_sv               escaped_body   = {0};
     ghcli_fetch_buffer  buffer         = {0};
-    ghcli_release       response       = {0};
-
-    assert(release);
 
     /* https://docs.github.com/en/rest/reference/repos#create-a-release */
     url = sn_asprintf(
-        "%s/repos/%s/%s/releases",
-        github_get_apibase(),
+        "%s/projects/%s%%2F%s/releases",
+        gitlab_get_apibase(),
         release->owner,
         release->repo);
 
@@ -212,7 +260,7 @@ github_create_release(const ghcli_new_release *release)
 
     if (release->commitish)
         commitish_json = sn_asprintf(
-            ",\"target_commitish\": \"%s\"",
+            ",\"ref\": \"%s\"",
             release->commitish);
 
     if (release->name)
@@ -220,33 +268,29 @@ github_create_release(const ghcli_new_release *release)
             ",\"name\": \"%s\"",
             release->name);
 
+    /* Warnings because unsupported on gitlab */
+    if (release->prerelease)
+        warnx("prereleases are not supported on GitLab, option ignored");
+
+    if (release->draft)
+        warnx("draft releases are not supported on GitLab, option ignored");
+
     post_data = sn_asprintf(
         "{"
         "    \"tag_name\": \"%s\","
-        "    \"draft\": %s,"
-        "    \"prerelease\": %s,"
         "    \"body\": \""SV_FMT"\""
         "    %s"
         "    %s"
         "}",
         release->tag,
-        ghcli_json_bool(release->draft),
-        ghcli_json_bool(release->prerelease),
         SV_ARGS(escaped_body),
         commitish_json ? commitish_json : "",
         name_json ? name_json : "");
 
     ghcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
-    github_parse_single_release(buffer, &response);
 
-    printf("INFO : Release at "SV_FMT"\n", SV_ARGS(response.html_url));
-
-    upload_url = github_get_upload_url(&response);
-
-    for (size_t i = 0; i < release->assets_size; ++i) {
-        printf("INFO : Uploading asset %s...\n", release->assets[i].path);
-        github_upload_release_asset(upload_url, release->assets[i]);
-    }
+    if (release->assets_size)
+        warnx("GitLab release asset uploads are not yet supported");
 
     free(upload_url);
     free(buffer.data);
@@ -258,14 +302,14 @@ github_create_release(const ghcli_new_release *release)
 }
 
 void
-github_delete_release(const char *owner, const char *repo, const char *id)
+gitlab_delete_release(const char *owner, const char *repo, const char *id)
 {
     char               *url    = NULL;
     ghcli_fetch_buffer  buffer = {0};
 
     url = sn_asprintf(
-        "%s/repos/%s/%s/releases/%s",
-        github_get_apibase(),
+        "%s/projects/%s%%2F%s/releases/%s",
+        gitlab_get_apibase(),
         owner, repo, id);
 
     ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);

@@ -3,7 +3,7 @@
 .Os
 .Sh NAME
 .Nm ghcli releases
-.Nd manage releases on GitHub
+.Nd manage releases on GitHub and GitLab
 .Sh SYNOPSIS
 
 .Nm
@@ -23,7 +23,6 @@
 
 .Nm
 .Cm delete
-.Fl t Ar tagname
 .Op Fl o Ar owner Fl r Ar repo
 .Op Fl y
 .Ar release-id
@@ -31,7 +30,7 @@
 .Sh DESCRIPTION
 Use
 .Nm
-to list, create or delete releases for repositories on GitHub.
+to list, create or delete releases for repositories on GitHub and GitLab.
 Without a subcommand specified,
 .Nm
 will list releases in the given or autodetected repository. If you are
@@ -50,7 +49,7 @@ used in combination with
 .It Fl r , -repo Ar repo
 List releases in the given repo. This option can only be used in
 combination with
-.Fl r .
+.Fl o .
 .It Fl n , -count Ar n
 Fetch at least
 .Ar n
@@ -165,5 +164,10 @@ $ ghcli releases create --owner herrhotzenplotz \\
 
 .Sh BUGS
 Yes. It is software.
+
+Currently uploading release assets to GitLab doesn't work.
+Prereleases and draft releases are unsupported by GitLab. Using those
+flags in a GitLab forge type remote will produce warnings but still
+create the release.
 
 Please report issues preferably via e-mail or on GitHub.

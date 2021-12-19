@@ -260,9 +260,10 @@ subcommand_pull_create(int argc, char *argv[])
 static int
 subcommand_comment(int argc, char *argv[])
 {
-    int         ch, issue  = -1;
-    const char *repo       = NULL, *owner = NULL;
-    bool        always_yes = false;
+    int                       ch, target_id  = -1;
+    const char               *repo       = NULL, *owner = NULL;
+    bool                      always_yes = false;
+    enum comment_target_type  target_type;
 
     const struct option options[] = {
         { .name    = "yes",
@@ -297,9 +298,13 @@ subcommand_comment(int argc, char *argv[])
             owner = optarg;
             break;
         case 'p':
-        case 'i': {
+            target_type = PR_COMMENT;
+            goto parse_target_id;
+        case 'i':
+            target_type = ISSUE_COMMENT;
+        parse_target_id: {
             char *endptr;
-            issue = strtoul(optarg, &endptr, 10);
+            target_id = strtoul(optarg, &endptr, 10);
             if (endptr != optarg + strlen(optarg))
                 err(1, "error: Cannot parse issue/PR number");
         } break;
@@ -316,14 +321,15 @@ subcommand_comment(int argc, char *argv[])
 
     check_owner_and_repo(&owner, &repo);
 
-    if (issue < 0)
-        errx(1, "error: missing issue/PR number (use -i)");
+    if (target_id < 0)
+        errx(1, "error: missing issue/PR number (use -i/-p)");
 
     ghcli_comment_submit((ghcli_submit_comment_opts) {
-            .owner      = owner,
-            .repo       = repo,
-            .issue      = issue,
-            .always_yes = always_yes,
+            .owner       = owner,
+            .repo        = repo,
+            .target_type = target_type,
+            .target_id   = target_id,
+            .always_yes  = always_yes,
     });
 
     return EXIT_SUCCESS;
@@ -445,7 +451,7 @@ subcommand_pulls(int argc, char *argv[])
         else if (strcmp(operation, "summary") == 0)
             ghcli_pr_summary(stdout, owner, repo, pr);
         else if (strcmp(operation, "comments") == 0)
-            ghcli_issue_comments(stdout, owner, repo, pr);
+            ghcli_pull_comments(stdout, owner, repo, pr);
         else if (strcmp(operation, "merge") == 0)
             ghcli_pr_merge(stdout, owner, repo, pr);
         else if (strcmp(operation, "close") == 0)

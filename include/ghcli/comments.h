@@ -46,20 +46,23 @@ struct ghcli_comment {
 };
 
 struct ghcli_submit_comment_opts {
-    const char *owner, *repo;
-    int         issue;
-    sn_sv       message;
-    bool        always_yes;
+    enum comment_target_type { ISSUE_COMMENT, PR_COMMENT }  target_type;
+    const char                                             *owner, *repo;
+    int                                                     target_id;
+    sn_sv                                                   message;
+    bool                                                    always_yes;
 };
 
-int  ghcli_get_comments(
-    const char *url,
-    ghcli_comment **comments);
 void ghcli_print_comment_list(
     FILE *stream,
     ghcli_comment *comments,
     size_t comments_size);
 void ghcli_issue_comments(
+    FILE *stream,
+    const char *owner,
+    const char *repo,
+    int issue);
+void ghcli_pull_comments(
     FILE *stream,
     const char *owner,
     const char *repo,

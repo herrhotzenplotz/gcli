@@ -27,23 +27,47 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <ghcli/curl.h>
 #include <ghcli/gitlab/config.h>
-#include <ghcli/gitlab/repos.h>
+#include <ghcli/gitlab/forks.h>
 #include <ghcli/json_util.h>
 
 #include <pdjson/pdjson.h>
-#include <sn/sn.h>
+
+static sn_sv
+parse_namespace(struct json_stream *input)
+{
+    enum json_type  key_type = JSON_NULL;
+    sn_sv           result   = {0};
+    const char     *key      = NULL;
+
+    if (json_next(input) != JSON_OBJECT)
+        errx(1, "Expected an object for a namespace");
+
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t len;
+        key = json_get_string(input, &len);
+        if (strncmp("full_path", key, len) == 0)
+            result = get_sv(input);
+        else
+            json_next(input);
+    }
+
+    if (key_type != JSON_OBJECT_END)
+        errx(1, "Namespace object not closed");
+
+    return result;
+}
 
 static void
-gitlab_parse_repo(json_stream *input, ghcli_repo *out)
+parse_fork(struct json_stream *input, ghcli_fork *out)
 {
-    enum json_type  next       = JSON_NULL;
     enum json_type  key_type   = JSON_NULL;
     enum json_type  value_type = JSON_NULL;
     const char     *key        = NULL;
 
-    if ((next = json_next(input)) != JSON_OBJECT)
-        errx(1, "Expected an object for a repo");
+    if (json_next(input) != JSON_OBJECT)
+        errx(1, "Expected an object for a fork");
 
     while ((key_type = json_next(input)) == JSON_STRING) {
         size_t len;
@@ -51,18 +75,12 @@ gitlab_parse_repo(json_stream *input, ghcli_repo *out)
 
         if (strncmp("path_with_namespace", key, len) == 0) {
             out->full_name = get_sv(input);
-        } else if (strncmp("name", key, len) == 0) {
-            out->name = get_sv(input);
-        } else if (strncmp("owner", key, len) == 0) {
-            out->owner = get_user_sv(input);
+        } else if (strncmp("namespace", key, len) == 0) {
+            out->owner = parse_namespace(input);
         } else if (strncmp("created_at", key, len) == 0) {
             out->date = get_sv(input);
-        } else if (strncmp("visibility", key, len) == 0) {
-            out->visibility = get_sv(input);
-        } else if (strncmp("fork", key, len) == 0) {
-            out->is_fork = get_bool(input);
-        } else if (strncmp("id", key, len) == 0) {
-            out->id = get_int(input);
+        } else if (strncmp("forks_count", key, len) == 0) {
+            out->forks = get_int(input);
         } else {
             value_type = json_next(input);
 
@@ -80,49 +98,29 @@ gitlab_parse_repo(json_stream *input, ghcli_repo *out)
     }
 
     if (key_type != JSON_OBJECT_END)
-        errx(1, "Repo object not closed");
-}
-
-void
-gitlab_get_repo(
-    sn_sv       owner,
-    sn_sv       repo,
-    ghcli_repo *out)
-{
-    /* GET /projects/:id */
-    char               *url    = NULL;
-    ghcli_fetch_buffer  buffer = {0};
-    struct json_stream  stream = {0};
-
-    url = sn_asprintf(
-        "%s/projects/"SV_FMT"%%2F"SV_FMT,
-        gitlab_get_apibase(),
-        SV_ARGS(owner), SV_ARGS(repo));
-
-    ghcli_fetch(url, NULL, &buffer);
-    json_open_buffer(&stream, buffer.data, buffer.length);
-
-    gitlab_parse_repo(&stream, out);
-
-    json_close(&stream);
-    free(buffer.data);
-    free(url);
+        errx(1, "Fork object not closed");
 }
 
 int
-gitlab_get_repos(
+gitlab_get_forks(
     const char  *owner,
+    const char  *repo,
     int          max,
-    ghcli_repo **out)
+    ghcli_fork **out)
 {
+    ghcli_fetch_buffer  buffer   = {0};
     char               *url      = NULL;
     char               *next_url = NULL;
-    ghcli_fetch_buffer  buffer   = {0};
+    enum   json_type    next     = JSON_NULL;
     struct json_stream  stream   = {0};
-    enum  json_type     next     = JSON_NULL;
     int                 size     = 0;
 
-    url = sn_asprintf("%s/users/%s/projects", gitlab_get_apibase(), owner);
+    *out = NULL;
+
+    url = sn_asprintf(
+        "%s/projects/%s%%2F%s/forks",
+        gitlab_get_apibase(),
+        owner, repo);
 
     do {
         ghcli_fetch(url, &next_url, &buffer);
@@ -137,60 +135,47 @@ gitlab_get_repos(
                  "but got something else instead");
 
         while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
-            *out = realloc(*out, sizeof(**out) * (size + 1));
-            ghcli_repo *it = &(*out)[size++];
-            gitlab_parse_repo(&stream, it);
+            *out = realloc(*out, sizeof(ghcli_fork) * (size + 1));
+            ghcli_fork *it = &(*out)[size++];
+            parse_fork(&stream, it);
 
             if (size == max)
                 break;
         }
 
-        free(url);
-        free(buffer.data);
         json_close(&stream);
+        free(buffer.data);
+        free(url);
     } while ((url = next_url) && (max == -1 || size < max));
 
-    free(url);
+    free(next_url);
 
     return size;
 }
 
-int
-gitlab_get_own_repos(
-    int          max,
-    ghcli_repo **out)
-{
-    char  *_account = NULL;
-    sn_sv  account  = {0};
-    int    n;
-
-    account = gitlab_get_account();
-    if (!account.length)
-        errx(1, "error: gitlab.account is not set");
-
-    _account = sn_sv_to_cstr(account);
-
-    n = gitlab_get_repos(_account, max, out);
-
-    free(_account);
-
-    return n;
-}
-
 void
-gitlab_repo_delete(
-    const char *owner,
-    const char *repo)
+gitlab_fork_create(const char *owner, const char *repo, const char *_in)
 {
-    char               *url    = NULL;
-    ghcli_fetch_buffer  buffer = {0};
+    char               *url       = NULL;
+    char               *post_data = NULL;
+    sn_sv               in        = SV_NULL;
+    ghcli_fetch_buffer  buffer    = {0};
 
-    url = sn_asprintf("%s/projects/%s%%2F%s",
-                      gitlab_get_apibase(),
-                      owner, repo);
+    url = sn_asprintf(
+        "%s/projects/%s%%2F%s/fork",
+        gitlab_get_apibase(),
+        owner, repo);
+    if (_in) {
+        in        = ghcli_json_escape(SV((char *)_in));
+        post_data = sn_asprintf("{\"namespace_path\":\""SV_FMT"\"}",
+                                SV_ARGS(in));
+    }
 
-    ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+    ghcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
+    ghcli_print_html_url(buffer);
 
-    free(buffer.data);
+    free(in.data);
     free(url);
+    free(post_data);
+    free(buffer.data);
 }

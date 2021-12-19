@@ -35,10 +35,13 @@ ghcli_SRCS			=	src/comments.c			\
 					src/github/releases.c		\
 					src/github/repos.c		\
 					src/gitlab/api.c		\
+					src/gitlab/comments.c		\
 					src/gitlab/config.c		\
+					src/gitlab/forks.c		\
 					src/gitlab/issues.c		\
 					src/gitlab/merge_requests.c	\
 					src/gitlab/repos.c		\
+					src/gitlab/releases.c		\
 					src/issues.c			\
 					src/json_util.c			\
 					src/pulls.c			\

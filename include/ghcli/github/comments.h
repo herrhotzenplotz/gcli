@@ -37,7 +37,7 @@ void github_perform_submit_comment(
     ghcli_submit_comment_opts  opts,
     ghcli_fetch_buffer        *out);
 
-int github_get_issue_comments(
+int github_get_comments(
     const char     *owner,
     const char     *repo,
     int             issue,

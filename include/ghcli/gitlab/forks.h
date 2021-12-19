@@ -27,27 +27,20 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GITLAB_REPOS_H
-#define GITLAB_REPOS_H
+#ifndef GITLAB_FORKS_H
+#define GITLAB_FORKS_H
 
-#include <ghcli/repos.h>
+#include <ghcli/forks.h>
 
-void gitlab_get_repo(
-    sn_sv       owner,
-    sn_sv       repo,
-    ghcli_repo *out);
-
-int gitlab_get_repos(
+int gitlab_get_forks(
     const char  *owner,
+    const char  *repo,
     int          max,
-    ghcli_repo **out);
+    ghcli_fork **out);
 
-int gitlab_get_own_repos(
-    int          max,
-    ghcli_repo **out);
-
-void gitlab_repo_delete(
+void gitlab_fork_create(
     const char *owner,
-    const char *repo);
+    const char *repo,
+    const char *_in);
 
-#endif /* GITLAB_REPOS_H */
+#endif /* GITLAB_FORKS_H */

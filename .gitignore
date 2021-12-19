@@ -40,3 +40,12 @@
 /src/gitlab/repos.o
 /src/github/api.o
 /src/gitlab/api.o
+/include/ghcli/gitlab/comments.h~
+/src/gitlab/comments.c~
+/src/gitlab/comments.o
+/include/ghcli/gitlab/forks.h~
+/src/gitlab/forks.c~
+/src/gitlab/forks.o
+/include/ghcli/gitlab/releases.h~
+/src/gitlab/releases.c~
+/src/gitlab/releases.o

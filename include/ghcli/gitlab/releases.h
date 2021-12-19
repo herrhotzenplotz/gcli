@@ -27,27 +27,23 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GITLAB_REPOS_H
-#define GITLAB_REPOS_H
+#ifndef GITLAB_RELEASES_H
+#define GITLAB_RELEASES_H
 
-#include <ghcli/repos.h>
+#include <ghcli/releases.h>
 
-void gitlab_get_repo(
-    sn_sv       owner,
-    sn_sv       repo,
-    ghcli_repo *out);
+int gitlab_get_releases(
+    const char     *owner,
+    const char     *repo,
+    int             max,
+    ghcli_release **out);
 
-int gitlab_get_repos(
-    const char  *owner,
-    int          max,
-    ghcli_repo **out);
+void gitlab_create_release(
+    const ghcli_new_release *release);
 
-int gitlab_get_own_repos(
-    int          max,
-    ghcli_repo **out);
-
-void gitlab_repo_delete(
+void gitlab_delete_release(
     const char *owner,
-    const char *repo);
+    const char *repo,
+    const char *id);
 
-#endif /* GITLAB_REPOS_H */
+#endif /* GITLAB_RELEASES_H */

@@ -59,6 +59,14 @@ struct ghcli_forge_descriptor {
         ghcli_comment **out);
 
     /**
+     * List comments on the given PR */
+    int (*get_pull_comments)(
+        const char     *owner,
+        const char     *repo,
+        int             pr,
+        ghcli_comment **out);
+
+    /**
      * List forks of the given repo */
     int (*get_forks)(
         const char  *owner,

@@ -125,10 +125,13 @@ The config file for
 It shall contain the following data:
 
 .Bd -literal
-api_token=<valid github api token>
 editor=/path/to/ganoooo/emacs
-account=herrhotzenplotz
-api_base=https://api.github.com
+github.account=herrhotzenplotz
+github.api_token=<valid github api token>
+github.api_base=https://api.github.com
+gitlab.account=herrhotzenplotz
+gitlab.api_token=<valid gitlab api token>
+gitlab.api_base=https://api.gitlab.com
 .Ed
 
 In case api_base is not set, it defaults to https://api.github.com.

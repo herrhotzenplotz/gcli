@@ -3,7 +3,7 @@
 .Os
 .Sh NAME
 .Nm ghcli forks
-.Nd Manage GitHub repositories forks
+.Nd Manage repository forks on GitHub and GitLab
 .Sh SYNOPSIS
 .Nm
 .Op Fl n Ar n
@@ -18,7 +18,7 @@
 .Sh DESCRIPTION
 Use
 .Nm
-to manage forks of other repositories on GitHub.
+to manage forks of other repositories on both GitHub and GitLab.
 .Sh OPTIONS
 .Bl -tag -width indent
 .It Fl o , -owner Ar owner
@@ -43,7 +43,7 @@ forks. Setting
 .Ar n
 to -1 will fetch all forks. Default: 30. Note that on repositories
 with many forks fetching all forks can take a considerable amount of
-time and may result in rate limiting by the GitHub API.
+time and may result in rate limiting by the GitHub/GitLab API.
 .El
 .El
 .Sh ACTIONS

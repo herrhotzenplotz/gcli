@@ -1,27 +1,36 @@
 # GHCLI
 
-An effort to build a somewhat portable, simple and easily
-comprehendable GitHub commandline utility so you can avoid the web
-browser entirely.
+Simple and portable CLI tool for interacting with GitHub and GitLab
+from the command line.
 
-But hold on, there is an official utility out there!
+![](docs/screenshot-01.png)
 
-Yes, but it is written in Go, which is a security nightmare for sane
-people using Tor. This is, because the Go runtime circumvents the DNS
-resolution mechanisms of the Operating System entirely, thus at least
-leaking your IP to the DNS server.
+## Why?
+
+The official GitHub CLI tool only supports GitHub. I wanted a simple
+unified tool for both GitHub and GitLab because every forge does
+things differently yet all build on Git and purposefully break with
+its philosophy.
+
+Also, the official tool from Github is written in Go, which does
+manual [DNS
+resolution](https://github.com/golang/go/blob/master/src/net/dnsclient_unix.go#L49)
+which is a massive security vulnerability for people using Tor as it
+leaks your IP to the DNS server. This program builds upon libcurl,
+which obeys the operating system's DNS resolution mechanisms and thus
+also works with Tor.
 
 ## Building
 
-- Required dependencies:
-  - libcurl
-  - pkg-config
-  - C99 Compiler and linker
-  - make (bmake or smake is recommended)
-    + BUG WARNING: GNU make has two longstanding bugs in the include
-      directive. This may lead to it generating files in the incorrect
-      order and spitting out incorrect warnings or causing builds to
-      fail. You may want to use smake or bmake instead.
+Required dependencies:
+- libcurl
+- pkg-config
+- C99 Compiler and linker
+- make (bmake or smake is recommended)
+  + BUG WARNING: GNU make has two longstanding bugs in the include
+    directive. This may lead to it generating files in the incorrect
+    order and spitting out incorrect warnings or causing builds to
+    fail. You may want to use smake or bmake instead.
 
 In order to perform a build, do:
 ```console
@@ -56,8 +65,9 @@ at »man ghcli«.
 
 ## Bugs and contributions
 
-Please report bugs to nsonack@outlook.com .
-You can also submit patches this way using git-send-email.
+Please report bugs to nsonack@outlook.com or on
+[GitHub](https://github.com/herrhotzenplotz/ghcli). You can also
+submit patches this way using git-send-email.
 
 ## License
 

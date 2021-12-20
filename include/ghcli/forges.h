@@ -37,6 +37,7 @@
 #include <ghcli/pulls.h>
 #include <ghcli/releases.h>
 #include <ghcli/repos.h>
+#include <ghcli/review.h>
 
 typedef struct ghcli_forge_descriptor ghcli_forge_descriptor;
 
@@ -217,6 +218,14 @@ struct ghcli_forge_descriptor {
     void (*repo_delete)(
         const char *owner,
         const char *repo);
+
+    /**
+     * Fetch MR/PR reviews including comments */
+    size_t (*get_reviews)(
+        const char       *owner,
+        const char       *repo,
+        int               pr,
+        ghcli_pr_review **out);
 
     /**
      * Get an the http authentication header for use by curl */

@@ -34,6 +34,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 static inline void
 barf(const char *message, const char *where)
@@ -279,4 +280,44 @@ ghcli_read_user_list(json_stream *input, sn_sv **out)
         errx(1, "Expected end of array for user list");
 
     return n;
+}
+
+void
+ghcli_json_advance(struct json_stream *stream, const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+
+    while (*fmt) {
+        switch (*fmt++) {
+        case '[': {
+            if (json_next(stream) != JSON_ARRAY)
+                errx(1, "Expected array begin");
+        } break;
+        case '{': {
+            if (json_next(stream) != JSON_OBJECT)
+                errx(1, "Expected array begin");
+        } break;
+        case 's': {
+            if (json_next(stream) != JSON_STRING)
+                errx(1, "Expected string");
+
+            char       *it    = va_arg(ap, char *);
+            size_t      len   = 0;
+            const char *other = json_get_string(stream, &len);
+            if (strncmp(it, other, len))
+                errx(1, "String unmatched");
+        } break;
+        case ']': {
+            if (json_next(stream) != JSON_ARRAY_END)
+                errx(1, "Expected array end");
+        }   break;
+        case '}': {
+            if (json_next(stream) != JSON_OBJECT_END)
+                errx(1, "Expected object end");
+        }   break;
+        }
+    }
+
+    va_end(ap);
 }

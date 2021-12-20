@@ -35,8 +35,65 @@
 
 #include <pdjson/pdjson.h>
 
-#include <stdarg.h>
 #include <limits.h>
+
+static void
+parse_review_comment(json_stream *stream, ghcli_pr_review_comment *it)
+{
+    if (json_next(stream) != JSON_OBJECT)
+        errx(1, "Expected review comment object");
+
+    enum json_type key_type;
+    while ((key_type = json_next(stream)) == JSON_STRING) {
+        size_t          len        = 0;
+        const char     *key        = json_get_string(stream, &len);
+        enum json_type  value_type = 0;
+
+        if (strncmp("bodyText", key, len) == 0)
+            it->body = get_string(stream);
+        else if (strncmp("id", key, len) == 0)
+            it->id = get_string(stream);
+        else if (strncmp("createdAt", key, len) == 0)
+            it->date = get_string(stream);
+        else if (strncmp("author", key, len) == 0)
+            it->author = get_user(stream);
+        else if (strncmp("diffHunk", key, len) == 0)
+            it->diff = get_string(stream);
+        else if (strncmp("path", key, len) == 0)
+            it->path = get_string(stream);
+        else if (strncmp("originalPosition", key, len) == 0)
+            it->original_position = get_int(stream);
+        else {
+            value_type = json_next(stream);
+
+            switch (value_type) {
+            case JSON_ARRAY:
+                json_skip_until(stream, JSON_ARRAY_END);
+                break;
+            case JSON_OBJECT:
+                json_skip_until(stream, JSON_OBJECT_END);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+}
+
+static void
+parse_review_comments(json_stream *stream, ghcli_pr_review *it)
+{
+    ghcli_json_advance(stream, "{s[", "nodes");
+    while (json_peek(stream) == JSON_OBJECT) {
+        it->comments = realloc(
+            it->comments,
+            sizeof(*it->comments) * (it->comments_size + 1));
+        ghcli_pr_review_comment *comment = &it->comments[it->comments_size++];
+        *comment                         = (ghcli_pr_review_comment) {0};
+        parse_review_comment(stream, comment);
+    }
+    ghcli_json_advance(stream, "]}");
+}
 
 static void
 parse_review_header(json_stream *stream, ghcli_pr_review *it)
@@ -60,7 +117,9 @@ parse_review_header(json_stream *stream, ghcli_pr_review *it)
             it->date = get_string(stream);
         else if (strncmp("author", key, len) == 0)
             it->author = get_user(stream);
-        else {
+        else if (strncmp("comments", key, len) == 0) {
+            parse_review_comments(stream, it);
+        } else {
             value_type = json_next(stream);
 
             switch (value_type) {
@@ -89,13 +148,19 @@ static const char *get_reviews_fmt =
     "          bodyText"
     "          id"
     "          createdAt"
+    "          state"
     "          comments(first: 10) {"
     "            nodes {"
     "              bodyText"
+    "              diffHunk"
+    "              path"
+    "              originalPosition"
     "              author {"
     "                login"
     "              }"
     "              state"
+    "              createdAt"
+    "              id"
     "            }"
     "          }"
     "        }"
@@ -103,46 +168,6 @@ static const char *get_reviews_fmt =
     "    }"
     "  }"
     "}";
-
-static void
-json_advance(struct json_stream *stream, const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-
-    while (*fmt) {
-        switch (*fmt++) {
-        case '[': {
-            if (json_next(stream) != JSON_ARRAY)
-                errx(1, "Expected array begin");
-        } break;
-        case '{': {
-            if (json_next(stream) != JSON_OBJECT)
-                errx(1, "Expected array begin");
-        } break;
-        case 's': {
-            if (json_next(stream) != JSON_STRING)
-                errx(1, "Expected string");
-
-            char       *it    = va_arg(ap, char *);
-            size_t      len   = 0;
-            const char *other = json_get_string(stream, &len);
-            if (strncmp(it, other, len))
-                errx(1, "String unmatched");
-        } break;
-        case ']': {
-            if (json_next(stream) != JSON_ARRAY_END)
-                errx(1, "Expected array end");
-        }   break;
-        case '}': {
-            if (json_next(stream) != JSON_OBJECT_END)
-                errx(1, "Expected object end");
-        }   break;
-        }
-    }
-
-    va_end(ap);
-}
 
 size_t
 ghcli_review_get_reviews(
@@ -170,7 +195,7 @@ ghcli_review_get_reviews(
     json_open_buffer(&stream, buffer.data, buffer.length);
     json_set_streaming(&stream, true);
 
-    json_advance(
+    ghcli_json_advance(
         &stream, "{s{s{s{s{s",
         "data", "repository", "pullRequest", "reviews", "nodes");
 
@@ -182,6 +207,8 @@ ghcli_review_get_reviews(
         *out = realloc(*out, sizeof(ghcli_pr_review) * (size + 1));
         ghcli_pr_review *it = &(*out)[size];
 
+        *it = (ghcli_pr_review) {0};
+
         parse_review_header(&stream, it);
 
         size++;
@@ -190,7 +217,7 @@ ghcli_review_get_reviews(
     if (json_next(&stream) != JSON_ARRAY_END)
         errx(1, "error: expected end of json array");
 
-    json_advance(&stream, "}}}}}");
+    ghcli_json_advance(&stream, "}}}}}");
 
     free(buffer.data);
     free(url);
@@ -218,6 +245,12 @@ ghcli_review_print_review_table(
                 headers[i].date, headers[i].state);
 
         pretty_print(headers[i].body, 9, 80, out);
+
+        ghcli_review_print_comments(
+            out,
+            headers->comments,
+            headers->comments_size);
+
         fputc('\n', out);
     }
 }
@@ -230,58 +263,16 @@ ghcli_review_print_comments(
 {
     for (size_t i = 0; i < comments_size; ++i) {
         fprintf(out,
-                "BODY              : %s\n"
-                "PATH              : %s\n"
-                "ORIGINAL POSITION : %d\n"
-                "DIFF              :\n",
-                comments[i].body,
+                "       | PATH              : %s\n"
+                "       | ORIGINAL POSITION : %d\n"
+                "       | DIFF              :\n",
                 comments[i].path,
                 comments[i].original_position);
 
         pretty_print(comments[i].diff, 20, INT_MAX, out);
-    }
-}
 
-static void
-parse_review_comment(json_stream *stream, ghcli_pr_review_comment *it)
-{
-    if (json_next(stream) != JSON_OBJECT)
-        errx(1, "Expected review comment object");
-
-    enum json_type key_type;
-    while ((key_type = json_next(stream)) == JSON_STRING) {
-        size_t          len        = 0;
-        const char     *key        = json_get_string(stream, &len);
-        enum json_type  value_type = 0;
-
-        if (strncmp("body", key, len) == 0)
-            it->body = get_string(stream);
-        else if (strncmp("id", key, len) == 0)
-            it->id = get_int(stream);
-        else if (strncmp("submitted_at", key, len) == 0)
-            it->date = get_string(stream);
-        else if (strncmp("user", key, len) == 0)
-            it->author = get_user(stream);
-        else if (strncmp("diff_hunk", key, len) == 0)
-            it->diff = get_string(stream);
-        else if (strncmp("path", key, len) == 0)
-            it->path = get_string(stream);
-        else if (strncmp("original_position", key, len) == 0)
-            it->original_position = get_int(stream);
-        else {
-            value_type = json_next(stream);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(stream, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(stream, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+        fprintf(out, "       | MESSAGE :\n");
+        pretty_print(comments[i].body, 20, 80, out);
     }
 }
 
@@ -295,6 +286,9 @@ ghcli_review_reviews_free(ghcli_pr_review *it, size_t size)
         free(it[i].body);
         free(it[i].id);
     }
+
+    ghcli_review_comments_free(it->comments, it->comments_size);
+
     free(it);
 }
 
@@ -302,6 +296,7 @@ void
 ghcli_review_comments_free(ghcli_pr_review_comment *it, size_t size)
 {
     for (size_t i = 0; i < size; ++i) {
+        free(it[i].id);
         free(it[i].author);
         free(it[i].date);
         free(it[i].diff);

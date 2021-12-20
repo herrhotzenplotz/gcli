@@ -32,6 +32,7 @@
 #include <ghcli/forges.h>
 
 #include <dirent.h>
+#include <getopt.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -41,6 +42,9 @@ static struct ghcli_config {
         sn_sv value;
     } entries[128];
     size_t entries_size;
+
+    bool                  override_forge_type;
+    enum ghcli_forge_type forge_type;
 
     sn_sv buffer;
     void *mmap_pointer;
@@ -201,10 +205,60 @@ init_local_config(void)
     free((void *)path);
 }
 
+static void
+ghcli_config_parse_args(int *argc, char ***argv)
+{
+    /* These are the very first options passed to the ghcli command
+     * itself. It is the first ever getopt call we do to parse any
+     * arguments. Only global options that do not alter subcommand
+     * specific behaviour should be accepted here. */
+
+    int ch;
+    const struct option options[] = {
+        { .name    = "type",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 't' },
+        {0},
+    };
+
+    while ((ch = getopt_long(*argc, *argv, "+t:", options, NULL)) != -1) {
+        switch (ch) {
+        case 't': {
+            config.override_forge_type = true;
+            if (strcmp(optarg, "github") == 0)
+                config.forge_type = GHCLI_FORGE_GITHUB;
+            else if (strcmp(optarg, "gitlab") == 0)
+                config.forge_type = GHCLI_FORGE_GITLAB;
+            else
+                errx(1,
+                     "unknown forge type %s. "
+                     "can be either gitlab or github.", optarg);
+        } break;
+        case '?':
+        default:
+            errx(1, "usage: ghcli [options] subcommand ...");
+        }
+    }
+
+    *argc -= optind;
+    *argv += optind;
+
+    /* This one is a little odd: We are going to call getopt_long
+     * again. Eventually. But since this is a global variable and the
+     * getopt parser is reusing it, we need to reset it to zero. On
+     * BSDs there is also the optreset variable, but it doesn't exist
+     * on Solaris. I will thus not depend on it as it seems to be
+     * working without it. */
+    optind = 0;
+}
+
 void
-ghcli_config_init(const char *file_path)
+ghcli_config_init(int *argc, char ***argv, const char *file_path)
 {
     const char *in_file_path = file_path;
+
+    ghcli_config_parse_args(argc, argv);
 
     if (!file_path) {
         file_path = getenv("XDG_CONFIG_PATH");
@@ -339,6 +393,9 @@ ghcli_forge_type
 ghcli_config_get_forge_type(void)
 {
     init_local_config();
+
+    if (config.override_forge_type)
+        return config.forge_type;
 
     sn_sv entry = ghcli_local_config_find_by_key("forge-type");
     if (entry.length > 0) {

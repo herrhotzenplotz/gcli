@@ -33,14 +33,23 @@
 #include <sn/sn.h>
 #include <ghcli/ghcli.h>
 
-void              ghcli_config_init(const char *file_path);
+void ghcli_config_init(
+    int          *argc,
+    char       ***argv,
+    const char   *file_path);
+
+void ghcli_config_get_upstream_parts(
+    sn_sv *owner,
+    sn_sv *repo);
+
+sn_sv ghcli_config_find_by_key(
+    const char *key);
+
 char             *ghcli_config_get_editor(void);
 char             *ghcli_config_get_authheader(void);
 sn_sv             ghcli_config_get_account(void);
 sn_sv             ghcli_config_get_upstream(void);
-void              ghcli_config_get_upstream_parts(sn_sv *owner, sn_sv *repo);
 sn_sv             ghcli_config_get_base(void);
-sn_sv             ghcli_config_find_by_key(const char *);
 ghcli_forge_type  ghcli_config_get_forge_type(void);
 
 #endif /* CONFIG_H */

@@ -88,6 +88,9 @@ ghcli_review_print_comments(
 void
 ghcli_review_reviews_free(ghcli_pr_review *it, size_t size)
 {
+    if (!it)
+        return;
+
     for (size_t i = 0; i < size; ++i) {
         free(it[i].author);
         free(it[i].date);
@@ -104,6 +107,9 @@ ghcli_review_reviews_free(ghcli_pr_review *it, size_t size)
 void
 ghcli_review_comments_free(ghcli_pr_review_comment *it, size_t size)
 {
+    if (!it)
+        return;
+
     for (size_t i = 0; i < size; ++i) {
         free(it[i].id);
         free(it[i].author);

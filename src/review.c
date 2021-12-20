@@ -35,6 +35,7 @@
 
 #include <pdjson/pdjson.h>
 
+#include <stdarg.h>
 #include <limits.h>
 
 static void
@@ -76,6 +77,69 @@ parse_review_header(json_stream *stream, ghcli_pr_review *it)
     }
 }
 
+
+static const char *get_reviews_fmt =
+    "query {"
+    "  repository(owner: \"%s\", name: \"%s\") {"
+    "    pullRequest(number: %d) {"
+    "      reviews(first: 10) {"
+    "        nodes {"
+    "          author {"
+    "            login"
+    "          }"
+    "          bodyText"
+    "          id"
+    "          createdAt"
+    "          comments(first: 10) {"
+    "            nodes {"
+    "              bodyText"
+    "              author {"
+    "                login"
+    "              }"
+    "              state"
+    "            }"
+    "          }"
+    "        }"
+    "      }"
+    "    }"
+    "  }"
+    "}";
+
+static void
+json_advance(struct json_stream *stream, const char *fmt, ...)
+{
+    va_list ap;
+    va_begin(ap, fmt);
+
+    while (*fmt) {
+        switch (*fmt++) {
+        case '[': {
+            if (json_next(stream) != JSON_ARRAY)
+                errx(1, "Expected array begin");
+        } break;
+        case '{': {
+            if (json_next(stream) != JSON_OBJECT)
+                errx(1, "Expected array begin");
+        } break;
+        case 's': {
+            if (json_next(stream) != JSON_STRING)
+                errx(1, "Expected string");
+            char *it = va_arg(ap, char *);
+            if (strncmp(it, json_get_string(stream)))
+                errx(1, "String unmatched");
+        } break;
+        case ']': {
+            if (json_next(stream) != JSON_ARRAY_END)
+                errx(1, "Expected array end");
+        }   break;
+        case '}': {
+            if (json_next(stream) != JSON_OBJECT_END)
+                errx(1, "Expected object end");
+        }   break;
+        }
+    }
+}
+
 size_t
 ghcli_review_get_reviews(
     const char *owner,
@@ -83,20 +147,26 @@ ghcli_review_get_reviews(
     int pr,
     ghcli_pr_review **out)
 {
-    ghcli_fetch_buffer  buffer = {0};
-    char               *url    = NULL;
-    struct json_stream  stream = {0};
-    enum   json_type    next   = JSON_NULL;
-    size_t              size   = 0;
+    ghcli_fetch_buffer  buffer        = {0};
+    char               *url           = NULL;
+    char               *query         = NULL;
+    sn_sv               query_escaped = {0};
+    char               *post_data     = NULL;
+    struct json_stream  stream        = {0};
+    enum   json_type    next          = JSON_NULL;
+    size_t              size          = 0;
 
-    url = sn_asprintf(
-        "%s/repos/%s/%s/pulls/%d/reviews",
-        github_get_apibase(),
-        owner, repo, pr);
-    ghcli_fetch(url, NULL, &buffer);
+    url           = sn_asprintf("%s/graphql", github_get_apibase());
+    query         = sn_asprintf(get_reviews_fmt, owner, repo, pr);
+    query_escaped = ghcli_json_escape(SV(query));
+    post_data     = sn_asprintf("{\"query\": \""SV_FMT"\"}",
+                                SV_ARGS(query_escaped));
+    ghcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
 
     json_open_buffer(&stream, buffer.data, buffer.length);
     json_set_streaming(&stream, true);
+
+    json_advance(&stream, "{s{s{s{s{s", "data", "repository", "pullRequest", "reviews", "nodes");
 
     next = json_next(&stream);
     if (next != JSON_ARRAY)
@@ -116,6 +186,9 @@ ghcli_review_get_reviews(
 
     free(buffer.data);
     free(url);
+    free(query);
+    free(query_escaped.data);
+    free(post_data);
     json_close(&stream);
 
     return size;

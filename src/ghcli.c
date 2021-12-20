@@ -1438,11 +1438,7 @@ static struct subcommand {
 int
 main(int argc, char *argv[])
 {
-    /* discard program name */
-    shift(&argc, &argv);
-
-    // TODO: accept arguments
-    ghcli_config_init(NULL);
+    ghcli_config_init(&argc, &argv, NULL);
 
     if (argc == 0)
         errx(1, "error: missing subcommand");

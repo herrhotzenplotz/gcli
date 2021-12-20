@@ -257,9 +257,9 @@ ghcli_review_print_review_table(
 
 void
 ghcli_review_print_comments(
-    FILE *out,
+    FILE                    *out,
     ghcli_pr_review_comment *comments,
-    size_t comments_size)
+    size_t                   comments_size)
 {
     for (size_t i = 0; i < comments_size; ++i) {
         fprintf(out,

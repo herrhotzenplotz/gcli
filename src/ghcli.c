@@ -446,20 +446,28 @@ subcommand_pulls(int argc, char *argv[])
     while (argc > 0) {
         const char *operation = shift(&argc, &argv);
 
-        if (strcmp(operation, "diff") == 0)
+        if (strcmp(operation, "diff") == 0) {
             ghcli_print_pr_diff(stdout, owner, repo, pr);
-        else if (strcmp(operation, "summary") == 0)
+        } else if (strcmp(operation, "summary") == 0) {
             ghcli_pr_summary(stdout, owner, repo, pr);
-        else if (strcmp(operation, "comments") == 0)
+        } else if (strcmp(operation, "comments") == 0) {
             ghcli_pull_comments(stdout, owner, repo, pr);
-        else if (strcmp(operation, "merge") == 0)
+        } else if (strcmp(operation, "merge") == 0) {
             ghcli_pr_merge(stdout, owner, repo, pr);
-        else if (strcmp(operation, "close") == 0)
+        } else if (strcmp(operation, "close") == 0) {
             ghcli_pr_close(owner, repo, pr);
-        else if (strcmp(operation, "reopen") == 0)
+        } else if (strcmp(operation, "reopen") == 0) {
             ghcli_pr_reopen(owner, repo, pr);
-        else
+        } else if (strcmp(operation, "reviews") == 0) {
+            /* list reviews */
+            ghcli_pr_review *reviews      = NULL;
+            size_t           reviews_size = ghcli_review_get_reviews(
+                owner, repo, pr, &reviews);
+            ghcli_review_print_review_table(stdout, reviews, reviews_size);
+            ghcli_review_reviews_free(reviews, reviews_size);
+        } else {
             errx(1, "error: unknown operation %s", operation);
+        }
     }
 
     return EXIT_SUCCESS;
@@ -587,96 +595,6 @@ subcommand_issues(int argc, char *argv[])
     }
 
     return EXIT_SUCCESS;
-}
-
-static int
-subcommand_review(int argc, char *argv[])
-{
-    int         ch        = 0;
-    int         pr        = -1;
-    int         review_id = -1;
-    const char *owner     = NULL;
-    const char *repo      = NULL;
-
-    const struct option options[] = {
-        { .name    = "repo",
-          .has_arg = required_argument,
-          .flag    = NULL,
-          .val     = 'r' },
-        { .name    = "owner",
-          .has_arg = required_argument,
-          .flag    = NULL,
-          .val     = 'o' },
-        { .name    = "pull",
-          .has_arg = required_argument,
-          .flag    = NULL,
-          .val     = 'p' },
-        { .name    = "comment",
-          .has_arg = required_argument,
-          .flag    = NULL,
-          .val     = 'c' },
-        {0},
-    };
-
-    /* parse options */
-    while ((ch = getopt_long(argc, argv, "p:o:r:c:", options, NULL)) != -1) {
-        switch (ch) {
-        case 'p': {
-            char *endptr = NULL;
-            pr = strtol(optarg, &endptr, 10);
-            if (endptr != (optarg + strlen(optarg)))
-                err(1, "error: cannot parse pr number");
-
-            if (pr < 0)
-                errx(1, "error: pr number is out of range");
-        } break;
-        case 'o':
-            owner = optarg;
-            break;
-        case 'r':
-            repo = optarg;
-            break;
-        case 'c': {
-            char *endptr;
-            review_id = strtol(optarg, &endptr, 10);
-
-            if (optarg + strlen(optarg) != endptr)
-                err(1, "error: cannot parse comment id");
-        } break;
-        case '?':
-        default:
-            usage();
-        }
-    }
-
-    argc -= optind;
-    argv += optind;
-
-    check_owner_and_repo(&owner, &repo);
-
-    if (pr > 0 && review_id > 0) {
-        /* print comments */
-        ghcli_pr_review_comment *comments  = NULL;
-        size_t                   comments_size =
-            ghcli_review_get_review_comments(
-                owner, repo, pr, review_id, &comments);
-
-        ghcli_review_print_comments(stdout, comments, comments_size);
-        ghcli_review_comments_free(comments, comments_size);
-        return 0;
-    } else if (pr > 0) {
-        /* list reviews */
-        ghcli_pr_review *reviews      = NULL;
-        size_t           reviews_size = ghcli_review_get_reviews(
-            owner, repo, pr, &reviews);
-        ghcli_review_print_review_table(stdout, reviews, reviews_size);
-        ghcli_review_reviews_free(reviews, reviews_size);
-        return 0;
-    } else {
-        sn_unimplemented;
-    }
-
-    return 1;
 }
 
 static int
@@ -1428,7 +1346,6 @@ static struct subcommand {
     { .cmd_name = "issues",   .fn = subcommand_issues   },
     { .cmd_name = "repos",    .fn = subcommand_repos    },
     { .cmd_name = "comment",  .fn = subcommand_comment  },
-    { .cmd_name = "review",   .fn = subcommand_review   },
     { .cmd_name = "forks",    .fn = subcommand_forks    },
     { .cmd_name = "gists",    .fn = subcommand_gists    },
     { .cmd_name = "releases", .fn = subcommand_releases },

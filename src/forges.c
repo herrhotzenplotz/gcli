@@ -40,6 +40,7 @@
 #include <ghcli/github/pulls.h>
 #include <ghcli/github/releases.h>
 #include <ghcli/github/repos.h>
+#include <ghcli/github/review.h>
 
 #include <ghcli/gitlab/api.h>
 #include <ghcli/gitlab/comments.h>
@@ -49,6 +50,7 @@
 #include <ghcli/gitlab/merge_requests.h>
 #include <ghcli/gitlab/releases.h>
 #include <ghcli/gitlab/repos.h>
+#include <ghcli/gitlab/review.h>
 
 static ghcli_forge_descriptor
 github_forge_descriptor =
@@ -76,6 +78,7 @@ github_forge_descriptor =
     .delete_release         = github_delete_release,
     .get_repos              = github_get_repos,
     .get_own_repos          = github_get_own_repos,
+    .get_reviews            = github_review_get_reviews,
     .repo_delete            = github_repo_delete,
     .get_authheader         = github_get_authheader,
     .get_account            = github_get_account,
@@ -110,6 +113,7 @@ gitlab_forge_descriptor =
     .delete_release         = gitlab_delete_release,
     .get_repos              = gitlab_get_repos,
     .get_own_repos          = gitlab_get_own_repos,
+    .get_reviews            = gitlab_review_get_reviews,
     .repo_delete            = gitlab_repo_delete,
     .get_authheader         = gitlab_get_authheader,
     .get_account            = gitlab_get_account,

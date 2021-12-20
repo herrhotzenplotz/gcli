@@ -49,3 +49,10 @@
 /include/ghcli/gitlab/releases.h~
 /src/gitlab/releases.c~
 /src/gitlab/releases.o
+/include/ghcli/github/review.h~
+/include/ghcli/gitlab/review.h~
+/src/github/review.c~
+/src/github/review.o
+/src/github/reviews.c~
+/src/gitlab/review.c~
+/src/gitlab/review.o

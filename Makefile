@@ -1,8 +1,7 @@
 # Declare the list of programs
 PROGS				=	ghcli
 
-GHCLI_VERSION			=	0.4.1-alpha
-
+GHCLI_VERSION			=	0.5.2-alpha
 # These and LDFLAGS can be overwritten
 CFLAGS				=	-std=iso9899:1999 \
 					-Ithirdparty/pdjson/ \

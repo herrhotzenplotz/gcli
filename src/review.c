@@ -50,15 +50,15 @@ parse_review_header(json_stream *stream, ghcli_pr_review *it)
         const char     *key        = json_get_string(stream, &len);
         enum json_type  value_type = 0;
 
-        if (strncmp("body", key, len) == 0)
+        if (strncmp("bodyText", key, len) == 0)
             it->body = get_string(stream);
         else if (strncmp("state", key, len) == 0)
             it->state = get_string(stream);
         else if (strncmp("id", key, len) == 0)
-            it->id = get_int(stream);
-        else if (strncmp("submitted_at", key, len) == 0)
+            it->id = get_string(stream);
+        else if (strncmp("createdAt", key, len) == 0)
             it->date = get_string(stream);
-        else if (strncmp("user", key, len) == 0)
+        else if (strncmp("author", key, len) == 0)
             it->author = get_user(stream);
         else {
             value_type = json_next(stream);
@@ -76,7 +76,6 @@ parse_review_header(json_stream *stream, ghcli_pr_review *it)
         }
     }
 }
-
 
 static const char *get_reviews_fmt =
     "query {"
@@ -109,7 +108,7 @@ static void
 json_advance(struct json_stream *stream, const char *fmt, ...)
 {
     va_list ap;
-    va_begin(ap, fmt);
+    va_start(ap, fmt);
 
     while (*fmt) {
         switch (*fmt++) {
@@ -124,8 +123,11 @@ json_advance(struct json_stream *stream, const char *fmt, ...)
         case 's': {
             if (json_next(stream) != JSON_STRING)
                 errx(1, "Expected string");
-            char *it = va_arg(ap, char *);
-            if (strncmp(it, json_get_string(stream)))
+
+            char       *it    = va_arg(ap, char *);
+            size_t      len   = 0;
+            const char *other = json_get_string(stream, &len);
+            if (strncmp(it, other, len))
                 errx(1, "String unmatched");
         } break;
         case ']': {
@@ -138,6 +140,8 @@ json_advance(struct json_stream *stream, const char *fmt, ...)
         }   break;
         }
     }
+
+    va_end(ap);
 }
 
 size_t
@@ -166,7 +170,9 @@ ghcli_review_get_reviews(
     json_open_buffer(&stream, buffer.data, buffer.length);
     json_set_streaming(&stream, true);
 
-    json_advance(&stream, "{s{s{s{s{s", "data", "repository", "pullRequest", "reviews", "nodes");
+    json_advance(
+        &stream, "{s{s{s{s{s",
+        "data", "repository", "pullRequest", "reviews", "nodes");
 
     next = json_next(&stream);
     if (next != JSON_ARRAY)
@@ -183,6 +189,8 @@ ghcli_review_get_reviews(
 
     if (json_next(&stream) != JSON_ARRAY_END)
         errx(1, "error: expected end of json array");
+
+    json_advance(&stream, "}}}}}");
 
     free(buffer.data);
     free(url);
@@ -202,7 +210,7 @@ ghcli_review_print_review_table(
 {
     for (size_t i = 0; i < headers_size; ++i) {
         fprintf(out,
-                "ID     : %d\n"
+                "ID     : %s\n"
                 "AUTHOR : %s\n"
                 "DATE   : %s\n"
                 "STATE  : %s\n",
@@ -285,6 +293,7 @@ ghcli_review_reviews_free(ghcli_pr_review *it, size_t size)
         free(it[i].date);
         free(it[i].state);
         free(it[i].body);
+        free(it[i].id);
     }
     free(it);
 }

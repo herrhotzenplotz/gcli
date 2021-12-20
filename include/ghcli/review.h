@@ -36,7 +36,7 @@ typedef struct ghcli_pr_review         ghcli_pr_review;
 typedef struct ghcli_pr_review_comment ghcli_pr_review_comment;
 
 struct ghcli_pr_review {
-    int   id;
+    char *id;
     char *author;
     char *date;
     char *state;

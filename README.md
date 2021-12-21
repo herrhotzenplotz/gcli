@@ -56,6 +56,7 @@ Tested Operating Systems so far:
 - Fedora 34 x86_64
 - Haiku x86_64
 - Minix 3.4.0 (GENERIC) i386
+- OpenBSD 7.0 GENERIC amd64
 
 ## Support
 

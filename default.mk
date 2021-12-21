@@ -24,11 +24,6 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# WHY ARE THESE LINES SWAPPED?
-# To work around a bug in GNU make.
--include ${DEPS}
--include config.mk
-
 .SILENT:
 .DEFAULT_TARGET: all
 
@@ -36,6 +31,11 @@ PROGS	?=	${PROG}
 SRCS	?=	${${PROGS:=_SRCS}} ${${LIBS:=_SRCS}}
 OBJS	=	${SRCS:.c=.o}
 DEPS	=	${SRCS:.c=.d}
+
+# WHY ARE THESE LINES SWAPPED?
+# To work around a bug in GNU make.
+-include config.mk
+-include ${DEPS}
 
 all: Makefile config.mk
 	${MAKE} -f Makefile depend

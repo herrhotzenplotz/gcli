@@ -366,7 +366,7 @@ ghcli_gitconfig_add_fork_remote(const char *org, const char *repo)
                        "rename", "origin", "upstream", NULL);
             } else if (pid > 0) {
                 int status = 0;
-                waitpid(pid, &status, WEXITED);
+                waitpid(pid, &status, 0);
 
                 if (!(WIFEXITED(status) && (WEXITSTATUS(status) == 0)))
                     errx(1, "git child process failed");
@@ -391,7 +391,7 @@ ghcli_gitconfig_add_fork_remote(const char *org, const char *repo)
             execlp("git", "git", "remote", "add", "origin", remote_url, NULL);
         } else if (pid > 0) {
             int status = 0;
-            waitpid(pid, &status, WEXITED);
+            waitpid(pid, &status, 0);
 
             if (!(WIFEXITED(status) && (WEXITSTATUS(status) == 0)))
                 errx(1, "git child process failed");

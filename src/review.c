@@ -46,19 +46,15 @@ ghcli_review_print_review_table(
 {
     for (size_t i = 0; i < headers_size; ++i) {
         fprintf(out,
-                "ID     : %s\n"
-                "AUTHOR : %s\n"
-                "DATE   : %s\n"
-                "STATE  : %s\n",
-                headers[i].id, headers[i].author,
-                headers[i].date, headers[i].state);
+                "   %s - %s - %s\n",
+                headers[i].author, headers[i].date, headers[i].state);
 
         pretty_print(headers[i].body, 9, 80, out);
 
         ghcli_review_print_comments(
             out,
-            headers->comments,
-            headers->comments_size);
+            headers[i].comments,
+            headers[i].comments_size);
 
         fputc('\n', out);
     }
@@ -71,17 +67,15 @@ ghcli_review_print_comments(
     size_t                   comments_size)
 {
     for (size_t i = 0; i < comments_size; ++i) {
+        fputc('\n', out);
         fprintf(out,
-                "       | PATH              : %s\n"
-                "       | ORIGINAL POSITION : %d\n"
-                "       | DIFF              :\n",
-                comments[i].path,
-                comments[i].original_position);
+                "         PATH : %s\n"
+                "         DIFF :\n",
+                comments[i].path);
 
         pretty_print(comments[i].diff, 20, INT_MAX, out);
-
-        fprintf(out, "       | MESSAGE :\n");
-        pretty_print(comments[i].body, 20, 80, out);
+        fputc('\n', out);
+        pretty_print(comments[i].body, 16, 80, out);
     }
 }
 

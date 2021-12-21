@@ -146,7 +146,18 @@ check_library() {
     checking_result "found"
 }
 
+warn_gnu_make() {
+    barf="`${MAKE} -v 2>&1 | grep GNU`"
+    if [ "${barf}" != "" ]; then
+        info "/!\\ You appear to be using GNU make to build this software."
+        info "/!\\ In case you just saw a whole bunch of compiler errors,"
+        info "/!\\ this is because of a buggy make implementation found in GNU."
+        info "/!\\ PLEASE USE A BETTER MAKE INSTEAD."
+    fi
+}
+
 main() {
+    warn_gnu_make
     target_triplet
     linker
     compiler_flags

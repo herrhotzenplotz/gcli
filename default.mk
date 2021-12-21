@@ -32,8 +32,18 @@ SRCS	?=	${${PROGS:=_SRCS}} ${${LIBS:=_SRCS}}
 OBJS	=	${SRCS:.c=.o}
 DEPS	=	${SRCS:.c=.d}
 
-# WHY ARE THESE LINES SWAPPED?
-# To work around a bug in GNU make.
+# Unfortunately GNU make is a buggy piece of crap, so we have to do a
+# dance around it and include stuff in this specific order (yes,
+# otherwise GNU make is too fucking stupid to run the makefile at
+# all). Even worse: it now tries to generate the dependency files
+# first (which I didn't instruct it to do, but who cares right?) and
+# then afterwards it runs the config.mk script which spits out the
+# rules on how to properly generate the dependencies. At least it
+# builds. This is the only way to do things without complete build
+# failures and still maintain compatibility to OpenBSD make, as it
+# does things seemingly correct. Mind you, it builds on all kinds of
+# different make implementations. Only GNU make tries to be
+# special. Thank you! </rant>
 -include config.mk
 -include ${DEPS}
 

@@ -27,9 +27,61 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <ghcli/curl.h>
+#include <ghcli/gitlab/config.h>
 #include <ghcli/gitlab/review.h>
+#include <ghcli/json_util.h>
 
+#include <pdjson/pdjson.h>
 #include <sn/sn.h>
+
+#include <stdlib.h>
+
+static void
+gitlab_parse_review_note(struct json_stream *stream, ghcli_pr_review *out)
+{
+    if (json_next(stream) != JSON_OBJECT)
+        errx(1, "Expected object");
+
+    enum json_type key_type;
+    while ((key_type = json_next(stream)) == JSON_STRING) {
+        size_t          len        = 0;
+        const char     *key        = json_get_string(stream, &len);
+        enum json_type  value_type = 0;
+
+        if (strncmp("created_at", key, len) == 0)
+            out->date = get_string(stream);
+        else if (strncmp("body", key, len) == 0)
+            out->body = get_string(stream);
+        else if (strncmp("author", key, len) == 0)
+            out->author = get_user(stream);
+        else if (strncmp("id", key, len) == 0)
+            out->id = sn_asprintf("%d", get_int(stream));
+        else {
+            value_type = json_next(stream);
+
+            switch (value_type) {
+            case JSON_ARRAY:
+                json_skip_until(stream, JSON_ARRAY_END);
+                break;
+            case JSON_OBJECT:
+                json_skip_until(stream, JSON_OBJECT_END);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    if (key_type != JSON_OBJECT_END)
+        errx(1, "Expected object end");
+
+    /* Gitlab works a little different with comments on merge
+     * requests. Set it to 0. */
+    out->comments_size = 0;
+    out->comments      = NULL;
+    out->state         = NULL;
+}
 
 size_t
 gitlab_review_get_reviews(
@@ -38,12 +90,34 @@ gitlab_review_get_reviews(
     int               pr,
     ghcli_pr_review **out)
 {
-    (void) owner;
-    (void) repo;
-    (void) pr;
+    ghcli_fetch_buffer  buffer = {0};
+    struct json_stream  stream = {0};
+    char               *url    = NULL;
+    int                 size   = 0;
 
-    warnx("Reviews are not yet supported on Gitlab");
-    *out = NULL;
+    url = sn_asprintf(
+        "%s/projects/%s%%2F%s/merge_requests/%d/notes?sort=asc",
+        gitlab_get_apibase(), owner, repo, pr);
 
-    return 0;
+    ghcli_fetch(url, NULL, &buffer);
+
+    json_open_buffer(&stream, buffer.data, buffer.length);
+    json_set_streaming(&stream, 1);
+
+    if (json_next(&stream) != JSON_ARRAY)
+        errx(1, "Expected array");
+
+    while (json_peek(&stream) == JSON_OBJECT) {
+        *out = realloc(*out, sizeof(ghcli_pr_review) * (size + 1));
+        ghcli_pr_review *it  = &(*out)[size++];
+        gitlab_parse_review_note(&stream, it);
+    }
+
+    if (json_next(&stream) != JSON_ARRAY_END)
+        errx(1, "Expected array end");
+
+    json_close(&stream);
+    free(url);
+
+    return size;
 }

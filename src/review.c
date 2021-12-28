@@ -45,9 +45,15 @@ ghcli_review_print_review_table(
     size_t headers_size)
 {
     for (size_t i = 0; i < headers_size; ++i) {
-        fprintf(out,
-                "   %s - %s - %s\n",
-                headers[i].author, headers[i].date, headers[i].state);
+        if (headers[i].state) {
+            fprintf(out,
+                    "   %s - %s - %s\n",
+                    headers[i].author, headers[i].date, headers[i].state);
+        } else {
+            fprintf(out,
+                    "   %s - %s\n",
+                    headers[i].author, headers[i].date);
+        }
 
         pretty_print(headers[i].body, 9, 80, out);
 

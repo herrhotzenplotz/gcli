@@ -103,38 +103,46 @@ gitlab_parse_snippet(struct json_stream *stream, ghcli_snippet *out)
 }
 
 int
-ghcli_snippets_get(ghcli_snippet **out)
+ghcli_snippets_get(int max, ghcli_snippet **out)
 {
-    char               *url    = NULL;
-    ghcli_fetch_buffer  buffer = {0};
-    struct json_stream  stream = {0};
-    int                 size   = 0;
+    char               *url      = NULL;
+    char               *next_url = NULL;
+    ghcli_fetch_buffer  buffer   = {0};
+    struct json_stream  stream   = {0};
+    int                 size     = 0;
 
     *out = NULL;
 
-    // TODO: handle pagination
-
     url = sn_asprintf("%s/snippets", gitlab_get_apibase());
-    ghcli_fetch(url, NULL, &buffer);
 
-    json_open_buffer(&stream, buffer.data, buffer.length);
-    json_set_streaming(&stream, 1);
+    do {
+        ghcli_fetch(url, &next_url, &buffer);
 
-    if (json_next(&stream) != JSON_ARRAY)
-        errx(1, "Expected array");
+        json_open_buffer(&stream, buffer.data, buffer.length);
+        json_set_streaming(&stream, 1);
 
-    while (json_peek(&stream) == JSON_OBJECT) {
-        *out = realloc(*out, sizeof(**out) * (size + 1));
-        ghcli_snippet *it = &(*out)[size++];
-        gitlab_parse_snippet(&stream, it);
-    }
+        if (json_next(&stream) != JSON_ARRAY)
+            errx(1, "Expected array");
 
-    if (json_next(&stream) != JSON_ARRAY_END)
-        errx(1, "Expected end of array");
+        while (json_peek(&stream) == JSON_OBJECT) {
+            *out = realloc(*out, sizeof(**out) * (size + 1));
+            ghcli_snippet *it = &(*out)[size++];
+            gitlab_parse_snippet(&stream, it);
 
-    json_close(&stream);
-    free(url);
-    free(buffer.data);
+            if (size == max)
+                goto enough;
+        }
+
+        if (json_next(&stream) != JSON_ARRAY_END)
+            errx(1, "Expected end of array");
+
+    enough:
+        json_close(&stream);
+        free(url);
+        free(buffer.data);
+    } while ((url = next_url) && (max == -1 || size < max));
+
+    free(next_url);
 
     return size;
 }

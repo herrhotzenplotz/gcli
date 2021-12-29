@@ -47,6 +47,7 @@ void ghcli_snippets_free(
     int             list_size);
 
 int ghcli_snippets_get(
+    int             max,
     ghcli_snippet **out);
 
 void ghcli_snippets_print(

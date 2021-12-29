@@ -977,8 +977,8 @@ subcommand_snippets(int argc, char *argv[])
     int                      ch;
     ghcli_snippet           *snippets      = NULL;
     int                      snippets_size = 0;
-    int                      count      = 30;
-    enum ghcli_output_order  order      = OUTPUT_ORDER_UNSORTED;
+    int                      count         = 30;
+    enum ghcli_output_order  order         = OUTPUT_ORDER_UNSORTED;
 
     const struct option options[] = {
         { .name    = "count",
@@ -1012,7 +1012,7 @@ subcommand_snippets(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    snippets_size = ghcli_snippets_get(&snippets);
+    snippets_size = ghcli_snippets_get(count, &snippets);
     ghcli_snippets_print(stdout, snippets, snippets_size);
     return EXIT_SUCCESS;
 }

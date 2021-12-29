@@ -39,7 +39,7 @@ namespace ghcli
         , m_model(nullptr)
     {
         ghcli_pull *pulls = nullptr;
-        int pulls_size = ghcli_get_prs(org, repo, all, &pulls);
+        int pulls_size = ghcli_get_prs(org, repo, all, -1, &pulls);
         this->m_model = new PullsModel(pulls, pulls_size);
 
         this->setModel(this->m_model);

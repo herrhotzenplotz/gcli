@@ -1013,7 +1013,7 @@ subcommand_snippets(int argc, char *argv[])
     argv += optind;
 
     snippets_size = ghcli_snippets_get(count, &snippets);
-    ghcli_snippets_print(stdout, snippets, snippets_size);
+    ghcli_snippets_print(stdout, order, snippets, snippets_size);
     return EXIT_SUCCESS;
 }
 

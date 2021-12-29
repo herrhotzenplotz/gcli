@@ -147,17 +147,40 @@ ghcli_snippets_get(int max, ghcli_snippet **out)
     return size;
 }
 
-void
-ghcli_snippets_print(FILE *stream, ghcli_snippet *list, int list_size)
+static void
+ghcli_print_snippet(FILE *stream, ghcli_snippet *it)
 {
-    for (int i = 0; i < list_size; ++i) {
-        fputc('\n', stream);
-        fprintf(stream, "    ID : %d\n", list[i].id);
-        fprintf(stream, " TITLE : %s\n", list[i].title);
-        fprintf(stream, "AUTHOR : %s\n", list[i].author);
-        fprintf(stream, "  FILE : %s\n", list[i].filename);
-        fprintf(stream, "  DATE : %s\n", list[i].date);
-        fprintf(stream, "VSBLTY : %s\n", list[i].visibility);
-        fprintf(stream, "   URL : %s\n", list[i].raw_url);
+    fprintf(stream, "    ID : %d\n", it->id);
+    fprintf(stream, " TITLE : %s\n", it->title);
+    fprintf(stream, "AUTHOR : %s\n", it->author);
+    fprintf(stream, "  FILE : %s\n", it->filename);
+    fprintf(stream, "  DATE : %s\n", it->date);
+    fprintf(stream, "VSBLTY : %s\n", it->visibility);
+    fprintf(stream, "   URL : %s\n", it->raw_url);
+}
+
+void
+ghcli_snippets_print(
+    FILE                    *stream,
+    enum ghcli_output_order  order,
+    ghcli_snippet           *list,
+    int                      list_size)
+{
+    if (list_size == 0) {
+        fprintf(stream, "No Snippets\n");
+        return;
+    }
+
+    /* output in reverse order if the sorted flag was enabled */
+    if (order == OUTPUT_ORDER_SORTED) {
+        for (int i = list_size; i > 0; --i) {
+            ghcli_print_snippet(stream, &list[i - 1]);
+            fputc('\n', stream);
+        }
+    } else {
+        for (int i = 0; i < list_size; ++i) {
+            ghcli_print_snippet(stream, &list[i]);
+            fputc('\n', stream);
+        }
     }
 }

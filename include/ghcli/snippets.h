@@ -30,6 +30,8 @@
 #ifndef SNIPPETS_H
 #define SNIPPETS_H
 
+#include <ghcli/ghcli.h>
+
 typedef struct ghcli_snippet ghcli_snippet;
 
 struct ghcli_snippet {
@@ -51,8 +53,9 @@ int ghcli_snippets_get(
     ghcli_snippet **out);
 
 void ghcli_snippets_print(
-    FILE           *stream,
-    ghcli_snippet  *list,
-    int             list_size);
+    FILE                    *stream,
+    enum ghcli_output_order  order,
+    ghcli_snippet           *list,
+    int                      list_size);
 
 #endif /* SNIPPETS_H */

@@ -972,6 +972,32 @@ subcommand_gists(int argc, char *argv[])
 }
 
 static int
+subcommand_snippet_delete(int argc, char *argv[])
+{
+    argc -= 1;
+    argv += 1;
+
+    if (!argc)
+        errx(1, "snippets delete: expected ID of snippet to delete");
+
+    char *snippet_id = shift(&argc, &argv);
+
+    if (argc)
+        errx(1, "snippet delete: trailing options");
+
+    ghcli_snippet_delete(snippet_id);
+
+    return EXIT_FAILURE;
+}
+
+static struct snippet_subcommand {
+    const char *name;
+    int (*fn)(int argc, char *argv[]);
+} snippet_subcommands[] = {
+    { .name = "delete", .fn = subcommand_snippet_delete }
+};
+
+static int
 subcommand_snippets(int argc, char *argv[])
 {
     int                      ch;
@@ -979,6 +1005,14 @@ subcommand_snippets(int argc, char *argv[])
     int                      snippets_size = 0;
     int                      count         = 30;
     enum ghcli_output_order  order         = OUTPUT_ORDER_UNSORTED;
+
+    for (size_t i = 0; i < ARRAY_SIZE(snippet_subcommands); ++i) {
+        if (argc > 1 && strcmp(argv[1], snippet_subcommands[i].name) == 0) {
+            argc -= 1;
+            argv += 1;
+            return snippet_subcommands[i].fn(argc, argv);
+        }
+    }
 
     const struct option options[] = {
         { .name    = "count",

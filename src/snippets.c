@@ -184,3 +184,15 @@ ghcli_snippets_print(
         }
     }
 }
+
+void
+ghcli_snippet_delete(const char *snippet_id)
+{
+    ghcli_fetch_buffer buffer = {0};
+    char *url = sn_asprintf("%s/snippets/%s", gitlab_get_apibase(), snippet_id);
+
+    ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+
+    free(url);
+    free(buffer.data);
+}

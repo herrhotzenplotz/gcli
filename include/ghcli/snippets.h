@@ -58,4 +58,7 @@ void ghcli_snippets_print(
     ghcli_snippet           *list,
     int                      list_size);
 
+void ghcli_snippet_delete(
+    const char *snippet_id);
+
 #endif /* SNIPPETS_H */

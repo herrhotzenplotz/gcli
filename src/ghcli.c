@@ -46,6 +46,7 @@
 #include <ghcli/repos.h>
 #include <ghcli/review.h>
 #include <ghcli/releases.h>
+#include <ghcli/snippets.h>
 
 #include <sn/sn.h>
 
@@ -971,6 +972,52 @@ subcommand_gists(int argc, char *argv[])
 }
 
 static int
+subcommand_snippets(int argc, char *argv[])
+{
+    int                      ch;
+    ghcli_snippet           *snippets      = NULL;
+    int                      snippets_size = 0;
+    int                      count      = 30;
+    enum ghcli_output_order  order      = OUTPUT_ORDER_UNSORTED;
+
+    const struct option options[] = {
+        { .name    = "count",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'n' },
+        { .name    = "sorted",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 's' },
+        {0},
+    };
+
+    while ((ch = getopt_long(argc, argv, "sn:", options, NULL)) != -1) {
+        switch (ch) {
+        case 'n': {
+            char *endptr = NULL;
+            count        = strtol(optarg, &endptr, 10);
+            if (endptr != (optarg + strlen(optarg)))
+                err(1, "snippets: cannot parse snippets count");
+        } break;
+        case 's':
+            order = OUTPUT_ORDER_SORTED;
+            break;
+        case '?':
+        default:
+            usage();
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    snippets_size = ghcli_snippets_get(&snippets);
+    ghcli_snippets_print(stdout, snippets, snippets_size);
+    return EXIT_SUCCESS;
+}
+
+static int
 subcommand_forks(int argc, char *argv[])
 {
     ghcli_fork              *forks      = NULL;
@@ -1348,6 +1395,7 @@ static struct subcommand {
     { .cmd_name = "comment",  .fn = subcommand_comment  },
     { .cmd_name = "forks",    .fn = subcommand_forks    },
     { .cmd_name = "gists",    .fn = subcommand_gists    },
+    { .cmd_name = "snippets", .fn = subcommand_snippets },
     { .cmd_name = "releases", .fn = subcommand_releases },
     { .cmd_name = "version",  .fn = subcommand_version  },
 };

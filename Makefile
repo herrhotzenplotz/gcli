@@ -49,6 +49,7 @@ ghcli_SRCS			=	src/comments.c			\
 					src/releases.c			\
 					src/repos.c			\
 					src/review.c			\
+					src/snippets.c			\
 					thirdparty/pdjson/pdjson.c	\
 					thirdparty/sn/sn.c
 

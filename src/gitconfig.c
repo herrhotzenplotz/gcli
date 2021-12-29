@@ -212,10 +212,7 @@ ghcli_gitconfig_atexit(void)
 }
 
 static bool
-gitconfig_url_extract_github_data(
-    sn_sv url,
-    const char **owner,
-    const char **repo)
+gitconfig_url_extract_github_data(sn_sv url)
 {
     sn_sv foo;
 
@@ -266,12 +263,12 @@ gitconfig_url_extract_github_data(
     if (url.length == 0)
         return false;
 
-    *owner = gitconfig_owner = sn_strndup(foo.data, foo.length);
+    gitconfig_owner = sn_strndup(foo.data, foo.length);
 
     url.length -= 1;
     url.data   += 1;
 
-    *repo = gitconfig_repo = sn_strip_suffix(
+    gitconfig_repo = sn_strip_suffix(
         sn_strndup(url.data, url.length),
         ".git");
 
@@ -281,33 +278,18 @@ gitconfig_url_extract_github_data(
     return true;
 }
 
-void
-ghcli_gitconfig_get_repo(const char **owner, const char **repo)
+static void
+ghcli_gitconfig_read_gitconfig(void)
 {
-    const char *path     = NULL;
-    sn_sv       buffer   = {0};
-    sn_sv       upstream = {0};
+    static int has_read_gitconfig = 0;
 
-    if (gitconfig_owner && gitconfig_repo) {
-        *owner  = gitconfig_owner;
-        *repo = gitconfig_repo;
+    if (has_read_gitconfig)
         return;
-    }
 
-    if ((upstream = ghcli_config_get_upstream()).length != 0) {
-        sn_sv owner_sv = sn_sv_chop_until(&upstream, '/');
-        sn_sv repo_sv  = sn_sv_from_parts(
-            upstream.data + 1,
-            upstream.length - 1);
+    has_read_gitconfig = 1;
 
-        *owner = gitconfig_owner = sn_sv_to_cstr(owner_sv);
-        *repo  = gitconfig_repo  = sn_sv_to_cstr(repo_sv);
-
-        should_free_owner_and_repo = true;
-        atexit(ghcli_gitconfig_atexit);
-
-        return;
-    }
+    const char *path   = NULL;
+    sn_sv       buffer = {0};
 
     path          = ghcli_find_gitconfig();
     buffer.length = sn_mmap_file(path, (void **)&buffer.data);
@@ -336,12 +318,43 @@ ghcli_gitconfig_get_repo(const char **owner, const char **repo)
             sn_sv url = {0};
 
             if (gitconfig_find_url_entry(entry, &url)
-                && gitconfig_url_extract_github_data(url, owner, repo))
+                && gitconfig_url_extract_github_data(url))
                 return;
         }
     }
 
-    errx(1, "No GitHub remote found");
+    errx(1, "No GitHub or GitLab remote found");
+}
+
+void
+ghcli_gitconfig_get_repo(const char **owner, const char **repo)
+{
+    sn_sv upstream = {0};
+
+    if (!gitconfig_owner && gitconfig_repo)
+        goto use_gitconfig_values;
+
+    if ((upstream = ghcli_config_get_upstream()).length != 0) {
+        sn_sv owner_sv = sn_sv_chop_until(&upstream, '/');
+        sn_sv repo_sv  = sn_sv_from_parts(
+            upstream.data + 1,
+            upstream.length - 1);
+
+        *owner = gitconfig_owner = sn_sv_to_cstr(owner_sv);
+        *repo  = gitconfig_repo  = sn_sv_to_cstr(repo_sv);
+
+        should_free_owner_and_repo = true;
+        atexit(ghcli_gitconfig_atexit);
+
+        return;
+    }
+
+    ghcli_gitconfig_read_gitconfig();
+
+use_gitconfig_values:
+    *owner = gitconfig_owner;
+    *repo = gitconfig_repo;
+    return;
 }
 
 void
@@ -406,5 +419,7 @@ ghcli_gitconfig_add_fork_remote(const char *org, const char *repo)
 int
 ghcli_gitconfig_get_forgetype(void)
 {
+    ghcli_gitconfig_read_gitconfig();
+
     return gitconfig_forgetype;
 }

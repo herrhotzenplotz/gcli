@@ -90,34 +90,40 @@ gitlab_review_get_reviews(
     int               pr,
     ghcli_pr_review **out)
 {
-    ghcli_fetch_buffer  buffer = {0};
-    struct json_stream  stream = {0};
-    char               *url    = NULL;
-    int                 size   = 0;
+    ghcli_fetch_buffer  buffer   = {0};
+    struct json_stream  stream   = {0};
+    char               *url      = NULL;
+    char               *next_url = NULL;
+    int                 size     = 0;
 
     url = sn_asprintf(
         "%s/projects/%s%%2F%s/merge_requests/%d/notes?sort=asc",
         gitlab_get_apibase(), owner, repo, pr);
 
-    ghcli_fetch(url, NULL, &buffer);
+    do {
+        ghcli_fetch(url, &next_url, &buffer);
 
-    json_open_buffer(&stream, buffer.data, buffer.length);
-    json_set_streaming(&stream, 1);
+        json_open_buffer(&stream, buffer.data, buffer.length);
+        json_set_streaming(&stream, 1);
 
-    if (json_next(&stream) != JSON_ARRAY)
-        errx(1, "Expected array");
+        if (json_next(&stream) != JSON_ARRAY)
+            errx(1, "Expected array");
 
-    while (json_peek(&stream) == JSON_OBJECT) {
-        *out = realloc(*out, sizeof(ghcli_pr_review) * (size + 1));
-        ghcli_pr_review *it  = &(*out)[size++];
-        gitlab_parse_review_note(&stream, it);
-    }
+        while (json_peek(&stream) == JSON_OBJECT) {
+            *out = realloc(*out, sizeof(ghcli_pr_review) * (size + 1));
+            ghcli_pr_review *it  = &(*out)[size++];
+            gitlab_parse_review_note(&stream, it);
+        }
 
-    if (json_next(&stream) != JSON_ARRAY_END)
-        errx(1, "Expected array end");
+        if (json_next(&stream) != JSON_ARRAY_END)
+            errx(1, "Expected array end");
 
-    json_close(&stream);
-    free(url);
+        json_close(&stream);
+        free(url);
+        free(buffer.data);
+    } while ((url = next_url)); /* I hope this doesn't cause any issues */
+
+    free(next_url);
 
     return size;
 }

@@ -1,3 +1,2 @@
 pr.base=trunk
 pr.upstream=herrhotzenplotz/ghcli
-forge-type=github

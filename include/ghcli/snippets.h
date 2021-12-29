@@ -61,4 +61,7 @@ void ghcli_snippets_print(
 void ghcli_snippet_delete(
     const char *snippet_id);
 
+void ghcli_snippet_get(
+    const char *snippet_id);
+
 #endif /* SNIPPETS_H */

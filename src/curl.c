@@ -136,7 +136,9 @@ ghcli_curl(FILE *stream, const char *url, const char *content_type)
     ghcli_fetch_buffer buffer = {0};
 
     headers = NULL;
-    headers = curl_slist_append(headers, content_type);
+
+    if (content_type)
+        headers = curl_slist_append(headers, content_type);
 
     session = curl_easy_init();
 

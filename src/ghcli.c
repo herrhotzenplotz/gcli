@@ -972,6 +972,25 @@ subcommand_gists(int argc, char *argv[])
 }
 
 static int
+subcommand_snippet_get(int argc, char *argv[])
+{
+    argc -= 1;
+    argv += 1;
+
+    if (!argc)
+        errx(1, "snippets get: expected ID of snippet to fetch");
+
+    char *snippet_id = shift(&argc, &argv);
+
+    if (argc)
+        errx(1, "snippet get: trailing options");
+
+    ghcli_snippet_get(snippet_id);
+
+    return EXIT_SUCCESS;
+}
+
+static int
 subcommand_snippet_delete(int argc, char *argv[])
 {
     argc -= 1;
@@ -987,14 +1006,15 @@ subcommand_snippet_delete(int argc, char *argv[])
 
     ghcli_snippet_delete(snippet_id);
 
-    return EXIT_FAILURE;
+    return EXIT_SUCCESS;
 }
 
 static struct snippet_subcommand {
     const char *name;
     int (*fn)(int argc, char *argv[]);
 } snippet_subcommands[] = {
-    { .name = "delete", .fn = subcommand_snippet_delete }
+    { .name = "get",    .fn = subcommand_snippet_get    },
+    { .name = "delete", .fn = subcommand_snippet_delete },
 };
 
 static int

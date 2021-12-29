@@ -64,7 +64,8 @@ MAN				=	docs/ghcli.1 \
 					docs/ghcli-issues.1 \
 					docs/ghcli-pulls.1 \
 					docs/ghcli-comment.1 \
-					docs/ghcli-gists.1
+					docs/ghcli-gists.1 \
+					docs/ghcli-snippets.1
 
 # Include the rules to build your program
 # Important: the autodetect.sh script needs to be in place

@@ -86,9 +86,12 @@ warnx(const char *fmt, ...)
 char *
 sn_strndup(const char *it, size_t len)
 {
-    size_t actual = 0;
-    const char *tmp = NULL;
-    char *result = NULL;
+    size_t      actual = 0;
+    const char *tmp    = NULL;
+    char       *result = NULL;
+
+    if (!len)
+        return NULL;
 
     tmp = it;
 

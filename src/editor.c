@@ -58,7 +58,9 @@ ghcli_editor_get_user_message(
     if (!editor) {
         editor = ghcli_config_get_editor();
         if (!editor)
-            errx(1, "No editor");
+            errx(1,
+                 "I have no editor. Either set editor=... in your config "
+                 "file or set the EDITOR environment variable.");
     }
 
     char   filename[31] = "/tmp/ghcli_message.XXXXXXX\0";

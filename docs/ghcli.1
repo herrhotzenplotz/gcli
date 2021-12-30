@@ -142,17 +142,30 @@ The config file for
 It shall contain the following data:
 
 .Bd -literal
-editor=/path/to/ganoooo/emacs
-github.account=herrhotzenplotz
-github.token=<valid github api token>
-github.api_base=https://api.github.com
-gitlab.account=herrhotzenplotz
-gitlab.token=<valid gitlab api token>
-gitlab.api_base=https://api.gitlab.com
+defaults {
+    editor=/path/to/ganoooo/emacs
+    github-default-account=herrhotzenplotz-gh
+    gitlab-default-account=herrhotzenplotz-gitlab
+}
+
+herrhotzenplotz-gh {
+    account=herrhotzenplotz
+    token=foobar
+    apibase=https://api.github.com
+    forge-type=github
+}
+
+herrhotzenplotz-gl {
+    account=herrhotzenplotz
+    token=<valid gitlab api token>
+    apibase=https://gitlab.com/api/v4
+    forge-type=gitlab
+}
 .Ed
 
-In case api_base is not set, it defaults to https://api.github.com.
-
+In case
+.Sq apibase
+is not set, it defaults to the above values.
 For the API token, you can set whatever scopes you want. However, I
 recommend setting the following on GitHub:
 .Sq admin:org, delete_repo, gist, repo, workflow .
@@ -165,6 +178,12 @@ If editor is not set in the config file,
 will use
 .Ev EDITOR
 from the environment.
+
+Both
+.Sq gitlab-default-account
+and
+.Sq github-default-account
+must point at a config section with that exact name.
 
 .It Pa .ghcli
 A repo-specific config file that may contain the following data:

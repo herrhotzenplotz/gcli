@@ -31,6 +31,7 @@
 #include <ghcli/gitconfig.h>
 #include <ghcli/forges.h>
 
+#include <ctype.h>
 #include <dirent.h>
 #include <getopt.h>
 #include <stdlib.h>
@@ -302,22 +303,44 @@ parse_keyvaluepair(struct config_parser *input, struct ghcli_config_entry *out)
     out->value = sn_sv_trim(value);
 }
 
+static sn_sv
+parse_section_title(struct config_parser *input)
+{
+    size_t len = 0;
+    if (input->buffer.length == 0)
+        errx(1, "%s:%d: unexpected end of input in section title",
+             input->filename, input->line);
+
+
+    while (!isspace(input->buffer.data[len]) && input->buffer.data[len] != '{')
+        len++;
+
+    sn_sv title = sn_sv_from_parts(input->buffer.data, len);
+    input->buffer.data   += len;
+    input->buffer.length -= len;
+
+    skip_ws_and_comments(input);
+
+    if (input->buffer.length == 0)
+        errx(1, "%s:%d: unexpected end of input", input->filename, input->line);
+
+    if (input->buffer.data[0] != '{')
+        errx(1, "%s:%d: expected '{'", input->filename, input->line);
+
+    input->buffer.length -= 1;
+    input->buffer.data   += 1;
+
+    skip_ws_and_comments(input);
+    return title;
+}
+
 static void
 parse_config_section(struct config_parser *input)
 {
     struct ghcli_config_section *section =
         &config.sections[config.sections_size++];
 
-    sn_sv title = sn_sv_chop_until(&input->buffer, '{');
-    section->title = sn_sv_trim(title);
-
-    if (input->buffer.length == 0)
-        errx(1, "%s:%d: unexpected end of input", input->filename, input->line);
-
-    input->buffer.length -= 1;
-    input->buffer.data   += 1;
-
-    skip_ws_and_comments(input);
+    section->title = parse_section_title(input);
 
     while (input->buffer.length > 0 && input->buffer.data[0] != '}') {
         skip_ws_and_comments(input);

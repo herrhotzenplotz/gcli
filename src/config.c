@@ -31,30 +31,36 @@
 #include <ghcli/gitconfig.h>
 #include <ghcli/forges.h>
 
+#include <ctype.h>
 #include <dirent.h>
 #include <getopt.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-static struct ghcli_config {
+#define CONFIG_MAX_ENTRIES 16
+struct ghcli_config_section {
     struct ghcli_config_entry {
         sn_sv key;
         sn_sv value;
-    } entries[128];
+    } entries[CONFIG_MAX_ENTRIES];
     size_t entries_size;
 
-    bool                  override_forge_type;
-    enum ghcli_forge_type forge_type;
+    sn_sv title;
+};
+
+#define CONFIG_MAX_SECTIONS 16
+static struct ghcli_config {
+    struct ghcli_config_section sections[CONFIG_MAX_SECTIONS];
+    size_t                      sections_size;
+
+    const char *override_default_account;
 
     sn_sv buffer;
     void *mmap_pointer;
 } config;
 
 static struct ghcli_dotghcli {
-    struct ghcli_local_config_entry {
-        sn_sv key;
-        sn_sv value;
-    } entries[128];
+    struct ghcli_config_entry entries[128];
     size_t entries_size;
 
     sn_sv  buffer;
@@ -215,25 +221,17 @@ ghcli_config_parse_args(int *argc, char ***argv)
 
     int ch;
     const struct option options[] = {
-        { .name    = "type",
+        { .name    = "account",
           .has_arg = required_argument,
           .flag    = NULL,
-          .val     = 't' },
+          .val     = 'a' },
         {0},
     };
 
-    while ((ch = getopt_long(*argc, *argv, "+t:", options, NULL)) != -1) {
+    while ((ch = getopt_long(*argc, *argv, "+a:", options, NULL)) != -1) {
         switch (ch) {
-        case 't': {
-            config.override_forge_type = true;
-            if (strcmp(optarg, "github") == 0)
-                config.forge_type = GHCLI_FORGE_GITHUB;
-            else if (strcmp(optarg, "gitlab") == 0)
-                config.forge_type = GHCLI_FORGE_GITLAB;
-            else
-                errx(1,
-                     "unknown forge type %s. "
-                     "can be either gitlab or github.", optarg);
+        case 'a': {
+            config.override_default_account = optarg;
         } break;
         case '?':
         default:
@@ -253,10 +251,136 @@ ghcli_config_parse_args(int *argc, char ***argv)
     optind = 0;
 }
 
+struct config_parser {
+    sn_sv       buffer;
+    int         line;
+    const char *filename;
+};
+
+static void
+skip_ws_and_comments(struct config_parser *input)
+{
+again:
+    while (input->buffer.length > 0) {
+        switch (input->buffer.data[0]) {
+        case '\n':
+            input->line++;
+        case ' ':
+        case '\t':
+        case '\r':
+            input->buffer.data   += 1;
+            input->buffer.length -= 1;
+            break;
+        default:
+            goto not_whitespace;
+        }
+    }
+
+    return;
+
+not_whitespace:
+    if (input->buffer.data[0] == '#') {
+        /* This is a comment */
+        sn_sv_chop_until(&input->buffer, '\n');
+        goto again;
+    }
+}
+
+static void
+parse_keyvaluepair(struct config_parser *input, struct ghcli_config_entry *out)
+{
+    sn_sv key  = sn_sv_chop_until(&input->buffer, '=');
+
+    if (key.length == 0)
+        errx(1, "%s:%d: empty key", input->filename, input->line);
+
+    input->buffer.data   += 1;
+    input->buffer.length -= 1;
+
+    sn_sv value = sn_sv_chop_until(&input->buffer, '\n');
+
+    out->key   = sn_sv_trim(key);
+    out->value = sn_sv_trim(value);
+}
+
+static sn_sv
+parse_section_title(struct config_parser *input)
+{
+    size_t len = 0;
+    if (input->buffer.length == 0)
+        errx(1, "%s:%d: unexpected end of input in section title",
+             input->filename, input->line);
+
+
+    while (!isspace(input->buffer.data[len]) && input->buffer.data[len] != '{')
+        len++;
+
+    sn_sv title = sn_sv_from_parts(input->buffer.data, len);
+    input->buffer.data   += len;
+    input->buffer.length -= len;
+
+    skip_ws_and_comments(input);
+
+    if (input->buffer.length == 0)
+        errx(1, "%s:%d: unexpected end of input", input->filename, input->line);
+
+    if (input->buffer.data[0] != '{')
+        errx(1, "%s:%d: expected '{'", input->filename, input->line);
+
+    input->buffer.length -= 1;
+    input->buffer.data   += 1;
+
+    skip_ws_and_comments(input);
+    return title;
+}
+
+static void
+parse_config_section(struct config_parser *input)
+{
+    struct ghcli_config_section *section = NULL;
+
+    if (config.sections_size == CONFIG_MAX_SECTIONS)
+        errx(1, "error: too many config sections");
+
+    section = &config.sections[config.sections_size++];
+
+    section->title = parse_section_title(input);
+
+    while (input->buffer.length > 0 && input->buffer.data[0] != '}') {
+        skip_ws_and_comments(input);
+
+        if (section->entries_size == CONFIG_MAX_ENTRIES)
+            errx(1, "error: too many config entries in section "SV_FMT,
+                 SV_ARGS(section->title));
+
+        parse_keyvaluepair(input, &section->entries[section->entries_size++]);
+        skip_ws_and_comments(input);
+    }
+
+    if (input->buffer.length == 0)
+        errx(1, "%s:%d: missing '}' before end of file",
+             input->filename, input->line);
+
+    input->buffer.length -= 1;
+    input->buffer.data   += 1;
+}
+
+static void
+parse_config_file(struct config_parser *input)
+{
+    skip_ws_and_comments(input);
+
+    while (input->buffer.length > 0) {
+        parse_config_section(input);
+        skip_ws_and_comments(input);
+    }
+}
+
 void
 ghcli_config_init(int *argc, char ***argv, const char *file_path)
 {
-    const char *in_file_path = file_path;
+    const char           *in_file_path = file_path;
+    struct config_parser  parser       = {0};
 
     ghcli_config_parse_args(argc, argv);
 
@@ -285,53 +409,40 @@ ghcli_config_init(int *argc, char ***argv, const char *file_path)
     config.buffer = sn_sv_from_parts(config.mmap_pointer, len);
     config.buffer = sn_sv_trim_front(config.buffer);
 
-    int curr_line = 1;
-    while (config.buffer.length > 0) {
-        sn_sv line = sn_sv_chop_until(&config.buffer, '\n');
+    parser.buffer   = config.buffer;
+    parser.line     = 1;
+    parser.filename = file_path;
 
-        line = sn_sv_trim(line);
-
-        if (line.length == 0)
-            errx(1, "%s:%d: Unexpected end of line",
-                 file_path, curr_line);
-
-        // Comments
-        if (line.data[0] == '#') {
-            config.buffer = sn_sv_trim_front(config.buffer);
-            curr_line++;
-            continue;
-        }
-
-        sn_sv key  = sn_sv_chop_until(&line, '=');
-
-        key = sn_sv_trim(key);
-
-        if (key.length == 0)
-            errx(1, "%s:%d: empty key", file_path, curr_line);
-
-        line.data   += 1;
-        line.length -= 1;
-
-        sn_sv value = sn_sv_trim(line);
-
-        config.entries[config.entries_size].key   = key;
-        config.entries[config.entries_size].value = value;
-        config.entries_size++;
-
-        config.buffer = sn_sv_trim_front(config.buffer);
-        curr_line++;
-    }
+    parse_config_file(&parser);
 
     if (file_path != in_file_path)
         free((void *)file_path);
 }
 
-sn_sv
-ghcli_config_find_by_key(const char *key)
+static struct ghcli_config_section *
+find_section(sn_sv name)
 {
-    for (size_t i = 0; i < config.entries_size; ++i)
-        if (sn_sv_eq_to(config.entries[i].key, key))
-            return config.entries[i].value;
+    for (size_t i = 0; i < config.sections_size; ++i) {
+        if (sn_sv_eq(config.sections[i].title, name))
+            return &config.sections[i];
+    }
+    return NULL;
+}
+
+sn_sv
+ghcli_config_find_by_key(sn_sv section_name, const char *key)
+{
+    struct ghcli_config_section *section = find_section(section_name);
+
+    if (!section) {
+        warnx("no config section with name '"SV_FMT"'", SV_ARGS(section_name));
+        return SV_NULL;
+    }
+
+    for (size_t i = 0; i < section->entries_size; ++i)
+        if (sn_sv_eq_to(section->entries[i].key, key))
+            return section->entries[i].value;
+
     return SV_NULL;
 }
 
@@ -347,7 +458,7 @@ ghcli_local_config_find_by_key(const char *key)
 char *
 ghcli_config_get_editor(void)
 {
-    return sn_sv_to_cstr(ghcli_config_find_by_key("editor"));
+    return sn_sv_to_cstr(ghcli_config_find_by_key(SV("defaults"), "editor"));
 }
 
 char *
@@ -394,11 +505,20 @@ ghcli_config_get_forge_type(void)
 {
     init_local_config();
 
-    if (config.override_forge_type)
-        return config.forge_type;
+    sn_sv entry = {0};
 
-    sn_sv entry = ghcli_local_config_find_by_key("forge-type");
-    if (entry.length > 0) {
+    if (config.override_default_account) {
+        sn_sv section = SV((char *)config.override_default_account);
+        entry = ghcli_config_find_by_key(section, "forge-type");
+        if (sn_sv_null(entry))
+            errx(1,
+                 "error: given default override account not found or "
+                 "missing forge-type");
+    } else {
+        entry = ghcli_local_config_find_by_key("forge-type");
+    }
+
+    if (!sn_sv_null(entry)) {
         if (sn_sv_eq_to(entry, "github"))
             return GHCLI_FORGE_GITHUB;
         else if (sn_sv_eq_to(entry, "gitlab"))

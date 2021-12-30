@@ -7,32 +7,32 @@
 .Sh SYNOPSIS
 
 .Nm
-.Op Fl t Ar forge-type
+.Op Fl a Ar override-account
 .Cm issues Op Ar options
 .Nm
-.Op Fl t Ar forge-type
+.Op Fl a Ar override-account
 .Cm pulls Op Ar options
 .Nm
-.Op Fl t Ar forge-type
+.Op Fl a Ar override-account
 .Cm comment Op Ar options
 .Nm
-.Op Fl t Ar forge-type
+.Op Fl a Ar override-account
 .Cm review Op Ar options
 .Nm
-.Op Fl t Ar forge-type
+.Op Fl a Ar override-account
 .Cm forks Op Ar options
 .Nm
-.Op Fl t Ar forge-type
+.Op Fl a Ar override-account
 .Cm repos Op Ar options
 .Nm
 .Cm gists Op Ar options
 .Nm
 .Cm snippets Op Ar options
 .Nm
-.Op Fl t Ar forge-type
+.Op Fl a Ar override-account
 .Cm releases Op Ar options
 .Nm
-.Op Fl t Ar forge-type
+.Op Fl a Ar override-account
 .Cm comment Op Ar options
 .Nm
 .Cm version
@@ -79,10 +79,11 @@ Print version and exit.
 .El
 .Sh OPTIONS
 .Bl -tag -width indent
-.It Fl t , -type Ar forge-type
-Manually override the forge type.
-.Ar forge-type
-can be either github or gitlab.
+.It Fl a , -account Ar override-account
+Manually override the default account.
+.Ar override-account
+must name a config section for an account in the global config file. See
+.Sx FILES .
 .El
 
 Common options across almost all of the subcommands are:
@@ -142,17 +143,30 @@ The config file for
 It shall contain the following data:
 
 .Bd -literal
-editor=/path/to/ganoooo/emacs
-github.account=herrhotzenplotz
-github.token=<valid github api token>
-github.api_base=https://api.github.com
-gitlab.account=herrhotzenplotz
-gitlab.token=<valid gitlab api token>
-gitlab.api_base=https://api.gitlab.com
+defaults {
+    editor=/path/to/ganoooo/emacs
+    github-default-account=herrhotzenplotz-gh
+    gitlab-default-account=herrhotzenplotz-gitlab
+}
+
+herrhotzenplotz-gh {
+    account=herrhotzenplotz
+    token=foobar
+    apibase=https://api.github.com
+    forge-type=github
+}
+
+herrhotzenplotz-gl {
+    account=herrhotzenplotz
+    token=<valid gitlab api token>
+    apibase=https://gitlab.com/api/v4
+    forge-type=gitlab
+}
 .Ed
 
-In case api_base is not set, it defaults to https://api.github.com.
-
+In case
+.Sq apibase
+is not set, it defaults to the above values.
 For the API token, you can set whatever scopes you want. However, I
 recommend setting the following on GitHub:
 .Sq admin:org, delete_repo, gist, repo, workflow .
@@ -165,6 +179,12 @@ If editor is not set in the config file,
 will use
 .Ev EDITOR
 from the environment.
+
+Both
+.Sq gitlab-default-account
+and
+.Sq github-default-account
+must point at a config section with that exact name.
 
 .It Pa .ghcli
 A repo-specific config file that may contain the following data:
@@ -233,7 +253,7 @@ functionality.
 Yes. It is software. Please report issues preferably via e-mail or on
 GitHub. You may also report an issue like so:
 .Bd -literal -width indent
-$ ghcli -t github issues create -o herrhotzenplotz -r ghcli "BUG : ..."
+$ ghcli -a some-github-account issues create -o herrhotzenplotz -r ghcli "BUG : ..."
 .Ed
 .Sh SECURITY CONSIDERATIONS
 It is written in C. If it were written in Rust, it would have been

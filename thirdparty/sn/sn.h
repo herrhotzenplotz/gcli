@@ -96,6 +96,12 @@ bool   sn_sv_eq_to(const sn_sv, const char *);
 sn_sv  sn_sv_fmt(const char *fmt, ...) PRINTF_FORMAT(1, 2);
 char  *sn_sv_to_cstr(sn_sv);
 
+static inline bool
+sn_sv_null(sn_sv it)
+{
+    return it.data == NULL && it.length == 0;
+}
+
 /* interactive user functions */
 bool   sn_yesno(const char *fmt, ...) PRINTF_FORMAT(1, 2);
 

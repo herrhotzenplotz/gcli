@@ -7,32 +7,32 @@
 .Sh SYNOPSIS
 
 .Nm
-.Op Fl t Ar forge-type
+.Op Fl a Ar override-account
 .Cm issues Op Ar options
 .Nm
-.Op Fl t Ar forge-type
+.Op Fl a Ar override-account
 .Cm pulls Op Ar options
 .Nm
-.Op Fl t Ar forge-type
+.Op Fl a Ar override-account
 .Cm comment Op Ar options
 .Nm
-.Op Fl t Ar forge-type
+.Op Fl a Ar override-account
 .Cm review Op Ar options
 .Nm
-.Op Fl t Ar forge-type
+.Op Fl a Ar override-account
 .Cm forks Op Ar options
 .Nm
-.Op Fl t Ar forge-type
+.Op Fl a Ar override-account
 .Cm repos Op Ar options
 .Nm
 .Cm gists Op Ar options
 .Nm
 .Cm snippets Op Ar options
 .Nm
-.Op Fl t Ar forge-type
+.Op Fl a Ar override-account
 .Cm releases Op Ar options
 .Nm
-.Op Fl t Ar forge-type
+.Op Fl a Ar override-account
 .Cm comment Op Ar options
 .Nm
 .Cm version
@@ -79,10 +79,11 @@ Print version and exit.
 .El
 .Sh OPTIONS
 .Bl -tag -width indent
-.It Fl t , -type Ar forge-type
-Manually override the forge type.
-.Ar forge-type
-can be either github or gitlab.
+.It Fl a , -account Ar override-account
+Manually override the default account.
+.Ar override-account
+must name a config section for an account in the global config file. See
+.Sx FILES .
 .El
 
 Common options across almost all of the subcommands are:
@@ -252,7 +253,7 @@ functionality.
 Yes. It is software. Please report issues preferably via e-mail or on
 GitHub. You may also report an issue like so:
 .Bd -literal -width indent
-$ ghcli -t github issues create -o herrhotzenplotz -r ghcli "BUG : ..."
+$ ghcli -a some-github-account issues create -o herrhotzenplotz -r ghcli "BUG : ..."
 .Ed
 .Sh SECURITY CONSIDERATIONS
 It is written in C. If it were written in Rust, it would have been

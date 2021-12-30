@@ -51,8 +51,8 @@ struct ghcli_config_section {
 static struct ghcli_config {
     struct ghcli_config_section sections[CONFIG_MAX_SECTIONS];
     size_t                      sections_size;
-    bool                        override_forge_type;
-    enum ghcli_forge_type       forge_type;
+
+    const char *override_default_account;
 
     sn_sv buffer;
     void *mmap_pointer;
@@ -220,25 +220,17 @@ ghcli_config_parse_args(int *argc, char ***argv)
 
     int ch;
     const struct option options[] = {
-        { .name    = "type",
+        { .name    = "account",
           .has_arg = required_argument,
           .flag    = NULL,
-          .val     = 't' },
+          .val     = 'a' },
         {0},
     };
 
-    while ((ch = getopt_long(*argc, *argv, "+t:", options, NULL)) != -1) {
+    while ((ch = getopt_long(*argc, *argv, "+a:", options, NULL)) != -1) {
         switch (ch) {
-        case 't': {
-            config.override_forge_type = true;
-            if (strcmp(optarg, "github") == 0)
-                config.forge_type = GHCLI_FORGE_GITHUB;
-            else if (strcmp(optarg, "gitlab") == 0)
-                config.forge_type = GHCLI_FORGE_GITLAB;
-            else
-                errx(1,
-                     "unknown forge type %s. "
-                     "can be either gitlab or github.", optarg);
+        case 'a': {
+            config.override_default_account = optarg;
         } break;
         case '?':
         default:
@@ -480,11 +472,20 @@ ghcli_config_get_forge_type(void)
 {
     init_local_config();
 
-    if (config.override_forge_type)
-        return config.forge_type;
+    sn_sv entry = {0};
 
-    sn_sv entry = ghcli_local_config_find_by_key("forge-type");
-    if (entry.length > 0) {
+    if (config.override_default_account) {
+        sn_sv section = SV((char *)config.override_default_account);
+        entry = ghcli_config_find_by_key(section, "forge-type");
+        if (sn_sv_null(entry))
+            errx(1,
+                 "error: given default override account not found or "
+                 "missing forge-type");
+    } else {
+        entry = ghcli_local_config_find_by_key("forge-type");
+    }
+
+    if (!sn_sv_null(entry)) {
         if (sn_sv_eq_to(entry, "github"))
             return GHCLI_FORGE_GITHUB;
         else if (sn_sv_eq_to(entry, "gitlab"))

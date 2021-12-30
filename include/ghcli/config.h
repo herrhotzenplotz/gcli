@@ -43,6 +43,7 @@ void ghcli_config_get_upstream_parts(
     sn_sv *repo);
 
 sn_sv ghcli_config_find_by_key(
+    sn_sv       section_name,
     const char *key);
 
 char             *ghcli_config_get_editor(void);

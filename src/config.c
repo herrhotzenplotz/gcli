@@ -337,14 +337,22 @@ parse_section_title(struct config_parser *input)
 static void
 parse_config_section(struct config_parser *input)
 {
-    struct ghcli_config_section *section =
-        &config.sections[config.sections_size++];
+    struct ghcli_config_section *section = NULL;
+
+    if (config.sections_size == CONFIG_MAX_SECTIONS)
+        errx(1, "error: too many config sections");
+
+    section = &config.sections[config.sections_size++];
 
     section->title = parse_section_title(input);
 
     while (input->buffer.length > 0 && input->buffer.data[0] != '}') {
         skip_ws_and_comments(input);
-        // TODO: bounds check
+
+        if (section->entries_size == CONFIG_MAX_ENTRIES)
+            errx(1, "error: too many config entries in section "SV_FMT,
+                 SV_ARGS(section->title));
+
         parse_keyvaluepair(input, &section->entries[section->entries_size++]);
         skip_ws_and_comments(input);
     }

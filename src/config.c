@@ -433,9 +433,11 @@ sn_sv
 ghcli_config_find_by_key(sn_sv section_name, const char *key)
 {
     struct ghcli_config_section *section = find_section(section_name);
-    // TODO: Emit a warning
-    if (!section)
+
+    if (!section) {
+        warnx("no config section with name '"SV_FMT"'", SV_ARGS(section_name));
         return SV_NULL;
+    }
 
     for (size_t i = 0; i < section->entries_size; ++i)
         if (sn_sv_eq_to(section->entries[i].key, key))

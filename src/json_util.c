@@ -123,6 +123,7 @@ static struct {
 } json_escape_table[] = {
     { .c = '\n', .with = "\\n"  },
     { .c = '\t', .with = "\\t"  },
+    { .c = '\r', .with = "\\r"  },
     { .c = '\\', .with = "\\\\" },
     { .c = '"' , .with = "\\\"" },
 };
@@ -130,14 +131,16 @@ static struct {
 sn_sv
 ghcli_json_escape(sn_sv it)
 {
-    // TODO: Improve performance of ghcli_json_escape
     sn_sv result = {0};
+
+    result.data = malloc(2 * it.length);
+    if (!result.data)
+        err(1, "malloc");
 
     for (size_t i = 0; i < it.length; ++i) {
         for (size_t c = 0; c < ARRAY_SIZE(json_escape_table); ++c) {
             if (json_escape_table[c].c == it.data[i]) {
                 size_t len     = strlen(json_escape_table[c].with);
-                result.data    = realloc(result.data, result.length + len);
                 memcpy(result.data + result.length,
                        json_escape_table[c].with,
                        len);
@@ -146,7 +149,6 @@ ghcli_json_escape(sn_sv it)
             }
         }
 
-        result.data = realloc(result.data, result.length + 1);
         memcpy(result.data + result.length, it.data + i, 1);
         result.length += 1;
     next:

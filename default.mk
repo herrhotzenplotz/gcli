@@ -82,6 +82,7 @@ ${LIBS}: ${OBJS}
 
 clean:
 	@echo " ==> Cleaning"
+	@[ -d tests/ ] && ${MAKE} -C tests clean
 	rm -f ${PROGS} ${LIBS} ${OBJS} ${DEPS} config.mk
 
 PREFIX	?=	/usr/local
@@ -117,3 +118,9 @@ snmk-update:
 	@echo " ==> Updated. Rebuilding everything..."
 	${MAKE} clean
 	${MAKE} all
+
+check: Makefile config.mk
+	${MAKE} do-test
+
+do-test: ${LIBS}
+	${MAKE} -C tests

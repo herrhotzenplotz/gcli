@@ -57,3 +57,9 @@
 /src/gitlab/review.c~
 /src/gitlab/review.o
 /docs/ghcli-snippets.1~
+/libghcli.a
+/tests/Makefile~
+/tests/json_escape/expected.stdout~
+/tests/json_escape/json_escape
+/tests/json_escape/json_escape.o
+/tests/test.mk~

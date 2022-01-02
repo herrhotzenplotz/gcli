@@ -1,12 +1,15 @@
 # Declare the list of programs
 PROGS				=	ghcli
+LIBS				=	libghcli.a
 
 GHCLI_VERSION			=	0.6.0-alpha
 # These and LDFLAGS can be overwritten
 CFLAGS				=	-std=iso9899:1999 \
 					-Ithirdparty/pdjson/ \
 					-Ithirdparty/ \
-					-Iinclude/
+					-Iinclude/ -fPIC -fPIE
+LDFLAGS				=	-L. -lghcli -rdynamic -fPIC \
+					-fPIE
 CFLAGS_amd64-freebsd-clang	=	-pedantic \
 					-g -O0 -ggdb -Wall -Wextra
 CFLAGS_sparc-sunos-sunstudio	=	-pedantic -I/opt/bw/include \
@@ -16,18 +19,19 @@ CPPFLAGS			=	-D_XOPEN_SOURCE=600 \
 					-DGHCLI_VERSION_STRING=\"${GHCLI_VERSION}\"
 
 # List the source files for each binary to be built
-ghcli_SRCS			=	src/comments.c			\
+ghcli_SRCS			=	src/ghcli.c
+
+libghcli.a_SRCS			=	src/comments.c			\
 					src/config.c			\
 					src/curl.c			\
 					src/editor.c			\
 					src/forges.c			\
 					src/forks.c			\
-					src/ghcli.c			\
 					src/gists.c			\
 					src/gitconfig.c			\
 					src/github/api.c		\
-					src/github/config.c		\
 					src/github/comments.c		\
+					src/github/config.c		\
 					src/github/forks.c		\
 					src/github/issues.c		\
 					src/github/pulls.c		\
@@ -40,9 +44,10 @@ ghcli_SRCS			=	src/comments.c			\
 					src/gitlab/forks.c		\
 					src/gitlab/issues.c		\
 					src/gitlab/merge_requests.c	\
-					src/gitlab/repos.c		\
 					src/gitlab/releases.c		\
+					src/gitlab/repos.c		\
 					src/gitlab/review.c		\
+					src/issues.c			\
 					src/issues.c			\
 					src/json_util.c			\
 					src/pulls.c			\
@@ -70,6 +75,8 @@ MAN				=	docs/ghcli.1 \
 # Include the rules to build your program
 # Important: the autodetect.sh script needs to be in place
 include default.mk
+
+ghcli: libghcli.a
 
 .PHONY: TAGS
 TAGS:

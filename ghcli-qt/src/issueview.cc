@@ -43,7 +43,7 @@ namespace ghcli
         this->m_model = new IssueModel(issues, issues_size);
 
         this->setModel(this->m_model);
-        this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        this->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     }
 
     IssueView::~IssueView()

@@ -49,6 +49,8 @@ public:
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
+    ghcli_issue& getIssue(int i) { return m_issues[i]; }
+
 private:
     ghcli_issue *m_issues;
     size_t       m_issues_size;

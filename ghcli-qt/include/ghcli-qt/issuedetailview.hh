@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Nico Sonack <nsonack@outlook.com>
+ * Copyright 2022 Nico Sonack <nsonack@outlook.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,39 +27,29 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli-qt/issueview.hh>
+#pragma once
 
-#include <QtWidgets>
+#include <ghcli/issues.h>
+
+#include <QFutureWatcher>
+#include <QWidget>
+#include <QLabel>
 
 namespace ghcli
 {
-
-    IssueView::IssueView(const char *org, const char *repo, QWidget *parent, bool all)
-        : QTableView(parent)
-        , m_model(nullptr)
+    class IssueDetailView : public QWidget
     {
-        ghcli_issue *issues = nullptr;
-        int issues_size = ghcli_get_issues(org, repo, all, -1, &issues);
-        this->m_model = new IssueModel(issues, issues_size);
+        Q_OBJECT
 
-        this->setModel(this->m_model);
-        this->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    public:
+        IssueDetailView(const char *owner, const char *repo, int issue);
+        virtual ~IssueDetailView();
 
-        connect(this, &QAbstractItemView::doubleClicked,
-                this, &IssueView::onIssueDoubleClicked);
-    }
+    public slots:
+        void fetchFinished();
 
-    IssueView::~IssueView()
-    {
-        if (this->m_model)
-            delete this->m_model;
-    }
-
-    void IssueView::onIssueDoubleClicked(const QModelIndex& idx)
-    {
-        auto& issue = m_model->getIssue(idx.row());
-        emit issueDoubleClicked(issue.number);
-    }
-
-
-} // ghcli
+    private:
+        ghcli_issue_details   m_details;
+        QFutureWatcher<void>  m_fetch_watcher;
+    };
+}

@@ -71,33 +71,48 @@ struct ghcli_submit_issue_options {
     bool  always_yes;
 };
 
-int  ghcli_get_issues(
+int ghcli_get_issues(
     const char   *owner,
     const char   *reponame,
     bool          all,
     int           max,
     ghcli_issue **out);
+
 void ghcli_issues_free(
     ghcli_issue *it,
     int          size);
+
 void ghcli_print_issues_table(
     FILE                    *stream,
     enum ghcli_output_order  order,
     ghcli_issue             *issues,
     int                      issues_size);
+
+void ghcli_get_issue_details(
+    const char          *owner,
+    const char          *repo,
+    int                  issue,
+    ghcli_issue_details *out);
+
 void ghcli_issue_summary(
     FILE       *stream,
     const char *owner,
     const char *reponame,
     int         issue_number);
+
+void ghcli_issue_details_free(
+    ghcli_issue_details *it);
+
 void ghcli_issue_close(
     const char *owner,
     const char *repo,
     int issue_number);
+
 void ghcli_issue_reopen(
     const char *owner,
     const char *repo,
     int         issue_number);
+
 void ghcli_issue_submit(ghcli_submit_issue_options);
 
 SN_END_DECLS

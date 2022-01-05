@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Nico Sonack <nsonack@outlook.com>
+ * Copyright 2022 Nico Sonack <nsonack@outlook.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,39 +27,32 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli-qt/issueview.hh>
+#include <ghcli-qt/issuedetailview.hh>
 
-#include <QtWidgets>
+#include <QFuture>
+#include <QtConcurrent>
+#include <QFormLayout>
 
 namespace ghcli
 {
 
-    IssueView::IssueView(const char *org, const char *repo, QWidget *parent, bool all)
-        : QTableView(parent)
-        , m_model(nullptr)
+    IssueDetailView::IssueDetailView(const char *owner, const char *repo, int issue)
     {
-        ghcli_issue *issues = nullptr;
-        int issues_size = ghcli_get_issues(org, repo, all, -1, &issues);
-        this->m_model = new IssueModel(issues, issues_size);
-
-        this->setModel(this->m_model);
-        this->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-
-        connect(this, &QAbstractItemView::doubleClicked,
-                this, &IssueView::onIssueDoubleClicked);
+        connect(&m_fetch_watcher, &QFutureWatcher<void>::finished, this, &IssueDetailView::fetchFinished);
+        auto future = QtConcurrent::run(ghcli_get_issue_details, owner, repo, issue, &m_details);
+        m_fetch_watcher.setFuture(future);
     }
 
-    IssueView::~IssueView()
+    IssueDetailView::~IssueDetailView()
     {
-        if (this->m_model)
-            delete this->m_model;
+        ghcli_issue_details_free(&m_details);
     }
 
-    void IssueView::onIssueDoubleClicked(const QModelIndex& idx)
+    void IssueDetailView::fetchFinished()
     {
-        auto& issue = m_model->getIssue(idx.row());
-        emit issueDoubleClicked(issue.number);
+        auto *layout = new QFormLayout(this);
+        layout->addRow("Title",  new QLabel { QString::fromUtf8(m_details.title.data, m_details.title.length) });
+        layout->addRow("Author", new QLabel { QString::fromUtf8(m_details.author.data, m_details.author.length) });
     }
 
-
-} // ghcli
+}

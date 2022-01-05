@@ -28,6 +28,7 @@
  */
 
 #include <ghcli-qt/mainwindow.hh>
+#include <ghcli-qt/issuedetailview.hh>
 
 #include <ghcli/gitconfig.h>
 
@@ -49,11 +50,23 @@ namespace ghcli
         this->m_tabwidget->addTab(this->m_pulls, "PRs");
 
         this->setCentralWidget(this->m_tabwidget);
+
+        connect(this->m_issues, &IssueView::issueDoubleClicked, this, &MainWindow::issueClicked);
     }
 
     MainWindow::~MainWindow()
     {
         if (this->m_tabwidget)
             delete this->m_tabwidget;
+    }
+
+    void MainWindow::issueClicked(int issue)
+    {
+        const char *owner, *repo;
+        ghcli_gitconfig_get_repo(&owner, &repo);
+
+        auto *details = new IssueDetailView {owner, repo, issue};
+        this->m_tabwidget->addTab(details, QString::asprintf("Issue #%d", issue));
+        details->setFocus(Qt::TabFocusReason);
     }
 }

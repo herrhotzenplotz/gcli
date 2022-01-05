@@ -43,6 +43,9 @@ public:
     explicit MainWindow();
     ~MainWindow();
 
+public slots:
+    void issueClicked(int issue);
+
 private:
     QTabWidget *m_tabwidget;
     IssueView  *m_issues;

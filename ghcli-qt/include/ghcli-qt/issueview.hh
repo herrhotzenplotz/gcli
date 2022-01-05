@@ -42,6 +42,12 @@ namespace ghcli
         explicit IssueView(const char *org, const char *repo, QWidget *parent = nullptr, bool all = false);
         ~IssueView();
 
+    signals:
+        void issueDoubleClicked(int issue);
+
+    private slots:
+        void onIssueDoubleClicked(const QModelIndex& idx);
+
     private:
         IssueModel *m_model;
     };

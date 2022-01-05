@@ -133,7 +133,7 @@ ghcli_print_issue_summary(FILE *out, ghcli_issue_details *it)
     }
 }
 
-static void
+void
 ghcli_issue_details_free(ghcli_issue_details *it)
 {
     free(it->title.data);
@@ -149,6 +149,16 @@ ghcli_issue_details_free(ghcli_issue_details *it)
 }
 
 void
+ghcli_get_issue_details(
+    const char          *owner,
+    const char          *repo,
+    int                  issue,
+    ghcli_issue_details *out)
+{
+    ghcli_forge()->get_issue_summary(owner, repo, issue, out);
+}
+
+void
 ghcli_issue_summary(
     FILE       *stream,
     const char *owner,
@@ -157,7 +167,7 @@ ghcli_issue_summary(
 {
     ghcli_issue_details  details = {0};
 
-    ghcli_forge()->get_issue_summary(owner, repo, issue_number, &details);
+    ghcli_get_issue_details(owner, repo, issue_number, &details);
     ghcli_print_issue_summary(stream, &details);
     ghcli_issue_details_free(&details);
 }

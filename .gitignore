@@ -64,3 +64,5 @@
 /tests/json_escape/json_escape.o
 /tests/test.mk~
 /ghcli-qt/build/
+/ghcli-qt/include/ghcli-qt/issuedetailview.hh~
+/ghcli-qt/src/issuedetailview.cc~

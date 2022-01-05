@@ -51,8 +51,16 @@ namespace ghcli
     void IssueDetailView::fetchFinished()
     {
         auto *layout = new QFormLayout(this);
+        auto *body_label = new QLabel { QString::fromUtf8(m_details.body.data, m_details.body.length) };
+        body_label->setTextFormat(Qt::MarkdownText);
+        body_label->setWordWrap(true);
+
         layout->addRow("Title",  new QLabel { QString::fromUtf8(m_details.title.data, m_details.title.length) });
         layout->addRow("Author", new QLabel { QString::fromUtf8(m_details.author.data, m_details.author.length) });
+        layout->addRow("Number", new QLabel { QString::number(m_details.number) });
+        layout->addRow("State",  new QLabel { QString::fromUtf8(m_details.state.data, m_details.state.length) });
+        layout->addRow("Date",   new QLabel { QString::fromUtf8(m_details.created_at.data, m_details.created_at.length) });
+        layout->addRow("Body",   body_label);
     }
 
 }

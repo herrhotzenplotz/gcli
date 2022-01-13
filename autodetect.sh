@@ -2,11 +2,11 @@
 
 # set -x
 info() {
-    echo "$*" 1>&2
+    printf -- "$*\n" 1>&2
 }
 
 die() {
-    info "Config Error: $*"
+    info "\nConfig Error: $*"
     exit 1
 }
 
@@ -82,7 +82,7 @@ linker_flags() {
 c_compiler() {
     checking "C compiler"
     if [ ! "${CC}" ]; then
-        for compiler in /opt/developerstudio*/bin/cc /usr/bin/cc /usr/bin/gcc* /usr/bin/clang* /usr/local/bin/gcc*; do
+        for compiler in /opt/developerstudio*/bin/cc /usr/bin/cc /usr/bin/gcc* /usr/bin/clang* /usr/local/bin/gcc* /usr/bin/tcc /usr/local/bin/tcc; do
             which ${compiler} 2>/dev/null >/dev/null
             [ $? -eq 0 ] || continue
 
@@ -117,6 +117,13 @@ c_compiler() {
         checking_result "${CC} is ${CCNAME}"
         return
     fi
+
+    # tcc
+    foo=`${CC} -v 2>&1 | grep "tcc version"`
+    if [ $? -eq 0 ] && [ "${foo}" ]; then
+        die "TCC cannot be supported due to both its lack of TLS and failures to properly compile the standard library of some BSDs."
+    fi
+
 }
 
 linker() {

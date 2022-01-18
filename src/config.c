@@ -505,7 +505,10 @@ ghcli_config_get_override_default_account(void)
 {
     init_local_config();
 
-    return SV((char *)config.override_default_account);
+    if (config.override_default_account)
+        return SV((char *)config.override_default_account);
+    else
+        return SV_NULL;
 }
 
 ghcli_forge_type

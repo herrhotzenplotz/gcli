@@ -52,5 +52,6 @@ sn_sv             ghcli_config_get_account(void);
 sn_sv             ghcli_config_get_upstream(void);
 sn_sv             ghcli_config_get_base(void);
 ghcli_forge_type  ghcli_config_get_forge_type(void);
+sn_sv             ghcli_config_get_override_default_account(void);
 
 #endif /* CONFIG_H */

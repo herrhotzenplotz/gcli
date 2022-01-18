@@ -500,6 +500,14 @@ ghcli_config_get_base(void)
     return ghcli_local_config_find_by_key("pr.base");
 }
 
+sn_sv
+ghcli_config_get_override_default_account(void)
+{
+    init_local_config();
+
+    return SV((char *)config.override_default_account);
+}
+
 ghcli_forge_type
 ghcli_config_get_forge_type(void)
 {

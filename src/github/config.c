@@ -34,12 +34,18 @@
 static sn_sv
 github_default_account_name(void)
 {
-    sn_sv section_name = ghcli_config_find_by_key(
-        SV("defaults"),
-        "github-default-account");
+    sn_sv section_name;
 
-    if (sn_sv_null(section_name))
-        errx(1, "Config file does not name a default GitHub account name.");
+    section_name = ghcli_config_get_override_default_account();
+
+    if (sn_sv_null(section_name)) {
+        section_name = ghcli_config_find_by_key(
+            SV("defaults"),
+            "github-default-account");
+
+        if (sn_sv_null(section_name))
+            errx(1, "Config file does not name a default GitHub account name.");
+    }
 
     return section_name;
 }

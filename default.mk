@@ -95,17 +95,12 @@ ${PROGS:=-install}:
 	install -d ${BINDIR}
 	install ${@:-install=} ${BINDIR}
 
-${LIBS:=-install}:
-	@echo " ==> Installing library {@:-install=}"
-	install -d ${LIBDIR}
-	install ${@:-install=} ${LIBDIR}
-
 ${MAN:=-install}:
 	@echo " ==> Installing man page ${@:-install=}"
 	install -d ${MANDIR}/man`echo "${@:-install=}" | sed 's/.*\.\([1-9]\)$$/\1/g'`
 	gzip -c ${@:-install=} > ${MANDIR}/man`echo "${@:-install=}" | sed 's/.*\.\([1-9]\)$$/\1/g'`/`basename ${@:-install=}`.gz
 
-install: all ${PROGS:=-install} ${LIBS:=-install} ${MAN:=-install}
+install: all ${PROGS:=-install} ${MAN:=-install}
 	@echo " ==> Installation finished"
 
 snmk-libdeps:

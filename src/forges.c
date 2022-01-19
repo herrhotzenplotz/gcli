@@ -41,6 +41,7 @@
 #include <ghcli/github/releases.h>
 #include <ghcli/github/repos.h>
 #include <ghcli/github/review.h>
+#include <ghcli/github/status.h>
 
 #include <ghcli/gitlab/api.h>
 #include <ghcli/gitlab/comments.h>
@@ -80,6 +81,7 @@ github_forge_descriptor =
     .get_own_repos          = github_get_own_repos,
     .get_reviews            = github_review_get_reviews,
     .repo_delete            = github_repo_delete,
+    .status                 = github_status,
     .get_authheader         = github_get_authheader,
     .get_account            = github_get_account,
     .get_api_error_string   = github_api_error_string,

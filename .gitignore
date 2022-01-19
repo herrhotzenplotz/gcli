@@ -63,3 +63,7 @@
 /tests/json_escape/json_escape
 /tests/json_escape/json_escape.o
 /tests/test.mk~
+/include/ghcli/status.h~
+/src/github/status.c~
+/src/github/status.o
+/src/status.c~

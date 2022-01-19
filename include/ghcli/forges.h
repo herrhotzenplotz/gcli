@@ -228,6 +228,10 @@ struct ghcli_forge_descriptor {
         ghcli_pr_review **out);
 
     /**
+     * Status summary for the account */
+    void (*status)(void);
+
+    /**
      * Get an the http authentication header for use by curl */
     char *(*get_authheader)(void);
 

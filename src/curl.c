@@ -130,15 +130,19 @@ ghcli_curl_test_success(const char *url)
 void
 ghcli_curl(FILE *stream, const char *url, const char *content_type)
 {
-    CURLcode           ret;
-    CURL              *session;
-    struct curl_slist *headers;
-    ghcli_fetch_buffer buffer = {0};
+    CURLcode            ret;
+    CURL               *session;
+    struct curl_slist  *headers;
+    ghcli_fetch_buffer  buffer      = {0};
+    char               *auth_header = NULL;
 
     headers = NULL;
 
     if (content_type)
         headers = curl_slist_append(headers, content_type);
+
+    auth_header = ghcli_config_get_authheader();
+    headers     = curl_slist_append(headers, auth_header);
 
     session = curl_easy_init();
 
@@ -164,6 +168,8 @@ ghcli_curl(FILE *stream, const char *url, const char *content_type)
 
     curl_easy_cleanup(session);
     curl_slist_free_all(headers);
+
+    free(auth_header);
 }
 
 static size_t

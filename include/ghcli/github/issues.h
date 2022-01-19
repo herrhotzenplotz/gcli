@@ -60,4 +60,10 @@ void github_perform_submit_issue(
     ghcli_submit_issue_options  opts,
     ghcli_fetch_buffer         *out);
 
+void github_issue_assign(
+    const char *owner,
+    const char *repo,
+    int         issue_number,
+    const char *assignee);
+
 #endif /* GHCLI_ISSUES_H */

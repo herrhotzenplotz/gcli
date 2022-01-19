@@ -121,6 +121,8 @@ ghcli_print_issue_summary(FILE *out, ghcli_issue_details *it)
         fprintf(out, "ASSIGNEES : "SV_FMT, SV_ARGS(it->assignees[0]));
         for (size_t i = 1; i < it->assignees_size; ++i)
             fprintf(out, ", "SV_FMT, SV_ARGS(it->assignees[i]));
+    } else {
+        fprintf(out, "ASSIGNEES : none\n");
     }
 
     fputc('\n', out);
@@ -224,4 +226,14 @@ ghcli_issue_submit(ghcli_submit_issue_options opts)
     free(body.data);
     free(opts.body.data);
     free(json_buffer.data);
+}
+
+void
+ghcli_issue_assign(
+    const char *owner,
+    const char *repo,
+    int         issue_number,
+    const char *assignee)
+{
+    ghcli_forge()->issue_assign(owner, repo, issue_number, assignee);
 }

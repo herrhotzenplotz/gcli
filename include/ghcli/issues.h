@@ -97,5 +97,10 @@ void ghcli_issue_reopen(
     const char *repo,
     int         issue_number);
 void ghcli_issue_submit(ghcli_submit_issue_options);
+void ghcli_issue_assign(
+    const char *owner,
+    const char *repo,
+    int         issue_number,
+    const char *assignee);
 
 #endif /* ISSUES_H */

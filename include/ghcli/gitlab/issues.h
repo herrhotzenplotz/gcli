@@ -56,6 +56,12 @@ void gitlab_issue_reopen(
     const char *repo,
     int         issue_number);
 
+void gitlab_issue_assign(
+    const char *owner,
+    const char *repo,
+    int         issue_number,
+    const char *assignee);
+
 void gitlab_perform_submit_issue(
     ghcli_submit_issue_options  opts,
     ghcli_fetch_buffer         *out);

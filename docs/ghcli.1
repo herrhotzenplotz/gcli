@@ -36,6 +36,9 @@
 .Cm comment Op Ar options
 .Nm
 .Cm version
+.Nm
+.Op Fl a Ar override-account
+.Cm status
 .Sh DESCRIPTION
 .Nm
 can be used to interact with both GitHub and GitLab from the command
@@ -76,6 +79,9 @@ Submit comments under issues and PRs. See
 .Xr ghcli-comment 1 .
 .It Cm version
 Print version and exit.
+.It Cm status
+Print a list of TODOs and/or notifications. See
+.Xr ghcli-status 1 .
 .El
 .Sh OPTIONS
 .Bl -tag -width indent

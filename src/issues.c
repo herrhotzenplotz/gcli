@@ -121,6 +121,8 @@ ghcli_print_issue_summary(FILE *out, ghcli_issue_details *it)
         fprintf(out, "ASSIGNEES : "SV_FMT, SV_ARGS(it->assignees[0]));
         for (size_t i = 1; i < it->assignees_size; ++i)
             fprintf(out, ", "SV_FMT, SV_ARGS(it->assignees[i]));
+    } else {
+        fprintf(out, "ASSIGNEES : none\n");
     }
 
     fputc('\n', out);

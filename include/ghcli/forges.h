@@ -38,6 +38,7 @@
 #include <ghcli/releases.h>
 #include <ghcli/repos.h>
 #include <ghcli/review.h>
+#include <ghcli/status.h>
 
 typedef struct ghcli_forge_descriptor ghcli_forge_descriptor;
 
@@ -226,6 +227,10 @@ struct ghcli_forge_descriptor {
         const char       *repo,
         int               pr,
         ghcli_pr_review **out);
+
+    /**
+     * Status summary for the account */
+    size_t (*get_notifications)(ghcli_notification **notifications);
 
     /**
      * Get an the http authentication header for use by curl */

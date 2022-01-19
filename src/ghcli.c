@@ -47,6 +47,7 @@
 #include <ghcli/review.h>
 #include <ghcli/releases.h>
 #include <ghcli/snippets.h>
+#include <ghcli/status.h>
 
 #include <sn/sn.h>
 
@@ -1431,6 +1432,15 @@ subcommand_releases(int argc, char *argv[])
 }
 
 static int
+subcommand_status(int argc, char *argv[])
+{
+    (void) argc;
+    (void) argv;
+    ghcli_status();
+    return EXIT_SUCCESS;
+}
+
+static int
 subcommand_version(int argc, char *argv[])
 {
     (void) argc;
@@ -1449,6 +1459,7 @@ static struct subcommand {
     { .cmd_name = "comment",  .fn = subcommand_comment  },
     { .cmd_name = "forks",    .fn = subcommand_forks    },
     { .cmd_name = "gists",    .fn = subcommand_gists    },
+    { .cmd_name = "status",   .fn = subcommand_status   },
     { .cmd_name = "snippets", .fn = subcommand_snippets },
     { .cmd_name = "releases", .fn = subcommand_releases },
     { .cmd_name = "version",  .fn = subcommand_version  },

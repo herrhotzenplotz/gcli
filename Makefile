@@ -38,6 +38,7 @@ libghcli.a_SRCS			=	src/comments.c			\
 					src/github/releases.c		\
 					src/github/repos.c		\
 					src/github/review.c		\
+					src/github/status.c		\
 					src/gitlab/api.c		\
 					src/gitlab/comments.c		\
 					src/gitlab/config.c		\
@@ -47,6 +48,7 @@ libghcli.a_SRCS			=	src/comments.c			\
 					src/gitlab/releases.c		\
 					src/gitlab/repos.c		\
 					src/gitlab/review.c		\
+					src/gitlab/status.c		\
 					src/issues.c			\
 					src/issues.c			\
 					src/json_util.c			\
@@ -55,6 +57,7 @@ libghcli.a_SRCS			=	src/comments.c			\
 					src/repos.c			\
 					src/review.c			\
 					src/snippets.c			\
+					src/status.c			\
 					thirdparty/pdjson/pdjson.c	\
 					thirdparty/sn/sn.c
 

@@ -41,6 +41,7 @@
 #include <ghcli/github/releases.h>
 #include <ghcli/github/repos.h>
 #include <ghcli/github/review.h>
+#include <ghcli/github/status.h>
 
 #include <ghcli/gitlab/api.h>
 #include <ghcli/gitlab/comments.h>
@@ -51,6 +52,7 @@
 #include <ghcli/gitlab/releases.h>
 #include <ghcli/gitlab/repos.h>
 #include <ghcli/gitlab/review.h>
+#include <ghcli/gitlab/status.h>
 
 static ghcli_forge_descriptor
 github_forge_descriptor =
@@ -80,6 +82,7 @@ github_forge_descriptor =
     .get_own_repos          = github_get_own_repos,
     .get_reviews            = github_review_get_reviews,
     .repo_delete            = github_repo_delete,
+    .get_notifications      = github_get_notifications,
     .get_authheader         = github_get_authheader,
     .get_account            = github_get_account,
     .get_api_error_string   = github_api_error_string,
@@ -115,6 +118,7 @@ gitlab_forge_descriptor =
     .get_own_repos          = gitlab_get_own_repos,
     .get_reviews            = gitlab_review_get_reviews,
     .repo_delete            = gitlab_repo_delete,
+    .get_notifications      = gitlab_get_notifications,
     .get_authheader         = gitlab_get_authheader,
     .get_account            = gitlab_get_account,
     .get_api_error_string   = gitlab_api_error_string,

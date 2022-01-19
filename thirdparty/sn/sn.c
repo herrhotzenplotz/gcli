@@ -110,10 +110,12 @@ sn_asprintf(const char *fmt, ...)
     va_list vp;
 
     va_start(vp, fmt);
-
     actual = vsnprintf(&tmp, 1, fmt, vp);
     va_end(vp);
+
     result = calloc(1, actual + 1);
+    if (!result)
+        err(1, "calloc");
 
     va_start(vp, fmt);
     vsnprintf(result, actual + 1, fmt, vp);

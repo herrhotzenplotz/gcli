@@ -274,3 +274,52 @@ gitlab_perform_submit_issue(
     free(post_fields);
     free(url);
 }
+
+static int
+gitlab_user_id(const char *user_name)
+{
+    ghcli_fetch_buffer  buffer = {0};
+    struct json_stream  stream = {0};
+    char               *url    = NULL;
+    int                 uid    = -1;
+
+    url = sn_asprintf("%s/users?username=%s", gitlab_get_apibase(), user_name);
+
+    ghcli_fetch(url, NULL, &buffer);
+    json_open_buffer(&stream, buffer.data, buffer.length);
+    json_set_streaming(&stream, 1);
+
+    ghcli_json_advance(&stream, "[{s", "id");
+    uid = get_int(&stream);
+
+    json_close(&stream);
+    free(url);
+    free(buffer.data);
+
+    return uid;
+}
+
+void
+gitlab_issue_assign(
+    const char *owner,
+    const char *repo,
+    int         issue_number,
+    const char *assignee)
+{
+    int                 assignee_uid = -1;
+    ghcli_fetch_buffer  buffer       = {0};
+    char               *url          = NULL;
+    char               *post_data    = NULL;
+
+    assignee_uid = gitlab_user_id(assignee);
+
+    url = sn_asprintf("%s/projects/%s%%2F%s/issues/%d",
+                      gitlab_get_apibase(),
+                      owner, repo, issue_number);
+    post_data = sn_asprintf("{ \"assignee_ids\": [ %d ] }", assignee_uid);
+    ghcli_fetch_with_method("PUT", url, post_data, NULL, &buffer);
+
+    free(buffer.data);
+    free(url);
+    free(post_data);
+}

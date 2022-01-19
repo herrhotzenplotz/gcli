@@ -103,6 +103,7 @@ gitlab_forge_descriptor =
     .get_issue_summary      = gitlab_get_issue_summary,
     .issue_close            = gitlab_issue_close,
     .issue_reopen           = gitlab_issue_reopen,
+    .issue_assign           = gitlab_issue_assign,
     .perform_submit_issue   = gitlab_perform_submit_issue,
     .get_prs                = gitlab_get_mrs,
     .print_pr_diff          = gitlab_print_pr_diff,

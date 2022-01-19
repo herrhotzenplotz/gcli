@@ -30,6 +30,21 @@
 #ifndef STATUS_H
 #define STATUS_H
 
-void ghcli_status(void);
+#include <stdlib.h>
+
+struct ghcli_notification {
+    char *title;
+    char *reason;
+    char *date;
+    char *type;
+    char *repository;
+};
+
+typedef struct ghcli_notification ghcli_notification;
+
+void   ghcli_status(void);
+size_t ghcli_get_notifications(ghcli_notification **out);
+void   ghcli_free_notifications(ghcli_notification *, size_t);
+void   ghcli_print_notifications(ghcli_notification *, size_t);
 
 #endif /* STATUS_H */

@@ -30,6 +30,8 @@
 #ifndef GITLAB_STATUS_H
 #define GITLAB_STATUS_H
 
-void gitlab_status(void);
+#include <ghcli/status.h>
+
+size_t gitlab_get_notifications(ghcli_notification **notifications);
 
 #endif /* GITLAB_STATUS_H */

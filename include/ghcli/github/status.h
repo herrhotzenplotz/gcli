@@ -30,6 +30,8 @@
 #ifndef GITHUB_STATUS_H
 #define GITHUB_STATUS_H
 
-void github_status(void);
+#include <ghcli/status.h>
+
+size_t github_get_notifications(ghcli_notification **notifications);
 
 #endif /* GITHUB_STATUS_H */

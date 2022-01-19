@@ -33,5 +33,48 @@
 void
 ghcli_status(void)
 {
-    ghcli_forge()->status();
+    ghcli_notification *notifications      = NULL;
+    size_t              notifications_size = 0;
+
+    notifications_size = ghcli_get_notifications(&notifications);
+    ghcli_print_notifications(notifications, notifications_size);
+    ghcli_free_notifications(notifications, notifications_size);
+}
+
+size_t
+ghcli_get_notifications(ghcli_notification **out)
+{
+    return ghcli_forge()->get_notifications(out);
+}
+
+void
+ghcli_free_notifications(
+    ghcli_notification *notifications,
+    size_t              notifications_size)
+{
+    for (size_t i = 0; i < notifications_size; ++i) {
+        free(notifications[i].title);
+        free(notifications[i].reason);
+        free(notifications[i].date);
+        free(notifications[i].type);
+        free(notifications[i].repository);
+    }
+
+    free(notifications);
+}
+
+void
+ghcli_print_notifications(
+    ghcli_notification *notifications,
+    size_t              notifications_size)
+{
+    for (size_t i = 0; i < notifications_size; ++i) {
+        printf(
+            "%s - %s - %s - %s\n",
+            notifications[i].repository, notifications[i].type,
+            notifications[i].date, notifications[i].reason);
+
+        pretty_print(notifications[i].title, 4, 80, stdout);
+        putchar('\n');
+    }
 }

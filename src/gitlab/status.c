@@ -28,11 +28,15 @@
  */
 
 #include <ghcli/gitlab/status.h>
+#include <ghcli/gitlab/config.h>
+#include <ghcli/curl.h>
 
 #include <sn/sn.h>
 
-void
-gitlab_status(void)
+size_t
+gitlab_get_notifications(ghcli_notification **out)
 {
-    errx(1, "error: status is not implemented for GitLab");
+    (void) out;
+    sn_unimplemented;
+    return 0;
 }

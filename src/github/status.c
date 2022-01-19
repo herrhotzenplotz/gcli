@@ -35,18 +35,10 @@
 #include <sn/sn.h>
 #include <pdjson/pdjson.h>
 
-struct github_notification {
-    char *title;
-    char *reason;
-    char *date;
-    char *type;
-    char *repository;
-};
-
 static void
 github_notification_parse_subject(
-    struct json_stream         *stream,
-    struct github_notification *it)
+    struct json_stream *stream,
+    ghcli_notification *it)
 {
     if (json_next(stream) != JSON_OBJECT)
         errx(1, "Expected Notification Subject Object");
@@ -80,8 +72,8 @@ github_notification_parse_subject(
 
 static void
 github_notification_parse_repository(
-    struct json_stream         *stream,
-    struct github_notification *it)
+    struct json_stream *stream,
+    ghcli_notification *it)
 {
     if (json_next(stream) != JSON_OBJECT)
         errx(1, "Expected Notification Repository Object");
@@ -113,8 +105,8 @@ github_notification_parse_repository(
 
 static void
 parse_github_notification(
-    struct json_stream         *stream,
-    struct github_notification *it)
+    struct json_stream *stream,
+    ghcli_notification *it)
 {
     if (json_next(stream) != JSON_OBJECT)
         errx(1, "Expected Notification Object");
@@ -150,8 +142,8 @@ parse_github_notification(
     }
 }
 
-static size_t
-github_get_notifications(struct github_notification **notifications)
+size_t
+github_get_notifications(ghcli_notification **notifications)
 {
     char               *url                = NULL;
     ghcli_fetch_buffer  buffer             = {0};
@@ -173,8 +165,8 @@ github_get_notifications(struct github_notification **notifications)
 
         *notifications = realloc(
             *notifications,
-            (notifications_size + 1) * sizeof(struct github_notification));
-        struct github_notification *it = &(*notifications)[notifications_size];
+            (notifications_size + 1) * sizeof(ghcli_notification));
+        ghcli_notification *it = &(*notifications)[notifications_size];
         parse_github_notification(&stream, it);
         notifications_size += 1;
     }
@@ -185,39 +177,4 @@ github_get_notifications(struct github_notification **notifications)
     free(buffer.data);
 
     return notifications_size;
-}
-
-static void
-github_free_notifications(
-    struct github_notification *notifications,
-    size_t                      notifications_size)
-{
-    for (size_t i = 0; i < notifications_size; ++i) {
-        free(notifications[i].title);
-        free(notifications[i].reason);
-        free(notifications[i].date);
-        free(notifications[i].type);
-        free(notifications[i].repository);
-    }
-
-    free(notifications);
-}
-
-void
-github_status(void)
-{
-    struct github_notification *notifications = NULL;
-    size_t notifications_size = github_get_notifications(&notifications);
-
-    for (size_t i = 0; i < notifications_size; ++i) {
-        printf(
-            "%s - %s - %s - %s\n",
-            notifications[i].repository, notifications[i].type,
-            notifications[i].date, notifications[i].reason);
-
-        pretty_print(notifications[i].title, 4, 80, stdout);
-        putchar('\n');
-    }
-
-    github_free_notifications(notifications, notifications_size);
 }

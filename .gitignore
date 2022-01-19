@@ -67,3 +67,5 @@
 /src/github/status.c~
 /src/github/status.o
 /src/status.c~
+/src/gitlab/status.c~
+/src/gitlab/status.o

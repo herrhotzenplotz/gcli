@@ -115,6 +115,14 @@ struct ghcli_forge_descriptor {
         int         issue_number);
 
     /**
+     * Assign an issue to a user */
+    void (*issue_assign)(
+        const char *owner,
+        const char *repo,
+        int         issue_number,
+        const char *assignee);
+
+    /**
      * Submit an issue */
     void (*perform_submit_issue)(
         ghcli_submit_issue_options  opts,

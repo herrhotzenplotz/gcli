@@ -227,3 +227,13 @@ ghcli_issue_submit(ghcli_submit_issue_options opts)
     free(opts.body.data);
     free(json_buffer.data);
 }
+
+void
+ghcli_issue_assign(
+    const char *owner,
+    const char *repo,
+    int         issue_number,
+    const char *assignee)
+{
+    ghcli_forge()->issue_assign(owner, repo, issue_number, assignee);
+}

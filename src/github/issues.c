@@ -273,3 +273,31 @@ github_perform_submit_issue(
     free(post_fields);
     free(url);
 }
+
+void
+github_issue_assign(
+    const char *owner,
+    const char *repo,
+    int         issue_number,
+    const char *assignee)
+{
+    ghcli_fetch_buffer  buffer           = {0};
+    sn_sv               escaped_assignee = SV_NULL;
+    char               *post_fields      = NULL;
+    char               *url              = NULL;
+
+    escaped_assignee = ghcli_json_escape(SV((char *)assignee));
+    post_fields = sn_asprintf("{ \"assignees\": [\""SV_FMT"\"] }",
+                              SV_ARGS(escaped_assignee));
+
+    url = sn_asprintf(
+        "%s/repos/%s/%s/issues/%d/assignees",
+        github_get_apibase(), owner, repo, issue_number);
+
+    ghcli_fetch_with_method("POST", url, post_fields, NULL, &buffer);
+
+    free(buffer.data);
+    free(escaped_assignee.data);
+    free(post_fields);
+    free(url);
+}

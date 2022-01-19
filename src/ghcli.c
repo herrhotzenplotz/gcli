@@ -584,16 +584,20 @@ subcommand_issues(int argc, char *argv[])
     while (argc > 0) {
         const char *operation = shift(&argc, &argv);
 
-        if (strcmp("comments", operation) == 0)
+        if (strcmp("comments", operation) == 0) {
             ghcli_issue_comments(stdout, owner, repo, issue);
-        else if (strcmp("summary", operation) == 0)
+        } else if (strcmp("summary", operation) == 0) {
             ghcli_issue_summary(stdout, owner, repo, issue);
-        else if (strcmp("close", operation) == 0)
+        } else if (strcmp("close", operation) == 0) {
             ghcli_issue_close(owner, repo, issue);
-        else if (strcmp("reopen", operation) == 0)
+        } else if (strcmp("reopen", operation) == 0) {
             ghcli_issue_reopen(owner, repo, issue);
-        else
+        } else if (strcmp("assign", operation) == 0) {
+            const char *assignee = shift(&argc, &argv);
+            ghcli_issue_assign(owner, repo, issue, assignee);
+        } else {
             errx(1, "error: unknown operation %s", operation);
+        }
     }
 
     return EXIT_SUCCESS;

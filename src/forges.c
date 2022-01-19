@@ -66,6 +66,7 @@ github_forge_descriptor =
     .get_issue_summary      = github_get_issue_summary,
     .issue_close            = github_issue_close,
     .issue_reopen           = github_issue_reopen,
+    .issue_assign           = github_issue_assign,
     .perform_submit_issue   = github_perform_submit_issue,
     .get_prs                = github_get_prs,
     .print_pr_diff          = github_print_pr_diff,

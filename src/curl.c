@@ -27,6 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <ctype.h>
 #include <string.h>
 
 #include <ghcli/config.h>
@@ -341,4 +342,29 @@ ghcli_post_upload(
     free(auth_header);
     free(contentsize_header);
     free(contenttype_header);
+}
+
+char *
+ghcli_url_encode(const char *input)
+{
+    size_t  input_len;
+    size_t  output_len;
+    size_t  i;
+    char   *output;
+
+    input_len  = strlen(input);
+    output     = calloc(1, 3 * input_len + 1);
+    output_len = 0;
+
+    for (i = 0; i < input_len; ++i) {
+        if (!isalnum(input[i])) {
+            unsigned val = (input[i] & 0xFF);
+            snprintf(output + output_len, 4, "%%%02.2X", val);
+            output_len += 3;
+        } else {
+            output[output_len++] = input[i];
+        }
+    }
+
+    return output;
 }

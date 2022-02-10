@@ -63,6 +63,6 @@ void ghcli_post_upload(
     ghcli_fetch_buffer *out);
 bool ghcli_curl_test_success(
     const char *url);
-char *ghcli_url_encode(const char *);
+char *ghcli_urlencode(const char *);
 
 #endif /* CURL_H */

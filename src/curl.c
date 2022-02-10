@@ -345,7 +345,7 @@ ghcli_post_upload(
 }
 
 char *
-ghcli_url_encode(const char *input)
+ghcli_urlencode(const char *input)
 {
     size_t  input_len;
     size_t  output_len;

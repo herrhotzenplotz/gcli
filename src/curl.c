@@ -344,15 +344,17 @@ ghcli_post_upload(
     free(contenttype_header);
 }
 
-char *
-ghcli_urlencode(const char *input)
+sn_sv
+ghcli_urlencode_sv(sn_sv _input)
 {
     size_t  input_len;
     size_t  output_len;
     size_t  i;
     char   *output;
+    char   *input;
 
-    input_len  = strlen(input);
+    input      = _input.data;
+    input_len  = _input.length;
     output     = calloc(1, 3 * input_len + 1);
     output_len = 0;
 
@@ -366,5 +368,12 @@ ghcli_urlencode(const char *input)
         }
     }
 
-    return output;
+    return sn_sv_from_parts(output, output_len);
+}
+
+char *
+ghcli_urlencode(const char *input)
+{
+    sn_sv encoded = ghcli_urlencode_sv(SV((char *)input));
+    return encoded.data;
 }

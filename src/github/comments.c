@@ -74,16 +74,20 @@ github_perform_submit_comment(
     ghcli_submit_comment_opts  opts,
     ghcli_fetch_buffer        *out)
 {
+    char *e_owner = ghcli_urlencode(opts.owner);
+    char *e_repo  = ghcli_urlencode(opts.repo);
     char *post_fields = sn_asprintf(
         "{ \"body\": \""SV_FMT"\" }",
         SV_ARGS(opts.message));
     char *url         = sn_asprintf(
         "%s/repos/%s/%s/issues/%d/comments",
         github_get_apibase(),
-        opts.owner, opts.repo, opts.target_id);
+        e_owner, e_repo, opts.target_id);
 
     ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
     free(post_fields);
+    free(e_owner);
+    free(e_repo);
     free(url);
 }
 
@@ -123,11 +127,21 @@ github_get_comments(
     int             issue,
     ghcli_comment **out)
 {
-    const char *url = sn_asprintf(
+    char *e_owner = NULL;
+    char *e_repo  = NULL;
+    char *url     = NULL;
+
+    e_owner = ghcli_urlencode(owner);
+    e_repo  = ghcli_urlencode(repo);
+
+    url = sn_asprintf(
         "%s/repos/%s/%s/issues/%d/comments",
         github_get_apibase(),
-        owner, repo, issue);
+        e_owner, e_repo, issue);
     int n = github_perform_get_comments(url, out);
-    free((void *)url);
+
+    free(e_owner);
+    free(e_repo);
+    free(url);
     return n;
 }

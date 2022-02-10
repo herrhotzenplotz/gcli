@@ -36,7 +36,12 @@ gitlab_perform_submit_comment(
     ghcli_submit_comment_opts  opts,
     ghcli_fetch_buffer        *out)
 {
-    const char *type  = NULL;
+    const char *type    = NULL;
+    char       *e_owner = NULL;
+    char       *e_repo  = NULL;
+
+    e_owner = ghcli_urlencode(opts.owner);
+    e_repo  = ghcli_urlencode(opts.repo);
 
     switch (opts.target_type) {
     case ISSUE_COMMENT:
@@ -53,10 +58,12 @@ gitlab_perform_submit_comment(
     char *url         = sn_asprintf(
         "%s/projects/%s%%2F%s/%s/%d/notes",
         gitlab_get_apibase(),
-        opts.owner, opts.repo, type, opts.target_id);
+        e_owner, e_repo, type, opts.target_id);
 
     ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
     free(post_fields);
+    free(e_owner);
+    free(e_repo);
     free(url);
 }
 
@@ -131,12 +138,20 @@ gitlab_get_mr_comments(
     int             mr,
     ghcli_comment **out)
 {
-    const char *url = sn_asprintf(
+    char *e_owner = ghcli_urlencode(owner);
+    char *e_repo  = ghcli_urlencode(repo);
+
+    char *url = sn_asprintf(
         "%s/projects/%s%%2F%s/merge_requests/%d/notes",
         gitlab_get_apibase(),
-        owner, repo, mr);
+        e_owner, e_repo, mr);
+
     int n = gitlab_perform_get_comments(url, out);
-    free((void *)url);
+
+    free(url);
+    free(e_owner);
+    free(e_repo);
+
     return n;
 }
 
@@ -147,11 +162,19 @@ gitlab_get_issue_comments(
     int             issue,
     ghcli_comment **out)
 {
-    const char *url = sn_asprintf(
+    char *e_owner = ghcli_urlencode(owner);
+    char *e_repo  = ghcli_urlencode(repo);
+
+    char *url = sn_asprintf(
         "%s/projects/%s%%2F%s/issues/%d/notes",
         gitlab_get_apibase(),
-        owner, repo, issue);
+        e_owner, e_repo, issue);
+
     int n = gitlab_perform_get_comments(url, out);
-    free((void *)url);
+
+    free(url);
+    free(e_owner);
+    free(e_repo);
+
     return n;
 }

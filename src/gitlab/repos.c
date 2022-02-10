@@ -90,14 +90,19 @@ gitlab_get_repo(
     ghcli_repo *out)
 {
     /* GET /projects/:id */
-    char               *url    = NULL;
-    ghcli_fetch_buffer  buffer = {0};
-    struct json_stream  stream = {0};
+    char               *url     = NULL;
+    ghcli_fetch_buffer  buffer  = {0};
+    struct json_stream  stream  = {0};
+    sn_sv               e_owner = {0};
+    sn_sv               e_repo  = {0};
+
+    e_owner = ghcli_urlencode_sv(owner);
+    e_repo  = ghcli_urlencode_sv(repo);
 
     url = sn_asprintf(
         "%s/projects/"SV_FMT"%%2F"SV_FMT,
         gitlab_get_apibase(),
-        SV_ARGS(owner), SV_ARGS(repo));
+        SV_ARGS(e_owner), SV_ARGS(e_repo));
 
     ghcli_fetch(url, NULL, &buffer);
     json_open_buffer(&stream, buffer.data, buffer.length);
@@ -106,6 +111,8 @@ gitlab_get_repo(
 
     json_close(&stream);
     free(buffer.data);
+    free(e_owner.data);
+    free(e_repo.data);
     free(url);
 }
 
@@ -117,12 +124,15 @@ gitlab_get_repos(
 {
     char               *url      = NULL;
     char               *next_url = NULL;
+    char               *e_owner  = NULL;
     ghcli_fetch_buffer  buffer   = {0};
     struct json_stream  stream   = {0};
     enum  json_type     next     = JSON_NULL;
     int                 size     = 0;
 
-    url = sn_asprintf("%s/users/%s/projects", gitlab_get_apibase(), owner);
+    e_owner = ghcli_urlencode(owner);
+
+    url = sn_asprintf("%s/users/%s/projects", gitlab_get_apibase(), e_owner);
 
     do {
         ghcli_fetch(url, &next_url, &buffer);
@@ -151,6 +161,7 @@ gitlab_get_repos(
     } while ((url = next_url) && (max == -1 || size < max));
 
     free(url);
+    free(e_owner);
 
     return size;
 }
@@ -182,15 +193,22 @@ gitlab_repo_delete(
     const char *owner,
     const char *repo)
 {
-    char               *url    = NULL;
-    ghcli_fetch_buffer  buffer = {0};
+    char               *url     = NULL;
+    char               *e_owner = NULL;
+    char               *e_repo  = NULL;
+    ghcli_fetch_buffer  buffer  = {0};
+
+    e_owner = ghcli_urlencode(owner);
+    e_repo  = ghcli_urlencode(repo);
 
     url = sn_asprintf("%s/projects/%s%%2F%s",
                       gitlab_get_apibase(),
-                      owner, repo);
+                      e_owner, e_repo);
 
     ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
     free(buffer.data);
     free(url);
+    free(e_owner);
+    free(e_repo);
 }

@@ -110,17 +110,22 @@ gitlab_get_forks(
 {
     ghcli_fetch_buffer  buffer   = {0};
     char               *url      = NULL;
+    char               *e_owner  = NULL;
+    char               *e_repo   = NULL;
     char               *next_url = NULL;
     enum   json_type    next     = JSON_NULL;
     struct json_stream  stream   = {0};
     int                 size     = 0;
+
+    e_owner = ghcli_urlencode(owner);
+    e_repo  = ghcli_urlencode(repo);
 
     *out = NULL;
 
     url = sn_asprintf(
         "%s/projects/%s%%2F%s/forks",
         gitlab_get_apibase(),
-        owner, repo);
+        e_owner, e_repo);
 
     do {
         ghcli_fetch(url, &next_url, &buffer);
@@ -149,6 +154,8 @@ gitlab_get_forks(
     } while ((url = next_url) && (max == -1 || size < max));
 
     free(next_url);
+    free(e_owner);
+    free(e_repo);
 
     return size;
 }
@@ -157,14 +164,19 @@ void
 gitlab_fork_create(const char *owner, const char *repo, const char *_in)
 {
     char               *url       = NULL;
+    char               *e_owner   = NULL;
+    char               *e_repo    = NULL;
     char               *post_data = NULL;
     sn_sv               in        = SV_NULL;
     ghcli_fetch_buffer  buffer    = {0};
 
+    e_owner = ghcli_urlencode(owner);
+    e_repo  = ghcli_urlencode(repo);
+
     url = sn_asprintf(
         "%s/projects/%s%%2F%s/fork",
         gitlab_get_apibase(),
-        owner, repo);
+        e_owner, e_repo);
     if (_in) {
         in        = ghcli_json_escape(SV((char *)_in));
         post_data = sn_asprintf("{\"namespace_path\":\""SV_FMT"\"}",
@@ -177,5 +189,7 @@ gitlab_fork_create(const char *owner, const char *repo, const char *_in)
     free(in.data);
     free(url);
     free(post_data);
+    free(e_owner);
+    free(e_repo);
     free(buffer.data);
 }

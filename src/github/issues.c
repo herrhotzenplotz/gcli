@@ -82,12 +82,17 @@ github_get_issues(
     json_stream         stream      = {0};
     ghcli_fetch_buffer  json_buffer = {0};
     char               *url         = NULL;
+    char               *e_owner     = NULL;
+    char               *e_repo      = NULL;
     char               *next_url    = NULL;
+
+    e_owner = ghcli_urlencode(owner);
+    e_repo  = ghcli_urlencode(repo);
 
     url = sn_asprintf(
         "%s/repos/%s/%s/issues?state=%s",
         github_get_apibase(),
-        owner, repo,
+        e_owner, e_repo,
         all ? "all" : "open");
 
     do {
@@ -129,6 +134,8 @@ github_get_issues(
      * or we haven't fetched enough yet). */
 
     free(next_url);
+    free(e_owner);
+    free(e_repo);
 
     return count;
 }
@@ -192,14 +199,19 @@ github_get_issue_summary(
     int                  issue_number,
     ghcli_issue_details *out)
 {
-    char               *url    = NULL;
-    ghcli_fetch_buffer  buffer = {0};
-    json_stream         parser = {0};
+    char               *url     = NULL;
+    char               *e_owner = NULL;
+    char               *e_repo  = NULL;
+    ghcli_fetch_buffer  buffer  = {0};
+    json_stream         parser  = {0};
+
+    e_owner = ghcli_urlencode(owner);
+    e_repo  = ghcli_urlencode(repo);
 
     url = sn_asprintf(
         "%s/repos/%s/%s/issues/%d",
         github_get_apibase(),
-        owner, repo,
+        e_owner, e_repo,
         issue_number);
     ghcli_fetch(url, NULL, &buffer);
 
@@ -210,6 +222,8 @@ github_get_issue_summary(
 
     json_close(&parser);
     free(url);
+    free(e_owner);
+    free(e_repo);
     free(buffer.data);
 }
 
@@ -217,20 +231,27 @@ void
 github_issue_close(const char *owner, const char *repo, int issue_number)
 {
     ghcli_fetch_buffer  json_buffer = {0};
-    const char         *url         = NULL;
-    const char         *data        = NULL;
+    char               *url         = NULL;
+    char               *data        = NULL;
+    char               *e_owner     = NULL;
+    char               *e_repo      = NULL;
 
-    url  = sn_asprintf(
+    e_owner = ghcli_urlencode(owner);
+    e_repo  = ghcli_urlencode(repo);
+
+    url = sn_asprintf(
         "%s/repos/%s/%s/issues/%d",
         github_get_apibase(),
-        owner, repo,
+        e_owner, e_repo,
         issue_number);
     data = sn_asprintf("{ \"state\": \"close\"}");
 
     ghcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
 
-    free((void *)data);
-    free((void *)url);
+    free(data);
+    free(url);
+    free(e_owner);
+    free(e_repo);
     free(json_buffer.data);
 }
 
@@ -238,20 +259,27 @@ void
 github_issue_reopen(const char *owner, const char *repo, int issue_number)
 {
     ghcli_fetch_buffer  json_buffer = {0};
-    const char         *url         = NULL;
-    const char         *data        = NULL;
+    char               *url         = NULL;
+    char               *data        = NULL;
+    char               *e_owner     = NULL;
+    char               *e_repo      = NULL;
 
-    url  = sn_asprintf(
+    e_owner = ghcli_urlencode(owner);
+    e_repo  = ghcli_urlencode(repo);
+
+    url = sn_asprintf(
         "%s/repos/%s/%s/issues/%d",
         github_get_apibase(),
-        owner, repo,
+        e_owner, e_repo,
         issue_number);
     data = sn_asprintf("{ \"state\": \"open\"}");
 
     ghcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
 
-    free((void *)data);
-    free((void *)url);
+    free(data);
+    free(url);
+    free(e_owner);
+    free(e_repo);
     free(json_buffer.data);
 }
 
@@ -260,16 +288,22 @@ github_perform_submit_issue(
     ghcli_submit_issue_options  opts,
     ghcli_fetch_buffer         *out)
 {
+    sn_sv e_owner = ghcli_urlencode_sv(opts.owner);
+    sn_sv e_repo  = ghcli_urlencode_sv(opts.repo);
+
     char *post_fields = sn_asprintf(
         "{ \"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
         SV_ARGS(opts.title), SV_ARGS(opts.body));
     char *url         = sn_asprintf(
         "%s/repos/"SV_FMT"/"SV_FMT"/issues",
         github_get_apibase(),
-        SV_ARGS(opts.owner),
-        SV_ARGS(opts.repo));
+        SV_ARGS(e_owner),
+        SV_ARGS(e_repo));
 
     ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
+
+    free(e_owner.data);
+    free(e_repo.data);
     free(post_fields);
     free(url);
 }
@@ -285,19 +319,26 @@ github_issue_assign(
     sn_sv               escaped_assignee = SV_NULL;
     char               *post_fields      = NULL;
     char               *url              = NULL;
+    char               *e_owner          = NULL;
+    char               *e_repo           = NULL;
 
     escaped_assignee = ghcli_json_escape(SV((char *)assignee));
     post_fields = sn_asprintf("{ \"assignees\": [\""SV_FMT"\"] }",
                               SV_ARGS(escaped_assignee));
 
+    e_owner = ghcli_urlencode(owner);
+    e_repo  = ghcli_urlencode(repo);
+
     url = sn_asprintf(
         "%s/repos/%s/%s/issues/%d/assignees",
-        github_get_apibase(), owner, repo, issue_number);
+        github_get_apibase(), e_owner, e_repo, issue_number);
 
     ghcli_fetch_with_method("POST", url, post_fields, NULL, &buffer);
 
     free(buffer.data);
     free(escaped_assignee.data);
     free(post_fields);
+    free(e_owner);
+    free(e_repo);
     free(url);
 }

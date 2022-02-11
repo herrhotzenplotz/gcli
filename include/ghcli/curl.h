@@ -34,6 +34,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <sn/sn.h>
+
 typedef struct ghcli_fetch_buffer ghcli_fetch_buffer;
 
 struct ghcli_fetch_buffer {
@@ -63,5 +65,7 @@ void ghcli_post_upload(
     ghcli_fetch_buffer *out);
 bool ghcli_curl_test_success(
     const char *url);
+char *ghcli_urlencode(const char *);
+sn_sv ghcli_urlencode_sv(sn_sv);
 
 #endif /* CURL_H */

@@ -79,7 +79,7 @@ gitlab_parse_mr_entry(json_stream *input, ghcli_pull *it)
 int
 gitlab_get_mrs(
     const char  *owner,
-    const char  *reponame,
+    const char  *repo,
     bool         all,
     int          max,
     ghcli_pull **out)
@@ -88,12 +88,17 @@ gitlab_get_mrs(
     json_stream         stream      = {0};
     ghcli_fetch_buffer  json_buffer = {0};
     char               *url         = NULL;
+    char               *e_owner     = NULL;
+    char               *e_repo      = NULL;
     char               *next_url    = NULL;
+
+    e_owner = ghcli_urlencode(owner);
+    e_repo  = ghcli_urlencode(repo);
 
     url = sn_asprintf(
         "%s/projects/%s%%2F%s/merge_requests%s",
         gitlab_get_apibase(),
-        owner, reponame,
+        e_owner, e_repo,
         all ? "" : "?state=opened");
 
     do {
@@ -132,6 +137,8 @@ gitlab_get_mrs(
     } while ((url = next_url) && (max == -1 || count < max));
 
     free(url);
+    free(e_owner);
+    free(e_repo);
 
     return count;
 }
@@ -140,11 +147,11 @@ void
 gitlab_print_pr_diff(
     FILE       *stream,
     const char *owner,
-    const char *reponame,
+    const char *repo,
     int         pr_number)
 {
     (void)owner;
-    (void)reponame;
+    (void)repo;
     (void)pr_number;
 
     fprintf(stream,
@@ -156,18 +163,23 @@ void
 gitlab_mr_merge(
     FILE       *stream,
     const char *owner,
-    const char *reponame,
+    const char *repo,
     int         mr_number)
 {
-    ghcli_fetch_buffer  buffer = {0};
-    char               *url    = NULL;
-    const char         *data   = "{}";
+    ghcli_fetch_buffer  buffer  = {0};
+    char               *url     = NULL;
+    char               *e_owner = NULL;
+    char               *e_repo  = NULL;
+    const char         *data    = "{}";
+
+    e_owner = ghcli_urlencode(owner);
+    e_repo  = ghcli_urlencode(repo);
 
     /* PUT /projects/:id/merge_requests/:merge_request_iid/merge */
     url = sn_asprintf(
         "%s/projects/%s%%2F%s/merge_requests/%d/merge",
         gitlab_get_apibase(),
-        owner, reponame, mr_number);
+        e_owner, e_repo, mr_number);
 
     ghcli_fetch_with_method("PUT", url, data, NULL, &buffer);
 
@@ -176,6 +188,8 @@ gitlab_mr_merge(
 
     free(buffer.data);
     free(url);
+    free(e_owner);
+    free(e_repo);
 }
 
 static void
@@ -255,12 +269,17 @@ gitlab_get_pull_summary(
     json_stream         stream       = {0};
     ghcli_fetch_buffer  json_buffer  = {0};
     char               *url          = NULL;
+    char               *e_owner      = NULL;
+    char               *e_repo       = NULL;
+
+    e_owner = ghcli_urlencode(owner);
+    e_repo  = ghcli_urlencode(repo);
 
     /* GET /projects/:id/merge_requests/:merge_request_iid */
     url = sn_asprintf(
         "%s/projects/%s%%2F%s/merge_requests/%d",
         gitlab_get_apibase(),
-        owner, repo, pr_number);
+        e_owner, e_repo, pr_number);
     ghcli_fetch(url, NULL, &json_buffer);
 
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
@@ -270,6 +289,8 @@ gitlab_get_pull_summary(
 
     json_close(&stream);
     free(url);
+    free(e_owner);
+    free(e_repo);
     free(json_buffer.data);
 }
 
@@ -323,15 +344,20 @@ gitlab_get_pull_commits(
     ghcli_commit **out)
 {
     char              *url         = NULL;
+    char              *e_owner     = NULL;
+    char              *e_repo      = NULL;
     int                count       = 0;
     json_stream        stream      = {0};
     ghcli_fetch_buffer json_buffer = {0};
+
+    e_owner = ghcli_urlencode(owner);
+    e_repo  = ghcli_urlencode(repo);
 
     /* GET /projects/:id/merge_requests/:merge_request_iid/commits */
     url = sn_asprintf(
         "%s/projects/%s%%2F%s/merge_requests/%d/commits",
         gitlab_get_apibase(),
-        owner, repo, pr_number);
+        e_owner, e_repo, pr_number);
 
     ghcli_fetch(url, NULL, &json_buffer);
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
@@ -351,48 +377,65 @@ gitlab_get_pull_commits(
 
     json_close(&stream);
     free(url);
+    free(e_owner);
+    free(e_repo);
     free(json_buffer.data);
+
     return count;
 }
 
 void
-gitlab_mr_close(const char *owner, const char *reponame, int pr_number)
+gitlab_mr_close(const char *owner, const char *repo, int pr_number)
 {
     ghcli_fetch_buffer  json_buffer = {0};
-    const char         *url         = NULL;
-    const char         *data        = NULL;
+    char               *url         = NULL;
+    char               *data        = NULL;
+    char               *e_owner     = NULL;
+    char               *e_repo      = NULL;
+
+    e_owner = ghcli_urlencode(owner);
+    e_repo  = ghcli_urlencode(repo);
 
     url  = sn_asprintf(
         "%s/projects/%s%%2F%s/merge_requests/%d",
         gitlab_get_apibase(),
-        owner, reponame, pr_number);
+        e_owner, e_repo, pr_number);
     data = sn_asprintf("{ \"state_event\": \"close\"}");
 
     ghcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
 
     free(json_buffer.data);
-    free((void *)url);
-    free((void *)data);
+    free(url);
+    free(e_owner);
+    free(e_repo);
+    free(data);
 }
 
 void
-gitlab_mr_reopen(const char *owner, const char *reponame, int pr_number)
+gitlab_mr_reopen(const char *owner, const char *repo, int pr_number)
 {
     ghcli_fetch_buffer  json_buffer = {0};
-    const char         *url         = NULL;
-    const char         *data        = NULL;
+    char               *url         = NULL;
+    char               *data        = NULL;
+    char               *e_owner     = NULL;
+    char               *e_repo      = NULL;
+
+    e_owner = ghcli_urlencode(owner);
+    e_repo  = ghcli_urlencode(repo);
 
     url  = sn_asprintf(
         "%s/projects/%s%%2F%s/merge_requests/%d",
         gitlab_get_apibase(),
-        owner, reponame, pr_number);
+        e_owner, e_repo, pr_number);
     data = sn_asprintf("{ \"state_event\": \"reopen\"}");
 
     ghcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
 
     free(json_buffer.data);
-    free((void *)url);
-    free((void *)data);
+    free(e_owner);
+    free(e_repo);
+    free(url);
+    free(data);
 }
 
 void
@@ -433,12 +476,19 @@ gitlab_perform_submit_mr(
         SV_ARGS(opts.title),
         SV_ARGS(opts.body),
         target.id);
+
+    sn_sv e_owner = ghcli_urlencode_sv(source_owner);
+    sn_sv e_repo  = ghcli_urlencode_sv(repo);
+
     char *url         = sn_asprintf(
         "%s/projects/"SV_FMT"%%2F"SV_FMT"/merge_requests",
         gitlab_get_apibase(),
-        SV_ARGS(source_owner), SV_ARGS(repo));
+        SV_ARGS(e_owner), SV_ARGS(e_repo));
 
     ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
+
+    free(e_owner.data);
+    free(e_repo.data);
     free(post_fields);
     free(url);
 }

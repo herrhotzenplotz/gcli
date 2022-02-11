@@ -1,4 +1,5 @@
-TESTS	=	json_escape
+TESTS	=	json_escape \
+		url-encode
 
 .PHONY: all clean ${TESTS:=-clean} ${TESTS}
 

@@ -198,6 +198,8 @@ gitlab_get_releases(
 {
     char               *url      = NULL;
     char               *next_url = NULL;
+    char               *e_owner  = NULL;
+    char               *e_repo   = NULL;
     ghcli_fetch_buffer  buffer   = {0};
     struct json_stream  stream   = {0};
     enum json_type      next     = JSON_NULL;
@@ -205,10 +207,13 @@ gitlab_get_releases(
 
     *out = NULL;
 
+    e_owner = ghcli_urlencode(owner);
+    e_repo  = ghcli_urlencode(repo);
+
     url = sn_asprintf(
         "%s/projects/%s%%2F%s/releases",
         gitlab_get_apibase(),
-        owner, repo);
+        e_owner, e_repo);
 
     do {
         ghcli_fetch(url, &next_url, &buffer);
@@ -233,6 +238,8 @@ gitlab_get_releases(
         free(buffer.data);
     } while ((url = next_url) && (max == -1 || size < max));
 
+    free(e_owner);
+    free(e_repo);
     free(next_url);
 
     return size;
@@ -245,16 +252,19 @@ gitlab_create_release(const ghcli_new_release *release)
     char               *upload_url     = NULL;
     char               *post_data      = NULL;
     char               *name_json      = NULL;
+    char               *e_owner        = NULL;
+    char               *e_repo         = NULL;
     char               *commitish_json = NULL;
     sn_sv               escaped_body   = {0};
     ghcli_fetch_buffer  buffer         = {0};
 
+    e_owner = ghcli_urlencode(release->owner);
+    e_repo  = ghcli_urlencode(release->repo);
+
     /* https://docs.github.com/en/rest/reference/repos#create-a-release */
     url = sn_asprintf(
         "%s/projects/%s%%2F%s/releases",
-        gitlab_get_apibase(),
-        release->owner,
-        release->repo);
+        gitlab_get_apibase(), e_owner, e_repo);
 
     escaped_body = ghcli_json_escape(release->body);
 
@@ -299,21 +309,30 @@ gitlab_create_release(const ghcli_new_release *release)
     free(escaped_body.data);
     free(name_json);
     free(commitish_json);
+    free(e_owner);
+    free(e_repo);
 }
 
 void
 gitlab_delete_release(const char *owner, const char *repo, const char *id)
 {
-    char               *url    = NULL;
-    ghcli_fetch_buffer  buffer = {0};
+    char               *url     = NULL;
+    char               *e_owner = NULL;
+    char               *e_repo  = NULL;
+    ghcli_fetch_buffer  buffer  = {0};
+
+    e_owner = ghcli_urlencode(owner);
+    e_repo  = ghcli_urlencode(repo);
 
     url = sn_asprintf(
         "%s/projects/%s%%2F%s/releases/%s",
         gitlab_get_apibase(),
-        owner, repo, id);
+        e_owner, e_repo, id);
 
     ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
     free(url);
+    free(e_owner);
+    free(e_repo);
     free(buffer.data);
 }

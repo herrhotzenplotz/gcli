@@ -88,27 +88,30 @@ github_get_repos(const char *owner, int max, ghcli_repo **out)
 {
     char               *url      = NULL;
     char               *next_url = NULL;
+    char               *e_owner  = NULL;
     ghcli_fetch_buffer  buffer   = {0};
     struct json_stream  stream   = {0};
     enum  json_type     next     = JSON_NULL;
     int                 size     = 0;
 
+    e_owner = ghcli_urlencode(owner);
+
     /* Github is a little stupid in that it distinguishes
      * organizations and users. Thus, we have to find out, whether the
      * <org> param is a user or an actual organization. */
-    url = sn_asprintf("%s/users/%s", github_get_apibase(), owner);
+    url = sn_asprintf("%s/users/%s", github_get_apibase(), e_owner);
     if (ghcli_curl_test_success(url)) {
         /* it is a user */
         free(url);
         url = sn_asprintf("%s/users/%s/repos",
                           github_get_apibase(),
-                          owner);
+                          e_owner);
     } else {
         /* this is an actual organization */
         free(url);
         url = sn_asprintf("%s/orgs/%s/repos",
                           github_get_apibase(),
-                          owner);
+                          e_owner);
     }
 
     do {
@@ -138,6 +141,7 @@ github_get_repos(const char *owner, int max, ghcli_repo **out)
     } while ((url = next_url) && (max == -1 || size < max));
 
     free(url);
+    free(e_owner);
 
     return size;
 }
@@ -188,15 +192,22 @@ github_get_own_repos(int max, ghcli_repo **out)
 void
 github_repo_delete(const char *owner, const char *repo)
 {
-    char               *url    = NULL;
-    ghcli_fetch_buffer  buffer = {0};
+    char               *url     = NULL;
+    char               *e_owner = NULL;
+    char               *e_repo  = NULL;
+    ghcli_fetch_buffer  buffer  = {0};
+
+    e_owner = ghcli_urlencode(owner);
+    e_repo  = ghcli_urlencode(repo);
 
     url = sn_asprintf("%s/repos/%s/%s",
                       github_get_apibase(),
-                      owner, repo);
+                      e_owner, e_repo);
 
     ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
     free(buffer.data);
+    free(e_owner);
+    free(e_repo);
     free(url);
 }

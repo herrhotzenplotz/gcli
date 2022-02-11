@@ -99,6 +99,8 @@ github_get_releases(
     ghcli_release **out)
 {
     char               *url      = NULL;
+    char               *e_owner  = NULL;
+    char               *e_repo   = NULL;
     char               *next_url = NULL;
     ghcli_fetch_buffer  buffer   = {0};
     struct json_stream  stream   = {0};
@@ -107,10 +109,13 @@ github_get_releases(
 
     *out = NULL;
 
+    e_owner = ghcli_urlencode(owner);
+    e_repo  = ghcli_urlencode(repo);
+
     url = sn_asprintf(
         "%s/repos/%s/%s/releases",
         github_get_apibase(),
-        owner, repo);
+        e_owner, e_repo);
 
     do {
         ghcli_fetch(url, &next_url, &buffer);
@@ -136,6 +141,8 @@ github_get_releases(
     } while ((url = next_url) && (max == -1 || size < max));
 
     free(next_url);
+    free(e_owner);
+    free(e_repo);
 
     return size;
 }
@@ -191,6 +198,8 @@ void
 github_create_release(const ghcli_new_release *release)
 {
     char               *url            = NULL;
+    char               *e_owner        = NULL;
+    char               *e_repo        = NULL;
     char               *upload_url     = NULL;
     char               *post_data      = NULL;
     char               *name_json      = NULL;
@@ -201,12 +210,13 @@ github_create_release(const ghcli_new_release *release)
 
     assert(release);
 
+    e_owner = ghcli_urlencode(release->owner);
+    e_repo  = ghcli_urlencode(release->repo);
+
     /* https://docs.github.com/en/rest/reference/repos#create-a-release */
     url = sn_asprintf(
         "%s/repos/%s/%s/releases",
-        github_get_apibase(),
-        release->owner,
-        release->repo);
+        github_get_apibase(), e_owner, e_repo);
 
     escaped_body = ghcli_json_escape(release->body);
 
@@ -253,6 +263,8 @@ github_create_release(const ghcli_new_release *release)
     free(url);
     free(post_data);
     free(escaped_body.data);
+    free(e_owner);
+    free(e_repo);
     free(name_json);
     free(commitish_json);
 }
@@ -260,16 +272,22 @@ github_create_release(const ghcli_new_release *release)
 void
 github_delete_release(const char *owner, const char *repo, const char *id)
 {
-    char               *url    = NULL;
-    ghcli_fetch_buffer  buffer = {0};
+    char               *url     = NULL;
+    char               *e_owner = NULL;
+    char               *e_repo  = NULL;
+    ghcli_fetch_buffer  buffer  = {0};
+
+    e_owner = ghcli_urlencode(owner);
+    e_repo  = ghcli_urlencode(repo);
 
     url = sn_asprintf(
         "%s/repos/%s/%s/releases/%s",
-        github_get_apibase(),
-        owner, repo, id);
+        github_get_apibase(), e_owner, e_repo, id);
 
     ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
     free(url);
+    free(e_owner);
+    free(e_repo);
     free(buffer.data);
 }

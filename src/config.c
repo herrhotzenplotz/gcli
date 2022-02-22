@@ -54,6 +54,7 @@ static struct ghcli_config {
     size_t                      sections_size;
 
     const char *override_default_account;
+    const char *override_remote;
 
     sn_sv buffer;
     void *mmap_pointer;
@@ -225,13 +226,20 @@ ghcli_config_parse_args(int *argc, char ***argv)
           .has_arg = required_argument,
           .flag    = NULL,
           .val     = 'a' },
+        { .name    = "remote",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
         {0},
     };
 
-    while ((ch = getopt_long(*argc, *argv, "+a:", options, NULL)) != -1) {
+    while ((ch = getopt_long(*argc, *argv, "+a:r:", options, NULL)) != -1) {
         switch (ch) {
         case 'a': {
             config.override_default_account = optarg;
+        } break;
+        case 'r': {
+            config.override_remote = optarg;
         } break;
         case '?':
         default:
@@ -538,10 +546,37 @@ ghcli_config_get_forge_type(void)
             errx(1, "Unknown forge type "SV_FMT, SV_ARGS(entry));
     }
 
-    int guessed_from_gitconfig = ghcli_gitconfig_get_forgetype();
-    if (guessed_from_gitconfig >= 0)
-        return (ghcli_forge_type)(guessed_from_gitconfig);
-    else
-        sn_notreached;
-    return -1;
+    return ghcli_gitconfig_get_forgetype(config.override_remote);
+}
+
+void
+ghcli_config_get_repo(const char **owner, const char **repo)
+{
+    sn_sv upstream = {0};
+
+    if (config.override_remote) {
+        ghcli_forge_type forge = ghcli_gitconfig_repo_by_remote(
+            config.override_remote, owner, repo);
+
+        if (forge >= 0) {
+            if (ghcli_config_get_forge_type() != forge)
+                errx(1, "error: forge types are inconsistent");
+        }
+
+        return;
+    }
+
+    if ((upstream = ghcli_config_get_upstream()).length != 0) {
+        sn_sv owner_sv = sn_sv_chop_until(&upstream, '/');
+        sn_sv repo_sv  = sn_sv_from_parts(
+            upstream.data + 1,
+            upstream.length - 1);
+
+        *owner = sn_sv_to_cstr(owner_sv);
+        *repo  = sn_sv_to_cstr(repo_sv);
+
+        return;
+    }
+
+    ghcli_gitconfig_repo_by_remote(NULL, owner, repo);
 }

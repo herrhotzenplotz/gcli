@@ -137,7 +137,9 @@ ghcli_forge(void)
     case GHCLI_FORGE_GITLAB:
         return &gitlab_forge_descriptor;
     default:
-        sn_unimplemented;
+        errx(1,
+             "error: cannot determine forge type. try forcing an account "
+             "with -a or create a .ghcli file.");
     }
     return NULL;
 }

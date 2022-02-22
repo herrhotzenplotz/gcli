@@ -89,7 +89,7 @@ check_owner_and_repo(const char **owner, const char **repo)
         errx(1, "error: missing either explicit owner or repo");
 
     if (*owner == NULL)
-        ghcli_gitconfig_get_repo(owner, repo);
+        ghcli_config_get_repo(owner, repo);
 }
 
 static sn_sv

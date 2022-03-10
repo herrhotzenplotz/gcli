@@ -36,7 +36,7 @@
    Solved in commit 4be0ca8. Leave it up to the user to point at the
    right repo. Also, there are the -o and -r flags.
 ** DONE Valgrind the new fork stuff
-** TODO Ask the user if they want to add a git remote if a fork is created
+** DONE Ask the user if they want to add a git remote if a fork is created
 ** DONE repos subcommand fails if -o is a user
 ** DONE Add docs for gists subcommand
 ** TODO add flags for sorting

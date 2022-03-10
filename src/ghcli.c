@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Nico Sonack <nsonack@outlook.com>
+ * Copyright 2021 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -68,7 +68,7 @@ version(void)
         stderr,
         "ghcli version "GHCLI_VERSION_STRING
         " - a command line utility to interact with GitHub\n"
-        "Copyright 2021 Nico Sonack <nsonack@outlook.com>\n"
+        "Copyright 2021 Nico Sonack <nsonack@herrhotzenplotz.de>\n"
         "This program is licensed under the BSD2CLAUSE license. You should\n"
         "received a copy of it with its distribution.\n");
 }
@@ -89,7 +89,7 @@ check_owner_and_repo(const char **owner, const char **repo)
         errx(1, "error: missing either explicit owner or repo");
 
     if (*owner == NULL)
-        ghcli_gitconfig_get_repo(owner, repo);
+        ghcli_config_get_repo(owner, repo);
 }
 
 static sn_sv

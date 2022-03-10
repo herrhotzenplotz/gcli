@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Nico Sonack <nsonack@outlook.com>
+ * Copyright 2021 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -53,5 +53,6 @@ sn_sv             ghcli_config_get_upstream(void);
 sn_sv             ghcli_config_get_base(void);
 ghcli_forge_type  ghcli_config_get_forge_type(void);
 sn_sv             ghcli_config_get_override_default_account(void);
+void              ghcli_config_get_repo(const char **, const char **);
 
 #endif /* CONFIG_H */

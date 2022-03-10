@@ -8,21 +8,27 @@
 
 .Nm
 .Op Fl a Ar override-account
+.Op Fl r Ar override-remote
 .Cm issues Op Ar options
 .Nm
 .Op Fl a Ar override-account
+.Op Fl r Ar override-remote
 .Cm pulls Op Ar options
 .Nm
 .Op Fl a Ar override-account
+.Op Fl r Ar override-remote
 .Cm comment Op Ar options
 .Nm
 .Op Fl a Ar override-account
+.Op Fl r Ar override-remote
 .Cm review Op Ar options
 .Nm
 .Op Fl a Ar override-account
+.Op Fl r Ar override-remote
 .Cm forks Op Ar options
 .Nm
 .Op Fl a Ar override-account
+.Op Fl r Ar override-remote
 .Cm repos Op Ar options
 .Nm
 .Cm gists Op Ar options
@@ -30,14 +36,17 @@
 .Cm snippets Op Ar options
 .Nm
 .Op Fl a Ar override-account
+.Op Fl r Ar override-remote
 .Cm releases Op Ar options
 .Nm
 .Op Fl a Ar override-account
+.Op Fl r Ar override-remote
 .Cm comment Op Ar options
 .Nm
 .Cm version
 .Nm
 .Op Fl a Ar override-account
+.Op Fl r Ar override-remote
 .Cm status
 .Sh DESCRIPTION
 .Nm
@@ -90,6 +99,10 @@ Manually override the default account.
 .Ar override-account
 must name a config section for an account in the global config file. See
 .Sx FILES .
+.It Fl r , -remote Ar override-remote
+Use
+.Ar override-remote
+as the remote when trying to infer repository data.
 .El
 
 Common options across almost all of the subcommands are:

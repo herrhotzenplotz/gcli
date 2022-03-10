@@ -66,7 +66,7 @@ at »man ghcli«.
 
 ## Bugs and contributions
 
-Please report bugs to nsonack@outlook.com or on
+Please report bugs to nsonack@herrhotzenplotz.de or on
 [GitHub](https://github.com/herrhotzenplotz/ghcli). You can also
 submit patches this way using git-send-email.
 

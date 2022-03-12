@@ -359,7 +359,7 @@ ghcli_urlencode_sv(sn_sv _input)
     output_len = 0;
 
     for (i = 0; i < input_len; ++i) {
-        if (!isalnum(input[i])) {
+        if (!isalnum(input[i]) && input[i] != '-') {
             unsigned val = (input[i] & 0xFF);
             snprintf(output + output_len, 4, "%%%02.2X", val);
             output_len += 3;

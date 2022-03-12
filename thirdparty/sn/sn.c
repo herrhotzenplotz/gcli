@@ -359,3 +359,21 @@ sn_yesno(const char *fmt, ...)
     free(message.data);
     return result;
 }
+
+sn_sv
+sn_sv_strip_suffix(sn_sv input, const char *suffix)
+{
+    sn_sv expected_suffix = SV((char *)suffix);
+
+    if (input.length < expected_suffix.length)
+        return input;
+
+    sn_sv actual_suffix = sn_sv_from_parts(
+        input.data + input.length - expected_suffix.length,
+        expected_suffix.length);
+
+    if (sn_sv_eq(expected_suffix, actual_suffix))
+        input.length -= expected_suffix.length;
+
+    return input;
+}

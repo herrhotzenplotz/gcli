@@ -203,6 +203,8 @@ http_extractor(ghcli_gitremote *remote, const char *prefix)
     pair.data   += 1;
     pair.length -= 1;
 
+    pair = sn_sv_strip_suffix(pair, ".git");
+
     remote->repo = pair;
 }
 
@@ -228,6 +230,8 @@ ssh_extractor(ghcli_gitremote *remote, const char *prefix)
 
     pair.data   += 1;
     pair.length -= 1;
+
+    pair = sn_sv_strip_suffix(pair, ".git");
 
     remote->repo = pair;
 }

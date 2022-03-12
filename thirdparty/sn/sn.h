@@ -95,6 +95,7 @@ bool   sn_sv_eq(const sn_sv, const sn_sv);
 bool   sn_sv_eq_to(const sn_sv, const char *);
 sn_sv  sn_sv_fmt(const char *fmt, ...) PRINTF_FORMAT(1, 2);
 char  *sn_sv_to_cstr(sn_sv);
+sn_sv  sn_sv_strip_suffix(sn_sv, const char *suffix);
 
 static inline bool
 sn_sv_null(sn_sv it)

@@ -108,7 +108,7 @@ gitlab_perform_get_comments(const char *_url, ghcli_comment **comments)
     int                 count       = 0;
     json_stream         stream      = {0};
     ghcli_fetch_buffer  json_buffer = {0};
-    char               *url         = _url;
+    char               *url         = (char *)_url;
     char               *next_url    = NULL;
 
     do {

@@ -103,30 +103,38 @@ gitlab_parse_comment(json_stream *input, ghcli_comment *it)
 }
 
 static int
-gitlab_perform_get_comments(const char *url, ghcli_comment **comments)
+gitlab_perform_get_comments(const char *_url, ghcli_comment **comments)
 {
-    int                count       = 0;
-    json_stream        stream      = {0};
-    ghcli_fetch_buffer json_buffer = {0};
+    int                 count       = 0;
+    json_stream         stream      = {0};
+    ghcli_fetch_buffer  json_buffer = {0};
+    char               *url         = _url;
+    char               *next_url    = NULL;
 
-    ghcli_fetch(url, NULL, &json_buffer);
-    json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-    json_set_streaming(&stream, true);
+    do {
+        ghcli_fetch(url, &next_url, &json_buffer);
+        json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+        json_set_streaming(&stream, true);
 
-    enum json_type next_token = json_next(&stream);
+        enum json_type next_token = json_next(&stream);
 
-    while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
-        if (next_token != JSON_OBJECT)
-            errx(1, "Unexpected non-object in comment list");
+        while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
+            if (next_token != JSON_OBJECT)
+                errx(1, "Unexpected non-object in comment list");
 
-        *comments = realloc(*comments, (count + 1) * sizeof(ghcli_comment));
-        ghcli_comment *it = &(*comments)[count];
-        gitlab_parse_comment(&stream, it);
-        count += 1;
-    }
+            *comments = realloc(*comments, (count + 1) * sizeof(ghcli_comment));
+            ghcli_comment *it = &(*comments)[count];
+            gitlab_parse_comment(&stream, it);
+            count += 1;
+        }
 
-    json_close(&stream);
-    free(json_buffer.data);
+        json_close(&stream);
+        free(json_buffer.data);
+
+        if (url != _url)
+            free(url);
+
+    } while ((url = next_url));
 
     return count;
 }

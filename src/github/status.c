@@ -143,12 +143,14 @@ parse_github_notification(
 }
 
 size_t
-github_get_notifications(ghcli_notification **notifications)
+github_get_notifications(ghcli_notification **notifications, int count)
 {
     char               *url                = NULL;
     ghcli_fetch_buffer  buffer             = {0};
     struct json_stream  stream             = {0};
     size_t              notifications_size = 0;
+
+    #warning I was here
 
     url = sn_asprintf("%s/notifications", github_get_apibase());
     // TODO: Handle pagination

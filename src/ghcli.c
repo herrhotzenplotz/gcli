@@ -1438,9 +1438,31 @@ subcommand_releases(int argc, char *argv[])
 static int
 subcommand_status(int argc, char *argv[])
 {
-    (void) argc;
-    (void) argv;
-    ghcli_status();
+    const struct option options[] = {
+        { .name    = "count",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'n' },
+        {0}
+    };
+    int   count  = 30;
+    int   ch     = 0;
+    char *endptr = NULL;
+
+    while ((ch = getopt_long(argc, argv, "n:", options, NULL)) != -1) {
+        switch (ch) {
+        case 'n': {
+            count = strtol(optarg, &endptr, 10);
+            if (endptr != optarg + strlen(optarg))
+                err(1, "status: cannot parse parameter to -n");
+        } break;
+        default:
+            usage();
+        }
+    }
+
+    ghcli_status(count);
+
     return EXIT_SUCCESS;
 }
 

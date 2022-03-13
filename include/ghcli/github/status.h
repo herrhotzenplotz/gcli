@@ -32,6 +32,6 @@
 
 #include <ghcli/status.h>
 
-size_t github_get_notifications(ghcli_notification **notifications);
+size_t github_get_notifications(ghcli_notification **notifications, int count);
 
 #endif /* GITHUB_STATUS_H */

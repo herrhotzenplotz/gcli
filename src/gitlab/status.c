@@ -106,7 +106,7 @@ parse_gitlab_todo(struct json_stream *stream, ghcli_notification *it)
 }
 
 size_t
-gitlab_get_notifications(ghcli_notification **notifications)
+gitlab_get_notifications(ghcli_notification **notifications, int count)
 {
     char               *url                = NULL;
     ghcli_fetch_buffer  buffer             = {0};
@@ -114,6 +114,7 @@ gitlab_get_notifications(ghcli_notification **notifications)
     size_t              notifications_size = 0;
 
     url = sn_asprintf("%s/todos", gitlab_get_apibase());
+    #warning fixme
     // TODO: Handle pagination
     ghcli_fetch(url, NULL, &buffer);
 

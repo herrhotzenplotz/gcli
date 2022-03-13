@@ -238,7 +238,7 @@ struct ghcli_forge_descriptor {
 
     /**
      * Status summary for the account */
-    size_t (*get_notifications)(ghcli_notification **notifications);
+    size_t (*get_notifications)(ghcli_notification **notifications, int count);
 
     /**
      * Get an the http authentication header for use by curl */

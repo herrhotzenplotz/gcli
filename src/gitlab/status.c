@@ -106,38 +106,40 @@ parse_gitlab_todo(struct json_stream *stream, ghcli_notification *it)
 }
 
 size_t
-gitlab_get_notifications(ghcli_notification **notifications)
+gitlab_get_notifications(ghcli_notification **notifications, int count)
 {
     char               *url                = NULL;
+    char               *next_url           = NULL;
     ghcli_fetch_buffer  buffer             = {0};
     struct json_stream  stream             = {0};
     size_t              notifications_size = 0;
 
     url = sn_asprintf("%s/todos", gitlab_get_apibase());
-    // TODO: Handle pagination
-    ghcli_fetch(url, NULL, &buffer);
 
-    json_open_buffer(&stream, buffer.data, buffer.length);
-    json_set_streaming(&stream, 1);
+    do {
+        ghcli_fetch(url, &next_url, &buffer);
 
-    enum json_type next_token = json_next(&stream);
+        json_open_buffer(&stream, buffer.data, buffer.length);
+        json_set_streaming(&stream, 1);
 
-    while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
-        if (next_token != JSON_OBJECT)
-            errx(1, "Unexpected non-object in todo list");
+        enum json_type next_token = json_next(&stream);
 
-        *notifications = realloc(
-            *notifications,
-            (notifications_size + 1) * sizeof(ghcli_notification));
-        ghcli_notification *it = &(*notifications)[notifications_size];
-        parse_gitlab_todo(&stream, it);
-        notifications_size += 1;
-    }
+        while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
+            if (next_token != JSON_OBJECT)
+                errx(1, "Unexpected non-object in todo list");
 
-    json_close(&stream);
+            *notifications = realloc(
+                *notifications,
+                (notifications_size + 1) * sizeof(ghcli_notification));
+            ghcli_notification *it = &(*notifications)[notifications_size];
+            parse_gitlab_todo(&stream, it);
+            notifications_size += 1;
+        }
 
-    free(url);
-    free(buffer.data);
+        json_close(&stream);
+        free(url);
+        free(buffer.data);
+    } while ((url = next_url) && (count < 0 || (int)notifications_size < count));
 
     return notifications_size;
 }

@@ -31,20 +31,29 @@
 #include <ghcli/forges.h>
 
 void
-ghcli_status(void)
+ghcli_status(int count)
 {
     ghcli_notification *notifications      = NULL;
     size_t              notifications_size = 0;
 
-    notifications_size = ghcli_get_notifications(&notifications);
-    ghcli_print_notifications(notifications, notifications_size);
+    notifications_size = ghcli_get_notifications(&notifications, count);
+
+    if (count < 0) {
+        ghcli_print_notifications(notifications, notifications_size);
+    } else {
+        ghcli_print_notifications(
+            notifications,
+            count < (int)notifications_size
+            ? count : notifications_size);
+    }
+
     ghcli_free_notifications(notifications, notifications_size);
 }
 
 size_t
-ghcli_get_notifications(ghcli_notification **out)
+ghcli_get_notifications(ghcli_notification **out, int count)
 {
-    return ghcli_forge()->get_notifications(out);
+    return ghcli_forge()->get_notifications(out, count);
 }
 
 void

@@ -344,6 +344,7 @@ gitlab_get_pull_commits(
     ghcli_commit **out)
 {
     char              *url         = NULL;
+    char              *next_url    = NULL;
     char              *e_owner     = NULL;
     char              *e_repo      = NULL;
     int                count       = 0;
@@ -359,27 +360,29 @@ gitlab_get_pull_commits(
         gitlab_get_apibase(),
         e_owner, e_repo, pr_number);
 
-    ghcli_fetch(url, NULL, &json_buffer);
-    json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-    json_set_streaming(&stream, true);
+    do {
+        ghcli_fetch(url, &next_url, &json_buffer);
+        json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+        json_set_streaming(&stream, true);
 
-    enum json_type next_token = json_next(&stream);
+        enum json_type next_token = json_next(&stream);
 
-    while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
-        if (next_token != JSON_OBJECT)
-            errx(1, "Unexpected non-object in commit list");
+        while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
+            if (next_token != JSON_OBJECT)
+                errx(1, "Unexpected non-object in commit list");
 
-        *out = realloc(*out, (count + 1) * sizeof(ghcli_commit));
-        ghcli_commit *it = &(*out)[count];
-        gitlab_parse_commit(&stream, it);
-        count += 1;
-    }
+            *out = realloc(*out, (count + 1) * sizeof(ghcli_commit));
+            ghcli_commit *it = &(*out)[count];
+            gitlab_parse_commit(&stream, it);
+            count += 1;
+        }
 
-    json_close(&stream);
-    free(url);
-    free(e_owner);
-    free(e_repo);
-    free(json_buffer.data);
+        json_close(&stream);
+        free(url);
+        free(e_owner);
+        free(e_repo);
+        free(json_buffer.data);
+    } while ((url = next_url));
 
     return count;
 }

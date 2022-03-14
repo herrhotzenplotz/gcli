@@ -281,7 +281,6 @@ github_perform_submit_pr(
     ghcli_submit_pull_options  opts,
     ghcli_fetch_buffer        *out)
 {
-    sn_sv repo = ghcli_urlencode_sv(opts.in);
     /* TODO : JSON Injection */
     char *post_fields = sn_asprintf(
         "{\"head\":\""SV_FMT"\",\"base\":\""SV_FMT"\", "
@@ -293,12 +292,11 @@ github_perform_submit_pr(
     char *url         = sn_asprintf(
         "%s/repos/"SV_FMT"/pulls",
         github_get_apibase(),
-        SV_ARGS(repo));
+        SV_ARGS(opts.in));
 
     ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
     free(post_fields);
     free(url);
-    free(repo.data);
 }
 
 static void

@@ -1494,7 +1494,7 @@ static struct subcommand {
 int
 main(int argc, char *argv[])
 {
-    ghcli_config_init(&argc, &argv, NULL);
+    ghcli_config_init(&argc, &argv);
 
     if (argc == 0)
         errx(1, "error: missing subcommand");

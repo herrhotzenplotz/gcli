@@ -34,9 +34,8 @@
 #include <ghcli/ghcli.h>
 
 void ghcli_config_init(
-    int          *argc,
-    char       ***argv,
-    const char   *file_path);
+    int    *argc,
+    char ***argv);
 
 void ghcli_config_get_upstream_parts(
     sn_sv *owner,

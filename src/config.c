@@ -56,8 +56,9 @@ static struct ghcli_config {
     const char *override_default_account;
     const char *override_remote;
 
-    sn_sv buffer;
-    void *mmap_pointer;
+    sn_sv  buffer;
+    void  *mmap_pointer;
+    bool   inited;
 } config;
 
 static struct ghcli_dotghcli {
@@ -212,53 +213,6 @@ init_local_config(void)
     free((void *)path);
 }
 
-static void
-ghcli_config_parse_args(int *argc, char ***argv)
-{
-    /* These are the very first options passed to the ghcli command
-     * itself. It is the first ever getopt call we do to parse any
-     * arguments. Only global options that do not alter subcommand
-     * specific behaviour should be accepted here. */
-
-    int ch;
-    const struct option options[] = {
-        { .name    = "account",
-          .has_arg = required_argument,
-          .flag    = NULL,
-          .val     = 'a' },
-        { .name    = "remote",
-          .has_arg = required_argument,
-          .flag    = NULL,
-          .val     = 'r' },
-        {0},
-    };
-
-    while ((ch = getopt_long(*argc, *argv, "+a:r:", options, NULL)) != -1) {
-        switch (ch) {
-        case 'a': {
-            config.override_default_account = optarg;
-        } break;
-        case 'r': {
-            config.override_remote = optarg;
-        } break;
-        case '?':
-        default:
-            errx(1, "usage: ghcli [options] subcommand ...");
-        }
-    }
-
-    *argc -= optind;
-    *argv += optind;
-
-    /* This one is a little odd: We are going to call getopt_long
-     * again. Eventually. But since this is a global variable and the
-     * getopt parser is reusing it, we need to reset it to zero. On
-     * BSDs there is also the optreset variable, but it doesn't exist
-     * on Solaris. I will thus not depend on it as it seems to be
-     * working without it. */
-    optind = 0;
-}
-
 struct config_parser {
     sn_sv       buffer;
     int         line;
@@ -384,27 +338,28 @@ parse_config_file(struct config_parser *input)
     }
 }
 
-void
-ghcli_config_init(int *argc, char ***argv, const char *file_path)
+static void
+ensure_config(void)
 {
-    const char           *in_file_path = file_path;
-    struct config_parser  parser       = {0};
+    char                 *file_path = NULL;
+    struct config_parser  parser    = {0};
 
-    ghcli_config_parse_args(argc, argv);
+    if (config.inited)
+        return;
 
+    config.inited = true;
+
+    file_path = getenv("XDG_CONFIG_PATH");
     if (!file_path) {
-        file_path = getenv("XDG_CONFIG_PATH");
-        if (!file_path) {
-            file_path = getenv("HOME");
-            if (!file_path)
-                errx(1, "Neither XDG_CONFIG_PATH nor HOME set in env");
+        file_path = getenv("HOME");
+        if (!file_path)
+            errx(1, "Neither XDG_CONFIG_PATH nor HOME set in env");
 
-            /*
-             * Code duplication to avoid leaking pointers */
-            file_path = sn_asprintf("%s/.config/ghcli/config", file_path);
-        } else {
-            file_path = sn_asprintf("%s/ghcli/config", file_path);
-        }
+        /*
+         * Code duplication to avoid leaking pointers */
+        file_path = sn_asprintf("%s/.config/ghcli/config", file_path);
+    } else {
+        file_path = sn_asprintf("%s/ghcli/config", file_path);
     }
 
     if (access(file_path, R_OK) < 0)
@@ -423,8 +378,56 @@ ghcli_config_init(int *argc, char ***argv, const char *file_path)
 
     parse_config_file(&parser);
 
-    if (file_path != in_file_path)
-        free((void *)file_path);
+    free((void *)file_path);
+}
+
+void
+ghcli_config_init(int *argc, char ***argv)
+{
+    /* These are the very first options passed to the ghcli command
+     * itself. It is the first ever getopt call we do to parse any
+     * arguments. Only global options that do not alter subcommand
+     * specific behaviour should be accepted here. */
+
+    int ch;
+    const struct option options[] = {
+        { .name    = "account",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'a' },
+        { .name    = "remote",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        {0},
+    };
+
+    while ((ch = getopt_long(*argc, *argv, "+a:r:", options, NULL)) != -1) {
+        switch (ch) {
+        case 'a': {
+            config.override_default_account = optarg;
+        } break;
+        case 'r': {
+            config.override_remote = optarg;
+        } break;
+        case '?':
+        default:
+            errx(1, "usage: ghcli [options] subcommand ...");
+        }
+    }
+
+    *argc -= optind;
+    *argv += optind;
+
+    /* This one is a little odd: We are going to call getopt_long
+     * again. Eventually. But since this is a global variable and the
+     * getopt parser is reusing it, we need to reset it to zero. On
+     * BSDs there is also the optreset variable, but it doesn't exist
+     * on Solaris. I will thus not depend on it as it seems to be
+     * working without it. */
+    optind = 0;
+
+    config.inited = false;
 }
 
 static struct ghcli_config_section *
@@ -440,6 +443,8 @@ find_section(sn_sv name)
 sn_sv
 ghcli_config_find_by_key(sn_sv section_name, const char *key)
 {
+    ensure_config();
+
     struct ghcli_config_section *section = find_section(section_name);
 
     if (!section) {
@@ -466,18 +471,24 @@ ghcli_local_config_find_by_key(const char *key)
 char *
 ghcli_config_get_editor(void)
 {
+    ensure_config();
+
     return sn_sv_to_cstr(ghcli_config_find_by_key(SV("defaults"), "editor"));
 }
 
 char *
 ghcli_config_get_authheader(void)
 {
+    ensure_config();
+
     return ghcli_forge()->get_authheader();
 }
 
 sn_sv
 ghcli_config_get_account(void)
 {
+    ensure_config();
+
     return ghcli_forge()->get_account();
 }
 
@@ -492,6 +503,8 @@ ghcli_config_get_upstream(void)
 void
 ghcli_config_get_upstream_parts(sn_sv *owner, sn_sv *repo)
 {
+    ensure_config();
+
     sn_sv upstream   = ghcli_config_get_upstream();
     *owner           = sn_sv_chop_until(&upstream, '/');
     /* TODO: Sanity check */
@@ -522,6 +535,7 @@ ghcli_config_get_override_default_account(void)
 ghcli_forge_type
 ghcli_config_get_forge_type(void)
 {
+    ensure_config();
     init_local_config();
 
     sn_sv entry = {0};
@@ -553,6 +567,8 @@ void
 ghcli_config_get_repo(const char **owner, const char **repo)
 {
     sn_sv upstream = {0};
+
+    ensure_config();
 
     if (config.override_remote) {
         ghcli_forge_type forge = ghcli_gitconfig_repo_by_remote(

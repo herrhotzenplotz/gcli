@@ -450,7 +450,8 @@ subcommand_pulls(int argc, char *argv[])
 
         if (strcmp(operation, "diff") == 0) {
             ghcli_print_pr_diff(stdout, owner, repo, pr);
-        } else if (strcmp(operation, "summary") == 0) {
+        } else if (strcmp(operation, "summary") == 0
+                   || strcmp(operation, "status") == 0) {
             ghcli_pr_summary(stdout, owner, repo, pr);
         } else if (strcmp(operation, "comments") == 0) {
             ghcli_pull_comments(stdout, owner, repo, pr);
@@ -586,7 +587,8 @@ subcommand_issues(int argc, char *argv[])
 
         if (strcmp("comments", operation) == 0) {
             ghcli_issue_comments(stdout, owner, repo, issue);
-        } else if (strcmp("summary", operation) == 0) {
+        } else if (strcmp("summary", operation) == 0
+                   || strcmp("status", operation) == 0) {
             ghcli_issue_summary(stdout, owner, repo, issue);
         } else if (strcmp("close", operation) == 0) {
             ghcli_issue_close(owner, repo, issue);

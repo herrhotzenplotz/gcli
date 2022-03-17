@@ -45,7 +45,6 @@ gitlab_parse_mr_entry(json_stream *input, ghcli_pull *it)
     while ((key_type = json_next(input)) == JSON_STRING) {
         size_t          len        = 0;
         const char     *key        = json_get_string(input, &len);
-        enum json_type  value_type = 0;
 
         if (strncmp("title", key, len) == 0)
             it->title = get_string(input);
@@ -59,20 +58,8 @@ gitlab_parse_mr_entry(json_stream *input, ghcli_pull *it)
             it->merged = json_next(input) == JSON_STRING;
         else if (strncmp("author", key, len) == 0)
             it->creator = get_user(input);
-        else {
-            value_type = json_next(input);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(input, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(input, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 }
 
@@ -195,7 +182,7 @@ gitlab_mr_merge(
 static void
 gitlab_pull_parse_summary(json_stream *input, ghcli_pull_summary *out)
 {
-    enum json_type key_type, value_type;
+    enum json_type key_type;
     const char *key;
 
     json_next(input);
@@ -239,20 +226,12 @@ gitlab_pull_parse_summary(json_stream *input, ghcli_pull_summary *out)
             out->draft = get_bool(input);
         else if (strncmp("author", key, len) == 0)
             out->author = get_user(input);
-        else {
-            value_type = json_next(input);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(input, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(input, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+        else if (strncmp("source_branch", key, len) == 0)
+            out->head_label = get_string(input);
+        else if (strncmp("target_branch", key, len) == 0)
+            out->base_label = get_string(input);
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 
     if (key_type != JSON_OBJECT_END)
@@ -297,7 +276,7 @@ gitlab_get_pull_summary(
 static void
 gitlab_parse_commit(json_stream *input, ghcli_commit *it)
 {
-    enum json_type key_type, value_type;
+    enum json_type key_type;
     const char *key;
 
     json_next(input);
@@ -316,20 +295,8 @@ gitlab_parse_commit(json_stream *input, ghcli_commit *it)
             it->author = get_string(input);
         else if (strncmp(key, "author_email", len) == 0)
             it->email = get_string(input);
-        else {
-            value_type = json_next(input);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(input, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(input, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 
     if (key_type != JSON_OBJECT_END)

@@ -36,6 +36,31 @@
 
 #include <pdjson/pdjson.h>
 
+static const char *
+get_branch_label(json_stream *input)
+{
+    enum json_type  key_type;
+    const char     *label = NULL;
+
+    if (json_next(input) != JSON_OBJECT)
+        errx(1, "expected branch object");
+
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t          len        = 0;
+        const char     *key        = json_get_string(input, &len);
+
+        if (strncmp("label", key, len) == 0)
+            label = get_string(input);
+        else
+            SKIP_OBJECT_VALUE(input);
+    }
+
+    if (key_type != JSON_OBJECT_END)
+        errx(1, "unexpected key type in branch object");
+
+    return label;
+}
+
 static void
 parse_pull_entry(json_stream *input, ghcli_pull *it)
 {
@@ -44,9 +69,8 @@ parse_pull_entry(json_stream *input, ghcli_pull *it)
 
     enum json_type key_type;
     while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t          len        = 0;
-        const char     *key        = json_get_string(input, &len);
-        enum json_type  value_type = 0;
+        size_t      len = 0;
+        const char *key = json_get_string(input, &len);
 
         if (strncmp("title", key, len) == 0)
             it->title = get_string(input);
@@ -60,20 +84,8 @@ parse_pull_entry(json_stream *input, ghcli_pull *it)
             it->merged = json_next(input) == JSON_STRING;
         else if (strncmp("user", key, len) == 0)
             it->creator = get_user(input);
-        else {
-            value_type = json_next(input);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(input, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(input, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 }
 
@@ -302,7 +314,7 @@ github_perform_submit_pr(
 static void
 github_parse_commit_author_field(json_stream *input, ghcli_commit *it)
 {
-    enum json_type key_type, value_type;
+    enum json_type key_type;
     const char *key;
 
     json_next(input);
@@ -317,20 +329,8 @@ github_parse_commit_author_field(json_stream *input, ghcli_commit *it)
             it->email = get_string(input);
         else if (strncmp(key, "date", len) == 0)
             it->date = get_string(input);
-        else {
-            value_type = json_next(input);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(input, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(input, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 
     if (key_type != JSON_OBJECT_END)
@@ -340,7 +340,7 @@ github_parse_commit_author_field(json_stream *input, ghcli_commit *it)
 static void
 github_parse_commit_commit_field(json_stream *input, ghcli_commit *it)
 {
-    enum json_type key_type, value_type;
+    enum json_type key_type;
     const char *key;
 
     json_next(input);
@@ -353,20 +353,8 @@ github_parse_commit_commit_field(json_stream *input, ghcli_commit *it)
             it->message = get_string(input);
         else if (strncmp(key, "author", len) == 0)
             github_parse_commit_author_field(input, it);
-        else {
-            value_type = json_next(input);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(input, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(input, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 
     if (key_type != JSON_OBJECT_END)
@@ -376,7 +364,7 @@ github_parse_commit_commit_field(json_stream *input, ghcli_commit *it)
 static void
 github_parse_commit(json_stream *input, ghcli_commit *it)
 {
-    enum json_type key_type, value_type;
+    enum json_type key_type;
     const char *key;
 
     json_next(input);
@@ -389,20 +377,8 @@ github_parse_commit(json_stream *input, ghcli_commit *it)
             it->sha = get_string(input);
         else if (strncmp(key, "commit", len) == 0)
             github_parse_commit_commit_field(input, it);
-        else {
-            value_type = json_next(input);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(input, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(input, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 
     if (key_type != JSON_OBJECT_END)
@@ -463,7 +439,7 @@ github_get_pull_commits(
 static void
 github_pull_parse_summary(json_stream *input, ghcli_pull_summary *out)
 {
-    enum json_type key_type, value_type;
+    enum json_type key_type;
     const char *key;
 
     json_next(input);
@@ -504,20 +480,12 @@ github_pull_parse_summary(json_stream *input, ghcli_pull_summary *out)
             out->draft = get_bool(input);
         else if (strncmp("user", key, len) == 0)
             out->author = get_user(input);
-        else {
-            value_type = json_next(input);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(input, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(input, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+        else if (strncmp("head", key, len) == 0)
+            out->head_label = get_branch_label(input);
+        else if (strncmp("base", key, len) == 0)
+            out->base_label = get_branch_label(input);
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 
     if (key_type != JSON_OBJECT_END)

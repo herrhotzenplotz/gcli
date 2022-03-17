@@ -36,72 +36,46 @@
 #include <pdjson/pdjson.h>
 
 static void
-parse_gitlab_project(struct json_stream *stream, ghcli_notification *it)
+parse_gitlab_project(struct json_stream *input, ghcli_notification *it)
 {
-    if (json_next(stream) != JSON_OBJECT)
+    if (json_next(input) != JSON_OBJECT)
         errx(1, "Expected Project Object");
 
     enum json_type key_type;
-    while ((key_type = json_next(stream)) == JSON_STRING) {
-        size_t          len        = 0;
-        const char     *key        = json_get_string(stream, &len);
-        enum json_type  value_type = 0;
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t      len = 0;
+        const char *key = json_get_string(input, &len);
 
         if (strncmp("path_with_namespace", key, len) == 0)
-            it->repository = get_string(stream);
-        else {
-            value_type = json_next(stream);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(stream, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(stream, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+            it->repository = get_string(input);
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 }
 
 static void
-parse_gitlab_todo(struct json_stream *stream, ghcli_notification *it)
+parse_gitlab_todo(struct json_stream *input, ghcli_notification *it)
 {
-    if (json_next(stream) != JSON_OBJECT)
+    if (json_next(input) != JSON_OBJECT)
         errx(1, "Expected Notification Object");
 
     enum json_type key_type;
-    while ((key_type = json_next(stream)) == JSON_STRING) {
-        size_t          len        = 0;
-        const char     *key        = json_get_string(stream, &len);
-        enum json_type  value_type = 0;
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t      len = 0;
+        const char *key = json_get_string(input, &len);
 
         if (strncmp("updated_at", key, len) == 0)
-            it->date = get_string(stream);
+            it->date = get_string(input);
         else if (strncmp("action_name", key, len) == 0)
-            it->reason = get_string(stream);
+            it->reason = get_string(input);
         else if (strncmp("body", key, len) == 0)
-            it->title = get_string(stream);
+            it->title = get_string(input);
         else if (strncmp("target_type", key, len) == 0)
-            it->type = get_string(stream);
+            it->type = get_string(input);
         else if (strncmp("project", key, len) == 0)
-            parse_gitlab_project(stream, it);
-        else {
-            value_type = json_next(stream);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(stream, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(stream, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+            parse_gitlab_project(input, it);
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 }
 

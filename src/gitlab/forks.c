@@ -63,7 +63,6 @@ static void
 parse_fork(struct json_stream *input, ghcli_fork *out)
 {
     enum json_type  key_type   = JSON_NULL;
-    enum json_type  value_type = JSON_NULL;
     const char     *key        = NULL;
 
     if (json_next(input) != JSON_OBJECT)
@@ -73,28 +72,16 @@ parse_fork(struct json_stream *input, ghcli_fork *out)
         size_t len;
         key = json_get_string(input, &len);
 
-        if (strncmp("path_with_namespace", key, len) == 0) {
+        if (strncmp("path_with_namespace", key, len) == 0)
             out->full_name = get_sv(input);
-        } else if (strncmp("namespace", key, len) == 0) {
+        else if (strncmp("namespace", key, len) == 0)
             out->owner = parse_namespace(input);
-        } else if (strncmp("created_at", key, len) == 0) {
+        else if (strncmp("created_at", key, len) == 0)
             out->date = get_sv(input);
-        } else if (strncmp("forks_count", key, len) == 0) {
+        else if (strncmp("forks_count", key, len) == 0)
             out->forks = get_int(input);
-        } else {
-            value_type = json_next(input);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(input, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(input, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 
     if (key_type != JSON_OBJECT_END)

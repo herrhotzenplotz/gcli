@@ -106,9 +106,12 @@ ghcli_print_pr_diff(
 static void
 ghcli_print_pr_summary(FILE *out, ghcli_pull_summary *it)
 {
+#define SANITIZE(x) (x ? x : "N/A")
     fprintf(out,
             "   NUMBER : %d\n"
             "    TITLE : %s\n"
+            "     HEAD : %s\n"
+            "     BASE : %s\n"
             "  CREATED : %s\n"
             "   AUTHOR : %s\n"
             "    STATE : %s\n"
@@ -120,12 +123,20 @@ ghcli_print_pr_summary(FILE *out, ghcli_pull_summary *it)
             "MERGEABLE : %s\n"
             "    DRAFT : %s\n"
             "   LABELS : ",
-            it->number, it->title, it->created_at,
-            it->author, it->state, it->comments,
-            it->additions, it->deletions, it->commits, it->changed_files,
+            it->number,
+            SANITIZE(it->title),
+            SANITIZE(it->head_label),
+            SANITIZE(it->base_label),
+            SANITIZE(it->created_at),
+            SANITIZE(it->author),
+            SANITIZE(it->state),
+            it->comments,
+            it->additions, it->deletions,
+            it->commits, it->changed_files,
             sn_bool_yesno(it->merged),
             sn_bool_yesno(it->mergeable),
             sn_bool_yesno(it->draft));
+#undef SANITIZE
 
     if (it->labels_size) {
         fprintf(out, SV_FMT, SV_ARGS(it->labels[0]));

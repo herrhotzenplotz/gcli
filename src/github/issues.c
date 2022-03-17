@@ -41,32 +41,19 @@ github_parse_issue_entry(json_stream *input, ghcli_issue *it)
         errx(1, "Expected Issue Object");
 
     while (json_next(input) == JSON_STRING) {
-        size_t          len        = 0;
-        const char     *key        = json_get_string(input, &len);
-        enum json_type  value_type = 0;
+        size_t      len = 0;
+        const char *key = json_get_string(input, &len);
 
-        if (strncmp("title", key, len) == 0) {
+        if (strncmp("title", key, len) == 0)
             it->title = get_string(input);
-        } else if (strncmp("state", key, len) == 0) {
+        else if (strncmp("state", key, len) == 0)
             it->state = get_string(input);
-        } else if (strncmp("number", key, len) == 0) {
+        else if (strncmp("number", key, len) == 0)
             it->number = get_int(input);
-        } else if (strncmp("id", key, len) == 0) {
+        else if (strncmp("id", key, len) == 0)
             it->id = get_int(input);
-        } else {
-            value_type = json_next(input);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(input, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(input, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 }
 
@@ -143,8 +130,8 @@ github_get_issues(
 static void
 github_parse_issue_details(json_stream *input, ghcli_issue_details *out)
 {
-    enum json_type key_type, value_type;
-    const char *key;
+    enum json_type  key_type;
+    const char     *key;
 
     json_next(input);
 
@@ -172,20 +159,8 @@ github_parse_issue_details(json_stream *input, ghcli_issue_details *out)
             out->labels_size = ghcli_read_label_list(input, &out->labels);
         else if (strncmp("assignees", key, len) == 0)
             out->assignees_size = ghcli_read_user_list(input, &out->assignees);
-        else {
-            value_type = json_next(input);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(input, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(input, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 
     if (key_type != JSON_OBJECT_END)

@@ -37,53 +37,41 @@
 #include <assert.h>
 
 static void
-github_parse_release(struct json_stream *stream, ghcli_release *out)
+github_parse_release(struct json_stream *input, ghcli_release *out)
 {
-    enum json_type  next       = JSON_NULL;
-    enum json_type  value_type = JSON_NULL;
+    enum json_type  next = JSON_NULL;
     const char     *key;
 
-    if ((next = json_next(stream)) != JSON_OBJECT)
+    if ((next = json_next(input)) != JSON_OBJECT)
         errx(1, "Expected Release Object");
 
-    while ((next = json_next(stream)) == JSON_STRING) {
+    while ((next = json_next(input)) == JSON_STRING) {
         size_t len;
-        key = json_get_string(stream, &len);
+        key = json_get_string(input, &len);
 
         if (strncmp("name", key, len) == 0) {
-            out->name = get_sv(stream);
+            out->name = get_sv(input);
         } else if (strncmp("id", key, len) == 0) {
-            int id = get_int(stream);
+            int id = get_int(input);
             out->id = sn_sv_fmt("%d", id);
         } else if (strncmp("body", key, len) == 0) {
-            out->body = get_sv(stream);
+            out->body = get_sv(input);
         } else if (strncmp("tarball_url", key, len) == 0) {
-            out->tarball_url = get_sv(stream);
+            out->tarball_url = get_sv(input);
         } else if (strncmp("author", key, len) == 0) {
-            out->author = get_user_sv(stream);
+            out->author = get_user_sv(input);
         } else if (strncmp("created_at", key, len) == 0) {
-            out->date = get_sv(stream);
+            out->date = get_sv(input);
         } else if (strncmp("draft", key, len) == 0) {
-            out->draft = get_bool(stream);
+            out->draft = get_bool(input);
         } else if (strncmp("prerelease", key, len) == 0) {
-            out->prerelease = get_bool(stream);
+            out->prerelease = get_bool(input);
         } else if (strncmp("upload_url", key, len) == 0) {
-            out->upload_url = get_sv(stream);
+            out->upload_url = get_sv(input);
         } else if (strncmp("html_url", key, len) == 0) {
-            out->html_url = get_sv(stream);
+            out->html_url = get_sv(input);
         } else {
-            value_type = json_next(stream);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(stream, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(stream, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
+            SKIP_OBJECT_VALUE(input);
         }
     }
 

@@ -34,101 +34,75 @@
 #include <pdjson/pdjson.h>
 
 static void
-github_parse_review_comment(json_stream *stream, ghcli_pr_review_comment *it)
+github_parse_review_comment(json_stream *input, ghcli_pr_review_comment *it)
 {
-    if (json_next(stream) != JSON_OBJECT)
+    if (json_next(input) != JSON_OBJECT)
         errx(1, "Expected review comment object");
 
     enum json_type key_type;
-    while ((key_type = json_next(stream)) == JSON_STRING) {
-        size_t          len        = 0;
-        const char     *key        = json_get_string(stream, &len);
-        enum json_type  value_type = 0;
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t      len = 0;
+        const char *key = json_get_string(input, &len);
 
         if (strncmp("bodyText", key, len) == 0)
-            it->body = get_string(stream);
+            it->body = get_string(input);
         else if (strncmp("id", key, len) == 0)
-            it->id = get_string(stream);
+            it->id = get_string(input);
         else if (strncmp("createdAt", key, len) == 0)
-            it->date = get_string(stream);
+            it->date = get_string(input);
         else if (strncmp("author", key, len) == 0)
-            it->author = get_user(stream);
+            it->author = get_user(input);
         else if (strncmp("diffHunk", key, len) == 0)
-            it->diff = get_string(stream);
+            it->diff = get_string(input);
         else if (strncmp("path", key, len) == 0)
-            it->path = get_string(stream);
+            it->path = get_string(input);
         else if (strncmp("originalPosition", key, len) == 0)
-            it->original_position = get_int(stream);
-        else {
-            value_type = json_next(stream);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(stream, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(stream, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+            it->original_position = get_int(input);
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 }
 
 static void
-github_parse_review_comments(json_stream *stream, ghcli_pr_review *it)
+github_parse_review_comments(json_stream *input, ghcli_pr_review *it)
 {
-    ghcli_json_advance(stream, "{s[", "nodes");
-    while (json_peek(stream) == JSON_OBJECT) {
+    ghcli_json_advance(input, "{s[", "nodes");
+    while (json_peek(input) == JSON_OBJECT) {
         it->comments = realloc(
             it->comments,
             sizeof(*it->comments) * (it->comments_size + 1));
         ghcli_pr_review_comment *comment = &it->comments[it->comments_size++];
         *comment                         = (ghcli_pr_review_comment) {0};
-        github_parse_review_comment(stream, comment);
+        github_parse_review_comment(input, comment);
     }
-    ghcli_json_advance(stream, "]}");
+    ghcli_json_advance(input, "]}");
 }
 
 static void
-github_parse_review_header(json_stream *stream, ghcli_pr_review *it)
+github_parse_review_header(json_stream *input, ghcli_pr_review *it)
 {
-    if (json_next(stream) != JSON_OBJECT)
+    if (json_next(input) != JSON_OBJECT)
         errx(1, "Expected review object");
 
     enum json_type key_type;
-    while ((key_type = json_next(stream)) == JSON_STRING) {
-        size_t          len        = 0;
-        const char     *key        = json_get_string(stream, &len);
-        enum json_type  value_type = 0;
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t      len = 0;
+        const char *key = json_get_string(input, &len);
 
         if (strncmp("bodyText", key, len) == 0)
-            it->body = get_string(stream);
+            it->body = get_string(input);
         else if (strncmp("state", key, len) == 0)
-            it->state = get_string(stream);
+            it->state = get_string(input);
         else if (strncmp("id", key, len) == 0)
-            it->id = get_string(stream);
+            it->id = get_string(input);
         else if (strncmp("createdAt", key, len) == 0)
-            it->date = get_string(stream);
+            it->date = get_string(input);
         else if (strncmp("author", key, len) == 0)
-            it->author = get_user(stream);
-        else if (strncmp("comments", key, len) == 0) {
-            github_parse_review_comments(stream, it);
-        } else {
-            value_type = json_next(stream);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(stream, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(stream, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+            it->author = get_user(input);
+        else if (strncmp("comments", key, len) == 0)
+            github_parse_review_comments(input, it);
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 }
 

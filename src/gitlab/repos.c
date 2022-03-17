@@ -37,10 +37,9 @@
 static void
 gitlab_parse_repo(json_stream *input, ghcli_repo *out)
 {
-    enum json_type  next       = JSON_NULL;
-    enum json_type  key_type   = JSON_NULL;
-    enum json_type  value_type = JSON_NULL;
-    const char     *key        = NULL;
+    enum json_type  next     = JSON_NULL;
+    enum json_type  key_type = JSON_NULL;
+    const char     *key      = NULL;
 
     if ((next = json_next(input)) != JSON_OBJECT)
         errx(1, "Expected an object for a repo");
@@ -49,34 +48,22 @@ gitlab_parse_repo(json_stream *input, ghcli_repo *out)
         size_t len;
         key = json_get_string(input, &len);
 
-        if (strncmp("path_with_namespace", key, len) == 0) {
+        if (strncmp("path_with_namespace", key, len) == 0)
             out->full_name = get_sv(input);
-        } else if (strncmp("name", key, len) == 0) {
+        else if (strncmp("name", key, len) == 0)
             out->name = get_sv(input);
-        } else if (strncmp("owner", key, len) == 0) {
+        else if (strncmp("owner", key, len) == 0)
             out->owner = get_user_sv(input);
-        } else if (strncmp("created_at", key, len) == 0) {
+        else if (strncmp("created_at", key, len) == 0)
             out->date = get_sv(input);
-        } else if (strncmp("visibility", key, len) == 0) {
+        else if (strncmp("visibility", key, len) == 0)
             out->visibility = get_sv(input);
-        } else if (strncmp("fork", key, len) == 0) {
+        else if (strncmp("fork", key, len) == 0)
             out->is_fork = get_bool(input);
-        } else if (strncmp("id", key, len) == 0) {
+        else if (strncmp("id", key, len) == 0)
             out->id = get_int(input);
-        } else {
-            value_type = json_next(input);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(input, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(input, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 
     if (key_type != JSON_OBJECT_END)

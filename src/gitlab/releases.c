@@ -35,41 +35,29 @@
 #include <pdjson/pdjson.h>
 
 static void
-gitlab_parse_assets_source(struct json_stream *stream, ghcli_release *out)
+gitlab_parse_assets_source(struct json_stream *input, ghcli_release *out)
 {
     enum json_type  next       = JSON_NULL;
-    enum json_type  value_type = JSON_NULL;
     const char     *key;
     sn_sv           url        = {0};
     bool            is_tarball = false;
 
-    if ((next = json_next(stream)) != JSON_OBJECT)
+    if ((next = json_next(input)) != JSON_OBJECT)
         errx(1, "expected asset source object");
 
-    while ((next = json_next(stream)) == JSON_STRING) {
+    while ((next = json_next(input)) == JSON_STRING) {
         size_t len;
-        key = json_get_string(stream, &len);
+        key = json_get_string(input, &len);
 
         if (strncmp(key, "format", len) == 0) {
-            sn_sv format_name = get_sv(stream);
+            sn_sv format_name = get_sv(input);
             if (sn_sv_eq_to(format_name, "tar.bz2"))
                 is_tarball = true;
             free(format_name.data);
         } else if (strncmp(key, "url", len) == 0) {
-            url = get_sv(stream);
+            url = get_sv(input);
         } else {
-            value_type = json_next(stream);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(stream, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(stream, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
+            SKIP_OBJECT_VALUE(input);
         }
     }
 
@@ -100,35 +88,22 @@ gitlab_parse_asset_sources(struct json_stream *stream, ghcli_release *out)
 }
 
 static void
-gitlab_parse_assets(struct json_stream *stream, ghcli_release *out)
+gitlab_parse_assets(struct json_stream *input, ghcli_release *out)
 {
-    enum json_type  next       = JSON_NULL;
-    enum json_type  value_type = JSON_NULL;
+    enum json_type  next = JSON_NULL;
     const char     *key;
 
-    if ((next = json_next(stream)) != JSON_OBJECT)
+    if ((next = json_next(input)) != JSON_OBJECT)
         errx(1, "expected release assets object");
 
-    while ((next = json_next(stream)) == JSON_STRING) {
+    while ((next = json_next(input)) == JSON_STRING) {
         size_t len;
-        key = json_get_string(stream, &len);
+        key = json_get_string(input, &len);
 
-        if (strncmp(key, "sources", len) == 0) {
-            gitlab_parse_asset_sources(stream, out);
-        } else {
-            value_type = json_next(stream);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(stream, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(stream, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+        if (strncmp(key, "sources", len) == 0)
+            gitlab_parse_asset_sources(input, out);
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 
     if (next != JSON_OBJECT_END)
@@ -136,53 +111,42 @@ gitlab_parse_assets(struct json_stream *stream, ghcli_release *out)
 }
 
 static void
-gitlab_parse_release(struct json_stream *stream, ghcli_release *out)
+gitlab_parse_release(struct json_stream *input, ghcli_release *out)
 {
-    enum json_type  next       = JSON_NULL;
-    enum json_type  value_type = JSON_NULL;
+    enum json_type  next = JSON_NULL;
     const char     *key;
 
-    if ((next = json_next(stream)) != JSON_OBJECT)
+    if ((next = json_next(input)) != JSON_OBJECT)
         errx(1, "expected release object");
 
-    while ((next = json_next(stream)) == JSON_STRING) {
+    while ((next = json_next(input)) == JSON_STRING) {
         size_t len;
-        key = json_get_string(stream, &len);
+        key = json_get_string(input, &len);
 
-        if (strncmp("name", key, len) == 0) {
-            out->name = get_sv(stream);
-        } else if (strncmp("tag_name", key, len) == 0) {
-            out->id = get_sv(stream);
-        } else if (strncmp("description", key, len) == 0) {
-            out->body = get_sv(stream);
-        } else if (strncmp("assets", key, len) == 0) {
-            gitlab_parse_assets(stream, out);
-        } else if (strncmp("author", key, len) == 0) {
-            out->author = get_user_sv(stream);
-        } else if (strncmp("created_at", key, len) == 0) {
-            out->date = get_sv(stream);
-        } else if (strncmp("draft", key, len) == 0) {
-            // Does not exist on gitlab
-        } else if (strncmp("prerelease", key, len) == 0) {
-            // check the released_at field
-        } else if (strncmp("upload_url", key, len) == 0) {
-            // doesn't exist on gitlab
-        } else if (strncmp("html_url", key, len) == 0) {
-            // good luck
-        } else {
-            value_type = json_next(stream);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(stream, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(stream, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+        if (strncmp("name", key, len) == 0)
+            out->name = get_sv(input);
+        else if (strncmp("tag_name", key, len) == 0)
+            out->id = get_sv(input);
+        else if (strncmp("description", key, len) == 0)
+            out->body = get_sv(input);
+        else if (strncmp("assets", key, len) == 0)
+            gitlab_parse_assets(input, out);
+        else if (strncmp("author", key, len) == 0)
+            out->author = get_user_sv(input);
+        else if (strncmp("created_at", key, len) == 0)
+            out->date = get_sv(input);
+#if 0
+        else if (strncmp("draft", key, len) == 0)
+            ;// Does not exist on gitlab
+        else if (strncmp("prerelease", key, len) == 0)
+            ;// check the released_at field
+        else if (strncmp("upload_url", key, len) == 0)
+            ;// doesn't exist on gitlab
+        else if (strncmp("html_url", key, len) == 0)
+            ;// good luck
+#endif
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 
     if (next != JSON_OBJECT_END)

@@ -42,9 +42,8 @@ github_parse_comment(json_stream *input, ghcli_comment *it)
 
     enum json_type key_type;
     while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t          len        = 0;
-        const char     *key        = json_get_string(input, &len);
-        enum json_type  value_type = 0;
+        size_t      len = 0;
+        const char *key = json_get_string(input, &len);
 
         if (strncmp("created_at", key, len) == 0)
             it->date = get_string(input);
@@ -52,20 +51,8 @@ github_parse_comment(json_stream *input, ghcli_comment *it)
             it->body = get_string(input);
         else if (strncmp("user", key, len) == 0)
             it->author = get_user(input);
-        else {
-            value_type = json_next(input);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(input, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(input, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 }
 

@@ -38,39 +38,26 @@
 #include <stdlib.h>
 
 static void
-gitlab_parse_review_note(struct json_stream *stream, ghcli_pr_review *out)
+gitlab_parse_review_note(struct json_stream *input, ghcli_pr_review *out)
 {
-    if (json_next(stream) != JSON_OBJECT)
+    if (json_next(input) != JSON_OBJECT)
         errx(1, "Expected object");
 
     enum json_type key_type;
-    while ((key_type = json_next(stream)) == JSON_STRING) {
-        size_t          len        = 0;
-        const char     *key        = json_get_string(stream, &len);
-        enum json_type  value_type = 0;
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t      len = 0;
+        const char *key = json_get_string(input, &len);
 
         if (strncmp("created_at", key, len) == 0)
-            out->date = get_string(stream);
+            out->date = get_string(input);
         else if (strncmp("body", key, len) == 0)
-            out->body = get_string(stream);
+            out->body = get_string(input);
         else if (strncmp("author", key, len) == 0)
-            out->author = get_user(stream);
+            out->author = get_user(input);
         else if (strncmp("id", key, len) == 0)
-            out->id = sn_asprintf("%d", get_int(stream));
-        else {
-            value_type = json_next(stream);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(stream, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(stream, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+            out->id = sn_asprintf("%d", get_int(input));
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 
     if (key_type != JSON_OBJECT_END)

@@ -37,108 +37,69 @@
 
 static void
 github_notification_parse_subject(
-    struct json_stream *stream,
+    struct json_stream *input,
     ghcli_notification *it)
 {
-    if (json_next(stream) != JSON_OBJECT)
+    if (json_next(input) != JSON_OBJECT)
         errx(1, "Expected Notification Subject Object");
 
     enum json_type key_type;
-    while ((key_type = json_next(stream)) == JSON_STRING) {
-        size_t          len        = 0;
-        const char     *key        = json_get_string(stream, &len);
-        enum json_type  value_type = 0;
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t      len = 0;
+        const char *key = json_get_string(input, &len);
 
         if (strncmp("title", key, len) == 0)
-            it->title = get_string(stream);
+            it->title = get_string(input);
         else if (strncmp("type", key, len) == 0)
-            it->type = get_string(stream);
-        else {
-            value_type = json_next(stream);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(stream, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(stream, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+            it->type = get_string(input);
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 }
 
 static void
 github_notification_parse_repository(
-    struct json_stream *stream,
+    struct json_stream *input,
     ghcli_notification *it)
 {
-    if (json_next(stream) != JSON_OBJECT)
+    if (json_next(input) != JSON_OBJECT)
         errx(1, "Expected Notification Repository Object");
 
     enum json_type key_type;
-    while ((key_type = json_next(stream)) == JSON_STRING) {
-        size_t          len        = 0;
-        const char     *key        = json_get_string(stream, &len);
-        enum json_type  value_type = 0;
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t      len = 0;
+        const char *key = json_get_string(input, &len);
 
         if (strncmp("full_name", key, len) == 0)
-            it->repository = get_string(stream);
-        else {
-            value_type = json_next(stream);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(stream, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(stream, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+            it->repository = get_string(input);
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 }
 
 static void
 parse_github_notification(
-    struct json_stream *stream,
+    struct json_stream *input,
     ghcli_notification *it)
 {
-    if (json_next(stream) != JSON_OBJECT)
+    if (json_next(input) != JSON_OBJECT)
         errx(1, "Expected Notification Object");
 
     enum json_type key_type;
-    while ((key_type = json_next(stream)) == JSON_STRING) {
-        size_t          len        = 0;
-        const char     *key        = json_get_string(stream, &len);
-        enum json_type  value_type = 0;
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t      len = 0;
+        const char *key = json_get_string(input, &len);
 
         if (strncmp("updated_at", key, len) == 0)
-            it->date = get_string(stream);
+            it->date = get_string(input);
         else if (strncmp("reason", key, len) == 0)
-            it->reason = get_string(stream);
+            it->reason = get_string(input);
         else if (strncmp("subject", key, len) == 0)
-            github_notification_parse_subject(stream, it);
+            github_notification_parse_subject(input, it);
         else if (strncmp("repository", key, len) == 0)
-            github_notification_parse_repository(stream, it);
-        else {
-            value_type = json_next(stream);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(stream, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(stream, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
+            github_notification_parse_repository(input, it);
+        else
+            SKIP_OBJECT_VALUE(input);
     }
 }
 

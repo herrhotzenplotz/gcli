@@ -38,9 +38,8 @@
 static void
 parse_fork(struct json_stream *input, ghcli_fork *out)
 {
-    enum json_type  key_type   = JSON_NULL;
-    enum json_type  value_type = JSON_NULL;
-    const char     *key        = NULL;
+    enum json_type  key_type = JSON_NULL;
+    const char     *key      = NULL;
 
     if (json_next(input) != JSON_OBJECT)
         errx(1, "Expected an object for a fork");
@@ -59,18 +58,7 @@ parse_fork(struct json_stream *input, ghcli_fork *out)
         } else if (strncmp("forks_count", key, len) == 0) {
             out->forks = get_int(input);
         } else {
-            value_type = json_next(input);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(input, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(input, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
+            SKIP_OBJECT_VALUE(input);
         }
     }
 

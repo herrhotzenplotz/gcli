@@ -2,7 +2,7 @@
 PROGS				=	ghcli
 LIBS				=	libghcli.a
 
-GHCLI_VERSION			=	0.6.2-alpha
+GHCLI_VERSION			=	0.7.0-dev
 # These and LDFLAGS can be overwritten
 CFLAGS				=	-std=iso9899:1999 \
 					-Ithirdparty/pdjson/ \

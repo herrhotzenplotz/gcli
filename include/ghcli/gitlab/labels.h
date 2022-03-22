@@ -41,5 +41,9 @@ void gitlab_create_label(
     const char  *owner,
     const char  *repo,
     ghcli_label *label);
+void gitlab_delete_label(
+    const char *owner,
+    const char *repo,
+    const char *label);
 
 #endif /* GITLAB_LABELS_H */

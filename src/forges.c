@@ -120,6 +120,7 @@ gitlab_forge_descriptor =
     .delete_release            = gitlab_delete_release,
     .get_labels                = gitlab_get_labels,
     .create_label              = gitlab_create_label,
+    .delete_label              = gitlab_delete_label,
     .get_repos                 = gitlab_get_repos,
     .get_own_repos             = gitlab_get_own_repos,
     .get_reviews               = gitlab_review_get_reviews,

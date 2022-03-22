@@ -33,7 +33,7 @@
 #include <stdlib.h>
 
 struct ghcli_notification {
-    int   id;
+    long  id;
     char *title;
     char *reason;
     char *date;

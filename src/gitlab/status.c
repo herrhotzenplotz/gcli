@@ -68,6 +68,8 @@ parse_gitlab_todo(struct json_stream *input, ghcli_notification *it)
             it->date = get_string(input);
         else if (strncmp("action_name", key, len) == 0)
             it->reason = get_string(input);
+        else if (strncmp("id", key, len) == 0)
+            it->id = get_int(input);
         else if (strncmp("body", key, len) == 0)
             it->title = get_string(input);
         else if (strncmp("target_type", key, len) == 0)

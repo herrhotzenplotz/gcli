@@ -79,9 +79,10 @@ ghcli_print_notifications(
 {
     for (size_t i = 0; i < notifications_size; ++i) {
         printf(
-            "%s - %s - %s - %s\n",
-            notifications[i].repository, notifications[i].type,
-            notifications[i].date, notifications[i].reason);
+            "%ld - %s - %s - %s - %s\n",
+            notifications[i].id, notifications[i].repository,
+            notifications[i].type, notifications[i].date,
+            notifications[i].reason);
 
         pretty_print(notifications[i].title, 4, 80, stdout);
         putchar('\n');

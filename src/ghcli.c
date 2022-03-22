@@ -1440,30 +1440,61 @@ subcommand_releases(int argc, char *argv[])
 static int
 subcommand_status(int argc, char *argv[])
 {
+    int   count  = 30;
+    int   ch     = 0;
+    char *endptr = NULL;
+    int   mark   = 0;
+
     const struct option options[] = {
         { .name    = "count",
           .has_arg = required_argument,
           .flag    = NULL,
           .val     = 'n' },
+        { .name    = "mark",
+          .has_arg = no_argument,
+          .flag    = &mark,
+          .val     = 1 },
         {0}
     };
-    int   count  = 30;
-    int   ch     = 0;
-    char *endptr = NULL;
 
-    while ((ch = getopt_long(argc, argv, "n:", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "n:m", options, NULL)) != -1) {
         switch (ch) {
         case 'n': {
             count = strtol(optarg, &endptr, 10);
             if (endptr != optarg + strlen(optarg))
                 err(1, "status: cannot parse parameter to -n");
         } break;
+        case 'm': {
+            mark = 1;
+        } break;
         default:
             usage();
         }
     }
 
-    ghcli_status(count);
+    argc -= optind;
+    argv += optind;
+
+    if (!mark) {
+        ghcli_status(count);
+    } else {
+        int id;
+
+        if (count != 30)
+            warnx("ignoring -n/--count argument");
+
+        if (argc > 1)
+            errx(1, "error: too many arguments for marking notifications");
+
+        if (argc < 1)
+            errx(1, "error: missing notification id to mark as read");
+
+        id = strtol(argv[0], &endptr, 10);
+        if (endptr != argv[0] + strlen(argv[0]))
+            err(1, "error: cannot parse notification id");
+
+        ghcli_notification_mark_as_read(id);
+    }
 
     return EXIT_SUCCESS;
 }

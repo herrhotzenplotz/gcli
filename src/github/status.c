@@ -92,6 +92,9 @@ parse_github_notification(
 
         if (strncmp("updated_at", key, len) == 0)
             it->date = get_string(input);
+        else if (strncmp("id", key, len) == 0)
+            it->id = get_parse_int(input); /* Let's just hope we get a
+                                            * parsable integer */
         else if (strncmp("reason", key, len) == 0)
             it->reason = get_string(input);
         else if (strncmp("subject", key, len) == 0)

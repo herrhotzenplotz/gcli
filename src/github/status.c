@@ -93,8 +93,7 @@ parse_github_notification(
         if (strncmp("updated_at", key, len) == 0)
             it->date = get_string(input);
         else if (strncmp("id", key, len) == 0)
-            it->id = get_parse_int(input); /* Let's just hope we get a
-                                            * parsable integer */
+            it->id = get_string(input);
         else if (strncmp("reason", key, len) == 0)
             it->reason = get_string(input);
         else if (strncmp("subject", key, len) == 0)
@@ -146,13 +145,13 @@ github_get_notifications(ghcli_notification **notifications, int count)
 }
 
 void
-github_notification_mark_as_read(long id)
+github_notification_mark_as_read(const char *id)
 {
     char               *url    = NULL;
     ghcli_fetch_buffer  buffer = {0};
 
     url = sn_asprintf(
-        "%s/notifications/threads/%ld",
+        "%s/notifications/threads/%s",
         github_get_apibase(),
         id);
     ghcli_fetch_with_method("PATCH", url, NULL, NULL, &buffer);

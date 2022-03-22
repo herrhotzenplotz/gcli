@@ -244,7 +244,7 @@ struct ghcli_forge_descriptor {
      * Mark notification with the given id as read
      *
      * Returns 0 on success or negative code on failure. */
-    void (*notification_mark_as_read)(long id);
+    void (*notification_mark_as_read)(const char *id);
 
     /**
      * Get an the http authentication header for use by curl */

@@ -62,6 +62,7 @@ ghcli_free_notifications(
     size_t              notifications_size)
 {
     for (size_t i = 0; i < notifications_size; ++i) {
+        free(notifications[i].id);
         free(notifications[i].title);
         free(notifications[i].reason);
         free(notifications[i].date);
@@ -79,7 +80,7 @@ ghcli_print_notifications(
 {
     for (size_t i = 0; i < notifications_size; ++i) {
         printf(
-            "%ld - %s - %s - %s - %s\n",
+            "%s - %s - %s - %s - %s\n",
             notifications[i].id, notifications[i].repository,
             notifications[i].type, notifications[i].date,
             notifications[i].reason);
@@ -90,7 +91,7 @@ ghcli_print_notifications(
 }
 
 void
-ghcli_notification_mark_as_read(long id)
+ghcli_notification_mark_as_read(const char *id)
 {
     ghcli_forge()->notification_mark_as_read(id);
 }

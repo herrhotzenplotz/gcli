@@ -1478,8 +1478,6 @@ subcommand_status(int argc, char *argv[])
     if (!mark) {
         ghcli_status(count);
     } else {
-        long id;
-
         if (count != 30)
             warnx("ignoring -n/--count argument");
 
@@ -1489,11 +1487,7 @@ subcommand_status(int argc, char *argv[])
         if (argc < 1)
             errx(1, "error: missing notification id to mark as read");
 
-        id = strtol(argv[0], &endptr, 10);
-        if (endptr != argv[0] + strlen(argv[0]))
-            err(1, "error: cannot parse notification id");
-
-        ghcli_notification_mark_as_read(id);
+        ghcli_notification_mark_as_read(argv[0]);
     }
 
     return EXIT_SUCCESS;

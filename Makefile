@@ -29,6 +29,7 @@ libghcli.a_SRCS			=	src/comments.c			\
 					src/forges.c			\
 					src/forks.c			\
 					src/gists.c			\
+					src/labels.c			\
 					src/gitconfig.c			\
 					src/github/api.c		\
 					src/github/comments.c		\

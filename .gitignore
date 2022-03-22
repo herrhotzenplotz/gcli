@@ -78,3 +78,5 @@ i
 /tests/url-encode/url-encode.o
 /include/ghcli/color.h~
 /src/color.c~
+/include/ghcli/labels.h~
+/src/labels.c~

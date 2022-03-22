@@ -70,3 +70,9 @@ ghcli_create_label(const char *owner, const char *repo, ghcli_label *label)
 {
     ghcli_forge()->create_label(owner, repo, label);
 }
+
+void
+ghcli_delete_label(const char *owner, const char *repo, const char *label)
+{
+    ghcli_forge()->delete_label(owner, repo, label);
+}

@@ -228,6 +228,13 @@ struct ghcli_forge_descriptor {
         ghcli_label *label);
 
     /**
+     * Delete the given label */
+    void (*delete_label)(
+        const char *owner,
+        const char *repo,
+        const char *label);
+
+    /**
      * Get a list of repos of the given owner */
     int (*get_repos)(
         const char  *owner,

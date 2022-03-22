@@ -1441,11 +1441,39 @@ subcommand_releases(int argc, char *argv[])
 static int
 subcommand_labels_delete(int argc, char *argv[])
 {
-    (void) argc;
-    (void) argv;
-    sn_unimplemented;
+    int         ch;
+    const char *owner             = NULL, *repo = NULL;
+    const struct option options[] = {
+        {.name = "repo",  .has_arg = required_argument, .val = 'r'},
+        {.name = "owner", .has_arg = required_argument, .val = 'o'},
+        {0},
+    };
 
-    return 69;
+    while ((ch = getopt_long(argc, argv, "n:o:r:", options, NULL)) != -1) {
+        switch (ch) {
+        case 'o':
+            owner = optarg;
+            break;
+        case 'r':
+            repo = optarg;
+            break;
+        case '?':
+        default:
+            usage();
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    check_owner_and_repo(&owner, &repo);
+
+    if (argc != 1)
+        errx(1, "labels: missing label to delete");
+
+    ghcli_delete_label(owner, repo, argv[0]);
+
+    return EXIT_SUCCESS;
 }
 
 static int

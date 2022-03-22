@@ -56,5 +56,9 @@ void ghcli_create_label(
     const char  *owner,
     const char  *repo,
     ghcli_label *label);
+void ghcli_delete_label(
+    const char *owner,
+    const char *repo,
+    const char *label);
 
 #endif /* LABELS_H */

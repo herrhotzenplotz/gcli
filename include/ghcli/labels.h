@@ -50,7 +50,6 @@ size_t ghcli_get_labels(
     ghcli_label **out);
 void ghcli_free_labels(ghcli_label *labels, size_t labels_size);
 void ghcli_print_labels(
-    FILE              *out,
     const ghcli_label *labels,
     size_t             labels_size);
 

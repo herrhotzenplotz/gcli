@@ -56,13 +56,13 @@ ghcli_free_labels(ghcli_label *labels, size_t labels_size)
 }
 
 void
-ghcli_print_labels(FILE *out, const ghcli_label *labels, size_t labels_size)
+ghcli_print_labels(const ghcli_label *labels, size_t labels_size)
 {
-    fprintf(out, "%5.5s\t%20.20s\t%s\n", "ID", "NAME", "DESCRIPTION");
+    printf("%5.5s\t%20.20s\t%s\n", "ID", "NAME", "DESCRIPTION");
 
     for (size_t i = 0; i < labels_size; ++i) {
-        fprintf(
-            out, "%5ld\t%s%20.20s%s\t%s\n",
+        printf(
+            "%5ld\t%s%20.20s%s\t%s\n",
             labels[i].id,
             ghcli_setcolor(labels[i].color), labels[i].name, ghcli_resetcolor(),
             labels[i].description);

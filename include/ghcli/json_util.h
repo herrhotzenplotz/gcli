@@ -56,6 +56,7 @@ void        ghcli_print_html_url(ghcli_fetch_buffer);
 size_t      ghcli_read_label_list(json_stream *, sn_sv **);
 size_t      ghcli_read_user_list(json_stream *input, sn_sv **out);
 void        ghcli_json_advance(json_stream *input, const char *fmt, ...);
+size_t      ghcli_read_sv_list(json_stream *input, sn_sv **out);
 
 static inline sn_sv
 get_user_sv(json_stream *input)

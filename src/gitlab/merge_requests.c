@@ -204,7 +204,7 @@ gitlab_pull_parse_summary(json_stream *input, ghcli_pull_summary *out)
         else if (strncmp("id", key, len) == 0)
             out->id = get_int(input);
         else if (strncmp("labels", key, len) == 0)
-            out->labels_size = ghcli_read_label_list(input, &out->labels);
+            out->labels_size = ghcli_read_sv_list(input, &out->labels);
         else if (strncmp("user_notes_count", key, len) == 0)
             out->comments = get_int(input);
 #if 0

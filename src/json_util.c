@@ -46,7 +46,7 @@ barf(const char *message, const char *where)
          "       flags are correct. If you are certain that all your options\n"
          "       were correct, please submit a bug report including the\n"
          "       command you invoked and the following information about the\n"
-         "       error location: file = %s", message, where);
+         "       error location: function = %s", message, where);
 }
 
 long
@@ -337,4 +337,26 @@ get_parse_int_(json_stream *input, const char *function)
             function);
 
     return result;
+}
+
+size_t
+ghcli_read_sv_list(json_stream *input, sn_sv **out)
+{
+    enum json_type next;
+    size_t         size;
+
+    next = json_next(input);
+    if (next != JSON_ARRAY)
+        errx(1, "expected begin of array in string list");
+
+    size = 0;
+    while ((next = json_peek(input)) != JSON_ARRAY_END) {
+        *out           = realloc(*out, sizeof(sn_sv) * (size + 1));
+        (*out)[size++] = get_sv(input);
+    }
+
+    if (json_next(input) != JSON_ARRAY_END)
+        errx(1, "expected end of array in string list");
+
+    return size;
 }

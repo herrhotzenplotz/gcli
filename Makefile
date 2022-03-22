@@ -23,6 +23,7 @@ ghcli_SRCS			=	src/ghcli.c
 
 libghcli.a_SRCS			=	src/comments.c			\
 					src/config.c			\
+					src/color.c			\
 					src/curl.c			\
 					src/editor.c			\
 					src/forges.c			\

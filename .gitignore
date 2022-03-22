@@ -76,3 +76,5 @@ i
 /tests/url-encode/url-encode.core
 /tests/url-encode/url-encode.c~
 /tests/url-encode/url-encode.o
+/include/ghcli/color.h~
+/src/color.c~

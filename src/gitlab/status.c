@@ -121,7 +121,7 @@ gitlab_get_notifications(ghcli_notification **notifications, int count)
 }
 
 void
-gitlab_notification_mark_as_read(int id)
+gitlab_notification_mark_as_read(long id)
 {
     (void) id;
 

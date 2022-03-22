@@ -33,6 +33,6 @@
 #include <ghcli/status.h>
 
 size_t gitlab_get_notifications(ghcli_notification **notifications, int count);
-void   gitlab_notification_mark_as_read(int id);
+void   gitlab_notification_mark_as_read(long id);
 
 #endif /* GITLAB_STATUS_H */

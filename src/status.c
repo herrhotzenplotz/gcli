@@ -90,7 +90,7 @@ ghcli_print_notifications(
 }
 
 void
-ghcli_notification_mark_as_read(int id)
+ghcli_notification_mark_as_read(long id)
 {
     ghcli_forge()->notification_mark_as_read(id);
 }

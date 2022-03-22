@@ -1478,7 +1478,7 @@ subcommand_status(int argc, char *argv[])
     if (!mark) {
         ghcli_status(count);
     } else {
-        int id;
+        long id;
 
         if (count != 30)
             warnx("ignoring -n/--count argument");

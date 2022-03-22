@@ -45,7 +45,7 @@ typedef struct ghcli_notification ghcli_notification;
 
 void   ghcli_status(int count);
 size_t ghcli_get_notifications(ghcli_notification **out, int count);
-void   ghcli_notification_mark_as_read(int id);
+void   ghcli_notification_mark_as_read(long id);
 void   ghcli_free_notifications(ghcli_notification *, size_t);
 void   ghcli_print_notifications(ghcli_notification *, size_t);
 

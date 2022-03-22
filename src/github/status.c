@@ -146,9 +146,17 @@ github_get_notifications(ghcli_notification **notifications, int count)
 }
 
 void
-github_notification_mark_as_read(int id)
+github_notification_mark_as_read(long id)
 {
-    (void) id;
+    char               *url    = NULL;
+    ghcli_fetch_buffer  buffer = {0};
 
-    sn_unimplemented;
+    url = sn_asprintf(
+        "%s/notifications/threads/%ld",
+        github_get_apibase(),
+        id);
+    ghcli_fetch_with_method("PATCH", url, NULL, NULL, &buffer);
+
+    free(url);
+    free(buffer.data);
 }

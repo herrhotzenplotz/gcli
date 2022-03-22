@@ -55,7 +55,7 @@ gitlab_parse_review_note(struct json_stream *input, ghcli_pr_review *out)
         else if (strncmp("author", key, len) == 0)
             out->author = get_user(input);
         else if (strncmp("id", key, len) == 0)
-            out->id = sn_asprintf("%d", get_int(input));
+            out->id = sn_asprintf("%ld", get_int(input));
         else
             SKIP_OBJECT_VALUE(input);
     }

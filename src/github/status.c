@@ -92,6 +92,8 @@ parse_github_notification(
 
         if (strncmp("updated_at", key, len) == 0)
             it->date = get_string(input);
+        else if (strncmp("id", key, len) == 0)
+            it->id = get_string(input);
         else if (strncmp("reason", key, len) == 0)
             it->reason = get_string(input);
         else if (strncmp("subject", key, len) == 0)
@@ -140,4 +142,20 @@ github_get_notifications(ghcli_notification **notifications, int count)
     } while ((url = next_url) && (count < 0 || ((int)notifications_size < count)));
 
     return notifications_size;
+}
+
+void
+github_notification_mark_as_read(const char *id)
+{
+    char               *url    = NULL;
+    ghcli_fetch_buffer  buffer = {0};
+
+    url = sn_asprintf(
+        "%s/notifications/threads/%s",
+        github_get_apibase(),
+        id);
+    ghcli_fetch_with_method("PATCH", url, NULL, NULL, &buffer);
+
+    free(url);
+    free(buffer.data);
 }

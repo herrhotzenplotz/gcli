@@ -68,6 +68,8 @@ parse_gitlab_todo(struct json_stream *input, ghcli_notification *it)
             it->date = get_string(input);
         else if (strncmp("action_name", key, len) == 0)
             it->reason = get_string(input);
+        else if (strncmp("id", key, len) == 0)
+            it->id = sn_asprintf("%ld", get_int(input));
         else if (strncmp("body", key, len) == 0)
             it->title = get_string(input);
         else if (strncmp("target_type", key, len) == 0)
@@ -116,4 +118,17 @@ gitlab_get_notifications(ghcli_notification **notifications, int count)
     } while ((url = next_url) && (count < 0 || (int)notifications_size < count));
 
     return notifications_size;
+}
+
+void
+gitlab_notification_mark_as_read(const char *id)
+{
+    char               *url    = NULL;
+    ghcli_fetch_buffer  buffer = {0};
+
+    url = sn_asprintf("%s/todos/%s/mark_as_done", gitlab_get_apibase(), id);
+    ghcli_fetch_with_method("POST", url, NULL, NULL, &buffer);
+
+    free(url);
+    free(buffer.data);
 }

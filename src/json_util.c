@@ -49,7 +49,7 @@ barf(const char *message, const char *where)
          "       error location: file = %s", message, where);
 }
 
-int
+long
 get_int_(json_stream *input, const char *where)
 {
     if (json_next(input) != JSON_NUMBER)
@@ -322,4 +322,19 @@ ghcli_json_advance(struct json_stream *stream, const char *fmt, ...)
     }
 
     va_end(ap);
+}
+
+long
+get_parse_int_(json_stream *input, const char *function)
+{
+    long  result = 0;
+    char *endptr = NULL;
+    char *string = get_string(input);
+
+    result = strtol(string, &endptr, 10);
+    if (endptr != string + strlen(string))
+        err(1, "in %s: unable to parse string field into decimal integer",
+            function);
+
+    return result;
 }

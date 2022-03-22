@@ -123,7 +123,12 @@ gitlab_get_notifications(ghcli_notification **notifications, int count)
 void
 gitlab_notification_mark_as_read(const char *id)
 {
-    (void) id;
+    char               *url    = NULL;
+    ghcli_fetch_buffer  buffer = {0};
 
-    sn_unimplemented;
+    url = sn_asprintf("%s/todos/%s/mark_as_done", gitlab_get_apibase(), id);
+    ghcli_fetch_with_method("POST", url, NULL, NULL, &buffer);
+
+    free(url);
+    free(buffer.data);
 }

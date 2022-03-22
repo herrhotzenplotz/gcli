@@ -118,3 +118,36 @@ gitlab_get_labels(
 
     return out_size;
 }
+
+void
+gitlab_create_label(const char *owner, const char *repo, ghcli_label *label)
+{
+    char               *url    = NULL;
+    char               *data   = NULL;
+    ghcli_fetch_buffer  buffer = {0};
+    struct json_stream  stream = {0};
+
+    url = sn_asprintf("%s/projects/%s%%2F%s/labels",
+                      gitlab_get_apibase(),
+                      owner, repo);
+    /* TODO: fix leaks */
+    data = sn_asprintf(
+        "{\"name\": \""SV_FMT"\","
+        "\"color\":\"#%s\","
+        "\"description\":\""SV_FMT"\"}",
+        SV_ARGS(ghcli_json_escape(SV(label->name))),
+        sn_asprintf("%06X", (label->color>>8)&0xFFFFFF),
+        SV_ARGS(ghcli_json_escape(SV(label->description))));
+
+    ghcli_fetch_with_method("POST", url, data, NULL, &buffer);
+
+    json_open_buffer(&stream, buffer.data, buffer.length);
+    json_set_streaming(&stream, 1);
+
+    gitlab_parse_label(&stream, label);
+
+    json_close(&stream);
+    free(data);
+    free(url);
+    free(buffer.data);
+}

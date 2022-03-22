@@ -52,5 +52,9 @@ void ghcli_free_labels(ghcli_label *labels, size_t labels_size);
 void ghcli_print_labels(
     const ghcli_label *labels,
     size_t             labels_size);
+void ghcli_create_label(
+    const char  *owner,
+    const char  *repo,
+    ghcli_label *label);
 
 #endif /* LABELS_H */

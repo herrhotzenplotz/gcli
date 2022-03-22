@@ -64,3 +64,9 @@ ghcli_print_labels(const ghcli_label *labels, size_t labels_size)
             labels[i].description);
     }
 }
+
+void
+ghcli_create_label(const char *owner, const char *repo, ghcli_label *label)
+{
+    ghcli_forge()->create_label(owner, repo, label);
+}

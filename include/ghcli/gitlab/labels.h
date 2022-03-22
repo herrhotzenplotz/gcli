@@ -37,5 +37,9 @@ size_t gitlab_get_labels(
     const char   *reponame,
     int           max,
     ghcli_label **out);
+void gitlab_create_label(
+    const char  *owner,
+    const char  *repo,
+    ghcli_label *label);
 
 #endif /* GITLAB_LABELS_H */

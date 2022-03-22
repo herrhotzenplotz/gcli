@@ -1439,6 +1439,83 @@ subcommand_releases(int argc, char *argv[])
 }
 
 static int
+subcommand_labels_delete(int argc, char *argv[])
+{
+    (void) argc;
+    (void) argv;
+    sn_unimplemented;
+
+    return 69;
+}
+
+static int
+subcommand_labels_create(int argc, char *argv[])
+{
+    ghcli_label  label = {0};
+    const char  *owner = NULL, *repo = NULL;
+    int          ch;
+
+    const struct option options[] = {
+        {.name = "repo",        .has_arg = required_argument, .val = 'r'},
+        {.name = "owner",       .has_arg = required_argument, .val = 'o'},
+        {.name = "name",        .has_arg = required_argument, .val = 'n'},
+        {.name = "color",       .has_arg = required_argument, .val = 'c'},
+        {.name = "description", .has_arg = required_argument, .val = 'd'},
+        {0}
+    };
+
+    while ((ch = getopt_long(argc, argv, "n:o:r:", options, NULL)) != -1) {
+        switch (ch) {
+        case 'o':
+            owner = optarg;
+            break;
+        case 'r':
+            repo = optarg;
+            break;
+        case 'c': {
+            char *endptr = NULL;
+            label.color = strtol(optarg, &endptr, 16);
+            if (endptr != (optarg + strlen(optarg)))
+                err(1, "labels: cannot parse color");
+        } break;
+        case 'd': {
+            label.description = optarg;
+        } break;
+        case 'n': {
+            label.name = optarg;
+        } break;
+        case '?':
+        default:
+            usage();
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    check_owner_and_repo(&owner, &repo);
+
+    if (!label.name)
+        errx(1, "error: missing name for label");
+
+    if (!label.description)
+        errx(1, "error: missing description for label");
+
+    ghcli_create_label(owner, repo, &label);
+    ghcli_print_labels(&label, 1);
+
+    return EXIT_SUCCESS;
+}
+
+static struct {
+    const char *name;
+    int (*fn)(int, char **);
+} labels_subcommands[] = {
+    { .name = "delete", .fn = subcommand_labels_delete },
+    { .name = "create", .fn = subcommand_labels_create },
+};
+
+static int
 subcommand_labels(int argc, char *argv[])
 {
     int          count = 30;
@@ -1448,20 +1525,18 @@ subcommand_labels(int argc, char *argv[])
     ghcli_label *labels;
 
     const struct option options[] = {
-        { .name    = "repo",
-          .has_arg = required_argument,
-          .flag    = NULL,
-          .val     = 'r' },
-        { .name    = "owner",
-          .has_arg = required_argument,
-          .flag    = NULL,
-          .val     = 'o' },
-        { .name    = "count",
-          .has_arg = required_argument,
-          .flag    = NULL,
-          .val     = 'n' },
+        {.name = "repo",  .has_arg = required_argument, .flag = NULL, .val = 'r'},
+        {.name = "owner", .has_arg = required_argument, .flag = NULL, .val = 'o'},
+        {.name = "count", .has_arg = required_argument, .flag = NULL, .val = 'c'},
         {0}
     };
+
+    if (argc > 1) {
+        for (size_t i = 0; i < ARRAY_SIZE(releases_subcommands); ++i) {
+            if (strcmp(labels_subcommands[i].name, argv[1]) == 0)
+                return labels_subcommands[i].fn(argc - 1, argv + 1);
+        }
+    }
 
     while ((ch = getopt_long(argc, argv, "n:o:r:", options, NULL)) != -1) {
         switch (ch) {

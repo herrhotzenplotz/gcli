@@ -219,6 +219,15 @@ struct ghcli_forge_descriptor {
         ghcli_label **out);
 
     /**
+     * Create the given label
+     *
+     * The ID will be filled in for you */
+    void (*create_label)(
+        const char  *owner,
+        const char  *repo,
+        ghcli_label *label);
+
+    /**
      * Get a list of repos of the given owner */
     int (*get_repos)(
         const char  *owner,

@@ -156,7 +156,7 @@ gitlab_parse_issue_details(json_stream *input, ghcli_issue_details *out)
         else if (strncmp("discussion_locked", key, len) == 0)
             out->locked = get_bool(input);
         else if (strncmp("labels", key, len) == 0)
-            out->labels_size = ghcli_read_label_list(input, &out->labels);
+            out->labels_size = ghcli_read_sv_list(input, &out->labels);
         else if (strncmp("assignees", key, len) == 0)
             out->assignees_size = ghcli_read_user_list(input, &out->assignees);
         else

@@ -37,15 +37,16 @@
 #include <ghcli/config.h>
 #include <ghcli/curl.h>
 #include <ghcli/editor.h>
-#include <ghcli/forks.h>
 #include <ghcli/forges.h>
+#include <ghcli/forks.h>
 #include <ghcli/gists.h>
 #include <ghcli/gitconfig.h>
 #include <ghcli/issues.h>
+#include <ghcli/labels.h>
 #include <ghcli/pulls.h>
+#include <ghcli/releases.h>
 #include <ghcli/repos.h>
 #include <ghcli/review.h>
-#include <ghcli/releases.h>
 #include <ghcli/snippets.h>
 #include <ghcli/status.h>
 
@@ -1438,6 +1439,64 @@ subcommand_releases(int argc, char *argv[])
 }
 
 static int
+subcommand_labels(int argc, char *argv[])
+{
+    int          count = 30;
+    int          ch;
+    const char  *owner = NULL, *repo = NULL;
+    size_t       labels_count;
+    ghcli_label *labels;
+
+    const struct option options[] = {
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "owner",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'o' },
+        { .name    = "count",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'n' },
+        {0}
+    };
+
+    while ((ch = getopt_long(argc, argv, "n:o:r:", options, NULL)) != -1) {
+        switch (ch) {
+        case 'o':
+            owner = optarg;
+            break;
+        case 'r':
+            repo = optarg;
+            break;
+        case 'n': {
+            char *endptr = NULL;
+            count        = strtol(optarg, &endptr, 10);
+            if (endptr != (optarg + strlen(optarg)))
+                err(1, "labels: cannot parse label count");
+        } break;
+        case '?':
+        default:
+            usage();
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    check_owner_and_repo(&owner, &repo);
+
+    labels_count = ghcli_get_labels(owner, repo, count, &labels);
+
+    ghcli_print_labels(labels, labels_count);
+    ghcli_free_labels(labels, labels_count);
+
+    return EXIT_SUCCESS;
+}
+
+static int
 subcommand_status(int argc, char *argv[])
 {
     int   count  = 30;
@@ -1506,15 +1565,16 @@ static struct subcommand {
     const char *cmd_name;
     int (*fn)(int, char **);
 } subcommands[] = {
-    { .cmd_name = "pulls",    .fn = subcommand_pulls    },
-    { .cmd_name = "issues",   .fn = subcommand_issues   },
-    { .cmd_name = "repos",    .fn = subcommand_repos    },
     { .cmd_name = "comment",  .fn = subcommand_comment  },
     { .cmd_name = "forks",    .fn = subcommand_forks    },
     { .cmd_name = "gists",    .fn = subcommand_gists    },
-    { .cmd_name = "status",   .fn = subcommand_status   },
-    { .cmd_name = "snippets", .fn = subcommand_snippets },
+    { .cmd_name = "issues",   .fn = subcommand_issues   },
+    { .cmd_name = "labels",   .fn = subcommand_labels   },
+    { .cmd_name = "pulls",    .fn = subcommand_pulls    },
     { .cmd_name = "releases", .fn = subcommand_releases },
+    { .cmd_name = "repos",    .fn = subcommand_repos    },
+    { .cmd_name = "snippets", .fn = subcommand_snippets },
+    { .cmd_name = "status",   .fn = subcommand_status   },
     { .cmd_name = "version",  .fn = subcommand_version  },
 };
 

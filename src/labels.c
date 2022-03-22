@@ -27,8 +27,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/labels.h>
 #include <ghcli/color.h>
+#include <ghcli/forges.h>
+#include <ghcli/labels.h>
 
 size_t
 ghcli_get_labels(
@@ -37,12 +38,7 @@ ghcli_get_labels(
     int           max,
     ghcli_label **out)
 {
-    (void) owner;
-    (void) reponame;
-    (void) max;
-
-    *out = NULL;
-    return 0;
+    return ghcli_forge()->get_labels(owner, reponame, max, out);
 }
 
 void

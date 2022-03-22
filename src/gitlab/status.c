@@ -117,3 +117,11 @@ gitlab_get_notifications(ghcli_notification **notifications, int count)
 
     return notifications_size;
 }
+
+void
+gitlab_notification_mark_as_read(int id)
+{
+    (void) id;
+
+    sn_unimplemented;
+}

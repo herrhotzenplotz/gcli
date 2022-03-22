@@ -34,6 +34,7 @@
 #include <ghcli/curl.h>
 #include <ghcli/forks.h>
 #include <ghcli/issues.h>
+#include <ghcli/labels.h>
 #include <ghcli/pulls.h>
 #include <ghcli/releases.h>
 #include <ghcli/repos.h>
@@ -208,6 +209,30 @@ struct ghcli_forge_descriptor {
         const char *owner,
         const char *repo,
         const char *id);
+
+    /**
+     * Get a list of labels that are valid in the given repository */
+    size_t (*get_labels)(
+        const char   *owner,
+        const char   *repo,
+        int           max,
+        ghcli_label **out);
+
+    /**
+     * Create the given label
+     *
+     * The ID will be filled in for you */
+    void (*create_label)(
+        const char  *owner,
+        const char  *repo,
+        ghcli_label *label);
+
+    /**
+     * Delete the given label */
+    void (*delete_label)(
+        const char *owner,
+        const char *repo,
+        const char *label);
 
     /**
      * Get a list of repos of the given owner */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022 Nico Sonack <nsonack@outlook.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,32 +27,38 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef LABELS_H
+#define LABELS_H
 
-#include <sn/sn.h>
-#include <ghcli/ghcli.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
 
-void ghcli_config_init(
-    int    *argc,
-    char ***argv);
+typedef struct ghcli_label ghcli_label;
 
-void ghcli_config_get_upstream_parts(
-    sn_sv *owner,
-    sn_sv *repo);
+struct ghcli_label {
+    long      id;
+    char     *name;
+    char     *description;
+    uint32_t  color;
+};
 
-sn_sv ghcli_config_find_by_key(
-    sn_sv       section_name,
-    const char *key);
+size_t ghcli_get_labels(
+    const char   *owner,
+    const char   *reponame,
+    int           max,
+    ghcli_label **out);
+void ghcli_free_labels(ghcli_label *labels, size_t labels_size);
+void ghcli_print_labels(
+    const ghcli_label *labels,
+    size_t             labels_size);
+void ghcli_create_label(
+    const char  *owner,
+    const char  *repo,
+    ghcli_label *label);
+void ghcli_delete_label(
+    const char *owner,
+    const char *repo,
+    const char *label);
 
-char             *ghcli_config_get_editor(void);
-char             *ghcli_config_get_authheader(void);
-sn_sv             ghcli_config_get_account(void);
-sn_sv             ghcli_config_get_upstream(void);
-sn_sv             ghcli_config_get_base(void);
-ghcli_forge_type  ghcli_config_get_forge_type(void);
-sn_sv             ghcli_config_get_override_default_account(void);
-void              ghcli_config_get_repo(const char **, const char **);
-int               ghcli_config_have_colors(void);
-
-#endif /* CONFIG_H */
+#endif /* LABELS_H */

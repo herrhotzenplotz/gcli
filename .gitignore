@@ -76,3 +76,10 @@ i
 /tests/url-encode/url-encode.core
 /tests/url-encode/url-encode.c~
 /tests/url-encode/url-encode.o
+/include/ghcli/color.h~
+/src/color.c~
+/include/ghcli/labels.h~
+/src/labels.c~
+/src/gitlab/labels.c~
+/src/gitlab/labels.o
+/include/ghcli/gitlab/labels.h~

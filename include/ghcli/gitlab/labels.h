@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022 Nico Sonack <nsonack@outlook.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,32 +27,23 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef GITLAB_LABELS_H
+#define GITLAB_LABELS_H
 
-#include <sn/sn.h>
-#include <ghcli/ghcli.h>
+#include <ghcli/labels.h>
 
-void ghcli_config_init(
-    int    *argc,
-    char ***argv);
+size_t gitlab_get_labels(
+    const char   *owner,
+    const char   *reponame,
+    int           max,
+    ghcli_label **out);
+void gitlab_create_label(
+    const char  *owner,
+    const char  *repo,
+    ghcli_label *label);
+void gitlab_delete_label(
+    const char *owner,
+    const char *repo,
+    const char *label);
 
-void ghcli_config_get_upstream_parts(
-    sn_sv *owner,
-    sn_sv *repo);
-
-sn_sv ghcli_config_find_by_key(
-    sn_sv       section_name,
-    const char *key);
-
-char             *ghcli_config_get_editor(void);
-char             *ghcli_config_get_authheader(void);
-sn_sv             ghcli_config_get_account(void);
-sn_sv             ghcli_config_get_upstream(void);
-sn_sv             ghcli_config_get_base(void);
-ghcli_forge_type  ghcli_config_get_forge_type(void);
-sn_sv             ghcli_config_get_override_default_account(void);
-void              ghcli_config_get_repo(const char **, const char **);
-int               ghcli_config_have_colors(void);
-
-#endif /* CONFIG_H */
+#endif /* GITLAB_LABELS_H */

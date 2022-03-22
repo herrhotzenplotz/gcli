@@ -55,6 +55,7 @@ static struct ghcli_config {
 
     const char *override_default_account;
     const char *override_remote;
+    int         colors_disabled;
 
     sn_sv  buffer;
     void  *mmap_pointer;
@@ -399,10 +400,14 @@ ghcli_config_init(int *argc, char ***argv)
           .has_arg = required_argument,
           .flag    = NULL,
           .val     = 'r' },
+        { .name    = "no-colors",
+          .has_arg = no_argument,
+          .flag    = &config.colors_disabled,
+          .val     = 1 },
         {0},
     };
 
-    while ((ch = getopt_long(*argc, *argv, "+a:r:", options, NULL)) != -1) {
+    while ((ch = getopt_long(*argc, *argv, "+a:r:c", options, NULL)) != -1) {
         switch (ch) {
         case 'a': {
             config.override_default_account = optarg;
@@ -410,6 +415,10 @@ ghcli_config_init(int *argc, char ***argv)
         case 'r': {
             config.override_remote = optarg;
         } break;
+        case 'c': {
+            config.colors_disabled = 1;
+        } break;
+        case 0: break;
         case '?':
         default:
             errx(1, "usage: ghcli [options] subcommand ...");
@@ -595,4 +604,23 @@ ghcli_config_get_repo(const char **owner, const char **repo)
     }
 
     ghcli_gitconfig_repo_by_remote(NULL, owner, repo);
+}
+
+int
+ghcli_config_have_colors(void)
+{
+    static int tested_tty = 0;
+
+    if (config.colors_disabled)
+        return 0;
+
+    if (tested_tty)
+        return !config.colors_disabled;
+
+    if (isatty(STDOUT_FILENO))
+        config.colors_disabled = false;
+    else
+        config.colors_disabled = true;
+
+    return !config.colors_disabled;
 }

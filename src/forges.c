@@ -48,6 +48,7 @@
 #include <ghcli/gitlab/config.h>
 #include <ghcli/gitlab/forks.h>
 #include <ghcli/gitlab/issues.h>
+#include <ghcli/gitlab/labels.h>
 #include <ghcli/gitlab/merge_requests.h>
 #include <ghcli/gitlab/releases.h>
 #include <ghcli/gitlab/repos.h>
@@ -117,6 +118,9 @@ gitlab_forge_descriptor =
     .get_releases              = gitlab_get_releases,
     .create_release            = gitlab_create_release,
     .delete_release            = gitlab_delete_release,
+    .get_labels                = gitlab_get_labels,
+    .create_label              = gitlab_create_label,
+    .delete_label              = gitlab_delete_label,
     .get_repos                 = gitlab_get_repos,
     .get_own_repos             = gitlab_get_own_repos,
     .get_reviews               = gitlab_review_get_reviews,

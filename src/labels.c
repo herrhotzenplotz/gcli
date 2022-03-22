@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022 Nico Sonack <nsonack@outlook.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,32 +27,52 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#include <ghcli/color.h>
+#include <ghcli/forges.h>
+#include <ghcli/labels.h>
 
-#include <sn/sn.h>
-#include <ghcli/ghcli.h>
+size_t
+ghcli_get_labels(
+    const char   *owner,
+    const char   *reponame,
+    int           max,
+    ghcli_label **out)
+{
+    return ghcli_forge()->get_labels(owner, reponame, max, out);
+}
 
-void ghcli_config_init(
-    int    *argc,
-    char ***argv);
+void
+ghcli_free_labels(ghcli_label *labels, size_t labels_size)
+{
+    for (size_t i = 0; i < labels_size; ++i) {
+        free(labels[i].name);
+        free(labels[i].description);
+    }
+    free(labels);
+}
 
-void ghcli_config_get_upstream_parts(
-    sn_sv *owner,
-    sn_sv *repo);
+void
+ghcli_print_labels(const ghcli_label *labels, size_t labels_size)
+{
+    printf("%10.10s %-15.15s %s\n", "ID", "NAME", "DESCRIPTION");
 
-sn_sv ghcli_config_find_by_key(
-    sn_sv       section_name,
-    const char *key);
+    for (size_t i = 0; i < labels_size; ++i) {
+        printf(
+            "%10.10ld %s%-15.15s%s %s\n",
+            labels[i].id,
+            ghcli_setcolor(labels[i].color), labels[i].name, ghcli_resetcolor(),
+            labels[i].description);
+    }
+}
 
-char             *ghcli_config_get_editor(void);
-char             *ghcli_config_get_authheader(void);
-sn_sv             ghcli_config_get_account(void);
-sn_sv             ghcli_config_get_upstream(void);
-sn_sv             ghcli_config_get_base(void);
-ghcli_forge_type  ghcli_config_get_forge_type(void);
-sn_sv             ghcli_config_get_override_default_account(void);
-void              ghcli_config_get_repo(const char **, const char **);
-int               ghcli_config_have_colors(void);
+void
+ghcli_create_label(const char *owner, const char *repo, ghcli_label *label)
+{
+    ghcli_forge()->create_label(owner, repo, label);
+}
 
-#endif /* CONFIG_H */
+void
+ghcli_delete_label(const char *owner, const char *repo, const char *label)
+{
+    ghcli_forge()->delete_label(owner, repo, label);
+}

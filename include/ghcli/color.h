@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022 Nico Sonack <nsonack@outlook.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,32 +27,12 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef COLOR_H
+#define COLOR_H
 
-#include <sn/sn.h>
-#include <ghcli/ghcli.h>
+#include <stdint.h>
 
-void ghcli_config_init(
-    int    *argc,
-    char ***argv);
+const char *ghcli_setcolor(uint32_t colorcode);
+const char *ghcli_resetcolor(void);
 
-void ghcli_config_get_upstream_parts(
-    sn_sv *owner,
-    sn_sv *repo);
-
-sn_sv ghcli_config_find_by_key(
-    sn_sv       section_name,
-    const char *key);
-
-char             *ghcli_config_get_editor(void);
-char             *ghcli_config_get_authheader(void);
-sn_sv             ghcli_config_get_account(void);
-sn_sv             ghcli_config_get_upstream(void);
-sn_sv             ghcli_config_get_base(void);
-ghcli_forge_type  ghcli_config_get_forge_type(void);
-sn_sv             ghcli_config_get_override_default_account(void);
-void              ghcli_config_get_repo(const char **, const char **);
-int               ghcli_config_have_colors(void);
-
-#endif /* CONFIG_H */
+#endif /* COLOR_H */

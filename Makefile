@@ -2,7 +2,7 @@
 PROGS				=	ghcli
 LIBS				=	libghcli.a
 
-GHCLI_VERSION			=	0.6.2-alpha
+GHCLI_VERSION			=	0.7.0-dev
 # These and LDFLAGS can be overwritten
 CFLAGS				=	-std=iso9899:1999 \
 					-Ithirdparty/pdjson/ \
@@ -23,11 +23,13 @@ ghcli_SRCS			=	src/ghcli.c
 
 libghcli.a_SRCS			=	src/comments.c			\
 					src/config.c			\
+					src/color.c			\
 					src/curl.c			\
 					src/editor.c			\
 					src/forges.c			\
 					src/forks.c			\
 					src/gists.c			\
+					src/labels.c			\
 					src/gitconfig.c			\
 					src/github/api.c		\
 					src/github/comments.c		\
@@ -43,6 +45,7 @@ libghcli.a_SRCS			=	src/comments.c			\
 					src/gitlab/comments.c		\
 					src/gitlab/config.c		\
 					src/gitlab/forks.c		\
+					src/gitlab/labels.c		\
 					src/gitlab/issues.c		\
 					src/gitlab/merge_requests.c	\
 					src/gitlab/releases.c		\

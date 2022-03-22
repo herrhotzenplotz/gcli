@@ -27,40 +27,15 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/color.h>
-#include <ghcli/forges.h>
+#ifndef GITLAB_LABELS_H
+#define GITLAB_LABELS_H
+
 #include <ghcli/labels.h>
 
-size_t
-ghcli_get_labels(
+size_t gitlab_get_labels(
     const char   *owner,
     const char   *reponame,
     int           max,
-    ghcli_label **out)
-{
-    return ghcli_forge()->get_labels(owner, reponame, max, out);
-}
+    ghcli_label **out);
 
-void
-ghcli_free_labels(ghcli_label *labels, size_t labels_size)
-{
-    for (size_t i = 0; i < labels_size; ++i) {
-        free(labels[i].name);
-        free(labels[i].description);
-    }
-    free(labels);
-}
-
-void
-ghcli_print_labels(const ghcli_label *labels, size_t labels_size)
-{
-    printf("%10.10s %-15.15s %s\n", "ID", "NAME", "DESCRIPTION");
-
-    for (size_t i = 0; i < labels_size; ++i) {
-        printf(
-            "%10.10ld %s%-15.15s%s %s\n",
-            labels[i].id,
-            ghcli_setcolor(labels[i].color), labels[i].name, ghcli_resetcolor(),
-            labels[i].description);
-    }
-}
+#endif /* GITLAB_LABELS_H */

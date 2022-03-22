@@ -80,3 +80,6 @@ i
 /src/color.c~
 /include/ghcli/labels.h~
 /src/labels.c~
+/src/gitlab/labels.c~
+/src/gitlab/labels.o
+/include/ghcli/gitlab/labels.h~

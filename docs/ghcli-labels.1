@@ -1,0 +1,100 @@
+.Dd $Mdocdate$
+.Dt GHCLI-LABELS 1
+.Os
+.Sh NAME
+.Nm ghcli labels
+.Nd Manage GitHub and GitLab labels
+.Sh SYNOPSIS
+.Nm
+.Op Fl o Ar owner Fl r Ar repo
+.Nm
+.Cm create
+.Op Fl o Ar owner Fl r Ar repo
+.Fl d Ar description
+.Fl n Ar name
+.Fl c Ar colour
+.Nm
+.Cm delete
+.Op Fl o Ar owner Fl r Ar repo
+.Ar name\ or\ id
+.Sh DESCRIPTION
+Use
+.Nm
+to list, create, edit or delete labels for PullRequests/MergeRequests
+and issues in repositories on both GitHub and GitLab. Without any
+action specified,
+.Nm
+will list all defined labels in the given or autodetected repository.
+.Sh OPTIONS
+.Bl -tag -width indent
+.It Fl o , -owner Ar owner
+Work in the repository of the given owner. This option can only be
+used in combination with
+.Fl r .
+.It Fl r , -repo Ar repo
+Work in the given repository. This option can only be used in
+combination with
+.Fl o .
+.El
+
+.Sh SUBCOMMANDS
+.Bl -tag -width indent
+.It Cm create
+Create a new label in the given or autodetected repository.
+
+The following flags must be specified:
+.Bl -tag -width indent
+.It Fl n , -name Ar name
+Set the short name of the label to the given
+.Ar name .
+.It Fl d , -description Ar description
+Set the description of the label to the given
+.Ar text .
+Note that on GitHub this field may only consist of up to 150
+characters.
+.It Fl c , -color Ar code
+Set the color of the label to the given
+.Ar code .
+.Ar code
+is expected to be a 6 digit hexadecimal RGB color code.
+.El
+.It Cm delete
+Delete the specified label in the given or autodetected repository.
+
+There are no flags for this subcommand.
+.El
+.Sh EXAMPLES
+Print a list of all labels in the current project:
+.Bd -literal -offset indent
+$ ghcli labels
+.Ed
+
+Create a new label called
+.Sq bug
+with a description
+.Sq Something is not working as expected
+and give it a red colour:
+.Bd -literal -offset indent
+$ ghcli labels create \\
+        --name bug \\
+        --description "Something is not working as expected" \\
+        --color FF0000
+.Ed
+
+Delete the label
+.Sq foobar
+in herrhotzenplotz/ghcli and use the configured account
+.Sq gitlab :
+.Bd -literal -offset indent
+$ ghcli -a gitlab labels delete -o herrhotzenplotz -r ghcli foobar
+.Ed
+.Sh SEE ALSO
+.Xr git 1 ,
+.Xr ghcli 1
+.Sh AUTHORS
+.An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+.Sh BUGS
+The delete subcommand should ask for confirmation and have a flag to
+override this behaviour.
+
+Please report issues preferably via e-mail, on GitLab or on GitHub.

@@ -7,46 +7,40 @@
 .Sh SYNOPSIS
 
 .Nm
-.Op Fl a Ar override-account
-.Op Fl r Ar override-remote
+.Op common\ options
 .Cm issues Op Ar options
 .Nm
-.Op Fl a Ar override-account
-.Op Fl r Ar override-remote
+.Op common\ options
 .Cm pulls Op Ar options
 .Nm
-.Op Fl a Ar override-account
-.Op Fl r Ar override-remote
+.Op common\ options
+.Cm labels Op Ar options
+.Nm
+.Op common\ options
 .Cm comment Op Ar options
 .Nm
-.Op Fl a Ar override-account
-.Op Fl r Ar override-remote
+.Op common\ options
 .Cm review Op Ar options
 .Nm
-.Op Fl a Ar override-account
-.Op Fl r Ar override-remote
+.Op common\ options
 .Cm forks Op Ar options
 .Nm
-.Op Fl a Ar override-account
-.Op Fl r Ar override-remote
+.Op common\ options
 .Cm repos Op Ar options
 .Nm
 .Cm gists Op Ar options
 .Nm
 .Cm snippets Op Ar options
 .Nm
-.Op Fl a Ar override-account
-.Op Fl r Ar override-remote
+.Op common\ options
 .Cm releases Op Ar options
 .Nm
-.Op Fl a Ar override-account
-.Op Fl r Ar override-remote
+.Op common\ options
 .Cm comment Op Ar options
 .Nm
 .Cm version
 .Nm
-.Op Fl a Ar override-account
-.Op Fl r Ar override-remote
+.Op common\ options
 .Cm status
 .Sh DESCRIPTION
 .Nm
@@ -70,6 +64,9 @@ Issues in repositories. See
 .It Cm pulls
 Pull Requests on repositories. See
 .Xr ghcli-pulls 1 .
+.It Cm labels
+Manage labels for issues and pull/merge requests on repositories. See
+.Xr ghcli-labels 1 .
 .It Cm forks
 Forking repositories. See
 .Xr ghcli-forks 1 .
@@ -93,6 +90,7 @@ Print a list of TODOs and/or notifications. See
 .Xr ghcli-status 1 .
 .El
 .Sh OPTIONS
+Common options are:
 .Bl -tag -width indent
 .It Fl a , -account Ar override-account
 Manually override the default account.
@@ -238,6 +236,7 @@ $ ghcli pulls -p 22 summary comments
 .Xr git 1 ,
 .Xr ghcli-issues 1 ,
 .Xr ghcli-pulls 1 ,
+.Xr ghcli-labels 1 ,
 .Xr ghcli-comment 1 ,
 .Xr ghcli-review 1 ,
 .Xr ghcli-forks 1 ,
@@ -269,10 +268,12 @@ Not all features that are available from the web version are available in
 However, it is a non-goal of the project to provide all this
 functionality.
 .Sh BUGS
-Yes. It is software. Please report issues preferably via e-mail or on
+Yes. It is software.
+
+Please report issues preferably via e-mail, on GitLab or on
 GitHub. You may also report an issue like so:
 .Bd -literal -width indent
-$ ghcli -a some-github-account issues create -o herrhotzenplotz -r ghcli "BUG : ..."
+$ ghcli -a some-gitlab-account issues create -o herrhotzenplotz -r ghcli "BUG : ..."
 .Ed
 .Sh SECURITY CONSIDERATIONS
 It is written in C. If it were written in Rust, it would have been

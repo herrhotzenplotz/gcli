@@ -27,8 +27,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/forges.h>
+#include <ghcli/color.h>
 #include <ghcli/editor.h>
+#include <ghcli/forges.h>
 #include <ghcli/github/issues.h>
 #include <ghcli/issues.h>
 #include <ghcli/json_util.h>
@@ -73,17 +74,21 @@ ghcli_print_issues_table(
     if (order == OUTPUT_ORDER_SORTED) {
         for (int i = issues_size; i > 0; --i) {
             fprintf(
-                stream, "%6d  %7.7s  %-s\n",
+                stream, "%6d  %s%7.7s%s  %-s\n",
                 issues[i - 1].number,
-                issues[i - 1].state,
+                ghcli_state_color_str(issues[i-1].state),
+                issues[i-1].state,
+                ghcli_resetcolor(),
                 issues[i - 1].title);
         }
     } else {
         for (int i = 0; i < issues_size; ++i) {
             fprintf(
-                stream, "%6d  %7.7s  %-s\n",
+                stream, "%6d  %s%7.7s%s  %-s\n",
                 issues[i].number,
+                ghcli_state_color_str(issues[i].state),
                 issues[i].state,
+                ghcli_resetcolor(),
                 issues[i].title);
         }
     }
@@ -97,13 +102,14 @@ ghcli_print_issue_summary(FILE *out, ghcli_issue_details *it)
             "    TITLE : "SV_FMT"\n"
             "  CREATED : "SV_FMT"\n"
             "   AUTHOR : "SV_FMT"\n"
-            "    STATE : "SV_FMT"\n"
+            "    STATE : %s"SV_FMT"%s\n"
             " COMMENTS : %d\n"
             "   LOCKED : %s\n"
             "   LABELS : ",
             it->number,
             SV_ARGS(it->title), SV_ARGS(it->created_at),
-            SV_ARGS(it->author), SV_ARGS(it->state),
+            SV_ARGS(it->author),
+            ghcli_state_color_sv(it->state), SV_ARGS(it->state), ghcli_resetcolor(),
             it->comments, sn_bool_yesno(it->locked));
 
     if (it->labels_size) {

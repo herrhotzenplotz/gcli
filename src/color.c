@@ -64,7 +64,7 @@ color_cache_insert(uint32_t code, char *sequence)
 }
 
 const char *
-ghcli_setcolor(uint32_t code)
+ghcli_setcolor256(uint32_t code)
 {
     char *result = NULL;
 
@@ -96,4 +96,52 @@ ghcli_resetcolor(void)
         return "";
 
     return "\033[m";
+}
+
+const char *
+ghcli_setcolor(int code)
+{
+    if (!ghcli_config_have_colors())
+        return "";
+
+    switch (code) {
+    case GHCLI_COLOR_BLACK:   return "\033[30m";
+    case GHCLI_COLOR_RED:     return "\033[31m";
+    case GHCLI_COLOR_GREEN:   return "\033[32m";
+    case GHCLI_COLOR_YELLOW:  return "\033[33m";
+    case GHCLI_COLOR_BLUE:    return "\033[34m";
+    case GHCLI_COLOR_MAGENTA: return "\033[35m";
+    case GHCLI_COLOR_CYAN:    return "\033[36m";
+    case GHCLI_COLOR_WHITE:   return "\033[37m";
+    case GHCLI_COLOR_DEFAULT: return "\033[39m";
+    default:
+        sn_notreached;
+    }
+    return NULL;
+}
+
+const char *
+ghcli_state_color_str(const char *it)
+{
+    if (it)
+        return ghcli_state_color_sv(SV((char *)it));
+    else
+        return "";
+}
+
+const char *
+ghcli_state_color_sv(sn_sv state)
+{
+    if (!sn_sv_null(state)) {
+        if (sn_sv_has_prefix(state, "open"))
+            return ghcli_setcolor(GHCLI_COLOR_GREEN);
+
+        if (sn_sv_has_prefix(state, "merged"))
+            return ghcli_setcolor(GHCLI_COLOR_MAGENTA);
+
+        if (sn_sv_has_prefix(state, "closed"))
+            return ghcli_setcolor(GHCLI_COLOR_RED);
+    }
+
+    return ghcli_setcolor(GHCLI_COLOR_DEFAULT);
 }

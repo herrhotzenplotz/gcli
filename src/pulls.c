@@ -27,6 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <ghcli/color.h>
 #include <ghcli/editor.h>
 #include <ghcli/forges.h>
 #include <ghcli/github/pulls.h>
@@ -74,18 +75,22 @@ ghcli_print_pr_table(
 
     if (order == OUTPUT_ORDER_SORTED) {
         for (int i = pulls_size; i > 0; --i) {
-            fprintf(stream, "%6d  %6.6s  %6.6s  %20.20s  %-s\n",
+            fprintf(stream, "%6d  %s%6.6s%s  %6.6s  %20.20s  %-s\n",
                     pulls[i - 1].number,
+                    ghcli_state_color_str(pulls[i - 1].state),
                     pulls[i - 1].state,
+                    ghcli_resetcolor(),
                     sn_bool_yesno(pulls[i - 1].merged),
                     pulls[i - 1].creator,
                     pulls[i - 1].title);
         }
     } else {
         for (int i = 0; i < pulls_size; ++i) {
-            fprintf(stream, "%6d  %6.6s  %6.6s  %20.20s  %-s\n",
+            fprintf(stream, "%6d  %s%6.6s%s  %6.6s  %20.20s  %-s\n",
                     pulls[i].number,
+                    ghcli_state_color_str(pulls[i].state),
                     pulls[i].state,
+                    ghcli_resetcolor(),
                     sn_bool_yesno(pulls[i].merged),
                     pulls[i].creator,
                     pulls[i].title);
@@ -114,9 +119,9 @@ ghcli_print_pr_summary(FILE *out, ghcli_pull_summary *it)
             "     BASE : %s\n"
             "  CREATED : %s\n"
             "   AUTHOR : %s\n"
-            "    STATE : %s\n"
+            "    STATE : %s%s%s\n"
             " COMMENTS : %d\n"
-            "  ADD:DEL : %d:%d\n"
+            "  ADD:DEL : %s%d%s:%s%d%s\n"
             "  COMMITS : %d\n"
             "  CHANGED : %d\n"
             "   MERGED : %s\n"
@@ -129,9 +134,10 @@ ghcli_print_pr_summary(FILE *out, ghcli_pull_summary *it)
             SANITIZE(it->base_label),
             SANITIZE(it->created_at),
             SANITIZE(it->author),
-            SANITIZE(it->state),
+            ghcli_state_color_str(it->state), SANITIZE(it->state), ghcli_resetcolor(),
             it->comments,
-            it->additions, it->deletions,
+            ghcli_setcolor(GHCLI_COLOR_GREEN), it->additions, ghcli_resetcolor(),
+            ghcli_setcolor(GHCLI_COLOR_RED),   it->deletions, ghcli_resetcolor(),
             it->commits, it->changed_files,
             sn_bool_yesno(it->merged),
             sn_bool_yesno(it->mergeable),

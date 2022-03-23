@@ -51,6 +51,18 @@
 ** TODO Check unnecessary includes
 ** TODO Valgrind again
 
+** Label shit
+
+   #+begin_example
+   $ ghcli labels
+   <red>bug</red> - something is broken
+   ...
+   $ ghcli labels create --description 'something is broken' --color FF0000 bug
+   $ ghcli labels delete bug
+   #+end_example
+
+   - for colors see [[https://github.com/git/git/blob/master/color.h][git implementation]]
+
 * On the review API
   - A PR has got reviews (could be none, could be a thousand)
     + https://api.github.com/repos/zorchenhimer/MovieNight/pulls/156/reviews

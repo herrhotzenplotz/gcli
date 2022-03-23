@@ -112,6 +112,8 @@ sn_bool_yesno(bool x)
     return x ? "yes" : "no";
 }
 
+char *sn_join_with(const char *items[], size_t items_size, char sep);
+
 #ifndef ARRAY_SIZE
 #    define ARRAY_SIZE(xs) (sizeof(xs) / sizeof(xs[0]))
 #endif /* ARRAY_SIZE */

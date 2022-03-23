@@ -527,7 +527,7 @@ subcommand_issues(int argc, char *argv[])
     };
 
     /* parse options */
-    while ((ch = getopt_long(argc, argv, "sn:o:r:i:a", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "+sn:o:r:i:a", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -598,6 +598,46 @@ subcommand_issues(int argc, char *argv[])
         } else if (strcmp("assign", operation) == 0) {
             const char *assignee = shift(&argc, &argv);
             ghcli_issue_assign(owner, repo, issue, assignee);
+        } else if (strcmp("labels", operation) == 0) {
+            const char **add_labels         = NULL;
+            size_t       add_labels_size    = 0;
+            const char **remove_labels      = NULL;
+            size_t       remove_labels_size = 0;
+
+            if (argc == 0)
+                errx(1, "error: expected label operations");
+
+            /* Collect add/delete labels */
+            while (argc > 0) {
+                if (strcmp(*argv, "--add") == 0) {
+                    shift(&argc, &argv);
+
+                    add_labels = realloc(
+                        add_labels,
+                        (add_labels_size + 1) * sizeof(*add_labels));
+                    add_labels[add_labels_size++] = shift(&argc, &argv);
+                } else if (strcmp(*argv, "--remove") == 0) {
+                    shift(&argc, &argv);
+
+                    remove_labels = realloc(
+                        remove_labels,
+                        (remove_labels_size + 1) * sizeof(*remove_labels));
+                    remove_labels[remove_labels_size++] = shift(&argc, &argv);
+                } else {
+                    break;
+                }
+            }
+
+            /* actually go about deleting and adding the labels */
+            if (add_labels_size)
+                ghcli_issue_add_labels(owner, repo, issue,
+                                       add_labels, add_labels_size);
+            if (remove_labels_size)
+                ghcli_issue_remove_labels(owner, repo, issue,
+                                          remove_labels, remove_labels_size);
+
+            free(add_labels);
+            free(remove_labels);
         } else {
             errx(1, "error: unknown operation %s", operation);
         }

@@ -353,7 +353,23 @@ gitlab_issue_add_labels(
     const char *labels[],
     size_t      labels_size)
 {
-    sn_unimplemented;
+    char               *url    = NULL;
+    char               *data   = NULL;
+    char               *list   = NULL;
+    ghcli_fetch_buffer  buffer = {0};
+
+    url = sn_asprintf("%s/projects/%s%%2F%s/issues/%d",
+                      gitlab_get_apibase(), owner, repo, issue);
+
+    list = sn_join_with(labels, labels_size, ',');
+    data = sn_asprintf("{ \"add_labels\": \"%s\"}", list);
+
+    ghcli_fetch_with_method("PUT", url, data, NULL, &buffer);
+
+    free(url);
+    free(data);
+    free(list);
+    free(buffer.data);
 }
 
 void
@@ -364,5 +380,10 @@ gitlab_issue_remove_labels(
     const char *labels[],
     size_t      labels_size)
 {
+    (void) owner;
+    (void) repo;
+    (void) issue;
+    (void) labels;
+    (void) labels_size;
     sn_unimplemented;
 }

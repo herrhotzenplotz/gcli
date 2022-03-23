@@ -377,3 +377,32 @@ sn_sv_strip_suffix(sn_sv input, const char *suffix)
 
     return input;
 }
+
+char *
+sn_join_with(const char *items[], size_t items_size, char sep)
+{
+    char   *buffer      = NULL;
+    size_t  buffer_size = 0;
+    size_t  bufoff      = 0;
+
+    /* this works because of the null terminator at the end */
+    for (size_t i = 0; i < items_size; ++i) {
+        buffer_size += strlen(items[i]) + 1;
+    }
+
+    buffer = calloc(1, buffer_size);
+    if (!buffer)
+        return NULL;
+
+    for (size_t i = 0; i < items_size; ++i) {
+        size_t len = strlen(items[i]);
+
+        memcpy(buffer + bufoff, items[i], len);
+        if (i != items_size - 1)
+            buffer[bufoff + len] = sep;
+
+        bufoff += len + 1;
+    }
+
+    return buffer;
+}

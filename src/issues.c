@@ -74,17 +74,21 @@ ghcli_print_issues_table(
     if (order == OUTPUT_ORDER_SORTED) {
         for (int i = issues_size; i > 0; --i) {
             fprintf(
-                stream, "%6d  %7.7s  %-s\n",
+                stream, "%6d  %s%7.7s%s  %-s\n",
                 issues[i - 1].number,
-                issues[i - 1].state,
+                ghcli_state_color_str(issues[i-1].state),
+                issues[i-1].state,
+                ghcli_resetcolor(),
                 issues[i - 1].title);
         }
     } else {
         for (int i = 0; i < issues_size; ++i) {
             fprintf(
-                stream, "%6d  %7.7s  %-s\n",
+                stream, "%6d  %s%7.7s%s  %-s\n",
                 issues[i].number,
+                ghcli_state_color_str(issues[i].state),
                 issues[i].state,
+                ghcli_resetcolor(),
                 issues[i].title);
         }
     }

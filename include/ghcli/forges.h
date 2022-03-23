@@ -124,6 +124,24 @@ struct ghcli_forge_descriptor {
         const char *assignee);
 
     /**
+     * Add labels to issues */
+    void (*issue_add_labels)(
+        const char *owner,
+        const char *repo,
+        int         issue,
+        const char *labels[],
+        size_t      labels_size);
+
+    /**
+     * Removes labels from issues */
+    void (*issue_remove_labels)(
+        const char *owner,
+        const char *repo,
+        int         issue,
+        const char *labels[],
+        size_t      labels_size);
+
+    /**
      * Submit an issue */
     void (*perform_submit_issue)(
         ghcli_submit_issue_options  opts,

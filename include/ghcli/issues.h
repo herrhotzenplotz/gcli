@@ -102,5 +102,17 @@ void ghcli_issue_assign(
     const char *repo,
     int         issue_number,
     const char *assignee);
+void ghcli_issue_add_labels(
+    const char *owner,
+    const char *repo,
+    int         issue_number,
+    const char *labels[],
+    size_t      labels_size);
+void ghcli_issue_remove_labels(
+    const char *owner,
+    const char *repo,
+    int         issue_number,
+    const char *labels[],
+    size_t      labels_size);
 
 #endif /* ISSUES_H */

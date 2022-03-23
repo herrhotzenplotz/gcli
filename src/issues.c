@@ -243,3 +243,25 @@ ghcli_issue_assign(
 {
     ghcli_forge()->issue_assign(owner, repo, issue_number, assignee);
 }
+
+void
+ghcli_issue_add_labels(
+    const char *owner,
+    const char *repo,
+    int         issue,
+    const char *labels[],
+    size_t      labels_size)
+{
+    ghcli_forge()->issue_add_labels(owner, repo, issue, labels, labels_size);
+}
+
+void
+ghcli_issue_remove_labels(
+    const char *owner,
+    const char *repo,
+    int         issue,
+    const char *labels[],
+    size_t      labels_size)
+{
+    ghcli_forge()->issue_remove_labels(owner, repo, issue, labels, labels_size);
+}

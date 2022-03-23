@@ -344,3 +344,25 @@ gitlab_issue_assign(
     free(url);
     free(post_data);
 }
+
+void
+gitlab_issue_add_labels(
+    const char *owner,
+    const char *repo,
+    int         issue,
+    const char *labels[],
+    size_t      labels_size)
+{
+    sn_unimplemented;
+}
+
+void
+gitlab_issue_remove_labels(
+    const char *owner,
+    const char *repo,
+    int         issue,
+    const char *labels[],
+    size_t      labels_size)
+{
+    sn_unimplemented;
+}

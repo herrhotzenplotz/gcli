@@ -66,4 +66,19 @@ void gitlab_perform_submit_issue(
     ghcli_submit_issue_options  opts,
     ghcli_fetch_buffer         *out);
 
+void gitlab_issue_add_labels(
+    const char *owner,
+    const char *repo,
+    int         issue,
+    const char *labels[],
+    size_t      labels_size);
+
+void gitlab_issue_remove_labels(
+    const char *owner,
+    const char *repo,
+    int         issue,
+    const char *labels[],
+    size_t      labels_size);
+
+
 #endif /* GITLAB_ISSUES_H */

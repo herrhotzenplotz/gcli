@@ -60,7 +60,7 @@ ghcli_print_labels(const ghcli_label *labels, size_t labels_size)
         printf(
             "%10.10ld %s%-15.15s%s %s\n",
             labels[i].id,
-            ghcli_setcolor(labels[i].color), labels[i].name, ghcli_resetcolor(),
+            ghcli_setcolor256(labels[i].color), labels[i].name, ghcli_resetcolor(),
             labels[i].description);
     }
 }

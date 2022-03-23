@@ -27,6 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <ghcli/color.h>
 #include <ghcli/editor.h>
 #include <ghcli/forges.h>
 #include <ghcli/github/pulls.h>
@@ -114,9 +115,9 @@ ghcli_print_pr_summary(FILE *out, ghcli_pull_summary *it)
             "     BASE : %s\n"
             "  CREATED : %s\n"
             "   AUTHOR : %s\n"
-            "    STATE : %s\n"
+            "    STATE : %s%s%s\n"
             " COMMENTS : %d\n"
-            "  ADD:DEL : %d:%d\n"
+            "  ADD:DEL : %s%d%s:%s%d%s\n"
             "  COMMITS : %d\n"
             "  CHANGED : %d\n"
             "   MERGED : %s\n"
@@ -129,9 +130,10 @@ ghcli_print_pr_summary(FILE *out, ghcli_pull_summary *it)
             SANITIZE(it->base_label),
             SANITIZE(it->created_at),
             SANITIZE(it->author),
-            SANITIZE(it->state),
+            ghcli_state_color_str(it->state), SANITIZE(it->state), ghcli_resetcolor(),
             it->comments,
-            it->additions, it->deletions,
+            ghcli_setcolor(GHCLI_COLOR_GREEN), it->additions, ghcli_resetcolor(),
+            ghcli_setcolor(GHCLI_COLOR_RED),   it->deletions, ghcli_resetcolor(),
             it->commits, it->changed_files,
             sn_bool_yesno(it->merged),
             sn_bool_yesno(it->mergeable),

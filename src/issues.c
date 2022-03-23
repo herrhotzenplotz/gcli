@@ -93,13 +93,6 @@ ghcli_print_issues_table(
 static void
 ghcli_print_issue_summary(FILE *out, ghcli_issue_details *it)
 {
-    const char *state_color;
-
-    if (sn_sv_has_prefix(it->state, "open"))
-        state_color = ghcli_setcolor(0x04FF0100);
-    else
-        state_color = ghcli_setcolor(0x3F0FAF00);
-
     fprintf(out,
             "   NUMBER : %d\n"
             "    TITLE : "SV_FMT"\n"
@@ -112,7 +105,7 @@ ghcli_print_issue_summary(FILE *out, ghcli_issue_details *it)
             it->number,
             SV_ARGS(it->title), SV_ARGS(it->created_at),
             SV_ARGS(it->author),
-            state_color, SV_ARGS(it->state), ghcli_resetcolor(),
+            ghcli_state_color_sv(it->state), SV_ARGS(it->state), ghcli_resetcolor(),
             it->comments, sn_bool_yesno(it->locked));
 
     if (it->labels_size) {

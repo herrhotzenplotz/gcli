@@ -32,7 +32,27 @@
 
 #include <stdint.h>
 
-const char *ghcli_setcolor(uint32_t colorcode);
+#include <sn/sn.h>
+
+#define GHCLI_256COLOR_DONE   0x3F0FAF00
+#define GHCLI_256COLOR_OPEN   0x04FF0100
+
+enum {
+    GHCLI_COLOR_BLACK,
+    GHCLI_COLOR_RED,
+    GHCLI_COLOR_GREEN,
+    GHCLI_COLOR_YELLOW,
+    GHCLI_COLOR_BLUE,
+    GHCLI_COLOR_MAGENTA,
+    GHCLI_COLOR_CYAN,
+    GHCLI_COLOR_WHITE,
+    GHCLI_COLOR_DEFAULT,
+};
+
+const char *ghcli_setcolor256(uint32_t colorcode);
 const char *ghcli_resetcolor(void);
+const char *ghcli_setcolor(int color);
+const char *ghcli_state_color_sv(sn_sv state);
+const char *ghcli_state_color_str(const char *it);
 
 #endif /* COLOR_H */

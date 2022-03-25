@@ -159,6 +159,12 @@ ghcli_state_color_sv(sn_sv state)
 
         if (sn_sv_has_prefix(state, "closed"))
             return ghcli_setcolor(GHCLI_COLOR_RED);
+
+        if (sn_sv_has_prefix(state, "COMMENTED"))
+            return ghcli_setcolor(GHCLI_COLOR_BLUE);
+
+        if (sn_sv_has_prefix(state, "APPROVED"))
+            return ghcli_setcolor(GHCLI_COLOR_GREEN);
     }
 
     return ghcli_setcolor(GHCLI_COLOR_DEFAULT);

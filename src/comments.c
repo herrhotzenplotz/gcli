@@ -27,8 +27,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/config.h>
+#include <ghcli/color.h>
 #include <ghcli/comments.h>
+#include <ghcli/config.h>
 #include <ghcli/editor.h>
 #include <ghcli/forges.h>
 #include <ghcli/github/comments.h>
@@ -51,8 +52,10 @@ ghcli_print_comment_list(
 {
     for (size_t i = 0; i < comments_size; ++i) {
         fprintf(stream,
-                "AUTHOR : %s\n"
-                "DATE   : %s\n", comments[i].author, comments[i].date);
+                "AUTHOR : %s%s%s\n"
+                "DATE   : %s\n",
+                ghcli_setbold(), comments[i].author, ghcli_resetbold(),
+                comments[i].date);
         pretty_print(comments[i].body, 9, 80, stream);
         fputc('\n', stream);
     }

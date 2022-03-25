@@ -121,6 +121,24 @@ ghcli_setcolor(int code)
 }
 
 const char *
+ghcli_setbold(void)
+{
+    if (!ghcli_config_have_colors())
+        return "";
+    else
+        return "\033[1m";
+}
+
+const char *
+ghcli_resetbold(void)
+{
+    if (!ghcli_config_have_colors())
+        return "";
+    else
+        return "\033[22m";
+}
+
+const char *
 ghcli_state_color_str(const char *it)
 {
     if (it)

@@ -101,6 +101,11 @@ must name a config section for an account in the global config file. See
 Use
 .Ar override-remote
 as the remote when trying to infer repository data.
+.It Fl c , -no-colors
+Do not output ANSI escape sequences for changing text
+formatting. Default is to output colors unless stdout is not a
+tty. See
+.Xr isatty 3 .
 .El
 
 Common options across almost all of the subcommands are:

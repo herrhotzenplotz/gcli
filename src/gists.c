@@ -29,6 +29,7 @@
 
 #include <ghcli/gists.h>
 #include <ghcli/config.h>
+#include <ghcli/color.h>
 #include <ghcli/curl.h>
 #include <ghcli/json_util.h>
 
@@ -254,14 +255,14 @@ print_gist(FILE *stream, ghcli_gist *gist)
 {
     fprintf(
         stream,
-        "   ID : "SV_FMT"\n"
-        "OWNER : "SV_FMT"\n"
+        "   ID : %s"SV_FMT"%s\n"
+        "OWNER : %s"SV_FMT"%s\n"
         "DESCR : "SV_FMT"\n"
         " DATE : "SV_FMT"\n"
         "  URL : "SV_FMT"\n"
         " PULL : "SV_FMT"\n",
-        SV_ARGS(gist->id),
-        SV_ARGS(gist->owner),
+        ghcli_setcolor(GHCLI_COLOR_YELLOW), SV_ARGS(gist->id), ghcli_resetcolor(),
+        ghcli_setbold(), SV_ARGS(gist->owner), ghcli_resetbold(),
         SV_ARGS(gist->description),
         SV_ARGS(gist->date),
         SV_ARGS(gist->url),

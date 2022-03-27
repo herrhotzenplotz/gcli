@@ -118,7 +118,7 @@ ghcli_print_pr_summary(FILE *out, ghcli_pull_summary *it)
             "     HEAD : %s\n"
             "     BASE : %s\n"
             "  CREATED : %s\n"
-            "   AUTHOR : %s\n"
+            "   AUTHOR : %s%s%s\n"
             "    STATE : %s%s%s\n"
             " COMMENTS : %d\n"
             "  ADD:DEL : %s%d%s:%s%d%s\n"
@@ -133,7 +133,7 @@ ghcli_print_pr_summary(FILE *out, ghcli_pull_summary *it)
             SANITIZE(it->head_label),
             SANITIZE(it->base_label),
             SANITIZE(it->created_at),
-            SANITIZE(it->author),
+            ghcli_setbold(), SANITIZE(it->author), ghcli_resetbold(),
             ghcli_state_color_str(it->state), SANITIZE(it->state), ghcli_resetcolor(),
             it->comments,
             ghcli_setcolor(GHCLI_COLOR_GREEN), it->additions, ghcli_resetcolor(),

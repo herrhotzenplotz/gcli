@@ -202,9 +202,13 @@ ghcli_print_commits_table(FILE *stream, ghcli_commit *commits, int commits_size)
 
     for (int i = 0; i < commits_size; ++i) {
         char *message = cut_newline(commits[i].message);
-        fprintf(stream, "%-8.8s  %-15.15s  %-20.20s  %-16.16s  %-s\n",
+        fprintf(stream, "%s%-8.8s%s  %s%-15.15s%s  %-20.20s  %-16.16s  %-s\n",
+                ghcli_setcolor(GHCLI_COLOR_YELLOW),
                 commits[i].sha,
+                ghcli_resetcolor(),
+                ghcli_setbold(),
                 commits[i].author,
+                ghcli_resetbold(),
                 commits[i].email,
                 commits[i].date,
                 message);

@@ -101,14 +101,14 @@ ghcli_print_issue_summary(FILE *out, ghcli_issue_details *it)
             "   NUMBER : %d\n"
             "    TITLE : "SV_FMT"\n"
             "  CREATED : "SV_FMT"\n"
-            "   AUTHOR : "SV_FMT"\n"
+            "   AUTHOR : %s"SV_FMT"%s\n"
             "    STATE : %s"SV_FMT"%s\n"
             " COMMENTS : %d\n"
             "   LOCKED : %s\n"
             "   LABELS : ",
             it->number,
             SV_ARGS(it->title), SV_ARGS(it->created_at),
-            SV_ARGS(it->author),
+            ghcli_setbold(), SV_ARGS(it->author), ghcli_resetbold(),
             ghcli_state_color_sv(it->state), SV_ARGS(it->state), ghcli_resetcolor(),
             it->comments, sn_bool_yesno(it->locked));
 

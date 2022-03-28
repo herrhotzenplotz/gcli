@@ -116,7 +116,7 @@ ghcli_print_issue_summary(FILE *out, ghcli_issue_details *it)
         fprintf(out, SV_FMT, SV_ARGS(it->labels[0]));
 
         for (size_t i = 1; i < it->labels_size; ++i)
-            fprintf(out, ", "SV_FMT, SV_ARGS(it->labels[0]));
+            fprintf(out, ", "SV_FMT, SV_ARGS(it->labels[i]));
     } else {
         fprintf(out, "none");
     }

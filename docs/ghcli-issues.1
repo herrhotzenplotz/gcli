@@ -121,6 +121,12 @@ $ ghcli issues -i420 labels --add foo --add bar
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
 .Sh BUGS
-It is impossible to manage labels of issues with this subcommand.
+GitHub only supports removing labels from issues one by one. If you
+still wanna remove multiple issues with one ghcli call, you may do
+something like:
+
+.Bd -literal -offset indent
+$ ghcli issues -i42 labels --remove bug labels --remove foo
+.Ed
 
 Please report issues preferably via e-mail, on GitLab or on GitHub.

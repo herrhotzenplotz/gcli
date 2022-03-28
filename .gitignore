@@ -83,3 +83,6 @@ i
 /src/gitlab/labels.c~
 /src/gitlab/labels.o
 /include/ghcli/gitlab/labels.h~
+/include/ghcli/github/labels.h~
+/src/github/labels.c~
+/src/github/labels.o

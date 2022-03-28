@@ -34,6 +34,8 @@
 #include <ghcli/json_util.h>
 #include <pdjson/pdjson.h>
 
+#include <assert.h>
+
 static void
 github_parse_issue_entry(json_stream *input, ghcli_issue *it)
 {
@@ -316,4 +318,61 @@ github_issue_assign(
     free(e_owner);
     free(e_repo);
     free(url);
+}
+
+void
+github_issue_add_labels(
+    const char *owner,
+    const char *repo,
+    int         issue,
+    const char *labels[],
+    size_t      labels_size)
+{
+    char               *url    = NULL;
+    char               *data   = NULL;
+    char               *list   = NULL;
+    ghcli_fetch_buffer  buffer = {0};
+
+    assert(labels_size > 0);
+
+    url = sn_asprintf("%s/repos/%s/%s/issues/%d/labels",
+                      github_get_apibase(), owner, repo, issue);
+
+    list = sn_join_with(labels, labels_size, "\",\"");
+    data = sn_asprintf("{ \"labels\": [\"%s\"]}", list);
+
+    ghcli_fetch_with_method("POST", url, data, NULL, &buffer);
+
+    free(url);
+    free(data);
+    free(list);
+    free(buffer.data);
+}
+
+void
+github_issue_remove_labels(
+    const char *owner,
+    const char *repo,
+    int         issue,
+    const char *labels[],
+    size_t      labels_size)
+{
+    char               *url     = NULL;
+    char               *e_label = NULL;
+    ghcli_fetch_buffer  buffer  = {0};
+
+    if (labels_size != 1)
+        errx(1, "error: GitHub only supports removing labels from "
+             "issues one by one.");
+
+    e_label = ghcli_urlencode(labels[0]);
+
+    url = sn_asprintf("%s/repos/%s/%s/issues/%d/labels/%s",
+                      github_get_apibase(), owner, repo, issue, e_label);
+
+    ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+
+    free(url);
+    free(e_label);
+    free(buffer.data);
 }

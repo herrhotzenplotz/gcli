@@ -36,6 +36,7 @@ libghcli.a_SRCS			=	src/comments.c			\
 					src/github/config.c		\
 					src/github/forks.c		\
 					src/github/issues.c		\
+					src/github/labels.c		\
 					src/github/pulls.c		\
 					src/github/releases.c		\
 					src/github/repos.c		\
@@ -45,14 +46,13 @@ libghcli.a_SRCS			=	src/comments.c			\
 					src/gitlab/comments.c		\
 					src/gitlab/config.c		\
 					src/gitlab/forks.c		\
-					src/gitlab/labels.c		\
 					src/gitlab/issues.c		\
+					src/gitlab/labels.c		\
 					src/gitlab/merge_requests.c	\
 					src/gitlab/releases.c		\
 					src/gitlab/repos.c		\
 					src/gitlab/review.c		\
 					src/gitlab/status.c		\
-					src/issues.c			\
 					src/issues.c			\
 					src/json_util.c			\
 					src/pulls.c			\

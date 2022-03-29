@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022 Nico Sonack <nsonack@outlook.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,57 +27,23 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GHCLI_ISSUES_H
-#define GHCLI_ISSUES_H
+#ifndef GITHUB_LABELS_H
+#define GITHUB_LABELS_H
 
-#include <ghcli/curl.h>
-#include <ghcli/issues.h>
+#include <ghcli/labels.h>
 
-int github_get_issues(
+size_t github_get_labels(
     const char   *owner,
-    const char   *repo,
-    bool          all,
+    const char   *reponame,
     int           max,
-    ghcli_issue **out);
-
-void github_get_issue_summary(
-    const char          *owner,
-    const char          *repo,
-    int                  issue_number,
-    ghcli_issue_details *out);
-
-void github_issue_close(
+    ghcli_label **out);
+void github_create_label(
+    const char  *owner,
+    const char  *repo,
+    ghcli_label *label);
+void github_delete_label(
     const char *owner,
     const char *repo,
-    int         issue_number);
+    const char *label);
 
-void github_issue_reopen(
-    const char *owner,
-    const char *repo,
-    int         issue_number);
-
-void github_perform_submit_issue(
-    ghcli_submit_issue_options  opts,
-    ghcli_fetch_buffer         *out);
-
-void github_issue_assign(
-    const char *owner,
-    const char *repo,
-    int         issue_number,
-    const char *assignee);
-
-void github_issue_add_labels(
-    const char *owner,
-    const char *repo,
-    int         issue,
-    const char *labels[],
-    size_t      labels_size);
-
-void github_issue_remove_labels(
-    const char *owner,
-    const char *repo,
-    int         issue,
-    const char *labels[],
-    size_t      labels_size);
-
-#endif /* GHCLI_ISSUES_H */
+#endif /* GITHUB_LABELS_H */

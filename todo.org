@@ -50,6 +50,8 @@
 ** DONE pulls commit table header is weird
 ** TODO Check unnecessary includes
 ** TODO Valgrind again
+** TODO write colors test for big-endian machines
+** TODO Implement adding/removing labels from github prs
 
 ** Label shit
 

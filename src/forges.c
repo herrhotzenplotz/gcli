@@ -37,6 +37,7 @@
 #include <ghcli/github/config.h>
 #include <ghcli/github/forks.h>
 #include <ghcli/github/issues.h>
+#include <ghcli/github/labels.h>
 #include <ghcli/github/pulls.h>
 #include <ghcli/github/releases.h>
 #include <ghcli/github/repos.h>
@@ -68,6 +69,8 @@ github_forge_descriptor =
     .issue_close               = github_issue_close,
     .issue_reopen              = github_issue_reopen,
     .issue_assign              = github_issue_assign,
+    .issue_add_labels          = github_issue_add_labels,
+    .issue_remove_labels       = github_issue_remove_labels,
     .perform_submit_issue      = github_perform_submit_issue,
     .get_prs                   = github_get_prs,
     .print_pr_diff             = github_print_pr_diff,
@@ -80,6 +83,9 @@ github_forge_descriptor =
     .get_releases              = github_get_releases,
     .create_release            = github_create_release,
     .delete_release            = github_delete_release,
+    .get_labels                = github_get_labels,
+    .create_label              = github_create_label,
+    .delete_label              = github_delete_label,
     .get_repos                 = github_get_repos,
     .get_own_repos             = github_get_own_repos,
     .get_reviews               = github_review_get_reviews,

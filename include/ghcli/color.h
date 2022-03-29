@@ -54,5 +54,7 @@ const char *ghcli_resetcolor(void);
 const char *ghcli_setcolor(int color);
 const char *ghcli_state_color_sv(sn_sv state);
 const char *ghcli_state_color_str(const char *it);
+const char *ghcli_setbold(void);
+const char *ghcli_resetbold(void);
 
 #endif /* COLOR_H */

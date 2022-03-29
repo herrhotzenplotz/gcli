@@ -27,6 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <ghcli/color.h>
 #include <ghcli/forges.h>
 #include <ghcli/forks.h>
 #include <ghcli/github/forks.h>
@@ -61,8 +62,8 @@ ghcli_print_forks(
     if (order == OUTPUT_ORDER_SORTED) {
         for (size_t i = forks_size; i > 0; --i) {
             fprintf(
-                stream, "%-20.20s  %-20.20s  %5d  %s\n",
-                forks[i - 1].owner.data,
+                stream, "%s%-20.20s%s  %-20.20s  %5d  %s\n",
+                ghcli_setbold(), forks[i - 1].owner.data, ghcli_resetbold(),
                 forks[i - 1].date.data,
                 forks[i - 1].forks,
                 forks[i - 1].full_name.data);
@@ -70,8 +71,8 @@ ghcli_print_forks(
     } else {
         for (size_t i = 0; i < forks_size; ++i) {
             fprintf(
-                stream, "%-20.20s  %-20.20s  %5d  %s\n",
-                forks[i].owner.data,
+                stream, "%s%-20.20s%s  %-20.20s  %5d  %s\n",
+                ghcli_setbold(), forks[i].owner.data, ghcli_resetbold(),
                 forks[i].date.data,
                 forks[i].forks,
                 forks[i].full_name.data);

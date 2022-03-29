@@ -27,6 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <ghcli/color.h>
 #include <ghcli/config.h>
 #include <ghcli/curl.h>
 #include <ghcli/forges.h>
@@ -47,12 +48,17 @@ ghcli_review_print_review_table(
     for (size_t i = 0; i < headers_size; ++i) {
         if (headers[i].state) {
             fprintf(out,
-                    "   %s - %s - %s\n",
-                    headers[i].author, headers[i].date, headers[i].state);
+                    "   %s%s%s - %s - %s%s%s\n",
+                    ghcli_setbold(), headers[i].author, ghcli_resetbold(),
+                    headers[i].date,
+                    ghcli_state_color_str(headers[i].state),
+                    headers[i].state,
+                    ghcli_resetcolor());
         } else {
             fprintf(out,
-                    "   %s - %s\n",
-                    headers[i].author, headers[i].date);
+                    "   %s%s%s - %s\n",
+                    ghcli_setbold(), headers[i].author, ghcli_resetbold(),
+                    headers[i].date);
         }
 
         pretty_print(headers[i].body, 9, 80, out);

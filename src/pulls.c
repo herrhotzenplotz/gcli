@@ -75,24 +75,28 @@ ghcli_print_pr_table(
 
     if (order == OUTPUT_ORDER_SORTED) {
         for (int i = pulls_size; i > 0; --i) {
-            fprintf(stream, "%6d  %s%6.6s%s  %6.6s  %20.20s  %-s\n",
+            fprintf(stream, "%6d  %s%6.6s%s  %6.6s  %s%20.20s%s  %-s\n",
                     pulls[i - 1].number,
                     ghcli_state_color_str(pulls[i - 1].state),
                     pulls[i - 1].state,
                     ghcli_resetcolor(),
                     sn_bool_yesno(pulls[i - 1].merged),
+                    ghcli_setbold(),
                     pulls[i - 1].creator,
+                    ghcli_resetbold(),
                     pulls[i - 1].title);
         }
     } else {
         for (int i = 0; i < pulls_size; ++i) {
-            fprintf(stream, "%6d  %s%6.6s%s  %6.6s  %20.20s  %-s\n",
+            fprintf(stream, "%6d  %s%6.6s%s  %6.6s  %s%20.20s%s  %-s\n",
                     pulls[i].number,
                     ghcli_state_color_str(pulls[i].state),
                     pulls[i].state,
                     ghcli_resetcolor(),
                     sn_bool_yesno(pulls[i].merged),
+                    ghcli_setbold(),
                     pulls[i].creator,
+                    ghcli_resetbold(),
                     pulls[i].title);
         }
     }
@@ -118,7 +122,7 @@ ghcli_print_pr_summary(FILE *out, ghcli_pull_summary *it)
             "     HEAD : %s\n"
             "     BASE : %s\n"
             "  CREATED : %s\n"
-            "   AUTHOR : %s\n"
+            "   AUTHOR : %s%s%s\n"
             "    STATE : %s%s%s\n"
             " COMMENTS : %d\n"
             "  ADD:DEL : %s%d%s:%s%d%s\n"
@@ -133,7 +137,7 @@ ghcli_print_pr_summary(FILE *out, ghcli_pull_summary *it)
             SANITIZE(it->head_label),
             SANITIZE(it->base_label),
             SANITIZE(it->created_at),
-            SANITIZE(it->author),
+            ghcli_setbold(), SANITIZE(it->author), ghcli_resetbold(),
             ghcli_state_color_str(it->state), SANITIZE(it->state), ghcli_resetcolor(),
             it->comments,
             ghcli_setcolor(GHCLI_COLOR_GREEN), it->additions, ghcli_resetcolor(),
@@ -202,9 +206,13 @@ ghcli_print_commits_table(FILE *stream, ghcli_commit *commits, int commits_size)
 
     for (int i = 0; i < commits_size; ++i) {
         char *message = cut_newline(commits[i].message);
-        fprintf(stream, "%-8.8s  %-15.15s  %-20.20s  %-16.16s  %-s\n",
+        fprintf(stream, "%s%-8.8s%s  %s%-15.15s%s  %-20.20s  %-16.16s  %-s\n",
+                ghcli_setcolor(GHCLI_COLOR_YELLOW),
                 commits[i].sha,
+                ghcli_resetcolor(),
+                ghcli_setbold(),
                 commits[i].author,
+                ghcli_resetbold(),
                 commits[i].email,
                 commits[i].date,
                 message);

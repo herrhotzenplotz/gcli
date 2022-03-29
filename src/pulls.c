@@ -75,24 +75,28 @@ ghcli_print_pr_table(
 
     if (order == OUTPUT_ORDER_SORTED) {
         for (int i = pulls_size; i > 0; --i) {
-            fprintf(stream, "%6d  %s%6.6s%s  %6.6s  %20.20s  %-s\n",
+            fprintf(stream, "%6d  %s%6.6s%s  %6.6s  %s%20.20s%s  %-s\n",
                     pulls[i - 1].number,
                     ghcli_state_color_str(pulls[i - 1].state),
                     pulls[i - 1].state,
                     ghcli_resetcolor(),
                     sn_bool_yesno(pulls[i - 1].merged),
+                    ghcli_setbold(),
                     pulls[i - 1].creator,
+                    ghcli_resetbold(),
                     pulls[i - 1].title);
         }
     } else {
         for (int i = 0; i < pulls_size; ++i) {
-            fprintf(stream, "%6d  %s%6.6s%s  %6.6s  %20.20s  %-s\n",
+            fprintf(stream, "%6d  %s%6.6s%s  %6.6s  %s%20.20s%s  %-s\n",
                     pulls[i].number,
                     ghcli_state_color_str(pulls[i].state),
                     pulls[i].state,
                     ghcli_resetcolor(),
                     sn_bool_yesno(pulls[i].merged),
+                    ghcli_setbold(),
                     pulls[i].creator,
+                    ghcli_resetbold(),
                     pulls[i].title);
         }
     }

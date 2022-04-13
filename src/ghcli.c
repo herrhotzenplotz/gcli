@@ -113,6 +113,47 @@ pr_try_derive_head(void)
     return sn_sv_fmt(SV_FMT":"SV_FMT, SV_ARGS(account), SV_ARGS(branch));
 }
 
+/* Parses (and updates) the given argument list into two seperate lists:
+ *
+ *   --add    -> add_labels
+ *   --remove -> remove_labels
+ */
+static void
+parse_labels_options(int *argc, char ***argv,
+                     const char ***_add_labels,    size_t *_add_labels_size,
+                     const char ***_remove_labels, size_t *_remove_labels_size)
+{
+    const char **add_labels = NULL, **remove_labels = NULL;
+    size_t       add_labels_size = 0, remove_labels_size = 0;
+
+    /* Collect add/delete labels */
+    while (*argc > 0) {
+        if (strcmp(**argv, "--add") == 0) {
+            shift(argc, argv);
+
+            add_labels = realloc(
+                add_labels,
+                (add_labels_size + 1) * sizeof(*add_labels));
+            add_labels[add_labels_size++] = shift(argc, argv);
+        } else if (strcmp(**argv, "--remove") == 0) {
+            shift(argc, argv);
+
+            remove_labels = realloc(
+                remove_labels,
+                (remove_labels_size + 1) * sizeof(*remove_labels));
+            remove_labels[remove_labels_size++] = shift(argc, argv);
+        } else {
+            break;
+        }
+    }
+
+    *_add_labels      = add_labels;
+    *_add_labels_size = add_labels_size;
+
+    *_remove_labels      = remove_labels;
+    *_remove_labels_size = remove_labels_size;
+}
+
 /**
  * Create a pull request
  */
@@ -387,7 +428,7 @@ subcommand_pulls(int argc, char *argv[])
     };
 
     /* Parse commandline options */
-    while ((ch = getopt_long(argc, argv, "n:o:r:p:as", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "+n:o:r:p:as", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -469,6 +510,29 @@ subcommand_pulls(int argc, char *argv[])
                 owner, repo, pr, &reviews);
             ghcli_review_print_review_table(stdout, reviews, reviews_size);
             ghcli_review_reviews_free(reviews, reviews_size);
+        } else if (strcmp("labels", operation) == 0) {
+            const char **add_labels         = NULL;
+            size_t       add_labels_size    = 0;
+            const char **remove_labels      = NULL;
+            size_t       remove_labels_size = 0;
+
+            if (argc == 0)
+                errx(1, "error: expected label operations");
+
+            parse_labels_options(&argc, &argv,
+                                 &add_labels,    &add_labels_size,
+                                 &remove_labels, &remove_labels_size);
+
+            /* actually go about deleting and adding the labels */
+            if (add_labels_size)
+                ghcli_pr_add_labels(
+                    owner, repo, pr, add_labels, add_labels_size);
+            if (remove_labels_size)
+                ghcli_pr_remove_labels(
+                    owner, repo, pr, remove_labels, remove_labels_size);
+
+            free(add_labels);
+            free(remove_labels);
         } else {
             errx(1, "error: unknown operation %s", operation);
         }
@@ -607,26 +671,9 @@ subcommand_issues(int argc, char *argv[])
             if (argc == 0)
                 errx(1, "error: expected label operations");
 
-            /* Collect add/delete labels */
-            while (argc > 0) {
-                if (strcmp(*argv, "--add") == 0) {
-                    shift(&argc, &argv);
-
-                    add_labels = realloc(
-                        add_labels,
-                        (add_labels_size + 1) * sizeof(*add_labels));
-                    add_labels[add_labels_size++] = shift(&argc, &argv);
-                } else if (strcmp(*argv, "--remove") == 0) {
-                    shift(&argc, &argv);
-
-                    remove_labels = realloc(
-                        remove_labels,
-                        (remove_labels_size + 1) * sizeof(*remove_labels));
-                    remove_labels[remove_labels_size++] = shift(&argc, &argv);
-                } else {
-                    break;
-                }
-            }
+            parse_labels_options(&argc, &argv,
+                                 &add_labels, &add_labels_size,
+                                 &remove_labels, &remove_labels_size);
 
             /* actually go about deleting and adding the labels */
             if (add_labels_size)

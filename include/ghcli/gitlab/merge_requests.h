@@ -77,4 +77,18 @@ void gitlab_perform_submit_mr(
     ghcli_submit_pull_options  opts,
     ghcli_fetch_buffer        *out);
 
+void gitlab_mr_add_labels(
+    const char *owner,
+    const char *repo,
+    int         mr,
+    const char *labels[],
+    size_t      labels_size);
+
+void gitlab_mr_remove_labels(
+    const char *owner,
+    const char *repo,
+    int         mr,
+    const char *labels[],
+    size_t      labels_size);
+
 #endif /* GITLAB_MERGE_REQUESTS_H */

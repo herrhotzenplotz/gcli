@@ -77,6 +77,13 @@ github_forge_descriptor =
     .pr_merge                  = github_pr_merge,
     .pr_reopen                 = github_pr_reopen,
     .pr_close                  = github_pr_close,
+
+    /* HACK: Here we can use the same functions as with issues because
+     * PRs are the same as issues on Github and the functions have the
+     * same types/arguments */
+    .pr_add_labels             = github_issue_add_labels,
+    .pr_remove_labels          = github_issue_remove_labels,
+
     .perform_submit_pr         = github_perform_submit_pr,
     .get_pull_commits          = github_get_pull_commits,
     .get_pull_summary          = github_get_pull_summary,

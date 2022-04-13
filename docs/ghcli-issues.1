@@ -10,7 +10,10 @@
 .Op Fl a
 .Op Fl s
 .Op Fl o Ar owner Fl r Ar repo
-.Op Ar actions...
+.Nm
+.Fl i Ar issue
+.Op Fl o Ar owner Fl r Ar repo
+.Ar actions...
 .Nm
 .Cm create
 .Op Fl o Ar owner Fl r Ar repo
@@ -47,6 +50,11 @@ issues. Setting
 to -1 will fetch all issues. Default: 30. Note that
 on large repositories fetching all issues can take a considerable
 amount of time and may result in rate limiting by the GitHub/GitLab API.
+.It Fl i , -issue Ar issue
+execcute the given
+.Ar actions
+for the specified
+.Ar issue .
 .El
 
 .Sh SUBCOMMANDS

@@ -357,3 +357,27 @@ ghcli_pr_reopen(const char *owner, const char *reponame, int pr_number)
 {
     ghcli_forge()->pr_reopen(owner, reponame, pr_number);
 }
+
+void
+ghcli_pr_add_labels(
+    const char *owner,
+    const char *repo,
+    int         pr_number,
+    const char *labels[],
+    size_t      labels_size)
+{
+    ghcli_forge()->pr_add_labels(
+        owner, repo, pr_number, labels, labels_size);
+}
+
+void
+ghcli_pr_remove_labels(
+    const char *owner,
+    const char *repo,
+    int         pr_number,
+    const char *labels[],
+    size_t      labels_size)
+{
+    ghcli_forge()->pr_remove_labels(
+        owner, repo, pr_number, labels, labels_size);
+}

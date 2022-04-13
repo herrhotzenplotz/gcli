@@ -209,6 +209,24 @@ struct ghcli_forge_descriptor {
         ghcli_pull_summary *out);
 
     /**
+     * Add labels to Pull Requests */
+    void (*pr_add_labels)(
+        const char *owner,
+        const char *repo,
+        int         pr,
+        const char *labels[],
+        size_t      labels_size);
+
+    /**
+     * Removes labels from Pull Requests */
+    void (*pr_remove_labels)(
+        const char *owner,
+        const char *repo,
+        int         pr,
+        const char *labels[],
+        size_t      labels_size);
+
+    /**
      * Get a list of releases in the given repo */
     int (*get_releases)(
         const char     *owner,

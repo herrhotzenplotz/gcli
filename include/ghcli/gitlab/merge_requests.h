@@ -46,7 +46,6 @@ void gitlab_print_pr_diff(
     int         pr_number);
 
 void gitlab_mr_merge(
-    FILE       *out,
     const char *owner,
     const char *reponame,
     int         mr_number);

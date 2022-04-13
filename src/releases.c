@@ -45,48 +45,46 @@ ghcli_get_releases(
 }
 
 static void
-ghcli_print_release(FILE *stream, ghcli_release *it)
+ghcli_print_release(ghcli_release *it)
 {
-        fprintf(stream,
-                "        ID : "SV_FMT"\n"
-                "      NAME : "SV_FMT"\n"
-                "    AUTHOR : "SV_FMT"\n"
-                "      DATE : "SV_FMT"\n"
-                "     DRAFT : %s\n"
-                "PRERELEASE : %s\n"
-                "   TARBALL : "SV_FMT"\n"
-                "      BODY :\n",
-                SV_ARGS(it->id),
-                SV_ARGS(it->name),
-                SV_ARGS(it->author),
-                SV_ARGS(it->date),
-                sn_bool_yesno(it->draft),
-                sn_bool_yesno(it->prerelease),
-                SV_ARGS(it->tarball_url));
+    printf("        ID : "SV_FMT"\n"
+           "      NAME : "SV_FMT"\n"
+           "    AUTHOR : "SV_FMT"\n"
+           "      DATE : "SV_FMT"\n"
+           "     DRAFT : %s\n"
+           "PRERELEASE : %s\n"
+           "   TARBALL : "SV_FMT"\n"
+           "      BODY :\n",
+           SV_ARGS(it->id),
+           SV_ARGS(it->name),
+           SV_ARGS(it->author),
+           SV_ARGS(it->date),
+           sn_bool_yesno(it->draft),
+           sn_bool_yesno(it->prerelease),
+           SV_ARGS(it->tarball_url));
 
-        pretty_print(it->body.data, 13, 80, stream);
+    pretty_print(it->body.data, 13, 80, stdout);
 
-        fputc('\n', stream);
+    putchar('\n');
 }
 
 void
 ghcli_print_releases(
-    FILE                    *stream,
     enum ghcli_output_order  order,
     ghcli_release           *releases,
     int                      releases_size)
 {
     if (releases_size == 0) {
-        fprintf(stream, "No releases\n");
+        puts("No releases");
         return;
     }
 
     if (order == OUTPUT_ORDER_SORTED) {
         for (int i = releases_size; i > 0; --i)
-            ghcli_print_release(stream, &releases[i - 1]);
+            ghcli_print_release(&releases[i - 1]);
     } else {
         for (int i = 0; i < releases_size; ++i)
-            ghcli_print_release(stream, &releases[i]);
+            ghcli_print_release(&releases[i]);
     }
 }
 

@@ -47,7 +47,6 @@ void github_print_pr_diff(
     int         pr_number);
 
 void github_pr_merge(
-    FILE       *out,
     const char *owner,
     const char *reponame,
     int         pr_number);

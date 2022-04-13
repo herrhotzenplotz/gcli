@@ -41,53 +41,47 @@
 
 void
 ghcli_review_print_review_table(
-    FILE *out,
     ghcli_pr_review *headers,
     size_t headers_size)
 {
     for (size_t i = 0; i < headers_size; ++i) {
         if (headers[i].state) {
-            fprintf(out,
-                    "   %s%s%s - %s - %s%s%s\n",
-                    ghcli_setbold(), headers[i].author, ghcli_resetbold(),
-                    headers[i].date,
-                    ghcli_state_color_str(headers[i].state),
-                    headers[i].state,
-                    ghcli_resetcolor());
+            printf("   %s%s%s - %s - %s%s%s\n",
+                   ghcli_setbold(), headers[i].author, ghcli_resetbold(),
+                   headers[i].date,
+                   ghcli_state_color_str(headers[i].state),
+                   headers[i].state,
+                   ghcli_resetcolor());
         } else {
-            fprintf(out,
-                    "   %s%s%s - %s\n",
-                    ghcli_setbold(), headers[i].author, ghcli_resetbold(),
-                    headers[i].date);
+            printf("   %s%s%s - %s\n",
+                   ghcli_setbold(), headers[i].author, ghcli_resetbold(),
+                   headers[i].date);
         }
 
-        pretty_print(headers[i].body, 9, 80, out);
+        pretty_print(headers[i].body, 9, 80, stdout);
 
         ghcli_review_print_comments(
-            out,
             headers[i].comments,
             headers[i].comments_size);
 
-        fputc('\n', out);
+        putchar('\n');
     }
 }
 
 void
 ghcli_review_print_comments(
-    FILE                    *out,
     ghcli_pr_review_comment *comments,
     size_t                   comments_size)
 {
     for (size_t i = 0; i < comments_size; ++i) {
-        fputc('\n', out);
-        fprintf(out,
-                "         PATH : %s\n"
-                "         DIFF :\n",
-                comments[i].path);
+        putchar('\n');
+        printf("         PATH : %s\n"
+               "         DIFF :\n",
+               comments[i].path);
 
-        pretty_print(comments[i].diff, 20, INT_MAX, out);
-        fputc('\n', out);
-        pretty_print(comments[i].body, 16, 80, out);
+        pretty_print(comments[i].diff, 20, INT_MAX, stdout);
+        putchar('\n');
+        pretty_print(comments[i].body, 16, 80, stdout);
     }
 }
 

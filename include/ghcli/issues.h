@@ -79,12 +79,10 @@ void ghcli_issues_free(
     ghcli_issue *it,
     int          size);
 void ghcli_print_issues_table(
-    FILE                    *stream,
     enum ghcli_output_order  order,
     ghcli_issue             *issues,
     int                      issues_size);
 void ghcli_issue_summary(
-    FILE       *stream,
     const char *owner,
     const char *reponame,
     int         issue_number);

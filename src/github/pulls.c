@@ -182,7 +182,6 @@ github_print_pr_diff(
 
 void
 github_pr_merge(
-    FILE       *out,
     const char *owner,
     const char *repo,
     int         pr_number)
@@ -219,7 +218,7 @@ github_pr_merge(
             next = json_next(&stream);
             message  = json_get_string(&stream, &len);
 
-            fprintf(out, "%.*s\n", (int)len, message);
+            printf("%.*s\n", (int)len, message);
 
             json_close(&stream);
             free(json_buffer.data);

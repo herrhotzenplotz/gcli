@@ -70,12 +70,10 @@ size_t ghcli_review_get_reviews(
     ghcli_pr_review **out);
 
 void ghcli_review_print_review_table(
-    FILE *,
     ghcli_pr_review *,
     size_t);
 
 void ghcli_review_print_comments(
-    FILE *out,
     ghcli_pr_review_comment *comments,
     size_t comments_size);
 

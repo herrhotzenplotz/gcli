@@ -53,7 +53,6 @@ int ghcli_snippets_get(
     ghcli_snippet **out);
 
 void ghcli_snippets_print(
-    FILE                    *stream,
     enum ghcli_output_order  order,
     ghcli_snippet           *list,
     int                      list_size);

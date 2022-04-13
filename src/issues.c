@@ -59,22 +59,21 @@ ghcli_get_issues(
 
 void
 ghcli_print_issues_table(
-    FILE                    *stream,
     enum ghcli_output_order  order,
     ghcli_issue             *issues,
     int                      issues_size)
 {
     if (issues_size == 0) {
-        fprintf(stream, "No issues\n");
+        puts("No issues");
         return;
     }
 
-    fprintf(stream, "%6.6s  %7.7s  %-s\n", "NUMBER", "STATE", "TITLE");
+    printf("%6.6s  %7.7s  %-s\n", "NUMBER", "STATE", "TITLE");
 
     if (order == OUTPUT_ORDER_SORTED) {
         for (int i = issues_size; i > 0; --i) {
-            fprintf(
-                stream, "%6d  %s%7.7s%s  %-s\n",
+            printf(
+                "%6d  %s%7.7s%s  %-s\n",
                 issues[i - 1].number,
                 ghcli_state_color_str(issues[i-1].state),
                 issues[i-1].state,
@@ -83,61 +82,59 @@ ghcli_print_issues_table(
         }
     } else {
         for (int i = 0; i < issues_size; ++i) {
-            fprintf(
-                stream, "%6d  %s%7.7s%s  %-s\n",
-                issues[i].number,
-                ghcli_state_color_str(issues[i].state),
-                issues[i].state,
-                ghcli_resetcolor(),
-                issues[i].title);
+            printf("%6d  %s%7.7s%s  %-s\n",
+                   issues[i].number,
+                   ghcli_state_color_str(issues[i].state),
+                   issues[i].state,
+                   ghcli_resetcolor(),
+                   issues[i].title);
         }
     }
 }
 
 static void
-ghcli_print_issue_summary(FILE *out, ghcli_issue_details *it)
+ghcli_print_issue_summary(ghcli_issue_details *it)
 {
-    fprintf(out,
-            "   NUMBER : %d\n"
-            "    TITLE : "SV_FMT"\n"
-            "  CREATED : "SV_FMT"\n"
-            "   AUTHOR : %s"SV_FMT"%s\n"
-            "    STATE : %s"SV_FMT"%s\n"
-            " COMMENTS : %d\n"
-            "   LOCKED : %s\n"
-            "   LABELS : ",
-            it->number,
-            SV_ARGS(it->title), SV_ARGS(it->created_at),
-            ghcli_setbold(), SV_ARGS(it->author), ghcli_resetbold(),
-            ghcli_state_color_sv(it->state), SV_ARGS(it->state), ghcli_resetcolor(),
-            it->comments, sn_bool_yesno(it->locked));
+    printf("   NUMBER : %d\n"
+           "    TITLE : "SV_FMT"\n"
+           "  CREATED : "SV_FMT"\n"
+           "   AUTHOR : %s"SV_FMT"%s\n"
+           "    STATE : %s"SV_FMT"%s\n"
+           " COMMENTS : %d\n"
+           "   LOCKED : %s\n"
+           "   LABELS : ",
+           it->number,
+           SV_ARGS(it->title), SV_ARGS(it->created_at),
+           ghcli_setbold(), SV_ARGS(it->author), ghcli_resetbold(),
+           ghcli_state_color_sv(it->state), SV_ARGS(it->state), ghcli_resetcolor(),
+           it->comments, sn_bool_yesno(it->locked));
 
     if (it->labels_size) {
-        fprintf(out, SV_FMT, SV_ARGS(it->labels[0]));
+        printf(SV_FMT, SV_ARGS(it->labels[0]));
 
         for (size_t i = 1; i < it->labels_size; ++i)
-            fprintf(out, ", "SV_FMT, SV_ARGS(it->labels[i]));
+            printf(", "SV_FMT, SV_ARGS(it->labels[i]));
     } else {
-        fprintf(out, "none");
+        printf("none");
     }
 
-    fputc('\n', out);
+    putchar('\n');
 
     if (it->assignees_size) {
-        fprintf(out, "ASSIGNEES : "SV_FMT, SV_ARGS(it->assignees[0]));
+        printf("ASSIGNEES : "SV_FMT, SV_ARGS(it->assignees[0]));
         for (size_t i = 1; i < it->assignees_size; ++i)
-            fprintf(out, ", "SV_FMT, SV_ARGS(it->assignees[i]));
+            printf(", "SV_FMT, SV_ARGS(it->assignees[i]));
     } else {
-        fprintf(out, "ASSIGNEES : none\n");
+        printf("ASSIGNEES : none\n");
     }
 
-    fputc('\n', out);
+    putchar('\n');
 
     /* The API may not return a body if the user didn't put in any
      * comment */
     if (it->body.data) {
-        pretty_print(it->body.data, 4, 80, out);
-        fputc('\n', out);
+        pretty_print(it->body.data, 4, 80, stdout);
+        putchar('\n');
     }
 }
 
@@ -158,7 +155,6 @@ ghcli_issue_details_free(ghcli_issue_details *it)
 
 void
 ghcli_issue_summary(
-    FILE       *stream,
     const char *owner,
     const char *repo,
     int         issue_number)
@@ -166,7 +162,7 @@ ghcli_issue_summary(
     ghcli_issue_details  details = {0};
 
     ghcli_forge()->get_issue_summary(owner, repo, issue_number, &details);
-    ghcli_print_issue_summary(stream, &details);
+    ghcli_print_issue_summary(&details);
     ghcli_issue_details_free(&details);
 }
 
@@ -209,17 +205,16 @@ ghcli_issue_submit(ghcli_submit_issue_options opts)
 
     opts.body = ghcli_json_escape(body);
 
-    fprintf(stdout,
-            "The following issue will be created:\n"
-            "\n"
-            "TITLE   : "SV_FMT"\n"
-            "OWNER   : "SV_FMT"\n"
-            "REPO    : "SV_FMT"\n"
-            "MESSAGE :\n"SV_FMT"\n",
-            SV_ARGS(opts.title), SV_ARGS(opts.owner),
-            SV_ARGS(opts.repo), SV_ARGS(body));
+    printf("The following issue will be created:\n"
+           "\n"
+           "TITLE   : "SV_FMT"\n"
+           "OWNER   : "SV_FMT"\n"
+           "REPO    : "SV_FMT"\n"
+           "MESSAGE :\n"SV_FMT"\n",
+           SV_ARGS(opts.title), SV_ARGS(opts.owner),
+           SV_ARGS(opts.repo), SV_ARGS(body));
 
-    fputc('\n', stdout);
+    putchar('\n');
 
     if (!opts.always_yes) {
         if (!sn_yesno("Do you want to continue?"))

@@ -76,7 +76,6 @@ int ghcli_get_releases(
     int             max,
     ghcli_release **out);
 void ghcli_print_releases(
-    FILE                    *stream,
     enum ghcli_output_order  order,
     ghcli_release           *releases,
     int                      releases_size);

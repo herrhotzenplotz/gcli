@@ -148,7 +148,6 @@ gitlab_print_pr_diff(
 
 void
 gitlab_mr_merge(
-    FILE       *stream,
     const char *owner,
     const char *repo,
     int         mr_number)
@@ -170,7 +169,7 @@ gitlab_mr_merge(
 
     ghcli_fetch_with_method("PUT", url, data, NULL, &buffer);
 
-    fprintf(stream, "Merged.\n");
+    puts("Merged.");
     ghcli_print_html_url(buffer);
 
     free(buffer.data);

@@ -46,24 +46,21 @@ ghcli_issue_comment_free(ghcli_comment *it)
 
 void
 ghcli_print_comment_list(
-    FILE *stream,
     ghcli_comment *comments,
     size_t comments_size)
 {
     for (size_t i = 0; i < comments_size; ++i) {
-        fprintf(stream,
-                "AUTHOR : %s%s%s\n"
-                "DATE   : %s\n",
-                ghcli_setbold(), comments[i].author, ghcli_resetbold(),
-                comments[i].date);
-        pretty_print(comments[i].body, 9, 80, stream);
-        fputc('\n', stream);
+        printf("AUTHOR : %s%s%s\n"
+               "DATE   : %s\n",
+               ghcli_setbold(), comments[i].author, ghcli_resetbold(),
+               comments[i].date);
+        pretty_print(comments[i].body, 9, 80, stdout);
+        putchar('\n');
     }
 }
 
 void
 ghcli_issue_comments(
-    FILE       *stream,
     const char *owner,
     const char *repo,
     int         issue)
@@ -72,7 +69,7 @@ ghcli_issue_comments(
     int            n        = -1;
 
     n = ghcli_forge()->get_issue_comments(owner, repo, issue, &comments);
-    ghcli_print_comment_list(stream, comments, (size_t)n);
+    ghcli_print_comment_list(comments, (size_t)n);
 
     for (int i = 0; i < n; ++i)
         ghcli_issue_comment_free(&comments[i]);
@@ -82,7 +79,6 @@ ghcli_issue_comments(
 
 void
 ghcli_pull_comments(
-    FILE       *stream,
     const char *owner,
     const char *repo,
     int         issue)
@@ -91,7 +87,7 @@ ghcli_pull_comments(
     int            n        = -1;
 
     n = ghcli_forge()->get_pull_comments(owner, repo, issue, &comments);
-    ghcli_print_comment_list(stream, comments, (size_t)n);
+    ghcli_print_comment_list(comments, (size_t)n);
 
     for (int i = 0; i < n; ++i)
         ghcli_issue_comment_free(&comments[i]);

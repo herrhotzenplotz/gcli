@@ -240,63 +240,57 @@ language_fmt(const char *it)
 }
 
 static void
-print_gist_file(FILE *stream, ghcli_gist_file *file)
+print_gist_file(ghcli_gist_file *file)
 {
-    fprintf(
-        stream,
-        "      • %-15.15s  %-8.8s  %-s\n",
-        language_fmt(file->language.data),
-        human_readable_size(file->size),
-        file->filename.data);
+    printf("      • %-15.15s  %-8.8s  %-s\n",
+           language_fmt(file->language.data),
+           human_readable_size(file->size),
+           file->filename.data);
 }
 
 static void
-print_gist(FILE *stream, ghcli_gist *gist)
+print_gist(ghcli_gist *gist)
 {
-    fprintf(
-        stream,
-        "   ID : %s"SV_FMT"%s\n"
-        "OWNER : %s"SV_FMT"%s\n"
-        "DESCR : "SV_FMT"\n"
-        " DATE : "SV_FMT"\n"
-        "  URL : "SV_FMT"\n"
-        " PULL : "SV_FMT"\n",
-        ghcli_setcolor(GHCLI_COLOR_YELLOW), SV_ARGS(gist->id), ghcli_resetcolor(),
-        ghcli_setbold(), SV_ARGS(gist->owner), ghcli_resetbold(),
-        SV_ARGS(gist->description),
-        SV_ARGS(gist->date),
-        SV_ARGS(gist->url),
-        SV_ARGS(gist->git_pull_url));
-    fprintf(stream,
-            "FILES : %-15.15s  %-8.8s  %-s\n",
-            "LANGUAGE", "SIZE", "FILENAME");
+    printf("   ID : %s"SV_FMT"%s\n"
+           "OWNER : %s"SV_FMT"%s\n"
+           "DESCR : "SV_FMT"\n"
+           " DATE : "SV_FMT"\n"
+           "  URL : "SV_FMT"\n"
+           " PULL : "SV_FMT"\n",
+           ghcli_setcolor(GHCLI_COLOR_YELLOW), SV_ARGS(gist->id), ghcli_resetcolor(),
+           ghcli_setbold(), SV_ARGS(gist->owner), ghcli_resetbold(),
+           SV_ARGS(gist->description),
+           SV_ARGS(gist->date),
+           SV_ARGS(gist->url),
+           SV_ARGS(gist->git_pull_url));
+    printf("FILES : %-15.15s  %-8.8s  %-s\n",
+           "LANGUAGE", "SIZE", "FILENAME");
 
     for (size_t i = 0; i < gist->files_size; ++i)
-        print_gist_file(stream, &gist->files[i]);
+        print_gist_file(&gist->files[i]);
 }
 
 void
 ghcli_print_gists_table(
-    FILE                    *stream,
     enum ghcli_output_order  order,
     ghcli_gist              *gists,
     int                      gists_size)
 {
     if (gists_size == 0) {
-        fprintf(stream, "No Gists\n");
+        puts("No Gists");
         return;
     }
 
     /* output in reverse order if the sorted flag was enabled */
     if (order == OUTPUT_ORDER_SORTED) {
         for (int i = gists_size; i > 0; --i) {
-            print_gist(stream, &gists[i - 1]);
-            fputc('\n', stream);
+            print_gist(&gists[i - 1]);
+            putchar('\n');
         }
     } else {
         for (int i = 0; i < gists_size; ++i) {
-            print_gist(stream, &gists[i]);
-            fputc('\n', stream);
+            print_gist(&gists[i]);
+            putchar('\n');
         }
     }
 }

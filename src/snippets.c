@@ -148,39 +148,38 @@ ghcli_snippets_get(int max, ghcli_snippet **out)
 }
 
 static void
-ghcli_print_snippet(FILE *stream, ghcli_snippet *it)
+ghcli_print_snippet(ghcli_snippet *it)
 {
-    fprintf(stream, "    ID : %d\n", it->id);
-    fprintf(stream, " TITLE : %s\n", it->title);
-    fprintf(stream, "AUTHOR : %s\n", it->author);
-    fprintf(stream, "  FILE : %s\n", it->filename);
-    fprintf(stream, "  DATE : %s\n", it->date);
-    fprintf(stream, "VSBLTY : %s\n", it->visibility);
-    fprintf(stream, "   URL : %s\n", it->raw_url);
+    printf("    ID : %d\n", it->id);
+    printf(" TITLE : %s\n", it->title);
+    printf("AUTHOR : %s\n", it->author);
+    printf("  FILE : %s\n", it->filename);
+    printf("  DATE : %s\n", it->date);
+    printf("VSBLTY : %s\n", it->visibility);
+    printf("   URL : %s\n", it->raw_url);
 }
 
 void
 ghcli_snippets_print(
-    FILE                    *stream,
     enum ghcli_output_order  order,
     ghcli_snippet           *list,
     int                      list_size)
 {
     if (list_size == 0) {
-        fprintf(stream, "No Snippets\n");
+        puts("No Snippets");
         return;
     }
 
     /* output in reverse order if the sorted flag was enabled */
     if (order == OUTPUT_ORDER_SORTED) {
         for (int i = list_size; i > 0; --i) {
-            ghcli_print_snippet(stream, &list[i - 1]);
-            fputc('\n', stream);
+            ghcli_print_snippet(&list[i - 1]);
+            putchar('\n');
         }
     } else {
         for (int i = 0; i < list_size; ++i) {
-            ghcli_print_snippet(stream, &list[i]);
-            fputc('\n', stream);
+            ghcli_print_snippet(&list[i]);
+            putchar('\n');
         }
     }
 }

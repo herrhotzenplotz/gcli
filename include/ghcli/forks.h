@@ -52,7 +52,6 @@ void ghcli_fork_create(
     const char *repo,
     const char *in);
 void ghcli_print_forks(
-    FILE                    *stream,
     enum ghcli_output_order  order,
     ghcli_fork              *forks,
     size_t                   forks_size);

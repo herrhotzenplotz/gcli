@@ -473,7 +473,7 @@ subcommand_pulls(int argc, char *argv[])
      * open PRs and exit */
     if (pr < 0) {
         pulls_size = ghcli_get_prs(owner, repo, all, n, &pulls);
-        ghcli_print_pr_table(stdout, order, pulls, pulls_size);
+        ghcli_print_pr_table(order, pulls, pulls_size);
 
         ghcli_pulls_free(pulls, pulls_size);
         free(pulls);
@@ -494,11 +494,11 @@ subcommand_pulls(int argc, char *argv[])
             ghcli_print_pr_diff(stdout, owner, repo, pr);
         } else if (strcmp(operation, "summary") == 0
                    || strcmp(operation, "status") == 0) {
-            ghcli_pr_summary(stdout, owner, repo, pr);
+            ghcli_pr_summary(owner, repo, pr);
         } else if (strcmp(operation, "comments") == 0) {
-            ghcli_pull_comments(stdout, owner, repo, pr);
+            ghcli_pull_comments(owner, repo, pr);
         } else if (strcmp(operation, "merge") == 0) {
-            ghcli_pr_merge(stdout, owner, repo, pr);
+            ghcli_pr_merge(owner, repo, pr);
         } else if (strcmp(operation, "close") == 0) {
             ghcli_pr_close(owner, repo, pr);
         } else if (strcmp(operation, "reopen") == 0) {
@@ -508,7 +508,7 @@ subcommand_pulls(int argc, char *argv[])
             ghcli_pr_review *reviews      = NULL;
             size_t           reviews_size = ghcli_review_get_reviews(
                 owner, repo, pr, &reviews);
-            ghcli_review_print_review_table(stdout, reviews, reviews_size);
+            ghcli_review_print_review_table(reviews, reviews_size);
             ghcli_review_reviews_free(reviews, reviews_size);
         } else if (strcmp("labels", operation) == 0) {
             const char **add_labels         = NULL;
@@ -636,7 +636,7 @@ subcommand_issues(int argc, char *argv[])
     /* No issue number was given, so list all open issues */
     if (issue < 0) {
         issues_size = ghcli_get_issues(owner, repo, all, n, &issues);
-        ghcli_print_issues_table(stdout, order, issues, issues_size);
+        ghcli_print_issues_table(order, issues, issues_size);
 
         ghcli_issues_free(issues, issues_size);
         return EXIT_SUCCESS;
@@ -651,10 +651,10 @@ subcommand_issues(int argc, char *argv[])
         const char *operation = shift(&argc, &argv);
 
         if (strcmp("comments", operation) == 0) {
-            ghcli_issue_comments(stdout, owner, repo, issue);
+            ghcli_issue_comments(owner, repo, issue);
         } else if (strcmp("summary", operation) == 0
                    || strcmp("status", operation) == 0) {
-            ghcli_issue_summary(stdout, owner, repo, issue);
+            ghcli_issue_summary(owner, repo, issue);
         } else if (strcmp("close", operation) == 0) {
             ghcli_issue_close(owner, repo, issue);
         } else if (strcmp("reopen", operation) == 0) {
@@ -852,7 +852,7 @@ subcommand_repos(int argc, char *argv[])
         else
             repos_size = ghcli_get_repos(owner, n, &repos);
 
-        ghcli_print_repos_table(stdout, order, repos, (size_t)repos_size);
+        ghcli_print_repos_table(order, repos, (size_t)repos_size);
         ghcli_repos_free(repos, repos_size);
     } else {
         check_owner_and_repo(&owner, &repo);
@@ -1062,7 +1062,7 @@ subcommand_gists(int argc, char *argv[])
     argv += optind;
 
     gists_size = ghcli_get_gists(user, count, &gists);
-    ghcli_print_gists_table(stdout, order, gists, gists_size);
+    ghcli_print_gists_table(order, gists, gists_size);
     return EXIT_SUCCESS;
 }
 
@@ -1162,7 +1162,7 @@ subcommand_snippets(int argc, char *argv[])
     argv += optind;
 
     snippets_size = ghcli_snippets_get(count, &snippets);
-    ghcli_snippets_print(stdout, order, snippets, snippets_size);
+    ghcli_snippets_print(order, snippets, snippets_size);
     return EXIT_SUCCESS;
 }
 
@@ -1240,7 +1240,7 @@ subcommand_forks(int argc, char *argv[])
 
     if (argc == 0) {
         forks_size = ghcli_get_forks(owner, repo, count, &forks);
-        ghcli_print_forks(stdout, order, forks, forks_size);
+        ghcli_print_forks(order, forks, forks_size);
         return EXIT_SUCCESS;
     }
 
@@ -1519,7 +1519,7 @@ subcommand_releases(int argc, char *argv[])
     check_owner_and_repo(&owner, &repo);
 
     releases_size = ghcli_get_releases(owner, repo, count, &releases);
-    ghcli_print_releases(stdout, order, releases, releases_size);
+    ghcli_print_releases(order, releases, releases_size);
     ghcli_free_releases(releases, releases_size);
 
     return EXIT_SUCCESS;

@@ -69,7 +69,6 @@ int ghcli_get_gists(
 ghcli_gist *ghcli_get_gist(
     const char *gist_id);
 void ghcli_print_gists_table(
-    FILE                    *stream,
     enum ghcli_output_order  order,
     ghcli_gist              *gists,
     int                      gists_size);

@@ -167,7 +167,6 @@ struct ghcli_forge_descriptor {
     /**
      * Merge the given PR/MR */
     void (*pr_merge)(
-        FILE       *out,
         const char *owner,
         const char *reponame,
         int         pr_number);

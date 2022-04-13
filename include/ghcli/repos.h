@@ -49,7 +49,6 @@ int  ghcli_get_repos(const char *owner, int max, ghcli_repo **out);
 int  ghcli_get_own_repos(int max, ghcli_repo **out);
 void ghcli_repos_free(ghcli_repo *, size_t);
 void ghcli_print_repos_table(
-    FILE                    *stream,
     enum ghcli_output_order  order,
     ghcli_repo              *repos,
     size_t                   repos_size);

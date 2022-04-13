@@ -54,16 +54,13 @@ struct ghcli_submit_comment_opts {
 };
 
 void ghcli_print_comment_list(
-    FILE *stream,
     ghcli_comment *comments,
     size_t comments_size);
 void ghcli_issue_comments(
-    FILE *stream,
     const char *owner,
     const char *repo,
     int issue);
 void ghcli_pull_comments(
-    FILE *stream,
     const char *owner,
     const char *repo,
     int issue);

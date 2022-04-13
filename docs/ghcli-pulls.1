@@ -10,7 +10,10 @@
 .Op Fl s
 .Op Fl n Ar n
 .Op Fl o Ar owner Fl r Ar repo
-.Op Ar actions...
+.Nm
+.Fl p Ar pr
+.Op Fl o Ar owner Fl r Ar repo
+.Ar actions...
 .Nm
 .Cm create
 .Op Fl i Ar owner/repo
@@ -47,6 +50,11 @@ pull requests. Default: 30. If
 is set to -1 this will fetch all pull requests. Note that on large
 repositories fetching all pull requests can take a considerable amount
 of time and may result in rate limiting by the GitHub/GitLab API.
+.It Fl p , -pull Ar PR
+execute the given
+.Ar actions
+on the specified
+.Ar PR .
 .El
 
 .Sh SUBCOMMANDS
@@ -95,6 +103,14 @@ Reopen a closed PR.
 Merge the PR.
 .It Cm reviews
 Print reviews including comments under them.
+.It Cm labels Op Ar options
+The following options can be specified more than once:
+.Bl -tag -width indent
+.It Fl -add Ar label
+Add the given label to the pull request.
+.It Fl -remove Ar label
+Remove the given label from the pull request.
+.El
 .El
 .Sh EXAMPLES
 Print a list of open PRs in the current project:
@@ -139,6 +155,4 @@ $ git merge --no-ff 42-review
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
 .Sh BUGS
-It is impossible to manage labels of PRs with this subcommand.
-
 Please report issues preferably via e-mail, on GitLab or on GitHub.

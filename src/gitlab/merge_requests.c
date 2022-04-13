@@ -462,3 +462,57 @@ gitlab_perform_submit_mr(
     free(post_fields);
     free(url);
 }
+
+void
+gitlab_mr_add_labels(
+    const char *owner,
+    const char *repo,
+    int         mr,
+    const char *labels[],
+    size_t      labels_size)
+{
+    char               *url    = NULL;
+    char               *data   = NULL;
+    char               *list   = NULL;
+    ghcli_fetch_buffer  buffer = {0};
+
+    url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%d",
+                      gitlab_get_apibase(), owner, repo, mr);
+
+    list = sn_join_with(labels, labels_size, ",");
+    data = sn_asprintf("{ \"add_labels\": \"%s\"}", list);
+
+    ghcli_fetch_with_method("PUT", url, data, NULL, &buffer);
+
+    free(url);
+    free(data);
+    free(list);
+    free(buffer.data);
+}
+
+void
+gitlab_mr_remove_labels(
+    const char *owner,
+    const char *repo,
+    int         mr,
+    const char *labels[],
+    size_t      labels_size)
+{
+    char               *url    = NULL;
+    char               *data   = NULL;
+    char               *list   = NULL;
+    ghcli_fetch_buffer  buffer = {0};
+
+    url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%d",
+                      gitlab_get_apibase(), owner, repo, mr);
+
+    list = sn_join_with(labels, labels_size, ",");
+    data = sn_asprintf("{ \"remove_labels\": \"%s\"}", list);
+
+    ghcli_fetch_with_method("PUT", url, data, NULL, &buffer);
+
+    free(url);
+    free(data);
+    free(list);
+    free(buffer.data);
+}

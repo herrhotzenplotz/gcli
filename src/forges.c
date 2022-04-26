@@ -142,6 +142,7 @@ gitlab_forge_descriptor =
     .get_repos                 = gitlab_get_repos,
     .get_own_repos             = gitlab_get_own_repos,
     .get_reviews               = gitlab_review_get_reviews,
+    .repo_create               = gitlab_repo_create,
     .repo_delete               = gitlab_repo_delete,
     .get_notifications         = gitlab_get_notifications,
     .notification_mark_as_read = gitlab_notification_mark_as_read,

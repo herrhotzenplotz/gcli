@@ -98,3 +98,10 @@ ghcli_repo_delete(const char *owner, const char *repo)
 {
     ghcli_forge()->repo_delete(owner, repo);
 }
+
+ghcli_repo *
+ghcli_repo_create(
+    const ghcli_repo_create_options *options) /* Options descriptor */
+{
+    return ghcli_forge()->repo_create(options);
+}

@@ -787,7 +787,7 @@ subcommand_repos_create(int argc, char *argv[])
     ghcli_repo                *created_repo   = NULL;
 
     const struct option options[] = {
-        { .name    = "name",
+        { .name    = "repo",
           .has_arg = required_argument,
           .flag    = NULL,
           .val     = 'r' },
@@ -821,6 +821,11 @@ subcommand_repos_create(int argc, char *argv[])
 
     argc -= optind;
     argv += optind;
+
+    if (sn_sv_null(create_options.name))
+        errx(1,
+             "name cannot be empty. please set a repository "
+             "name with -r/--name");
 
     created_repo = ghcli_repo_create(&create_options);
 

@@ -10,14 +10,18 @@
 .Op Fl n Ar n
 .Op Fl o Ar owner
 .Nm
+.Cm create
+.Fl r Ar name
+.Op Fl d Ar description
+.Op Fl p
+.Nm
 .Op Fl y
 .Op Fl o Ar owner Fl r Ar repo
 .Ar actions...
 .Sh DESCRIPTION
 .Nm
 can be used to list or manage your own or an organization's
-repositories on Github and GitLab.
-With no actions given,
+repositories on Github and GitLab. With no actions given,
 .Nm
 will list repositories, either of the through
 .Fl o
@@ -35,7 +39,8 @@ used in combination with
 .It Fl r , -repo Ar repo
 Operate on the given repository. This option can only be used in
 combination with
-.Fl o .
+.Fl o
+unless you are creating a repository.
 .It Fl y , -yes
 Do not ask for confirmation. Assume yes.
 .It Fl n , -count Ar n
@@ -47,6 +52,10 @@ to -1 will fetch all repositories. Default: 30. Note that on owners
 with many repositories fetching all of them can take a considerable
 amount of time and may result in rate limiting by the GitHub/GitLab
 API.
+.It Fl d , -description Ar description
+Set the description of a repo to be created.
+.It Fl p , -private
+Create a private repo.
 .El
 .El
 .Sh ACTIONS
@@ -85,6 +94,12 @@ Delete vim/vim without confirmation:
 .Bd -literal -offset indent
 $ ghcli repos -o vim -r vim -y delete
 .Ed
+
+Create a repository called emacs with a description and make it
+public:
+.Bd -literal -offset indent
+$ ghcli repos create -r emacs -d "welcome to the holy church of emacs."
+.Ed
 .Sh SEE ALSO
 .Xr git 1 ,
 .Xr ghcli 1 ,
@@ -92,6 +107,8 @@ $ ghcli repos -o vim -r vim -y delete
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
 .Sh BUGS
-It is impossible to create repos with this subcommand.
+Currently it is only possible to create repositories for authenticated
+users thus it is impossible to create a repository in another
+organization.
 
 Please report issues preferably via e-mail, on GitLab or on GitHub.

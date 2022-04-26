@@ -34,6 +34,7 @@
 #include <ghcli/ghcli.h>
 
 typedef struct ghcli_repo ghcli_repo;
+typedef struct ghcli_repo_create_options ghcli_repo_create_options;
 
 struct ghcli_repo {
     int   id;
@@ -45,13 +46,20 @@ struct ghcli_repo {
     bool  is_fork;
 };
 
-int  ghcli_get_repos(const char *owner, int max, ghcli_repo **out);
-int  ghcli_get_own_repos(int max, ghcli_repo **out);
-void ghcli_repos_free(ghcli_repo *, size_t);
-void ghcli_print_repos_table(
-    enum ghcli_output_order  order,
-    ghcli_repo              *repos,
-    size_t                   repos_size);
-void ghcli_repo_delete(const char *owner, const char *repo);
+struct ghcli_repo_create_options {
+    sn_sv name;
+    sn_sv description;
+    bool  private;
+};
+
+int		ghcli_get_repos		(const char *owner, int max,
+                                         ghcli_repo **out);
+int		ghcli_get_own_repos	(int max, ghcli_repo **out);
+void		ghcli_repos_free	(ghcli_repo *, size_t);
+void		ghcli_print_repos_table	(enum ghcli_output_order  order,
+                                         ghcli_repo              *repos,
+                                         size_t                   repos_size);
+void		ghcli_repo_delete	(const char *owner, const char *repo);
+ghcli_repo	*ghcli_repo_create	(const ghcli_repo_create_options *);
 
 #endif /* REPOS_H */

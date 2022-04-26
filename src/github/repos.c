@@ -199,3 +199,39 @@ github_repo_delete(const char *owner, const char *repo)
     free(e_repo);
     free(url);
 }
+
+ghcli_repo *
+github_repo_create(
+    const ghcli_repo_create_options *options) /* Options descriptor */
+{
+    ghcli_repo         *repo;
+    char               *url, *data;
+    ghcli_fetch_buffer  buffer = {0};
+    struct json_stream  stream = {0};
+
+    /* Will be freed by the caller with ghcli_repos_free */
+    repo = calloc(1, sizeof(ghcli_repo));
+
+    /* Request preparation */
+    url = sn_asprintf("%s/user/repos", github_get_apibase());
+    /* TODO: escape the repo name and the description */
+    data = sn_asprintf("{\"name\": \""SV_FMT"\","
+                       " \"description\": \""SV_FMT"\","
+                       " \"private\": %s }",
+                       SV_ARGS(options->name),
+                       SV_ARGS(options->description),
+                       ghcli_json_bool(options->private));
+
+    /* Fetch and parse result */
+    ghcli_fetch_with_method("POST", url, data, NULL, &buffer);
+    json_open_buffer(&stream, buffer.data, buffer.length);
+    parse_repo(&stream, repo);
+
+    /* Cleanup */
+    json_close(&stream);
+    free(buffer.data);
+    free(data);
+    free(url);
+
+    return repo;
+}

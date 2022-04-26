@@ -780,6 +780,62 @@ delete_repo(bool always_yes, const char *owner, const char *repo)
 }
 
 static int
+subcommand_repos_create(int argc, char *argv[])
+{
+    int                        ch;
+    ghcli_repo_create_options  create_options = {0};
+    ghcli_repo                *created_repo   = NULL;
+
+    const struct option options[] = {
+        { .name    = "repo",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'r' },
+        { .name    = "private",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'p' },
+        { .name    = "description",
+          .has_arg = required_argument,
+          .flag    = NULL,
+          .val     = 'd' },
+        {0},
+    };
+
+    while ((ch = getopt_long(argc, argv, "r:d:p", options, NULL)) != -1) {
+        switch (ch) {
+        case 'r':
+            create_options.name = SV(optarg);
+            break;
+        case 'd':
+            create_options.description = SV(optarg);
+            break;
+        case 'p':
+            create_options.private = true;
+            break;
+        case '?':
+        default:
+            usage();
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    if (sn_sv_null(create_options.name))
+        errx(1,
+             "name cannot be empty. please set a repository "
+             "name with -r/--name");
+
+    created_repo = ghcli_repo_create(&create_options);
+
+    ghcli_print_repos_table(OUTPUT_ORDER_UNSORTED, created_repo, 1);
+    ghcli_repos_free(created_repo, 1);
+
+    return EXIT_SUCCESS;
+}
+
+static int
 subcommand_repos(int argc, char *argv[])
 {
     int                      ch, repos_size, n = 30;
@@ -788,6 +844,12 @@ subcommand_repos(int argc, char *argv[])
     ghcli_repo              *repos             = NULL;
     bool                     always_yes        = false;
     enum ghcli_output_order  order             = OUTPUT_ORDER_UNSORTED;
+
+    /* detect whether we wanna create a repo */
+    if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
+        shift(&argc, &argv);
+        return subcommand_repos_create(argc, argv);
+    }
 
     const struct option options[] = {
         { .name    = "count",

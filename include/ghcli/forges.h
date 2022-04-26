@@ -283,6 +283,11 @@ struct ghcli_forge_descriptor {
         ghcli_repo **out);
 
     /**
+     * Create the given repo */
+    ghcli_repo *(*repo_create)(
+        const ghcli_repo_create_options *options);
+
+    /**
      * Delete the given repo */
     void (*repo_delete)(
         const char *owner,

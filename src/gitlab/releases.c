@@ -119,6 +119,8 @@ gitlab_parse_release(struct json_stream *input, ghcli_release *out)
     if ((next = json_next(input)) != JSON_OBJECT)
         errx(1, "expected release object");
 
+    memset(out, 0, sizeof(*out));
+
     while ((next = json_next(input)) == JSON_STRING) {
         size_t len;
         key = json_get_string(input, &len);
@@ -252,7 +254,7 @@ gitlab_create_release(const ghcli_new_release *release)
     post_data = sn_asprintf(
         "{"
         "    \"tag_name\": \"%s\","
-        "    \"body\": \""SV_FMT"\""
+        "    \"description\": \""SV_FMT"\""
         "    %s"
         "    %s"
         "}",

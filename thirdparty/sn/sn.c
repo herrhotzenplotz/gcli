@@ -138,6 +138,10 @@ void
 pretty_print(const char *input, int indent, int maxlinelen, FILE *out)
 {
     const char *it = input;
+
+    if (!it)
+        return;
+
     while (*it) {
         int linelength = indent;
         fprintf(out, "%*.*s", indent, indent, "");

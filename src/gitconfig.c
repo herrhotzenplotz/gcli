@@ -250,6 +250,12 @@ gitconfig_parse_remote(sn_sv section_title, sn_sv entry)
 {
     sn_sv remote_name = SV_NULL;
 
+    /* If there is no remote name, just return and continue with the
+     * next section. I don't exactly know why there even are such
+     * sections and what they are useful for, but ok. */
+    if (sn_sv_eq_to(sn_sv_trim(section_title), "remote"))
+        return;
+
     /* the remote name is wrapped in double quotes */
     sn_sv_chop_until(&section_title, '"');
 

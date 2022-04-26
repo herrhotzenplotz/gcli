@@ -68,7 +68,7 @@ version(void)
     fprintf(
         stderr,
         "ghcli version "GHCLI_VERSION_STRING
-        " - a command line utility to interact with GitHub\n"
+        " - a command line utility to interact with GitHub and GitLab\n"
         "Copyright 2021 Nico Sonack <nsonack@herrhotzenplotz.de>\n"
         "This program is licensed under the BSD2CLAUSE license. You should\n"
         "received a copy of it with its distribution.\n");

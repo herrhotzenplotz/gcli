@@ -96,6 +96,7 @@ github_forge_descriptor =
     .get_repos                 = github_get_repos,
     .get_own_repos             = github_get_own_repos,
     .get_reviews               = github_review_get_reviews,
+    .repo_create               = github_repo_create,
     .repo_delete               = github_repo_delete,
     .get_notifications         = github_get_notifications,
     .notification_mark_as_read = github_notification_mark_as_read,

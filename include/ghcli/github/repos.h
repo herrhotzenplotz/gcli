@@ -45,4 +45,7 @@ void github_repo_delete(
     const char *owner,
     const char *repo);
 
+ghcli_repo *github_repo_create(
+    const ghcli_repo_create_options *options);
+
 #endif /* GITHUB_REPOS_H */

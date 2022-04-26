@@ -3,7 +3,7 @@
 Simple and portable CLI tool for interacting with GitHub and GitLab
 from the command line.
 
-![](docs/screenshot-01.png)
+![](docs/screenshot-02.png)
 
 ## Why?
 

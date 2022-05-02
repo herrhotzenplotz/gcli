@@ -38,97 +38,97 @@
 static void
 parse_gitlab_project(struct json_stream *input, ghcli_notification *it)
 {
-    if (json_next(input) != JSON_OBJECT)
-        errx(1, "Expected Project Object");
+	if (json_next(input) != JSON_OBJECT)
+		errx(1, "Expected Project Object");
 
-    enum json_type key_type;
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t      len = 0;
-        const char *key = json_get_string(input, &len);
+	enum json_type key_type;
+	while ((key_type = json_next(input)) == JSON_STRING) {
+		size_t      len = 0;
+		const char *key = json_get_string(input, &len);
 
-        if (strncmp("path_with_namespace", key, len) == 0)
-            it->repository = get_string(input);
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
+		if (strncmp("path_with_namespace", key, len) == 0)
+			it->repository = get_string(input);
+		else
+			SKIP_OBJECT_VALUE(input);
+	}
 }
 
 static void
 parse_gitlab_todo(struct json_stream *input, ghcli_notification *it)
 {
-    if (json_next(input) != JSON_OBJECT)
-        errx(1, "Expected Notification Object");
+	if (json_next(input) != JSON_OBJECT)
+		errx(1, "Expected Notification Object");
 
-    enum json_type key_type;
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t      len = 0;
-        const char *key = json_get_string(input, &len);
+	enum json_type key_type;
+	while ((key_type = json_next(input)) == JSON_STRING) {
+		size_t      len = 0;
+		const char *key = json_get_string(input, &len);
 
-        if (strncmp("updated_at", key, len) == 0)
-            it->date = get_string(input);
-        else if (strncmp("action_name", key, len) == 0)
-            it->reason = get_string(input);
-        else if (strncmp("id", key, len) == 0)
-            it->id = sn_asprintf("%ld", get_int(input));
-        else if (strncmp("body", key, len) == 0)
-            it->title = get_string(input);
-        else if (strncmp("target_type", key, len) == 0)
-            it->type = get_string(input);
-        else if (strncmp("project", key, len) == 0)
-            parse_gitlab_project(input, it);
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
+		if (strncmp("updated_at", key, len) == 0)
+			it->date = get_string(input);
+		else if (strncmp("action_name", key, len) == 0)
+			it->reason = get_string(input);
+		else if (strncmp("id", key, len) == 0)
+			it->id = sn_asprintf("%ld", get_int(input));
+		else if (strncmp("body", key, len) == 0)
+			it->title = get_string(input);
+		else if (strncmp("target_type", key, len) == 0)
+			it->type = get_string(input);
+		else if (strncmp("project", key, len) == 0)
+			parse_gitlab_project(input, it);
+		else
+			SKIP_OBJECT_VALUE(input);
+	}
 }
 
 size_t
 gitlab_get_notifications(ghcli_notification **notifications, int count)
 {
-    char               *url                = NULL;
-    char               *next_url           = NULL;
-    ghcli_fetch_buffer  buffer             = {0};
-    struct json_stream  stream             = {0};
-    size_t              notifications_size = 0;
+	char               *url                = NULL;
+	char               *next_url           = NULL;
+	ghcli_fetch_buffer  buffer             = {0};
+	struct json_stream  stream             = {0};
+	size_t              notifications_size = 0;
 
-    url = sn_asprintf("%s/todos", gitlab_get_apibase());
+	url = sn_asprintf("%s/todos", gitlab_get_apibase());
 
-    do {
-        ghcli_fetch(url, &next_url, &buffer);
+	do {
+		ghcli_fetch(url, &next_url, &buffer);
 
-        json_open_buffer(&stream, buffer.data, buffer.length);
-        json_set_streaming(&stream, 1);
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		json_set_streaming(&stream, 1);
 
-        enum json_type next_token = json_next(&stream);
+		enum json_type next_token = json_next(&stream);
 
-        while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
-            if (next_token != JSON_OBJECT)
-                errx(1, "Unexpected non-object in todo list");
+		while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
+			if (next_token != JSON_OBJECT)
+				errx(1, "Unexpected non-object in todo list");
 
-            *notifications = realloc(
-                *notifications,
-                (notifications_size + 1) * sizeof(ghcli_notification));
-            ghcli_notification *it = &(*notifications)[notifications_size];
-            parse_gitlab_todo(&stream, it);
-            notifications_size += 1;
-        }
+			*notifications = realloc(
+				*notifications,
+				(notifications_size + 1) * sizeof(ghcli_notification));
+			ghcli_notification *it = &(*notifications)[notifications_size];
+			parse_gitlab_todo(&stream, it);
+			notifications_size += 1;
+		}
 
-        json_close(&stream);
-        free(url);
-        free(buffer.data);
-    } while ((url = next_url) && (count < 0 || (int)notifications_size < count));
+		json_close(&stream);
+		free(url);
+		free(buffer.data);
+	} while ((url = next_url) && (count < 0 || (int)notifications_size < count));
 
-    return notifications_size;
+	return notifications_size;
 }
 
 void
 gitlab_notification_mark_as_read(const char *id)
 {
-    char               *url    = NULL;
-    ghcli_fetch_buffer  buffer = {0};
+	char               *url    = NULL;
+	ghcli_fetch_buffer  buffer = {0};
 
-    url = sn_asprintf("%s/todos/%s/mark_as_done", gitlab_get_apibase(), id);
-    ghcli_fetch_with_method("POST", url, NULL, NULL, &buffer);
+	url = sn_asprintf("%s/todos/%s/mark_as_done", gitlab_get_apibase(), id);
+	ghcli_fetch_with_method("POST", url, NULL, NULL, &buffer);
 
-    free(url);
-    free(buffer.data);
+	free(url);
+	free(buffer.data);
 }

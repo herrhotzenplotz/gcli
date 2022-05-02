@@ -34,16 +34,16 @@
 #include <ghcli/ghcli.h>
 
 void ghcli_config_init(
-    int    *argc,
-    char ***argv);
+	int    *argc,
+	char ***argv);
 
 void ghcli_config_get_upstream_parts(
-    sn_sv *owner,
-    sn_sv *repo);
+	sn_sv *owner,
+	sn_sv *repo);
 
 sn_sv ghcli_config_find_by_key(
-    sn_sv       section_name,
-    const char *key);
+	sn_sv       section_name,
+	const char *key);
 
 char             *ghcli_config_get_editor(void);
 char             *ghcli_config_get_authheader(void);

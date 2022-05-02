@@ -35,32 +35,32 @@
 typedef struct ghcli_snippet ghcli_snippet;
 
 struct ghcli_snippet {
-    int   id;
-    char *title;
-    char *filename;
-    char *date;
-    char *author;
-    char *visibility;
-    char *raw_url;
+	int   id;
+	char *title;
+	char *filename;
+	char *date;
+	char *author;
+	char *visibility;
+	char *raw_url;
 };
 
 void ghcli_snippets_free(
-    ghcli_snippet  *list,
-    int             list_size);
+	ghcli_snippet  *list,
+	int             list_size);
 
 int ghcli_snippets_get(
-    int             max,
-    ghcli_snippet **out);
+	int             max,
+	ghcli_snippet **out);
 
 void ghcli_snippets_print(
-    enum ghcli_output_order  order,
-    ghcli_snippet           *list,
-    int                      list_size);
+	enum ghcli_output_order  order,
+	ghcli_snippet           *list,
+	int                      list_size);
 
 void ghcli_snippet_delete(
-    const char *snippet_id);
+	const char *snippet_id);
 
 void ghcli_snippet_get(
-    const char *snippet_id);
+	const char *snippet_id);
 
 #endif /* SNIPPETS_H */

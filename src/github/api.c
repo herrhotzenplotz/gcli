@@ -35,22 +35,22 @@
 const char *
 github_api_error_string(ghcli_fetch_buffer *it)
 {
-    struct json_stream stream = {0};
-    enum json_type     next   = JSON_NULL;
+	struct json_stream stream = {0};
+	enum json_type     next   = JSON_NULL;
 
-    if (!it->length)
-        return NULL;
+	if (!it->length)
+		return NULL;
 
-    json_open_buffer(&stream, it->data, it->length);
-    json_set_streaming(&stream, true);
+	json_open_buffer(&stream, it->data, it->length);
+	json_set_streaming(&stream, true);
 
-    while ((next = json_next(&stream)) != JSON_OBJECT_END) {
-        char *key = get_string(&stream);
-        if (strcmp(key, "message") == 0)
-            return get_string(&stream);
+	while ((next = json_next(&stream)) != JSON_OBJECT_END) {
+		char *key = get_string(&stream);
+		if (strcmp(key, "message") == 0)
+			return get_string(&stream);
 
-        free(key);
-    }
+		free(key);
+	}
 
-    return "<No message key in error response object>";
+	return "<No message key in error response object>";
 }

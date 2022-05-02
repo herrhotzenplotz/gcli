@@ -33,12 +33,12 @@
 #include <stdlib.h>
 
 struct ghcli_notification {
-    char *id;
-    char *title;
-    char *reason;
-    char *date;
-    char *type;
-    char *repository;
+	char *id;
+	char *title;
+	char *reason;
+	char *date;
+	char *type;
+	char *repository;
 };
 
 typedef struct ghcli_notification ghcli_notification;

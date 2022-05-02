@@ -36,27 +36,27 @@
 typedef struct ghcli_fork ghcli_fork;
 
 struct ghcli_fork {
-    sn_sv full_name;
-    sn_sv owner;
-    sn_sv date;
-    int   forks;
+	sn_sv full_name;
+	sn_sv owner;
+	sn_sv date;
+	int   forks;
 };
 
 int ghcli_get_forks(
-    const char  *owner,
-    const char  *reponame,
-    int          max,
-    ghcli_fork **out);
+	const char  *owner,
+	const char  *reponame,
+	int          max,
+	ghcli_fork **out);
 void ghcli_fork_create(
-    const char *owner,
-    const char *repo,
-    const char *in);
+	const char *owner,
+	const char *repo,
+	const char *in);
 void ghcli_print_forks(
-    enum ghcli_output_order  order,
-    ghcli_fork              *forks,
-    size_t                   forks_size);
+	enum ghcli_output_order  order,
+	ghcli_fork              *forks,
+	size_t                   forks_size);
 void ghcli_fork_delete(
-    const char *owner,
-    const char *repo);
+	const char *owner,
+	const char *repo);
 
 #endif /* FORK_H */

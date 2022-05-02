@@ -39,120 +39,120 @@
 static void
 ghcli_issue_comment_free(ghcli_comment *it)
 {
-    free((void *)it->author);
-    free((void *)it->date);
-    free((void *)it->body);
+	free((void *)it->author);
+	free((void *)it->date);
+	free((void *)it->body);
 }
 
 void
 ghcli_print_comment_list(
-    ghcli_comment *comments,
-    size_t comments_size)
+	ghcli_comment *comments,
+	size_t comments_size)
 {
-    for (size_t i = 0; i < comments_size; ++i) {
-        printf("AUTHOR : %s%s%s\n"
-               "DATE   : %s\n",
-               ghcli_setbold(), comments[i].author, ghcli_resetbold(),
-               comments[i].date);
-        pretty_print(comments[i].body, 9, 80, stdout);
-        putchar('\n');
-    }
+	for (size_t i = 0; i < comments_size; ++i) {
+		printf("AUTHOR : %s%s%s\n"
+		       "DATE   : %s\n",
+		       ghcli_setbold(), comments[i].author, ghcli_resetbold(),
+		       comments[i].date);
+		pretty_print(comments[i].body, 9, 80, stdout);
+		putchar('\n');
+	}
 }
 
 void
 ghcli_issue_comments(
-    const char *owner,
-    const char *repo,
-    int         issue)
+	const char *owner,
+	const char *repo,
+	int         issue)
 {
-    ghcli_comment *comments = NULL;
-    int            n        = -1;
+	ghcli_comment *comments = NULL;
+	int            n        = -1;
 
-    n = ghcli_forge()->get_issue_comments(owner, repo, issue, &comments);
-    ghcli_print_comment_list(comments, (size_t)n);
+	n = ghcli_forge()->get_issue_comments(owner, repo, issue, &comments);
+	ghcli_print_comment_list(comments, (size_t)n);
 
-    for (int i = 0; i < n; ++i)
-        ghcli_issue_comment_free(&comments[i]);
+	for (int i = 0; i < n; ++i)
+		ghcli_issue_comment_free(&comments[i]);
 
-    free(comments);
+	free(comments);
 }
 
 void
 ghcli_pull_comments(
-    const char *owner,
-    const char *repo,
-    int         issue)
+	const char *owner,
+	const char *repo,
+	int         issue)
 {
-    ghcli_comment *comments = NULL;
-    int            n        = -1;
+	ghcli_comment *comments = NULL;
+	int            n        = -1;
 
-    n = ghcli_forge()->get_pull_comments(owner, repo, issue, &comments);
-    ghcli_print_comment_list(comments, (size_t)n);
+	n = ghcli_forge()->get_pull_comments(owner, repo, issue, &comments);
+	ghcli_print_comment_list(comments, (size_t)n);
 
-    for (int i = 0; i < n; ++i)
-        ghcli_issue_comment_free(&comments[i]);
+	for (int i = 0; i < n; ++i)
+		ghcli_issue_comment_free(&comments[i]);
 
-    free(comments);
+	free(comments);
 }
 
 static void
 comment_init(FILE *f, void *_data)
 {
-    ghcli_submit_comment_opts *info        = _data;
-    const char                *target_type = NULL;
+	ghcli_submit_comment_opts *info        = _data;
+	const char                *target_type = NULL;
 
-    switch (info->target_type) {
-    case ISSUE_COMMENT:
-        target_type = "issue";
-        break;
-    case PR_COMMENT: {
-        switch (ghcli_config_get_forge_type()) {
-        case GHCLI_FORGE_GITHUB:
-            target_type = "Pull Request";
-            break;
-        case GHCLI_FORGE_GITLAB:
-            target_type = "Merge Request";
-            break;
-        }
-    } break;
-    }
+	switch (info->target_type) {
+	case ISSUE_COMMENT:
+		target_type = "issue";
+		break;
+	case PR_COMMENT: {
+		switch (ghcli_config_get_forge_type()) {
+		case GHCLI_FORGE_GITHUB:
+			target_type = "Pull Request";
+			break;
+		case GHCLI_FORGE_GITLAB:
+			target_type = "Merge Request";
+			break;
+		}
+	} break;
+	}
 
-    fprintf(
-        f,
-        "# Enter your comment below, save and exit.\n"
-        "# All lines with a leading '#' are discarded and will not\n"
-        "# appear in your comment.\n"
-        "# COMMENT IN : %s/%s %s #%d\n",
-        info->owner, info->repo, target_type, info->target_id);
+	fprintf(
+		f,
+		"# Enter your comment below, save and exit.\n"
+		"# All lines with a leading '#' are discarded and will not\n"
+		"# appear in your comment.\n"
+		"# COMMENT IN : %s/%s %s #%d\n",
+		info->owner, info->repo, target_type, info->target_id);
 }
 
 static sn_sv
 ghcli_comment_get_message(ghcli_submit_comment_opts *info)
 {
-    return ghcli_editor_get_user_message(comment_init, info);
+	return ghcli_editor_get_user_message(comment_init, info);
 }
 
 void
 ghcli_comment_submit(ghcli_submit_comment_opts opts)
 {
-    ghcli_fetch_buffer buffer = {0};
-    sn_sv message = ghcli_comment_get_message(&opts);
-    opts.message  = ghcli_json_escape(message);
+	ghcli_fetch_buffer buffer = {0};
+	sn_sv message = ghcli_comment_get_message(&opts);
+	opts.message  = ghcli_json_escape(message);
 
-    fprintf(
-        stdout,
-        "You will be commenting the following in %s/%s #%d:\n"SV_FMT"\n",
-        opts.owner, opts.repo, opts.target_id, SV_ARGS(message));
+	fprintf(
+		stdout,
+		"You will be commenting the following in %s/%s #%d:\n"SV_FMT"\n",
+		opts.owner, opts.repo, opts.target_id, SV_ARGS(message));
 
-    if (!opts.always_yes) {
-        if (!sn_yesno("Is this okay?"))
-            errx(1, "Aborted by user");
-    }
+	if (!opts.always_yes) {
+		if (!sn_yesno("Is this okay?"))
+			errx(1, "Aborted by user");
+	}
 
-    ghcli_forge()->perform_submit_comment(opts, &buffer);
-    ghcli_print_html_url(buffer);
+	ghcli_forge()->perform_submit_comment(opts, &buffer);
+	ghcli_print_html_url(buffer);
 
-    free(buffer.data);
-    free(message.data);
-    free(opts.message.data);
+	free(buffer.data);
+	free(message.data);
+	free(opts.message.data);
 }

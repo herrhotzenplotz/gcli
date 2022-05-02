@@ -33,139 +33,139 @@
 #include <stdlib.h>
 
 static struct {
-    uint32_t code;
-    char *sequence;
+	uint32_t code;
+	char *sequence;
 } color_table[1024];
 static size_t color_table_size;
 
 static void
 clean_color_table(void)
 {
-    for (size_t i = 0; i < color_table_size; ++i)
-        free(color_table[i].sequence);
+	for (size_t i = 0; i < color_table_size; ++i)
+		free(color_table[i].sequence);
 }
 
 static char *
 color_cache_lookup(uint32_t code)
 {
-    for (size_t i = 0; i < color_table_size; ++i) {
-        if (color_table[i].code == code)
-            return color_table[i].sequence;
-    }
-    return NULL;
+	for (size_t i = 0; i < color_table_size; ++i) {
+		if (color_table[i].code == code)
+			return color_table[i].sequence;
+	}
+	return NULL;
 }
 
 static void
 color_cache_insert(uint32_t code, char *sequence)
 {
-    color_table[color_table_size].code     = code;
-    color_table[color_table_size].sequence = sequence;
-    color_table_size++;
+	color_table[color_table_size].code     = code;
+	color_table[color_table_size].sequence = sequence;
+	color_table_size++;
 }
 
 const char *
 ghcli_setcolor256(uint32_t code)
 {
-    char *result = NULL;
+	char *result = NULL;
 
-    if (!ghcli_config_have_colors())
-        return "";
+	if (!ghcli_config_have_colors())
+		return "";
 
-    if (color_table_size == 0)
-        atexit(clean_color_table);
+	if (color_table_size == 0)
+		atexit(clean_color_table);
 
-    result = color_cache_lookup(code);
-    if (result)
-        return result;
+	result = color_cache_lookup(code);
+	if (result)
+		return result;
 
-    /* TODO: This is inherently screwed */
-    result = sn_asprintf("\033[38;2;%02d;%02d;%02dm",
-                         (code & 0xFF000000) >> 24,
-                         (code & 0x00FF0000) >> 16,
-                         (code & 0x0000FF00) >>  8);
+	/* TODO: This is inherently screwed */
+	result = sn_asprintf("\033[38;2;%02d;%02d;%02dm",
+			     (code & 0xFF000000) >> 24,
+			     (code & 0x00FF0000) >> 16,
+			     (code & 0x0000FF00) >>  8);
 
-    color_cache_insert(code, result);
+	color_cache_insert(code, result);
 
-    return result;
+	return result;
 }
 
 const char *
 ghcli_resetcolor(void)
 {
-    if (!ghcli_config_have_colors())
-        return "";
+	if (!ghcli_config_have_colors())
+		return "";
 
-    return "\033[m";
+	return "\033[m";
 }
 
 const char *
 ghcli_setcolor(int code)
 {
-    if (!ghcli_config_have_colors())
-        return "";
+	if (!ghcli_config_have_colors())
+		return "";
 
-    switch (code) {
-    case GHCLI_COLOR_BLACK:   return "\033[30m";
-    case GHCLI_COLOR_RED:     return "\033[31m";
-    case GHCLI_COLOR_GREEN:   return "\033[32m";
-    case GHCLI_COLOR_YELLOW:  return "\033[33m";
-    case GHCLI_COLOR_BLUE:    return "\033[34m";
-    case GHCLI_COLOR_MAGENTA: return "\033[35m";
-    case GHCLI_COLOR_CYAN:    return "\033[36m";
-    case GHCLI_COLOR_WHITE:   return "\033[37m";
-    case GHCLI_COLOR_DEFAULT: return "\033[39m";
-    default:
-        sn_notreached;
-    }
-    return NULL;
+	switch (code) {
+	case GHCLI_COLOR_BLACK:   return "\033[30m";
+	case GHCLI_COLOR_RED:     return "\033[31m";
+	case GHCLI_COLOR_GREEN:   return "\033[32m";
+	case GHCLI_COLOR_YELLOW:  return "\033[33m";
+	case GHCLI_COLOR_BLUE:    return "\033[34m";
+	case GHCLI_COLOR_MAGENTA: return "\033[35m";
+	case GHCLI_COLOR_CYAN:    return "\033[36m";
+	case GHCLI_COLOR_WHITE:   return "\033[37m";
+	case GHCLI_COLOR_DEFAULT: return "\033[39m";
+	default:
+		sn_notreached;
+	}
+	return NULL;
 }
 
 const char *
 ghcli_setbold(void)
 {
-    if (!ghcli_config_have_colors())
-        return "";
-    else
-        return "\033[1m";
+	if (!ghcli_config_have_colors())
+		return "";
+	else
+		return "\033[1m";
 }
 
 const char *
 ghcli_resetbold(void)
 {
-    if (!ghcli_config_have_colors())
-        return "";
-    else
-        return "\033[22m";
+	if (!ghcli_config_have_colors())
+		return "";
+	else
+		return "\033[22m";
 }
 
 const char *
 ghcli_state_color_str(const char *it)
 {
-    if (it)
-        return ghcli_state_color_sv(SV((char *)it));
-    else
-        return "";
+	if (it)
+		return ghcli_state_color_sv(SV((char *)it));
+	else
+		return "";
 }
 
 const char *
 ghcli_state_color_sv(sn_sv state)
 {
-    if (!sn_sv_null(state)) {
-        if (sn_sv_has_prefix(state, "open"))
-            return ghcli_setcolor(GHCLI_COLOR_GREEN);
+	if (!sn_sv_null(state)) {
+		if (sn_sv_has_prefix(state, "open"))
+			return ghcli_setcolor(GHCLI_COLOR_GREEN);
 
-        if (sn_sv_has_prefix(state, "merged"))
-            return ghcli_setcolor(GHCLI_COLOR_MAGENTA);
+		if (sn_sv_has_prefix(state, "merged"))
+			return ghcli_setcolor(GHCLI_COLOR_MAGENTA);
 
-        if (sn_sv_has_prefix(state, "closed"))
-            return ghcli_setcolor(GHCLI_COLOR_RED);
+		if (sn_sv_has_prefix(state, "closed"))
+			return ghcli_setcolor(GHCLI_COLOR_RED);
 
-        if (sn_sv_has_prefix(state, "COMMENTED"))
-            return ghcli_setcolor(GHCLI_COLOR_BLUE);
+		if (sn_sv_has_prefix(state, "COMMENTED"))
+			return ghcli_setcolor(GHCLI_COLOR_BLUE);
 
-        if (sn_sv_has_prefix(state, "APPROVED"))
-            return ghcli_setcolor(GHCLI_COLOR_GREEN);
-    }
+		if (sn_sv_has_prefix(state, "APPROVED"))
+			return ghcli_setcolor(GHCLI_COLOR_GREEN);
+	}
 
-    return ghcli_setcolor(GHCLI_COLOR_DEFAULT);
+	return ghcli_setcolor(GHCLI_COLOR_DEFAULT);
 }

@@ -34,49 +34,49 @@
 
 int
 ghcli_get_forks(
-    const char  *owner,
-    const char  *repo,
-    int          max,
-    ghcli_fork **out)
+	const char  *owner,
+	const char  *repo,
+	int          max,
+	ghcli_fork **out)
 {
-    return ghcli_forge()->get_forks(owner, repo, max, out);
+	return ghcli_forge()->get_forks(owner, repo, max, out);
 }
 
 void
 ghcli_print_forks(
-    enum ghcli_output_order  order,
-    ghcli_fork              *forks,
-    size_t                   forks_size)
+	enum ghcli_output_order  order,
+	ghcli_fork              *forks,
+	size_t                   forks_size)
 {
-    if (forks_size == 0) {
-        puts("No forks");
-        return;
-    }
+	if (forks_size == 0) {
+		puts("No forks");
+		return;
+	}
 
-    printf("%-20.20s  %-20.20s  %-5.5s  %s\n",
-           "OWNER", "DATE", "FORKS", "FULLNAME");
+	printf("%-20.20s  %-20.20s  %-5.5s  %s\n",
+	       "OWNER", "DATE", "FORKS", "FULLNAME");
 
-    if (order == OUTPUT_ORDER_SORTED) {
-        for (size_t i = forks_size; i > 0; --i) {
-            printf("%s%-20.20s%s  %-20.20s  %5d  %s\n",
-                   ghcli_setbold(), forks[i - 1].owner.data, ghcli_resetbold(),
-                   forks[i - 1].date.data,
-                   forks[i - 1].forks,
-                   forks[i - 1].full_name.data);
-        }
-    } else {
-        for (size_t i = 0; i < forks_size; ++i) {
-            printf("%s%-20.20s%s  %-20.20s  %5d  %s\n",
-                   ghcli_setbold(), forks[i].owner.data, ghcli_resetbold(),
-                   forks[i].date.data,
-                   forks[i].forks,
-                   forks[i].full_name.data);
-        }
-    }
+	if (order == OUTPUT_ORDER_SORTED) {
+		for (size_t i = forks_size; i > 0; --i) {
+			printf("%s%-20.20s%s  %-20.20s  %5d  %s\n",
+			       ghcli_setbold(), forks[i - 1].owner.data, ghcli_resetbold(),
+			       forks[i - 1].date.data,
+			       forks[i - 1].forks,
+			       forks[i - 1].full_name.data);
+		}
+	} else {
+		for (size_t i = 0; i < forks_size; ++i) {
+			printf("%s%-20.20s%s  %-20.20s  %5d  %s\n",
+			       ghcli_setbold(), forks[i].owner.data, ghcli_resetbold(),
+			       forks[i].date.data,
+			       forks[i].forks,
+			       forks[i].full_name.data);
+		}
+	}
 }
 
 void
 ghcli_fork_create(const char *owner, const char *repo, const char *_in)
 {
-    ghcli_forge()->fork_create(owner, repo, _in);
+	ghcli_forge()->fork_create(owner, repo, _in);
 }

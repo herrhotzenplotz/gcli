@@ -33,17 +33,17 @@
 #include <ghcli/releases.h>
 
 int github_get_releases(
-    const char     *owner,
-    const char     *repo,
-    int             max,
-    ghcli_release **out);
+	const char     *owner,
+	const char     *repo,
+	int             max,
+	ghcli_release **out);
 
 void github_create_release(
-    const ghcli_new_release *release);
+	const ghcli_new_release *release);
 
 void github_delete_release(
-    const char *owner,
-    const char *repo,
-    const char *id);
+	const char *owner,
+	const char *repo,
+	const char *id);
 
 #endif /* GITHUB_RELEASES_H */

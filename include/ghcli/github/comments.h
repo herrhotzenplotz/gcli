@@ -34,13 +34,13 @@
 #include <ghcli/curl.h>
 
 void github_perform_submit_comment(
-    ghcli_submit_comment_opts  opts,
-    ghcli_fetch_buffer        *out);
+	ghcli_submit_comment_opts  opts,
+	ghcli_fetch_buffer        *out);
 
 int github_get_comments(
-    const char     *owner,
-    const char     *repo,
-    int             issue,
-    ghcli_comment **out);
+	const char     *owner,
+	const char     *repo,
+	int             issue,
+	ghcli_comment **out);
 
 #endif /* GITHUB_COMMENTS_H */

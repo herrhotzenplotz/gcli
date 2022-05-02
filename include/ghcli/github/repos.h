@@ -33,19 +33,19 @@
 #include <ghcli/repos.h>
 
 int github_get_repos(
-    const char  *owner,
-    int          max,
-    ghcli_repo **out);
+	const char  *owner,
+	int          max,
+	ghcli_repo **out);
 
 int github_get_own_repos(
-    int          max,
-    ghcli_repo **out);
+	int          max,
+	ghcli_repo **out);
 
 void github_repo_delete(
-    const char *owner,
-    const char *repo);
+	const char *owner,
+	const char *repo);
 
 ghcli_repo *github_repo_create(
-    const ghcli_repo_create_options *options);
+	const ghcli_repo_create_options *options);
 
 #endif /* GITHUB_REPOS_H */

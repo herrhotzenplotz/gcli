@@ -38,44 +38,44 @@ typedef struct ghcli_gist_file ghcli_gist_file;
 typedef struct ghcli_new_gist  ghcli_new_gist;
 
 struct ghcli_gist_file {
-    sn_sv  filename;
-    sn_sv  language;
-    sn_sv  url;
-    sn_sv  type;
-    size_t size;
+	sn_sv  filename;
+	sn_sv  language;
+	sn_sv  url;
+	sn_sv  type;
+	size_t size;
 };
 
 struct ghcli_gist {
-    sn_sv            id;
-    sn_sv            owner;
-    sn_sv            url;
-    sn_sv            date;
-    sn_sv            git_pull_url;
-    sn_sv            description;
-    ghcli_gist_file *files;
-    size_t           files_size;
+	sn_sv            id;
+	sn_sv            owner;
+	sn_sv            url;
+	sn_sv            date;
+	sn_sv            git_pull_url;
+	sn_sv            description;
+	ghcli_gist_file *files;
+	size_t           files_size;
 };
 
 struct ghcli_new_gist {
-    FILE       *file;
-    const char *file_name;
-    const char *gist_description;
+	FILE       *file;
+	const char *file_name;
+	const char *gist_description;
 };
 
 int ghcli_get_gists(
-    const char *user,
-    int max,
-    ghcli_gist **out);
+	const char *user,
+	int max,
+	ghcli_gist **out);
 ghcli_gist *ghcli_get_gist(
-    const char *gist_id);
+	const char *gist_id);
 void ghcli_print_gists_table(
-    enum ghcli_output_order  order,
-    ghcli_gist              *gists,
-    int                      gists_size);
+	enum ghcli_output_order  order,
+	ghcli_gist              *gists,
+	int                      gists_size);
 void ghcli_create_gist(
-    ghcli_new_gist);
+	ghcli_new_gist);
 void ghcli_delete_gist(
-    const char *gist_id,
-    bool        always_yes);
+	const char *gist_id,
+	bool        always_yes);
 
 #endif /* GISTS_H */

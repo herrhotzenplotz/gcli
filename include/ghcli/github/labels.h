@@ -33,17 +33,17 @@
 #include <ghcli/labels.h>
 
 size_t github_get_labels(
-    const char   *owner,
-    const char   *reponame,
-    int           max,
-    ghcli_label **out);
+	const char   *owner,
+	const char   *reponame,
+	int           max,
+	ghcli_label **out);
 void github_create_label(
-    const char  *owner,
-    const char  *repo,
-    ghcli_label *label);
+	const char  *owner,
+	const char  *repo,
+	ghcli_label *label);
 void github_delete_label(
-    const char *owner,
-    const char *repo,
-    const char *label);
+	const char *owner,
+	const char *repo,
+	const char *label);
 
 #endif /* GITHUB_LABELS_H */

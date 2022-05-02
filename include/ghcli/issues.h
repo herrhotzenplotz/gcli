@@ -40,77 +40,77 @@ typedef struct ghcli_issue_details ghcli_issue_details;
 typedef struct ghcli_submit_issue_options ghcli_submit_issue_options;
 
 struct ghcli_issue {
-    const char *title;
-    const char *state;
-    int         number;
-    int         id;
+	const char *title;
+	const char *state;
+	int         number;
+	int         id;
 };
 
 struct ghcli_issue_details {
-    int     number;
-    sn_sv   title;
-    sn_sv   created_at;
-    sn_sv   author;
-    sn_sv   state;
-    int     comments;
-    bool    locked;
-    sn_sv   body;
-    sn_sv  *labels;
-    size_t  labels_size;
-    sn_sv  *assignees;
-    size_t  assignees_size;
+	int     number;
+	sn_sv   title;
+	sn_sv   created_at;
+	sn_sv   author;
+	sn_sv   state;
+	int     comments;
+	bool    locked;
+	sn_sv   body;
+	sn_sv  *labels;
+	size_t  labels_size;
+	sn_sv  *assignees;
+	size_t  assignees_size;
 };
 
 struct ghcli_submit_issue_options {
-    sn_sv owner;
-    sn_sv repo;
-    sn_sv title;
-    sn_sv body;
-    bool  always_yes;
+	sn_sv owner;
+	sn_sv repo;
+	sn_sv title;
+	sn_sv body;
+	bool  always_yes;
 };
 
 int  ghcli_get_issues(
-    const char   *owner,
-    const char   *reponame,
-    bool          all,
-    int           max,
-    ghcli_issue **out);
+	const char   *owner,
+	const char   *reponame,
+	bool          all,
+	int           max,
+	ghcli_issue **out);
 void ghcli_issues_free(
-    ghcli_issue *it,
-    int          size);
+	ghcli_issue *it,
+	int          size);
 void ghcli_print_issues_table(
-    enum ghcli_output_order  order,
-    ghcli_issue             *issues,
-    int                      issues_size);
+	enum ghcli_output_order  order,
+	ghcli_issue             *issues,
+	int                      issues_size);
 void ghcli_issue_summary(
-    const char *owner,
-    const char *reponame,
-    int         issue_number);
+	const char *owner,
+	const char *reponame,
+	int         issue_number);
 void ghcli_issue_close(
-    const char *owner,
-    const char *repo,
-    int issue_number);
+	const char *owner,
+	const char *repo,
+	int issue_number);
 void ghcli_issue_reopen(
-    const char *owner,
-    const char *repo,
-    int         issue_number);
+	const char *owner,
+	const char *repo,
+	int         issue_number);
 void ghcli_issue_submit(ghcli_submit_issue_options);
 void ghcli_issue_assign(
-    const char *owner,
-    const char *repo,
-    int         issue_number,
-    const char *assignee);
+	const char *owner,
+	const char *repo,
+	int         issue_number,
+	const char *assignee);
 void ghcli_issue_add_labels(
-    const char *owner,
-    const char *repo,
-    int         issue_number,
-    const char *labels[],
-    size_t      labels_size);
+	const char *owner,
+	const char *repo,
+	int         issue_number,
+	const char *labels[],
+	size_t      labels_size);
 void ghcli_issue_remove_labels(
-    const char *owner,
-    const char *repo,
-    int         issue_number,
-    const char *labels[],
-    size_t      labels_size);
+	const char *owner,
+	const char *repo,
+	int         issue_number,
+	const char *labels[],
+	size_t      labels_size);
 
 #endif /* ISSUES_H */

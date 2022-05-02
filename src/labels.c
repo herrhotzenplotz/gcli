@@ -33,46 +33,46 @@
 
 size_t
 ghcli_get_labels(
-    const char   *owner,
-    const char   *reponame,
-    int           max,
-    ghcli_label **out)
+	const char   *owner,
+	const char   *reponame,
+	int           max,
+	ghcli_label **out)
 {
-    return ghcli_forge()->get_labels(owner, reponame, max, out);
+	return ghcli_forge()->get_labels(owner, reponame, max, out);
 }
 
 void
 ghcli_free_labels(ghcli_label *labels, size_t labels_size)
 {
-    for (size_t i = 0; i < labels_size; ++i) {
-        free(labels[i].name);
-        free(labels[i].description);
-    }
-    free(labels);
+	for (size_t i = 0; i < labels_size; ++i) {
+		free(labels[i].name);
+		free(labels[i].description);
+	}
+	free(labels);
 }
 
 void
 ghcli_print_labels(const ghcli_label *labels, size_t labels_size)
 {
-    printf("%10.10s %-15.15s %s\n", "ID", "NAME", "DESCRIPTION");
+	printf("%10.10s %-15.15s %s\n", "ID", "NAME", "DESCRIPTION");
 
-    for (size_t i = 0; i < labels_size; ++i) {
-        printf(
-            "%10.10ld %s%-15.15s%s %s\n",
-            labels[i].id,
-            ghcli_setcolor256(labels[i].color), labels[i].name, ghcli_resetcolor(),
-            labels[i].description);
-    }
+	for (size_t i = 0; i < labels_size; ++i) {
+		printf(
+			"%10.10ld %s%-15.15s%s %s\n",
+			labels[i].id,
+			ghcli_setcolor256(labels[i].color), labels[i].name, ghcli_resetcolor(),
+			labels[i].description);
+	}
 }
 
 void
 ghcli_create_label(const char *owner, const char *repo, ghcli_label *label)
 {
-    ghcli_forge()->create_label(owner, repo, label);
+	ghcli_forge()->create_label(owner, repo, label);
 }
 
 void
 ghcli_delete_label(const char *owner, const char *repo, const char *label)
 {
-    ghcli_forge()->delete_label(owner, repo, label);
+	ghcli_forge()->delete_label(owner, repo, label);
 }

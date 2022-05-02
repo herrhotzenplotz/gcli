@@ -47,291 +47,291 @@ typedef struct ghcli_forge_descriptor ghcli_forge_descriptor;
  * Struct of function pointers to perform actions in the given
  * forge. It is like a plugin system to dispatch. */
 struct ghcli_forge_descriptor {
-    /**
-     * Submit a comment to a pull/mr or issue */
-    void (*perform_submit_comment)(
-        ghcli_submit_comment_opts  opts,
-        ghcli_fetch_buffer        *out);
+	/**
+	 * Submit a comment to a pull/mr or issue */
+	void (*perform_submit_comment)(
+		ghcli_submit_comment_opts  opts,
+		ghcli_fetch_buffer        *out);
 
-    /**
-     * List comments on the given issue */
-    int (*get_issue_comments)(
-        const char     *owner,
-        const char     *repo,
-        int             issue,
-        ghcli_comment **out);
+	/**
+	 * List comments on the given issue */
+	int (*get_issue_comments)(
+		const char     *owner,
+		const char     *repo,
+		int             issue,
+		ghcli_comment **out);
 
-    /**
-     * List comments on the given PR */
-    int (*get_pull_comments)(
-        const char     *owner,
-        const char     *repo,
-        int             pr,
-        ghcli_comment **out);
+	/**
+	 * List comments on the given PR */
+	int (*get_pull_comments)(
+		const char     *owner,
+		const char     *repo,
+		int             pr,
+		ghcli_comment **out);
 
-    /**
-     * List forks of the given repo */
-    int (*get_forks)(
-        const char  *owner,
-        const char  *repo,
-        int          max,
-        ghcli_fork **out);
+	/**
+	 * List forks of the given repo */
+	int (*get_forks)(
+		const char  *owner,
+		const char  *repo,
+		int          max,
+		ghcli_fork **out);
 
-    /**
-     * Fork the given repo into the owner _in */
-    void (*fork_create)(
-        const char *owner,
-        const char *repo,
-        const char *_in);
+	/**
+	 * Fork the given repo into the owner _in */
+	void (*fork_create)(
+		const char *owner,
+		const char *repo,
+		const char *_in);
 
-    /**
-     * Get a list of issues on the given repo */
-    int (*get_issues)(
-        const char   *owner,
-        const char   *repo,
-        bool          all,
-        int           max,
-        ghcli_issue **out);
+	/**
+	 * Get a list of issues on the given repo */
+	int (*get_issues)(
+		const char   *owner,
+		const char   *repo,
+		bool          all,
+		int           max,
+		ghcli_issue **out);
 
-    /**
-     * Get a summary of an issue */
-    void (*get_issue_summary)(
-        const char          *owner,
-        const char          *repo,
-        int                  issue_number,
-        ghcli_issue_details *out);
+	/**
+	 * Get a summary of an issue */
+	void (*get_issue_summary)(
+		const char          *owner,
+		const char          *repo,
+		int                  issue_number,
+		ghcli_issue_details *out);
 
-    /**
-     * Close the given issue */
-    void (*issue_close)(
-        const char *owner,
-        const char *repo,
-        int         issue_number);
+	/**
+	 * Close the given issue */
+	void (*issue_close)(
+		const char *owner,
+		const char *repo,
+		int         issue_number);
 
-    /**
-     * Reopen the given issue */
-    void (*issue_reopen)(
-        const char *owner,
-        const char *repo,
-        int         issue_number);
+	/**
+	 * Reopen the given issue */
+	void (*issue_reopen)(
+		const char *owner,
+		const char *repo,
+		int         issue_number);
 
-    /**
-     * Assign an issue to a user */
-    void (*issue_assign)(
-        const char *owner,
-        const char *repo,
-        int         issue_number,
-        const char *assignee);
+	/**
+	 * Assign an issue to a user */
+	void (*issue_assign)(
+		const char *owner,
+		const char *repo,
+		int         issue_number,
+		const char *assignee);
 
-    /**
-     * Add labels to issues */
-    void (*issue_add_labels)(
-        const char *owner,
-        const char *repo,
-        int         issue,
-        const char *labels[],
-        size_t      labels_size);
+	/**
+	 * Add labels to issues */
+	void (*issue_add_labels)(
+		const char *owner,
+		const char *repo,
+		int         issue,
+		const char *labels[],
+		size_t      labels_size);
 
-    /**
-     * Removes labels from issues */
-    void (*issue_remove_labels)(
-        const char *owner,
-        const char *repo,
-        int         issue,
-        const char *labels[],
-        size_t      labels_size);
+	/**
+	 * Removes labels from issues */
+	void (*issue_remove_labels)(
+		const char *owner,
+		const char *repo,
+		int         issue,
+		const char *labels[],
+		size_t      labels_size);
 
-    /**
-     * Submit an issue */
-    void (*perform_submit_issue)(
-        ghcli_submit_issue_options  opts,
-        ghcli_fetch_buffer         *out);
+	/**
+	 * Submit an issue */
+	void (*perform_submit_issue)(
+		ghcli_submit_issue_options  opts,
+		ghcli_fetch_buffer         *out);
 
-    /**
-     * Get a list of PRs/MRs on the given repo */
-    int (*get_prs)(
-        const char  *owner,
-        const char  *reponame,
-        bool         all,
-        int          max,
-        ghcli_pull **out);
+	/**
+	 * Get a list of PRs/MRs on the given repo */
+	int (*get_prs)(
+		const char  *owner,
+		const char  *reponame,
+		bool         all,
+		int          max,
+		ghcli_pull **out);
 
-    /**
-     * Print a diff of the changes of a PR/MR to the stream */
-    void (*print_pr_diff)(
-        FILE       *stream,
-        const char *owner,
-        const char *reponame,
-        int         pr_number);
+	/**
+	 * Print a diff of the changes of a PR/MR to the stream */
+	void (*print_pr_diff)(
+		FILE       *stream,
+		const char *owner,
+		const char *reponame,
+		int         pr_number);
 
-    /**
-     * Merge the given PR/MR */
-    void (*pr_merge)(
-        const char *owner,
-        const char *reponame,
-        int         pr_number);
+	/**
+	 * Merge the given PR/MR */
+	void (*pr_merge)(
+		const char *owner,
+		const char *reponame,
+		int         pr_number);
 
-    /**
-     * Reopen the given PR/MR */
-    void (*pr_reopen)(
-        const char *owner,
-        const char *reponame,
-        int         pr_number);
+	/**
+	 * Reopen the given PR/MR */
+	void (*pr_reopen)(
+		const char *owner,
+		const char *reponame,
+		int         pr_number);
 
-    /**
-     * Close the given PR/MR */
-    void (*pr_close)(
-        const char *owner,
-        const char *reponame,
-        int         pr_number);
+	/**
+	 * Close the given PR/MR */
+	void (*pr_close)(
+		const char *owner,
+		const char *reponame,
+		int         pr_number);
 
-    /**
-     * Submit PR/MR */
-    void (*perform_submit_pr)(
-        ghcli_submit_pull_options  opts,
-        ghcli_fetch_buffer        *out);
+	/**
+	 * Submit PR/MR */
+	void (*perform_submit_pr)(
+		ghcli_submit_pull_options  opts,
+		ghcli_fetch_buffer        *out);
 
-    /**
-     * Get a list of commits in the given PR/MR */
-    int (*get_pull_commits)(
-        const char    *owner,
-        const char    *repo,
-        int            pr_number,
-        ghcli_commit **out);
+	/**
+	 * Get a list of commits in the given PR/MR */
+	int (*get_pull_commits)(
+		const char    *owner,
+		const char    *repo,
+		int            pr_number,
+		ghcli_commit **out);
 
-    /**
-     * Get a summary of the given PR/MR */
-    void (*get_pull_summary)(
-        const char         *owner,
-        const char         *repo,
-        int                 pr_number,
-        ghcli_pull_summary *out);
+	/**
+	 * Get a summary of the given PR/MR */
+	void (*get_pull_summary)(
+		const char         *owner,
+		const char         *repo,
+		int                 pr_number,
+		ghcli_pull_summary *out);
 
-    /**
-     * Add labels to Pull Requests */
-    void (*pr_add_labels)(
-        const char *owner,
-        const char *repo,
-        int         pr,
-        const char *labels[],
-        size_t      labels_size);
+	/**
+	 * Add labels to Pull Requests */
+	void (*pr_add_labels)(
+		const char *owner,
+		const char *repo,
+		int         pr,
+		const char *labels[],
+		size_t      labels_size);
 
-    /**
-     * Removes labels from Pull Requests */
-    void (*pr_remove_labels)(
-        const char *owner,
-        const char *repo,
-        int         pr,
-        const char *labels[],
-        size_t      labels_size);
+	/**
+	 * Removes labels from Pull Requests */
+	void (*pr_remove_labels)(
+		const char *owner,
+		const char *repo,
+		int         pr,
+		const char *labels[],
+		size_t      labels_size);
 
-    /**
-     * Get a list of releases in the given repo */
-    int (*get_releases)(
-        const char     *owner,
-        const char     *repo,
-        int             max,
-        ghcli_release **out);
+	/**
+	 * Get a list of releases in the given repo */
+	int (*get_releases)(
+		const char     *owner,
+		const char     *repo,
+		int             max,
+		ghcli_release **out);
 
-    /**
-     * Create a new release */
-    void (*create_release)(
-        const ghcli_new_release *release);
+	/**
+	 * Create a new release */
+	void (*create_release)(
+		const ghcli_new_release *release);
 
-    /**
-     * Delete the release */
-    void (*delete_release)(
-        const char *owner,
-        const char *repo,
-        const char *id);
+	/**
+	 * Delete the release */
+	void (*delete_release)(
+		const char *owner,
+		const char *repo,
+		const char *id);
 
-    /**
-     * Get a list of labels that are valid in the given repository */
-    size_t (*get_labels)(
-        const char   *owner,
-        const char   *repo,
-        int           max,
-        ghcli_label **out);
+	/**
+	 * Get a list of labels that are valid in the given repository */
+	size_t (*get_labels)(
+		const char   *owner,
+		const char   *repo,
+		int           max,
+		ghcli_label **out);
 
-    /**
-     * Create the given label
-     *
-     * The ID will be filled in for you */
-    void (*create_label)(
-        const char  *owner,
-        const char  *repo,
-        ghcli_label *label);
+	/**
+	 * Create the given label
+	 *
+	 * The ID will be filled in for you */
+	void (*create_label)(
+		const char  *owner,
+		const char  *repo,
+		ghcli_label *label);
 
-    /**
-     * Delete the given label */
-    void (*delete_label)(
-        const char *owner,
-        const char *repo,
-        const char *label);
+	/**
+	 * Delete the given label */
+	void (*delete_label)(
+		const char *owner,
+		const char *repo,
+		const char *label);
 
-    /**
-     * Get a list of repos of the given owner */
-    int (*get_repos)(
-        const char  *owner,
-        int          max,
-        ghcli_repo **out);
+	/**
+	 * Get a list of repos of the given owner */
+	int (*get_repos)(
+		const char  *owner,
+		int          max,
+		ghcli_repo **out);
 
-    /**
-     * Get a list of your own repos */
-    int (*get_own_repos)(
-        int          max,
-        ghcli_repo **out);
+	/**
+	 * Get a list of your own repos */
+	int (*get_own_repos)(
+		int          max,
+		ghcli_repo **out);
 
-    /**
-     * Create the given repo */
-    ghcli_repo *(*repo_create)(
-        const ghcli_repo_create_options *options);
+	/**
+	 * Create the given repo */
+	ghcli_repo *(*repo_create)(
+		const ghcli_repo_create_options *options);
 
-    /**
-     * Delete the given repo */
-    void (*repo_delete)(
-        const char *owner,
-        const char *repo);
+	/**
+	 * Delete the given repo */
+	void (*repo_delete)(
+		const char *owner,
+		const char *repo);
 
-    /**
-     * Fetch MR/PR reviews including comments */
-    size_t (*get_reviews)(
-        const char       *owner,
-        const char       *repo,
-        int               pr,
-        ghcli_pr_review **out);
+	/**
+	 * Fetch MR/PR reviews including comments */
+	size_t (*get_reviews)(
+		const char       *owner,
+		const char       *repo,
+		int               pr,
+		ghcli_pr_review **out);
 
-    /**
-     * Status summary for the account */
-    size_t (*get_notifications)(ghcli_notification **notifications, int count);
+	/**
+	 * Status summary for the account */
+	size_t (*get_notifications)(ghcli_notification **notifications, int count);
 
-    /**
-     * Mark notification with the given id as read
-     *
-     * Returns 0 on success or negative code on failure. */
-    void (*notification_mark_as_read)(const char *id);
+	/**
+	 * Mark notification with the given id as read
+	 *
+	 * Returns 0 on success or negative code on failure. */
+	void (*notification_mark_as_read)(const char *id);
 
-    /**
-     * Get an the http authentication header for use by curl */
-    char *(*get_authheader)(void);
+	/**
+	 * Get an the http authentication header for use by curl */
+	char *(*get_authheader)(void);
 
-    /**
-     * Get the user account name */
-    sn_sv (*get_account)(void);
+	/**
+	 * Get the user account name */
+	sn_sv (*get_account)(void);
 
-    /**
-     * Get the error string from the API */
-    const char *(*get_api_error_string)(ghcli_fetch_buffer *);
+	/**
+	 * Get the error string from the API */
+	const char *(*get_api_error_string)(ghcli_fetch_buffer *);
 
-    /**
-     * A key in the user json object sent by the API that represents
-     * the user name */
-    const char *user_object_key;
+	/**
+	 * A key in the user json object sent by the API that represents
+	 * the user name */
+	const char *user_object_key;
 
-    /**
-     * A key in responses by the API that represents the URL for the
-     * object being operated on */
-    const char *html_url_key;
+	/**
+	 * A key in responses by the API that represents the URL for the
+	 * object being operated on */
+	const char *html_url_key;
 };
 
 const ghcli_forge_descriptor *ghcli_forge(void);

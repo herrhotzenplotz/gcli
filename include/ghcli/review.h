@@ -36,45 +36,45 @@ typedef struct ghcli_pr_review         ghcli_pr_review;
 typedef struct ghcli_pr_review_comment ghcli_pr_review_comment;
 
 struct ghcli_pr_review_comment {
-    char *id;
-    char *author;
-    char *date;
-    char *diff;
-    char *path;
-    char *body;
-    int   original_position;
+	char *id;
+	char *author;
+	char *date;
+	char *diff;
+	char *path;
+	char *body;
+	int   original_position;
 };
 
 struct ghcli_pr_review {
-    char                    *id;
-    char                    *author;
-    char                    *date;
-    char                    *state;
-    char                    *body;
-    ghcli_pr_review_comment *comments;
-    size_t                   comments_size;
+	char                    *id;
+	char                    *author;
+	char                    *date;
+	char                    *state;
+	char                    *body;
+	ghcli_pr_review_comment *comments;
+	size_t                   comments_size;
 };
 
 void ghcli_review_reviews_free(
-    ghcli_pr_review *it,
-    size_t size);
+	ghcli_pr_review *it,
+	size_t size);
 
 void ghcli_review_comments_free(
-    ghcli_pr_review_comment *it,
-    size_t size);
+	ghcli_pr_review_comment *it,
+	size_t size);
 
 size_t ghcli_review_get_reviews(
-    const char *owner,
-    const char *repo,
-    int pr,
-    ghcli_pr_review **out);
+	const char *owner,
+	const char *repo,
+	int pr,
+	ghcli_pr_review **out);
 
 void ghcli_review_print_review_table(
-    ghcli_pr_review *,
-    size_t);
+	ghcli_pr_review *,
+	size_t);
 
 void ghcli_review_print_comments(
-    ghcli_pr_review_comment *comments,
-    size_t comments_size);
+	ghcli_pr_review_comment *comments,
+	size_t comments_size);
 
 #endif /* REVIEW_H */

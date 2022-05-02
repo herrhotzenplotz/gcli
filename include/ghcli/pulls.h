@@ -42,84 +42,84 @@ typedef struct ghcli_commit              ghcli_commit;
 typedef struct ghcli_pull_summary        ghcli_pull_summary;
 
 struct ghcli_pull {
-    const char *title, *state, *creator;
-    int number, id;
-    bool merged;
+	const char *title, *state, *creator;
+	int number, id;
+	bool merged;
 };
 
 struct ghcli_pull_summary {
-    const char *author, *state, *title, *body, *created_at, *commits_link;
-    const char *head_label, *base_label;
-    int         id, number, comments, additions, deletions, commits, changed_files;
-    sn_sv      *labels;
-    size_t      labels_size;
-    bool        merged, mergeable, draft;
+	const char *author, *state, *title, *body, *created_at, *commits_link;
+	const char *head_label, *base_label;
+	int         id, number, comments, additions, deletions, commits, changed_files;
+	sn_sv      *labels;
+	size_t      labels_size;
+	bool        merged, mergeable, draft;
 };
 
 struct ghcli_commit {
-    const char *sha, *message, *date, *author, *email;
+	const char *sha, *message, *date, *author, *email;
 };
 
 /* Options to submit to the gh api for creating a PR */
 struct ghcli_submit_pull_options {
-    sn_sv in;
-    sn_sv from;
-    sn_sv to;
-    sn_sv title;
-    sn_sv body;
-    int   draft;
-    bool  always_yes;
+	sn_sv in;
+	sn_sv from;
+	sn_sv to;
+	sn_sv title;
+	sn_sv body;
+	int   draft;
+	bool  always_yes;
 };
 
 int ghcli_get_prs(
-    const char  *owner,
-    const char  *reponame,
-    bool         all,
-    int          max,
-    ghcli_pull **out);
+	const char  *owner,
+	const char  *reponame,
+	bool         all,
+	int          max,
+	ghcli_pull **out);
 void ghcli_pulls_free(
-    ghcli_pull *it,
-    int         n);
+	ghcli_pull *it,
+	int         n);
 void ghcli_pulls_summary_free(
-    ghcli_pull_summary *it);
+	ghcli_pull_summary *it);
 void ghcli_print_pr_table(
-    enum ghcli_output_order  order,
-    ghcli_pull              *pulls,
-    int                      pulls_size);
+	enum ghcli_output_order  order,
+	ghcli_pull              *pulls,
+	int                      pulls_size);
 void ghcli_print_pr_diff(
-    FILE       *stream,
-    const char *owner,
-    const char *reponame,
-    int         pr_number);
+	FILE       *stream,
+	const char *owner,
+	const char *reponame,
+	int         pr_number);
 void ghcli_pr_summary(
-    const char *owner,
-    const char *reponame,
-    int         pr_number);
+	const char *owner,
+	const char *reponame,
+	int         pr_number);
 void ghcli_pr_submit(
-    ghcli_submit_pull_options);
+	ghcli_submit_pull_options);
 void ghcli_pr_merge(
-    const char *owner,
-    const char *reponame,
-    int         pr_number);
+	const char *owner,
+	const char *reponame,
+	int         pr_number);
 void ghcli_pr_close(
-    const char *owner,
-    const char *reponame,
-    int         pr_number);
+	const char *owner,
+	const char *reponame,
+	int         pr_number);
 void ghcli_pr_reopen(
-    const char *owner,
-    const char *reponame,
-    int         pr_number);
+	const char *owner,
+	const char *reponame,
+	int         pr_number);
 void ghcli_pr_add_labels(
-    const char *owner,
-    const char *repo,
-    int         pr_number,
-    const char *labels[],
-    size_t      labels_size);
+	const char *owner,
+	const char *repo,
+	int         pr_number,
+	const char *labels[],
+	size_t      labels_size);
 void ghcli_pr_remove_labels(
-    const char *owner,
-    const char *repo,
-    int         pr_number,
-    const char *labels[],
-    size_t      labels_size);
+	const char *owner,
+	const char *repo,
+	int         pr_number,
+	const char *labels[],
+	size_t      labels_size);
 
 #endif /* PULLS_H */

@@ -33,17 +33,17 @@
 #include <ghcli/labels.h>
 
 size_t gitlab_get_labels(
-    const char   *owner,
-    const char   *reponame,
-    int           max,
-    ghcli_label **out);
+	const char   *owner,
+	const char   *reponame,
+	int           max,
+	ghcli_label **out);
 void gitlab_create_label(
-    const char  *owner,
-    const char  *repo,
-    ghcli_label *label);
+	const char  *owner,
+	const char  *repo,
+	ghcli_label *label);
 void gitlab_delete_label(
-    const char *owner,
-    const char *repo,
-    const char *label);
+	const char *owner,
+	const char *repo,
+	const char *label);
 
 #endif /* GITLAB_LABELS_H */

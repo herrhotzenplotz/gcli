@@ -33,9 +33,9 @@
 #include <ghcli/review.h>
 
 size_t github_review_get_reviews(
-    const char       *owner,
-    const char       *repo,
-    int               pr,
-    ghcli_pr_review **out);
+	const char       *owner,
+	const char       *repo,
+	int               pr,
+	ghcli_pr_review **out);
 
 #endif /* GITHUB_REVIEW_H */

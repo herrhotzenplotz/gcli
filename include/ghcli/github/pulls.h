@@ -34,48 +34,48 @@
 #include <ghcli/pulls.h>
 
 int github_get_prs(
-    const char  *owner,
-    const char  *reponame,
-    bool         all,
-    int          max,
-    ghcli_pull **out);
+	const char  *owner,
+	const char  *reponame,
+	bool         all,
+	int          max,
+	ghcli_pull **out);
 
 void github_print_pr_diff(
-    FILE       *stream,
-    const char *owner,
-    const char *reponame,
-    int         pr_number);
+	FILE       *stream,
+	const char *owner,
+	const char *reponame,
+	int         pr_number);
 
 void github_pr_merge(
-    const char *owner,
-    const char *reponame,
-    int         pr_number);
+	const char *owner,
+	const char *reponame,
+	int         pr_number);
 
 void github_pr_reopen(
-    const char *owner,
-    const char *reponame,
-    int         pr_number);
+	const char *owner,
+	const char *reponame,
+	int         pr_number);
 
 void github_pr_close(
-    const char *owner,
-    const char *reponame,
-    int         pr_number);
+	const char *owner,
+	const char *reponame,
+	int         pr_number);
 
 void github_perform_submit_pr(
-    ghcli_submit_pull_options  opts,
-    ghcli_fetch_buffer        *out);
+	ghcli_submit_pull_options  opts,
+	ghcli_fetch_buffer        *out);
 
 int github_get_pull_commits(
-    const char    *owner,
-    const char    *repo,
-    int            pr_number,
-    ghcli_commit **out);
+	const char    *owner,
+	const char    *repo,
+	int            pr_number,
+	ghcli_commit **out);
 
 void github_get_pull_summary(
-    const char         *owner,
-    const char         *repo,
-    int                 pr_number,
-    ghcli_pull_summary *out);
+	const char         *owner,
+	const char         *repo,
+	int                 pr_number,
+	ghcli_pull_summary *out);
 
 sn_sv github_pull_try_derive_head(void);
 

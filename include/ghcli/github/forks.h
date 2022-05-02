@@ -33,14 +33,14 @@
 #include <ghcli/forks.h>
 
 int github_get_forks(
-    const char  *owner,
-    const char  *repo,
-    int          max,
-    ghcli_fork **out);
+	const char  *owner,
+	const char  *repo,
+	int          max,
+	ghcli_fork **out);
 
 void github_fork_create(
-    const char *owner,
-    const char *repo,
-    const char *_in);
+	const char *owner,
+	const char *repo,
+	const char *_in);
 
 #endif /* GITHUB_FORKS_H */

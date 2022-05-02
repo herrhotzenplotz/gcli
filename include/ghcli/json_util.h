@@ -61,30 +61,30 @@ size_t      ghcli_read_sv_list(json_stream *input, sn_sv **out);
 static inline sn_sv
 get_user_sv(json_stream *input)
 {
-    char *user_str = (char *)get_user(input);
-    return SV(user_str);
+	char *user_str = (char *)get_user(input);
+	return SV(user_str);
 }
 
 static inline const char *
 ghcli_json_bool(bool it)
 {
-    return it ? "true" : "false";
+	return it ? "true" : "false";
 }
 
-#define SKIP_OBJECT_VALUE(stream)                       \
-    do {                                                \
-        enum json_type value_type = json_next(stream);  \
-                                                        \
-        switch (value_type) {                           \
-        case JSON_ARRAY:                                \
-            json_skip_until(stream, JSON_ARRAY_END);    \
-            break;                                      \
-        case JSON_OBJECT:                               \
-            json_skip_until(stream, JSON_OBJECT_END);   \
-            break;                                      \
-        default:                                        \
-            break;                                      \
-        }                                               \
-    } while (0)
+#define SKIP_OBJECT_VALUE(stream)					\
+	do {								\
+		enum json_type value_type = json_next(stream);		\
+									\
+		switch (value_type) {					\
+		case JSON_ARRAY:					\
+			json_skip_until(stream, JSON_ARRAY_END);	\
+			break;						\
+		case JSON_OBJECT:					\
+			json_skip_until(stream, JSON_OBJECT_END);	\
+			break;						\
+		default:						\
+			break;						\
+		}							\
+	} while (0)
 
 #endif /* JSON_UTIL_H */

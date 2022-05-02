@@ -39,32 +39,32 @@ typedef struct ghcli_comment ghcli_comment;
 typedef struct ghcli_submit_comment_opts ghcli_submit_comment_opts;
 
 struct ghcli_comment {
-    const char *author;    /* Login name of the comment author */
-    const char *date;      /* Creation date of the comment     */
-    int         id;        /* id of the comment                */
-    const char *body;      /* Raw text of the comment          */
+	const char *author;    /* Login name of the comment author */
+	const char *date;      /* Creation date of the comment     */
+	int         id;        /* id of the comment                */
+	const char *body;      /* Raw text of the comment          */
 };
 
 struct ghcli_submit_comment_opts {
-    enum comment_target_type { ISSUE_COMMENT, PR_COMMENT }  target_type;
-    const char                                             *owner, *repo;
-    int                                                     target_id;
-    sn_sv                                                   message;
-    bool                                                    always_yes;
+	enum comment_target_type { ISSUE_COMMENT, PR_COMMENT }  target_type;
+	const char                                             *owner, *repo;
+	int                                                     target_id;
+	sn_sv                                                   message;
+	bool                                                    always_yes;
 };
 
 void ghcli_print_comment_list(
-    ghcli_comment *comments,
-    size_t comments_size);
+	ghcli_comment *comments,
+	size_t comments_size);
 void ghcli_issue_comments(
-    const char *owner,
-    const char *repo,
-    int issue);
+	const char *owner,
+	const char *repo,
+	int issue);
 void ghcli_pull_comments(
-    const char *owner,
-    const char *repo,
-    int issue);
+	const char *owner,
+	const char *repo,
+	int issue);
 void ghcli_comment_submit(
-    ghcli_submit_comment_opts opts);
+	ghcli_submit_comment_opts opts);
 
 #endif /* COMMENTS_H */

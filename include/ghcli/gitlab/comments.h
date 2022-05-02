@@ -34,19 +34,19 @@
 #include <ghcli/curl.h>
 
 void gitlab_perform_submit_comment(
-    ghcli_submit_comment_opts  opts,
-    ghcli_fetch_buffer        *out);
+	ghcli_submit_comment_opts  opts,
+	ghcli_fetch_buffer        *out);
 
 int gitlab_get_issue_comments(
-    const char     *owner,
-    const char     *repo,
-    int             issue,
-    ghcli_comment **out);
+	const char     *owner,
+	const char     *repo,
+	int             issue,
+	ghcli_comment **out);
 
 int gitlab_get_mr_comments(
-    const char     *owner,
-    const char     *repo,
-    int             issue,
-    ghcli_comment **out);
+	const char     *owner,
+	const char     *repo,
+	int             issue,
+	ghcli_comment **out);
 
 #endif /* GITLAB_COMMENTS_H */

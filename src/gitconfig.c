@@ -102,7 +102,7 @@ find_file_in_dotgit(const char *fname)
 			if (strcmp("/", curr_dir_path) == 0) {
 				free(curr_dir_path);
 				closedir(curr_dir);
-				warn("not a git repository");
+				warnx("not a git repository");
 				return NULL;
 			}
 		}

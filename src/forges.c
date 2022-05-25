@@ -163,8 +163,8 @@ ghcli_forge(void)
 		return &gitlab_forge_descriptor;
 	default:
 		errx(1,
-		     "error: cannot determine forge type. try forcing an account "
-		     "with -a or create a .ghcli file.");
+			 "error: cannot determine forge type. try forcing an account "
+			 "with -a, specifying -t or create a .ghcli file.");
 	}
 	return NULL;
 }

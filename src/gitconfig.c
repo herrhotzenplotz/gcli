@@ -102,7 +102,8 @@ find_file_in_dotgit(const char *fname)
 			if (strcmp("/", curr_dir_path) == 0) {
 				free(curr_dir_path);
 				closedir(curr_dir);
-				errx(1, "error: not a git repository");
+				warn("not a git repository");
+				return NULL;
 			}
 		}
 
@@ -192,7 +193,7 @@ http_extractor(ghcli_gitremote *remote, const char *prefix)
 		remote->forge_type = GHCLI_FORGE_GITLAB;
 	} else {
 		warnx("non-github or non-gitlab https remotes are not supported "
-		      "and will likely cause bugs");
+			  "and will likely cause bugs");
 	}
 
 	pair.length -= prefix_size;
@@ -310,7 +311,10 @@ ghcli_gitconfig_read_gitconfig(void)
 	const char *path   = NULL;
 	sn_sv       buffer = {0};
 
-	path          = ghcli_find_gitconfig();
+	path = ghcli_find_gitconfig();
+	if (!path)
+		return;
+
 	buffer.length = sn_mmap_file(path, (void **)&buffer.data);
 
 	while (buffer.length > 0) {
@@ -359,7 +363,7 @@ ghcli_gitconfig_add_fork_remote(const char *org, const char *repo)
 			if ((pid = fork()) == 0) {
 				printf("[INFO] git remote rename origin upstream\n");
 				execlp("git", "git", "remote",
-				       "rename", "origin", "upstream", NULL);
+					   "rename", "origin", "upstream", NULL);
 			} else if (pid > 0) {
 				int status = 0;
 				waitpid(pid, &status, 0);
@@ -412,8 +416,10 @@ ghcli_gitconfig_get_forgetype(const char *remote_name)
 		}
 	}
 
-	if (!remotes_size)
-		errx(1, "error: no remotes to auto-detect forge");
+	if (!remotes_size) {
+		warn("no remotes to auto-detect forge");
+		return -1;
+	}
 
 	return remotes[0].forge_type;
 }

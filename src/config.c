@@ -55,6 +55,7 @@ static struct ghcli_config {
 
 	const char *override_default_account;
 	const char *override_remote;
+	int         override_forgetype;
 	int         colors_disabled;
 
 	sn_sv  buffer;
@@ -182,7 +183,7 @@ init_local_config(void)
 
 		if (line.length == 0)
 			errx(1, "%s:%d: Unexpected end of line",
-			     path, curr_line);
+				 path, curr_line);
 
 		// Comments
 		if (line.data[0] == '#') {
@@ -272,7 +273,7 @@ parse_section_title(struct config_parser *input)
 	size_t len = 0;
 	if (input->buffer.length == 0)
 		errx(1, "%s:%d: unexpected end of input in section title",
-		     input->filename, input->line);
+			 input->filename, input->line);
 
 
 	while (!isspace(input->buffer.data[len]) && input->buffer.data[len] != '{')
@@ -314,7 +315,7 @@ parse_config_section(struct config_parser *input)
 
 		if (section->entries_size == CONFIG_MAX_ENTRIES)
 			errx(1, "error: too many config entries in section "SV_FMT,
-			     SV_ARGS(section->title));
+				 SV_ARGS(section->title));
 
 		parse_keyvaluepair(input, &section->entries[section->entries_size++]);
 		skip_ws_and_comments(input);
@@ -322,7 +323,7 @@ parse_config_section(struct config_parser *input)
 
 	if (input->buffer.length == 0)
 		errx(1, "%s:%d: missing '}' before end of file",
-		     input->filename, input->line);
+			 input->filename, input->line);
 
 	input->buffer.length -= 1;
 	input->buffer.data   += 1;
@@ -339,22 +340,28 @@ parse_config_file(struct config_parser *input)
 	}
 }
 
-static void
+/**
+ * Try to load up the local config file if it exists. If we succeed,
+ * return 0. Otherwise return -1.
+ */
+static int
 ensure_config(void)
 {
 	char                 *file_path = NULL;
 	struct config_parser  parser    = {0};
 
 	if (config.inited)
-		return;
+		return 0;
 
 	config.inited = true;
 
 	file_path = getenv("XDG_CONFIG_PATH");
 	if (!file_path) {
 		file_path = getenv("HOME");
-		if (!file_path)
-			errx(1, "Neither XDG_CONFIG_PATH nor HOME set in env");
+		if (!file_path) {
+			warnx("Neither XDG_CONFIG_PATH nor HOME set in env");
+			return -1;
+		}
 
 		/*
 		 * Code duplication to avoid leaking pointers */
@@ -363,8 +370,10 @@ ensure_config(void)
 		file_path = sn_asprintf("%s/ghcli/config", file_path);
 	}
 
-	if (access(file_path, R_OK) < 0)
-		err(1, "Cannot access config file at %s", file_path);
+	if (access(file_path, R_OK) < 0) {
+		warn("Cannot access config file at %s", file_path);
+		return -1;
+	}
 
 	int len = sn_mmap_file(file_path, &config.mmap_pointer);
 	if (len < 0)
@@ -380,6 +389,8 @@ ensure_config(void)
 	parse_config_file(&parser);
 
 	free((void *)file_path);
+
+	return 0;
 }
 
 void
@@ -404,10 +415,22 @@ ghcli_config_init(int *argc, char ***argv)
 		  .has_arg = no_argument,
 		  .flag    = &config.colors_disabled,
 		  .val     = 1 },
+		{ .name    = "type",
+		  .has_arg = required_argument,
+		  .flag    = NULL,
+		  .val     = 't' },
+		{ .name    = "quiet",
+		  .has_arg = no_argument,
+		  .flag    = NULL,
+		  .val     = 'q' },
 		{0},
 	};
 
-	while ((ch = getopt_long(*argc, *argv, "+a:r:c", options, NULL)) != -1) {
+	/* Before we parse options, invalidate the override type so it
+	 * doesn't get confused later */
+	config.override_forgetype = -1;
+
+	while ((ch = getopt_long(*argc, *argv, "+a:r:cqt:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'a': {
 			config.override_default_account = optarg;
@@ -417,6 +440,18 @@ ghcli_config_init(int *argc, char ***argv)
 		} break;
 		case 'c': {
 			config.colors_disabled = 1;
+		} break;
+		case 'q': {
+			sn_setquiet(1);
+		} break;
+		case 't': {
+			if (strcmp(optarg, "github") == 0)
+				config.override_forgetype = GHCLI_FORGE_GITHUB;
+			else if (strcmp(optarg, "gitlab") == 0)
+				config.override_forgetype = GHCLI_FORGE_GITLAB;
+			else
+				errx(1, "error: unknown forge type '%s'. "
+					 "Have either github or gitlab.", optarg);
 		} break;
 		case 0: break;
 		case '?':
@@ -544,6 +579,10 @@ ghcli_config_get_override_default_account(void)
 ghcli_forge_type
 ghcli_config_get_forge_type(void)
 {
+	/* Hard override */
+	if (config.override_forgetype >= 0)
+		return config.override_forgetype;
+
 	ensure_config();
 	init_local_config();
 
@@ -554,8 +593,8 @@ ghcli_config_get_forge_type(void)
 		entry = ghcli_config_find_by_key(section, "forge-type");
 		if (sn_sv_null(entry))
 			errx(1,
-			     "error: given default override account not found or "
-			     "missing forge-type");
+				 "error: given default override account not found or "
+				 "missing forge-type");
 	} else {
 		entry = ghcli_local_config_find_by_key("forge-type");
 	}
@@ -569,7 +608,14 @@ ghcli_config_get_forge_type(void)
 			errx(1, "Unknown forge type "SV_FMT, SV_ARGS(entry));
 	}
 
-	return ghcli_gitconfig_get_forgetype(config.override_remote);
+	/* As a last resort, try to infer from the git remote */
+	int type = ghcli_gitconfig_get_forgetype(config.override_remote);
+	if (type < 0)
+		errx(1, "error: cannot infer forge type. "
+			 "use -t <forge-type> to overrride manually.");
+
+	return type;
+
 }
 
 void

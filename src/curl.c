@@ -79,19 +79,19 @@ ghcli_curl_check_api_error(
 
 	if (code != CURLE_OK)
 		errx(1,
-		     "error: request to %s failed\n"
-		     "     : curl error: %s",
-		     url,
-		     curl_easy_strerror(code));
+			 "error: request to %s failed\n"
+			 "     : curl error: %s",
+			 url,
+			 curl_easy_strerror(code));
 
 	curl_easy_getinfo(ghcli_curl_session, CURLINFO_RESPONSE_CODE, &status_code);
 
 	if (status_code >= 300L) {
 		errx(1,
-		     "error: request to %s failed with code %ld\n"
-		     "     : API error: %s",
-		     url, status_code,
-		     ghcli_forge()->get_api_error_string(result));
+			 "error: request to %s failed with code %ld\n"
+			 "     : API error: %s",
+			 url, status_code,
+			 ghcli_forge()->get_api_error_string(result));
 	}
 }
 
@@ -304,7 +304,8 @@ ghcli_fetch_with_method(
 	headers = curl_slist_append(
 		headers,
 		"Content-Type: application/json");
-	headers = curl_slist_append(headers, auth_header);
+	if (auth_header)
+		headers = curl_slist_append(headers, auth_header);
 
 	*out = (ghcli_fetch_buffer) {0};
 

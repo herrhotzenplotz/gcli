@@ -48,7 +48,7 @@ gitlab_default_account_name(void)
 
 		/* Welp, no luck here */
 		if (sn_sv_null(section_name))
-			errx(1, "Config file does not name a default GitLab account name.");
+			warnx("Config file does not name a default GitLab account name.");
 	}
 
 	return section_name;
@@ -57,19 +57,27 @@ gitlab_default_account_name(void)
 char *
 gitlab_get_apibase(void)
 {
-	sn_sv account  = gitlab_default_account_name();
-	sn_sv api_base = ghcli_config_find_by_key(account, "apibase");
+	sn_sv account = gitlab_default_account_name();
+	if (sn_sv_null(account))
+		goto default_val;
 
+	sn_sv api_base = ghcli_config_find_by_key(account, "apibase");
 	if (sn_sv_null(api_base))
-		return "https://gitlab.com/api/v4";
+		goto default_val;
 
 	return sn_sv_to_cstr(api_base);
+
+default_val:
+	return "https://gitlab.com/api/v4";
 }
 
 char *
 gitlab_get_authheader(void)
 {
 	sn_sv account = gitlab_default_account_name();
+	if (sn_sv_null(account))
+		return NULL;
+
 	sn_sv token = ghcli_config_find_by_key(account, "token");
 	if (sn_sv_null(token))
 		errx(1, "Missing GitLab token");
@@ -80,6 +88,9 @@ sn_sv
 gitlab_get_account(void)
 {
 	sn_sv section = gitlab_default_account_name();
+	if (sn_sv_null(section))
+		return SV_NULL;
+
 	sn_sv account = ghcli_config_find_by_key(section, "account");;
 	if (sn_sv_null(account))
 		errx(1, "Missing GitLab account name");

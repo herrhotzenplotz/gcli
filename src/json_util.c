@@ -40,13 +40,13 @@ static inline void
 barf(const char *message, const char *where)
 {
 	errx(1,
-	     "error: %s.\n"
-	     "       This might be an error on the GitHub api or the result of\n"
-	     "       incorrect usage of cli flags. See ghcli(1) to make sure your\n"
-	     "       flags are correct. If you are certain that all your options\n"
-	     "       were correct, please submit a bug report including the\n"
-	     "       command you invoked and the following information about the\n"
-	     "       error location: function = %s", message, where);
+		 "error: %s.\n"
+		 "       This might be an error on the GitHub api or the result of\n"
+		 "       incorrect usage of cli flags. See ghcli(1) to make sure your\n"
+		 "       flags are correct. If you are certain that all your options\n"
+		 "       were correct, please submit a bug report including the\n"
+		 "       command you invoked and the following information about the\n"
+		 "       error location: function = %s", message, where);
 }
 
 long
@@ -142,8 +142,8 @@ ghcli_json_escape(sn_sv it)
 			if (json_escape_table[c].c == it.data[i]) {
 				size_t len     = strlen(json_escape_table[c].with);
 				memcpy(result.data + result.length,
-				       json_escape_table[c].with,
-				       len);
+					   json_escape_table[c].with,
+					   len);
 				result.length += len;
 				goto next;
 			}
@@ -318,6 +318,10 @@ ghcli_json_advance(struct json_stream *stream, const char *fmt, ...)
 			if (json_next(stream) != JSON_OBJECT_END)
 				errx(1, "Expected object end");
 		}   break;
+		case 'i': {
+			if (json_next(stream) != JSON_NUMBER)
+				errx(1, "Expected integer");
+		}   break;
 		}
 	}
 
@@ -334,7 +338,7 @@ get_parse_int_(json_stream *input, const char *function)
 	result = strtol(string, &endptr, 10);
 	if (endptr != string + strlen(string))
 		err(1, "in %s: unable to parse string field into decimal integer",
-		    function);
+			function);
 
 	return result;
 }

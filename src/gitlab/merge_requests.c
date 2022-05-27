@@ -228,6 +228,8 @@ gitlab_pull_parse_summary(json_stream *input, ghcli_pull_summary *out)
 			out->author = get_user(input);
 		else if (strncmp("source_branch", key, len) == 0)
 			out->head_label = get_string(input);
+		else if (strncmp("sha", key, len) == 0)
+			out->head_sha = get_string(input);
 		else if (strncmp("target_branch", key, len) == 0)
 			out->base_label = get_string(input);
 		else

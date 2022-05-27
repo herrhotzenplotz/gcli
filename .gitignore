@@ -86,3 +86,6 @@ i
 /include/ghcli/github/labels.h~
 /src/github/labels.c~
 /src/github/labels.o
+/include/ghcli/github/checks.h~
+/src/github/checks.c~
+/src/github/checks.o

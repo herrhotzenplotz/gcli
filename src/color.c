@@ -154,10 +154,16 @@ ghcli_state_color_sv(sn_sv state)
 		if (sn_sv_has_prefix(state, "open"))
 			return ghcli_setcolor(GHCLI_COLOR_GREEN);
 
+		if (sn_sv_has_prefix(state, "success"))
+			return ghcli_setcolor(GHCLI_COLOR_GREEN);
+
 		if (sn_sv_has_prefix(state, "merged"))
 			return ghcli_setcolor(GHCLI_COLOR_MAGENTA);
 
 		if (sn_sv_has_prefix(state, "closed"))
+			return ghcli_setcolor(GHCLI_COLOR_RED);
+
+		if (sn_sv_has_prefix(state, "failure"))
 			return ghcli_setcolor(GHCLI_COLOR_RED);
 
 		if (sn_sv_has_prefix(state, "COMMENTED"))

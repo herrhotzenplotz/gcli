@@ -30,7 +30,7 @@
    #+begin_example
    src/editor.o: In function `ghcli_editor_get_user_message':
    editor.c:(.text+0x108): warning: the use of `mktemp' is
-                   dangerous, better use `mkstemp' or `mkdtemp'
+		   dangerous, better use `mkstemp' or `mkdtemp'
    #+end_example
 ** DONE Check for multiple Github remotes and choose the right one
    Solved in commit 4be0ca8. Leave it up to the user to point at the
@@ -52,6 +52,20 @@
 ** TODO Valgrind again
 ** TODO write colors test for big-endian machines
 ** TODO Implement adding/removing labels from github prs
+** TODO CI [83%]
+   - [X] release resources properly
+   - [X] check that we are connecting to github if we ever use the
+     =ci= subcommand [[file:src/ghcli.c::if (ghcli_config_get_forge_type() != GHCLI_FORGE_GITHUB)][see here]]
+   - [X] (maybe) integrate ci checks in status subcommand
+   - [X] Split =status= and =summary= subcommands:
+     - =summary= should print header and commits
+     - =status= should print summary and checks
+   - [X] overflow bug in id
+   - [ ] dump logs I dunno whether i really want to implement
+     that. the problem is that github is misbehaving and doesn't give
+     me any association from the checks api to the actions api. maybe
+     I wanna add an actions subcommand that handles this very case for
+     github.
 
 ** Label shit
 
@@ -72,3 +86,4 @@
     + https://api.github.com/repos/zorchenhimer/MovieNight/pulls/156/reviews/611653998
   - A review comment has got a diff hunk and a body attached to it.
     + https://api.github.com/repos/zorchenhimer/MovieNight/pulls/156/reviews/611653998/comments
+https://open.spotify.com/track/spotify:tracks:5Xc7TIjrQ74V8B2qq4uCwS

@@ -50,6 +50,8 @@
 #include <ghcli/snippets.h>
 #include <ghcli/status.h>
 
+#include <ghcli/github/checks.h>
+
 #include <sn/sn.h>
 
 static char *
@@ -101,14 +103,14 @@ pr_try_derive_head(void)
 
 	if (!(account = ghcli_config_get_account()).length)
 		errx(1,
-		     "error: Cannot derive PR head. Please specify --from or set the\n"
-		     "       account in the users ghcli config file.");
+			 "error: Cannot derive PR head. Please specify --from or set the\n"
+			 "       account in the users ghcli config file.");
 
 	if (!(branch = ghcli_gitconfig_get_current_branch()).length)
 		errx(1,
-		     "error: Cannot derive PR head. Please specify --from or, if you\n"
-		     "       are in »detached HEAD« state, checkout the branch you \n"
-		     "       want to pull request.");
+			 "error: Cannot derive PR head. Please specify --from or, if you\n"
+			 "       are in »detached HEAD« state, checkout the branch you \n"
+			 "       want to pull request.");
 
 	return sn_sv_fmt(SV_FMT":"SV_FMT, SV_ARGS(account), SV_ARGS(branch));
 }
@@ -120,8 +122,8 @@ pr_try_derive_head(void)
  */
 static void
 parse_labels_options(int *argc, char ***argv,
-		     const char ***_add_labels,    size_t *_add_labels_size,
-		     const char ***_remove_labels, size_t *_remove_labels_size)
+			 const char ***_add_labels,    size_t *_add_labels_size,
+			 const char ***_remove_labels, size_t *_remove_labels_size)
 {
 	const char **add_labels = NULL, **remove_labels = NULL;
 	size_t       add_labels_size = 0, remove_labels_size = 0;
@@ -202,9 +204,9 @@ subcommand_issue_create(int argc, char *argv[])
 		ghcli_config_get_upstream_parts(&opts.owner, &opts.repo);
 		if (!opts.owner.length || !opts.repo.length)
 			errx(1,
-			     "error: Target repo for the issue to be created "
-			     "in is missing. Please either specify '-o owner' "
-			     "and '-r repo' or set pr.upstream in .ghcli.");
+				 "error: Target repo for the issue to be created "
+				 "in is missing. Please either specify '-o owner' "
+				 "and '-r repo' or set pr.upstream in .ghcli.");
 	}
 
 	if (argc != 1)
@@ -278,14 +280,14 @@ subcommand_pull_create(int argc, char *argv[])
 	if (!opts.to.length) {
 		if (!(opts.to = ghcli_config_get_base()).length)
 			errx(1,
-			     "error: PR base is missing. Please either specify "
-			     "--to branch-name or set pr.base in .ghcli.");
+				 "error: PR base is missing. Please either specify "
+				 "--to branch-name or set pr.base in .ghcli.");
 	}
 
 	if (!opts.in.length) {
 		if (!(opts.in = ghcli_config_get_upstream()).length)
 			errx(1, "error: PR target repo is missing. Please either "
-			     "specify --in owner/repo or set pr.upstream in .ghcli.");
+				 "specify --in owner/repo or set pr.upstream in .ghcli.");
 	}
 
 	if (argc != 1)
@@ -492,9 +494,10 @@ subcommand_pulls(int argc, char *argv[])
 
 		if (strcmp(operation, "diff") == 0) {
 			ghcli_print_pr_diff(stdout, owner, repo, pr);
-		} else if (strcmp(operation, "summary") == 0
-			   || strcmp(operation, "status") == 0) {
+		} else if (strcmp(operation, "summary") == 0) {
 			ghcli_pr_summary(owner, repo, pr);
+		} else if (strcmp(operation, "status") == 0) {
+			ghcli_pr_status(owner, repo, pr);
 		} else if (strcmp(operation, "comments") == 0) {
 			ghcli_pull_comments(owner, repo, pr);
 		} else if (strcmp(operation, "merge") == 0) {
@@ -526,8 +529,8 @@ subcommand_pulls(int argc, char *argv[])
 				errx(1, "error: expected label operations");
 
 			parse_labels_options(&argc, &argv,
-					     &add_labels,    &add_labels_size,
-					     &remove_labels, &remove_labels_size);
+						 &add_labels,    &add_labels_size,
+						 &remove_labels, &remove_labels_size);
 
 			/* actually go about deleting and adding the labels */
 			if (add_labels_size)
@@ -678,13 +681,13 @@ subcommand_issues(int argc, char *argv[])
 				errx(1, "error: expected label operations");
 
 			parse_labels_options(&argc, &argv,
-					     &add_labels, &add_labels_size,
-					     &remove_labels, &remove_labels_size);
+						 &add_labels, &add_labels_size,
+						 &remove_labels, &remove_labels_size);
 
 			/* actually go about deleting and adding the labels */
 			if (add_labels_size)
 				ghcli_issue_add_labels(owner, repo, issue,
-						       add_labels, add_labels_size);
+							   add_labels, add_labels_size);
 			if (remove_labels_size)
 				ghcli_issue_remove_labels(owner, repo, issue,
 							  remove_labels, remove_labels_size);
@@ -830,8 +833,8 @@ subcommand_repos_create(int argc, char *argv[])
 
 	if (sn_sv_null(create_options.name))
 		errx(1,
-		     "name cannot be empty. please set a repository "
-		     "name with -r/--name");
+			 "name cannot be empty. please set a repository "
+			 "name with -r/--name");
 
 	created_repo = ghcli_repo_create(&create_options);
 
@@ -959,7 +962,7 @@ subcommand_gist_get(int argc, char *argv[])
 	}
 
 	errx(1, "gists get: %s: no such file in gist with id %s",
-	     file_name, gist_id);
+		 file_name, gist_id);
 
 file_found:
 	/* TODO: check if tty when file is large */
@@ -1811,6 +1814,69 @@ subcommand_status(int argc, char *argv[])
 }
 
 static int
+subcommand_ci(int argc, char *argv[])
+{
+	int					 ch	   = 0;
+	const char			*owner = NULL, *repo = NULL;
+	const char          *ref   = NULL;
+	int                  count = -1; /* fetch all checks by default */
+
+	/* Parse options */
+	const struct option options[] = {
+		{.name = "repo",  .has_arg = required_argument, .flag = NULL, .val = 'r'},
+		{.name = "owner", .has_arg = required_argument, .flag = NULL, .val = 'o'},
+		{.name = "count", .has_arg = required_argument, .flag = NULL, .val = 'c'},
+		{0}
+	};
+
+	while ((ch = getopt_long(argc, argv, "n:o:r:", options, NULL)) != -1) {
+		switch (ch) {
+		case 'o':
+			owner = optarg;
+			break;
+		case 'r':
+			repo = optarg;
+			break;
+		case 'n': {
+			char *endptr = NULL;
+			count        = strtol(optarg, &endptr, 10);
+			if (endptr != (optarg + strlen(optarg)))
+				err(1, "ci: cannot parse argument to -n");
+		} break;
+		case '?':
+		default:
+			usage();
+		}
+	}
+
+	argc -= optind;
+	argv += optind;
+
+	/* Check that we have exactly one left argument and print proper
+	 * error messages */
+	if (argc < 1)
+		errx(1, "error: missing ref");
+
+	if (argc > 1)
+		errx(1, "error: stray arguments");
+
+	/* Save the ref */
+	ref = argv[0];
+
+	check_owner_and_repo(&owner, &repo);
+
+	/* Make sure we are actually talking about a github remote because
+	 * we might be incorrectly inferring it */
+	if (ghcli_config_get_forge_type() != GHCLI_FORGE_GITHUB)
+		errx(1, "error: The ci subcommand only works for GitHub. "
+			 "Use ghcli -t github ... to force a GitHub remote.");
+
+	github_checks(owner, repo, ref, count);
+
+	return EXIT_SUCCESS;
+}
+
+static int
 subcommand_version(int argc, char *argv[])
 {
 	(void) argc;
@@ -1823,6 +1889,7 @@ static struct subcommand {
 	const char *cmd_name;
 	int (*fn)(int, char **);
 } subcommands[] = {
+	{ .cmd_name = "ci",       .fn = subcommand_ci       },
 	{ .cmd_name = "comment",  .fn = subcommand_comment  },
 	{ .cmd_name = "forks",    .fn = subcommand_forks    },
 	{ .cmd_name = "gists",    .fn = subcommand_gists    },

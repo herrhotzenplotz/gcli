@@ -86,10 +86,10 @@ may be one or more of the following:
 .It Cm comments
 Print a list of comments under the PR.
 .It Cm status
-Print a short summary of the PR.
+Print a short summary of the PR including all CI check runs on the
+head commit.
 .It Cm summary
-Alias for
-.Cm status .
+Print a short summary of the PR (without CI checks).
 .It Cm diff
 Print a diff of the changes attached to the PR. This can be piped into
 .Xr patch 1

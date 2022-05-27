@@ -89,3 +89,6 @@ i
 /include/ghcli/github/checks.h~
 /src/github/checks.c~
 /src/github/checks.o
+/include/ghcli/gitlab/pipelines.h~
+/src/gitlab/pipelines.c~
+/src/gitlab/pipelines.o

@@ -80,9 +80,9 @@ ghcli_setcolor256(uint32_t code)
 
 	/* TODO: This is inherently screwed */
 	result = sn_asprintf("\033[38;2;%02d;%02d;%02dm",
-			     (code & 0xFF000000) >> 24,
-			     (code & 0x00FF0000) >> 16,
-			     (code & 0x0000FF00) >>  8);
+				 (code & 0xFF000000) >> 24,
+				 (code & 0x00FF0000) >> 16,
+				 (code & 0x0000FF00) >>  8);
 
 	color_cache_insert(code, result);
 
@@ -161,6 +161,9 @@ ghcli_state_color_sv(sn_sv state)
 			return ghcli_setcolor(GHCLI_COLOR_MAGENTA);
 
 		if (sn_sv_has_prefix(state, "closed"))
+			return ghcli_setcolor(GHCLI_COLOR_RED);
+
+		if (sn_sv_has_prefix(state, "failed"))
 			return ghcli_setcolor(GHCLI_COLOR_RED);
 
 		if (sn_sv_has_prefix(state, "failure"))

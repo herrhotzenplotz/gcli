@@ -51,6 +51,7 @@
 #include <ghcli/status.h>
 
 #include <ghcli/github/checks.h>
+#include <ghcli/gitlab/pipelines.h>
 
 #include <sn/sn.h>
 
@@ -1877,6 +1878,60 @@ subcommand_ci(int argc, char *argv[])
 }
 
 static int
+subcommand_pipelines(int argc, char *argv[])
+{
+	int			 ch	   = 0;
+	const char	*owner = NULL, *repo = NULL;
+	int          count = -1;	/* fetch all checks by default */
+
+	/* Parse options */
+	const struct option options[] = {
+		{.name = "repo",  .has_arg = required_argument, .flag = NULL, .val = 'r'},
+		{.name = "owner", .has_arg = required_argument, .flag = NULL, .val = 'o'},
+		{.name = "count", .has_arg = required_argument, .flag = NULL, .val = 'c'},
+		{0}
+	};
+
+	while ((ch = getopt_long(argc, argv, "n:o:r:", options, NULL)) != -1) {
+		switch (ch) {
+		case 'o':
+			owner = optarg;
+			break;
+		case 'r':
+			repo = optarg;
+			break;
+		case 'n': {
+			char *endptr = NULL;
+			count        = strtol(optarg, &endptr, 10);
+			if (endptr != (optarg + strlen(optarg)))
+				err(1, "ci: cannot parse argument to -n");
+		} break;
+		case '?':
+		default:
+			usage();
+		}
+	}
+
+	argc -= optind;
+	argv += optind;
+
+	if (argc != 0)
+		errx(1, "error: stray parameters");
+
+	check_owner_and_repo(&owner, &repo);
+
+	/* Make sure we are actually talking about a gitlab remote because
+	 * we might be incorrectly inferring it */
+	if (ghcli_config_get_forge_type() != GHCLI_FORGE_GITLAB)
+		errx(1, "error: The pipelines subcommand only works for GitLab. "
+			 "Use ghcli -t gitlab ... to force a GitLab remote.");
+
+	gitlab_pipelines(owner, repo, count);
+
+	return EXIT_SUCCESS;
+}
+
+static int
 subcommand_version(int argc, char *argv[])
 {
 	(void) argc;
@@ -1889,18 +1944,19 @@ static struct subcommand {
 	const char *cmd_name;
 	int (*fn)(int, char **);
 } subcommands[] = {
-	{ .cmd_name = "ci",       .fn = subcommand_ci       },
-	{ .cmd_name = "comment",  .fn = subcommand_comment  },
-	{ .cmd_name = "forks",    .fn = subcommand_forks    },
-	{ .cmd_name = "gists",    .fn = subcommand_gists    },
-	{ .cmd_name = "issues",   .fn = subcommand_issues   },
-	{ .cmd_name = "labels",   .fn = subcommand_labels   },
-	{ .cmd_name = "pulls",    .fn = subcommand_pulls    },
-	{ .cmd_name = "releases", .fn = subcommand_releases },
-	{ .cmd_name = "repos",    .fn = subcommand_repos    },
-	{ .cmd_name = "snippets", .fn = subcommand_snippets },
-	{ .cmd_name = "status",   .fn = subcommand_status   },
-	{ .cmd_name = "version",  .fn = subcommand_version  },
+	{ .cmd_name = "ci",        .fn = subcommand_ci        },
+	{ .cmd_name = "comment",   .fn = subcommand_comment   },
+	{ .cmd_name = "forks",     .fn = subcommand_forks     },
+	{ .cmd_name = "gists",     .fn = subcommand_gists     },
+	{ .cmd_name = "issues",    .fn = subcommand_issues    },
+	{ .cmd_name = "labels",    .fn = subcommand_labels    },
+	{ .cmd_name = "pipelines", .fn = subcommand_pipelines },
+	{ .cmd_name = "pulls",     .fn = subcommand_pulls     },
+	{ .cmd_name = "releases",  .fn = subcommand_releases  },
+	{ .cmd_name = "repos",     .fn = subcommand_repos     },
+	{ .cmd_name = "snippets",  .fn = subcommand_snippets  },
+	{ .cmd_name = "status",    .fn = subcommand_status    },
+	{ .cmd_name = "version",   .fn = subcommand_version   },
 };
 
 int

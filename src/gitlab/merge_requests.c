@@ -150,7 +150,8 @@ void
 gitlab_mr_merge(
 	const char *owner,
 	const char *repo,
-	int         mr_number)
+	int         mr_number,
+	bool        squash)
 {
 	ghcli_fetch_buffer  buffer  = {0};
 	char               *url     = NULL;
@@ -163,13 +164,13 @@ gitlab_mr_merge(
 
 	/* PUT /projects/:id/merge_requests/:merge_request_iid/merge */
 	url = sn_asprintf(
-		"%s/projects/%s%%2F%s/merge_requests/%d/merge",
+		"%s/projects/%s%%2F%s/merge_requests/%d/merge?squash=%s",
 		gitlab_get_apibase(),
-		e_owner, e_repo, mr_number);
+		e_owner, e_repo, mr_number,
+		squash ? "true" : "false");
 
 	ghcli_fetch_with_method("PUT", url, data, NULL, &buffer);
 
-	puts("Merged.");
 	ghcli_print_html_url(buffer);
 
 	free(buffer.data);

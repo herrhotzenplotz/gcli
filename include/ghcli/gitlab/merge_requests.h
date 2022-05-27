@@ -48,7 +48,8 @@ void gitlab_print_pr_diff(
 void gitlab_mr_merge(
 	const char *owner,
 	const char *reponame,
-	int         mr_number);
+	int         mr_number,
+	bool        squash);
 
 void gitlab_mr_close(
 	const char *owner,

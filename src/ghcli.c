@@ -498,7 +498,13 @@ subcommand_pulls(int argc, char *argv[])
 		} else if (strcmp(operation, "comments") == 0) {
 			ghcli_pull_comments(owner, repo, pr);
 		} else if (strcmp(operation, "merge") == 0) {
-			ghcli_pr_merge(owner, repo, pr);
+			/* Check whether the user intends a squash-merge */
+			if (argc > 1 && (strcmp(argv[0], "-s") == 0 || strcmp(argv[0], "--squash") == 0)) {
+				--argc; ++argv;
+				ghcli_pr_merge(owner, repo, pr, true);
+			} else {
+				ghcli_pr_merge(owner, repo, pr, false);
+			}
 		} else if (strcmp(operation, "close") == 0) {
 			ghcli_pr_close(owner, repo, pr);
 		} else if (strcmp(operation, "reopen") == 0) {

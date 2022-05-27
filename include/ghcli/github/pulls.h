@@ -49,7 +49,8 @@ void github_print_pr_diff(
 void github_pr_merge(
 	const char *owner,
 	const char *reponame,
-	int         pr_number);
+	int         pr_number,
+	bool        squash);
 
 void github_pr_reopen(
 	const char *owner,

@@ -333,9 +333,10 @@ void
 ghcli_pr_merge(
 	const char *owner,
 	const char *reponame,
-	int         pr_number)
+	int         pr_number,
+	bool        squash)
 {
-	ghcli_forge()->pr_merge(owner, reponame, pr_number);
+	ghcli_forge()->pr_merge(owner, reponame, pr_number, squash);
 }
 
 void

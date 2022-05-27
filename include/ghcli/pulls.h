@@ -77,44 +77,56 @@ int ghcli_get_prs(
 	bool         all,
 	int          max,
 	ghcli_pull **out);
+
 void ghcli_pulls_free(
 	ghcli_pull *it,
 	int         n);
+
 void ghcli_pulls_summary_free(
 	ghcli_pull_summary *it);
+
 void ghcli_print_pr_table(
 	enum ghcli_output_order  order,
 	ghcli_pull              *pulls,
 	int                      pulls_size);
+
 void ghcli_print_pr_diff(
 	FILE       *stream,
 	const char *owner,
 	const char *reponame,
 	int         pr_number);
+
 void ghcli_pr_summary(
 	const char *owner,
 	const char *reponame,
 	int         pr_number);
+
 void ghcli_pr_submit(
 	ghcli_submit_pull_options);
+
 void ghcli_pr_merge(
 	const char *owner,
 	const char *reponame,
-	int         pr_number);
+	int         pr_number,
+	bool        squash);
+
 void ghcli_pr_close(
 	const char *owner,
 	const char *reponame,
 	int         pr_number);
+
 void ghcli_pr_reopen(
 	const char *owner,
 	const char *reponame,
 	int         pr_number);
+
 void ghcli_pr_add_labels(
 	const char *owner,
 	const char *repo,
 	int         pr_number,
 	const char *labels[],
 	size_t      labels_size);
+
 void ghcli_pr_remove_labels(
 	const char *owner,
 	const char *repo,

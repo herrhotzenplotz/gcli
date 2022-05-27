@@ -48,12 +48,28 @@ struct ghcli_pull {
 };
 
 struct ghcli_pull_summary {
-	const char *author, *state, *title, *body, *created_at, *commits_link;
-	const char *head_label, *base_label;
-	int         id, number, comments, additions, deletions, commits, changed_files;
-	sn_sv      *labels;
-	size_t      labels_size;
-	bool        merged, mergeable, draft;
+	char	*author;
+	char    *state;
+	char    *title;
+	char    *body;
+	char    *created_at;
+	char    *commits_link;
+	char	*head_label;
+	char    *base_label;
+	char    *head_sha;
+	int      id;
+	int      number;
+	int      comments;
+	int      additions;
+	int      deletions;
+	int      commits;
+	int      changed_files;
+	int      head_pipeline_id;	/* This is GitLab specific */
+	sn_sv   *labels;
+	size_t   labels_size;
+	bool     merged;
+	bool     mergeable;
+	bool     draft;
 };
 
 struct ghcli_commit {
@@ -97,6 +113,11 @@ void ghcli_print_pr_diff(
 	int         pr_number);
 
 void ghcli_pr_summary(
+	const char *owner,
+	const char *reponame,
+	int         pr_number);
+
+void ghcli_pr_status(
 	const char *owner,
 	const char *reponame,
 	int         pr_number);

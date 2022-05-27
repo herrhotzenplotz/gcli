@@ -28,9 +28,11 @@
  */
 
 #include <ghcli/color.h>
+#include <ghcli/config.h>
 #include <ghcli/editor.h>
 #include <ghcli/forges.h>
 #include <ghcli/github/pulls.h>
+#include <ghcli/github/checks.h>
 #include <ghcli/json_util.h>
 #include <ghcli/pulls.h>
 #include <sn/sn.h>
@@ -68,33 +70,33 @@ ghcli_print_pr_table(
 	}
 
 	printf("%-6.6s  %6.6s  %6.6s  %20.20s  %-s\n",
-	       "NUMBER", "STATE", "MERGED", "CREATOR", "TITLE");
+		   "NUMBER", "STATE", "MERGED", "CREATOR", "TITLE");
 
 	if (order == OUTPUT_ORDER_SORTED) {
 		for (int i = pulls_size; i > 0; --i) {
 			printf("%6d  %s%6.6s%s  %6.6s  %s%20.20s%s  %-s\n",
-			       pulls[i - 1].number,
-			       ghcli_state_color_str(pulls[i - 1].state),
-			       pulls[i - 1].state,
-			       ghcli_resetcolor(),
-			       sn_bool_yesno(pulls[i - 1].merged),
-			       ghcli_setbold(),
-			       pulls[i - 1].creator,
-			       ghcli_resetbold(),
-			       pulls[i - 1].title);
+				   pulls[i - 1].number,
+				   ghcli_state_color_str(pulls[i - 1].state),
+				   pulls[i - 1].state,
+				   ghcli_resetcolor(),
+				   sn_bool_yesno(pulls[i - 1].merged),
+				   ghcli_setbold(),
+				   pulls[i - 1].creator,
+				   ghcli_resetbold(),
+				   pulls[i - 1].title);
 		}
 	} else {
 		for (int i = 0; i < pulls_size; ++i) {
 			printf("%6d  %s%6.6s%s  %6.6s  %s%20.20s%s  %-s\n",
-			       pulls[i].number,
-			       ghcli_state_color_str(pulls[i].state),
-			       pulls[i].state,
-			       ghcli_resetcolor(),
-			       sn_bool_yesno(pulls[i].merged),
-			       ghcli_setbold(),
-			       pulls[i].creator,
-			       ghcli_resetbold(),
-			       pulls[i].title);
+				   pulls[i].number,
+				   ghcli_state_color_str(pulls[i].state),
+				   pulls[i].state,
+				   ghcli_resetcolor(),
+				   sn_bool_yesno(pulls[i].merged),
+				   ghcli_setbold(),
+				   pulls[i].creator,
+				   ghcli_resetbold(),
+				   pulls[i].title);
 		}
 	}
 }
@@ -114,34 +116,34 @@ ghcli_print_pr_summary(ghcli_pull_summary *it)
 {
 #define SANITIZE(x) (x ? x : "N/A")
 	printf("   NUMBER : %d\n"
-	       "    TITLE : %s\n"
-	       "     HEAD : %s\n"
-	       "     BASE : %s\n"
-	       "  CREATED : %s\n"
-	       "   AUTHOR : %s%s%s\n"
-	       "    STATE : %s%s%s\n"
-	       " COMMENTS : %d\n"
-	       "  ADD:DEL : %s%d%s:%s%d%s\n"
-	       "  COMMITS : %d\n"
-	       "  CHANGED : %d\n"
-	       "   MERGED : %s\n"
-	       "MERGEABLE : %s\n"
-	       "    DRAFT : %s\n"
-	       "   LABELS : ",
-	       it->number,
-	       SANITIZE(it->title),
-	       SANITIZE(it->head_label),
-	       SANITIZE(it->base_label),
-	       SANITIZE(it->created_at),
-	       ghcli_setbold(), SANITIZE(it->author), ghcli_resetbold(),
-	       ghcli_state_color_str(it->state), SANITIZE(it->state), ghcli_resetcolor(),
-	       it->comments,
-	       ghcli_setcolor(GHCLI_COLOR_GREEN), it->additions, ghcli_resetcolor(),
-	       ghcli_setcolor(GHCLI_COLOR_RED),   it->deletions, ghcli_resetcolor(),
-	       it->commits, it->changed_files,
-	       sn_bool_yesno(it->merged),
-	       sn_bool_yesno(it->mergeable),
-	       sn_bool_yesno(it->draft));
+		   "    TITLE : %s\n"
+		   "     HEAD : %s\n"
+		   "     BASE : %s\n"
+		   "  CREATED : %s\n"
+		   "   AUTHOR : %s%s%s\n"
+		   "    STATE : %s%s%s\n"
+		   " COMMENTS : %d\n"
+		   "  ADD:DEL : %s%d%s:%s%d%s\n"
+		   "  COMMITS : %d\n"
+		   "  CHANGED : %d\n"
+		   "   MERGED : %s\n"
+		   "MERGEABLE : %s\n"
+		   "    DRAFT : %s\n"
+		   "   LABELS : ",
+		   it->number,
+		   SANITIZE(it->title),
+		   SANITIZE(it->head_label),
+		   SANITIZE(it->base_label),
+		   SANITIZE(it->created_at),
+		   ghcli_setbold(), SANITIZE(it->author), ghcli_resetbold(),
+		   ghcli_state_color_str(it->state), SANITIZE(it->state), ghcli_resetcolor(),
+		   it->comments,
+		   ghcli_setcolor(GHCLI_COLOR_GREEN), it->additions, ghcli_resetcolor(),
+		   ghcli_setcolor(GHCLI_COLOR_RED),   it->deletions, ghcli_resetcolor(),
+		   it->commits, it->changed_files,
+		   sn_bool_yesno(it->merged),
+		   sn_bool_yesno(it->mergeable),
+		   sn_bool_yesno(it->draft));
 #undef SANITIZE
 
 	if (it->labels_size) {
@@ -196,20 +198,20 @@ ghcli_print_commits_table(ghcli_commit *commits, int commits_size)
 	}
 
 	printf("%-8.8s  %-15.15s  %-20.20s  %-16.16s  %-s\n",
-	       "SHA", "AUTHOR", "EMAIL", "DATE", "MESSAGE");
+		   "SHA", "AUTHOR", "EMAIL", "DATE", "MESSAGE");
 
 	for (int i = 0; i < commits_size; ++i) {
 		char *message = cut_newline(commits[i].message);
 		printf("%s%-8.8s%s  %s%-15.15s%s  %-20.20s  %-16.16s  %-s\n",
-		       ghcli_setcolor(GHCLI_COLOR_YELLOW),
-		       commits[i].sha,
-		       ghcli_resetcolor(),
-		       ghcli_setbold(),
-		       commits[i].author,
-		       ghcli_resetbold(),
-		       commits[i].email,
-		       commits[i].date,
-		       message);
+			   ghcli_setcolor(GHCLI_COLOR_YELLOW),
+			   commits[i].sha,
+			   ghcli_resetcolor(),
+			   ghcli_setbold(),
+			   commits[i].author,
+			   ghcli_resetbold(),
+			   commits[i].email,
+			   commits[i].date,
+			   message);
 		free(message);
 	}
 }
@@ -231,12 +233,15 @@ ghcli_commits_free(ghcli_commit *it, int size)
 void
 ghcli_pulls_summary_free(ghcli_pull_summary *it)
 {
-	free((void *)it->author);
-	free((void *)it->state);
-	free((void *)it->title);
-	free((void *)it->body);
-	free((void *)it->created_at);
-	free((void *)it->commits_link);
+	free(it->author);
+	free(it->state);
+	free(it->title);
+	free(it->body);
+	free(it->created_at);
+	free(it->commits_link);
+	free(it->head_label);
+	free(it->base_label);
+	free(it->head_sha);
 
 	for (size_t i = 0; i < it->labels_size; ++i)
 		free(it->labels[i].data);
@@ -252,19 +257,20 @@ ghcli_get_pull_summary(
 	ghcli_forge()->get_pull_summary(owner, repo, pr_number, out);
 }
 
-void
-ghcli_pr_summary(
+static void
+ghcli_pr_info(
 	const char *owner,
 	const char *repo,
-	int         pr_number)
+	int         pr_number,
+	bool        is_status)
 {
 	ghcli_pull_summary  summary      = {0};
 	ghcli_commit       *commits      = NULL;
 	int                 commits_size = 0;
 
+	/* Summary header */
 	ghcli_get_pull_summary(owner, repo, pr_number, &summary);
 	ghcli_print_pr_summary(&summary);
-	ghcli_pulls_summary_free(&summary);
 
 	/* Commits */
 	commits_size = ghcli_get_pull_commits(owner, repo, pr_number, &commits);
@@ -273,6 +279,34 @@ ghcli_pr_summary(
 	ghcli_print_commits_table(commits, commits_size);
 
 	ghcli_commits_free(commits, commits_size);
+
+	/* Only print checks if the user issued the 'status' action */
+	if (is_status) {
+		if (ghcli_config_get_forge_type() == GHCLI_FORGE_GITHUB) {
+			puts("\nCHECKS");
+			github_checks(owner, repo, summary.head_sha, -1);
+		}
+	}
+
+	ghcli_pulls_summary_free(&summary);
+}
+
+void
+ghcli_pr_status(
+	const char *owner,
+	const char *repo,
+	int         pr_number)
+{
+	ghcli_pr_info(owner, repo, pr_number, true);
+}
+
+void
+ghcli_pr_summary(
+	const char *owner,
+	const char *repo,
+	int         pr_number)
+{
+	ghcli_pr_info(owner, repo, pr_number, false);
 }
 
 static void

@@ -36,11 +36,11 @@
 
 #include <pdjson/pdjson.h>
 
-static const char *
+static char *
 get_branch_label(json_stream *input)
 {
-	enum json_type  key_type;
-	const char     *label = NULL;
+	enum json_type	 key_type;
+	char			*label = NULL;
 
 	if (json_next(input) != JSON_OBJECT)
 		errx(1, "expected branch object");
@@ -439,6 +439,29 @@ github_get_pull_commits(
 }
 
 static void
+github_parse_pull_head(json_stream *input, ghcli_pull_summary *out)
+{
+	enum json_type key_type;
+	const char *key;
+
+	json_next(input);
+
+	while ((key_type = json_next(input)) == JSON_STRING) {
+		size_t len;
+		key = json_get_string(input, &len);
+		if (strncmp("sha", key, len) == 0)
+			out->head_sha = get_string(input);
+		else if (strncmp("label", key, len) == 0)
+			out->head_label = get_string(input);
+		else
+			SKIP_OBJECT_VALUE(input);
+	}
+
+	if (key_type != JSON_OBJECT_END)
+		errx(1, "Unexpected object key type");
+}
+
+static void
 github_pull_parse_summary(json_stream *input, ghcli_pull_summary *out)
 {
 	enum json_type key_type;
@@ -483,7 +506,7 @@ github_pull_parse_summary(json_stream *input, ghcli_pull_summary *out)
 		else if (strncmp("user", key, len) == 0)
 			out->author = get_user(input);
 		else if (strncmp("head", key, len) == 0)
-			out->head_label = get_branch_label(input);
+			github_parse_pull_head(input, out);
 		else if (strncmp("base", key, len) == 0)
 			out->base_label = get_branch_label(input);
 		else

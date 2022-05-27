@@ -99,8 +99,12 @@ or
 Close the PR.
 .It Cm reopen
 Reopen a closed PR.
-.It Cm merge
-Merge the PR.
+.It Cm merge Op Ar options
+Merge the PR. You may supply the following options:
+.Bl -tag -width indent
+.It Fl -squash , s
+Squash the commits before merging.
+.El
 .It Cm reviews
 Print reviews including comments under them.
 .It Cm labels Op Ar options

@@ -184,7 +184,8 @@ void
 github_pr_merge(
 	const char *owner,
 	const char *repo,
-	int         pr_number)
+	int         pr_number,
+	bool        squash)
 {
 	json_stream         stream      = {0};
 	ghcli_fetch_buffer  json_buffer = {0};
@@ -201,9 +202,11 @@ github_pr_merge(
 	e_repo  = ghcli_urlencode(repo);
 
 	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%d/merge",
+		"%s/repos/%s/%s/pulls/%d/merge?merge_method=%s",
 		github_get_apibase(),
-		e_owner, e_repo, pr_number);
+		e_owner, e_repo, pr_number,
+		squash ? "squash" : "merge");
+
 	ghcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
 	json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 	json_set_streaming(&stream, true);

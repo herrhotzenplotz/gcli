@@ -1,5 +1,6 @@
 /*
  * Copyright 2021 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022 Aritra Sarkar <aritra1911@yahoo.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -411,7 +412,7 @@ ghcli_urlencode_sv(sn_sv _input)
 	output_len = 0;
 
 	for (i = 0; i < input_len; ++i) {
-		if (!isalnum(input[i]) && input[i] != '-') {
+		if (!isalnum(input[i]) && input[i] != '-' && input[i] != '_') {
 			unsigned val = (input[i] & 0xFF);
 			snprintf(output + output_len, 4, "%%%02.2X", val);
 			output_len += 3;

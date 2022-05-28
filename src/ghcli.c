@@ -1887,14 +1887,14 @@ subcommand_pipelines(int argc, char *argv[])
 
 	/* Parse options */
 	const struct option options[] = {
-		{.name = "repo",  .has_arg = required_argument, .flag = NULL, .val = 'r'},
-		{.name = "owner", .has_arg = required_argument, .flag = NULL, .val = 'o'},
-		{.name = "count", .has_arg = required_argument, .flag = NULL, .val = 'c'},
-		{.name = "jobs",  .has_arg = required_argument, .flag = NULL, .val = 'j'},
+		{.name = "repo",     .has_arg = required_argument, .flag = NULL, .val = 'r'},
+		{.name = "owner",    .has_arg = required_argument, .flag = NULL, .val = 'o'},
+		{.name = "count",    .has_arg = required_argument, .flag = NULL, .val = 'c'},
+		{.name = "pipeline", .has_arg = required_argument, .flag = NULL, .val = 'p'},
 		{0}
 	};
 
-	while ((ch = getopt_long(argc, argv, "+n:o:r:j:", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "+n:o:r:p:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
 			owner = optarg;
@@ -1908,11 +1908,11 @@ subcommand_pipelines(int argc, char *argv[])
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "ci: cannot parse argument to -n");
 		} break;
-		case 'j': {
+		case 'p': {
 			char *endptr = NULL;
 			id           = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
-				err(1, "ci: cannot parse argument to -i");
+				err(1, "ci: cannot parse argument to -p");
 			if (id < 0) {
 				errx(1, "error: pipeline id must be a positive number");
 			}

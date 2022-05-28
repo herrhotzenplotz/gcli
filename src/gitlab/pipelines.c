@@ -172,6 +172,36 @@ gitlab_pipeline_jobs(const char *owner, const char *repo, long id, int count)
 }
 
 static void
+gitlab_parse_job_runner(struct json_stream *stream, gitlab_job *out)
+{
+	enum json_type next = json_next(stream);
+	if (next == JSON_NULL)
+		goto out;
+
+	if (next != JSON_OBJECT)
+		errx(1, "error: expected job runner object");
+
+	while (json_next(stream) == JSON_STRING) {
+		size_t      len = 0;
+		const char *key = json_get_string(stream, &len);
+
+		if (strncmp("name", key, len) == 0)
+			out->runner_name = get_string(stream);
+		else if (strncmp("description", key, len) == 0)
+			out->runner_description = get_string(stream);
+		else
+			SKIP_OBJECT_VALUE(stream);
+	}
+
+out:
+	/* Hack to prevent null pointers passed into printf */
+	if (!out->runner_name)
+		out->runner_name = strdup("<empty>");
+	if (!out->runner_description)
+		out->runner_description = strdup("<empty>");
+}
+
+static void
 gitlab_parse_job(struct json_stream *stream, gitlab_job *out)
 {
 	if (json_next(stream) != JSON_OBJECT)
@@ -195,10 +225,8 @@ gitlab_parse_job(struct json_stream *stream, gitlab_job *out)
 			out->started_at = get_string(stream);
 		else if (strncmp("finished_at", key, len) == 0)
 			out->finished_at = get_string(stream);
-		else if (strncmp("runner_name", key, len) == 0)
-			out->runner_name = get_string(stream);
-		else if (strncmp("runner_description", key, len) == 0)
-			out->runner_description = get_string(stream);
+		else if (strncmp("runner", key, len) == 0)
+			gitlab_parse_job_runner(stream, out);
 		else if (strncmp("duration", key, len) == 0)
 			out->duration = get_double(stream);
 		else if (strncmp("id", key, len) == 0)
@@ -253,10 +281,13 @@ gitlab_get_pipeline_jobs(
 void
 gitlab_print_jobs(gitlab_job *jobs, int jobs_size)
 {
-	printf("%10.10s  %10.10s  %10.10s  %16.16s  %16.16s  %8.8s  %-s\n",
-		   "ID", "NAME", "STATUS", "STARTED", "FINISHED", "DURATION", "REF");
+	printf("%10.10s  %10.10s  %10.10s  %16.16s  %16.16s  %8.8s  %12.12s  "
+		   "%12.12s  %-s\n",
+		   "ID", "NAME", "STATUS", "STARTED", "FINISHED", "DURATION",
+		   "RUNNERNAME", "RUNNERDESC", "REF");
 	for (int i = 0; i < jobs_size; ++i) {
-		printf("%10ld  %10.10s  %s%10.10s%s  %16.16s  %16.16s  %7.2lfs  %-s\n",
+		printf("%10ld  %10.10s  %s%10.10s%s  %16.16s  %16.16s  %7.2lfs  "
+			   "%12.12s  %12.12s  %-s\n",
 			   jobs[i].id,
 			   jobs[i].name,
 			   ghcli_state_color_str(jobs[i].status),
@@ -265,6 +296,8 @@ gitlab_print_jobs(gitlab_job *jobs, int jobs_size)
 			   jobs[i].started_at,
 			   jobs[i].finished_at,
 			   jobs[i].duration,
+			   jobs[i].runner_name,
+			   jobs[i].runner_description,
 			   jobs[i].ref);
 	}
 }

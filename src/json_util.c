@@ -53,9 +53,24 @@ long
 get_int_(json_stream *input, const char *where)
 {
 	if (json_next(input) != JSON_NUMBER)
-		barf("unexpected non-numeric field", where);
+		barf("unexpected non-integer field", where);
 
 	return json_get_number(input);
+}
+
+double
+get_double_(json_stream *input, const char *where)
+{
+	enum json_type type = json_next(input);
+
+	/* This is dumb but it fixes a couple of weirdnesses of the API */
+	if (type == JSON_NULL)
+		return 0;
+	if (type == JSON_NUMBER)
+		return json_get_number(input);
+
+	barf("unexpected non-double field", where);
+	return 0; /* NOTREACHED */
 }
 
 char *

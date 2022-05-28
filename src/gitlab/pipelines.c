@@ -151,10 +151,8 @@ gitlab_free_pipelines(
 	free(pipelines);
 }
 
-void gitlab_pipelines(
-	const char *owner,
-	const char *repo,
-	int         count)
+void
+gitlab_pipelines(const char *owner, const char *repo, int count)
 {
 	gitlab_pipeline *pipelines = NULL;
 	int pipelines_size = gitlab_get_pipelines(
@@ -162,4 +160,128 @@ void gitlab_pipelines(
 
 	gitlab_print_pipelines(pipelines, pipelines_size);
 	gitlab_free_pipelines(pipelines, pipelines_size);
+}
+
+void
+gitlab_pipeline_jobs(const char *owner, const char *repo, long id, int count)
+{
+	gitlab_job *jobs = NULL;
+	int jobs_size = gitlab_get_pipeline_jobs(owner, repo, id, count, &jobs);
+	gitlab_print_jobs(jobs, jobs_size);
+	gitlab_free_jobs(jobs, jobs_size);
+}
+
+static void
+gitlab_parse_job(struct json_stream *stream, gitlab_job *out)
+{
+	if (json_next(stream) != JSON_OBJECT)
+		errx(1, "error: expected job object");
+
+	while (json_next(stream) == JSON_STRING) {
+		size_t      len = 0;
+		const char *key = json_get_string(stream, &len);
+
+		if (strncmp("status", key, len) == 0)
+			out->status = get_string(stream);
+		else if (strncmp("stage", key, len) == 0)
+			out->stage = get_string(stream);
+		else if (strncmp("name", key, len) == 0)
+			out->name = get_string(stream);
+		else if (strncmp("ref", key, len) == 0)
+			out->ref = get_string(stream);
+		else if (strncmp("created_at", key, len) == 0)
+			out->created_at = get_string(stream);
+		else if (strncmp("started_at", key, len) == 0)
+			out->started_at = get_string(stream);
+		else if (strncmp("finished_at", key, len) == 0)
+			out->finished_at = get_string(stream);
+		else if (strncmp("runner_name", key, len) == 0)
+			out->runner_name = get_string(stream);
+		else if (strncmp("runner_description", key, len) == 0)
+			out->runner_description = get_string(stream);
+		else if (strncmp("duration", key, len) == 0)
+			out->duration = get_double(stream);
+		else if (strncmp("id", key, len) == 0)
+			out->id = get_int(stream);
+		else
+			SKIP_OBJECT_VALUE(stream);
+	}
+}
+
+int
+gitlab_get_pipeline_jobs(
+	const char	 *owner,
+	const char	 *repo,
+	long		  pipeline,
+	int			  max,
+	gitlab_job	**out)
+{
+	char	*url	  = NULL;
+	char	*next_url = NULL;
+	int		 out_size = 0;
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/pipelines/%ld/jobs",
+					  gitlab_get_apibase(), owner, repo, pipeline);
+
+	do {
+		ghcli_fetch_buffer	buffer = {0};
+		struct json_stream	stream = {0};
+		enum json_type		next   = JSON_NULL;
+
+		ghcli_fetch(url, &next_url, &buffer);
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		json_set_streaming(&stream, 1);
+
+		next = json_next(&stream);
+		if (next != JSON_ARRAY)
+			errx(1, "error: expected array of jobs");
+
+		while (json_peek(&stream) == JSON_OBJECT) {
+			gitlab_job *it = NULL;
+			*out = realloc(*out, sizeof(gitlab_job) * (out_size + 1));
+
+			it = &(*out)[out_size++];
+			memset(it, 0, sizeof(gitlab_job));
+			gitlab_parse_job(&stream, it);
+		}
+
+	} while ((next_url = url) && (out_size < max || max == -1), false);
+
+	return out_size;
+}
+
+void
+gitlab_print_jobs(gitlab_job *jobs, int jobs_size)
+{
+	printf("%10.10s  %10.10s  %10.10s  %16.16s  %16.16s  %8.8s  %-s\n",
+		   "ID", "NAME", "STATUS", "STARTED", "FINISHED", "DURATION", "REF");
+	for (int i = 0; i < jobs_size; ++i) {
+		printf("%10ld  %10.10s  %s%10.10s%s  %16.16s  %16.16s  %7.2lfs  %-s\n",
+			   jobs[i].id,
+			   jobs[i].name,
+			   ghcli_state_color_str(jobs[i].status),
+			   jobs[i].status,
+			   ghcli_resetcolor(),
+			   jobs[i].started_at,
+			   jobs[i].finished_at,
+			   jobs[i].duration,
+			   jobs[i].ref);
+	}
+}
+
+void
+gitlab_free_jobs(gitlab_job	*jobs, int jobs_size)
+{
+	for (int i = 0; i < jobs_size; ++i) {
+		free(jobs[i].status);
+		free(jobs[i].stage);
+		free(jobs[i].name);
+		free(jobs[i].ref);
+		free(jobs[i].created_at);
+		free(jobs[i].started_at);
+		free(jobs[i].finished_at);
+		free(jobs[i].runner_name);
+		free(jobs[i].runner_description);
+	}
+	free(jobs);
 }

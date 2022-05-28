@@ -31,6 +31,7 @@
 #define GITLAB_PIPELINES_H
 
 typedef struct gitlab_pipeline gitlab_pipeline;
+typedef struct gitlab_job      gitlab_job;
 
 struct gitlab_pipeline {
 	long	 id;
@@ -40,6 +41,20 @@ struct gitlab_pipeline {
 	char    *ref;
 	char    *sha;
 	char    *source;
+};
+
+struct gitlab_job {
+	long	 id;
+	char	*status;
+	char	*stage;
+	char	*name;
+	char	*ref;
+	char	*created_at;
+	char	*started_at;
+	char	*finished_at;
+	double	 duration;
+	char	*runner_name;
+	char	*runner_description;
 };
 
 int gitlab_get_pipelines(
@@ -60,5 +75,26 @@ void gitlab_pipelines(
 	const char *owner,
 	const char *repo,
 	int         count);
+
+void gitlab_pipeline_jobs(
+	const char *owner,
+	const char *repo,
+	long        pipeline,
+	int         count);
+
+int gitlab_get_pipeline_jobs(
+	const char	 *owner,
+	const char	 *repo,
+	long		  pipeline,
+	int			  count,
+	gitlab_job	**jobs);
+
+void gitlab_print_jobs(
+	gitlab_job	*jobs,
+	int			 jobs_size);
+
+void gitlab_free_jobs(
+	gitlab_job	*jobs,
+	int			 jobs_size);
 
 #endif /* GITLAB_PIPELINES_H */

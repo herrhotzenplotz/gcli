@@ -1882,17 +1882,19 @@ subcommand_pipelines(int argc, char *argv[])
 {
 	int			 ch	   = 0;
 	const char	*owner = NULL, *repo = NULL;
-	int          count = -1;	/* fetch all checks by default */
+	int          count = 30;
+	long         id    = -1;
 
 	/* Parse options */
 	const struct option options[] = {
 		{.name = "repo",  .has_arg = required_argument, .flag = NULL, .val = 'r'},
 		{.name = "owner", .has_arg = required_argument, .flag = NULL, .val = 'o'},
 		{.name = "count", .has_arg = required_argument, .flag = NULL, .val = 'c'},
+		{.name = "jobs",  .has_arg = required_argument, .flag = NULL, .val = 'j'},
 		{0}
 	};
 
-	while ((ch = getopt_long(argc, argv, "n:o:r:", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "+n:o:r:j:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
 			owner = optarg;
@@ -1905,6 +1907,15 @@ subcommand_pipelines(int argc, char *argv[])
 			count        = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "ci: cannot parse argument to -n");
+		} break;
+		case 'j': {
+			char *endptr = NULL;
+			id           = strtol(optarg, &endptr, 10);
+			if (endptr != (optarg + strlen(optarg)))
+				err(1, "ci: cannot parse argument to -i");
+			if (id < 0) {
+				errx(1, "error: pipeline id must be a positive number");
+			}
 		} break;
 		case '?':
 		default:
@@ -1926,7 +1937,12 @@ subcommand_pipelines(int argc, char *argv[])
 		errx(1, "error: The pipelines subcommand only works for GitLab. "
 			 "Use ghcli -t gitlab ... to force a GitLab remote.");
 
-	gitlab_pipelines(owner, repo, count);
+	/* If the user specified a pipeline id, print the jobs of that
+	 * given pipeline */
+	if (id < 0)
+		gitlab_pipelines(owner, repo, count);
+	else
+		gitlab_pipeline_jobs(owner, repo, id, count);
 
 	return EXIT_SUCCESS;
 }

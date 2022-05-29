@@ -302,19 +302,25 @@ gitlab_print_jobs(gitlab_job *jobs, int jobs_size)
 	}
 }
 
+static void
+gitlab_free_job_data(gitlab_job *job)
+{
+	free(job->status);
+	free(job->stage);
+	free(job->name);
+	free(job->ref);
+	free(job->created_at);
+	free(job->started_at);
+	free(job->finished_at);
+	free(job->runner_name);
+	free(job->runner_description);
+}
+
 void
 gitlab_free_jobs(gitlab_job	*jobs, int jobs_size)
 {
 	for (int i = 0; i < jobs_size; ++i) {
-		free(jobs[i].status);
-		free(jobs[i].stage);
-		free(jobs[i].name);
-		free(jobs[i].ref);
-		free(jobs[i].created_at);
-		free(jobs[i].started_at);
-		free(jobs[i].finished_at);
-		free(jobs[i].runner_name);
-		free(jobs[i].runner_description);
+		gitlab_free_job_data(&jobs[i]);
 	}
 	free(jobs);
 }
@@ -334,4 +340,42 @@ gitlab_job_get_log(const char *owner, const char *repo, long job_id)
 
 	free(buffer.data);
 	free(url);
+}
+
+static void
+gitlab_get_job(const char *owner, const char *repo, long jid, gitlab_job *out)
+{
+	ghcli_fetch_buffer	 buffer = {0};
+	char				*url	= NULL;
+	struct json_stream	 stream = {0};
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld",
+					  gitlab_get_apibase(), owner, repo, jid);
+	ghcli_fetch(url, NULL, &buffer);
+
+	json_open_buffer(&stream, buffer.data, buffer.length);
+	json_set_streaming(&stream, 1);
+
+	gitlab_parse_job(&stream, out);
+
+	free(buffer.data);
+	free(url);
+	json_close(&stream);
+}
+
+static void
+gitlab_print_job_status(gitlab_job *job)
+{
+	(void) job;
+	printf("TODO: Print job data\n");
+}
+
+void
+gitlab_job_status(const char *owner, const char *repo, long jid)
+{
+	gitlab_job job = {0};
+
+	gitlab_get_job(owner, repo, jid, &job);
+	gitlab_print_job_status(&job);
+	gitlab_free_job_data(&job);
 }

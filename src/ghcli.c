@@ -1937,9 +1937,6 @@ subcommand_pipelines(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	if (argc != 0)
-		errx(1, "error: stray parameters");
-
 	if (pid > 0 && jid > 0)
 		errx(1, "error: -p and -j are mutually exclusive");
 
@@ -1953,13 +1950,51 @@ subcommand_pipelines(int argc, char *argv[])
 
 	/* If the user specified a pipeline id, print the jobs of that
 	 * given pipeline */
-	if (jid >= 0)
-		gitlab_job_get_log(owner, repo, jid);
-	else if (pid >= 0)
-		gitlab_pipeline_jobs(owner, repo, pid, count);
-	else
-		gitlab_pipelines(owner, repo, count);
+	if (pid >= 0) {
+		/* Make sure we are interpreting things correctly */
+		if (argc != 0)
+			errx(1, "error: stray arguments");
 
+		gitlab_pipeline_jobs(owner, repo, pid, count);
+		return EXIT_SUCCESS;
+	}
+
+	/* if the user didn't specify the -j option to list jobs, list the
+	 * pipelines instead */
+	if (jid < 0) {
+		/* Make sure we are interpreting things correctly */
+		if (argc != 0)
+			errx(1, "error: stray arguments");
+
+		gitlab_pipelines(owner, repo, count);
+		return EXIT_SUCCESS;
+	}
+
+	/* At this point jid contains a (hopefully) valid job id */
+
+	/* Definition of the action list */
+	struct {
+		const char *name;                               /* Name on the cli */
+		void (*fn)(const char *, const char *, long);   /* Function to be invoked for this action */
+	} job_actions[] = {
+		{ .name = "log",    .fn = gitlab_job_get_log },
+		{ .name = "status", .fn = gitlab_job_status  },
+	};
+
+next_action:
+	while (argc) {
+		const char *action = shift(&argc, &argv);
+
+		/* Find the action and invoke it */
+		for (size_t i = 0; i < ARRAY_SIZE(job_actions); ++i) {
+			if (strcmp(action, job_actions[i].name) == 0) {
+				job_actions[i].fn(owner, repo, jid);
+				goto next_action;
+			}
+		}
+
+		errx(1, "error: unknown action '%s'", action);
+	}
 
 	return EXIT_SUCCESS;
 }

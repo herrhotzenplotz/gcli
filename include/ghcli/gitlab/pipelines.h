@@ -102,4 +102,9 @@ void gitlab_job_get_log(
 	const char *repo,
 	long        job_id);
 
+void gitlab_job_status(
+	const char *owner,
+	const char *repo,
+	long        job_id);
+
 #endif /* GITLAB_PIPELINES_H */

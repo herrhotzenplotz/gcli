@@ -186,10 +186,10 @@ http_extractor(ghcli_gitremote *remote, const char *prefix)
 	sn_sv  pair        = remote->url;
 
 	if (sn_sv_has_prefix(remote->url, "https://github.com/")) {
-		prefix_size = sizeof("https://github.com/");
+		prefix_size = sizeof("https://github.com/") - 1;
 		remote->forge_type = GHCLI_FORGE_GITHUB;
 	} else if (sn_sv_has_prefix(remote->url, "https://gitlab.com/")) {
-		prefix_size = sizeof("https://gitlab.com/");
+		prefix_size = sizeof("https://gitlab.com/") - 1;
 		remote->forge_type = GHCLI_FORGE_GITLAB;
 	} else {
 		warnx("non-github or non-gitlab https remotes are not supported "

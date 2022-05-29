@@ -389,3 +389,32 @@ gitlab_job_status(const char *owner, const char *repo, long jid)
 	gitlab_print_job_status(&job);
 	gitlab_free_job_data(&job);
 }
+
+/* TODO: Maybe devise a macro for these things ? */
+void
+gitlab_job_cancel(const char *owner, const char *repo, long jid)
+{
+	ghcli_fetch_buffer	 buffer = {0};
+	char				*url	= NULL;
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld/cancel",
+					  gitlab_get_apibase(), owner, repo, jid);
+	ghcli_fetch_with_method("POST", url, NULL, NULL, &buffer);
+
+	free(url);
+	free(buffer.data);
+}
+
+void
+gitlab_job_retry(const char *owner, const char *repo, long jid)
+{
+	ghcli_fetch_buffer	 buffer = {0};
+	char				*url	= NULL;
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld/retry",
+					  gitlab_get_apibase(), owner, repo, jid);
+	ghcli_fetch_with_method("POST", url, NULL, NULL, &buffer);
+
+	free(url);
+	free(buffer.data);
+}

@@ -1979,6 +1979,8 @@ subcommand_pipelines(int argc, char *argv[])
 	} job_actions[] = {
 		{ .name = "log",    .fn = gitlab_job_get_log },
 		{ .name = "status", .fn = gitlab_job_status  },
+		{ .name = "cancel", .fn = gitlab_job_cancel  },
+		{ .name = "retry",  .fn = gitlab_job_retry   },
 	};
 
 next_action:

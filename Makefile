@@ -50,6 +50,7 @@ libghcli.a_SRCS			=	src/comments.c			\
 					src/gitlab/issues.c		\
 					src/gitlab/labels.c		\
 					src/gitlab/merge_requests.c	\
+					src/gitlab/pipelines.c		\
 					src/gitlab/releases.c		\
 					src/gitlab/repos.c		\
 					src/gitlab/review.c		\

@@ -37,6 +37,7 @@
 #include <sn/sn.h>
 
 #define get_int(input)       get_int_(input, __func__)
+#define get_double(input)    get_double_(input, __func__)
 #define get_parse_int(input) get_parse_int_(input, __func__)
 #define get_bool(input)      get_bool_(input, __func__)
 #define get_string(input)    get_string_(input, __func__)
@@ -45,6 +46,7 @@
 #define get_label(input)     get_label_(input, __func__)
 
 long        get_int_(json_stream *input, const char *function);
+double      get_double_(json_stream *input, const char *function);
 long        get_parse_int_(json_stream *input, const char *function);
 bool        get_bool_(json_stream *input, const char *function);
 char       *get_string_(json_stream *input, const char *function);

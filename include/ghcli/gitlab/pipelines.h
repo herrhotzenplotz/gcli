@@ -97,4 +97,9 @@ void gitlab_free_jobs(
 	gitlab_job	*jobs,
 	int			 jobs_size);
 
+void gitlab_job_get_log(
+	const char *owner,
+	const char *repo,
+	long        job_id);
+
 #endif /* GITLAB_PIPELINES_H */

@@ -318,3 +318,20 @@ gitlab_free_jobs(gitlab_job	*jobs, int jobs_size)
 	}
 	free(jobs);
 }
+
+void
+gitlab_job_get_log(const char *owner, const char *repo, long job_id)
+{
+	ghcli_fetch_buffer	 buffer = {0};
+	char				*url	= NULL;
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld/trace",
+					  gitlab_get_apibase(), owner, repo, job_id);
+
+	ghcli_fetch(url, NULL, &buffer);
+
+	fwrite(buffer.data, buffer.length, 1, stdout);
+
+	free(buffer.data);
+	free(url);
+}

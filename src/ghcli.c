@@ -1883,7 +1883,8 @@ subcommand_pipelines(int argc, char *argv[])
 	int			 ch	   = 0;
 	const char	*owner = NULL, *repo = NULL;
 	int          count = 30;
-	long         id    = -1;
+	long         pid   = -1; /* pipeline id                           */
+	long         jid   = -1; /* job id. these are mutually exclusive. */
 
 	/* Parse options */
 	const struct option options[] = {
@@ -1891,10 +1892,11 @@ subcommand_pipelines(int argc, char *argv[])
 		{.name = "owner",    .has_arg = required_argument, .flag = NULL, .val = 'o'},
 		{.name = "count",    .has_arg = required_argument, .flag = NULL, .val = 'c'},
 		{.name = "pipeline", .has_arg = required_argument, .flag = NULL, .val = 'p'},
+		{.name = "job",      .has_arg = required_argument, .flag = NULL, .val = 'j'},
 		{0}
 	};
 
-	while ((ch = getopt_long(argc, argv, "+n:o:r:p:", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "+n:o:r:p:j:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
 			owner = optarg;
@@ -1910,11 +1912,20 @@ subcommand_pipelines(int argc, char *argv[])
 		} break;
 		case 'p': {
 			char *endptr = NULL;
-			id           = strtol(optarg, &endptr, 10);
+			pid          = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "ci: cannot parse argument to -p");
-			if (id < 0) {
+			if (pid < 0) {
 				errx(1, "error: pipeline id must be a positive number");
+			}
+		} break;
+		case 'j': {
+			char *endptr = NULL;
+			jid          = strtol(optarg, &endptr, 10);
+			if (endptr != (optarg + strlen(optarg)))
+				err(1, "ci: cannot parse argument to -j");
+			if (jid < 0) {
+				errx(1, "error: job id must be a positive number");
 			}
 		} break;
 		case '?':
@@ -1929,6 +1940,9 @@ subcommand_pipelines(int argc, char *argv[])
 	if (argc != 0)
 		errx(1, "error: stray parameters");
 
+	if (pid > 0 && jid > 0)
+		errx(1, "error: -p and -j are mutually exclusive");
+
 	check_owner_and_repo(&owner, &repo);
 
 	/* Make sure we are actually talking about a gitlab remote because
@@ -1939,10 +1953,13 @@ subcommand_pipelines(int argc, char *argv[])
 
 	/* If the user specified a pipeline id, print the jobs of that
 	 * given pipeline */
-	if (id < 0)
-		gitlab_pipelines(owner, repo, count);
+	if (jid >= 0)
+		gitlab_job_get_log(owner, repo, jid);
+	else if (pid >= 0)
+		gitlab_pipeline_jobs(owner, repo, pid, count);
 	else
-		gitlab_pipeline_jobs(owner, repo, id, count);
+		gitlab_pipelines(owner, repo, count);
+
 
 	return EXIT_SUCCESS;
 }

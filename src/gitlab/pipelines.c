@@ -281,13 +281,10 @@ gitlab_get_pipeline_jobs(
 void
 gitlab_print_jobs(gitlab_job *jobs, int jobs_size)
 {
-	printf("%10.10s  %10.10s  %10.10s  %16.16s  %16.16s  %8.8s  %12.12s  "
-		   "%12.12s  %-s\n",
-		   "ID", "NAME", "STATUS", "STARTED", "FINISHED", "DURATION",
-		   "RUNNERNAME", "RUNNERDESC", "REF");
+	printf("%10.10s  %10.10s  %10.10s  %16.16s  %16.16s  %12.12s  %-s\n",
+		   "ID", "NAME", "STATUS", "STARTED", "FINISHED", "RUNNERDESC", "REF");
 	for (int i = 0; i < jobs_size; ++i) {
-		printf("%10ld  %10.10s  %s%10.10s%s  %16.16s  %16.16s  %7.2lfs  "
-			   "%12.12s  %12.12s  %-s\n",
+		printf("%10ld  %10.10s  %s%10.10s%s  %16.16s  %16.16s  %12.12s  %-s\n",
 			   jobs[i].id,
 			   jobs[i].name,
 			   ghcli_state_color_str(jobs[i].status),
@@ -295,8 +292,6 @@ gitlab_print_jobs(gitlab_job *jobs, int jobs_size)
 			   ghcli_resetcolor(),
 			   jobs[i].started_at,
 			   jobs[i].finished_at,
-			   jobs[i].duration,
-			   jobs[i].runner_name,
 			   jobs[i].runner_description,
 			   jobs[i].ref);
 	}

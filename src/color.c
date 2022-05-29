@@ -147,33 +147,30 @@ ghcli_state_color_str(const char *it)
 		return "";
 }
 
+/* TODO: Probably a hash table would be more suitable */
+static const struct { const char *name; int code; }
+	state_color_table[] =
+{
+	{ .name = "open",      .code = GHCLI_COLOR_GREEN   },
+	{ .name = "success",   .code = GHCLI_COLOR_GREEN   },
+	{ .name = "APPROVED",  .code = GHCLI_COLOR_GREEN   },
+	{ .name = "merged",    .code = GHCLI_COLOR_MAGENTA },
+	{ .name = "closed",    .code = GHCLI_COLOR_RED     },
+	{ .name = "failed",    .code = GHCLI_COLOR_RED     },
+	{ .name = "canceled",  .code = GHCLI_COLOR_RED     }, /* orthography has left the channel */
+	{ .name = "failure",   .code = GHCLI_COLOR_RED     },
+	{ .name = "running",   .code = GHCLI_COLOR_BLUE    },
+	{ .name = "COMMENTED", .code = GHCLI_COLOR_BLUE    },
+};
+
 const char *
 ghcli_state_color_sv(sn_sv state)
 {
 	if (!sn_sv_null(state)) {
-		if (sn_sv_has_prefix(state, "open"))
-			return ghcli_setcolor(GHCLI_COLOR_GREEN);
-
-		if (sn_sv_has_prefix(state, "success"))
-			return ghcli_setcolor(GHCLI_COLOR_GREEN);
-
-		if (sn_sv_has_prefix(state, "merged"))
-			return ghcli_setcolor(GHCLI_COLOR_MAGENTA);
-
-		if (sn_sv_has_prefix(state, "closed"))
-			return ghcli_setcolor(GHCLI_COLOR_RED);
-
-		if (sn_sv_has_prefix(state, "failed"))
-			return ghcli_setcolor(GHCLI_COLOR_RED);
-
-		if (sn_sv_has_prefix(state, "failure"))
-			return ghcli_setcolor(GHCLI_COLOR_RED);
-
-		if (sn_sv_has_prefix(state, "COMMENTED"))
-			return ghcli_setcolor(GHCLI_COLOR_BLUE);
-
-		if (sn_sv_has_prefix(state, "APPROVED"))
-			return ghcli_setcolor(GHCLI_COLOR_GREEN);
+		for (size_t i = 0; i < ARRAY_SIZE(state_color_table); ++i) {
+			if (sn_sv_has_prefix(state, state_color_table[i].name))
+				return ghcli_setcolor(state_color_table[i].code);
+		}
 	}
 
 	return ghcli_setcolor(GHCLI_COLOR_DEFAULT);

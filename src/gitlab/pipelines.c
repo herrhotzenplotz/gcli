@@ -366,8 +366,23 @@ gitlab_get_job(const char *owner, const char *repo, long jid, gitlab_job *out)
 static void
 gitlab_print_job_status(gitlab_job *job)
 {
-	(void) job;
-	printf("TODO: Print job data\n");
+	printf("          ID : %ld\n",     job->id);
+	printf("      STATUS : %s%s%s\n",
+		   ghcli_state_color_str(job->status),
+		   job->status,
+		   ghcli_resetcolor());
+	printf("       STAGE : %s\n",      job->stage);
+	printf("        NAME : %s\n",      job->name);
+	printf("         REF : %s%s%s\n",
+		   ghcli_setcolor(GHCLI_COLOR_YELLOW),
+		   job->ref,
+		   ghcli_resetcolor());
+	printf("     CREATED : %s\n",      job->created_at);
+	printf("     STARTED : %s\n",      job->started_at);
+	printf("    FINISHED : %s\n",      job->finished_at);
+	printf("    DURATION : %-.2lfs\n", job->duration);
+	printf(" RUNNER NAME : %s\n",      job->runner_name);
+	printf("RUNNER DESCR : %s\n",      job->runner_description);
 }
 
 void

@@ -121,17 +121,21 @@ gitlab_print_pipelines(
 	gitlab_pipeline *pipelines,
 	int              pipelines_size)
 {
-	printf("%10.10s  %10.10s  %16.16s  %16.16s %-s\n",
-		   "ID", "STATUS", "CREATED", "UPDATED", "REF");
-	for (int i = 0; i < pipelines_size; ++i) {
-		printf("%10ld  %s%10.10s%s  %16.16s  %16.16s %-s\n",
-			   pipelines[i].id,
-			   ghcli_state_color_str(pipelines[i].status),
-			   pipelines[i].status,
-			   ghcli_resetcolor(),
-			   pipelines[i].created_at,
-			   pipelines[i].updated_at,
-			   pipelines[i].ref);
+	if (pipelines_size) {
+		printf("%10.10s  %10.10s  %16.16s  %16.16s %-s\n",
+			   "ID", "STATUS", "CREATED", "UPDATED", "REF");
+		for (int i = 0; i < pipelines_size; ++i) {
+			printf("%10ld  %s%10.10s%s  %16.16s  %16.16s %-s\n",
+				   pipelines[i].id,
+				   ghcli_state_color_str(pipelines[i].status),
+				   pipelines[i].status,
+				   ghcli_resetcolor(),
+				   pipelines[i].created_at,
+				   pipelines[i].updated_at,
+				   pipelines[i].ref);
+		}
+	} else {
+		printf("No pipelines\n");
 	}
 }
 
@@ -281,19 +285,23 @@ gitlab_get_pipeline_jobs(
 void
 gitlab_print_jobs(gitlab_job *jobs, int jobs_size)
 {
-	printf("%10.10s  %10.10s  %10.10s  %16.16s  %16.16s  %12.12s  %-s\n",
-		   "ID", "NAME", "STATUS", "STARTED", "FINISHED", "RUNNERDESC", "REF");
-	for (int i = 0; i < jobs_size; ++i) {
-		printf("%10ld  %10.10s  %s%10.10s%s  %16.16s  %16.16s  %12.12s  %-s\n",
-			   jobs[i].id,
-			   jobs[i].name,
-			   ghcli_state_color_str(jobs[i].status),
-			   jobs[i].status,
-			   ghcli_resetcolor(),
-			   jobs[i].started_at,
-			   jobs[i].finished_at,
-			   jobs[i].runner_description,
-			   jobs[i].ref);
+	if (jobs_size) {
+		printf("%10.10s  %10.10s  %10.10s  %16.16s  %16.16s  %12.12s  %-s\n",
+			   "ID", "NAME", "STATUS", "STARTED", "FINISHED", "RUNNERDESC", "REF");
+		for (int i = 0; i < jobs_size; ++i) {
+			printf("%10ld  %10.10s  %s%10.10s%s  %16.16s  %16.16s  %12.12s  %-s\n",
+				   jobs[i].id,
+				   jobs[i].name,
+				   ghcli_state_color_str(jobs[i].status),
+				   jobs[i].status,
+				   ghcli_resetcolor(),
+				   jobs[i].started_at,
+				   jobs[i].finished_at,
+				   jobs[i].runner_description,
+				   jobs[i].ref);
+		}
+	} else {
+		printf("No jobs\n");
 	}
 }
 

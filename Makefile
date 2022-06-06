@@ -2,7 +2,7 @@
 PROGS				=	ghcli
 LIBS				=	libghcli.a
 
-GHCLI_VERSION			=	0.8.0-beta
+GHCLI_VERSION			=	0.8.1-beta
 # These and LDFLAGS can be overwritten
 CFLAGS				=	-std=iso9899:1999 \
 					-Ithirdparty/pdjson/ \
@@ -80,7 +80,8 @@ MAN				=	docs/ghcli.1		\
 					docs/ghcli-gists.1	\
 					docs/ghcli-snippets.1	\
 					docs/ghcli-status.1	\
-					docs/ghcli-labels.1
+					docs/ghcli-labels.1	\
+					docs/ghcli-pipelines.1
 
 # Include the rules to build your program
 # Important: the autodetect.sh script needs to be in place

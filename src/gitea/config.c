@@ -74,6 +74,12 @@ default_val:
 char *
 gitea_get_authheader(void)
 {
-	// FIXME: Return the actually needed headers
-	return NULL;
+	sn_sv account = gitea_default_account_name();
+	if (sn_sv_null(account))
+		return NULL;
+
+	sn_sv token = ghcli_config_find_by_key(account, "token");;
+	if (sn_sv_null(token))
+		errx(1, "Missing Github token");
+	return sn_asprintf("Authorization: token "SV_FMT, SV_ARGS(token));
 }

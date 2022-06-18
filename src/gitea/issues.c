@@ -187,3 +187,28 @@ gitea_get_issue_summary(
 	free(e_repo);
 	free(buffer.data);
 }
+
+void
+gitea_submit_issue(
+	ghcli_submit_issue_options	 opts,
+	ghcli_fetch_buffer			*out)
+{
+	sn_sv e_owner = ghcli_urlencode_sv(opts.owner);
+	sn_sv e_repo  = ghcli_urlencode_sv(opts.repo);
+
+	char *post_fields = sn_asprintf(
+		"{ \"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
+		SV_ARGS(opts.title), SV_ARGS(opts.body));
+	char *url         = sn_asprintf(
+		"%s/repos/"SV_FMT"/"SV_FMT"/issues",
+		gitea_get_apibase(),
+		SV_ARGS(e_owner),
+		SV_ARGS(e_repo));
+
+	ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
+
+	free(e_owner.data);
+	free(e_repo.data);
+	free(post_fields);
+	free(url);
+}

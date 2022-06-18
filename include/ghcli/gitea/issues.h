@@ -43,5 +43,8 @@ void gitea_get_issue_summary(
 	const char			*repo,
 	int					 issue,
 	ghcli_issue_details *out);
+void gitea_submit_issue(
+	ghcli_submit_issue_options	 opts,
+	ghcli_fetch_buffer			*out);
 
 #endif /* GITEA_ISSUES_H */

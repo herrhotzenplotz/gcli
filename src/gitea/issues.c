@@ -67,6 +67,8 @@ gitea_get_issues(
 {
 	char				*url	  = NULL;
 	char				*next_url = NULL;
+	char				*e_owner  = NULL;
+	char				*e_repo	  = NULL;
 	ghcli_fetch_buffer	 buffer	  = {0};
 	struct json_stream	 stream	  = {0};
 	enum json_type		 next	  = JSON_NULL;
@@ -74,7 +76,13 @@ gitea_get_issues(
 
 	*out = NULL;
 
-	url = sn_asprintf("%s/repos/%s/%s/issues", gitea_get_apibase(), owner, repo);
+	e_owner = ghcli_urlencode(owner);
+	e_repo  = ghcli_urlencode(repo);
+
+	url = sn_asprintf("%s/repos/%s/%s/issues%s",
+					  gitea_get_apibase(),
+					  owner, repo,
+					  all ? "?state=all" : "");
 
 	do {
 		ghcli_fetch(url, &next_url, &buffer);
@@ -99,5 +107,83 @@ gitea_get_issues(
 		free(buffer.data);
 	} while ((url = next_url) && (max == -1 || out_size < max));
 
+	free(e_owner);
+	free(e_repo);
+
 	return out_size;
+}
+
+static void
+gitea_parse_issue_details(struct json_stream *input, ghcli_issue_details *out)
+{
+	enum json_type  key_type;
+	const char     *key;
+
+	json_next(input);
+
+	while ((key_type = json_next(input)) == JSON_STRING) {
+		size_t len;
+		key = json_get_string(input, &len);
+
+		if (strncmp("title", key, len) == 0)
+			out->title = get_sv(input);
+		else if (strncmp("state", key, len) == 0)
+			out->state = get_sv(input);
+		else if (strncmp("body", key, len) == 0)
+			out->body = get_sv(input);
+		else if (strncmp("created_at", key, len) == 0)
+			out->created_at = get_sv(input);
+		else if (strncmp("number", key, len) == 0)
+			out->number = get_int(input);
+		else if (strncmp("comments", key, len) == 0)
+			out->comments = get_int(input);
+		else if (strncmp("user", key, len) == 0)
+			out->author = get_user_sv(input);
+		else if (strncmp("locked", key, len) == 0)
+			out->locked = get_bool(input);
+		else if (strncmp("labels", key, len) == 0)
+			out->labels_size = ghcli_read_label_list(input, &out->labels);
+		else if (strncmp("assignees", key, len) == 0)
+			out->assignees_size = ghcli_read_user_list(input, &out->assignees);
+		else
+			SKIP_OBJECT_VALUE(input);
+	}
+
+	if (key_type != JSON_OBJECT_END)
+		errx(1, "Unexpected object key type");
+}
+
+void
+gitea_get_issue_summary(
+	const char          *owner,
+	const char          *repo,
+	int                  issue_number,
+	ghcli_issue_details *out)
+{
+	char               *url     = NULL;
+	char               *e_owner = NULL;
+	char               *e_repo  = NULL;
+	ghcli_fetch_buffer  buffer  = {0};
+	json_stream         parser  = {0};
+
+	e_owner = ghcli_urlencode(owner);
+	e_repo  = ghcli_urlencode(repo);
+
+	url = sn_asprintf(
+		"%s/repos/%s/%s/issues/%d",
+		gitea_get_apibase(),
+		e_owner, e_repo,
+		issue_number);
+	ghcli_fetch(url, NULL, &buffer);
+
+	json_open_buffer(&parser, buffer.data, buffer.length);
+	json_set_streaming(&parser, true);
+
+	gitea_parse_issue_details(&parser, out);
+
+	json_close(&parser);
+	free(url);
+	free(e_owner);
+	free(e_repo);
+	free(buffer.data);
 }

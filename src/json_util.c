@@ -264,6 +264,11 @@ ghcli_read_label_list(json_stream *stream, sn_sv **out)
 	size_t         size;
 
 	next = json_next(stream);
+	if (next == JSON_NULL) {
+		*out = NULL;
+		return 0;
+	}
+
 	if (next != JSON_ARRAY)
 		barf("expected begin of array in label list", __func__);
 
@@ -284,6 +289,14 @@ size_t
 ghcli_read_user_list(json_stream *input, sn_sv **out)
 {
 	size_t n = 0;
+
+	/* Hack for Gitea because it returns NULL instead of an empty
+	 * array */
+	if (json_peek(input) == JSON_NULL) {
+		json_next(input);
+		*out = NULL;
+		return 0;
+	}
 
 	if (json_next(input) != JSON_ARRAY)
 		errx(1, "Expected array for user list");

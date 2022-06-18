@@ -38,5 +38,10 @@ int gitea_get_issues(
 	bool          all,
 	int           max,
 	ghcli_issue **out);
+void gitea_get_issue_summary(
+	const char			*owner,
+	const char			*repo,
+	int					 issue,
+	ghcli_issue_details *out);
 
 #endif /* GITEA_ISSUES_H */

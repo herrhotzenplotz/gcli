@@ -606,6 +606,8 @@ ghcli_config_get_forge_type(void)
 			return GHCLI_FORGE_GITHUB;
 		else if (sn_sv_eq_to(entry, "gitlab"))
 			return GHCLI_FORGE_GITLAB;
+		else if (sn_sv_eq_to(entry, "gitea"))
+			return GHCLI_FORGE_GITEA;
 		else
 			errx(1, "Unknown forge type "SV_FMT, SV_ARGS(entry));
 	}

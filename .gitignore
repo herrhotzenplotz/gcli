@@ -71,7 +71,6 @@
 /src/gitlab/status.o
 /tests/url-encode/Makefile~
 /tests/url-encode/expected.stdout~
-i
 /tests/url-encode/url-encode
 /tests/url-encode/url-encode.core
 /tests/url-encode/url-encode.c~
@@ -92,3 +91,12 @@ i
 /include/ghcli/gitlab/pipelines.h~
 /src/gitlab/pipelines.c~
 /src/gitlab/pipelines.o
+/include/ghcli/gitea/config.h~
+/include/ghcli/gitea/issues.h~
+/src/gitea/config.c~
+/src/gitea/config.o
+/src/gitea/issues.c~
+/src/gitea/issues.o
+/include/ghcli/gitea/comments.h~
+/src/gitea/comments.c~
+/src/gitea/comments.o

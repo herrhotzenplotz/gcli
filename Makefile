@@ -2,7 +2,7 @@
 PROGS				=	ghcli
 LIBS				=	libghcli.a
 
-GHCLI_VERSION			=	0.8.1-beta
+GHCLI_VERSION			=	0.9.0-beta
 # These and LDFLAGS can be overwritten
 CFLAGS				=	-std=iso9899:1999 \
 					-Ithirdparty/pdjson/ \
@@ -55,6 +55,9 @@ libghcli.a_SRCS			=	src/comments.c			\
 					src/gitlab/repos.c		\
 					src/gitlab/review.c		\
 					src/gitlab/status.c		\
+					src/gitea/issues.c		\
+					src/gitea/config.c		\
+					src/gitea/comments.c		\
 					src/issues.c			\
 					src/json_util.c			\
 					src/pulls.c			\

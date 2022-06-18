@@ -449,9 +449,11 @@ ghcli_config_init(int *argc, char ***argv)
 				config.override_forgetype = GHCLI_FORGE_GITHUB;
 			else if (strcmp(optarg, "gitlab") == 0)
 				config.override_forgetype = GHCLI_FORGE_GITLAB;
+			else if (strcmp(optarg, "gitea") == 0)
+				config.override_forgetype = GHCLI_FORGE_GITEA;
 			else
 				errx(1, "error: unknown forge type '%s'. "
-					 "Have either github or gitlab.", optarg);
+					 "Have either github, gitlab or gitea.", optarg);
 		} break;
 		case 0: break;
 		case '?':

@@ -392,3 +392,19 @@ ghcli_read_sv_list(json_stream *input, sn_sv **out)
 
 	return size;
 }
+
+uint32_t
+get_github_style_color(struct json_stream *input)
+{
+	char *color_str = get_string(input);
+	char *endptr    = NULL;
+
+	unsigned long color = strtoul(color_str, &endptr, 16);
+	if (endptr != color_str + strlen(color_str))
+		errx(1, "error: the api returned an"
+			 "invalid hexadecimal color code");
+
+	free(color_str);
+
+	return ((uint32_t)(color)) << 8;
+}

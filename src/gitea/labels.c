@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@outlook.com>
+ * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,14 +27,15 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/github/labels.h>
-#include <ghcli/github/config.h>
+#include <ghcli/gitea/config.h>
+#include <ghcli/gitea/labels.h>
 #include <ghcli/json_util.h>
 
 #include <pdjson/pdjson.h>
+#include <sn/sn.h>
 
 static void
-github_parse_label(struct json_stream *input, ghcli_label *out)
+gitea_parse_label(struct json_stream *input, ghcli_label *out)
 {
 	if (json_next(input) != JSON_OBJECT)
 		errx(1, "Expected Issue Object");
@@ -57,7 +58,7 @@ github_parse_label(struct json_stream *input, ghcli_label *out)
 }
 
 size_t
-github_get_labels(
+gitea_get_labels(
 	const char   *owner,
 	const char   *reponame,
 	int           max,
@@ -72,7 +73,7 @@ github_get_labels(
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/labels",
-		github_get_apibase(), owner, reponame);
+		gitea_get_apibase(), owner, reponame);
 
 	do {
 		struct json_stream stream = {0};
@@ -93,7 +94,7 @@ github_get_labels(
 			it = &(*out)[out_size++];
 
 			memset(it, 0, sizeof(*it));
-			github_parse_label(&stream, it);
+			gitea_parse_label(&stream, it);
 		}
 
 		json_close(&stream);
@@ -105,7 +106,7 @@ github_get_labels(
 }
 
 void
-github_create_label(
+gitea_create_label(
 	const char  *owner,
 	const char  *repo,
 	ghcli_label *label)
@@ -132,7 +133,7 @@ github_create_label(
 
 	/* /repos/{owner}/{repo}/labels */
 	url = sn_asprintf("%s/repos/%s/%s/labels",
-			  github_get_apibase(), e_owner, e_repo);
+			  gitea_get_apibase(), e_owner, e_repo);
 
 
 	data = sn_asprintf("{ "
@@ -146,7 +147,7 @@ github_create_label(
 
 	ghcli_fetch_with_method("POST", url, data, NULL, &buffer);
 	json_open_buffer(&stream, buffer.data, buffer.length);
-	github_parse_label(&stream, label);
+	gitea_parse_label(&stream, label);
 
 	json_close(&stream);
 	free(url);
@@ -161,25 +162,41 @@ github_create_label(
 }
 
 void
-github_delete_label(
+gitea_delete_label(
 	const char *owner,
 	const char *repo,
 	const char *label)
 {
-	char               *url     = NULL;
-	char               *e_label = NULL;
-	ghcli_fetch_buffer  buffer  = {0};
+	char				*url		 = NULL;
+	ghcli_fetch_buffer	 buffer		 = {0};
+	ghcli_label			*labels		 = NULL;
+	size_t				 labels_size = 0;
+	int                  id			 = -1;
 
-	e_label = ghcli_urlencode(label);
+	/* Gitea wants the id of the label, not its name. thus fetch all
+	 * the labels first to then find out what the id is we need. */
+	labels_size = gitea_get_labels(owner, repo, -1, &labels);
 
-	/* DELETE /repos/{owner}/{repo}/labels/{name} */
-	url = sn_asprintf("%s/repos/%s/%s/labels/%s",
-			  github_get_apibase(),
-			  owner, repo, e_label);
+	/* Search for the id */
+	for (size_t i = 0; i < labels_size; ++i) {
+		if (strcmp(labels[i].name, label) == 0) {
+			id = labels[i].id;
+			break;
+		}
+	}
+
+	/* did we find a label? */
+	if (id < 0)
+		errx(1, "error: label '%s' does not exist", label);
+
+	/* DELETE /repos/{owner}/{repo}/labels/{} */
+	url = sn_asprintf("%s/repos/%s/%s/labels/%d",
+					  gitea_get_apibase(),
+					  owner, repo, id);
 
 	ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
+	ghcli_free_labels(labels, labels_size);
 	free(url);
-	free(e_label);
 	free(buffer.data);
 }

@@ -59,6 +59,7 @@
 #include <ghcli/gitea/comments.h>
 #include <ghcli/gitea/config.h>
 #include <ghcli/gitea/issues.h>
+#include <ghcli/gitea/labels.h>
 
 static ghcli_forge_descriptor
 github_forge_descriptor =
@@ -167,9 +168,12 @@ gitea_forge_descriptor =
 	.issue_reopen		  = gitea_issue_reopen,
 	.issue_assign		  = gitea_issue_assign,
 	.get_issue_comments   = gitea_get_comments,
+	.get_labels			  = gitea_get_labels,
+	.create_label		  = gitea_create_label,
+	.delete_label		  = gitea_delete_label,
 
 	.get_authheader		  = gitea_get_authheader,
-	.get_api_error_string = github_api_error_string, /* hack! */
+	.get_api_error_string = github_api_error_string,	/* hack! */
 	.user_object_key	  = "username",
 	.html_url_key		  = "web_url",
 };

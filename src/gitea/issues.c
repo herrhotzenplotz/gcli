@@ -240,7 +240,7 @@ gitea_issue_patch_state(
 
 	free(data);
 	free(url);
-	free(e_owner);
+ 	free(e_owner);
 	free(e_repo);
 	free(json_buffer.data);
 }

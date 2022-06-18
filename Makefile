@@ -58,6 +58,7 @@ libghcli.a_SRCS			=	src/comments.c			\
 					src/gitea/issues.c		\
 					src/gitea/config.c		\
 					src/gitea/comments.c		\
+					src/gitea/labels.c		\
 					src/issues.c			\
 					src/json_util.c			\
 					src/pulls.c			\

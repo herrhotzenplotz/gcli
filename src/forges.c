@@ -56,6 +56,9 @@
 #include <ghcli/gitlab/review.h>
 #include <ghcli/gitlab/status.h>
 
+#include <ghcli/gitea/config.h>
+#include <ghcli/gitea/issues.h>
+
 static ghcli_forge_descriptor
 github_forge_descriptor =
 {
@@ -156,8 +159,10 @@ gitlab_forge_descriptor =
 static ghcli_forge_descriptor
 gitea_forge_descriptor =
 {
-	.user_object_key           = "username",
-	.html_url_key              = "web_url",
+	.get_issues		 = gitea_get_issues,
+	.get_authheader  = gitea_get_authheader,
+	.user_object_key = "username",
+	.html_url_key    = "web_url",
 };
 
 const ghcli_forge_descriptor *

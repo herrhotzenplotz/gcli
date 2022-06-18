@@ -55,6 +55,8 @@ libghcli.a_SRCS			=	src/comments.c			\
 					src/gitlab/repos.c		\
 					src/gitlab/review.c		\
 					src/gitlab/status.c		\
+					src/gitea/issues.c		\
+					src/gitea/config.c		\
 					src/issues.c			\
 					src/json_util.c			\
 					src/pulls.c			\

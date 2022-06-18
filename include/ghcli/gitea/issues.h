@@ -54,5 +54,10 @@ void gitea_issue_reopen(
 	const char	*owner,
 	const char	*repo,
 	int			 issue_number);
+void gitea_issue_assign(
+	const char	*owner,
+	const char	*repo,
+	int			 issue_number,
+	const char	*assignee);
 
 #endif /* GITEA_ISSUES_H */

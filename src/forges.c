@@ -164,6 +164,7 @@ gitea_forge_descriptor =
 	.perform_submit_issue = gitea_submit_issue,
 	.issue_close		  = gitea_issue_close,
 	.issue_reopen		  = gitea_issue_reopen,
+	.issue_assign		  = gitea_issue_assign,
 
 	.get_authheader		  = gitea_get_authheader,
 	.get_api_error_string = github_api_error_string, /* hack! */

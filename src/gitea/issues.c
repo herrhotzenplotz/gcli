@@ -213,11 +213,12 @@ gitea_submit_issue(
 	free(url);
 }
 
-void
-gitea_issue_close(
+static void
+gitea_issue_patch_state(
 	const char	*owner,
 	const char	*repo,
-	int			 issue_number)
+	int			 issue_number,
+	const char	*state)
 {
 	ghcli_fetch_buffer  json_buffer = {0};
 	char               *url         = NULL;
@@ -233,7 +234,7 @@ gitea_issue_close(
 		gitea_get_apibase(),
 		e_owner, e_repo,
 		issue_number);
-	data = sn_asprintf("{ \"state\": \"closed\"}");
+	data = sn_asprintf("{ \"state\": \"%s\"}", state);
 
 	ghcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
 
@@ -242,4 +243,22 @@ gitea_issue_close(
 	free(e_owner);
 	free(e_repo);
 	free(json_buffer.data);
+}
+
+void
+gitea_issue_close(
+	const char	*owner,
+	const char	*repo,
+	int			 issue_number)
+{
+	gitea_issue_patch_state(owner, repo, issue_number, "closed");
+}
+
+void
+gitea_issue_reopen(
+	const char	*owner,
+	const char	*repo,
+	int			 issue_number)
+{
+	gitea_issue_patch_state(owner, repo, issue_number, "open");
 }

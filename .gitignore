@@ -97,3 +97,6 @@
 /src/gitea/config.o
 /src/gitea/issues.c~
 /src/gitea/issues.o
+/include/ghcli/gitea/comments.h~
+/src/gitea/comments.c~
+/src/gitea/comments.o

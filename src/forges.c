@@ -56,6 +56,7 @@
 #include <ghcli/gitlab/review.h>
 #include <ghcli/gitlab/status.h>
 
+#include <ghcli/gitea/comments.h>
 #include <ghcli/gitea/config.h>
 #include <ghcli/gitea/issues.h>
 
@@ -165,6 +166,7 @@ gitea_forge_descriptor =
 	.issue_close		  = gitea_issue_close,
 	.issue_reopen		  = gitea_issue_reopen,
 	.issue_assign		  = gitea_issue_assign,
+	.get_issue_comments   = gitea_get_comments,
 
 	.get_authheader		  = gitea_get_authheader,
 	.get_api_error_string = github_api_error_string, /* hack! */

@@ -51,9 +51,9 @@ ghcli_print_comment_list(
 {
 	for (size_t i = 0; i < comments_size; ++i) {
 		printf("AUTHOR : %s%s%s\n"
-		       "DATE   : %s\n",
-		       ghcli_setbold(), comments[i].author, ghcli_resetbold(),
-		       comments[i].date);
+			   "DATE   : %s\n",
+			   ghcli_setbold(), comments[i].author, ghcli_resetbold(),
+			   comments[i].date);
 		pretty_print(comments[i].body, 9, 80, stdout);
 		putchar('\n');
 	}
@@ -107,6 +107,7 @@ comment_init(FILE *f, void *_data)
 		break;
 	case PR_COMMENT: {
 		switch (ghcli_config_get_forge_type()) {
+		case GHCLI_FORGE_GITEA:
 		case GHCLI_FORGE_GITHUB:
 			target_type = "Pull Request";
 			break;

@@ -153,6 +153,13 @@ gitlab_forge_descriptor =
 	.html_url_key              = "web_url",
 };
 
+static ghcli_forge_descriptor
+gitea_forge_descriptor =
+{
+	.user_object_key           = "username",
+	.html_url_key              = "web_url",
+};
+
 const ghcli_forge_descriptor *
 ghcli_forge(void)
 {
@@ -161,6 +168,8 @@ ghcli_forge(void)
 		return &github_forge_descriptor;
 	case GHCLI_FORGE_GITLAB:
 		return &gitlab_forge_descriptor;
+	case GHCLI_FORGE_GITEA:
+		return &gitea_forge_descriptor;
 	default:
 		errx(1,
 			 "error: cannot determine forge type. try forcing an account "

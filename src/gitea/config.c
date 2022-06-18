@@ -79,7 +79,10 @@ gitea_get_authheader(void)
 		return NULL;
 
 	sn_sv token = ghcli_config_find_by_key(account, "token");;
-	if (sn_sv_null(token))
-		errx(1, "Missing Github token");
+	if (sn_sv_null(token)) {
+		warnx("Missing Gitea token");
+		return NULL;
+	}
+
 	return sn_asprintf("Authorization: token "SV_FMT, SV_ARGS(token));
 }

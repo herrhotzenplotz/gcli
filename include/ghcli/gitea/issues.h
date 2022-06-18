@@ -46,5 +46,9 @@ void gitea_get_issue_summary(
 void gitea_submit_issue(
 	ghcli_submit_issue_options	 opts,
 	ghcli_fetch_buffer			*out);
+void gitea_issue_close(
+	const char	*owner,
+	const char	*repo,
+	int			 issue_number);
 
 #endif /* GITEA_ISSUES_H */

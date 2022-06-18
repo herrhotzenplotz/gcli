@@ -162,6 +162,8 @@ gitea_forge_descriptor =
 	.get_issues			  = gitea_get_issues,
 	.get_issue_summary	  = gitea_get_issue_summary,
 	.perform_submit_issue = gitea_submit_issue,
+	.issue_close		  = gitea_issue_close,
+
 	.get_authheader		  = gitea_get_authheader,
 	.get_api_error_string = github_api_error_string, /* hack! */
 	.user_object_key	  = "username",

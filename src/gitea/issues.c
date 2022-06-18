@@ -212,3 +212,34 @@ gitea_submit_issue(
 	free(post_fields);
 	free(url);
 }
+
+void
+gitea_issue_close(
+	const char	*owner,
+	const char	*repo,
+	int			 issue_number)
+{
+	ghcli_fetch_buffer  json_buffer = {0};
+	char               *url         = NULL;
+	char               *data        = NULL;
+	char               *e_owner     = NULL;
+	char               *e_repo      = NULL;
+
+	e_owner = ghcli_urlencode(owner);
+	e_repo  = ghcli_urlencode(repo);
+
+	url = sn_asprintf(
+		"%s/repos/%s/%s/issues/%d",
+		gitea_get_apibase(),
+		e_owner, e_repo,
+		issue_number);
+	data = sn_asprintf("{ \"state\": \"closed\"}");
+
+	ghcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
+
+	free(data);
+	free(url);
+	free(e_owner);
+	free(e_repo);
+	free(json_buffer.data);
+}

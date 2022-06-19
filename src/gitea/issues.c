@@ -30,7 +30,9 @@
 #include <ghcli/curl.h>
 #include <ghcli/gitea/config.h>
 #include <ghcli/gitea/issues.h>
+#include <ghcli/gitea/labels.h>
 #include <ghcli/json_util.h>
+#include <ghcli/labels.h>
 
 #include <pdjson/pdjson.h>
 
@@ -296,4 +298,117 @@ gitea_issue_assign(
 	free(e_owner);
 	free(e_repo);
 	free(url);
+}
+
+/* Return the stringified id of the given label */
+static char *
+get_id_of_label(
+	const char			*label_name,
+	const ghcli_label	*labels,
+	size_t				 labels_size)
+{
+	for (size_t i = 0; i < labels_size; ++i)
+		if (strcmp(labels[i].name, label_name) == 0)
+			return sn_asprintf("%ld", labels[i].id);
+	return NULL;
+}
+
+static char **
+label_names_to_ids(
+	const char	  *owner,
+	const char	  *repo,
+	const char	  *names[],
+	size_t		   names_size)
+{
+	ghcli_label	 *labels	  = NULL;
+	size_t		  labels_size = 0;
+	char		**ids		  = NULL;
+	size_t		  ids_size	  = 0;
+
+	labels_size = gitea_get_labels(owner, repo, -1, &labels);
+
+	for (size_t i = 0; i < names_size; ++i) {
+		char *label_id = get_id_of_label(
+			names[i], labels, labels_size);
+
+		if (!label_id)
+			errx(1, "error: no such label '%s'", names[i]);
+
+		ids = realloc(ids, sizeof(*ids) * (ids_size +1));
+		ids[ids_size++] = label_id;
+	}
+
+	ghcli_free_labels(labels, labels_size);
+
+	return ids;
+}
+
+static void
+free_id_list(char *list[], size_t list_size)
+{
+	for (size_t i = 0; i < list_size; ++i) {
+		free(list[i]);
+	}
+	free(list);
+}
+
+void
+gitea_issue_add_labels(
+	const char	*owner,
+	const char	*repo,
+	int			 issue,
+	const char	*labels[],
+	size_t		 labels_size)
+{
+	char				*list	= NULL;
+	char				*data	= NULL;
+	char				*url	= NULL;
+	ghcli_fetch_buffer	 buffer = {0};
+
+	/* First, convert to ids */
+	char **ids = label_names_to_ids(owner, repo, labels, labels_size);
+
+	/* Construct json payload */
+
+	/* Note: http://www.c-faq.com/ansi/constmismatch.html */
+	list = sn_join_with((const char **)ids, labels_size, ",");
+	data = sn_asprintf("{ \"labels\": [%s] }", list);
+
+	url = sn_asprintf("%s/repos/%s/%s/issues/%d/labels",
+					  gitea_get_apibase(), owner, repo, issue);
+	ghcli_fetch_with_method("POST", url, data, NULL, &buffer);
+
+	free(list);
+	free(data);
+	free(url);
+	free(buffer.data);
+	free_id_list(ids, labels_size);
+}
+
+void
+gitea_issue_remove_labels(
+	const char	*owner,
+	const char	*repo,
+	int			 issue,
+	const char	*labels[],
+	size_t		 labels_size)
+{
+	/* Unfortunately the gitea api does not give us an endpoint to
+	 * delete labels from an issue in bulk. So, just iterate over the
+	 * given labels and delete them one after another. */
+	char **ids = label_names_to_ids(owner, repo, labels, labels_size);
+
+	for (size_t i = 0; i < labels_size; ++i) {
+		char				*url	= NULL;
+		ghcli_fetch_buffer	 buffer = {0};
+
+		url = sn_asprintf("%s/repos/%s/%s/issues/%d/labels/%s",
+						  gitea_get_apibase(), owner, repo, issue, ids[i]);
+		ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+
+		free(buffer.data);
+		free(url);
+	}
+
+	free_id_list(ids, labels_size);
 }

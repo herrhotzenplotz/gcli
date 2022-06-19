@@ -27,49 +27,23 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GITEA_ISSUES_H
-#define GITEA_ISSUES_H
+#ifndef GITEA_LABELS_H
+#define GITEA_LABELS_H
 
-#include <ghcli/issues.h>
+#include <ghcli/labels.h>
 
-int gitea_get_issues(
+size_t gitea_get_labels(
 	const char   *owner,
 	const char   *reponame,
-	bool          all,
 	int           max,
-	ghcli_issue **out);
-void gitea_get_issue_summary(
-	const char			*owner,
-	const char			*repo,
-	int					 issue,
-	ghcli_issue_details *out);
-void gitea_submit_issue(
-	ghcli_submit_issue_options	 opts,
-	ghcli_fetch_buffer			*out);
-void gitea_issue_close(
-	const char	*owner,
-	const char	*repo,
-	int			 issue_number);
-void gitea_issue_reopen(
-	const char	*owner,
-	const char	*repo,
-	int			 issue_number);
-void gitea_issue_assign(
-	const char	*owner,
-	const char	*repo,
-	int			 issue_number,
-	const char	*assignee);
-void gitea_issue_add_labels(
-	const char	*owner,
-	const char	*repo,
-	int			 issue,
-	const char	*labels[],
-	size_t		 labels_size);
-void gitea_issue_remove_labels(
-	const char	*owner,
-	const char	*repo,
-	int			 issue,
-	const char	*labels[],
-	size_t		 labels_size);
+	ghcli_label **out);
+void gitea_create_label(
+	const char  *owner,
+	const char  *repo,
+	ghcli_label *label);
+void gitea_delete_label(
+	const char  *owner,
+	const char  *repo,
+	const char	*label);
 
-#endif /* GITEA_ISSUES_H */
+#endif /* GITEA_LABELS_H */

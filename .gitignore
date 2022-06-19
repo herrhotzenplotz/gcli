@@ -100,3 +100,6 @@
 /include/ghcli/gitea/comments.h~
 /src/gitea/comments.c~
 /src/gitea/comments.o
+/src/gitea/labels.c~
+/src/gitea/labels.o
+/include/ghcli/gitea/labels.h~

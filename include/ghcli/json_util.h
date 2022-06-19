@@ -36,6 +36,8 @@
 
 #include <sn/sn.h>
 
+#include <stdint.h>
+
 #define get_int(input)       get_int_(input, __func__)
 #define get_double(input)    get_double_(input, __func__)
 #define get_parse_int(input) get_parse_int_(input, __func__)
@@ -45,20 +47,21 @@
 #define get_user(input)      get_user_(input, __func__)
 #define get_label(input)     get_label_(input, __func__)
 
-long        get_int_(json_stream *input, const char *function);
-double      get_double_(json_stream *input, const char *function);
-long        get_parse_int_(json_stream *input, const char *function);
-bool        get_bool_(json_stream *input, const char *function);
-char       *get_string_(json_stream *input, const char *function);
-sn_sv       get_sv_(json_stream *input, const char *function);
-char       *get_user_(json_stream *input, const char *function);
-const char *get_label_(json_stream *input, const char *function);
-sn_sv       ghcli_json_escape(sn_sv);
-void        ghcli_print_html_url(ghcli_fetch_buffer);
-size_t      ghcli_read_label_list(json_stream *, sn_sv **);
-size_t      ghcli_read_user_list(json_stream *input, sn_sv **out);
-void        ghcli_json_advance(json_stream *input, const char *fmt, ...);
-size_t      ghcli_read_sv_list(json_stream *input, sn_sv **out);
+long		 get_int_(json_stream *input, const char *function);
+double		 get_double_(json_stream *input, const char *function);
+long		 get_parse_int_(json_stream *input, const char *function);
+bool		 get_bool_(json_stream *input, const char *function);
+char		*get_string_(json_stream *input, const char *function);
+sn_sv		 get_sv_(json_stream *input, const char *function);
+char		*get_user_(json_stream *input, const char *function);
+const char	*get_label_(json_stream *input, const char *function);
+sn_sv		 ghcli_json_escape(sn_sv);
+void		 ghcli_print_html_url(ghcli_fetch_buffer);
+size_t		 ghcli_read_label_list(json_stream *, sn_sv **);
+size_t		 ghcli_read_user_list(json_stream *input, sn_sv **out);
+void		 ghcli_json_advance(json_stream *input, const char *fmt, ...);
+size_t		 ghcli_read_sv_list(json_stream *input, sn_sv **out);
+uint32_t	 get_github_style_color(struct json_stream *input);
 
 static inline sn_sv
 get_user_sv(json_stream *input)

@@ -103,3 +103,6 @@
 /src/gitea/labels.c~
 /src/gitea/labels.o
 /include/ghcli/gitea/labels.h~
+/include/ghcli/gitea/pulls.h~
+/src/gitea/pulls.c~
+/src/gitea/pulls.o

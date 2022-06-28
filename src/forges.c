@@ -60,6 +60,7 @@
 #include <ghcli/gitea/config.h>
 #include <ghcli/gitea/issues.h>
 #include <ghcli/gitea/labels.h>
+#include <ghcli/gitea/pulls.h>
 
 static ghcli_forge_descriptor
 github_forge_descriptor =
@@ -173,6 +174,7 @@ gitea_forge_descriptor =
 	.get_labels			  = gitea_get_labels,
 	.create_label		  = gitea_create_label,
 	.delete_label		  = gitea_delete_label,
+	.get_prs			  = gitea_get_pulls,
 
 	.get_authheader		  = gitea_get_authheader,
 	.get_api_error_string = github_api_error_string,	/* hack! */

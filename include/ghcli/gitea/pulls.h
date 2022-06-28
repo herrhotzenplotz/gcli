@@ -39,5 +39,16 @@ int gitea_get_pulls(
 	int          max,
 	ghcli_pull **out);
 
+void gitea_get_pull_summary(
+	const char			*owner,
+	const char			*repo,
+	int					 pr_number,
+	ghcli_pull_summary	*out);
+
+int gitea_get_pull_commits(
+	const char		 *owner,
+	const char		 *repo,
+	int				  pr_number,
+	ghcli_commit	**out);
 
 #endif /* GITEA_PULLS_H */

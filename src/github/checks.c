@@ -30,7 +30,7 @@
 #include <assert.h>
 
 #include <ghcli/github/checks.h>
-#include <ghcli/github/config.h>
+#include <ghcli/config.h>
 #include <ghcli/color.h>
 #include <ghcli/curl.h>
 #include <ghcli/json_util.h>
@@ -83,7 +83,7 @@ github_get_checks(
 	*out = NULL;
 
 	url = sn_asprintf("%s/repos/%s/%s/commits/%s/check-runs",
-					  github_get_apibase(),
+					  ghcli_get_apibase(),
 					  owner, repo, ref);
 
 	do {

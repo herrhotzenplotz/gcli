@@ -29,7 +29,7 @@
 
 #include <ghcli/curl.h>
 #include <ghcli/github/status.h>
-#include <ghcli/github/config.h>
+#include <ghcli/config.h>
 #include <ghcli/json_util.h>
 
 #include <sn/sn.h>
@@ -114,7 +114,7 @@ github_get_notifications(ghcli_notification **notifications, int count)
 	struct json_stream  stream             = {0};
 	size_t              notifications_size = 0;
 
-	url = sn_asprintf("%s/notifications", github_get_apibase());
+	url = sn_asprintf("%s/notifications", ghcli_get_apibase());
 
 	do {
 		ghcli_fetch(url, &next_url, &buffer);
@@ -152,7 +152,7 @@ github_notification_mark_as_read(const char *id)
 
 	url = sn_asprintf(
 		"%s/notifications/threads/%s",
-		github_get_apibase(),
+		ghcli_get_apibase(),
 		id);
 	ghcli_fetch_with_method("PATCH", url, NULL, NULL, &buffer);
 

@@ -54,7 +54,7 @@ gitea_default_account_name(void)
 	return section_name;
 }
 
-const char *
+char *
 gitea_get_apibase(void)
 {
 	sn_sv account = gitea_default_account_name();

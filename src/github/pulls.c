@@ -110,7 +110,7 @@ github_get_prs(
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/pulls?state=%s",
-		github_get_apibase(),
+		ghcli_get_apibase(),
 		e_owner, e_repo, all ? "all" : "open");
 
 	do {
@@ -171,7 +171,7 @@ github_print_pr_diff(
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/pulls/%d",
-		github_get_apibase(),
+		ghcli_get_apibase(),
 		e_owner, e_repo, pr_number);
 	ghcli_curl(stream, url, "Accept: application/vnd.github.v3.diff");
 
@@ -203,7 +203,7 @@ github_pr_merge(
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/pulls/%d/merge?merge_method=%s",
-		github_get_apibase(),
+		ghcli_get_apibase(),
 		e_owner, e_repo, pr_number,
 		squash ? "squash" : "merge");
 
@@ -250,7 +250,7 @@ github_pr_close(const char *owner, const char *repo, int pr_number)
 
 	url  = sn_asprintf(
 		"%s/repos/%s/%s/pulls/%d",
-		github_get_apibase(),
+		ghcli_get_apibase(),
 		e_owner, e_repo, pr_number);
 	data = sn_asprintf("{ \"state\": \"closed\"}");
 
@@ -277,7 +277,7 @@ github_pr_reopen(const char *owner, const char *repo, int pr_number)
 
 	url  = sn_asprintf(
 		"%s/repos/%s/%s/pulls/%d",
-		github_get_apibase(),
+		ghcli_get_apibase(),
 		e_owner, e_repo, pr_number);
 	data = sn_asprintf("{ \"state\": \"open\"}");
 
@@ -305,7 +305,7 @@ github_perform_submit_pr(
 		SV_ARGS(opts.body));
 	char *url         = sn_asprintf(
 		"%s/repos/"SV_FMT"/pulls",
-		github_get_apibase(),
+		ghcli_get_apibase(),
 		SV_ARGS(opts.in));
 
 	ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
@@ -407,7 +407,7 @@ github_get_pull_commits(
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/pulls/%d/commits",
-		github_get_apibase(),
+		ghcli_get_apibase(),
 		e_owner, e_repo, pr_number);
 
 	do {
@@ -535,7 +535,7 @@ github_get_pull_summary(
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/pulls/%d",
-		github_get_apibase(),
+		ghcli_get_apibase(),
 		e_owner, e_repo, pr_number);
 	ghcli_fetch(url, NULL, &json_buffer);
 

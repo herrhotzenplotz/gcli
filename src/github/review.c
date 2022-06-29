@@ -28,7 +28,7 @@
  */
 
 #include <ghcli/github/review.h>
-#include <ghcli/github/config.h>
+#include <ghcli/config.h>
 #include <ghcli/json_util.h>
 
 #include <pdjson/pdjson.h>
@@ -155,7 +155,7 @@ github_review_get_reviews(
 	enum   json_type    next          = JSON_NULL;
 	size_t              size          = 0;
 
-	url           = sn_asprintf("%s/graphql", github_get_apibase());
+	url           = sn_asprintf("%s/graphql", ghcli_get_apibase());
 	query         = sn_asprintf(get_reviews_fmt, owner, repo, pr);
 	query_escaped = ghcli_json_escape(SV(query));
 	post_data     = sn_asprintf("{\"query\": \""SV_FMT"\"}",

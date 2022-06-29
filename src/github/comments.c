@@ -68,7 +68,7 @@ github_perform_submit_comment(
 		SV_ARGS(opts.message));
 	char *url         = sn_asprintf(
 		"%s/repos/%s/%s/issues/%d/comments",
-		github_get_apibase(),
+		ghcli_get_apibase(),
 		e_owner, e_repo, opts.target_id);
 
 	ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
@@ -130,7 +130,7 @@ github_get_comments(
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/issues/%d/comments",
-		github_get_apibase(),
+		ghcli_get_apibase(),
 		e_owner, e_repo, issue);
 	int n = github_perform_get_comments(url, out);
 

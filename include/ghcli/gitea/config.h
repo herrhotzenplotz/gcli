@@ -32,7 +32,7 @@
 
 #include <sn/sn.h>
 
-const char	*gitea_get_apibase(void);
+char		*gitea_get_apibase(void);
 char		*gitea_get_authheader(void);
 sn_sv		 gitea_get_account(void);
 

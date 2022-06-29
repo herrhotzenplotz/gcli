@@ -29,33 +29,11 @@
 
 #include <ghcli/gitea/config.h>
 #include <ghcli/gitea/labels.h>
+#include <ghcli/github/labels.h>
 #include <ghcli/json_util.h>
 
 #include <pdjson/pdjson.h>
 #include <sn/sn.h>
-
-static void
-gitea_parse_label(struct json_stream *input, ghcli_label *out)
-{
-	if (json_next(input) != JSON_OBJECT)
-		errx(1, "Expected Issue Object");
-
-	while (json_next(input) == JSON_STRING) {
-		size_t      len = 0;
-		const char *key = json_get_string(input, &len);
-
-		if (strncmp("id", key, len) == 0)
-			out->id = get_int(input);
-		else if (strncmp("name", key, len) == 0)
-			out->name = get_string(input);
-		else if (strncmp("description", key, len) == 0)
-			out->description = get_string(input);
-		else if (strncmp("color", key, len) == 0)
-			out->color = get_github_style_color(input);
-		else
-			SKIP_OBJECT_VALUE(input);
-	}
-}
 
 size_t
 gitea_get_labels(
@@ -64,45 +42,7 @@ gitea_get_labels(
 	int           max,
 	ghcli_label **out)
 {
-	size_t              out_size = 0;
-	char               *url      = NULL;
-	char               *next_url = NULL;
-	ghcli_fetch_buffer  buffer   = {0};
-
-	*out = NULL;
-
-	url = sn_asprintf(
-		"%s/repos/%s/%s/labels",
-		gitea_get_apibase(), owner, reponame);
-
-	do {
-		struct json_stream stream = {0};
-		enum   json_type   next   = JSON_NULL;
-
-		ghcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
-		json_set_streaming(&stream, 1);
-
-		next = json_next(&stream);
-		if (next != JSON_ARRAY)
-			errx(1, "error: expected array of labels");
-
-		while (json_peek(&stream) != JSON_ARRAY_END) {
-			ghcli_label *it = NULL;
-
-			*out = realloc(*out, sizeof(ghcli_label) * (out_size + 1));
-			it = &(*out)[out_size++];
-
-			memset(it, 0, sizeof(*it));
-			gitea_parse_label(&stream, it);
-		}
-
-		json_close(&stream);
-		free(url);
-		free(buffer.data);
-	} while ((url = next_url) && ((int)(out_size) < max || max < 0));
-
-	return out_size;
+	return github_get_labels(owner, reponame, max, out);
 }
 
 void
@@ -111,54 +51,7 @@ gitea_create_label(
 	const char  *repo,
 	ghcli_label *label)
 {
-	char               *url         = NULL;
-	char               *data        = NULL;
-	char               *e_owner     = NULL;
-	char               *e_repo      = NULL;
-	char               *color       = NULL;
-	sn_sv               label_name  = SV_NULL;
-	sn_sv               label_descr = SV_NULL;
-	sn_sv               label_color = SV_NULL;
-	ghcli_fetch_buffer  buffer      = {0};
-	struct json_stream  stream      = {0};
-
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
-
-	color = sn_asprintf("%06X", label->color >> 8);
-
-	label_name  = ghcli_json_escape(SV(label->name));
-	label_descr = ghcli_json_escape(SV(label->description));
-	label_color = ghcli_json_escape(SV(color));
-
-	/* /repos/{owner}/{repo}/labels */
-	url = sn_asprintf("%s/repos/%s/%s/labels",
-			  gitea_get_apibase(), e_owner, e_repo);
-
-
-	data = sn_asprintf("{ "
-			   "  \"name\": \""SV_FMT"\", "
-			   "  \"description\": \""SV_FMT"\", "
-			   "  \"color\": \""SV_FMT"\""
-			   "}",
-			   SV_ARGS(label_name),
-			   SV_ARGS(label_descr),
-			   SV_ARGS(label_color));
-
-	ghcli_fetch_with_method("POST", url, data, NULL, &buffer);
-	json_open_buffer(&stream, buffer.data, buffer.length);
-	gitea_parse_label(&stream, label);
-
-	json_close(&stream);
-	free(url);
-	free(data);
-	free(e_owner);
-	free(e_repo);
-	free(color);
-	free(label_name.data);
-	free(label_descr.data);
-	free(label_color.data);
-	free(buffer.data);
+	github_create_label(owner, repo, label);
 }
 
 void

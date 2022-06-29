@@ -27,9 +27,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/config.h>
-#include <ghcli/gitea/pulls.h>
-#include <ghcli/github/pulls.h>
+#include <gcli/config.h>
+#include <gcli/gitea/pulls.h>
+#include <gcli/github/pulls.h>
 
 int
 gitea_get_pulls(
@@ -37,7 +37,7 @@ gitea_get_pulls(
 	const char  *repo,
 	bool         all,
 	int          max,
-	ghcli_pull **out)
+	gcli_pull **out)
 {
 	return github_get_prs(owner, repo, all, max, out);
 }
@@ -47,7 +47,7 @@ gitea_get_pull_summary(
 	const char			*owner,
 	const char			*repo,
 	int					 pr_number,
-	ghcli_pull_summary	*out)
+	gcli_pull_summary	*out)
 {
 	github_get_pull_summary(owner, repo, pr_number, out);
 }
@@ -57,15 +57,15 @@ gitea_get_pull_commits(
 	const char    *owner,
 	const char    *repo,
 	int            pr_number,
-	ghcli_commit **out)
+	gcli_commit **out)
 {
 	return github_get_pull_commits(owner, repo, pr_number, out);
 }
 
 void
 gitea_pull_submit(
-	ghcli_submit_pull_options  opts,
-	ghcli_fetch_buffer        *out)
+	gcli_submit_pull_options  opts,
+	gcli_fetch_buffer        *out)
 {
 	warnx("In case the following process errors out, see: "
 		  "https://github.com/go-gitea/gitea/issues/20175");
@@ -83,15 +83,15 @@ gitea_pull_merge(
 	char				*e_owner = NULL;
 	char				*e_repo	 = NULL;
 	char				*data	 = NULL;
-	ghcli_fetch_buffer	 buffer	 = {0};
+	gcli_fetch_buffer	 buffer	 = {0};
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo	= ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo	= gcli_urlencode(repo);
 	url		= sn_asprintf("%s/repos/%s/%s/pulls/%d/merge",
-						  ghcli_get_apibase(), e_owner, e_repo, pr_number);
+						  gcli_get_apibase(), e_owner, e_repo, pr_number);
 	data	= sn_asprintf("{ \"Do\": \"%s\" }", squash ? "squash" : "merge");
 
-	ghcli_fetch_with_method("POST", url, data, NULL, &buffer);
+	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
 
 	free(url);
 	free(e_owner);
@@ -107,23 +107,23 @@ gitea_pulls_patch_state(
 	int			 pr_number,
 	const char	*state)
 {
-	ghcli_fetch_buffer  json_buffer = {0};
+	gcli_fetch_buffer  json_buffer = {0};
 	char               *url         = NULL;
 	char               *data        = NULL;
 	char               *e_owner     = NULL;
 	char               *e_repo      = NULL;
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/pulls/%d",
-		ghcli_get_apibase(),
+		gcli_get_apibase(),
 		e_owner, e_repo,
 		pr_number);
 	data = sn_asprintf("{ \"state\": \"%s\"}", state);
 
-	ghcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
+	gcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
 
 	free(data);
 	free(url);
@@ -161,14 +161,14 @@ gitea_print_pr_diff(
 	char *e_owner = NULL;
 	char *e_repo  = NULL;
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/pulls/%d.patch",
-		ghcli_get_apibase(),
+		gcli_get_apibase(),
 		e_owner, e_repo, pr_number);
-	ghcli_curl(stream, url, NULL);
+	gcli_curl(stream, url, NULL);
 
 	free(e_owner);
 	free(e_repo);

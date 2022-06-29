@@ -27,10 +27,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/gitea/config.h>
-#include <ghcli/gitea/labels.h>
-#include <ghcli/github/labels.h>
-#include <ghcli/json_util.h>
+#include <gcli/gitea/config.h>
+#include <gcli/gitea/labels.h>
+#include <gcli/github/labels.h>
+#include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
 #include <sn/sn.h>
@@ -40,7 +40,7 @@ gitea_get_labels(
 	const char   *owner,
 	const char   *reponame,
 	int           max,
-	ghcli_label **out)
+	gcli_label **out)
 {
 	return github_get_labels(owner, reponame, max, out);
 }
@@ -49,7 +49,7 @@ void
 gitea_create_label(
 	const char  *owner,
 	const char  *repo,
-	ghcli_label *label)
+	gcli_label *label)
 {
 	github_create_label(owner, repo, label);
 }
@@ -61,8 +61,8 @@ gitea_delete_label(
 	const char *label)
 {
 	char				*url		 = NULL;
-	ghcli_fetch_buffer	 buffer		 = {0};
-	ghcli_label			*labels		 = NULL;
+	gcli_fetch_buffer	 buffer		 = {0};
+	gcli_label			*labels		 = NULL;
 	size_t				 labels_size = 0;
 	int                  id			 = -1;
 
@@ -87,9 +87,9 @@ gitea_delete_label(
 					  gitea_get_apibase(),
 					  owner, repo, id);
 
-	ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
-	ghcli_free_labels(labels, labels_size);
+	gcli_free_labels(labels, labels_size);
 	free(url);
 	free(buffer.data);
 }

@@ -27,12 +27,12 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/config.h>
-#include <ghcli/github/config.h>
-#include <ghcli/gitlab/config.h>
-#include <ghcli/gitea/config.h>
-#include <ghcli/gitconfig.h>
-#include <ghcli/forges.h>
+#include <gcli/config.h>
+#include <gcli/github/config.h>
+#include <gcli/gitlab/config.h>
+#include <gcli/gitea/config.h>
+#include <gcli/gitconfig.h>
+#include <gcli/forges.h>
 
 #include <assert.h>
 #include <ctype.h>
@@ -42,8 +42,8 @@
 #include <unistd.h>
 
 #define CONFIG_MAX_ENTRIES 16
-struct ghcli_config_section {
-	struct ghcli_config_entry {
+struct gcli_config_section {
+	struct gcli_config_entry {
 		sn_sv key;
 		sn_sv value;
 	} entries[CONFIG_MAX_ENTRIES];
@@ -53,8 +53,8 @@ struct ghcli_config_section {
 };
 
 #define CONFIG_MAX_SECTIONS 16
-static struct ghcli_config {
-	struct ghcli_config_section sections[CONFIG_MAX_SECTIONS];
+static struct gcli_config {
+	struct gcli_config_section sections[CONFIG_MAX_SECTIONS];
 	size_t                      sections_size;
 
 	const char *override_default_account;
@@ -67,8 +67,8 @@ static struct ghcli_config {
 	bool   inited;
 } config;
 
-static struct ghcli_dotghcli {
-	struct ghcli_config_entry entries[128];
+static struct gcli_dotgcli {
+	struct gcli_config_entry entries[128];
 	size_t entries_size;
 
 	sn_sv  buffer;
@@ -78,17 +78,17 @@ static struct ghcli_dotghcli {
 } local_config;
 
 static bool
-should_init_dotghcli(void)
+should_init_dotgcli(void)
 {
 	return !local_config.has_been_searched_for ||
 		(local_config.has_been_searched_for && !local_config.has_been_found);
 }
 
 static const char *
-find_dotghcli(void)
+find_dotgcli(void)
 {
 	char          *curr_dir_path = NULL;
-	char          *dotghcli      = NULL;
+	char          *dotgcli      = NULL;
 	DIR           *curr_dir      = NULL;
 	struct dirent *ent           = NULL;
 
@@ -108,21 +108,21 @@ find_dotghcli(void)
 			if (strcmp(".", ent->d_name) == 0 || strcmp("..", ent->d_name) == 0)
 				continue;
 
-			if (strcmp(".ghcli", ent->d_name) == 0) {
+			if (strcmp(".gcli", ent->d_name) == 0) {
 				size_t len = strlen(curr_dir_path);
-				dotghcli = malloc(len + strlen(ent->d_name) + 2);
-				memcpy(dotghcli, curr_dir_path, len);
-				dotghcli[len] = '/';
-				memcpy(dotghcli + len + 1, ent->d_name, strlen(ent->d_name));
+				dotgcli = malloc(len + strlen(ent->d_name) + 2);
+				memcpy(dotgcli, curr_dir_path, len);
+				dotgcli[len] = '/';
+				memcpy(dotgcli + len + 1, ent->d_name, strlen(ent->d_name));
 
-				dotghcli[len + 1 + strlen(ent->d_name)] = 0;
+				dotgcli[len + 1 + strlen(ent->d_name)] = 0;
 
 				break;
 			}
 		}
 
 
-		if (!dotghcli) {
+		if (!dotgcli) {
 			size_t len = strlen(curr_dir_path);
 			char *tmp = malloc(len + sizeof("/.."));
 
@@ -142,27 +142,27 @@ find_dotghcli(void)
 				closedir(curr_dir);
 
 				// At this point we know for sure that we cannot find
-				// a .ghcli and thus return a NULL pointer
+				// a .gcli and thus return a NULL pointer
 				return NULL;
 			}
 		}
 
 
 		closedir(curr_dir);
-	} while (dotghcli == NULL);
+	} while (dotgcli == NULL);
 
 	free(curr_dir_path);
 
-	return dotghcli;
+	return dotgcli;
 }
 
 static void
 init_local_config(void)
 {
-	if (!should_init_dotghcli())
+	if (!should_init_dotgcli())
 		return;
 
-	const char *path = find_dotghcli();
+	const char *path = find_dotgcli();
 	if (!path) {
 		local_config.has_been_searched_for = true;
 		local_config.has_been_found        = false;
@@ -255,7 +255,7 @@ not_whitespace:
 }
 
 static void
-parse_keyvaluepair(struct config_parser *input, struct ghcli_config_entry *out)
+parse_keyvaluepair(struct config_parser *input, struct gcli_config_entry *out)
 {
 	sn_sv key  = sn_sv_chop_until(&input->buffer, '=');
 
@@ -305,7 +305,7 @@ parse_section_title(struct config_parser *input)
 static void
 parse_config_section(struct config_parser *input)
 {
-	struct ghcli_config_section *section = NULL;
+	struct gcli_config_section *section = NULL;
 
 	if (config.sections_size == CONFIG_MAX_SECTIONS)
 		errx(1, "error: too many config sections");
@@ -369,9 +369,9 @@ ensure_config(void)
 
 		/*
 		 * Code duplication to avoid leaking pointers */
-		file_path = sn_asprintf("%s/.config/ghcli/config", file_path);
+		file_path = sn_asprintf("%s/.config/gcli/config", file_path);
 	} else {
-		file_path = sn_asprintf("%s/ghcli/config", file_path);
+		file_path = sn_asprintf("%s/gcli/config", file_path);
 	}
 
 	if (access(file_path, R_OK) < 0) {
@@ -398,9 +398,9 @@ ensure_config(void)
 }
 
 void
-ghcli_config_init(int *argc, char ***argv)
+gcli_config_init(int *argc, char ***argv)
 {
-	/* These are the very first options passed to the ghcli command
+	/* These are the very first options passed to the gcli command
 	 * itself. It is the first ever getopt call we do to parse any
 	 * arguments. Only global options that do not alter subcommand
 	 * specific behaviour should be accepted here. */
@@ -450,11 +450,11 @@ ghcli_config_init(int *argc, char ***argv)
 		} break;
 		case 't': {
 			if (strcmp(optarg, "github") == 0)
-				config.override_forgetype = GHCLI_FORGE_GITHUB;
+				config.override_forgetype = GCLI_FORGE_GITHUB;
 			else if (strcmp(optarg, "gitlab") == 0)
-				config.override_forgetype = GHCLI_FORGE_GITLAB;
+				config.override_forgetype = GCLI_FORGE_GITLAB;
 			else if (strcmp(optarg, "gitea") == 0)
-				config.override_forgetype = GHCLI_FORGE_GITEA;
+				config.override_forgetype = GCLI_FORGE_GITEA;
 			else
 				errx(1, "error: unknown forge type '%s'. "
 					 "Have either github, gitlab or gitea.", optarg);
@@ -462,7 +462,7 @@ ghcli_config_init(int *argc, char ***argv)
 		case 0: break;
 		case '?':
 		default:
-			errx(1, "usage: ghcli [options] subcommand ...");
+			errx(1, "usage: gcli [options] subcommand ...");
 		}
 	}
 
@@ -480,7 +480,7 @@ ghcli_config_init(int *argc, char ***argv)
 	config.inited = false;
 }
 
-static struct ghcli_config_section *
+static struct gcli_config_section *
 find_section(sn_sv name)
 {
 	for (size_t i = 0; i < config.sections_size; ++i) {
@@ -491,11 +491,11 @@ find_section(sn_sv name)
 }
 
 sn_sv
-ghcli_config_find_by_key(sn_sv section_name, const char *key)
+gcli_config_find_by_key(sn_sv section_name, const char *key)
 {
 	ensure_config();
 
-	struct ghcli_config_section *section = find_section(section_name);
+	struct gcli_config_section *section = find_section(section_name);
 
 	if (!section) {
 		warnx("no config section with name '"SV_FMT"'", SV_ARGS(section_name));
@@ -510,7 +510,7 @@ ghcli_config_find_by_key(sn_sv section_name, const char *key)
 }
 
 static sn_sv
-ghcli_local_config_find_by_key(const char *key)
+gcli_local_config_find_by_key(const char *key)
 {
 	for (size_t i = 0; i < local_config.entries_size; ++i)
 		if (sn_sv_eq_to(local_config.entries[i].key, key))
@@ -519,43 +519,43 @@ ghcli_local_config_find_by_key(const char *key)
 }
 
 char *
-ghcli_config_get_editor(void)
+gcli_config_get_editor(void)
 {
 	ensure_config();
 
-	return sn_sv_to_cstr(ghcli_config_find_by_key(SV("defaults"), "editor"));
+	return sn_sv_to_cstr(gcli_config_find_by_key(SV("defaults"), "editor"));
 }
 
 char *
-ghcli_config_get_authheader(void)
+gcli_config_get_authheader(void)
 {
 	ensure_config();
 
-	return ghcli_forge()->get_authheader();
+	return gcli_forge()->get_authheader();
 }
 
 sn_sv
-ghcli_config_get_account(void)
+gcli_config_get_account(void)
 {
 	ensure_config();
 
-	return ghcli_forge()->get_account();
+	return gcli_forge()->get_account();
 }
 
 sn_sv
-ghcli_config_get_upstream(void)
+gcli_config_get_upstream(void)
 {
 	init_local_config();
 
-	return ghcli_local_config_find_by_key("pr.upstream");
+	return gcli_local_config_find_by_key("pr.upstream");
 }
 
 void
-ghcli_config_get_upstream_parts(sn_sv *owner, sn_sv *repo)
+gcli_config_get_upstream_parts(sn_sv *owner, sn_sv *repo)
 {
 	ensure_config();
 
-	sn_sv upstream   = ghcli_config_get_upstream();
+	sn_sv upstream   = gcli_config_get_upstream();
 	*owner           = sn_sv_chop_until(&upstream, '/');
 	/* TODO: Sanity check */
 	upstream.data   += 1;
@@ -564,15 +564,15 @@ ghcli_config_get_upstream_parts(sn_sv *owner, sn_sv *repo)
 }
 
 sn_sv
-ghcli_config_get_base(void)
+gcli_config_get_base(void)
 {
 	init_local_config();
 
-	return ghcli_local_config_find_by_key("pr.base");
+	return gcli_local_config_find_by_key("pr.base");
 }
 
 sn_sv
-ghcli_config_get_override_default_account(void)
+gcli_config_get_override_default_account(void)
 {
 	init_local_config();
 
@@ -582,8 +582,8 @@ ghcli_config_get_override_default_account(void)
 		return SV_NULL;
 }
 
-ghcli_forge_type
-ghcli_config_get_forge_type(void)
+gcli_forge_type
+gcli_config_get_forge_type(void)
 {
 	/* Hard override */
 	if (config.override_forgetype >= 0)
@@ -596,28 +596,28 @@ ghcli_config_get_forge_type(void)
 
 	if (config.override_default_account) {
 		sn_sv section = SV((char *)config.override_default_account);
-		entry = ghcli_config_find_by_key(section, "forge-type");
+		entry = gcli_config_find_by_key(section, "forge-type");
 		if (sn_sv_null(entry))
 			errx(1,
 				 "error: given default override account not found or "
 				 "missing forge-type");
 	} else {
-		entry = ghcli_local_config_find_by_key("forge-type");
+		entry = gcli_local_config_find_by_key("forge-type");
 	}
 
 	if (!sn_sv_null(entry)) {
 		if (sn_sv_eq_to(entry, "github"))
-			return GHCLI_FORGE_GITHUB;
+			return GCLI_FORGE_GITHUB;
 		else if (sn_sv_eq_to(entry, "gitlab"))
-			return GHCLI_FORGE_GITLAB;
+			return GCLI_FORGE_GITLAB;
 		else if (sn_sv_eq_to(entry, "gitea"))
-			return GHCLI_FORGE_GITEA;
+			return GCLI_FORGE_GITEA;
 		else
 			errx(1, "Unknown forge type "SV_FMT, SV_ARGS(entry));
 	}
 
 	/* As a last resort, try to infer from the git remote */
-	int type = ghcli_gitconfig_get_forgetype(config.override_remote);
+	int type = gcli_gitconfig_get_forgetype(config.override_remote);
 	if (type < 0)
 		errx(1, "error: cannot infer forge type. "
 			 "use -t <forge-type> to overrride manually.");
@@ -627,25 +627,25 @@ ghcli_config_get_forge_type(void)
 }
 
 void
-ghcli_config_get_repo(const char **owner, const char **repo)
+gcli_config_get_repo(const char **owner, const char **repo)
 {
 	sn_sv upstream = {0};
 
 	ensure_config();
 
 	if (config.override_remote) {
-		ghcli_forge_type forge = ghcli_gitconfig_repo_by_remote(
+		gcli_forge_type forge = gcli_gitconfig_repo_by_remote(
 			config.override_remote, owner, repo);
 
 		if (forge >= 0) {
-			if (ghcli_config_get_forge_type() != forge)
+			if (gcli_config_get_forge_type() != forge)
 				errx(1, "error: forge types are inconsistent");
 		}
 
 		return;
 	}
 
-	if ((upstream = ghcli_config_get_upstream()).length != 0) {
+	if ((upstream = gcli_config_get_upstream()).length != 0) {
 		sn_sv owner_sv = sn_sv_chop_until(&upstream, '/');
 		sn_sv repo_sv  = sn_sv_from_parts(
 			upstream.data + 1,
@@ -657,11 +657,11 @@ ghcli_config_get_repo(const char **owner, const char **repo)
 		return;
 	}
 
-	ghcli_gitconfig_repo_by_remote(NULL, owner, repo);
+	gcli_gitconfig_repo_by_remote(NULL, owner, repo);
 }
 
 int
-ghcli_config_have_colors(void)
+gcli_config_have_colors(void)
 {
 	static int tested_tty = 0;
 
@@ -680,17 +680,16 @@ ghcli_config_have_colors(void)
 }
 
 char *
-ghcli_get_apibase(void)
+gcli_get_apibase(void)
 {
-	switch (ghcli_config_get_forge_type()) {
-	case GHCLI_FORGE_GITHUB:
+	switch (gcli_config_get_forge_type()) {
+	case GCLI_FORGE_GITHUB:
 		return github_get_apibase();
-	case GHCLI_FORGE_GITEA:
+	case GCLI_FORGE_GITEA:
 		return gitea_get_apibase();
-	case GHCLI_FORGE_GITLAB:
+	case GCLI_FORGE_GITLAB:
 		return gitlab_get_apibase();
 	default:
 		assert(0 && "Not reached");
 	}
 }
-

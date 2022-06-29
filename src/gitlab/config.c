@@ -27,8 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/config.h>
-#include <ghcli/gitlab/config.h>
+#include <gcli/config.h>
+#include <gcli/gitlab/config.h>
 
 #include <sn/sn.h>
 
@@ -38,11 +38,11 @@ gitlab_default_account_name(void)
 	sn_sv section_name;
 
 	/* Use default override account */
-	section_name = ghcli_config_get_override_default_account();
+	section_name = gcli_config_get_override_default_account();
 
 	/* If not manually overridden */
 	if (sn_sv_null(section_name)) {
-		section_name = ghcli_config_find_by_key(
+		section_name = gcli_config_find_by_key(
 			SV("defaults"),
 			"gitlab-default-account");
 
@@ -61,7 +61,7 @@ gitlab_get_apibase(void)
 	if (sn_sv_null(account))
 		goto default_val;
 
-	sn_sv api_base = ghcli_config_find_by_key(account, "apibase");
+	sn_sv api_base = gcli_config_find_by_key(account, "apibase");
 	if (sn_sv_null(api_base))
 		goto default_val;
 
@@ -78,7 +78,7 @@ gitlab_get_authheader(void)
 	if (sn_sv_null(account))
 		return NULL;
 
-	sn_sv token = ghcli_config_find_by_key(account, "token");
+	sn_sv token = gcli_config_find_by_key(account, "token");
 	if (sn_sv_null(token))
 		errx(1, "Missing GitLab token");
 	return sn_asprintf("PRIVATE-TOKEN: "SV_FMT, SV_ARGS(token));
@@ -91,7 +91,7 @@ gitlab_get_account(void)
 	if (sn_sv_null(section))
 		return SV_NULL;
 
-	sn_sv account = ghcli_config_find_by_key(section, "account");;
+	sn_sv account = gcli_config_find_by_key(section, "account");;
 	if (sn_sv_null(account))
 		errx(1, "Missing GitLab account name");
 	return account;

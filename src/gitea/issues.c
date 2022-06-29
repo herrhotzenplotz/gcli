@@ -27,13 +27,13 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/curl.h>
-#include <ghcli/gitea/config.h>
-#include <ghcli/gitea/issues.h>
-#include <ghcli/gitea/labels.h>
-#include <ghcli/github/issues.h>
-#include <ghcli/json_util.h>
-#include <ghcli/labels.h>
+#include <gcli/curl.h>
+#include <gcli/gitea/config.h>
+#include <gcli/gitea/issues.h>
+#include <gcli/gitea/labels.h>
+#include <gcli/github/issues.h>
+#include <gcli/json_util.h>
+#include <gcli/labels.h>
 
 #include <pdjson/pdjson.h>
 
@@ -43,7 +43,7 @@ gitea_get_issues(
 	const char   *repo,
 	bool          all,
 	int           max,
-	ghcli_issue **out)
+	gcli_issue **out)
 {
 	return github_get_issues(owner, repo, all, max, out);
 }
@@ -53,15 +53,15 @@ gitea_get_issue_summary(
 	const char          *owner,
 	const char          *repo,
 	int                  issue_number,
-	ghcli_issue_details *out)
+	gcli_issue_details *out)
 {
 	github_get_issue_summary(owner, repo, issue_number, out);
 }
 
 void
 gitea_submit_issue(
-	ghcli_submit_issue_options	 opts,
-	ghcli_fetch_buffer			*out)
+	gcli_submit_issue_options	 opts,
+	gcli_fetch_buffer			*out)
 {
 	github_perform_submit_issue(opts, out);
 }
@@ -74,14 +74,14 @@ gitea_issue_patch_state(
 	int			 issue_number,
 	const char	*state)
 {
-	ghcli_fetch_buffer  json_buffer = {0};
+	gcli_fetch_buffer  json_buffer = {0};
 	char               *url         = NULL;
 	char               *data        = NULL;
 	char               *e_owner     = NULL;
 	char               *e_repo      = NULL;
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/issues/%d",
@@ -90,7 +90,7 @@ gitea_issue_patch_state(
 		issue_number);
 	data = sn_asprintf("{ \"state\": \"%s\"}", state);
 
-	ghcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
+	gcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
 
 	free(data);
 	free(url);
@@ -124,25 +124,25 @@ gitea_issue_assign(
 	int         issue_number,
 	const char *assignee)
 {
-	ghcli_fetch_buffer  buffer           = {0};
+	gcli_fetch_buffer  buffer           = {0};
 	sn_sv               escaped_assignee = SV_NULL;
 	char               *post_fields      = NULL;
 	char               *url              = NULL;
 	char               *e_owner          = NULL;
 	char               *e_repo           = NULL;
 
-	escaped_assignee = ghcli_json_escape(SV((char *)assignee));
+	escaped_assignee = gcli_json_escape(SV((char *)assignee));
 	post_fields = sn_asprintf("{ \"assignees\": [\""SV_FMT"\"] }",
 				  SV_ARGS(escaped_assignee));
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/issues/%d",
 		gitea_get_apibase(), e_owner, e_repo, issue_number);
 
-	ghcli_fetch_with_method("PATCH", url, post_fields, NULL, &buffer);
+	gcli_fetch_with_method("PATCH", url, post_fields, NULL, &buffer);
 
 	free(buffer.data);
 	free(escaped_assignee.data);
@@ -156,7 +156,7 @@ gitea_issue_assign(
 static char *
 get_id_of_label(
 	const char			*label_name,
-	const ghcli_label	*labels,
+	const gcli_label	*labels,
 	size_t				 labels_size)
 {
 	for (size_t i = 0; i < labels_size; ++i)
@@ -172,7 +172,7 @@ label_names_to_ids(
 	const char	  *names[],
 	size_t		   names_size)
 {
-	ghcli_label	 *labels	  = NULL;
+	gcli_label	 *labels	  = NULL;
 	size_t		  labels_size = 0;
 	char		**ids		  = NULL;
 	size_t		  ids_size	  = 0;
@@ -190,7 +190,7 @@ label_names_to_ids(
 		ids[ids_size++] = label_id;
 	}
 
-	ghcli_free_labels(labels, labels_size);
+	gcli_free_labels(labels, labels_size);
 
 	return ids;
 }
@@ -215,7 +215,7 @@ gitea_issue_add_labels(
 	char				*list	= NULL;
 	char				*data	= NULL;
 	char				*url	= NULL;
-	ghcli_fetch_buffer	 buffer = {0};
+	gcli_fetch_buffer	 buffer = {0};
 
 	/* First, convert to ids */
 	char **ids = label_names_to_ids(owner, repo, labels, labels_size);
@@ -228,7 +228,7 @@ gitea_issue_add_labels(
 
 	url = sn_asprintf("%s/repos/%s/%s/issues/%d/labels",
 					  gitea_get_apibase(), owner, repo, issue);
-	ghcli_fetch_with_method("POST", url, data, NULL, &buffer);
+	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
 
 	free(list);
 	free(data);
@@ -252,11 +252,11 @@ gitea_issue_remove_labels(
 
 	for (size_t i = 0; i < labels_size; ++i) {
 		char				*url	= NULL;
-		ghcli_fetch_buffer	 buffer = {0};
+		gcli_fetch_buffer	 buffer = {0};
 
 		url = sn_asprintf("%s/repos/%s/%s/issues/%d/labels/%s",
 						  gitea_get_apibase(), owner, repo, issue, ids[i]);
-		ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+		gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
 		free(buffer.data);
 		free(url);

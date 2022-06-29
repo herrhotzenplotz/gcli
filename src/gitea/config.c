@@ -27,8 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/gitea/config.h>
-#include <ghcli/config.h>
+#include <gcli/gitea/config.h>
+#include <gcli/config.h>
 
 #include <sn/sn.h>
 
@@ -38,11 +38,11 @@ gitea_default_account_name(void)
 	sn_sv section_name;
 
 	/* Use default override account */
-	section_name = ghcli_config_get_override_default_account();
+	section_name = gcli_config_get_override_default_account();
 
 	/* If not manually overridden */
 	if (sn_sv_null(section_name)) {
-		section_name = ghcli_config_find_by_key(
+		section_name = gcli_config_find_by_key(
 			SV("defaults"),
 			"gitea-default-account");
 
@@ -61,7 +61,7 @@ gitea_get_apibase(void)
 	if (sn_sv_null(account))
 		goto default_val;
 
-	sn_sv api_base = ghcli_config_find_by_key(account, "apibase");
+	sn_sv api_base = gcli_config_find_by_key(account, "apibase");
 	if (sn_sv_null(api_base))
 		goto default_val;
 
@@ -78,7 +78,7 @@ gitea_get_authheader(void)
 	if (sn_sv_null(account))
 		return NULL;
 
-	sn_sv token = ghcli_config_find_by_key(account, "token");;
+	sn_sv token = gcli_config_find_by_key(account, "token");;
 	if (sn_sv_null(token)) {
 		warnx("Missing Gitea token");
 		return NULL;
@@ -94,9 +94,8 @@ gitea_get_account(void)
 	if (sn_sv_null(section))
 		return SV_NULL;
 
-	sn_sv account = ghcli_config_find_by_key(section, "account");;
+	sn_sv account = gcli_config_find_by_key(section, "account");;
 	if (!account.length)
 		errx(1, "Missing Gitea account name");
 	return account;
 }
-

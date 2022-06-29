@@ -27,18 +27,18 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/gists.h>
-#include <ghcli/config.h>
-#include <ghcli/color.h>
-#include <ghcli/curl.h>
-#include <ghcli/json_util.h>
+#include <gcli/gists.h>
+#include <gcli/config.h>
+#include <gcli/color.h>
+#include <gcli/curl.h>
+#include <gcli/json_util.h>
 
-#include <ghcli/github/config.h>
+#include <gcli/github/config.h>
 
 #include <pdjson/pdjson.h>
 
 static void
-parse_gist_file(struct json_stream *stream, ghcli_gist_file *file)
+parse_gist_file(struct json_stream *stream, gcli_gist_file *file)
 {
 	enum json_type  next       = JSON_NULL;
 	enum json_type  value_type = JSON_NULL;
@@ -84,7 +84,7 @@ parse_gist_file(struct json_stream *stream, ghcli_gist_file *file)
 static void
 parse_gist_files(
 	struct json_stream  *stream,
-	ghcli_gist_file    **files,
+	gcli_gist_file    **files,
 	size_t              *files_size)
 {
 	enum json_type next     = JSON_NULL;
@@ -96,8 +96,8 @@ parse_gist_files(
 		errx(1, "Expected Gist Files Object");
 
 	while ((next = json_next(stream)) == JSON_STRING) {
-		*files = realloc(*files, sizeof(ghcli_gist_file) * (size + 1));
-		ghcli_gist_file *it = &(*files)[size++];
+		*files = realloc(*files, sizeof(gcli_gist_file) * (size + 1));
+		gcli_gist_file *it = &(*files)[size++];
 		parse_gist_file(stream, it);
 	}
 
@@ -108,7 +108,7 @@ parse_gist_files(
 }
 
 static void
-parse_gist(struct json_stream *stream, ghcli_gist *out)
+parse_gist(struct json_stream *stream, gcli_gist *out)
 {
 	enum json_type  next       = JSON_NULL;
 	enum json_type  value_type = JSON_NULL;
@@ -156,11 +156,11 @@ parse_gist(struct json_stream *stream, ghcli_gist *out)
 }
 
 int
-ghcli_get_gists(const char *user, int max, ghcli_gist **out)
+gcli_get_gists(const char *user, int max, gcli_gist **out)
 {
 	char               *url      = NULL;
 	char               *next_url = NULL;
-	ghcli_fetch_buffer  buffer   = {0};
+	gcli_fetch_buffer  buffer   = {0};
 	struct json_stream  stream   = {0};
 	enum   json_type    next     = JSON_NULL;
 	int                 size     = 0;
@@ -174,7 +174,7 @@ ghcli_get_gists(const char *user, int max, ghcli_gist **out)
 		url = sn_asprintf("%s/gists", github_get_apibase());
 
 	do {
-		ghcli_fetch(url, &next_url, &buffer);
+		gcli_fetch(url, &next_url, &buffer);
 
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		json_set_streaming(&stream, 1);
@@ -183,8 +183,8 @@ ghcli_get_gists(const char *user, int max, ghcli_gist **out)
 			errx(1, "Expected array in response");
 
 		while ((next = json_peek(&stream)) == JSON_OBJECT) {
-			*out = realloc(*out, sizeof(ghcli_gist) * (size + 1));
-			ghcli_gist *it = &(*out)[size++];
+			*out = realloc(*out, sizeof(gcli_gist) * (size + 1));
+			gcli_gist *it = &(*out)[size++];
 			parse_gist(&stream, it);
 
 			if (size == max)
@@ -240,40 +240,40 @@ language_fmt(const char *it)
 }
 
 static void
-print_gist_file(ghcli_gist_file *file)
+print_gist_file(gcli_gist_file *file)
 {
 	printf("      • %-15.15s  %-8.8s  %-s\n",
-	       language_fmt(file->language.data),
-	       human_readable_size(file->size),
-	       file->filename.data);
+		   language_fmt(file->language.data),
+		   human_readable_size(file->size),
+		   file->filename.data);
 }
 
 static void
-print_gist(ghcli_gist *gist)
+print_gist(gcli_gist *gist)
 {
 	printf("   ID : %s"SV_FMT"%s\n"
-	       "OWNER : %s"SV_FMT"%s\n"
-	       "DESCR : "SV_FMT"\n"
-	       " DATE : "SV_FMT"\n"
-	       "  URL : "SV_FMT"\n"
-	       " PULL : "SV_FMT"\n",
-	       ghcli_setcolor(GHCLI_COLOR_YELLOW), SV_ARGS(gist->id), ghcli_resetcolor(),
-	       ghcli_setbold(), SV_ARGS(gist->owner), ghcli_resetbold(),
-	       SV_ARGS(gist->description),
-	       SV_ARGS(gist->date),
-	       SV_ARGS(gist->url),
-	       SV_ARGS(gist->git_pull_url));
+		   "OWNER : %s"SV_FMT"%s\n"
+		   "DESCR : "SV_FMT"\n"
+		   " DATE : "SV_FMT"\n"
+		   "  URL : "SV_FMT"\n"
+		   " PULL : "SV_FMT"\n",
+		   gcli_setcolor(GCLI_COLOR_YELLOW), SV_ARGS(gist->id), gcli_resetcolor(),
+		   gcli_setbold(), SV_ARGS(gist->owner), gcli_resetbold(),
+		   SV_ARGS(gist->description),
+		   SV_ARGS(gist->date),
+		   SV_ARGS(gist->url),
+		   SV_ARGS(gist->git_pull_url));
 	printf("FILES : %-15.15s  %-8.8s  %-s\n",
-	       "LANGUAGE", "SIZE", "FILENAME");
+		   "LANGUAGE", "SIZE", "FILENAME");
 
 	for (size_t i = 0; i < gist->files_size; ++i)
 		print_gist_file(&gist->files[i]);
 }
 
 void
-ghcli_print_gists_table(
-	enum ghcli_output_order  order,
-	ghcli_gist              *gists,
+gcli_print_gists_table(
+	enum gcli_output_order  order,
+	gcli_gist              *gists,
 	int                      gists_size)
 {
 	if (gists_size == 0) {
@@ -295,22 +295,22 @@ ghcli_print_gists_table(
 	}
 }
 
-ghcli_gist *
-ghcli_get_gist(const char *gist_id)
+gcli_gist *
+gcli_get_gist(const char *gist_id)
 {
 	char               *url    = NULL;
-	ghcli_fetch_buffer  buffer = {0};
+	gcli_fetch_buffer  buffer = {0};
 	struct json_stream  stream = {0};
-	ghcli_gist         *it     = NULL;
+	gcli_gist         *it     = NULL;
 
 	url = sn_asprintf("%s/gists/%s", github_get_apibase(), gist_id);
 
-	ghcli_fetch(url, NULL, &buffer);
+	gcli_fetch(url, NULL, &buffer);
 
 	json_open_buffer(&stream, buffer.data, buffer.length);
 	json_set_streaming(&stream, 1);
 
-	it = calloc(sizeof(ghcli_gist), 1);
+	it = calloc(sizeof(gcli_gist), 1);
 	parse_gist(&stream, it);
 
 	json_close(&stream);
@@ -340,16 +340,16 @@ read_file(FILE *f, char **out)
 }
 
 void
-ghcli_create_gist(ghcli_new_gist opts)
+gcli_create_gist(gcli_new_gist opts)
 {
 	char               *url          = NULL;
 	char               *post_data    = NULL;
-	ghcli_fetch_buffer  fetch_buffer = {0};
+	gcli_fetch_buffer  fetch_buffer = {0};
 	sn_sv               read_buffer  = {0};
 	sn_sv               content      = {0};
 
 	read_buffer.length = read_file(opts.file, &read_buffer.data);
-	content = ghcli_json_escape(read_buffer);
+	content = gcli_json_escape(read_buffer);
 
 	/* This API is documented very badly. In fact, I dug up how you're
 	 * supposed to do this from
@@ -378,8 +378,8 @@ ghcli_create_gist(ghcli_new_gist opts)
 		opts.file_name,
 		SV_ARGS(content));
 
-	ghcli_fetch_with_method("POST", url, post_data, NULL, &fetch_buffer);
-	ghcli_print_html_url(fetch_buffer);
+	gcli_fetch_with_method("POST", url, post_data, NULL, &fetch_buffer);
+	gcli_print_html_url(fetch_buffer);
 
 	free(read_buffer.data);
 	free(fetch_buffer.data);
@@ -388,10 +388,10 @@ ghcli_create_gist(ghcli_new_gist opts)
 }
 
 void
-ghcli_delete_gist(const char *gist_id, bool always_yes)
+gcli_delete_gist(const char *gist_id, bool always_yes)
 {
 	char               *url    = NULL;
-	ghcli_fetch_buffer  buffer = {0};
+	gcli_fetch_buffer  buffer = {0};
 
 	url = sn_asprintf(
 		"%s/gists/%s",
@@ -401,7 +401,7 @@ ghcli_delete_gist(const char *gist_id, bool always_yes)
 	if (!always_yes && !sn_yesno("Are you sure you want to delete this gist?"))
 		errx(1, "Aborted by user");
 
-	ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
 	free(buffer.data);
 	free(url);

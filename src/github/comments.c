@@ -27,15 +27,15 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/config.h>
-#include <ghcli/github/comments.h>
-#include <ghcli/github/config.h>
-#include <ghcli/json_util.h>
+#include <gcli/config.h>
+#include <gcli/github/comments.h>
+#include <gcli/github/config.h>
+#include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
 
 static void
-github_parse_comment(json_stream *input, ghcli_comment *it)
+github_parse_comment(json_stream *input, gcli_comment *it)
 {
 	if (json_next(input) != JSON_OBJECT)
 		errx(1, "Expected Comment Object");
@@ -58,20 +58,20 @@ github_parse_comment(json_stream *input, ghcli_comment *it)
 
 void
 github_perform_submit_comment(
-	ghcli_submit_comment_opts  opts,
-	ghcli_fetch_buffer        *out)
+	gcli_submit_comment_opts  opts,
+	gcli_fetch_buffer        *out)
 {
-	char *e_owner = ghcli_urlencode(opts.owner);
-	char *e_repo  = ghcli_urlencode(opts.repo);
+	char *e_owner = gcli_urlencode(opts.owner);
+	char *e_repo  = gcli_urlencode(opts.repo);
 	char *post_fields = sn_asprintf(
 		"{ \"body\": \""SV_FMT"\" }",
 		SV_ARGS(opts.message));
 	char *url         = sn_asprintf(
 		"%s/repos/%s/%s/issues/%d/comments",
-		ghcli_get_apibase(),
+		gcli_get_apibase(),
 		e_owner, e_repo, opts.target_id);
 
-	ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
+	gcli_fetch_with_method("POST", url, post_fields, NULL, out);
 	free(post_fields);
 	free(e_owner);
 	free(e_repo);
@@ -79,16 +79,16 @@ github_perform_submit_comment(
 }
 
 static int
-github_perform_get_comments(const char *_url, ghcli_comment **comments)
+github_perform_get_comments(const char *_url, gcli_comment **comments)
 {
 	int                 count       = 0;
 	json_stream         stream      = {0};
-	ghcli_fetch_buffer  json_buffer = {0};
+	gcli_fetch_buffer  json_buffer = {0};
 	char               *next_url    = NULL;
 	char               *url         = (char *)(_url);
 
 	do {
-		ghcli_fetch(url, &next_url, &json_buffer);
+		gcli_fetch(url, &next_url, &json_buffer);
 		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 		json_set_streaming(&stream, true);
 
@@ -98,8 +98,8 @@ github_perform_get_comments(const char *_url, ghcli_comment **comments)
 			if (next_token != JSON_OBJECT)
 				errx(1, "Unexpected non-object in comment list");
 
-			*comments = realloc(*comments, (count + 1) * sizeof(ghcli_comment));
-			ghcli_comment *it = &(*comments)[count];
+			*comments = realloc(*comments, (count + 1) * sizeof(gcli_comment));
+			gcli_comment *it = &(*comments)[count];
 			github_parse_comment(&stream, it);
 			count += 1;
 		}
@@ -119,18 +119,18 @@ github_get_comments(
 	const char     *owner,
 	const char     *repo,
 	int             issue,
-	ghcli_comment **out)
+	gcli_comment **out)
 {
 	char *e_owner = NULL;
 	char *e_repo  = NULL;
 	char *url     = NULL;
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/issues/%d/comments",
-		ghcli_get_apibase(),
+		gcli_get_apibase(),
 		e_owner, e_repo, issue);
 	int n = github_perform_get_comments(url, out);
 

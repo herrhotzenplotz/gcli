@@ -27,10 +27,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/curl.h>
-#include <ghcli/gitlab/config.h>
-#include <ghcli/gitlab/forks.h>
-#include <ghcli/json_util.h>
+#include <gcli/curl.h>
+#include <gcli/gitlab/config.h>
+#include <gcli/gitlab/forks.h>
+#include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
 
@@ -60,7 +60,7 @@ parse_namespace(struct json_stream *input)
 }
 
 static void
-parse_fork(struct json_stream *input, ghcli_fork *out)
+parse_fork(struct json_stream *input, gcli_fork *out)
 {
 	enum json_type  key_type   = JSON_NULL;
 	const char     *key        = NULL;
@@ -93,9 +93,9 @@ gitlab_get_forks(
 	const char  *owner,
 	const char  *repo,
 	int          max,
-	ghcli_fork **out)
+	gcli_fork **out)
 {
-	ghcli_fetch_buffer  buffer   = {0};
+	gcli_fetch_buffer  buffer   = {0};
 	char               *url      = NULL;
 	char               *e_owner  = NULL;
 	char               *e_repo   = NULL;
@@ -104,8 +104,8 @@ gitlab_get_forks(
 	struct json_stream  stream   = {0};
 	int                 size     = 0;
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	*out = NULL;
 
@@ -115,7 +115,7 @@ gitlab_get_forks(
 		e_owner, e_repo);
 
 	do {
-		ghcli_fetch(url, &next_url, &buffer);
+		gcli_fetch(url, &next_url, &buffer);
 
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		json_set_streaming(&stream, 1);
@@ -123,12 +123,12 @@ gitlab_get_forks(
 		// TODO: Poor error message
 		if ((next = json_next(&stream)) != JSON_ARRAY)
 			errx(1,
-			     "Expected array in response from API "
-			     "but got something else instead");
+				 "Expected array in response from API "
+				 "but got something else instead");
 
 		while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
-			*out = realloc(*out, sizeof(ghcli_fork) * (size + 1));
-			ghcli_fork *it = &(*out)[size++];
+			*out = realloc(*out, sizeof(gcli_fork) * (size + 1));
+			gcli_fork *it = &(*out)[size++];
 			parse_fork(&stream, it);
 
 			if (size == max)
@@ -155,23 +155,23 @@ gitlab_fork_create(const char *owner, const char *repo, const char *_in)
 	char               *e_repo    = NULL;
 	char               *post_data = NULL;
 	sn_sv               in        = SV_NULL;
-	ghcli_fetch_buffer  buffer    = {0};
+	gcli_fetch_buffer  buffer    = {0};
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
 		"%s/projects/%s%%2F%s/fork",
 		gitlab_get_apibase(),
 		e_owner, e_repo);
 	if (_in) {
-		in        = ghcli_json_escape(SV((char *)_in));
+		in        = gcli_json_escape(SV((char *)_in));
 		post_data = sn_asprintf("{\"namespace_path\":\""SV_FMT"\"}",
 					SV_ARGS(in));
 	}
 
-	ghcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
-	ghcli_print_html_url(buffer);
+	gcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
+	gcli_print_html_url(buffer);
 
 	free(in.data);
 	free(url);

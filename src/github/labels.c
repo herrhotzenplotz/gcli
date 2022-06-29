@@ -27,14 +27,14 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/github/labels.h>
-#include <ghcli/config.h>
-#include <ghcli/json_util.h>
+#include <gcli/github/labels.h>
+#include <gcli/config.h>
+#include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
 
 static void
-github_parse_label(struct json_stream *input, ghcli_label *out)
+github_parse_label(struct json_stream *input, gcli_label *out)
 {
 	if (json_next(input) != JSON_OBJECT)
 		errx(1, "Expected Issue Object");
@@ -61,24 +61,24 @@ github_get_labels(
 	const char   *owner,
 	const char   *reponame,
 	int           max,
-	ghcli_label **out)
+	gcli_label **out)
 {
 	size_t              out_size = 0;
 	char               *url      = NULL;
 	char               *next_url = NULL;
-	ghcli_fetch_buffer  buffer   = {0};
+	gcli_fetch_buffer  buffer   = {0};
 
 	*out = NULL;
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/labels",
-		ghcli_get_apibase(), owner, reponame);
+		gcli_get_apibase(), owner, reponame);
 
 	do {
 		struct json_stream stream = {0};
 		enum   json_type   next   = JSON_NULL;
 
-		ghcli_fetch(url, &next_url, &buffer);
+		gcli_fetch(url, &next_url, &buffer);
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		json_set_streaming(&stream, 1);
 
@@ -87,9 +87,9 @@ github_get_labels(
 			errx(1, "error: expected array of labels");
 
 		while (json_peek(&stream) != JSON_ARRAY_END) {
-			ghcli_label *it = NULL;
+			gcli_label *it = NULL;
 
-			*out = realloc(*out, sizeof(ghcli_label) * (out_size + 1));
+			*out = realloc(*out, sizeof(gcli_label) * (out_size + 1));
 			it = &(*out)[out_size++];
 
 			memset(it, 0, sizeof(*it));
@@ -108,7 +108,7 @@ void
 github_create_label(
 	const char  *owner,
 	const char  *repo,
-	ghcli_label *label)
+	gcli_label *label)
 {
 	char               *url         = NULL;
 	char               *data        = NULL;
@@ -118,21 +118,21 @@ github_create_label(
 	sn_sv               label_name  = SV_NULL;
 	sn_sv               label_descr = SV_NULL;
 	sn_sv               label_color = SV_NULL;
-	ghcli_fetch_buffer  buffer      = {0};
+	gcli_fetch_buffer  buffer      = {0};
 	struct json_stream  stream      = {0};
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	color = sn_asprintf("%06X", label->color >> 8);
 
-	label_name  = ghcli_json_escape(SV(label->name));
-	label_descr = ghcli_json_escape(SV(label->description));
-	label_color = ghcli_json_escape(SV(color));
+	label_name  = gcli_json_escape(SV(label->name));
+	label_descr = gcli_json_escape(SV(label->description));
+	label_color = gcli_json_escape(SV(color));
 
 	/* /repos/{owner}/{repo}/labels */
 	url = sn_asprintf("%s/repos/%s/%s/labels",
-			  ghcli_get_apibase(), e_owner, e_repo);
+			  gcli_get_apibase(), e_owner, e_repo);
 
 
 	data = sn_asprintf("{ "
@@ -144,7 +144,7 @@ github_create_label(
 			   SV_ARGS(label_descr),
 			   SV_ARGS(label_color));
 
-	ghcli_fetch_with_method("POST", url, data, NULL, &buffer);
+	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
 	json_open_buffer(&stream, buffer.data, buffer.length);
 	github_parse_label(&stream, label);
 
@@ -168,16 +168,16 @@ github_delete_label(
 {
 	char               *url     = NULL;
 	char               *e_label = NULL;
-	ghcli_fetch_buffer  buffer  = {0};
+	gcli_fetch_buffer  buffer  = {0};
 
-	e_label = ghcli_urlencode(label);
+	e_label = gcli_urlencode(label);
 
 	/* DELETE /repos/{owner}/{repo}/labels/{name} */
 	url = sn_asprintf("%s/repos/%s/%s/labels/%s",
-			  ghcli_get_apibase(),
+			  gcli_get_apibase(),
 			  owner, repo, e_label);
 
-	ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
 	free(url);
 	free(e_label);

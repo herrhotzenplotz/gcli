@@ -27,9 +27,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/gitlab/config.h>
-#include <ghcli/gitlab/labels.h>
-#include <ghcli/json_util.h>
+#include <gcli/gitlab/config.h>
+#include <gcli/gitlab/labels.h>
+#include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
 
@@ -51,7 +51,7 @@ gitlab_get_color(struct json_stream *input)
 }
 
 static void
-gitlab_parse_label(struct json_stream *input, ghcli_label *it)
+gitlab_parse_label(struct json_stream *input, gcli_label *it)
 {
 	if (json_next(input) != JSON_OBJECT)
 		errx(1, "expected label object");
@@ -78,12 +78,12 @@ gitlab_get_labels(
 	const char   *owner,
 	const char   *repo,
 	int           max,
-	ghcli_label **out)
+	gcli_label **out)
 {
 	size_t              out_size = 0;
 	char               *url      = NULL;
 	char               *next_url = NULL;
-	ghcli_fetch_buffer  buffer   = {0};
+	gcli_fetch_buffer  buffer   = {0};
 	struct json_stream  stream   = {0};
 
 	*out = NULL;
@@ -94,7 +94,7 @@ gitlab_get_labels(
 	do {
 		enum json_type next_type;
 
-		ghcli_fetch(url, &next_url, &buffer);
+		gcli_fetch(url, &next_url, &buffer);
 
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		json_set_streaming(&stream, 1);
@@ -104,9 +104,9 @@ gitlab_get_labels(
 			errx(1, "error: expected array of labels");
 
 		while (json_peek(&stream) != JSON_ARRAY_END) {
-			ghcli_label *it;
+			gcli_label *it;
 
-			*out = realloc(*out, sizeof(ghcli_label) * (out_size + 1));
+			*out = realloc(*out, sizeof(gcli_label) * (out_size + 1));
 			it = &(*out)[out_size++];
 			gitlab_parse_label(&stream, it);
 		}
@@ -120,11 +120,11 @@ gitlab_get_labels(
 }
 
 void
-gitlab_create_label(const char *owner, const char *repo, ghcli_label *label)
+gitlab_create_label(const char *owner, const char *repo, gcli_label *label)
 {
 	char               *url    = NULL;
 	char               *data   = NULL;
-	ghcli_fetch_buffer  buffer = {0};
+	gcli_fetch_buffer  buffer = {0};
 	struct json_stream  stream = {0};
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/labels",
@@ -135,11 +135,11 @@ gitlab_create_label(const char *owner, const char *repo, ghcli_label *label)
 		"{\"name\": \""SV_FMT"\","
 		"\"color\":\"#%s\","
 		"\"description\":\""SV_FMT"\"}",
-		SV_ARGS(ghcli_json_escape(SV(label->name))),
+		SV_ARGS(gcli_json_escape(SV(label->name))),
 		sn_asprintf("%06X", (label->color>>8)&0xFFFFFF),
-		SV_ARGS(ghcli_json_escape(SV(label->description))));
+		SV_ARGS(gcli_json_escape(SV(label->description))));
 
-	ghcli_fetch_with_method("POST", url, data, NULL, &buffer);
+	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
 
 	json_open_buffer(&stream, buffer.data, buffer.length);
 	json_set_streaming(&stream, 1);
@@ -160,14 +160,14 @@ gitlab_delete_label(
 {
 	char               *url     = NULL;
 	char               *e_label = NULL;
-	ghcli_fetch_buffer  buffer  = {0};
+	gcli_fetch_buffer  buffer  = {0};
 
-	e_label = ghcli_urlencode(label);
+	e_label = gcli_urlencode(label);
 	url     = sn_asprintf("%s/projects/%s%%2F%s/labels/%s",
-			      gitlab_get_apibase(),
-			      owner, repo, e_label);
+				  gitlab_get_apibase(),
+				  owner, repo, e_label);
 
-	ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 	free(url);
 	free(buffer.data);
 	free(e_label);

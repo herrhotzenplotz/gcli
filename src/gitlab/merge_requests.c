@@ -27,16 +27,16 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/curl.h>
-#include <ghcli/gitlab/config.h>
-#include <ghcli/gitlab/repos.h>
-#include <ghcli/gitlab/merge_requests.h>
-#include <ghcli/json_util.h>
+#include <gcli/curl.h>
+#include <gcli/gitlab/config.h>
+#include <gcli/gitlab/repos.h>
+#include <gcli/gitlab/merge_requests.h>
+#include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
 
 static void
-gitlab_parse_mr_entry(json_stream *input, ghcli_pull *it)
+gitlab_parse_mr_entry(json_stream *input, gcli_pull *it)
 {
 	if (json_next(input) != JSON_OBJECT)
 		errx(1, "Expected Issue Object");
@@ -69,18 +69,18 @@ gitlab_get_mrs(
 	const char  *repo,
 	bool         all,
 	int          max,
-	ghcli_pull **out)
+	gcli_pull **out)
 {
 	int                 count       = 0;
 	json_stream         stream      = {0};
-	ghcli_fetch_buffer  json_buffer = {0};
+	gcli_fetch_buffer  json_buffer = {0};
 	char               *url         = NULL;
 	char               *e_owner     = NULL;
 	char               *e_repo      = NULL;
 	char               *next_url    = NULL;
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
 		"%s/projects/%s%%2F%s/merge_requests%s",
@@ -89,7 +89,7 @@ gitlab_get_mrs(
 		all ? "" : "?state=opened");
 
 	do {
-		ghcli_fetch(url, &next_url, &json_buffer);
+		gcli_fetch(url, &next_url, &json_buffer);
 
 		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 		json_set_streaming(&stream, true);
@@ -103,9 +103,9 @@ gitlab_get_mrs(
 				errx(1, "Parser error: %s", json_get_error(&stream));
 				break;
 			case JSON_OBJECT: {
-				*out = realloc(*out, sizeof(ghcli_pull) * (count + 1));
-				ghcli_pull *it = &(*out)[count];
-				memset(it, 0, sizeof(ghcli_pull));
+				*out = realloc(*out, sizeof(gcli_pull) * (count + 1));
+				gcli_pull *it = &(*out)[count];
+				memset(it, 0, sizeof(gcli_pull));
 				gitlab_parse_mr_entry(&stream, it);
 				count += 1;
 			} break;
@@ -153,14 +153,14 @@ gitlab_mr_merge(
 	int         mr_number,
 	bool        squash)
 {
-	ghcli_fetch_buffer  buffer  = {0};
+	gcli_fetch_buffer  buffer  = {0};
 	char               *url     = NULL;
 	char               *e_owner = NULL;
 	char               *e_repo  = NULL;
 	const char         *data    = "{}";
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	/* PUT /projects/:id/merge_requests/:merge_request_iid/merge */
 	url = sn_asprintf(
@@ -169,9 +169,9 @@ gitlab_mr_merge(
 		e_owner, e_repo, mr_number,
 		squash ? "true" : "false");
 
-	ghcli_fetch_with_method("PUT", url, data, NULL, &buffer);
+	gcli_fetch_with_method("PUT", url, data, NULL, &buffer);
 
-	ghcli_print_html_url(buffer);
+	gcli_print_html_url(buffer);
 
 	free(buffer.data);
 	free(url);
@@ -180,7 +180,7 @@ gitlab_mr_merge(
 }
 
 static void
-gitlab_pull_parse_summary(json_stream *input, ghcli_pull_summary *out)
+gitlab_pull_parse_summary(json_stream *input, gcli_pull_summary *out)
 {
 	enum json_type key_type;
 	const char *key;
@@ -204,7 +204,7 @@ gitlab_pull_parse_summary(json_stream *input, ghcli_pull_summary *out)
 		else if (strncmp("id", key, len) == 0)
 			out->id = get_int(input);
 		else if (strncmp("labels", key, len) == 0)
-			out->labels_size = ghcli_read_sv_list(input, &out->labels);
+			out->labels_size = gcli_read_sv_list(input, &out->labels);
 		else if (strncmp("user_notes_count", key, len) == 0)
 			out->comments = get_int(input);
 #if 0
@@ -245,23 +245,23 @@ gitlab_get_pull_summary(
 	const char         *owner,
 	const char         *repo,
 	int                 pr_number,
-	ghcli_pull_summary *out)
+	gcli_pull_summary *out)
 {
 	json_stream         stream       = {0};
-	ghcli_fetch_buffer  json_buffer  = {0};
+	gcli_fetch_buffer  json_buffer  = {0};
 	char               *url          = NULL;
 	char               *e_owner      = NULL;
 	char               *e_repo       = NULL;
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	/* GET /projects/:id/merge_requests/:merge_request_iid */
 	url = sn_asprintf(
 		"%s/projects/%s%%2F%s/merge_requests/%d",
 		gitlab_get_apibase(),
 		e_owner, e_repo, pr_number);
-	ghcli_fetch(url, NULL, &json_buffer);
+	gcli_fetch(url, NULL, &json_buffer);
 
 	json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 	json_set_streaming(&stream, true);
@@ -276,7 +276,7 @@ gitlab_get_pull_summary(
 }
 
 static void
-gitlab_parse_commit(json_stream *input, ghcli_commit *it)
+gitlab_parse_commit(json_stream *input, gcli_commit *it)
 {
 	enum json_type key_type;
 	const char *key;
@@ -310,7 +310,7 @@ gitlab_get_pull_commits(
 	const char    *owner,
 	const char    *repo,
 	int            pr_number,
-	ghcli_commit **out)
+	gcli_commit **out)
 {
 	char              *url         = NULL;
 	char              *next_url    = NULL;
@@ -318,10 +318,10 @@ gitlab_get_pull_commits(
 	char              *e_repo      = NULL;
 	int                count       = 0;
 	json_stream        stream      = {0};
-	ghcli_fetch_buffer json_buffer = {0};
+	gcli_fetch_buffer json_buffer = {0};
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	/* GET /projects/:id/merge_requests/:merge_request_iid/commits */
 	url = sn_asprintf(
@@ -330,7 +330,7 @@ gitlab_get_pull_commits(
 		e_owner, e_repo, pr_number);
 
 	do {
-		ghcli_fetch(url, &next_url, &json_buffer);
+		gcli_fetch(url, &next_url, &json_buffer);
 		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 		json_set_streaming(&stream, true);
 
@@ -340,8 +340,8 @@ gitlab_get_pull_commits(
 			if (next_token != JSON_OBJECT)
 				errx(1, "Unexpected non-object in commit list");
 
-			*out = realloc(*out, (count + 1) * sizeof(ghcli_commit));
-			ghcli_commit *it = &(*out)[count];
+			*out = realloc(*out, (count + 1) * sizeof(gcli_commit));
+			gcli_commit *it = &(*out)[count];
 			gitlab_parse_commit(&stream, it);
 			count += 1;
 		}
@@ -359,14 +359,14 @@ gitlab_get_pull_commits(
 void
 gitlab_mr_close(const char *owner, const char *repo, int pr_number)
 {
-	ghcli_fetch_buffer  json_buffer = {0};
+	gcli_fetch_buffer  json_buffer = {0};
 	char               *url         = NULL;
 	char               *data        = NULL;
 	char               *e_owner     = NULL;
 	char               *e_repo      = NULL;
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url  = sn_asprintf(
 		"%s/projects/%s%%2F%s/merge_requests/%d",
@@ -374,7 +374,7 @@ gitlab_mr_close(const char *owner, const char *repo, int pr_number)
 		e_owner, e_repo, pr_number);
 	data = sn_asprintf("{ \"state_event\": \"close\"}");
 
-	ghcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
+	gcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
 
 	free(json_buffer.data);
 	free(url);
@@ -386,14 +386,14 @@ gitlab_mr_close(const char *owner, const char *repo, int pr_number)
 void
 gitlab_mr_reopen(const char *owner, const char *repo, int pr_number)
 {
-	ghcli_fetch_buffer  json_buffer = {0};
+	gcli_fetch_buffer  json_buffer = {0};
 	char               *url         = NULL;
 	char               *data        = NULL;
 	char               *e_owner     = NULL;
 	char               *e_repo      = NULL;
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url  = sn_asprintf(
 		"%s/projects/%s%%2F%s/merge_requests/%d",
@@ -401,7 +401,7 @@ gitlab_mr_reopen(const char *owner, const char *repo, int pr_number)
 		e_owner, e_repo, pr_number);
 	data = sn_asprintf("{ \"state_event\": \"reopen\"}");
 
-	ghcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
+	gcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
 
 	free(json_buffer.data);
 	free(e_owner);
@@ -412,13 +412,13 @@ gitlab_mr_reopen(const char *owner, const char *repo, int pr_number)
 
 void
 gitlab_perform_submit_mr(
-	ghcli_submit_pull_options  opts,
-	ghcli_fetch_buffer        *out)
+	gcli_submit_pull_options  opts,
+	gcli_fetch_buffer        *out)
 {
 	/* Note: this doesn't really allow merging into repos with
 	 * different names. We need to figure out a way to make this
 	 * better for both github and gitlab. */
-	ghcli_repo target        = {0};
+	gcli_repo target        = {0};
 	sn_sv      target_owner  = {0};
 	sn_sv      target_branch = {0};
 	sn_sv      source_owner  = {0};
@@ -449,15 +449,15 @@ gitlab_perform_submit_mr(
 		SV_ARGS(opts.body),
 		target.id);
 
-	sn_sv e_owner = ghcli_urlencode_sv(source_owner);
-	sn_sv e_repo  = ghcli_urlencode_sv(repo);
+	sn_sv e_owner = gcli_urlencode_sv(source_owner);
+	sn_sv e_repo  = gcli_urlencode_sv(repo);
 
 	char *url         = sn_asprintf(
 		"%s/projects/"SV_FMT"%%2F"SV_FMT"/merge_requests",
 		gitlab_get_apibase(),
 		SV_ARGS(e_owner), SV_ARGS(e_repo));
 
-	ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
+	gcli_fetch_with_method("POST", url, post_fields, NULL, out);
 
 	free(e_owner.data);
 	free(e_repo.data);
@@ -476,7 +476,7 @@ gitlab_mr_add_labels(
 	char               *url    = NULL;
 	char               *data   = NULL;
 	char               *list   = NULL;
-	ghcli_fetch_buffer  buffer = {0};
+	gcli_fetch_buffer  buffer = {0};
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%d",
 			  gitlab_get_apibase(), owner, repo, mr);
@@ -484,7 +484,7 @@ gitlab_mr_add_labels(
 	list = sn_join_with(labels, labels_size, ",");
 	data = sn_asprintf("{ \"add_labels\": \"%s\"}", list);
 
-	ghcli_fetch_with_method("PUT", url, data, NULL, &buffer);
+	gcli_fetch_with_method("PUT", url, data, NULL, &buffer);
 
 	free(url);
 	free(data);
@@ -503,7 +503,7 @@ gitlab_mr_remove_labels(
 	char               *url    = NULL;
 	char               *data   = NULL;
 	char               *list   = NULL;
-	ghcli_fetch_buffer  buffer = {0};
+	gcli_fetch_buffer  buffer = {0};
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%d",
 			  gitlab_get_apibase(), owner, repo, mr);
@@ -511,7 +511,7 @@ gitlab_mr_remove_labels(
 	list = sn_join_with(labels, labels_size, ",");
 	data = sn_asprintf("{ \"remove_labels\": \"%s\"}", list);
 
-	ghcli_fetch_with_method("PUT", url, data, NULL, &buffer);
+	gcli_fetch_with_method("PUT", url, data, NULL, &buffer);
 
 	free(url);
 	free(data);

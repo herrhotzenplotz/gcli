@@ -27,13 +27,13 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/gitlab/api.h>
-#include <ghcli/json_util.h>
+#include <gcli/gitlab/api.h>
+#include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
 
 const char *
-gitlab_api_error_string(ghcli_fetch_buffer *it)
+gitlab_api_error_string(gcli_fetch_buffer *it)
 {
 	struct json_stream stream = {0};
 	enum json_type     next   = JSON_NULL;

@@ -27,10 +27,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/curl.h>
-#include <ghcli/gitlab/config.h>
-#include <ghcli/gitlab/review.h>
-#include <ghcli/json_util.h>
+#include <gcli/curl.h>
+#include <gcli/gitlab/config.h>
+#include <gcli/gitlab/review.h>
+#include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
 #include <sn/sn.h>
@@ -38,7 +38,7 @@
 #include <stdlib.h>
 
 static void
-gitlab_parse_review_note(struct json_stream *input, ghcli_pr_review *out)
+gitlab_parse_review_note(struct json_stream *input, gcli_pr_review *out)
 {
 	if (json_next(input) != JSON_OBJECT)
 		errx(1, "Expected object");
@@ -75,9 +75,9 @@ gitlab_review_get_reviews(
 	const char       *owner,
 	const char       *repo,
 	int               pr,
-	ghcli_pr_review **out)
+	gcli_pr_review **out)
 {
-	ghcli_fetch_buffer  buffer   = {0};
+	gcli_fetch_buffer  buffer   = {0};
 	struct json_stream  stream   = {0};
 	char               *url      = NULL;
 	char               *next_url = NULL;
@@ -88,7 +88,7 @@ gitlab_review_get_reviews(
 		gitlab_get_apibase(), owner, repo, pr);
 
 	do {
-		ghcli_fetch(url, &next_url, &buffer);
+		gcli_fetch(url, &next_url, &buffer);
 
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		json_set_streaming(&stream, 1);
@@ -97,8 +97,8 @@ gitlab_review_get_reviews(
 			errx(1, "Expected array");
 
 		while (json_peek(&stream) == JSON_OBJECT) {
-			*out = realloc(*out, sizeof(ghcli_pr_review) * (size + 1));
-			ghcli_pr_review *it  = &(*out)[size++];
+			*out = realloc(*out, sizeof(gcli_pr_review) * (size + 1));
+			gcli_pr_review *it  = &(*out)[size++];
 			gitlab_parse_review_note(&stream, it);
 		}
 

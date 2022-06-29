@@ -27,41 +27,41 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/forges.h>
-#include <ghcli/github/releases.h>
-#include <ghcli/releases.h>
+#include <gcli/forges.h>
+#include <gcli/github/releases.h>
+#include <gcli/releases.h>
 
 #include <assert.h>
 #include <stdlib.h>
 
 int
-ghcli_get_releases(
+gcli_get_releases(
 	const char     *owner,
 	const char     *repo,
 	int             max,
-	ghcli_release **out)
+	gcli_release **out)
 {
-	return ghcli_forge()->get_releases(owner, repo, max, out);
+	return gcli_forge()->get_releases(owner, repo, max, out);
 }
 
 static void
-ghcli_print_release(ghcli_release *it)
+gcli_print_release(gcli_release *it)
 {
 	printf("        ID : "SV_FMT"\n"
-	       "      NAME : "SV_FMT"\n"
-	       "    AUTHOR : "SV_FMT"\n"
-	       "      DATE : "SV_FMT"\n"
-	       "     DRAFT : %s\n"
-	       "PRERELEASE : %s\n"
-	       "   TARBALL : "SV_FMT"\n"
-	       "      BODY :\n",
-	       SV_ARGS(it->id),
-	       SV_ARGS(it->name),
-	       SV_ARGS(it->author),
-	       SV_ARGS(it->date),
-	       sn_bool_yesno(it->draft),
-	       sn_bool_yesno(it->prerelease),
-	       SV_ARGS(it->tarball_url));
+		   "      NAME : "SV_FMT"\n"
+		   "    AUTHOR : "SV_FMT"\n"
+		   "      DATE : "SV_FMT"\n"
+		   "     DRAFT : %s\n"
+		   "PRERELEASE : %s\n"
+		   "   TARBALL : "SV_FMT"\n"
+		   "      BODY :\n",
+		   SV_ARGS(it->id),
+		   SV_ARGS(it->name),
+		   SV_ARGS(it->author),
+		   SV_ARGS(it->date),
+		   sn_bool_yesno(it->draft),
+		   sn_bool_yesno(it->prerelease),
+		   SV_ARGS(it->tarball_url));
 
 	pretty_print(it->body.data, 13, 80, stdout);
 
@@ -69,9 +69,9 @@ ghcli_print_release(ghcli_release *it)
 }
 
 void
-ghcli_print_releases(
-	enum ghcli_output_order  order,
-	ghcli_release           *releases,
+gcli_print_releases(
+	enum gcli_output_order  order,
+	gcli_release           *releases,
 	int                      releases_size)
 {
 	if (releases_size == 0) {
@@ -81,15 +81,15 @@ ghcli_print_releases(
 
 	if (order == OUTPUT_ORDER_SORTED) {
 		for (int i = releases_size; i > 0; --i)
-			ghcli_print_release(&releases[i - 1]);
+			gcli_print_release(&releases[i - 1]);
 	} else {
 		for (int i = 0; i < releases_size; ++i)
-			ghcli_print_release(&releases[i]);
+			gcli_print_release(&releases[i]);
 	}
 }
 
 void
-ghcli_free_releases(ghcli_release *releases, int releases_size)
+gcli_free_releases(gcli_release *releases, int releases_size)
 {
 	if (!releases)
 		return;
@@ -106,22 +106,22 @@ ghcli_free_releases(ghcli_release *releases, int releases_size)
 }
 
 void
-ghcli_create_release(const ghcli_new_release *release)
+gcli_create_release(const gcli_new_release *release)
 {
-	ghcli_forge()->create_release(release);
+	gcli_forge()->create_release(release);
 }
 
 void
-ghcli_release_push_asset(ghcli_new_release *release, ghcli_release_asset asset)
+gcli_release_push_asset(gcli_new_release *release, gcli_release_asset asset)
 {
-	if (release->assets_size == GHCLI_RELEASE_MAX_ASSETS)
+	if (release->assets_size == GCLI_RELEASE_MAX_ASSETS)
 		errx(1, "Too many assets");
 
 	release->assets[release->assets_size++] = asset;
 }
 
 void
-ghcli_delete_release(const char *owner, const char *repo, const char *id)
+gcli_delete_release(const char *owner, const char *repo, const char *id)
 {
-	ghcli_forge()->delete_release(owner, repo, id);
+	gcli_forge()->delete_release(owner, repo, id);
 }

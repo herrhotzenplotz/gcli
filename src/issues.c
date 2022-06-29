@@ -27,16 +27,16 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/color.h>
-#include <ghcli/editor.h>
-#include <ghcli/forges.h>
-#include <ghcli/github/issues.h>
-#include <ghcli/issues.h>
-#include <ghcli/json_util.h>
+#include <gcli/color.h>
+#include <gcli/editor.h>
+#include <gcli/forges.h>
+#include <gcli/github/issues.h>
+#include <gcli/issues.h>
+#include <gcli/json_util.h>
 #include <sn/sn.h>
 
 void
-ghcli_issues_free(ghcli_issue *it, int size)
+gcli_issues_free(gcli_issue *it, int size)
 {
 	for (int i = 0; i < size; ++i) {
 		free((void *)it[i].title);
@@ -47,20 +47,20 @@ ghcli_issues_free(ghcli_issue *it, int size)
 }
 
 int
-ghcli_get_issues(
+gcli_get_issues(
 	const char   *owner,
 	const char   *repo,
 	bool          all,
 	int           max,
-	ghcli_issue **out)
+	gcli_issue **out)
 {
-	return ghcli_forge()->get_issues(owner, repo, all, max, out);
+	return gcli_forge()->get_issues(owner, repo, all, max, out);
 }
 
 void
-ghcli_print_issues_table(
-	enum ghcli_output_order  order,
-	ghcli_issue             *issues,
+gcli_print_issues_table(
+	enum gcli_output_order  order,
+	gcli_issue             *issues,
 	int                      issues_size)
 {
 	if (issues_size == 0) {
@@ -75,39 +75,39 @@ ghcli_print_issues_table(
 			printf(
 				"%6d  %s%7.7s%s  %-s\n",
 				issues[i - 1].number,
-				ghcli_state_color_str(issues[i-1].state),
+				gcli_state_color_str(issues[i-1].state),
 				issues[i-1].state,
-				ghcli_resetcolor(),
+				gcli_resetcolor(),
 				issues[i - 1].title);
 		}
 	} else {
 		for (int i = 0; i < issues_size; ++i) {
 			printf("%6d  %s%7.7s%s  %-s\n",
-			       issues[i].number,
-			       ghcli_state_color_str(issues[i].state),
-			       issues[i].state,
-			       ghcli_resetcolor(),
-			       issues[i].title);
+				   issues[i].number,
+				   gcli_state_color_str(issues[i].state),
+				   issues[i].state,
+				   gcli_resetcolor(),
+				   issues[i].title);
 		}
 	}
 }
 
 static void
-ghcli_print_issue_summary(ghcli_issue_details *it)
+gcli_print_issue_summary(gcli_issue_details *it)
 {
 	printf("   NUMBER : %d\n"
-	       "    TITLE : "SV_FMT"\n"
-	       "  CREATED : "SV_FMT"\n"
-	       "   AUTHOR : %s"SV_FMT"%s\n"
-	       "    STATE : %s"SV_FMT"%s\n"
-	       " COMMENTS : %d\n"
-	       "   LOCKED : %s\n"
-	       "   LABELS : ",
-	       it->number,
-	       SV_ARGS(it->title), SV_ARGS(it->created_at),
-	       ghcli_setbold(), SV_ARGS(it->author), ghcli_resetbold(),
-	       ghcli_state_color_sv(it->state), SV_ARGS(it->state), ghcli_resetcolor(),
-	       it->comments, sn_bool_yesno(it->locked));
+		   "    TITLE : "SV_FMT"\n"
+		   "  CREATED : "SV_FMT"\n"
+		   "   AUTHOR : %s"SV_FMT"%s\n"
+		   "    STATE : %s"SV_FMT"%s\n"
+		   " COMMENTS : %d\n"
+		   "   LOCKED : %s\n"
+		   "   LABELS : ",
+		   it->number,
+		   SV_ARGS(it->title), SV_ARGS(it->created_at),
+		   gcli_setbold(), SV_ARGS(it->author), gcli_resetbold(),
+		   gcli_state_color_sv(it->state), SV_ARGS(it->state), gcli_resetcolor(),
+		   it->comments, sn_bool_yesno(it->locked));
 
 	if (it->labels_size) {
 		printf(SV_FMT, SV_ARGS(it->labels[0]));
@@ -139,7 +139,7 @@ ghcli_print_issue_summary(ghcli_issue_details *it)
 }
 
 static void
-ghcli_issue_details_free(ghcli_issue_details *it)
+gcli_issue_details_free(gcli_issue_details *it)
 {
 	free(it->title.data);
 	free(it->created_at.data);
@@ -154,34 +154,34 @@ ghcli_issue_details_free(ghcli_issue_details *it)
 }
 
 void
-ghcli_issue_summary(
+gcli_issue_summary(
 	const char *owner,
 	const char *repo,
 	int         issue_number)
 {
-	ghcli_issue_details  details = {0};
+	gcli_issue_details  details = {0};
 
-	ghcli_forge()->get_issue_summary(owner, repo, issue_number, &details);
-	ghcli_print_issue_summary(&details);
-	ghcli_issue_details_free(&details);
+	gcli_forge()->get_issue_summary(owner, repo, issue_number, &details);
+	gcli_print_issue_summary(&details);
+	gcli_issue_details_free(&details);
 }
 
 void
-ghcli_issue_close(const char *owner, const char *repo, int issue_number)
+gcli_issue_close(const char *owner, const char *repo, int issue_number)
 {
-	ghcli_forge()->issue_close(owner, repo, issue_number);
+	gcli_forge()->issue_close(owner, repo, issue_number);
 }
 
 void
-ghcli_issue_reopen(const char *owner, const char *repo, int issue_number)
+gcli_issue_reopen(const char *owner, const char *repo, int issue_number)
 {
-	ghcli_forge()->issue_reopen(owner, repo, issue_number);
+	gcli_forge()->issue_reopen(owner, repo, issue_number);
 }
 
 static void
 issue_init_user_file(FILE *stream, void *_opts)
 {
-	ghcli_submit_issue_options *opts = _opts;
+	gcli_submit_issue_options *opts = _opts;
 	fprintf(
 		stream,
 		"# ISSUE TITLE : "SV_FMT"\n"
@@ -191,28 +191,28 @@ issue_init_user_file(FILE *stream, void *_opts)
 }
 
 static sn_sv
-ghcli_issue_get_user_message(ghcli_submit_issue_options *opts)
+gcli_issue_get_user_message(gcli_submit_issue_options *opts)
 {
-	return ghcli_editor_get_user_message(issue_init_user_file, opts);
+	return gcli_editor_get_user_message(issue_init_user_file, opts);
 }
 
 void
-ghcli_issue_submit(ghcli_submit_issue_options opts)
+gcli_issue_submit(gcli_submit_issue_options opts)
 {
-	ghcli_fetch_buffer  json_buffer  = {0};
+	gcli_fetch_buffer  json_buffer  = {0};
 
-	sn_sv body = ghcli_issue_get_user_message(&opts);
+	sn_sv body = gcli_issue_get_user_message(&opts);
 
-	opts.body = ghcli_json_escape(body);
+	opts.body = gcli_json_escape(body);
 
 	printf("The following issue will be created:\n"
-	       "\n"
-	       "TITLE   : "SV_FMT"\n"
-	       "OWNER   : "SV_FMT"\n"
-	       "REPO    : "SV_FMT"\n"
-	       "MESSAGE :\n"SV_FMT"\n",
-	       SV_ARGS(opts.title), SV_ARGS(opts.owner),
-	       SV_ARGS(opts.repo), SV_ARGS(body));
+		   "\n"
+		   "TITLE   : "SV_FMT"\n"
+		   "OWNER   : "SV_FMT"\n"
+		   "REPO    : "SV_FMT"\n"
+		   "MESSAGE :\n"SV_FMT"\n",
+		   SV_ARGS(opts.title), SV_ARGS(opts.owner),
+		   SV_ARGS(opts.repo), SV_ARGS(body));
 
 	putchar('\n');
 
@@ -221,8 +221,8 @@ ghcli_issue_submit(ghcli_submit_issue_options opts)
 			errx(1, "Submission aborted.");
 	}
 
-	ghcli_forge()->perform_submit_issue(opts, &json_buffer);
-	ghcli_print_html_url(json_buffer);
+	gcli_forge()->perform_submit_issue(opts, &json_buffer);
+	gcli_print_html_url(json_buffer);
 
 	free(body.data);
 	free(opts.body.data);
@@ -230,33 +230,33 @@ ghcli_issue_submit(ghcli_submit_issue_options opts)
 }
 
 void
-ghcli_issue_assign(
+gcli_issue_assign(
 	const char *owner,
 	const char *repo,
 	int         issue_number,
 	const char *assignee)
 {
-	ghcli_forge()->issue_assign(owner, repo, issue_number, assignee);
+	gcli_forge()->issue_assign(owner, repo, issue_number, assignee);
 }
 
 void
-ghcli_issue_add_labels(
+gcli_issue_add_labels(
 	const char *owner,
 	const char *repo,
 	int         issue,
 	const char *labels[],
 	size_t      labels_size)
 {
-	ghcli_forge()->issue_add_labels(owner, repo, issue, labels, labels_size);
+	gcli_forge()->issue_add_labels(owner, repo, issue, labels, labels_size);
 }
 
 void
-ghcli_issue_remove_labels(
+gcli_issue_remove_labels(
 	const char *owner,
 	const char *repo,
 	int         issue,
 	const char *labels[],
 	size_t      labels_size)
 {
-	ghcli_forge()->issue_remove_labels(owner, repo, issue, labels, labels_size);
+	gcli_forge()->issue_remove_labels(owner, repo, issue, labels, labels_size);
 }

@@ -27,17 +27,17 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/color.h>
-#include <ghcli/comments.h>
-#include <ghcli/config.h>
-#include <ghcli/editor.h>
-#include <ghcli/forges.h>
-#include <ghcli/github/comments.h>
-#include <ghcli/json_util.h>
+#include <gcli/color.h>
+#include <gcli/comments.h>
+#include <gcli/config.h>
+#include <gcli/editor.h>
+#include <gcli/forges.h>
+#include <gcli/github/comments.h>
+#include <gcli/json_util.h>
 #include <sn/sn.h>
 
 static void
-ghcli_issue_comment_free(ghcli_comment *it)
+gcli_issue_comment_free(gcli_comment *it)
 {
 	free((void *)it->author);
 	free((void *)it->date);
@@ -45,14 +45,14 @@ ghcli_issue_comment_free(ghcli_comment *it)
 }
 
 void
-ghcli_print_comment_list(
-	ghcli_comment *comments,
+gcli_print_comment_list(
+	gcli_comment *comments,
 	size_t comments_size)
 {
 	for (size_t i = 0; i < comments_size; ++i) {
 		printf("AUTHOR : %s%s%s\n"
 			   "DATE   : %s\n",
-			   ghcli_setbold(), comments[i].author, ghcli_resetbold(),
+			   gcli_setbold(), comments[i].author, gcli_resetbold(),
 			   comments[i].date);
 		pretty_print(comments[i].body, 9, 80, stdout);
 		putchar('\n');
@@ -60,37 +60,37 @@ ghcli_print_comment_list(
 }
 
 void
-ghcli_issue_comments(
+gcli_issue_comments(
 	const char *owner,
 	const char *repo,
 	int         issue)
 {
-	ghcli_comment *comments = NULL;
+	gcli_comment *comments = NULL;
 	int            n        = -1;
 
-	n = ghcli_forge()->get_issue_comments(owner, repo, issue, &comments);
-	ghcli_print_comment_list(comments, (size_t)n);
+	n = gcli_forge()->get_issue_comments(owner, repo, issue, &comments);
+	gcli_print_comment_list(comments, (size_t)n);
 
 	for (int i = 0; i < n; ++i)
-		ghcli_issue_comment_free(&comments[i]);
+		gcli_issue_comment_free(&comments[i]);
 
 	free(comments);
 }
 
 void
-ghcli_pull_comments(
+gcli_pull_comments(
 	const char *owner,
 	const char *repo,
 	int         issue)
 {
-	ghcli_comment *comments = NULL;
+	gcli_comment *comments = NULL;
 	int            n        = -1;
 
-	n = ghcli_forge()->get_pull_comments(owner, repo, issue, &comments);
-	ghcli_print_comment_list(comments, (size_t)n);
+	n = gcli_forge()->get_pull_comments(owner, repo, issue, &comments);
+	gcli_print_comment_list(comments, (size_t)n);
 
 	for (int i = 0; i < n; ++i)
-		ghcli_issue_comment_free(&comments[i]);
+		gcli_issue_comment_free(&comments[i]);
 
 	free(comments);
 }
@@ -98,7 +98,7 @@ ghcli_pull_comments(
 static void
 comment_init(FILE *f, void *_data)
 {
-	ghcli_submit_comment_opts *info        = _data;
+	gcli_submit_comment_opts *info        = _data;
 	const char                *target_type = NULL;
 
 	switch (info->target_type) {
@@ -106,12 +106,12 @@ comment_init(FILE *f, void *_data)
 		target_type = "issue";
 		break;
 	case PR_COMMENT: {
-		switch (ghcli_config_get_forge_type()) {
-		case GHCLI_FORGE_GITEA:
-		case GHCLI_FORGE_GITHUB:
+		switch (gcli_config_get_forge_type()) {
+		case GCLI_FORGE_GITEA:
+		case GCLI_FORGE_GITHUB:
 			target_type = "Pull Request";
 			break;
-		case GHCLI_FORGE_GITLAB:
+		case GCLI_FORGE_GITLAB:
 			target_type = "Merge Request";
 			break;
 		}
@@ -128,17 +128,17 @@ comment_init(FILE *f, void *_data)
 }
 
 static sn_sv
-ghcli_comment_get_message(ghcli_submit_comment_opts *info)
+gcli_comment_get_message(gcli_submit_comment_opts *info)
 {
-	return ghcli_editor_get_user_message(comment_init, info);
+	return gcli_editor_get_user_message(comment_init, info);
 }
 
 void
-ghcli_comment_submit(ghcli_submit_comment_opts opts)
+gcli_comment_submit(gcli_submit_comment_opts opts)
 {
-	ghcli_fetch_buffer buffer = {0};
-	sn_sv message = ghcli_comment_get_message(&opts);
-	opts.message  = ghcli_json_escape(message);
+	gcli_fetch_buffer buffer = {0};
+	sn_sv message = gcli_comment_get_message(&opts);
+	opts.message  = gcli_json_escape(message);
 
 	fprintf(
 		stdout,
@@ -150,8 +150,8 @@ ghcli_comment_submit(ghcli_submit_comment_opts opts)
 			errx(1, "Aborted by user");
 	}
 
-	ghcli_forge()->perform_submit_comment(opts, &buffer);
-	ghcli_print_html_url(buffer);
+	gcli_forge()->perform_submit_comment(opts, &buffer);
+	gcli_print_html_url(buffer);
 
 	free(buffer.data);
 	free(message.data);

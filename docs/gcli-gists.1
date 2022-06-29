@@ -1,0 +1,98 @@
+.Dd $Mdocdate$
+.Dt GCLI-GISTS 1
+.Os
+.Sh NAME
+.Nm gcli gists
+.Nd manage Github Gists
+.Sh SYNOPSIS
+.Nm
+.Op Fl s
+.Op Fl n Ar n
+.Op Fl u Ar user
+.Nm
+.Cm create
+.Op Fl d Ar description
+.Op Fl f Pa path
+.Ar gist-file-name
+.Nm
+.Cm delete
+.Op Fl y
+.Ar gist-id
+.Nm
+.Cm get
+.Ar gist-id
+.Ar file-name
+.Sh DESCRIPTION
+Use
+.Nm
+to list, create, download or delete Github Gists.
+Without a subcommand specified,
+.Nm
+will list Gists of the given or autodetected user account.
+.Sh OPTIONS
+.Bl -tag -width indent
+.It Fl s , -sorted
+Reverse the output such that most recent items appear at the bottom.
+.It Fl u , -user Ar owner
+List Gists of the given user.
+.It Fl n , -count Ar n
+Fetch at least
+.Ar n
+gists. Setting
+.Ar n
+to -1 will fetch all gists. Default: 30. Note that on users with many
+gists fetching all gists can take a considerable amount of time and
+may result in rate limiting by the GitHub API.
+.El
+.Sh SUBCOMMANDS
+.Bl -tag -width indent
+.It Cm create
+Paste a new Gist. The following flags can be specified:
+.Bl -tag -width indent
+.It Fl f , -file Pa file
+Read the content from the specified file instead of standard input.
+.It Fl d , -description Ar description
+The descrition of the Gist to be created.
+.El
+.It Cm delete
+Delete a Gist. The following options can be specified:
+.Bl -tag -width indent
+.It Fl y , -yes
+Do not ask for confirmation before deleting the Gist. Assume yes.
+.El
+.It Cm get
+Download a file from a Gist. There are no options to this subcommand.
+.Sh EXAMPLES
+List neutaaaaan's Gists:
+.Bd -literal -offset indent
+$ gcli gists -u neutaaaaan
+.Ed
+
+Paste a new gist named foobar and read from foobar.txt:
+.Bd -literal -offset indent
+$ gcli gists create foobar < foobar.txt
+.Ed
+
+Delete gist with id 3b546069d2856e6051bbe3c1080f1b5d:
+.Bd -literal -offset indent
+$ gcli gists delete 3b546069d2856e6051bbe3c1080f1b5d
+.Ed
+
+Print foobar.txt from Gist with id 3b546069d2856e6051bbe3c1080f1b5d
+into your pager:
+.Bd -literal -offset indent
+$ gcli gists get 3b546069d2856e6051bbe3c1080f1b5d foobar.txt | $PAGER
+.Ed
+
+.Sh SEE ALSO
+.Xr git 1 ,
+.Xr gcli 1
+.Sh AUTHORS
+.An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+.Sh BUGS
+Yes. It is software.
+
+This subcommand only works on GitHub. It is not implemented for
+GitLab, as GitLab snippets work differently.
+
+Please report issues preferably via e-mail, on GitLab or on GitHub.

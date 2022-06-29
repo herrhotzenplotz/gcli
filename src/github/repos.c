@@ -27,16 +27,16 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/config.h>
-#include <ghcli/curl.h>
-#include <ghcli/github/config.h>
-#include <ghcli/github/repos.h>
-#include <ghcli/json_util.h>
+#include <gcli/config.h>
+#include <gcli/curl.h>
+#include <gcli/github/config.h>
+#include <gcli/github/repos.h>
+#include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
 
 static void
-parse_repo(json_stream *input, ghcli_repo *out)
+parse_repo(json_stream *input, gcli_repo *out)
 {
 	enum json_type  next     = JSON_NULL;
 	enum json_type  key_type = JSON_NULL;
@@ -72,38 +72,38 @@ parse_repo(json_stream *input, ghcli_repo *out)
 }
 
 int
-github_get_repos(const char *owner, int max, ghcli_repo **out)
+github_get_repos(const char *owner, int max, gcli_repo **out)
 {
 	char               *url      = NULL;
 	char               *next_url = NULL;
 	char               *e_owner  = NULL;
-	ghcli_fetch_buffer  buffer   = {0};
+	gcli_fetch_buffer  buffer   = {0};
 	struct json_stream  stream   = {0};
 	enum  json_type     next     = JSON_NULL;
 	int                 size     = 0;
 
-	e_owner = ghcli_urlencode(owner);
+	e_owner = gcli_urlencode(owner);
 
 	/* Github is a little stupid in that it distinguishes
 	 * organizations and users. Thus, we have to find out, whether the
 	 * <org> param is a user or an actual organization. */
-	url = sn_asprintf("%s/users/%s", ghcli_get_apibase(), e_owner);
-	if (ghcli_curl_test_success(url)) {
+	url = sn_asprintf("%s/users/%s", gcli_get_apibase(), e_owner);
+	if (gcli_curl_test_success(url)) {
 		/* it is a user */
 		free(url);
 		url = sn_asprintf("%s/users/%s/repos",
-				  ghcli_get_apibase(),
+				  gcli_get_apibase(),
 				  e_owner);
 	} else {
 		/* this is an actual organization */
 		free(url);
 		url = sn_asprintf("%s/orgs/%s/repos",
-				  ghcli_get_apibase(),
+				  gcli_get_apibase(),
 				  e_owner);
 	}
 
 	do {
-		ghcli_fetch(url, &next_url, &buffer);
+		gcli_fetch(url, &next_url, &buffer);
 
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		json_set_streaming(&stream, 1);
@@ -111,12 +111,12 @@ github_get_repos(const char *owner, int max, ghcli_repo **out)
 		// TODO: Poor error message
 		if ((next = json_next(&stream)) != JSON_ARRAY)
 			errx(1,
-			     "Expected array in response from API "
-			     "but got something else instead");
+				 "Expected array in response from API "
+				 "but got something else instead");
 
 		while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
 			*out = realloc(*out, sizeof(**out) * (size + 1));
-			ghcli_repo *it = &(*out)[size++];
+			gcli_repo *it = &(*out)[size++];
 			parse_repo(&stream, it);
 
 			if (size == max)
@@ -135,19 +135,19 @@ github_get_repos(const char *owner, int max, ghcli_repo **out)
 }
 
 int
-github_get_own_repos(int max, ghcli_repo **out)
+github_get_own_repos(int max, gcli_repo **out)
 {
 	char               *url      = sn_asprintf("%s/user/repos",
-						   ghcli_get_apibase());
+						   gcli_get_apibase());
 	char               *next_url = NULL;
-	ghcli_fetch_buffer  buffer   = {0};
+	gcli_fetch_buffer  buffer   = {0};
 	struct json_stream  stream   = {0};
 	enum  json_type     next     = JSON_NULL;
 	int                 size     = 0;
 
 	do {
 		buffer.length = 0;
-		ghcli_fetch(url, &next_url, &buffer);
+		gcli_fetch(url, &next_url, &buffer);
 
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		json_set_streaming(&stream, 1);
@@ -155,12 +155,12 @@ github_get_own_repos(int max, ghcli_repo **out)
 		// TODO: Poor error message
 		if ((next = json_next(&stream)) != JSON_ARRAY)
 			errx(1,
-			     "Expected array in response from API "
-			     "but got something else instead");
+				 "Expected array in response from API "
+				 "but got something else instead");
 
 		while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
 			*out = realloc(*out, sizeof(**out) * (size + 1));
-			ghcli_repo *it = &(*out)[size++];
+			gcli_repo *it = &(*out)[size++];
 			parse_repo(&stream, it);
 
 			if (size == max)
@@ -183,16 +183,16 @@ github_repo_delete(const char *owner, const char *repo)
 	char               *url     = NULL;
 	char               *e_owner = NULL;
 	char               *e_repo  = NULL;
-	ghcli_fetch_buffer  buffer  = {0};
+	gcli_fetch_buffer  buffer  = {0};
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/repos/%s/%s",
-			  ghcli_get_apibase(),
+			  gcli_get_apibase(),
 			  e_owner, e_repo);
 
-	ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
 	free(buffer.data);
 	free(e_owner);
@@ -200,30 +200,30 @@ github_repo_delete(const char *owner, const char *repo)
 	free(url);
 }
 
-ghcli_repo *
+gcli_repo *
 github_repo_create(
-	const ghcli_repo_create_options *options) /* Options descriptor */
+	const gcli_repo_create_options *options) /* Options descriptor */
 {
-	ghcli_repo         *repo;
+	gcli_repo         *repo;
 	char               *url, *data;
-	ghcli_fetch_buffer  buffer = {0};
+	gcli_fetch_buffer  buffer = {0};
 	struct json_stream  stream = {0};
 
-	/* Will be freed by the caller with ghcli_repos_free */
-	repo = calloc(1, sizeof(ghcli_repo));
+	/* Will be freed by the caller with gcli_repos_free */
+	repo = calloc(1, sizeof(gcli_repo));
 
 	/* Request preparation */
-	url = sn_asprintf("%s/user/repos", ghcli_get_apibase());
+	url = sn_asprintf("%s/user/repos", gcli_get_apibase());
 	/* TODO: escape the repo name and the description */
 	data = sn_asprintf("{\"name\": \""SV_FMT"\","
 			   " \"description\": \""SV_FMT"\","
 			   " \"private\": %s }",
 			   SV_ARGS(options->name),
 			   SV_ARGS(options->description),
-			   ghcli_json_bool(options->private));
+			   gcli_json_bool(options->private));
 
 	/* Fetch and parse result */
-	ghcli_fetch_with_method("POST", url, data, NULL, &buffer);
+	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
 	json_open_buffer(&stream, buffer.data, buffer.length);
 	parse_repo(&stream, repo);
 

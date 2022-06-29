@@ -10,19 +10,19 @@ LDFLAGS_sparc-sunos-sunstudio	=	-L/opt/bw/lib -lcurl -R/opt/bw/lib
 .PHONY: test ${TESTNAME}
 
 test: ${TESTNAME}
-	./${TESTNAME} > /tmp/ghcli-test-stdout.${TESTNAME} 2>/tmp/ghcli-test-stderr.${TESTNAME}
-	@diff -u expected.stdout /tmp/ghcli-test-stdout.${TESTNAME} || (echo "[FAIL] Unexpected stdout of ${TESTNAME}" && exit 1)
-	@diff -u expected.stderr /tmp/ghcli-test-stderr.${TESTNAME} || (echo "[FAIL] Unexpected stderr of ${TESTNAME}" && exit 1)
+	./${TESTNAME} > /tmp/gcli-test-stdout.${TESTNAME} 2>/tmp/gcli-test-stderr.${TESTNAME}
+	@diff -u expected.stdout /tmp/gcli-test-stdout.${TESTNAME} || (echo "[FAIL] Unexpected stdout of ${TESTNAME}" && exit 1)
+	@diff -u expected.stderr /tmp/gcli-test-stderr.${TESTNAME} || (echo "[FAIL] Unexpected stderr of ${TESTNAME}" && exit 1)
 	@echo "[SUCCESS] ${TESTNAME}"
 
 ${TESTNAME}: ${TESTNAME}.o
-	${CC} -o ${TESTNAME} ${LINK_FLAGS} ${TESTNAME}.o ../../libghcli.a
+	${CC} -o ${TESTNAME} ${LINK_FLAGS} ${TESTNAME}.o ../../libgcli.a
 
 ${TESTNAME}.o: ${TESTNAME}.c
 	${CC} -c -o ${TESTNAME}.o ${COMPILE_FLAGS} ${TESTNAME}.c
 
 clean:
-	rm -f /tmp/ghcli-test-stdout.${TESTNAME}
-	rm -f /tmp/ghcli-test-stderr.${TESTNAME}
+	rm -f /tmp/gcli-test-stdout.${TESTNAME}
+	rm -f /tmp/gcli-test-stderr.${TESTNAME}
 	rm -f ${TESTNAME}.o
 	rm -f ${TESTNAME}

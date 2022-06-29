@@ -29,40 +29,40 @@
 
 #include <stdlib.h>
 
-#include <ghcli/config.h>
-#include <ghcli/forges.h>
+#include <gcli/config.h>
+#include <gcli/forges.h>
 
-#include <ghcli/github/api.h>
-#include <ghcli/github/comments.h>
-#include <ghcli/github/config.h>
-#include <ghcli/github/forks.h>
-#include <ghcli/github/issues.h>
-#include <ghcli/github/labels.h>
-#include <ghcli/github/pulls.h>
-#include <ghcli/github/releases.h>
-#include <ghcli/github/repos.h>
-#include <ghcli/github/review.h>
-#include <ghcli/github/status.h>
+#include <gcli/github/api.h>
+#include <gcli/github/comments.h>
+#include <gcli/github/config.h>
+#include <gcli/github/forks.h>
+#include <gcli/github/issues.h>
+#include <gcli/github/labels.h>
+#include <gcli/github/pulls.h>
+#include <gcli/github/releases.h>
+#include <gcli/github/repos.h>
+#include <gcli/github/review.h>
+#include <gcli/github/status.h>
 
-#include <ghcli/gitlab/api.h>
-#include <ghcli/gitlab/comments.h>
-#include <ghcli/gitlab/config.h>
-#include <ghcli/gitlab/forks.h>
-#include <ghcli/gitlab/issues.h>
-#include <ghcli/gitlab/labels.h>
-#include <ghcli/gitlab/merge_requests.h>
-#include <ghcli/gitlab/releases.h>
-#include <ghcli/gitlab/repos.h>
-#include <ghcli/gitlab/review.h>
-#include <ghcli/gitlab/status.h>
+#include <gcli/gitlab/api.h>
+#include <gcli/gitlab/comments.h>
+#include <gcli/gitlab/config.h>
+#include <gcli/gitlab/forks.h>
+#include <gcli/gitlab/issues.h>
+#include <gcli/gitlab/labels.h>
+#include <gcli/gitlab/merge_requests.h>
+#include <gcli/gitlab/releases.h>
+#include <gcli/gitlab/repos.h>
+#include <gcli/gitlab/review.h>
+#include <gcli/gitlab/status.h>
 
-#include <ghcli/gitea/comments.h>
-#include <ghcli/gitea/config.h>
-#include <ghcli/gitea/issues.h>
-#include <ghcli/gitea/labels.h>
-#include <ghcli/gitea/pulls.h>
+#include <gcli/gitea/comments.h>
+#include <gcli/gitea/config.h>
+#include <gcli/gitea/issues.h>
+#include <gcli/gitea/labels.h>
+#include <gcli/gitea/pulls.h>
 
-static ghcli_forge_descriptor
+static gcli_forge_descriptor
 github_forge_descriptor =
 {
 	.perform_submit_comment    = github_perform_submit_comment,
@@ -113,7 +113,7 @@ github_forge_descriptor =
 	.html_url_key              = "html_url",
 };
 
-static ghcli_forge_descriptor
+static gcli_forge_descriptor
 gitlab_forge_descriptor =
 {
 	.perform_submit_comment    = gitlab_perform_submit_comment,
@@ -159,7 +159,7 @@ gitlab_forge_descriptor =
 	.html_url_key              = "web_url",
 };
 
-static ghcli_forge_descriptor
+static gcli_forge_descriptor
 gitea_forge_descriptor =
 {
 	.get_issues			  = gitea_get_issues,
@@ -194,20 +194,20 @@ gitea_forge_descriptor =
 	.html_url_key		  = "web_url",
 };
 
-const ghcli_forge_descriptor *
-ghcli_forge(void)
+const gcli_forge_descriptor *
+gcli_forge(void)
 {
-	switch (ghcli_config_get_forge_type()) {
-	case GHCLI_FORGE_GITHUB:
+	switch (gcli_config_get_forge_type()) {
+	case GCLI_FORGE_GITHUB:
 		return &github_forge_descriptor;
-	case GHCLI_FORGE_GITLAB:
+	case GCLI_FORGE_GITLAB:
 		return &gitlab_forge_descriptor;
-	case GHCLI_FORGE_GITEA:
+	case GCLI_FORGE_GITEA:
 		return &gitea_forge_descriptor;
 	default:
 		errx(1,
 			 "error: cannot determine forge type. try forcing an account "
-			 "with -a, specifying -t or create a .ghcli file.");
+			 "with -a, specifying -t or create a .gcli file.");
 	}
 	return NULL;
 }

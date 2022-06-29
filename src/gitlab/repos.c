@@ -27,15 +27,15 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/gitlab/config.h>
-#include <ghcli/gitlab/repos.h>
-#include <ghcli/json_util.h>
+#include <gcli/gitlab/config.h>
+#include <gcli/gitlab/repos.h>
+#include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
 #include <sn/sn.h>
 
 static void
-gitlab_parse_repo(json_stream *input, ghcli_repo *out)
+gitlab_parse_repo(json_stream *input, gcli_repo *out)
 {
 	enum json_type  next     = JSON_NULL;
 	enum json_type  key_type = JSON_NULL;
@@ -74,24 +74,24 @@ void
 gitlab_get_repo(
 	sn_sv       owner,
 	sn_sv       repo,
-	ghcli_repo *out)
+	gcli_repo *out)
 {
 	/* GET /projects/:id */
 	char               *url     = NULL;
-	ghcli_fetch_buffer  buffer  = {0};
+	gcli_fetch_buffer  buffer  = {0};
 	struct json_stream  stream  = {0};
 	sn_sv               e_owner = {0};
 	sn_sv               e_repo  = {0};
 
-	e_owner = ghcli_urlencode_sv(owner);
-	e_repo  = ghcli_urlencode_sv(repo);
+	e_owner = gcli_urlencode_sv(owner);
+	e_repo  = gcli_urlencode_sv(repo);
 
 	url = sn_asprintf(
 		"%s/projects/"SV_FMT"%%2F"SV_FMT,
 		gitlab_get_apibase(),
 		SV_ARGS(e_owner), SV_ARGS(e_repo));
 
-	ghcli_fetch(url, NULL, &buffer);
+	gcli_fetch(url, NULL, &buffer);
 	json_open_buffer(&stream, buffer.data, buffer.length);
 
 	gitlab_parse_repo(&stream, out);
@@ -107,22 +107,22 @@ int
 gitlab_get_repos(
 	const char  *owner,
 	int          max,
-	ghcli_repo **out)
+	gcli_repo **out)
 {
 	char               *url      = NULL;
 	char               *next_url = NULL;
 	char               *e_owner  = NULL;
-	ghcli_fetch_buffer  buffer   = {0};
+	gcli_fetch_buffer  buffer   = {0};
 	struct json_stream  stream   = {0};
 	enum  json_type     next     = JSON_NULL;
 	int                 size     = 0;
 
-	e_owner = ghcli_urlencode(owner);
+	e_owner = gcli_urlencode(owner);
 
 	url = sn_asprintf("%s/users/%s/projects", gitlab_get_apibase(), e_owner);
 
 	do {
-		ghcli_fetch(url, &next_url, &buffer);
+		gcli_fetch(url, &next_url, &buffer);
 
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		json_set_streaming(&stream, 1);
@@ -130,12 +130,12 @@ gitlab_get_repos(
 		// TODO: Poor error message
 		if ((next = json_next(&stream)) != JSON_ARRAY)
 			errx(1,
-			     "Expected array in response from API "
-			     "but got something else instead");
+				 "Expected array in response from API "
+				 "but got something else instead");
 
 		while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
 			*out = realloc(*out, sizeof(**out) * (size + 1));
-			ghcli_repo *it = &(*out)[size++];
+			gcli_repo *it = &(*out)[size++];
 			gitlab_parse_repo(&stream, it);
 
 			if (size == max)
@@ -156,7 +156,7 @@ gitlab_get_repos(
 int
 gitlab_get_own_repos(
 	int          max,
-	ghcli_repo **out)
+	gcli_repo **out)
 {
 	char  *_account = NULL;
 	sn_sv  account  = {0};
@@ -183,16 +183,16 @@ gitlab_repo_delete(
 	char               *url     = NULL;
 	char               *e_owner = NULL;
 	char               *e_repo  = NULL;
-	ghcli_fetch_buffer  buffer  = {0};
+	gcli_fetch_buffer  buffer  = {0};
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/projects/%s%%2F%s",
 			  gitlab_get_apibase(),
 			  e_owner, e_repo);
 
-	ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
 	free(buffer.data);
 	free(url);
@@ -200,17 +200,17 @@ gitlab_repo_delete(
 	free(e_repo);
 }
 
-ghcli_repo *
+gcli_repo *
 gitlab_repo_create(
-	const ghcli_repo_create_options *options) /* Options descriptor */
+	const gcli_repo_create_options *options) /* Options descriptor */
 {
-	ghcli_repo         *repo;
+	gcli_repo         *repo;
 	char               *url, *data;
-	ghcli_fetch_buffer  buffer = {0};
+	gcli_fetch_buffer  buffer = {0};
 	struct json_stream  stream = {0};
 
-	/* Will be freed by the caller with ghcli_repos_free */
-	repo = calloc(1, sizeof(ghcli_repo));
+	/* Will be freed by the caller with gcli_repos_free */
+	repo = calloc(1, sizeof(gcli_repo));
 
 	/* Request preparation */
 	url = sn_asprintf("%s/projects", gitlab_get_apibase());
@@ -223,7 +223,7 @@ gitlab_repo_create(
 			   options->private ? "private" : "public");
 
 	/* Fetch and parse result */
-	ghcli_fetch_with_method("POST", url, data, NULL, &buffer);
+	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
 	json_open_buffer(&stream, buffer.data, buffer.length);
 	gitlab_parse_repo(&stream, repo);
 

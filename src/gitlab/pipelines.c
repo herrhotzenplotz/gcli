@@ -27,10 +27,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/color.h>
-#include <ghcli/gitlab/config.h>
-#include <ghcli/gitlab/pipelines.h>
-#include <ghcli/json_util.h>
+#include <gcli/color.h>
+#include <gcli/gitlab/config.h>
+#include <gcli/gitlab/pipelines.h>
+#include <gcli/json_util.h>
 #include <pdjson/pdjson.h>
 #include <sn/sn.h>
 
@@ -74,7 +74,7 @@ gitlab_get_pipelines(
 {
 	char				*url	  = NULL;
 	char				*next_url = NULL;
-	ghcli_fetch_buffer	 buffer	  = {0};
+	gcli_fetch_buffer	 buffer	  = {0};
 	struct json_stream   stream   = {0};
 	enum   json_type     next     = JSON_NULL;
 	int                  out_size = 0;
@@ -86,7 +86,7 @@ gitlab_get_pipelines(
 					  gitlab_get_apibase(), owner, repo);
 
 	do {
-		ghcli_fetch(url, &next_url, &buffer);
+		gcli_fetch(url, &next_url, &buffer);
 
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		json_set_streaming(&stream, 1);
@@ -127,9 +127,9 @@ gitlab_print_pipelines(
 		for (int i = 0; i < pipelines_size; ++i) {
 			printf("%10ld  %s%10.10s%s  %16.16s  %16.16s %-s\n",
 				   pipelines[i].id,
-				   ghcli_state_color_str(pipelines[i].status),
+				   gcli_state_color_str(pipelines[i].status),
 				   pipelines[i].status,
-				   ghcli_resetcolor(),
+				   gcli_resetcolor(),
 				   pipelines[i].created_at,
 				   pipelines[i].updated_at,
 				   pipelines[i].ref);
@@ -256,11 +256,11 @@ gitlab_get_pipeline_jobs(
 					  gitlab_get_apibase(), owner, repo, pipeline);
 
 	do {
-		ghcli_fetch_buffer	buffer = {0};
+		gcli_fetch_buffer	buffer = {0};
 		struct json_stream	stream = {0};
 		enum json_type		next   = JSON_NULL;
 
-		ghcli_fetch(url, &next_url, &buffer);
+		gcli_fetch(url, &next_url, &buffer);
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		json_set_streaming(&stream, 1);
 
@@ -292,9 +292,9 @@ gitlab_print_jobs(gitlab_job *jobs, int jobs_size)
 			printf("%10ld  %10.10s  %s%10.10s%s  %16.16s  %16.16s  %12.12s  %-s\n",
 				   jobs[i].id,
 				   jobs[i].name,
-				   ghcli_state_color_str(jobs[i].status),
+				   gcli_state_color_str(jobs[i].status),
 				   jobs[i].status,
-				   ghcli_resetcolor(),
+				   gcli_resetcolor(),
 				   jobs[i].started_at,
 				   jobs[i].finished_at,
 				   jobs[i].runner_description,
@@ -331,13 +331,13 @@ gitlab_free_jobs(gitlab_job	*jobs, int jobs_size)
 void
 gitlab_job_get_log(const char *owner, const char *repo, long job_id)
 {
-	ghcli_fetch_buffer	 buffer = {0};
+	gcli_fetch_buffer	 buffer = {0};
 	char				*url	= NULL;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld/trace",
 					  gitlab_get_apibase(), owner, repo, job_id);
 
-	ghcli_fetch(url, NULL, &buffer);
+	gcli_fetch(url, NULL, &buffer);
 
 	fwrite(buffer.data, buffer.length, 1, stdout);
 
@@ -348,13 +348,13 @@ gitlab_job_get_log(const char *owner, const char *repo, long job_id)
 static void
 gitlab_get_job(const char *owner, const char *repo, long jid, gitlab_job *out)
 {
-	ghcli_fetch_buffer	 buffer = {0};
+	gcli_fetch_buffer	 buffer = {0};
 	char				*url	= NULL;
 	struct json_stream	 stream = {0};
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld",
 					  gitlab_get_apibase(), owner, repo, jid);
-	ghcli_fetch(url, NULL, &buffer);
+	gcli_fetch(url, NULL, &buffer);
 
 	json_open_buffer(&stream, buffer.data, buffer.length);
 	json_set_streaming(&stream, 1);
@@ -371,15 +371,15 @@ gitlab_print_job_status(gitlab_job *job)
 {
 	printf("          ID : %ld\n",     job->id);
 	printf("      STATUS : %s%s%s\n",
-		   ghcli_state_color_str(job->status),
+		   gcli_state_color_str(job->status),
 		   job->status,
-		   ghcli_resetcolor());
+		   gcli_resetcolor());
 	printf("       STAGE : %s\n",      job->stage);
 	printf("        NAME : %s\n",      job->name);
 	printf("         REF : %s%s%s\n",
-		   ghcli_setcolor(GHCLI_COLOR_YELLOW),
+		   gcli_setcolor(GCLI_COLOR_YELLOW),
 		   job->ref,
-		   ghcli_resetcolor());
+		   gcli_resetcolor());
 	printf("     CREATED : %s\n",      job->created_at);
 	printf("     STARTED : %s\n",      job->started_at);
 	printf("    FINISHED : %s\n",      job->finished_at);
@@ -402,12 +402,12 @@ gitlab_job_status(const char *owner, const char *repo, long jid)
 void
 gitlab_job_cancel(const char *owner, const char *repo, long jid)
 {
-	ghcli_fetch_buffer	 buffer = {0};
+	gcli_fetch_buffer	 buffer = {0};
 	char				*url	= NULL;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld/cancel",
 					  gitlab_get_apibase(), owner, repo, jid);
-	ghcli_fetch_with_method("POST", url, NULL, NULL, &buffer);
+	gcli_fetch_with_method("POST", url, NULL, NULL, &buffer);
 
 	free(url);
 	free(buffer.data);
@@ -416,12 +416,12 @@ gitlab_job_cancel(const char *owner, const char *repo, long jid)
 void
 gitlab_job_retry(const char *owner, const char *repo, long jid)
 {
-	ghcli_fetch_buffer	 buffer = {0};
+	gcli_fetch_buffer	 buffer = {0};
 	char				*url	= NULL;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld/retry",
 					  gitlab_get_apibase(), owner, repo, jid);
-	ghcli_fetch_with_method("POST", url, NULL, NULL, &buffer);
+	gcli_fetch_with_method("POST", url, NULL, NULL, &buffer);
 
 	free(url);
 	free(buffer.data);

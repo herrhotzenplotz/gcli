@@ -179,6 +179,10 @@ gitea_forge_descriptor =
 	.get_pull_commits	  = gitea_get_pull_commits,
 	.perform_submit_pr	  = gitea_pull_submit,
 
+	/* Same procedure as with Github (see comment up there) */
+	.pr_add_labels        = gitea_issue_add_labels,
+	.pr_remove_labels     = gitea_issue_remove_labels,
+
 	.get_authheader		  = gitea_get_authheader,
 	.get_account		  = gitea_get_account,
 	.get_api_error_string = github_api_error_string,	/* hack! */

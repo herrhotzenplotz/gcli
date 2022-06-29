@@ -87,18 +87,18 @@ github_get_repos(const char *owner, int max, ghcli_repo **out)
 	/* Github is a little stupid in that it distinguishes
 	 * organizations and users. Thus, we have to find out, whether the
 	 * <org> param is a user or an actual organization. */
-	url = sn_asprintf("%s/users/%s", github_get_apibase(), e_owner);
+	url = sn_asprintf("%s/users/%s", ghcli_get_apibase(), e_owner);
 	if (ghcli_curl_test_success(url)) {
 		/* it is a user */
 		free(url);
 		url = sn_asprintf("%s/users/%s/repos",
-				  github_get_apibase(),
+				  ghcli_get_apibase(),
 				  e_owner);
 	} else {
 		/* this is an actual organization */
 		free(url);
 		url = sn_asprintf("%s/orgs/%s/repos",
-				  github_get_apibase(),
+				  ghcli_get_apibase(),
 				  e_owner);
 	}
 
@@ -138,7 +138,7 @@ int
 github_get_own_repos(int max, ghcli_repo **out)
 {
 	char               *url      = sn_asprintf("%s/user/repos",
-						   github_get_apibase());
+						   ghcli_get_apibase());
 	char               *next_url = NULL;
 	ghcli_fetch_buffer  buffer   = {0};
 	struct json_stream  stream   = {0};
@@ -189,7 +189,7 @@ github_repo_delete(const char *owner, const char *repo)
 	e_repo  = ghcli_urlencode(repo);
 
 	url = sn_asprintf("%s/repos/%s/%s",
-			  github_get_apibase(),
+			  ghcli_get_apibase(),
 			  e_owner, e_repo);
 
 	ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
@@ -213,7 +213,7 @@ github_repo_create(
 	repo = calloc(1, sizeof(ghcli_repo));
 
 	/* Request preparation */
-	url = sn_asprintf("%s/user/repos", github_get_apibase());
+	url = sn_asprintf("%s/user/repos", ghcli_get_apibase());
 	/* TODO: escape the repo name and the description */
 	data = sn_asprintf("{\"name\": \""SV_FMT"\","
 			   " \"description\": \""SV_FMT"\","

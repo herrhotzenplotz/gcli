@@ -28,7 +28,7 @@
  */
 
 #include <ghcli/github/labels.h>
-#include <ghcli/github/config.h>
+#include <ghcli/config.h>
 #include <ghcli/json_util.h>
 
 #include <pdjson/pdjson.h>
@@ -72,7 +72,7 @@ github_get_labels(
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/labels",
-		github_get_apibase(), owner, reponame);
+		ghcli_get_apibase(), owner, reponame);
 
 	do {
 		struct json_stream stream = {0};
@@ -132,7 +132,7 @@ github_create_label(
 
 	/* /repos/{owner}/{repo}/labels */
 	url = sn_asprintf("%s/repos/%s/%s/labels",
-			  github_get_apibase(), e_owner, e_repo);
+			  ghcli_get_apibase(), e_owner, e_repo);
 
 
 	data = sn_asprintf("{ "
@@ -174,7 +174,7 @@ github_delete_label(
 
 	/* DELETE /repos/{owner}/{repo}/labels/{name} */
 	url = sn_asprintf("%s/repos/%s/%s/labels/%s",
-			  github_get_apibase(),
+			  ghcli_get_apibase(),
 			  owner, repo, e_label);
 
 	ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);

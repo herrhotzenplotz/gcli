@@ -80,7 +80,7 @@ github_get_issues(
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/issues?state=%s",
-		github_get_apibase(),
+		ghcli_get_apibase(),
 		e_owner, e_repo,
 		all ? "all" : "open");
 
@@ -187,7 +187,7 @@ github_get_issue_summary(
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/issues/%d",
-		github_get_apibase(),
+		ghcli_get_apibase(),
 		e_owner, e_repo,
 		issue_number);
 	ghcli_fetch(url, NULL, &buffer);
@@ -218,7 +218,7 @@ github_issue_close(const char *owner, const char *repo, int issue_number)
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/issues/%d",
-		github_get_apibase(),
+		ghcli_get_apibase(),
 		e_owner, e_repo,
 		issue_number);
 	data = sn_asprintf("{ \"state\": \"close\"}");
@@ -246,7 +246,7 @@ github_issue_reopen(const char *owner, const char *repo, int issue_number)
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/issues/%d",
-		github_get_apibase(),
+		ghcli_get_apibase(),
 		e_owner, e_repo,
 		issue_number);
 	data = sn_asprintf("{ \"state\": \"open\"}");
@@ -273,7 +273,7 @@ github_perform_submit_issue(
 		SV_ARGS(opts.title), SV_ARGS(opts.body));
 	char *url         = sn_asprintf(
 		"%s/repos/"SV_FMT"/"SV_FMT"/issues",
-		github_get_apibase(),
+		ghcli_get_apibase(),
 		SV_ARGS(e_owner),
 		SV_ARGS(e_repo));
 
@@ -308,7 +308,7 @@ github_issue_assign(
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/issues/%d/assignees",
-		github_get_apibase(), e_owner, e_repo, issue_number);
+		ghcli_get_apibase(), e_owner, e_repo, issue_number);
 
 	ghcli_fetch_with_method("POST", url, post_fields, NULL, &buffer);
 
@@ -336,7 +336,7 @@ github_issue_add_labels(
 	assert(labels_size > 0);
 
 	url = sn_asprintf("%s/repos/%s/%s/issues/%d/labels",
-			  github_get_apibase(), owner, repo, issue);
+			  ghcli_get_apibase(), owner, repo, issue);
 
 	list = sn_join_with(labels, labels_size, "\",\"");
 	data = sn_asprintf("{ \"labels\": [\"%s\"]}", list);
@@ -368,7 +368,7 @@ github_issue_remove_labels(
 	e_label = ghcli_urlencode(labels[0]);
 
 	url = sn_asprintf("%s/repos/%s/%s/issues/%d/labels/%s",
-			  github_get_apibase(), owner, repo, issue, e_label);
+			  ghcli_get_apibase(), owner, repo, issue, e_label);
 
 	ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 

@@ -102,7 +102,7 @@ github_get_releases(
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/releases",
-		github_get_apibase(),
+		ghcli_get_apibase(),
 		e_owner, e_repo);
 
 	do {
@@ -204,7 +204,7 @@ github_create_release(const ghcli_new_release *release)
 	/* https://docs.github.com/en/rest/reference/repos#create-a-release */
 	url = sn_asprintf(
 		"%s/repos/%s/%s/releases",
-		github_get_apibase(), e_owner, e_repo);
+		ghcli_get_apibase(), e_owner, e_repo);
 
 	escaped_body = ghcli_json_escape(release->body);
 
@@ -270,7 +270,7 @@ github_delete_release(const char *owner, const char *repo, const char *id)
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/releases/%s",
-		github_get_apibase(), e_owner, e_repo, id);
+		ghcli_get_apibase(), e_owner, e_repo, id);
 
 	ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 

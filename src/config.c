@@ -28,9 +28,13 @@
  */
 
 #include <ghcli/config.h>
+#include <ghcli/github/config.h>
+#include <ghcli/gitlab/config.h>
+#include <ghcli/gitea/config.h>
 #include <ghcli/gitconfig.h>
 #include <ghcli/forges.h>
 
+#include <assert.h>
 #include <ctype.h>
 #include <dirent.h>
 #include <getopt.h>
@@ -674,3 +678,19 @@ ghcli_config_have_colors(void)
 
 	return !config.colors_disabled;
 }
+
+char *
+ghcli_get_apibase(void)
+{
+	switch (ghcli_config_get_forge_type()) {
+	case GHCLI_FORGE_GITHUB:
+		return github_get_apibase();
+	case GHCLI_FORGE_GITEA:
+		return gitea_get_apibase();
+	case GHCLI_FORGE_GITLAB:
+		return gitlab_get_apibase();
+	default:
+		assert(0 && "Not reached");
+	}
+}
+

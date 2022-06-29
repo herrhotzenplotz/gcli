@@ -60,6 +60,7 @@
 #include <ghcli/gitea/config.h>
 #include <ghcli/gitea/issues.h>
 #include <ghcli/gitea/labels.h>
+#include <ghcli/gitea/pulls.h>
 
 static ghcli_forge_descriptor
 github_forge_descriptor =
@@ -173,8 +174,21 @@ gitea_forge_descriptor =
 	.get_labels			  = gitea_get_labels,
 	.create_label		  = gitea_create_label,
 	.delete_label		  = gitea_delete_label,
+	.get_prs			  = gitea_get_pulls,
+	.pr_merge			  = gitea_pull_merge,
+	.pr_reopen            = gitea_pull_reopen,
+	.pr_close             = gitea_pull_close,
+	.get_pull_summary	  = gitea_get_pull_summary,
+	.get_pull_commits	  = gitea_get_pull_commits,
+	.perform_submit_pr	  = gitea_pull_submit,
+	.print_pr_diff		  = gitea_print_pr_diff,
+
+	/* Same procedure as with Github (see comment up there) */
+	.pr_add_labels        = gitea_issue_add_labels,
+	.pr_remove_labels     = gitea_issue_remove_labels,
 
 	.get_authheader		  = gitea_get_authheader,
+	.get_account		  = gitea_get_account,
 	.get_api_error_string = github_api_error_string,	/* hack! */
 	.user_object_key	  = "username",
 	.html_url_key		  = "web_url",

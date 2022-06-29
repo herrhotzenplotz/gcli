@@ -30,7 +30,10 @@
 #ifndef GITEA_CONFIG_H
 #define GITEA_CONFIG_H
 
-const char	*gitea_get_apibase(void);
+#include <sn/sn.h>
+
+char		*gitea_get_apibase(void);
 char		*gitea_get_authheader(void);
+sn_sv		 gitea_get_account(void);
 
 #endif /* GITEA_CONFIG_H */

@@ -89,7 +89,7 @@ github_get_forks(
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/forks",
-		github_get_apibase(),
+		ghcli_get_apibase(),
 		e_owner, e_repo);
 
 	do {
@@ -140,7 +140,7 @@ github_fork_create(const char *owner, const char *repo, const char *_in)
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/forks",
-		github_get_apibase(),
+		ghcli_get_apibase(),
 		e_owner, e_repo);
 	if (_in) {
 		in        = ghcli_json_escape(SV((char *)_in));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,33 +27,55 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef GITEA_PULLS_H
+#define GITEA_PULLS_H
 
-#include <sn/sn.h>
-#include <ghcli/ghcli.h>
+#include <ghcli/curl.h>
+#include <ghcli/pulls.h>
 
-void ghcli_config_init(
-	int    *argc,
-	char ***argv);
+int gitea_get_pulls(
+	const char  *owner,
+	const char  *reponame,
+	bool         all,
+	int          max,
+	ghcli_pull **out);
 
-void ghcli_config_get_upstream_parts(
-	sn_sv *owner,
-	sn_sv *repo);
+void gitea_get_pull_summary(
+	const char			*owner,
+	const char			*repo,
+	int					 pr_number,
+	ghcli_pull_summary	*out);
 
-sn_sv ghcli_config_find_by_key(
-	sn_sv       section_name,
-	const char *key);
+int gitea_get_pull_commits(
+	const char		 *owner,
+	const char		 *repo,
+	int				  pr_number,
+	ghcli_commit	**out);
 
-char             *ghcli_config_get_editor(void);
-char             *ghcli_config_get_authheader(void);
-sn_sv             ghcli_config_get_account(void);
-sn_sv             ghcli_config_get_upstream(void);
-sn_sv             ghcli_config_get_base(void);
-ghcli_forge_type  ghcli_config_get_forge_type(void);
-sn_sv             ghcli_config_get_override_default_account(void);
-void              ghcli_config_get_repo(const char **, const char **);
-int               ghcli_config_have_colors(void);
-char 		 *ghcli_get_apibase(void);
+void gitea_pull_submit(
+	ghcli_submit_pull_options  opts,
+	ghcli_fetch_buffer        *out);
 
-#endif /* CONFIG_H */
+void gitea_pull_merge(
+	const char	*owner,
+	const char	*reponame,
+	int			 pr_number,
+	bool		 squash);
+
+void gitea_pull_close(
+	const char	*owner,
+	const char	*repo,
+	int			 pr_number);
+
+void gitea_pull_reopen(
+	const char	*owner,
+	const char	*repo,
+	int			 pr_number);
+
+void gitea_print_pr_diff(
+	FILE       *stream,
+	const char *owner,
+	const char *repo,
+	int         pr_number);
+
+#endif /* GITEA_PULLS_H */

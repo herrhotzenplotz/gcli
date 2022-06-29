@@ -175,6 +175,7 @@ gitea_forge_descriptor =
 	.create_label		  = gitea_create_label,
 	.delete_label		  = gitea_delete_label,
 	.get_prs			  = gitea_get_pulls,
+	.pr_merge			  = gitea_pull_merge,
 	.get_pull_summary	  = gitea_get_pull_summary,
 	.get_pull_commits	  = gitea_get_pull_commits,
 	.perform_submit_pr	  = gitea_pull_submit,

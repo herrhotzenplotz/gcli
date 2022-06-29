@@ -56,4 +56,10 @@ void gitea_pull_submit(
 	ghcli_submit_pull_options  opts,
 	ghcli_fetch_buffer        *out);
 
+void gitea_pull_merge(
+	const char	*owner,
+	const char	*reponame,
+	int			 pr_number,
+	bool		 squash);
+
 #endif /* GITEA_PULLS_H */

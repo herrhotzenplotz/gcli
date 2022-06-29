@@ -27,9 +27,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <ghcli/config.h>
 #include <ghcli/gitea/pulls.h>
 #include <ghcli/github/pulls.h>
-#include <ghcli/json_util.h>
 
 int
 gitea_get_pulls(
@@ -70,4 +70,32 @@ gitea_pull_submit(
 	warnx("In case the following process errors out, see: "
 		  "https://github.com/go-gitea/gitea/issues/20175");
 	github_perform_submit_pr(opts, out);
+}
+
+void
+gitea_pull_merge(
+	const char	*owner,
+	const char	*repo,
+	int			 pr_number,
+	bool		 squash)
+{
+	char				*url	 = NULL;
+	char				*e_owner = NULL;
+	char				*e_repo	 = NULL;
+	char				*data	 = NULL;
+	ghcli_fetch_buffer	 buffer	 = {0};
+
+	e_owner = ghcli_urlencode(owner);
+	e_repo	= ghcli_urlencode(repo);
+	url		= sn_asprintf("%s/repos/%s/%s/pulls/%d/merge",
+						  ghcli_get_apibase(), e_owner, e_repo, pr_number);
+	data	= sn_asprintf("{ \"Do\": \"%s\" }", squash ? "squash" : "merge");
+
+	ghcli_fetch_with_method("POST", url, data, NULL, &buffer);
+
+	free(url);
+	free(e_owner);
+	free(e_repo);
+	free(data);
+	free(buffer.data);
 }

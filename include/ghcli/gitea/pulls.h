@@ -72,4 +72,10 @@ void gitea_pull_reopen(
 	const char	*repo,
 	int			 pr_number);
 
+void gitea_print_pr_diff(
+	FILE       *stream,
+	const char *owner,
+	const char *repo,
+	int         pr_number);
+
 #endif /* GITEA_PULLS_H */

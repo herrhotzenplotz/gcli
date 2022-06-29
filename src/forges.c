@@ -181,6 +181,7 @@ gitea_forge_descriptor =
 	.get_pull_summary	  = gitea_get_pull_summary,
 	.get_pull_commits	  = gitea_get_pull_commits,
 	.perform_submit_pr	  = gitea_pull_submit,
+	.print_pr_diff		  = gitea_print_pr_diff,
 
 	/* Same procedure as with Github (see comment up there) */
 	.pr_add_labels        = gitea_issue_add_labels,

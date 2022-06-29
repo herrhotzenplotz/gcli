@@ -62,4 +62,14 @@ void gitea_pull_merge(
 	int			 pr_number,
 	bool		 squash);
 
+void gitea_pull_close(
+	const char	*owner,
+	const char	*repo,
+	int			 pr_number);
+
+void gitea_pull_reopen(
+	const char	*owner,
+	const char	*repo,
+	int			 pr_number);
+
 #endif /* GITEA_PULLS_H */

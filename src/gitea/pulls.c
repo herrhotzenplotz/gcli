@@ -99,3 +99,53 @@ gitea_pull_merge(
 	free(data);
 	free(buffer.data);
 }
+
+static void
+gitea_pulls_patch_state(
+	const char	*owner,
+	const char	*repo,
+	int			 pr_number,
+	const char	*state)
+{
+	ghcli_fetch_buffer  json_buffer = {0};
+	char               *url         = NULL;
+	char               *data        = NULL;
+	char               *e_owner     = NULL;
+	char               *e_repo      = NULL;
+
+	e_owner = ghcli_urlencode(owner);
+	e_repo  = ghcli_urlencode(repo);
+
+	url = sn_asprintf(
+		"%s/repos/%s/%s/pulls/%d",
+		ghcli_get_apibase(),
+		e_owner, e_repo,
+		pr_number);
+	data = sn_asprintf("{ \"state\": \"%s\"}", state);
+
+	ghcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
+
+	free(data);
+	free(url);
+	free(e_owner);
+	free(e_repo);
+	free(json_buffer.data);
+}
+
+void
+gitea_pull_close(
+	const char	*owner,
+	const char	*repo,
+	int			 pr_number)
+{
+	gitea_pulls_patch_state(owner, repo, pr_number, "closed");
+}
+
+void
+gitea_pull_reopen(
+	const char	*owner,
+	const char	*repo,
+	int			 pr_number)
+{
+	gitea_pulls_patch_state(owner, repo, pr_number, "open");
+}

@@ -177,8 +177,10 @@ gitea_forge_descriptor =
 	.get_prs			  = gitea_get_pulls,
 	.get_pull_summary	  = gitea_get_pull_summary,
 	.get_pull_commits	  = gitea_get_pull_commits,
+	.perform_submit_pr	  = gitea_pull_submit,
 
 	.get_authheader		  = gitea_get_authheader,
+	.get_account		  = gitea_get_account,
 	.get_api_error_string = github_api_error_string,	/* hack! */
 	.user_object_key	  = "username",
 	.html_url_key		  = "web_url",

@@ -30,6 +30,7 @@
 #ifndef GITEA_PULLS_H
 #define GITEA_PULLS_H
 
+#include <ghcli/curl.h>
 #include <ghcli/pulls.h>
 
 int gitea_get_pulls(
@@ -50,5 +51,9 @@ int gitea_get_pull_commits(
 	const char		 *repo,
 	int				  pr_number,
 	ghcli_commit	**out);
+
+void gitea_pull_submit(
+	ghcli_submit_pull_options  opts,
+	ghcli_fetch_buffer        *out);
 
 #endif /* GITEA_PULLS_H */

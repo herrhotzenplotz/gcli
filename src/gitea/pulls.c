@@ -28,9 +28,10 @@
  */
 
 #include <ghcli/curl.h>
-#include <ghcli/json_util.h>
 #include <ghcli/gitea/config.h>
 #include <ghcli/gitea/pulls.h>
+#include <ghcli/github/pulls.h>
+#include <ghcli/json_util.h>
 
 #include <pdjson/pdjson.h>
 
@@ -380,4 +381,14 @@ gitea_get_pull_commits(
 	free(e_repo);
 
 	return count;
+}
+
+void
+gitea_pull_submit(
+	ghcli_submit_pull_options  opts,
+	ghcli_fetch_buffer        *out)
+{
+	warnx("In case the following process errors out, see: "
+		  "https://github.com/go-gitea/gitea/issues/20175");
+	github_perform_submit_pr(opts, out);
 }

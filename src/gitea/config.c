@@ -86,3 +86,17 @@ gitea_get_authheader(void)
 
 	return sn_asprintf("Authorization: token "SV_FMT, SV_ARGS(token));
 }
+
+sn_sv
+gitea_get_account(void)
+{
+	sn_sv section = gitea_default_account_name();
+	if (sn_sv_null(section))
+		return SV_NULL;
+
+	sn_sv account = ghcli_config_find_by_key(section, "account");;
+	if (!account.length)
+		errx(1, "Missing Gitea account name");
+	return account;
+}
+

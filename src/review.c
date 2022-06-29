@@ -27,40 +27,40 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/color.h>
-#include <ghcli/config.h>
-#include <ghcli/curl.h>
-#include <ghcli/forges.h>
-#include <ghcli/github/config.h>
-#include <ghcli/json_util.h>
-#include <ghcli/review.h>
+#include <gcli/color.h>
+#include <gcli/config.h>
+#include <gcli/curl.h>
+#include <gcli/forges.h>
+#include <gcli/github/config.h>
+#include <gcli/json_util.h>
+#include <gcli/review.h>
 
 #include <pdjson/pdjson.h>
 
 #include <limits.h>
 
 void
-ghcli_review_print_review_table(
-	ghcli_pr_review *headers,
+gcli_review_print_review_table(
+	gcli_pr_review *headers,
 	size_t headers_size)
 {
 	for (size_t i = 0; i < headers_size; ++i) {
 		if (headers[i].state) {
 			printf("   %s%s%s - %s - %s%s%s\n",
-			       ghcli_setbold(), headers[i].author, ghcli_resetbold(),
-			       headers[i].date,
-			       ghcli_state_color_str(headers[i].state),
-			       headers[i].state,
-			       ghcli_resetcolor());
+				   gcli_setbold(), headers[i].author, gcli_resetbold(),
+				   headers[i].date,
+				   gcli_state_color_str(headers[i].state),
+				   headers[i].state,
+				   gcli_resetcolor());
 		} else {
 			printf("   %s%s%s - %s\n",
-			       ghcli_setbold(), headers[i].author, ghcli_resetbold(),
-			       headers[i].date);
+				   gcli_setbold(), headers[i].author, gcli_resetbold(),
+				   headers[i].date);
 		}
 
 		pretty_print(headers[i].body, 9, 80, stdout);
 
-		ghcli_review_print_comments(
+		gcli_review_print_comments(
 			headers[i].comments,
 			headers[i].comments_size);
 
@@ -69,15 +69,15 @@ ghcli_review_print_review_table(
 }
 
 void
-ghcli_review_print_comments(
-	ghcli_pr_review_comment *comments,
+gcli_review_print_comments(
+	gcli_pr_review_comment *comments,
 	size_t                   comments_size)
 {
 	for (size_t i = 0; i < comments_size; ++i) {
 		putchar('\n');
 		printf("         PATH : %s\n"
-		       "         DIFF :\n",
-		       comments[i].path);
+			   "         DIFF :\n",
+			   comments[i].path);
 
 		pretty_print(comments[i].diff, 20, INT_MAX, stdout);
 		putchar('\n');
@@ -86,7 +86,7 @@ ghcli_review_print_comments(
 }
 
 void
-ghcli_review_reviews_free(ghcli_pr_review *it, size_t size)
+gcli_review_reviews_free(gcli_pr_review *it, size_t size)
 {
 	if (!it)
 		return;
@@ -99,13 +99,13 @@ ghcli_review_reviews_free(ghcli_pr_review *it, size_t size)
 		free(it[i].id);
 	}
 
-	ghcli_review_comments_free(it->comments, it->comments_size);
+	gcli_review_comments_free(it->comments, it->comments_size);
 
 	free(it);
 }
 
 void
-ghcli_review_comments_free(ghcli_pr_review_comment *it, size_t size)
+gcli_review_comments_free(gcli_pr_review_comment *it, size_t size)
 {
 	if (!it)
 		return;
@@ -122,11 +122,11 @@ ghcli_review_comments_free(ghcli_pr_review_comment *it, size_t size)
 	free(it);
 }
 
-size_t ghcli_review_get_reviews(
+size_t gcli_review_get_reviews(
 	const char       *owner,
 	const char       *repo,
 	int               pr,
-	ghcli_pr_review **out)
+	gcli_pr_review **out)
 {
-	return ghcli_forge()->get_reviews(owner, repo, pr, out);
+	return gcli_forge()->get_reviews(owner, repo, pr, out);
 }

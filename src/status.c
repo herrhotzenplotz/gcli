@@ -27,38 +27,38 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/status.h>
-#include <ghcli/forges.h>
+#include <gcli/status.h>
+#include <gcli/forges.h>
 
 void
-ghcli_status(int count)
+gcli_status(int count)
 {
-	ghcli_notification *notifications      = NULL;
+	gcli_notification *notifications      = NULL;
 	size_t              notifications_size = 0;
 
-	notifications_size = ghcli_get_notifications(&notifications, count);
+	notifications_size = gcli_get_notifications(&notifications, count);
 
 	if (count < 0) {
-		ghcli_print_notifications(notifications, notifications_size);
+		gcli_print_notifications(notifications, notifications_size);
 	} else {
-		ghcli_print_notifications(
+		gcli_print_notifications(
 			notifications,
 			count < (int)notifications_size
 			? count : notifications_size);
 	}
 
-	ghcli_free_notifications(notifications, notifications_size);
+	gcli_free_notifications(notifications, notifications_size);
 }
 
 size_t
-ghcli_get_notifications(ghcli_notification **out, int count)
+gcli_get_notifications(gcli_notification **out, int count)
 {
-	return ghcli_forge()->get_notifications(out, count);
+	return gcli_forge()->get_notifications(out, count);
 }
 
 void
-ghcli_free_notifications(
-	ghcli_notification *notifications,
+gcli_free_notifications(
+	gcli_notification *notifications,
 	size_t              notifications_size)
 {
 	for (size_t i = 0; i < notifications_size; ++i) {
@@ -74,8 +74,8 @@ ghcli_free_notifications(
 }
 
 void
-ghcli_print_notifications(
-	ghcli_notification *notifications,
+gcli_print_notifications(
+	gcli_notification *notifications,
 	size_t              notifications_size)
 {
 	for (size_t i = 0; i < notifications_size; ++i) {
@@ -91,7 +91,7 @@ ghcli_print_notifications(
 }
 
 void
-ghcli_notification_mark_as_read(const char *id)
+gcli_notification_mark_as_read(const char *id)
 {
-	ghcli_forge()->notification_mark_as_read(id);
+	gcli_forge()->notification_mark_as_read(id);
 }

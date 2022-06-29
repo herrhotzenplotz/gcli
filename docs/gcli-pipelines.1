@@ -1,0 +1,90 @@
+.Dd $Mdocdate$
+.Dt GCLI-PIPELINES 1
+.Os
+.Sh NAME
+.Nm gcli pipelines
+.Nd Inspect and manage GitLab Pipelines
+.Sh SYNOPSIS
+.Nm
+.Op Fl n Ar n
+.Op Fl o Ar owner Fl r Ar repo
+.Nm
+.Fl p Ar pipeline-id
+.Op Fl o Ar owner Fl r Ar repo
+.Op Fl n Ar n
+.Nm
+.Fl j Ar job-id
+.Op Fl o Ar owner Fl r Ar repo
+.Ar actions...
+.Sh DESCRIPTION
+.Nm
+is used to display data about the Continuous Integration (CI) service
+of Gitlab. You can list pipelines of a given repository, list jobs in
+a given pipeline or perform actions such as restarting jobs or
+fetching their logs.
+.Sh OPTIONS
+.Bl -tag -width indent
+.It Fl o , -owner Ar owner
+Operato on the repository of the given owner. This option can only be
+used in combination with
+.Fl r .
+.It Fl r , -repo Ar repo
+Operate on the given repository. This option can only be used in
+combination with
+.Fl o .
+.It Fl n , -count Ar n
+Fetch at least
+.Ar n
+items. Setting
+.Ar n
+to -1 will fetch all items. Default: 30. Note that on large
+repositories fetching all items can take a considerable amount of time
+and may result in rate limiting by the GitLab API.
+.It Fl p , -pipeline Ar pipeline-id
+List jobs in the given pipeline.
+.It Fl j , -jobs Ar job
+execute the given
+.Ar actions
+for the specified
+.Ar job .
+.El
+.Sh ACTIONS
+.Ar actions...
+may be one or more of the following:
+.Bl -tag -width indent
+.It Cm log
+Dump the log of the job.
+.It Cm status
+Print a short summary of the job.
+.It Cm cancel
+Cancel the job.
+.It Cm retry
+Retry the job.
+.El
+.Sh EXAMPLES
+Print a list of the last 30 pipelines in the current project:
+.Bd -literal -offset indent
+$ gcli pipelines
+.Ed
+
+List all jobs of pipeline #3316:
+.Bd -literal -offset indent
+$ gcli pipelines -p3316
+.Ed
+
+Dump the log of Job #423141 in herrhotzenplotz/gcli:
+.Bd -literal -offset indent
+$ gcli pipelines -o herrhotzenplotz -r gcli -j 423141 log
+.Ed
+.Ed
+.Sh SEE ALSO
+.Xr git 1 ,
+.Xr gcli 1
+.Sh AUTHORS
+.An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+.Sh BUGS
+We are missing a
+.Fl a
+flag. This is the current implied behaviour.
+
+Please report issues preferably via e-mail, on GitLab or on GitHub.

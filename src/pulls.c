@@ -27,18 +27,18 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/color.h>
-#include <ghcli/config.h>
-#include <ghcli/editor.h>
-#include <ghcli/forges.h>
-#include <ghcli/github/pulls.h>
-#include <ghcli/github/checks.h>
-#include <ghcli/json_util.h>
-#include <ghcli/pulls.h>
+#include <gcli/color.h>
+#include <gcli/config.h>
+#include <gcli/editor.h>
+#include <gcli/forges.h>
+#include <gcli/github/pulls.h>
+#include <gcli/github/checks.h>
+#include <gcli/json_util.h>
+#include <gcli/pulls.h>
 #include <sn/sn.h>
 
 void
-ghcli_pulls_free(ghcli_pull *it, int n)
+gcli_pulls_free(gcli_pull *it, int n)
 {
 	for (int i = 0; i < n; ++i) {
 		free((void *)it[i].title);
@@ -48,20 +48,20 @@ ghcli_pulls_free(ghcli_pull *it, int n)
 }
 
 int
-ghcli_get_prs(
+gcli_get_prs(
 	const char  *owner,
 	const char  *repo,
 	bool         all,
 	int          max,
-	ghcli_pull **out)
+	gcli_pull **out)
 {
-	return ghcli_forge()->get_prs(owner, repo, all, max, out);
+	return gcli_forge()->get_prs(owner, repo, all, max, out);
 }
 
 void
-ghcli_print_pr_table(
-	enum ghcli_output_order  order,
-	ghcli_pull              *pulls,
+gcli_print_pr_table(
+	enum gcli_output_order  order,
+	gcli_pull              *pulls,
 	int                      pulls_size)
 {
 	if (pulls_size == 0) {
@@ -76,43 +76,43 @@ ghcli_print_pr_table(
 		for (int i = pulls_size; i > 0; --i) {
 			printf("%6d  %s%6.6s%s  %6.6s  %s%20.20s%s  %-s\n",
 				   pulls[i - 1].number,
-				   ghcli_state_color_str(pulls[i - 1].state),
+				   gcli_state_color_str(pulls[i - 1].state),
 				   pulls[i - 1].state,
-				   ghcli_resetcolor(),
+				   gcli_resetcolor(),
 				   sn_bool_yesno(pulls[i - 1].merged),
-				   ghcli_setbold(),
+				   gcli_setbold(),
 				   pulls[i - 1].creator,
-				   ghcli_resetbold(),
+				   gcli_resetbold(),
 				   pulls[i - 1].title);
 		}
 	} else {
 		for (int i = 0; i < pulls_size; ++i) {
 			printf("%6d  %s%6.6s%s  %6.6s  %s%20.20s%s  %-s\n",
 				   pulls[i].number,
-				   ghcli_state_color_str(pulls[i].state),
+				   gcli_state_color_str(pulls[i].state),
 				   pulls[i].state,
-				   ghcli_resetcolor(),
+				   gcli_resetcolor(),
 				   sn_bool_yesno(pulls[i].merged),
-				   ghcli_setbold(),
+				   gcli_setbold(),
 				   pulls[i].creator,
-				   ghcli_resetbold(),
+				   gcli_resetbold(),
 				   pulls[i].title);
 		}
 	}
 }
 
 void
-ghcli_print_pr_diff(
+gcli_print_pr_diff(
 	FILE       *stream,
 	const char *owner,
 	const char *reponame,
 	int         pr_number)
 {
-	ghcli_forge()->print_pr_diff(stream, owner, reponame, pr_number);
+	gcli_forge()->print_pr_diff(stream, owner, reponame, pr_number);
 }
 
 static void
-ghcli_print_pr_summary(ghcli_pull_summary *it)
+gcli_print_pr_summary(gcli_pull_summary *it)
 {
 #define SANITIZE(x) (x ? x : "N/A")
 	printf("   NUMBER : %d\n"
@@ -135,11 +135,11 @@ ghcli_print_pr_summary(ghcli_pull_summary *it)
 		   SANITIZE(it->head_label),
 		   SANITIZE(it->base_label),
 		   SANITIZE(it->created_at),
-		   ghcli_setbold(), SANITIZE(it->author), ghcli_resetbold(),
-		   ghcli_state_color_str(it->state), SANITIZE(it->state), ghcli_resetcolor(),
+		   gcli_setbold(), SANITIZE(it->author), gcli_resetbold(),
+		   gcli_state_color_str(it->state), SANITIZE(it->state), gcli_resetcolor(),
 		   it->comments,
-		   ghcli_setcolor(GHCLI_COLOR_GREEN), it->additions, ghcli_resetcolor(),
-		   ghcli_setcolor(GHCLI_COLOR_RED),   it->deletions, ghcli_resetcolor(),
+		   gcli_setcolor(GCLI_COLOR_GREEN), it->additions, gcli_resetcolor(),
+		   gcli_setcolor(GCLI_COLOR_RED),   it->deletions, gcli_resetcolor(),
 		   it->commits, it->changed_files,
 		   sn_bool_yesno(it->merged),
 		   sn_bool_yesno(it->mergeable),
@@ -161,13 +161,13 @@ ghcli_print_pr_summary(ghcli_pull_summary *it)
 }
 
 static int
-ghcli_get_pull_commits(
+gcli_get_pull_commits(
 	const char    *owner,
 	const char    *repo,
 	int            pr_number,
-	ghcli_commit **out)
+	gcli_commit **out)
 {
-	return ghcli_forge()->get_pull_commits(owner, repo, pr_number, out);
+	return gcli_forge()->get_pull_commits(owner, repo, pr_number, out);
 }
 
 /**
@@ -190,7 +190,7 @@ cut_newline(const char *_it)
 }
 
 static void
-ghcli_print_commits_table(ghcli_commit *commits, int commits_size)
+gcli_print_commits_table(gcli_commit *commits, int commits_size)
 {
 	if (commits_size == 0) {
 		puts("No commits");
@@ -203,12 +203,12 @@ ghcli_print_commits_table(ghcli_commit *commits, int commits_size)
 	for (int i = 0; i < commits_size; ++i) {
 		char *message = cut_newline(commits[i].message);
 		printf("%s%-8.8s%s  %s%-15.15s%s  %-20.20s  %-16.16s  %-s\n",
-			   ghcli_setcolor(GHCLI_COLOR_YELLOW),
+			   gcli_setcolor(GCLI_COLOR_YELLOW),
 			   commits[i].sha,
-			   ghcli_resetcolor(),
-			   ghcli_setbold(),
+			   gcli_resetcolor(),
+			   gcli_setbold(),
 			   commits[i].author,
-			   ghcli_resetbold(),
+			   gcli_resetbold(),
 			   commits[i].email,
 			   commits[i].date,
 			   message);
@@ -217,7 +217,7 @@ ghcli_print_commits_table(ghcli_commit *commits, int commits_size)
 }
 
 static void
-ghcli_commits_free(ghcli_commit *it, int size)
+gcli_commits_free(gcli_commit *it, int size)
 {
 	for (int i = 0; i < size; ++i) {
 		free((void *)it[i].sha);
@@ -231,7 +231,7 @@ ghcli_commits_free(ghcli_commit *it, int size)
 }
 
 void
-ghcli_pulls_summary_free(ghcli_pull_summary *it)
+gcli_pulls_summary_free(gcli_pull_summary *it)
 {
 	free(it->author);
 	free(it->state);
@@ -248,71 +248,71 @@ ghcli_pulls_summary_free(ghcli_pull_summary *it)
 }
 
 static void
-ghcli_get_pull_summary(
+gcli_get_pull_summary(
 	const char         *owner,
 	const char         *repo,
 	int                 pr_number,
-	ghcli_pull_summary *out)
+	gcli_pull_summary *out)
 {
-	ghcli_forge()->get_pull_summary(owner, repo, pr_number, out);
+	gcli_forge()->get_pull_summary(owner, repo, pr_number, out);
 }
 
 static void
-ghcli_pr_info(
+gcli_pr_info(
 	const char *owner,
 	const char *repo,
 	int         pr_number,
 	bool        is_status)
 {
-	ghcli_pull_summary  summary      = {0};
-	ghcli_commit       *commits      = NULL;
+	gcli_pull_summary  summary      = {0};
+	gcli_commit       *commits      = NULL;
 	int                 commits_size = 0;
 
 	/* Summary header */
-	ghcli_get_pull_summary(owner, repo, pr_number, &summary);
-	ghcli_print_pr_summary(&summary);
+	gcli_get_pull_summary(owner, repo, pr_number, &summary);
+	gcli_print_pr_summary(&summary);
 
 	/* Commits */
-	commits_size = ghcli_get_pull_commits(owner, repo, pr_number, &commits);
+	commits_size = gcli_get_pull_commits(owner, repo, pr_number, &commits);
 
 	puts("\nCOMMITS");
-	ghcli_print_commits_table(commits, commits_size);
+	gcli_print_commits_table(commits, commits_size);
 
-	ghcli_commits_free(commits, commits_size);
+	gcli_commits_free(commits, commits_size);
 
 	/* Only print checks if the user issued the 'status' action */
 	if (is_status) {
-		if (ghcli_config_get_forge_type() == GHCLI_FORGE_GITHUB) {
+		if (gcli_config_get_forge_type() == GCLI_FORGE_GITHUB) {
 			puts("\nCHECKS");
 			github_checks(owner, repo, summary.head_sha, -1);
 		}
 	}
 
-	ghcli_pulls_summary_free(&summary);
+	gcli_pulls_summary_free(&summary);
 }
 
 void
-ghcli_pr_status(
+gcli_pr_status(
 	const char *owner,
 	const char *repo,
 	int         pr_number)
 {
-	ghcli_pr_info(owner, repo, pr_number, true);
+	gcli_pr_info(owner, repo, pr_number, true);
 }
 
 void
-ghcli_pr_summary(
+gcli_pr_summary(
 	const char *owner,
 	const char *repo,
 	int         pr_number)
 {
-	ghcli_pr_info(owner, repo, pr_number, false);
+	gcli_pr_info(owner, repo, pr_number, false);
 }
 
 static void
 pr_init_user_file(FILE *stream, void *_opts)
 {
-	ghcli_submit_pull_options *opts = _opts;
+	gcli_submit_pull_options *opts = _opts;
 	fprintf(
 		stream,
 		"# PR TITLE : "SV_FMT"\n"
@@ -323,18 +323,18 @@ pr_init_user_file(FILE *stream, void *_opts)
 }
 
 static sn_sv
-ghcli_pr_get_user_message(ghcli_submit_pull_options *opts)
+gcli_pr_get_user_message(gcli_submit_pull_options *opts)
 {
-	return ghcli_editor_get_user_message(pr_init_user_file, opts);
+	return gcli_editor_get_user_message(pr_init_user_file, opts);
 }
 
 void
-ghcli_pr_submit(ghcli_submit_pull_options opts)
+gcli_pr_submit(gcli_submit_pull_options opts)
 {
-	ghcli_fetch_buffer  json_buffer  = {0};
+	gcli_fetch_buffer  json_buffer  = {0};
 
-	sn_sv body = ghcli_pr_get_user_message(&opts);
-	opts.body = ghcli_json_escape(body);
+	sn_sv body = gcli_pr_get_user_message(&opts);
+	opts.body = gcli_json_escape(body);
 
 	fprintf(stdout,
 		"The following PR will be created:\n"
@@ -354,9 +354,9 @@ ghcli_pr_submit(ghcli_submit_pull_options opts)
 		if (!sn_yesno("Do you want to continue?"))
 			errx(1, "PR aborted.");
 
-	ghcli_forge()->perform_submit_pr(opts, &json_buffer);
+	gcli_forge()->perform_submit_pr(opts, &json_buffer);
 
-	ghcli_print_html_url(json_buffer);
+	gcli_print_html_url(json_buffer);
 
 	free(body.data);
 	free(opts.body.data);
@@ -364,47 +364,47 @@ ghcli_pr_submit(ghcli_submit_pull_options opts)
 }
 
 void
-ghcli_pr_merge(
+gcli_pr_merge(
 	const char *owner,
 	const char *reponame,
 	int         pr_number,
 	bool        squash)
 {
-	ghcli_forge()->pr_merge(owner, reponame, pr_number, squash);
+	gcli_forge()->pr_merge(owner, reponame, pr_number, squash);
 }
 
 void
-ghcli_pr_close(const char *owner, const char *reponame, int pr_number)
+gcli_pr_close(const char *owner, const char *reponame, int pr_number)
 {
-	ghcli_forge()->pr_close(owner, reponame, pr_number);
+	gcli_forge()->pr_close(owner, reponame, pr_number);
 }
 
 void
-ghcli_pr_reopen(const char *owner, const char *reponame, int pr_number)
+gcli_pr_reopen(const char *owner, const char *reponame, int pr_number)
 {
-	ghcli_forge()->pr_reopen(owner, reponame, pr_number);
+	gcli_forge()->pr_reopen(owner, reponame, pr_number);
 }
 
 void
-ghcli_pr_add_labels(
+gcli_pr_add_labels(
 	const char *owner,
 	const char *repo,
 	int         pr_number,
 	const char *labels[],
 	size_t      labels_size)
 {
-	ghcli_forge()->pr_add_labels(
+	gcli_forge()->pr_add_labels(
 		owner, repo, pr_number, labels, labels_size);
 }
 
 void
-ghcli_pr_remove_labels(
+gcli_pr_remove_labels(
 	const char *owner,
 	const char *repo,
 	int         pr_number,
 	const char *labels[],
 	size_t      labels_size)
 {
-	ghcli_forge()->pr_remove_labels(
+	gcli_forge()->pr_remove_labels(
 		owner, repo, pr_number, labels, labels_size);
 }

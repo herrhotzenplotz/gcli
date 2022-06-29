@@ -27,8 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/color.h>
-#include <ghcli/config.h>
+#include <gcli/color.h>
+#include <gcli/config.h>
 
 #include <stdlib.h>
 
@@ -64,11 +64,11 @@ color_cache_insert(uint32_t code, char *sequence)
 }
 
 const char *
-ghcli_setcolor256(uint32_t code)
+gcli_setcolor256(uint32_t code)
 {
 	char *result = NULL;
 
-	if (!ghcli_config_have_colors())
+	if (!gcli_config_have_colors())
 		return "";
 
 	if (color_table_size == 0)
@@ -90,30 +90,30 @@ ghcli_setcolor256(uint32_t code)
 }
 
 const char *
-ghcli_resetcolor(void)
+gcli_resetcolor(void)
 {
-	if (!ghcli_config_have_colors())
+	if (!gcli_config_have_colors())
 		return "";
 
 	return "\033[m";
 }
 
 const char *
-ghcli_setcolor(int code)
+gcli_setcolor(int code)
 {
-	if (!ghcli_config_have_colors())
+	if (!gcli_config_have_colors())
 		return "";
 
 	switch (code) {
-	case GHCLI_COLOR_BLACK:   return "\033[30m";
-	case GHCLI_COLOR_RED:     return "\033[31m";
-	case GHCLI_COLOR_GREEN:   return "\033[32m";
-	case GHCLI_COLOR_YELLOW:  return "\033[33m";
-	case GHCLI_COLOR_BLUE:    return "\033[34m";
-	case GHCLI_COLOR_MAGENTA: return "\033[35m";
-	case GHCLI_COLOR_CYAN:    return "\033[36m";
-	case GHCLI_COLOR_WHITE:   return "\033[37m";
-	case GHCLI_COLOR_DEFAULT: return "\033[39m";
+	case GCLI_COLOR_BLACK:   return "\033[30m";
+	case GCLI_COLOR_RED:     return "\033[31m";
+	case GCLI_COLOR_GREEN:   return "\033[32m";
+	case GCLI_COLOR_YELLOW:  return "\033[33m";
+	case GCLI_COLOR_BLUE:    return "\033[34m";
+	case GCLI_COLOR_MAGENTA: return "\033[35m";
+	case GCLI_COLOR_CYAN:    return "\033[36m";
+	case GCLI_COLOR_WHITE:   return "\033[37m";
+	case GCLI_COLOR_DEFAULT: return "\033[39m";
 	default:
 		sn_notreached;
 	}
@@ -121,28 +121,28 @@ ghcli_setcolor(int code)
 }
 
 const char *
-ghcli_setbold(void)
+gcli_setbold(void)
 {
-	if (!ghcli_config_have_colors())
+	if (!gcli_config_have_colors())
 		return "";
 	else
 		return "\033[1m";
 }
 
 const char *
-ghcli_resetbold(void)
+gcli_resetbold(void)
 {
-	if (!ghcli_config_have_colors())
+	if (!gcli_config_have_colors())
 		return "";
 	else
 		return "\033[22m";
 }
 
 const char *
-ghcli_state_color_str(const char *it)
+gcli_state_color_str(const char *it)
 {
 	if (it)
-		return ghcli_state_color_sv(SV((char *)it));
+		return gcli_state_color_sv(SV((char *)it));
 	else
 		return "";
 }
@@ -151,27 +151,27 @@ ghcli_state_color_str(const char *it)
 static const struct { const char *name; int code; }
 	state_color_table[] =
 {
-	{ .name = "open",      .code = GHCLI_COLOR_GREEN   },
-	{ .name = "success",   .code = GHCLI_COLOR_GREEN   },
-	{ .name = "APPROVED",  .code = GHCLI_COLOR_GREEN   },
-	{ .name = "merged",    .code = GHCLI_COLOR_MAGENTA },
-	{ .name = "closed",    .code = GHCLI_COLOR_RED     },
-	{ .name = "failed",    .code = GHCLI_COLOR_RED     },
-	{ .name = "canceled",  .code = GHCLI_COLOR_RED     }, /* orthography has left the channel */
-	{ .name = "failure",   .code = GHCLI_COLOR_RED     },
-	{ .name = "running",   .code = GHCLI_COLOR_BLUE    },
-	{ .name = "COMMENTED", .code = GHCLI_COLOR_BLUE    },
+	{ .name = "open",      .code = GCLI_COLOR_GREEN   },
+	{ .name = "success",   .code = GCLI_COLOR_GREEN   },
+	{ .name = "APPROVED",  .code = GCLI_COLOR_GREEN   },
+	{ .name = "merged",    .code = GCLI_COLOR_MAGENTA },
+	{ .name = "closed",    .code = GCLI_COLOR_RED     },
+	{ .name = "failed",    .code = GCLI_COLOR_RED     },
+	{ .name = "canceled",  .code = GCLI_COLOR_RED     }, /* orthography has left the channel */
+	{ .name = "failure",   .code = GCLI_COLOR_RED     },
+	{ .name = "running",   .code = GCLI_COLOR_BLUE    },
+	{ .name = "COMMENTED", .code = GCLI_COLOR_BLUE    },
 };
 
 const char *
-ghcli_state_color_sv(sn_sv state)
+gcli_state_color_sv(sn_sv state)
 {
 	if (!sn_sv_null(state)) {
 		for (size_t i = 0; i < ARRAY_SIZE(state_color_table); ++i) {
 			if (sn_sv_has_prefix(state, state_color_table[i].name))
-				return ghcli_setcolor(state_color_table[i].code);
+				return gcli_setcolor(state_color_table[i].code);
 		}
 	}
 
-	return ghcli_setcolor(GHCLI_COLOR_DEFAULT);
+	return gcli_setcolor(GCLI_COLOR_DEFAULT);
 }

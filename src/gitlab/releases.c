@@ -27,15 +27,15 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/curl.h>
-#include <ghcli/gitlab/config.h>
-#include <ghcli/gitlab/releases.h>
-#include <ghcli/json_util.h>
+#include <gcli/curl.h>
+#include <gcli/gitlab/config.h>
+#include <gcli/gitlab/releases.h>
+#include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
 
 static void
-gitlab_parse_assets_source(struct json_stream *input, ghcli_release *out)
+gitlab_parse_assets_source(struct json_stream *input, gcli_release *out)
 {
 	enum json_type  next       = JSON_NULL;
 	const char     *key;
@@ -72,7 +72,7 @@ gitlab_parse_assets_source(struct json_stream *input, ghcli_release *out)
 }
 
 static void
-gitlab_parse_asset_sources(struct json_stream *stream, ghcli_release *out)
+gitlab_parse_asset_sources(struct json_stream *stream, gcli_release *out)
 {
 	enum json_type next = JSON_NULL;
 
@@ -88,7 +88,7 @@ gitlab_parse_asset_sources(struct json_stream *stream, ghcli_release *out)
 }
 
 static void
-gitlab_parse_assets(struct json_stream *input, ghcli_release *out)
+gitlab_parse_assets(struct json_stream *input, gcli_release *out)
 {
 	enum json_type  next = JSON_NULL;
 	const char     *key;
@@ -111,7 +111,7 @@ gitlab_parse_assets(struct json_stream *input, ghcli_release *out)
 }
 
 static void
-gitlab_parse_release(struct json_stream *input, ghcli_release *out)
+gitlab_parse_release(struct json_stream *input, gcli_release *out)
 {
 	enum json_type  next = JSON_NULL;
 	const char     *key;
@@ -160,21 +160,21 @@ gitlab_get_releases(
 	const char     *owner,
 	const char     *repo,
 	int             max,
-	ghcli_release **out)
+	gcli_release **out)
 {
 	char               *url      = NULL;
 	char               *next_url = NULL;
 	char               *e_owner  = NULL;
 	char               *e_repo   = NULL;
-	ghcli_fetch_buffer  buffer   = {0};
+	gcli_fetch_buffer  buffer   = {0};
 	struct json_stream  stream   = {0};
 	enum json_type      next     = JSON_NULL;
 	int                 size     = 0;
 
 	*out = NULL;
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
 		"%s/projects/%s%%2F%s/releases",
@@ -182,7 +182,7 @@ gitlab_get_releases(
 		e_owner, e_repo);
 
 	do {
-		ghcli_fetch(url, &next_url, &buffer);
+		gcli_fetch(url, &next_url, &buffer);
 
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		json_set_streaming(&stream, 1);
@@ -192,7 +192,7 @@ gitlab_get_releases(
 
 		while ((next = json_peek(&stream)) == JSON_OBJECT) {
 			*out = realloc(*out, sizeof(**out) * (size + 1));
-			ghcli_release *it = &(*out)[size++];
+			gcli_release *it = &(*out)[size++];
 			gitlab_parse_release(&stream, it);
 
 			if (size == max)
@@ -212,7 +212,7 @@ gitlab_get_releases(
 }
 
 void
-gitlab_create_release(const ghcli_new_release *release)
+gitlab_create_release(const gcli_new_release *release)
 {
 	char               *url            = NULL;
 	char               *upload_url     = NULL;
@@ -222,17 +222,17 @@ gitlab_create_release(const ghcli_new_release *release)
 	char               *e_repo         = NULL;
 	char               *commitish_json = NULL;
 	sn_sv               escaped_body   = {0};
-	ghcli_fetch_buffer  buffer         = {0};
+	gcli_fetch_buffer  buffer         = {0};
 
-	e_owner = ghcli_urlencode(release->owner);
-	e_repo  = ghcli_urlencode(release->repo);
+	e_owner = gcli_urlencode(release->owner);
+	e_repo  = gcli_urlencode(release->repo);
 
 	/* https://docs.github.com/en/rest/reference/repos#create-a-release */
 	url = sn_asprintf(
 		"%s/projects/%s%%2F%s/releases",
 		gitlab_get_apibase(), e_owner, e_repo);
 
-	escaped_body = ghcli_json_escape(release->body);
+	escaped_body = gcli_json_escape(release->body);
 
 	if (release->commitish)
 		commitish_json = sn_asprintf(
@@ -263,7 +263,7 @@ gitlab_create_release(const ghcli_new_release *release)
 		commitish_json ? commitish_json : "",
 		name_json ? name_json : "");
 
-	ghcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
+	gcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
 
 	if (release->assets_size)
 		warnx("GitLab release asset uploads are not yet supported");
@@ -285,17 +285,17 @@ gitlab_delete_release(const char *owner, const char *repo, const char *id)
 	char               *url     = NULL;
 	char               *e_owner = NULL;
 	char               *e_repo  = NULL;
-	ghcli_fetch_buffer  buffer  = {0};
+	gcli_fetch_buffer  buffer  = {0};
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
 		"%s/projects/%s%%2F%s/releases/%s",
 		gitlab_get_apibase(),
 		e_owner, e_repo, id);
 
-	ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
 	free(url);
 	free(e_owner);

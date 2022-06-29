@@ -27,10 +27,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/curl.h>
-#include <ghcli/gitlab/config.h>
-#include <ghcli/json_util.h>
-#include <ghcli/snippets.h>
+#include <gcli/curl.h>
+#include <gcli/gitlab/config.h>
+#include <gcli/json_util.h>
+#include <gcli/snippets.h>
 
 #include <pdjson/pdjson.h>
 #include <sn/sn.h>
@@ -38,8 +38,8 @@
 #include <stdlib.h>
 
 void
-ghcli_snippets_free(
-	ghcli_snippet *list,
+gcli_snippets_free(
+	gcli_snippet *list,
 	int            list_size)
 {
 	for (int i = 0; i < list_size; ++i) {
@@ -55,7 +55,7 @@ ghcli_snippets_free(
 }
 
 static void
-gitlab_parse_snippet(struct json_stream *stream, ghcli_snippet *out)
+gitlab_parse_snippet(struct json_stream *stream, gcli_snippet *out)
 {
 	enum json_type  next       = JSON_NULL;
 	enum json_type  value_type = JSON_NULL;
@@ -103,11 +103,11 @@ gitlab_parse_snippet(struct json_stream *stream, ghcli_snippet *out)
 }
 
 int
-ghcli_snippets_get(int max, ghcli_snippet **out)
+gcli_snippets_get(int max, gcli_snippet **out)
 {
 	char               *url      = NULL;
 	char               *next_url = NULL;
-	ghcli_fetch_buffer  buffer   = {0};
+	gcli_fetch_buffer  buffer   = {0};
 	struct json_stream  stream   = {0};
 	int                 size     = 0;
 
@@ -116,7 +116,7 @@ ghcli_snippets_get(int max, ghcli_snippet **out)
 	url = sn_asprintf("%s/snippets", gitlab_get_apibase());
 
 	do {
-		ghcli_fetch(url, &next_url, &buffer);
+		gcli_fetch(url, &next_url, &buffer);
 
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		json_set_streaming(&stream, 1);
@@ -126,7 +126,7 @@ ghcli_snippets_get(int max, ghcli_snippet **out)
 
 		while (json_peek(&stream) == JSON_OBJECT) {
 			*out = realloc(*out, sizeof(**out) * (size + 1));
-			ghcli_snippet *it = &(*out)[size++];
+			gcli_snippet *it = &(*out)[size++];
 			gitlab_parse_snippet(&stream, it);
 
 			if (size == max)
@@ -148,7 +148,7 @@ ghcli_snippets_get(int max, ghcli_snippet **out)
 }
 
 static void
-ghcli_print_snippet(ghcli_snippet *it)
+gcli_print_snippet(gcli_snippet *it)
 {
 	printf("    ID : %d\n", it->id);
 	printf(" TITLE : %s\n", it->title);
@@ -160,9 +160,9 @@ ghcli_print_snippet(ghcli_snippet *it)
 }
 
 void
-ghcli_snippets_print(
-	enum ghcli_output_order  order,
-	ghcli_snippet           *list,
+gcli_snippets_print(
+	enum gcli_output_order  order,
+	gcli_snippet           *list,
 	int                      list_size)
 {
 	if (list_size == 0) {
@@ -173,35 +173,35 @@ ghcli_snippets_print(
 	/* output in reverse order if the sorted flag was enabled */
 	if (order == OUTPUT_ORDER_SORTED) {
 		for (int i = list_size; i > 0; --i) {
-			ghcli_print_snippet(&list[i - 1]);
+			gcli_print_snippet(&list[i - 1]);
 			putchar('\n');
 		}
 	} else {
 		for (int i = 0; i < list_size; ++i) {
-			ghcli_print_snippet(&list[i]);
+			gcli_print_snippet(&list[i]);
 			putchar('\n');
 		}
 	}
 }
 
 void
-ghcli_snippet_delete(const char *snippet_id)
+gcli_snippet_delete(const char *snippet_id)
 {
-	ghcli_fetch_buffer buffer = {0};
+	gcli_fetch_buffer buffer = {0};
 	char *url = sn_asprintf("%s/snippets/%s", gitlab_get_apibase(), snippet_id);
 
-	ghcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
 	free(url);
 	free(buffer.data);
 }
 
 void
-ghcli_snippet_get(const char *snippet_id)
+gcli_snippet_get(const char *snippet_id)
 {
 	char *url = sn_asprintf("%s/snippets/%s/raw",
 				gitlab_get_apibase(),
 				snippet_id);
-	ghcli_curl(stdout, url, NULL);
+	gcli_curl(stdout, url, NULL);
 	free(url);
 }

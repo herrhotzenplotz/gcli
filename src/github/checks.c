@@ -29,16 +29,16 @@
 
 #include <assert.h>
 
-#include <ghcli/github/checks.h>
-#include <ghcli/config.h>
-#include <ghcli/color.h>
-#include <ghcli/curl.h>
-#include <ghcli/json_util.h>
+#include <gcli/github/checks.h>
+#include <gcli/config.h>
+#include <gcli/color.h>
+#include <gcli/curl.h>
+#include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
 
 static void
-github_parse_check(struct json_stream *input, ghcli_github_check *it)
+github_parse_check(struct json_stream *input, gcli_github_check *it)
 {
 	if (json_next(input) != JSON_OBJECT)
 		errx(1, "Expected Check Object");
@@ -71,9 +71,9 @@ github_get_checks(
 	const char *repo,
 	const char *ref,
 	int         max,
-	ghcli_github_check **out)
+	gcli_github_check **out)
 {
-	ghcli_fetch_buffer	 buffer	  = {0};
+	gcli_fetch_buffer	 buffer	  = {0};
 	char				*url	  = NULL;
 	char                *next_url = NULL;
 	int					 out_size = 0;
@@ -83,27 +83,27 @@ github_get_checks(
 	*out = NULL;
 
 	url = sn_asprintf("%s/repos/%s/%s/commits/%s/check-runs",
-					  ghcli_get_apibase(),
+					  gcli_get_apibase(),
 					  owner, repo, ref);
 
 	do {
 		struct json_stream stream = {0};
 		enum   json_type   next   = JSON_NULL;
 
-		ghcli_fetch(url, &next_url, &buffer);
+		gcli_fetch(url, &next_url, &buffer);
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		json_set_streaming(&stream, 1);
 
-		ghcli_json_advance(&stream, "{sis", "total_count", "check_runs");
+		gcli_json_advance(&stream, "{sis", "total_count", "check_runs");
 
 		next = json_next(&stream);
 		if (next != JSON_ARRAY)
 			errx(1, "error: expected array of checks");
 
 		while (json_peek(&stream) != JSON_ARRAY_END) {
-			ghcli_github_check *it = NULL;
+			gcli_github_check *it = NULL;
 
-			*out = realloc(*out, sizeof(ghcli_github_check) * (out_size + 1));
+			*out = realloc(*out, sizeof(gcli_github_check) * (out_size + 1));
 			it = &(*out)[out_size++];
 
 			memset(it, 0, sizeof(*it));
@@ -128,7 +128,7 @@ github_get_checks(
 }
 
 void
-github_print_checks(ghcli_github_check *checks, int checks_size)
+github_print_checks(gcli_github_check *checks, int checks_size)
 {
 	printf("%10.10s  %10.10s  %10.10s  %16.16s  %16.16s  %-s\n",
 		   "ID", "STATUS", "CONCLUSION", "STARTED", "COMPLETED", "NAME");
@@ -137,9 +137,9 @@ github_print_checks(ghcli_github_check *checks, int checks_size)
 		printf("%10ld  %10.10s  %s%10.10s%s  %16.16s  %16.16s  %-s\n",
 			   checks[i].id,
 			   checks[i].status,
-			   ghcli_state_color_str(checks[i].conclusion),
+			   gcli_state_color_str(checks[i].conclusion),
 			   checks[i].conclusion,
-			   ghcli_resetcolor(),
+			   gcli_resetcolor(),
 			   checks[i].started_at,
 			   checks[i].completed_at,
 			   checks[i].name);
@@ -148,7 +148,7 @@ github_print_checks(ghcli_github_check *checks, int checks_size)
 
 void
 github_free_checks(
-	ghcli_github_check *checks,
+	gcli_github_check *checks,
 	int                 checks_size)
 {
 	for (int i = 0; i < checks_size; ++i) {
@@ -169,7 +169,7 @@ github_checks(
 	const char	*ref,
 	int			 max)
 {
-	ghcli_github_check	*checks		 = NULL;
+	gcli_github_check	*checks		 = NULL;
 	int					 checks_size = 0;
 
 	checks_size = github_get_checks(owner, repo, ref, max, &checks);

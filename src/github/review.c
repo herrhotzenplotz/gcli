@@ -27,14 +27,14 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/github/review.h>
-#include <ghcli/config.h>
-#include <ghcli/json_util.h>
+#include <gcli/github/review.h>
+#include <gcli/config.h>
+#include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
 
 static void
-github_parse_review_comment(json_stream *input, ghcli_pr_review_comment *it)
+github_parse_review_comment(json_stream *input, gcli_pr_review_comment *it)
 {
 	if (json_next(input) != JSON_OBJECT)
 		errx(1, "Expected review comment object");
@@ -64,22 +64,22 @@ github_parse_review_comment(json_stream *input, ghcli_pr_review_comment *it)
 }
 
 static void
-github_parse_review_comments(json_stream *input, ghcli_pr_review *it)
+github_parse_review_comments(json_stream *input, gcli_pr_review *it)
 {
-	ghcli_json_advance(input, "{s[", "nodes");
+	gcli_json_advance(input, "{s[", "nodes");
 	while (json_peek(input) == JSON_OBJECT) {
 		it->comments = realloc(
 			it->comments,
 			sizeof(*it->comments) * (it->comments_size + 1));
-		ghcli_pr_review_comment *comment = &it->comments[it->comments_size++];
-		*comment                         = (ghcli_pr_review_comment) {0};
+		gcli_pr_review_comment *comment = &it->comments[it->comments_size++];
+		*comment                         = (gcli_pr_review_comment) {0};
 		github_parse_review_comment(input, comment);
 	}
-	ghcli_json_advance(input, "]}");
+	gcli_json_advance(input, "]}");
 }
 
 static void
-github_parse_review_header(json_stream *input, ghcli_pr_review *it)
+github_parse_review_header(json_stream *input, gcli_pr_review *it)
 {
 	if (json_next(input) != JSON_OBJECT)
 		errx(1, "Expected review object");
@@ -144,9 +144,9 @@ github_review_get_reviews(
 	const char *owner,
 	const char *repo,
 	int pr,
-	ghcli_pr_review **out)
+	gcli_pr_review **out)
 {
-	ghcli_fetch_buffer  buffer        = {0};
+	gcli_fetch_buffer  buffer        = {0};
 	char               *url           = NULL;
 	char               *query         = NULL;
 	sn_sv               query_escaped = {0};
@@ -155,17 +155,17 @@ github_review_get_reviews(
 	enum   json_type    next          = JSON_NULL;
 	size_t              size          = 0;
 
-	url           = sn_asprintf("%s/graphql", ghcli_get_apibase());
+	url           = sn_asprintf("%s/graphql", gcli_get_apibase());
 	query         = sn_asprintf(get_reviews_fmt, owner, repo, pr);
-	query_escaped = ghcli_json_escape(SV(query));
+	query_escaped = gcli_json_escape(SV(query));
 	post_data     = sn_asprintf("{\"query\": \""SV_FMT"\"}",
-				    SV_ARGS(query_escaped));
-	ghcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
+					SV_ARGS(query_escaped));
+	gcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
 
 	json_open_buffer(&stream, buffer.data, buffer.length);
 	json_set_streaming(&stream, true);
 
-	ghcli_json_advance(
+	gcli_json_advance(
 		&stream, "{s{s{s{s{s",
 		"data", "repository", "pullRequest", "reviews", "nodes");
 
@@ -174,10 +174,10 @@ github_review_get_reviews(
 		errx(1, "error: expected json array for review list");
 
 	while ((next = json_peek(&stream)) == JSON_OBJECT) {
-		*out = realloc(*out, sizeof(ghcli_pr_review) * (size + 1));
-		ghcli_pr_review *it = &(*out)[size];
+		*out = realloc(*out, sizeof(gcli_pr_review) * (size + 1));
+		gcli_pr_review *it = &(*out)[size];
 
-		*it = (ghcli_pr_review) {0};
+		*it = (gcli_pr_review) {0};
 
 		github_parse_review_header(&stream, it);
 
@@ -187,7 +187,7 @@ github_review_get_reviews(
 	if (json_next(&stream) != JSON_ARRAY_END)
 		errx(1, "error: expected end of json array");
 
-	ghcli_json_advance(&stream, "}}}}}");
+	gcli_json_advance(&stream, "}}}}}");
 
 	free(buffer.data);
 	free(url);

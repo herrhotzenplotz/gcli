@@ -27,8 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/json_util.h>
-#include <ghcli/forges.h>
+#include <gcli/json_util.h>
+#include <gcli/forges.h>
 #include <sn/sn.h>
 
 #include <assert.h>
@@ -42,7 +42,7 @@ barf(const char *message, const char *where)
 	errx(1,
 		 "error: %s.\n"
 		 "       This might be an error on the GitHub api or the result of\n"
-		 "       incorrect usage of cli flags. See ghcli(1) to make sure your\n"
+		 "       incorrect usage of cli flags. See gcli(1) to make sure your\n"
 		 "       flags are correct. If you are certain that all your options\n"
 		 "       were correct, please submit a bug report including the\n"
 		 "       command you invoked and the following information about the\n"
@@ -109,7 +109,7 @@ get_user_(json_stream *input, const char *where)
 	if (json_next(input) != JSON_OBJECT)
 		barf("user field is not an object", where);
 
-	const char *expected_key = ghcli_forge()->user_object_key;
+	const char *expected_key = gcli_forge()->user_object_key;
 
 	char *result = NULL;
 	while (json_next(input) == JSON_STRING) {
@@ -144,7 +144,7 @@ static struct {
 };
 
 sn_sv
-ghcli_json_escape(sn_sv it)
+gcli_json_escape(sn_sv it)
 {
 	sn_sv result = {0};
 
@@ -190,7 +190,7 @@ get_sv_(json_stream *input, const char *where)
 }
 
 void
-ghcli_print_html_url(ghcli_fetch_buffer buffer)
+gcli_print_html_url(gcli_fetch_buffer buffer)
 {
 	json_stream stream = {0};
 
@@ -198,7 +198,7 @@ ghcli_print_html_url(ghcli_fetch_buffer buffer)
 	json_set_streaming(&stream, true);
 
 	enum json_type  next         = json_next(&stream);
-	const char     *expected_key = ghcli_forge()->html_url_key;
+	const char     *expected_key = gcli_forge()->html_url_key;
 
 	while ((next = json_next(&stream)) == JSON_STRING) {
 		size_t len;
@@ -258,7 +258,7 @@ get_label_(json_stream *input, const char *where)
 
 
 size_t
-ghcli_read_label_list(json_stream *stream, sn_sv **out)
+gcli_read_label_list(json_stream *stream, sn_sv **out)
 {
 	enum json_type next;
 	size_t         size;
@@ -286,7 +286,7 @@ ghcli_read_label_list(json_stream *stream, sn_sv **out)
 }
 
 size_t
-ghcli_read_user_list(json_stream *input, sn_sv **out)
+gcli_read_user_list(json_stream *input, sn_sv **out)
 {
 	size_t n = 0;
 
@@ -313,7 +313,7 @@ ghcli_read_user_list(json_stream *input, sn_sv **out)
 }
 
 void
-ghcli_json_advance(struct json_stream *stream, const char *fmt, ...)
+gcli_json_advance(struct json_stream *stream, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -372,7 +372,7 @@ get_parse_int_(json_stream *input, const char *function)
 }
 
 size_t
-ghcli_read_sv_list(json_stream *input, sn_sv **out)
+gcli_read_sv_list(json_stream *input, sn_sv **out)
 {
 	enum json_type next;
 	size_t         size;

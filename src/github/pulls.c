@@ -27,12 +27,12 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/config.h>
-#include <ghcli/curl.h>
-#include <ghcli/gitconfig.h>
-#include <ghcli/github/config.h>
-#include <ghcli/github/pulls.h>
-#include <ghcli/json_util.h>
+#include <gcli/config.h>
+#include <gcli/curl.h>
+#include <gcli/gitconfig.h>
+#include <gcli/github/config.h>
+#include <gcli/github/pulls.h>
+#include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
 
@@ -62,7 +62,7 @@ get_branch_label(json_stream *input)
 }
 
 static void
-parse_pull_entry(json_stream *input, ghcli_pull *it)
+parse_pull_entry(json_stream *input, gcli_pull *it)
 {
 	if (json_next(input) != JSON_OBJECT)
 		errx(1, "Expected Issue Object");
@@ -95,26 +95,26 @@ github_get_prs(
 	const char  *repo,
 	bool         all,
 	int          max,
-	ghcli_pull **out)
+	gcli_pull **out)
 {
 	int                 count       = 0;
 	json_stream         stream      = {0};
-	ghcli_fetch_buffer  json_buffer = {0};
+	gcli_fetch_buffer  json_buffer = {0};
 	char               *url         = NULL;
 	char               *next_url    = NULL;
 	char               *e_owner     = NULL;
 	char               *e_repo      = NULL;
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/pulls?state=%s",
-		ghcli_get_apibase(),
+		gcli_get_apibase(),
 		e_owner, e_repo, all ? "all" : "open");
 
 	do {
-		ghcli_fetch(url, &next_url, &json_buffer);
+		gcli_fetch(url, &next_url, &json_buffer);
 
 		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 		json_set_streaming(&stream, true);
@@ -128,9 +128,9 @@ github_get_prs(
 				errx(1, "Parser error: %s", json_get_error(&stream));
 				break;
 			case JSON_OBJECT: {
-				*out = realloc(*out, sizeof(ghcli_pull) * (count + 1));
-				ghcli_pull *it = &(*out)[count];
-				memset(it, 0, sizeof(ghcli_pull));
+				*out = realloc(*out, sizeof(gcli_pull) * (count + 1));
+				gcli_pull *it = &(*out)[count];
+				memset(it, 0, sizeof(gcli_pull));
 				parse_pull_entry(&stream, it);
 				count += 1;
 			} break;
@@ -166,14 +166,14 @@ github_print_pr_diff(
 	char *e_owner = NULL;
 	char *e_repo  = NULL;
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/pulls/%d",
-		ghcli_get_apibase(),
+		gcli_get_apibase(),
 		e_owner, e_repo, pr_number);
-	ghcli_curl(stream, url, "Accept: application/vnd.github.v3.diff");
+	gcli_curl(stream, url, "Accept: application/vnd.github.v3.diff");
 
 	free(e_owner);
 	free(e_repo);
@@ -188,7 +188,7 @@ github_pr_merge(
 	bool        squash)
 {
 	json_stream         stream      = {0};
-	ghcli_fetch_buffer  json_buffer = {0};
+	gcli_fetch_buffer  json_buffer = {0};
 	char               *url         = NULL;
 	char               *e_owner     = NULL;
 	char               *e_repo      = NULL;
@@ -198,16 +198,16 @@ github_pr_merge(
 	const char         *message;
 	const char         *key;
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/pulls/%d/merge?merge_method=%s",
-		ghcli_get_apibase(),
+		gcli_get_apibase(),
 		e_owner, e_repo, pr_number,
 		squash ? "squash" : "merge");
 
-	ghcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
+	gcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
 	json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 	json_set_streaming(&stream, true);
 
@@ -239,22 +239,22 @@ github_pr_merge(
 void
 github_pr_close(const char *owner, const char *repo, int pr_number)
 {
-	ghcli_fetch_buffer  json_buffer = {0};
+	gcli_fetch_buffer  json_buffer = {0};
 	char               *url         = NULL;
 	char               *e_owner     = NULL;
 	char               *e_repo      = NULL;
 	char               *data        = NULL;
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url  = sn_asprintf(
 		"%s/repos/%s/%s/pulls/%d",
-		ghcli_get_apibase(),
+		gcli_get_apibase(),
 		e_owner, e_repo, pr_number);
 	data = sn_asprintf("{ \"state\": \"closed\"}");
 
-	ghcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
+	gcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
 
 	free(json_buffer.data);
 	free(url);
@@ -266,22 +266,22 @@ github_pr_close(const char *owner, const char *repo, int pr_number)
 void
 github_pr_reopen(const char *owner, const char *repo, int pr_number)
 {
-	ghcli_fetch_buffer  json_buffer = {0};
+	gcli_fetch_buffer  json_buffer = {0};
 	char               *url         = NULL;
 	char               *data        = NULL;
 	char               *e_owner     = NULL;
 	char               *e_repo      = NULL;
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url  = sn_asprintf(
 		"%s/repos/%s/%s/pulls/%d",
-		ghcli_get_apibase(),
+		gcli_get_apibase(),
 		e_owner, e_repo, pr_number);
 	data = sn_asprintf("{ \"state\": \"open\"}");
 
-	ghcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
+	gcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
 
 	free(json_buffer.data);
 	free(url);
@@ -292,8 +292,8 @@ github_pr_reopen(const char *owner, const char *repo, int pr_number)
 
 void
 github_perform_submit_pr(
-	ghcli_submit_pull_options  opts,
-	ghcli_fetch_buffer        *out)
+	gcli_submit_pull_options  opts,
+	gcli_fetch_buffer        *out)
 {
 	/* TODO : JSON Injection */
 	char *post_fields = sn_asprintf(
@@ -305,16 +305,16 @@ github_perform_submit_pr(
 		SV_ARGS(opts.body));
 	char *url         = sn_asprintf(
 		"%s/repos/"SV_FMT"/pulls",
-		ghcli_get_apibase(),
+		gcli_get_apibase(),
 		SV_ARGS(opts.in));
 
-	ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
+	gcli_fetch_with_method("POST", url, post_fields, NULL, out);
 	free(post_fields);
 	free(url);
 }
 
 static void
-github_parse_commit_author_field(json_stream *input, ghcli_commit *it)
+github_parse_commit_author_field(json_stream *input, gcli_commit *it)
 {
 	enum json_type key_type;
 	const char *key;
@@ -340,7 +340,7 @@ github_parse_commit_author_field(json_stream *input, ghcli_commit *it)
 }
 
 static void
-github_parse_commit_commit_field(json_stream *input, ghcli_commit *it)
+github_parse_commit_commit_field(json_stream *input, gcli_commit *it)
 {
 	enum json_type key_type;
 	const char *key;
@@ -364,7 +364,7 @@ github_parse_commit_commit_field(json_stream *input, ghcli_commit *it)
 }
 
 static void
-github_parse_commit(json_stream *input, ghcli_commit *it)
+github_parse_commit(json_stream *input, gcli_commit *it)
 {
 	enum json_type key_type;
 	const char *key;
@@ -392,7 +392,7 @@ github_get_pull_commits(
 	const char    *owner,
 	const char    *repo,
 	int            pr_number,
-	ghcli_commit **out)
+	gcli_commit **out)
 {
 	char              *url         = NULL;
 	char              *next_url    = NULL;
@@ -400,18 +400,18 @@ github_get_pull_commits(
 	char              *e_repo      = NULL;
 	int                count       = 0;
 	json_stream        stream      = {0};
-	ghcli_fetch_buffer json_buffer = {0};
+	gcli_fetch_buffer json_buffer = {0};
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/pulls/%d/commits",
-		ghcli_get_apibase(),
+		gcli_get_apibase(),
 		e_owner, e_repo, pr_number);
 
 	do {
-		ghcli_fetch(url, &next_url, &json_buffer);
+		gcli_fetch(url, &next_url, &json_buffer);
 		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 		json_set_streaming(&stream, true);
 
@@ -421,8 +421,8 @@ github_get_pull_commits(
 			if (next_token != JSON_OBJECT)
 				errx(1, "Unexpected non-object in commit list");
 
-			*out = realloc(*out, (count + 1) * sizeof(ghcli_commit));
-			ghcli_commit *it = &(*out)[count];
+			*out = realloc(*out, (count + 1) * sizeof(gcli_commit));
+			gcli_commit *it = &(*out)[count];
 			github_parse_commit(&stream, it);
 			count += 1;
 		}
@@ -439,7 +439,7 @@ github_get_pull_commits(
 }
 
 static void
-github_parse_pull_head(json_stream *input, ghcli_pull_summary *out)
+github_parse_pull_head(json_stream *input, gcli_pull_summary *out)
 {
 	enum json_type key_type;
 	const char *key;
@@ -462,7 +462,7 @@ github_parse_pull_head(json_stream *input, ghcli_pull_summary *out)
 }
 
 static void
-github_pull_parse_summary(json_stream *input, ghcli_pull_summary *out)
+github_pull_parse_summary(json_stream *input, gcli_pull_summary *out)
 {
 	enum json_type key_type;
 	const char *key;
@@ -488,7 +488,7 @@ github_pull_parse_summary(json_stream *input, ghcli_pull_summary *out)
 		else if (strncmp("commits", key, len) == 0)
 			out->commits = get_int(input);
 		else if (strncmp("labels", key, len) == 0)
-			out->labels_size = ghcli_read_label_list(input, &out->labels);
+			out->labels_size = gcli_read_label_list(input, &out->labels);
 		else if (strncmp("comments", key, len) == 0)
 			out->comments = get_int(input);
 		else if (strncmp("additions", key, len) == 0)
@@ -522,22 +522,22 @@ github_get_pull_summary(
 	const char         *owner,
 	const char         *repo,
 	int                 pr_number,
-	ghcli_pull_summary *out)
+	gcli_pull_summary *out)
 {
 	json_stream         stream      = {0};
-	ghcli_fetch_buffer  json_buffer = {0};
+	gcli_fetch_buffer  json_buffer = {0};
 	char               *url         = NULL;
 	char               *e_owner     = NULL;
 	char               *e_repo      = NULL;
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/pulls/%d",
-		ghcli_get_apibase(),
+		gcli_get_apibase(),
 		e_owner, e_repo, pr_number);
-	ghcli_fetch(url, NULL, &json_buffer);
+	gcli_fetch(url, NULL, &json_buffer);
 
 	json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 	json_set_streaming(&stream, true);

@@ -31,50 +31,50 @@
 #include <ctype.h>
 #include <string.h>
 
-#include <ghcli/config.h>
-#include <ghcli/curl.h>
-#include <ghcli/forges.h>
-#include <ghcli/json_util.h>
+#include <gcli/config.h>
+#include <gcli/curl.h>
+#include <gcli/forges.h>
+#include <gcli/json_util.h>
 
 #include <curl/curl.h>
 #include <sn/sn.h>
 #include <pdjson/pdjson.h>
 
 /* Cached curl handle */
-static CURL *ghcli_curl_session = NULL;
+static CURL *gcli_curl_session = NULL;
 
 /* Clean up the curl handle. Called by the atexit destructor chain */
 static void
-ghcli_cleanup_curl(void)
+gcli_cleanup_curl(void)
 {
-	if (ghcli_curl_session)
-		curl_easy_cleanup(ghcli_curl_session);
-	ghcli_curl_session = NULL;
+	if (gcli_curl_session)
+		curl_easy_cleanup(gcli_curl_session);
+	gcli_curl_session = NULL;
 }
 
 /* Ensures a clean cURL handle. Call this whenever you wanna use the
- * ghcli_curl_session */
+ * gcli_curl_session */
 static void
-ghcli_curl_ensure(void)
+gcli_curl_ensure(void)
 {
-	if (ghcli_curl_session) {
-		curl_easy_reset(ghcli_curl_session);
+	if (gcli_curl_session) {
+		curl_easy_reset(gcli_curl_session);
 	} else {
-		ghcli_curl_session = curl_easy_init();
-		if (!ghcli_curl_session)
+		gcli_curl_session = curl_easy_init();
+		if (!gcli_curl_session)
 			errx(1, "error: cannot initialize curl");
 
-		atexit(ghcli_cleanup_curl);
+		atexit(gcli_cleanup_curl);
 	}
 }
 
 /* Check the given curl code for an OK result. If not, print an
  * appropriate error message and exit */
 static void
-ghcli_curl_check_api_error(
+gcli_curl_check_api_error(
 	CURLcode code,
 	const char *url,
-	ghcli_fetch_buffer *result)
+	gcli_fetch_buffer *result)
 {
 	long status_code = 0;
 
@@ -85,23 +85,23 @@ ghcli_curl_check_api_error(
 			 url,
 			 curl_easy_strerror(code));
 
-	curl_easy_getinfo(ghcli_curl_session, CURLINFO_RESPONSE_CODE, &status_code);
+	curl_easy_getinfo(gcli_curl_session, CURLINFO_RESPONSE_CODE, &status_code);
 
 	if (status_code >= 300L) {
 		errx(1,
 			 "error: request to %s failed with code %ld\n"
 			 "     : API error: %s",
 			 url, status_code,
-			 ghcli_forge()->get_api_error_string(result));
+			 gcli_forge()->get_api_error_string(result));
 	}
 }
 
-/* Callback for writing data into the ghcli_fetch_buffer passed by
+/* Callback for writing data into the gcli_fetch_buffer passed by
  * calling routines */
 static size_t
 fetch_write_callback(char *in, size_t size, size_t nmemb, void *data)
 {
-	ghcli_fetch_buffer *out = data;
+	gcli_fetch_buffer *out = data;
 
 	out->data = realloc(out->data, out->length + size * nmemb);
 	memcpy(&(out->data[out->length]), in, size * nmemb);
@@ -113,46 +113,46 @@ fetch_write_callback(char *in, size_t size, size_t nmemb, void *data)
 /* Plain HTTP get request.
  *
  * pagination_next returns the next url to query for paged results.
- * Results are placed into the ghcli_fetch_buffer. */
+ * Results are placed into the gcli_fetch_buffer. */
 void
-ghcli_fetch(
+gcli_fetch(
 	const char *url,
 	char **pagination_next,
-	ghcli_fetch_buffer *out)
+	gcli_fetch_buffer *out)
 {
-	ghcli_fetch_with_method("GET", url, NULL, pagination_next, out);
+	gcli_fetch_with_method("GET", url, NULL, pagination_next, out);
 }
 
 /* Check the given url for a successful query */
 bool
-ghcli_curl_test_success(const char *url)
+gcli_curl_test_success(const char *url)
 {
 	CURLcode           ret;
-	ghcli_fetch_buffer buffer = {0};
+	gcli_fetch_buffer buffer = {0};
 	long               status_code;
 	bool               is_success = true;
 
-	ghcli_curl_ensure();
+	gcli_curl_ensure();
 
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_URL, url);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_BUFFERSIZE, 102400L);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_NOPROGRESS, 1L);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_MAXREDIRS, 50L);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_FTP_SKIP_PASV_IP, 1L);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_USERAGENT, "curl/7.78.0");
+	curl_easy_setopt(gcli_curl_session, CURLOPT_URL, url);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_BUFFERSIZE, 102400L);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_NOPROGRESS, 1L);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_MAXREDIRS, 50L);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_FTP_SKIP_PASV_IP, 1L);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_USERAGENT, "curl/7.78.0");
 	curl_easy_setopt(
-		ghcli_curl_session, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_TCP_KEEPALIVE, 1L);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_WRITEDATA, &buffer);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_FAILONERROR, 0L);
+		gcli_curl_session, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_TCP_KEEPALIVE, 1L);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEDATA, &buffer);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_FAILONERROR, 0L);
 
-	ret = curl_easy_perform(ghcli_curl_session);
+	ret = curl_easy_perform(gcli_curl_session);
 
 	if (ret != CURLE_OK) {
 		is_success = false;
 	} else {
-		curl_easy_getinfo(ghcli_curl_session, CURLINFO_RESPONSE_CODE, &status_code);
+		curl_easy_getinfo(gcli_curl_session, CURLINFO_RESPONSE_CODE, &status_code);
 
 		if (status_code >= 300L)
 			is_success = false;
@@ -168,11 +168,11 @@ ghcli_curl_test_success(const char *url)
  *
  * content_type may be NULL. */
 void
-ghcli_curl(FILE *stream, const char *url, const char *content_type)
+gcli_curl(FILE *stream, const char *url, const char *content_type)
 {
 	CURLcode            ret;
 	struct curl_slist  *headers;
-	ghcli_fetch_buffer  buffer      = {0};
+	gcli_fetch_buffer  buffer      = {0};
 	char               *auth_header = NULL;
 
 	headers = NULL;
@@ -180,27 +180,27 @@ ghcli_curl(FILE *stream, const char *url, const char *content_type)
 	if (content_type)
 		headers = curl_slist_append(headers, content_type);
 
-	auth_header = ghcli_config_get_authheader();
+	auth_header = gcli_config_get_authheader();
 	headers     = curl_slist_append(headers, auth_header);
 
-	ghcli_curl_ensure();
+	gcli_curl_ensure();
 
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_URL, url);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_BUFFERSIZE, 102400L);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_NOPROGRESS, 1L);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_MAXREDIRS, 50L);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_FTP_SKIP_PASV_IP, 1L);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_HTTPHEADER, headers);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_USERAGENT, "curl/7.78.0");
+	curl_easy_setopt(gcli_curl_session, CURLOPT_URL, url);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_BUFFERSIZE, 102400L);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_NOPROGRESS, 1L);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_MAXREDIRS, 50L);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_FTP_SKIP_PASV_IP, 1L);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_HTTPHEADER, headers);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_USERAGENT, "curl/7.78.0");
 	curl_easy_setopt(
-		ghcli_curl_session, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_TCP_KEEPALIVE, 1L);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_WRITEDATA, &buffer);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_FAILONERROR, 0L);
+		gcli_curl_session, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_TCP_KEEPALIVE, 1L);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEDATA, &buffer);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_FAILONERROR, 0L);
 
-	ret = curl_easy_perform(ghcli_curl_session);
-	ghcli_curl_check_api_error(ret, url, &buffer);
+	ret = curl_easy_perform(gcli_curl_session);
+	gcli_curl_check_api_error(ret, url, &buffer);
 
 	fwrite(buffer.data, 1, buffer.length, stream);
 	free(buffer.data);
@@ -276,27 +276,27 @@ parse_link_header(char *_header)
  * - data may be NULL.
  * - pagination_next may be NULL.
  *
- * Results are placed in the ghcli_fetch_buffer.
+ * Results are placed in the gcli_fetch_buffer.
  *
  * All requests will be done with authorization through the
- * ghcli_config_get_authheader function.
+ * gcli_config_get_authheader function.
  *
  * If pagination_next is non-null a URL that can be queried for more
  * data (pagination) is placed into it. If there is no more data, it
  * will be set to NULL. */
 void
-ghcli_fetch_with_method(
+gcli_fetch_with_method(
 	const char  *method,          /* HTTP method. e.g. POST, GET, DELETE etc. */
 	const char  *url,             /* Endpoint                                 */
 	const char  *data,            /* Form data                                */
 	char       **pagination_next, /* Next URL for pagination                  */
-	ghcli_fetch_buffer *out)      /* output buffer                            */
+	gcli_fetch_buffer *out)      /* output buffer                            */
 {
 	CURLcode           ret;
 	struct curl_slist *headers;
 	char              *link_header = NULL;
 
-	char *auth_header = ghcli_config_get_authheader();
+	char *auth_header = gcli_config_get_authheader();
 
 	headers = NULL;
 	headers = curl_slist_append(
@@ -308,27 +308,27 @@ ghcli_fetch_with_method(
 	if (auth_header)
 		headers = curl_slist_append(headers, auth_header);
 
-	*out = (ghcli_fetch_buffer) {0};
+	*out = (gcli_fetch_buffer) {0};
 
-	ghcli_curl_ensure();
+	gcli_curl_ensure();
 
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_URL, url);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_URL, url);
 
 	if (data)
-		curl_easy_setopt(ghcli_curl_session, CURLOPT_POSTFIELDS, data);
+		curl_easy_setopt(gcli_curl_session, CURLOPT_POSTFIELDS, data);
 
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_HTTPHEADER, headers);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_USERAGENT, "curl/7.79.1");
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_CUSTOMREQUEST, method);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_TCP_KEEPALIVE, 1L);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_WRITEDATA, out);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_FAILONERROR, 0L);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_HEADERFUNCTION, fetch_header_callback);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_HEADERDATA, &link_header);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_HTTPHEADER, headers);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_USERAGENT, "curl/7.79.1");
+	curl_easy_setopt(gcli_curl_session, CURLOPT_CUSTOMREQUEST, method);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_TCP_KEEPALIVE, 1L);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEDATA, out);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_FAILONERROR, 0L);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_HEADERFUNCTION, fetch_header_callback);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_HEADERDATA, &link_header);
 
-	ret = curl_easy_perform(ghcli_curl_session);
-	ghcli_curl_check_api_error(ret, url, out);
+	ret = curl_easy_perform(gcli_curl_session);
+	gcli_curl_check_api_error(ret, url, out);
 
 	if (link_header && pagination_next)
 		*pagination_next = parse_link_header(link_header);
@@ -348,17 +348,17 @@ ghcli_fetch_with_method(
  * content_type may not be NULL.
  */
 void
-ghcli_post_upload(
+gcli_post_upload(
 	const char         *url,
 	const char         *content_type,
 	void               *buffer,
 	size_t              buffer_size,
-	ghcli_fetch_buffer *out)
+	gcli_fetch_buffer *out)
 {
 	CURLcode              ret;
 	struct curl_slist    *headers;
 
-	char *auth_header = ghcli_config_get_authheader();
+	char *auth_header = gcli_config_get_authheader();
 	char *contenttype_header = sn_asprintf(
 		"Content-Type: %s",
 		content_type);
@@ -374,20 +374,20 @@ ghcli_post_upload(
 	headers = curl_slist_append(headers, contenttype_header);
 	headers = curl_slist_append(headers, contentsize_header);
 
-	ghcli_curl_ensure();
+	gcli_curl_ensure();
 
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_URL, url);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_POST, 1L);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_POSTFIELDS, buffer);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_POSTFIELDSIZE, (long)buffer_size);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_URL, url);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_POST, 1L);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_POSTFIELDS, buffer);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_POSTFIELDSIZE, (long)buffer_size);
 
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_HTTPHEADER, headers);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_USERAGENT, "curl/7.79.1");
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_WRITEDATA, out);
-	curl_easy_setopt(ghcli_curl_session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_HTTPHEADER, headers);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_USERAGENT, "curl/7.79.1");
+	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEDATA, out);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
 
-	ret = curl_easy_perform(ghcli_curl_session);
-	ghcli_curl_check_api_error(ret, url, out);
+	ret = curl_easy_perform(gcli_curl_session);
+	gcli_curl_check_api_error(ret, url, out);
 
 	curl_slist_free_all(headers);
 	headers = NULL;
@@ -398,7 +398,7 @@ ghcli_post_upload(
 }
 
 sn_sv
-ghcli_urlencode_sv(sn_sv _input)
+gcli_urlencode_sv(sn_sv _input)
 {
 	size_t  input_len;
 	size_t  output_len;
@@ -425,8 +425,8 @@ ghcli_urlencode_sv(sn_sv _input)
 }
 
 char *
-ghcli_urlencode(const char *input)
+gcli_urlencode(const char *input)
 {
-	sn_sv encoded = ghcli_urlencode_sv(SV((char *)input));
+	sn_sv encoded = gcli_urlencode_sv(SV((char *)input));
 	return encoded.data;
 }

@@ -1,9 +1,9 @@
-#+TITLE: ghcli todos
+#+TITLE: gcli todos
 
 ** DONE handle errors from the github api
-   - [[file:src/curl.c::ghcli_fetch(const char *url, ghcli_fetch_buffer *out)][ghcli_fetch]]
-   - [[file:src/curl.c::ghcli_curl(FILE *stream, const char *url, const char *content_type)][ghcli_curl]]
-** TODO find a better way to pass the content type to ghcli_curl
+   - [[file:src/curl.c::ghcli_fetch(const char *url, ghcli_fetch_buffer *out)][gcli_fetch]]
+   - [[file:src/curl.c::ghcli_curl(FILE *stream, const char *url, const char *content_type)][gcli_curl]]
+** TODO find a better way to pass the content type to gcli_curl
 ** DONE Man page
 ** DONE fetch PR comments
 ** DONE leaks of huge buffers [50%]
@@ -28,7 +28,7 @@
 ** TODO make the use of C strings and string views more consistent
 ** DONE get rid of mktemp cuz binutils ld bitches about it
    #+begin_example
-   src/editor.o: In function `ghcli_editor_get_user_message':
+   src/editor.o: In function `gcli_editor_get_user_message':
    editor.c:(.text+0x108): warning: the use of `mktemp' is
 		   dangerous, better use `mkstemp' or `mkdtemp'
    #+end_example
@@ -55,7 +55,7 @@
 ** TODO CI [83%]
    - [X] release resources properly
    - [X] check that we are connecting to github if we ever use the
-	 =ci= subcommand [[file:src/ghcli.c::if (ghcli_config_get_forge_type() != GHCLI_FORGE_GITHUB)][see here]]
+	 =ci= subcommand [[file:src/gcli.c::if (gcli_config_get_forge_type() != GCLI_FORGE_GITHUB)][see here]]
    - [X] (maybe) integrate ci checks in status subcommand
    - [X] Split =status= and =summary= subcommands:
 	 - =summary= should print header and commits
@@ -76,11 +76,11 @@
 ** Label shit
 
    #+begin_example
-   $ ghcli labels
+   $ gcli labels
    <red>bug</red> - something is broken
    ...
-   $ ghcli labels create --description 'something is broken' --color FF0000 bug
-   $ ghcli labels delete bug
+   $ gcli labels create --description 'something is broken' --color FF0000 bug
+   $ gcli labels delete bug
    #+end_example
 
    - for colors see [[https://github.com/git/git/blob/master/color.h][git implementation]]

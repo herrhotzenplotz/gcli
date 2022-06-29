@@ -27,9 +27,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/config.h>
-#include <ghcli/ghcli.h>
-#include <ghcli/gitconfig.h>
+#include <gcli/config.h>
+#include <gcli/gcli.h>
+#include <gcli/gitconfig.h>
 #include <sn/sn.h>
 
 #include <stdio.h>
@@ -43,7 +43,7 @@
 #include <sys/mman.h>
 
 #define MAX_REMOTES 64
-static ghcli_gitremote remotes[MAX_REMOTES];
+static gcli_gitremote remotes[MAX_REMOTES];
 static size_t          remotes_size;
 
 static const char *
@@ -144,13 +144,13 @@ find_file_in_dotgit(const char *fname)
 }
 
 const char *
-ghcli_find_gitconfig(void)
+gcli_find_gitconfig(void)
 {
 	return find_file_in_dotgit("config");
 }
 
 sn_sv
-ghcli_gitconfig_get_current_branch(void)
+gcli_gitconfig_get_current_branch(void)
 {
 	const char *HEAD;
 	void       *mmap_pointer;
@@ -180,17 +180,17 @@ ghcli_gitconfig_get_current_branch(void)
 }
 
 static void
-http_extractor(ghcli_gitremote *remote, const char *prefix)
+http_extractor(gcli_gitremote *remote, const char *prefix)
 {
 	size_t prefix_size = strlen(prefix);
 	sn_sv  pair        = remote->url;
 
 	if (sn_sv_has_prefix(remote->url, "https://github.com/")) {
 		prefix_size = sizeof("https://github.com/") - 1;
-		remote->forge_type = GHCLI_FORGE_GITHUB;
+		remote->forge_type = GCLI_FORGE_GITHUB;
 	} else if (sn_sv_has_prefix(remote->url, "https://gitlab.com/")) {
 		prefix_size = sizeof("https://gitlab.com/") - 1;
-		remote->forge_type = GHCLI_FORGE_GITLAB;
+		remote->forge_type = GCLI_FORGE_GITLAB;
 	} else {
 		warnx("non-github or non-gitlab https remotes are not supported "
 			  "and will likely cause bugs");
@@ -210,14 +210,14 @@ http_extractor(ghcli_gitremote *remote, const char *prefix)
 }
 
 static void
-ssh_extractor(ghcli_gitremote *remote, const char *prefix)
+ssh_extractor(gcli_gitremote *remote, const char *prefix)
 {
 	size_t prefix_size = strlen(prefix);
 
 	if (sn_sv_has_prefix(remote->url, "git@github.com"))
-		remote->forge_type = GHCLI_FORGE_GITHUB;
+		remote->forge_type = GCLI_FORGE_GITHUB;
 	else if (sn_sv_has_prefix(remote->url, "git@gitlab.com"))
-		remote->forge_type = GHCLI_FORGE_GITLAB;
+		remote->forge_type = GCLI_FORGE_GITLAB;
 
 	sn_sv pair   = remote->url;
 	pair.length -= prefix_size;
@@ -239,7 +239,7 @@ ssh_extractor(ghcli_gitremote *remote, const char *prefix)
 
 struct forge_ex_def {
 	const char *prefix;
-	void (*extractor)(ghcli_gitremote *, const char *);
+	void (*extractor)(gcli_gitremote *, const char *);
 } url_extractors[] = {
 	{ .prefix = "git@",     .extractor = ssh_extractor  },
 	{ .prefix = "ssh://",   .extractor = ssh_extractor  },
@@ -271,7 +271,7 @@ gitconfig_parse_remote(sn_sv section_title, sn_sv entry)
 			if (remotes_size == MAX_REMOTES)
 				errx(1, "error: too many remotes");
 
-			ghcli_gitremote *remote = &remotes[remotes_size++];
+			gcli_gitremote *remote = &remotes[remotes_size++];
 
 			remote->name = remote_name;
 
@@ -299,7 +299,7 @@ gitconfig_parse_remote(sn_sv section_title, sn_sv entry)
 }
 
 static void
-ghcli_gitconfig_read_gitconfig(void)
+gcli_gitconfig_read_gitconfig(void)
 {
 	static int has_read_gitconfig = 0;
 
@@ -311,7 +311,7 @@ ghcli_gitconfig_read_gitconfig(void)
 	const char *path   = NULL;
 	sn_sv       buffer = {0};
 
-	path = ghcli_find_gitconfig();
+	path = gcli_find_gitconfig();
 	if (!path)
 		return;
 
@@ -345,7 +345,7 @@ ghcli_gitconfig_read_gitconfig(void)
 }
 
 void
-ghcli_gitconfig_add_fork_remote(const char *org, const char *repo)
+gcli_gitconfig_add_fork_remote(const char *org, const char *repo)
 {
 	char  remote[64]  = {0};
 	FILE *remote_list = popen("git remote", "r");
@@ -402,12 +402,12 @@ ghcli_gitconfig_add_fork_remote(const char *org, const char *repo)
 }
 
 /**
- * Return the ghcli_forge_type for the given remote or -1 if
+ * Return the gcli_forge_type for the given remote or -1 if
  * unknown */
 int
-ghcli_gitconfig_get_forgetype(const char *remote_name)
+gcli_gitconfig_get_forgetype(const char *remote_name)
 {
-	ghcli_gitconfig_read_gitconfig();
+	gcli_gitconfig_read_gitconfig();
 
 	if (remote_name) {
 		for (size_t i = 0; i < remotes_size; ++i) {
@@ -425,12 +425,12 @@ ghcli_gitconfig_get_forgetype(const char *remote_name)
 }
 
 int
-ghcli_gitconfig_repo_by_remote(
+gcli_gitconfig_repo_by_remote(
 	const char  *remote_name,
 	const char **owner,
 	const char **repo)
 {
-	ghcli_gitconfig_read_gitconfig();
+	gcli_gitconfig_read_gitconfig();
 
 	if (remote_name) {
 		for (size_t i = 0; i < remotes_size; ++i) {

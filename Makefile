@@ -1,14 +1,14 @@
 # Declare the list of programs
-PROGS				=	ghcli
-LIBS				=	libghcli.a
+PROGS				=	gcli
+LIBS				=	libgcli.a
 
-GHCLI_VERSION		=	0.9.0-beta
+GCLI_VERSION		=	0.9.1-beta
 # These and LDFLAGS can be overwritten
 CFLAGS				=	-std=iso9899:1999		\
 						-Ithirdparty/pdjson/	\
 						-Ithirdparty/			\
 						-Iinclude/ -fPIC -fPIE
-LDFLAGS				=	-L. -lghcli -rdynamic -fPIC \
+LDFLAGS				=	-L. -lgcli -rdynamic -fPIC \
 						-fPIE
 CFLAGS_amd64-freebsd-clang		=	-pedantic \
 									-g -O0 -ggdb -Wall -Wextra
@@ -16,12 +16,12 @@ CFLAGS_sparc-sunos-sunstudio	=	-pedantic -I/opt/bw/include \
 									-g -xO0
 LDFLAGS_sparc-sunos-sunstudio	=	-L/opt/bw/lib -lcurl -R/opt/bw/lib
 CPPFLAGS						=	-D_XOPEN_SOURCE=600 \
-									-DGHCLI_VERSION_STRING=\"${GHCLI_VERSION}\"
+									-DGCLI_VERSION_STRING=\"${GCLI_VERSION}\"
 
 # List the source files for each binary to be built
-ghcli_SRCS			=	src/ghcli.c
+gcli_SRCS			=	src/gcli.c
 
-libghcli.a_SRCS		=	src/comments.c				\
+libgcli.a_SRCS		=	src/comments.c				\
 						src/config.c				\
 						src/color.c					\
 						src/curl.c					\
@@ -75,24 +75,24 @@ LIBADD				=	libcurl
 
 # Leave this undefined if you don't have any manpages that need to be
 # installed.
-MAN				=	docs/ghcli.1			\
-					docs/ghcli-repos.1		\
-					docs/ghcli-forks.1		\
-					docs/ghcli-releases.1	\
-					docs/ghcli-issues.1		\
-					docs/ghcli-pulls.1		\
-					docs/ghcli-comment.1	\
-					docs/ghcli-gists.1		\
-					docs/ghcli-snippets.1	\
-					docs/ghcli-status.1		\
-					docs/ghcli-labels.1		\
-					docs/ghcli-pipelines.1
+MAN				=	docs/gcli.1			\
+					docs/gcli-repos.1		\
+					docs/gcli-forks.1		\
+					docs/gcli-releases.1	\
+					docs/gcli-issues.1		\
+					docs/gcli-pulls.1		\
+					docs/gcli-comment.1	\
+					docs/gcli-gists.1		\
+					docs/gcli-snippets.1	\
+					docs/gcli-status.1		\
+					docs/gcli-labels.1		\
+					docs/gcli-pipelines.1
 
 # Include the rules to build your program
 # Important: the autodetect.sh script needs to be in place
 include default.mk
 
-ghcli: libghcli.a
+gcli: libgcli.a
 
 .PHONY: TAGS
 TAGS:

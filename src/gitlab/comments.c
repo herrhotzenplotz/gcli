@@ -27,21 +27,21 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/gitlab/comments.h>
-#include <ghcli/gitlab/config.h>
-#include <ghcli/json_util.h>
+#include <gcli/gitlab/comments.h>
+#include <gcli/gitlab/config.h>
+#include <gcli/json_util.h>
 
 void
 gitlab_perform_submit_comment(
-	ghcli_submit_comment_opts  opts,
-	ghcli_fetch_buffer        *out)
+	gcli_submit_comment_opts  opts,
+	gcli_fetch_buffer        *out)
 {
 	const char *type    = NULL;
 	char       *e_owner = NULL;
 	char       *e_repo  = NULL;
 
-	e_owner = ghcli_urlencode(opts.owner);
-	e_repo  = ghcli_urlencode(opts.repo);
+	e_owner = gcli_urlencode(opts.owner);
+	e_repo  = gcli_urlencode(opts.repo);
 
 	switch (opts.target_type) {
 	case ISSUE_COMMENT:
@@ -60,7 +60,7 @@ gitlab_perform_submit_comment(
 		gitlab_get_apibase(),
 		e_owner, e_repo, type, opts.target_id);
 
-	ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
+	gcli_fetch_with_method("POST", url, post_fields, NULL, out);
 	free(post_fields);
 	free(e_owner);
 	free(e_repo);
@@ -68,7 +68,7 @@ gitlab_perform_submit_comment(
 }
 
 static void
-gitlab_parse_comment(json_stream *input, ghcli_comment *it)
+gitlab_parse_comment(json_stream *input, gcli_comment *it)
 {
 	if (json_next(input) != JSON_OBJECT)
 		errx(1, "Expected Comment Object");
@@ -90,16 +90,16 @@ gitlab_parse_comment(json_stream *input, ghcli_comment *it)
 }
 
 static int
-gitlab_perform_get_comments(const char *_url, ghcli_comment **comments)
+gitlab_perform_get_comments(const char *_url, gcli_comment **comments)
 {
 	int                 count       = 0;
 	json_stream         stream      = {0};
-	ghcli_fetch_buffer  json_buffer = {0};
+	gcli_fetch_buffer  json_buffer = {0};
 	char               *url         = (char *)_url;
 	char               *next_url    = NULL;
 
 	do {
-		ghcli_fetch(url, &next_url, &json_buffer);
+		gcli_fetch(url, &next_url, &json_buffer);
 		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 		json_set_streaming(&stream, true);
 
@@ -109,8 +109,8 @@ gitlab_perform_get_comments(const char *_url, ghcli_comment **comments)
 			if (next_token != JSON_OBJECT)
 				errx(1, "Unexpected non-object in comment list");
 
-			*comments = realloc(*comments, (count + 1) * sizeof(ghcli_comment));
-			ghcli_comment *it = &(*comments)[count];
+			*comments = realloc(*comments, (count + 1) * sizeof(gcli_comment));
+			gcli_comment *it = &(*comments)[count];
 			gitlab_parse_comment(&stream, it);
 			count += 1;
 		}
@@ -131,10 +131,10 @@ gitlab_get_mr_comments(
 	const char     *owner,
 	const char     *repo,
 	int             mr,
-	ghcli_comment **out)
+	gcli_comment **out)
 {
-	char *e_owner = ghcli_urlencode(owner);
-	char *e_repo  = ghcli_urlencode(repo);
+	char *e_owner = gcli_urlencode(owner);
+	char *e_repo  = gcli_urlencode(repo);
 
 	char *url = sn_asprintf(
 		"%s/projects/%s%%2F%s/merge_requests/%d/notes",
@@ -155,10 +155,10 @@ gitlab_get_issue_comments(
 	const char     *owner,
 	const char     *repo,
 	int             issue,
-	ghcli_comment **out)
+	gcli_comment **out)
 {
-	char *e_owner = ghcli_urlencode(owner);
-	char *e_repo  = ghcli_urlencode(repo);
+	char *e_owner = gcli_urlencode(owner);
+	char *e_repo  = gcli_urlencode(repo);
 
 	char *url = sn_asprintf(
 		"%s/projects/%s%%2F%s/issues/%d/notes",

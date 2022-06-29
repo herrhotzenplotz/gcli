@@ -27,33 +27,33 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/forges.h>
-#include <ghcli/github/repos.h>
-#include <ghcli/repos.h>
+#include <gcli/forges.h>
+#include <gcli/github/repos.h>
+#include <gcli/repos.h>
 
 #include <stdlib.h>
 
 int
-ghcli_get_repos(const char *owner, int max, ghcli_repo **out)
+gcli_get_repos(const char *owner, int max, gcli_repo **out)
 {
-	return ghcli_forge()->get_repos(owner, max, out);
+	return gcli_forge()->get_repos(owner, max, out);
 }
 
 
 static void
-ghcli_print_repo(ghcli_repo *repo)
+gcli_print_repo(gcli_repo *repo)
 {
 	printf("%-4.4s  %-10.10s  %-16.16s  %-s\n",
-	       sn_bool_yesno(repo->is_fork),
-	       repo->visibility.data,
-	       repo->date.data,
-	       repo->full_name.data);
+		   sn_bool_yesno(repo->is_fork),
+		   repo->visibility.data,
+		   repo->date.data,
+		   repo->full_name.data);
 }
 
 void
-ghcli_print_repos_table(
-	enum ghcli_output_order  order,
-	ghcli_repo              *repos,
+gcli_print_repos_table(
+	enum gcli_output_order  order,
+	gcli_repo              *repos,
 	size_t                   repos_size)
 {
 	if (repos_size == 0) {
@@ -62,19 +62,19 @@ ghcli_print_repos_table(
 	}
 
 	printf("%-4.4s  %-10.10s  %-16.16s  %-s\n",
-	       "FORK", "VISBLTY", "DATE", "FULLNAME");
+		   "FORK", "VISBLTY", "DATE", "FULLNAME");
 
 	if (order == OUTPUT_ORDER_SORTED) {
 		for (size_t i = repos_size; i > 0; --i)
-			ghcli_print_repo(&repos[i - 1]);
+			gcli_print_repo(&repos[i - 1]);
 	} else {
 		for (size_t i = 0; i < repos_size; ++i)
-			ghcli_print_repo(&repos[i]);
+			gcli_print_repo(&repos[i]);
 	}
 }
 
 void
-ghcli_repos_free(ghcli_repo *repos, size_t repos_size)
+gcli_repos_free(gcli_repo *repos, size_t repos_size)
 {
 	for (size_t i = 0; i < repos_size; ++i) {
 		free(repos[i].full_name.data);
@@ -88,20 +88,20 @@ ghcli_repos_free(ghcli_repo *repos, size_t repos_size)
 }
 
 int
-ghcli_get_own_repos(int max, ghcli_repo **out)
+gcli_get_own_repos(int max, gcli_repo **out)
 {
-	return ghcli_forge()->get_own_repos(max, out);
+	return gcli_forge()->get_own_repos(max, out);
 }
 
 void
-ghcli_repo_delete(const char *owner, const char *repo)
+gcli_repo_delete(const char *owner, const char *repo)
 {
-	ghcli_forge()->repo_delete(owner, repo);
+	gcli_forge()->repo_delete(owner, repo);
 }
 
-ghcli_repo *
-ghcli_repo_create(
-	const ghcli_repo_create_options *options) /* Options descriptor */
+gcli_repo *
+gcli_repo_create(
+	const gcli_repo_create_options *options) /* Options descriptor */
 {
-	return ghcli_forge()->repo_create(options);
+	return gcli_forge()->repo_create(options);
 }

@@ -27,10 +27,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/curl.h>
-#include <ghcli/github/status.h>
-#include <ghcli/config.h>
-#include <ghcli/json_util.h>
+#include <gcli/curl.h>
+#include <gcli/github/status.h>
+#include <gcli/config.h>
+#include <gcli/json_util.h>
 
 #include <sn/sn.h>
 #include <pdjson/pdjson.h>
@@ -38,7 +38,7 @@
 static void
 github_notification_parse_subject(
 	struct json_stream *input,
-	ghcli_notification *it)
+	gcli_notification *it)
 {
 	if (json_next(input) != JSON_OBJECT)
 		errx(1, "Expected Notification Subject Object");
@@ -60,7 +60,7 @@ github_notification_parse_subject(
 static void
 github_notification_parse_repository(
 	struct json_stream *input,
-	ghcli_notification *it)
+	gcli_notification *it)
 {
 	if (json_next(input) != JSON_OBJECT)
 		errx(1, "Expected Notification Repository Object");
@@ -80,7 +80,7 @@ github_notification_parse_repository(
 static void
 parse_github_notification(
 	struct json_stream *input,
-	ghcli_notification *it)
+	gcli_notification *it)
 {
 	if (json_next(input) != JSON_OBJECT)
 		errx(1, "Expected Notification Object");
@@ -106,18 +106,18 @@ parse_github_notification(
 }
 
 size_t
-github_get_notifications(ghcli_notification **notifications, int count)
+github_get_notifications(gcli_notification **notifications, int count)
 {
 	char               *url                = NULL;
 	char               *next_url           = NULL;
-	ghcli_fetch_buffer  buffer             = {0};
+	gcli_fetch_buffer  buffer             = {0};
 	struct json_stream  stream             = {0};
 	size_t              notifications_size = 0;
 
-	url = sn_asprintf("%s/notifications", ghcli_get_apibase());
+	url = sn_asprintf("%s/notifications", gcli_get_apibase());
 
 	do {
-		ghcli_fetch(url, &next_url, &buffer);
+		gcli_fetch(url, &next_url, &buffer);
 
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		json_set_streaming(&stream, 1);
@@ -130,8 +130,8 @@ github_get_notifications(ghcli_notification **notifications, int count)
 
 			*notifications = realloc(
 				*notifications,
-				(notifications_size + 1) * sizeof(ghcli_notification));
-			ghcli_notification *it = &(*notifications)[notifications_size];
+				(notifications_size + 1) * sizeof(gcli_notification));
+			gcli_notification *it = &(*notifications)[notifications_size];
 			parse_github_notification(&stream, it);
 			notifications_size += 1;
 		}
@@ -148,13 +148,13 @@ void
 github_notification_mark_as_read(const char *id)
 {
 	char               *url    = NULL;
-	ghcli_fetch_buffer  buffer = {0};
+	gcli_fetch_buffer  buffer = {0};
 
 	url = sn_asprintf(
 		"%s/notifications/threads/%s",
-		ghcli_get_apibase(),
+		gcli_get_apibase(),
 		id);
-	ghcli_fetch_with_method("PATCH", url, NULL, NULL, &buffer);
+	gcli_fetch_with_method("PATCH", url, NULL, NULL, &buffer);
 
 	free(url);
 	free(buffer.data);

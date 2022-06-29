@@ -27,16 +27,16 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/curl.h>
-#include <ghcli/gitlab/config.h>
-#include <ghcli/gitlab/status.h>
-#include <ghcli/json_util.h>
+#include <gcli/curl.h>
+#include <gcli/gitlab/config.h>
+#include <gcli/gitlab/status.h>
+#include <gcli/json_util.h>
 
 #include <sn/sn.h>
 #include <pdjson/pdjson.h>
 
 static void
-parse_gitlab_project(struct json_stream *input, ghcli_notification *it)
+parse_gitlab_project(struct json_stream *input, gcli_notification *it)
 {
 	if (json_next(input) != JSON_OBJECT)
 		errx(1, "Expected Project Object");
@@ -54,7 +54,7 @@ parse_gitlab_project(struct json_stream *input, ghcli_notification *it)
 }
 
 static void
-parse_gitlab_todo(struct json_stream *input, ghcli_notification *it)
+parse_gitlab_todo(struct json_stream *input, gcli_notification *it)
 {
 	if (json_next(input) != JSON_OBJECT)
 		errx(1, "Expected Notification Object");
@@ -82,18 +82,18 @@ parse_gitlab_todo(struct json_stream *input, ghcli_notification *it)
 }
 
 size_t
-gitlab_get_notifications(ghcli_notification **notifications, int count)
+gitlab_get_notifications(gcli_notification **notifications, int count)
 {
 	char               *url                = NULL;
 	char               *next_url           = NULL;
-	ghcli_fetch_buffer  buffer             = {0};
+	gcli_fetch_buffer  buffer             = {0};
 	struct json_stream  stream             = {0};
 	size_t              notifications_size = 0;
 
 	url = sn_asprintf("%s/todos", gitlab_get_apibase());
 
 	do {
-		ghcli_fetch(url, &next_url, &buffer);
+		gcli_fetch(url, &next_url, &buffer);
 
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		json_set_streaming(&stream, 1);
@@ -106,8 +106,8 @@ gitlab_get_notifications(ghcli_notification **notifications, int count)
 
 			*notifications = realloc(
 				*notifications,
-				(notifications_size + 1) * sizeof(ghcli_notification));
-			ghcli_notification *it = &(*notifications)[notifications_size];
+				(notifications_size + 1) * sizeof(gcli_notification));
+			gcli_notification *it = &(*notifications)[notifications_size];
 			parse_gitlab_todo(&stream, it);
 			notifications_size += 1;
 		}
@@ -124,10 +124,10 @@ void
 gitlab_notification_mark_as_read(const char *id)
 {
 	char               *url    = NULL;
-	ghcli_fetch_buffer  buffer = {0};
+	gcli_fetch_buffer  buffer = {0};
 
 	url = sn_asprintf("%s/todos/%s/mark_as_done", gitlab_get_apibase(), id);
-	ghcli_fetch_with_method("POST", url, NULL, NULL, &buffer);
+	gcli_fetch_with_method("POST", url, NULL, NULL, &buffer);
 
 	free(url);
 	free(buffer.data);

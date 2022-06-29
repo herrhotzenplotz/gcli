@@ -1,0 +1,34 @@
+.Dd $Mdocdate$
+.Dt GCLI-STATUS 1
+.Os
+.Sh NAME
+.Nm gcli status
+.Nd Print a list of notifications and/or TODOs
+.Sh SYNOPSIS
+.Nm
+.Op Fl n Ar number-of-items
+.Sh DESCRIPTION
+.Nm
+prints a list of TODOs and notifications on the given account.
+.Sh OPTIONS
+.Bl -tag -width indent
+.It Fl n Ar number-of-items
+Fetch at most
+.Ar number-of-items
+items and print them. If given a negative number, all notifications
+are fetched. The default is 30.
+.El
+.Sh EXAMPLES
+Print a TODO list for my-account:
+.Bd -literal -offset indent
+$ gcli -a my-account status
+.Ed
+
+.Sh SEE ALSO
+.Xr gcli 1 ,
+.Xr gcli-issues 1 ,
+.Xr gcli-pulls 1
+.Sh AUTHORS
+.An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+.Sh BUGS
+Please report issues preferably via e-mail, on GitLab or on GitHub.

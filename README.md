@@ -1,4 +1,4 @@
-# GHCLI
+# GCLI
 
 Simple and portable CLI tool for interacting with GitHub and GitLab
 from the command line.
@@ -28,9 +28,9 @@ Required dependencies:
 - C99 Compiler and linker
 - make (bmake or smake is recommended)
   + BUG WARNING: GNU make has two longstanding bugs in the include
-    directive. This may lead to it generating files in the incorrect
-    order and spitting out incorrect warnings or causing builds to
-    fail. You may want to use smake or bmake instead.
+	directive. This may lead to it generating files in the incorrect
+	order and spitting out incorrect warnings or causing builds to
+	fail. You may want to use smake or bmake instead.
 
 In order to perform a build, do:
 ```console
@@ -62,12 +62,12 @@ Tested Operating Systems so far:
 
 You can ask your local frenchman aka. neutaaaaan for emotional support
 when using this piece of software. Otherwise you can read the man page
-at »man ghcli«.
+at »man gcli«.
 
 ## Bugs and contributions
 
 Please report bugs to nsonack@herrhotzenplotz.de or on
-[GitHub](https://github.com/herrhotzenplotz/ghcli). You can also
+[GitHub](https://github.com/herrhotzenplotz/gcli). You can also
 submit patches this way using git-send-email.
 
 ## License
@@ -76,5 +76,5 @@ BSD-2 CLAUSE (aka. FreeBSD License). Please see the LICENSE file
 attached.
 
 
-                                     herrhotzenplotz aka. Nico Sonack
-                                                         October 2021
+									 herrhotzenplotz aka. Nico Sonack
+														 October 2021

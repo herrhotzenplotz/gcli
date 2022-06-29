@@ -27,15 +27,15 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/gitea/comments.h>
-#include <ghcli/github/comments.h>
+#include <gcli/gitea/comments.h>
+#include <gcli/github/comments.h>
 
 int
 gitea_get_comments(
 	const char     *owner,
 	const char     *repo,
 	int             issue,
-	ghcli_comment **out)
+	gcli_comment **out)
 {
 	return github_get_comments(owner, repo, issue, out);
 }

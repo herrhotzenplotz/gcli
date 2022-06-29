@@ -27,15 +27,15 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/config.h>
-#include <ghcli/curl.h>
-#include <ghcli/gitlab/config.h>
-#include <ghcli/gitlab/issues.h>
-#include <ghcli/json_util.h>
+#include <gcli/config.h>
+#include <gcli/curl.h>
+#include <gcli/gitlab/config.h>
+#include <gcli/gitlab/issues.h>
+#include <gcli/json_util.h>
 #include <pdjson/pdjson.h>
 
 static void
-gitlab_parse_issue_entry(json_stream *input, ghcli_issue *it)
+gitlab_parse_issue_entry(json_stream *input, gcli_issue *it)
 {
 	if (json_next(input) != JSON_OBJECT)
 		errx(1, "Expected Issue Object");
@@ -63,18 +63,18 @@ gitlab_get_issues(
 	const char   *repo,
 	bool          all,
 	int           max,
-	ghcli_issue **out)
+	gcli_issue **out)
 {
 	int                 count       = 0;
 	json_stream         stream      = {0};
-	ghcli_fetch_buffer  json_buffer = {0};
+	gcli_fetch_buffer  json_buffer = {0};
 	char               *url         = NULL;
 	char               *e_owner     = NULL;
 	char               *e_repo      = NULL;
 	char               *next_url    = NULL;
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
 		"%s/projects/%s%%2F%s/issues%s",
@@ -83,7 +83,7 @@ gitlab_get_issues(
 		all ? "" : "?state=opened");
 
 	do {
-		ghcli_fetch(url, &next_url, &json_buffer);
+		gcli_fetch(url, &next_url, &json_buffer);
 
 		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 		json_set_streaming(&stream, true);
@@ -96,9 +96,9 @@ gitlab_get_issues(
 				errx(1, "Parser error: %s", json_get_error(&stream));
 				break;
 			case JSON_OBJECT: {
-				*out = realloc(*out, sizeof(ghcli_issue) * (count + 1));
-				ghcli_issue *it = &(*out)[count];
-				memset(it, 0, sizeof(ghcli_issue));
+				*out = realloc(*out, sizeof(gcli_issue) * (count + 1));
+				gcli_issue *it = &(*out)[count];
+				memset(it, 0, sizeof(gcli_issue));
 				gitlab_parse_issue_entry(&stream, it);
 				count += 1;
 			} break;
@@ -128,7 +128,7 @@ gitlab_get_issues(
 }
 
 static void
-gitlab_parse_issue_details(json_stream *input, ghcli_issue_details *out)
+gitlab_parse_issue_details(json_stream *input, gcli_issue_details *out)
 {
 	enum json_type key_type;
 	const char *key;
@@ -156,9 +156,9 @@ gitlab_parse_issue_details(json_stream *input, ghcli_issue_details *out)
 		else if (strncmp("discussion_locked", key, len) == 0)
 			out->locked = get_bool(input);
 		else if (strncmp("labels", key, len) == 0)
-			out->labels_size = ghcli_read_sv_list(input, &out->labels);
+			out->labels_size = gcli_read_sv_list(input, &out->labels);
 		else if (strncmp("assignees", key, len) == 0)
-			out->assignees_size = ghcli_read_user_list(input, &out->assignees);
+			out->assignees_size = gcli_read_user_list(input, &out->assignees);
 		else
 			SKIP_OBJECT_VALUE(input);
 	}
@@ -172,23 +172,23 @@ gitlab_get_issue_summary(
 	const char          *owner,
 	const char          *repo,
 	int                  issue_number,
-	ghcli_issue_details *out)
+	gcli_issue_details *out)
 {
 	char               *url     = NULL;
 	char               *e_owner = NULL;
 	char               *e_repo  = NULL;
-	ghcli_fetch_buffer  buffer  = {0};
+	gcli_fetch_buffer  buffer  = {0};
 	json_stream         parser  = {0};
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
 		"%s/projects/%s%%2F%s/issues/%d",
 		gitlab_get_apibase(),
 		e_owner, e_repo,
 		issue_number);
-	ghcli_fetch(url, NULL, &buffer);
+	gcli_fetch(url, NULL, &buffer);
 
 	json_open_buffer(&parser, buffer.data, buffer.length);
 	json_set_streaming(&parser, true);
@@ -206,14 +206,14 @@ gitlab_get_issue_summary(
 void
 gitlab_issue_close(const char *owner, const char *repo, int issue_number)
 {
-	ghcli_fetch_buffer  json_buffer = {0};
+	gcli_fetch_buffer  json_buffer = {0};
 	char               *url         = NULL;
 	char               *data        = NULL;
 	char               *e_owner     = NULL;
 	char               *e_repo      = NULL;
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url  = sn_asprintf(
 		"%s/projects/%s%%2F%s/issues/%d",
@@ -222,7 +222,7 @@ gitlab_issue_close(const char *owner, const char *repo, int issue_number)
 		issue_number);
 	data = sn_asprintf("{ \"state_event\": \"close\"}");
 
-	ghcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
+	gcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
 
 	free(data);
 	free(url);
@@ -234,14 +234,14 @@ gitlab_issue_close(const char *owner, const char *repo, int issue_number)
 void
 gitlab_issue_reopen(const char *owner, const char *repo, int issue_number)
 {
-	ghcli_fetch_buffer  json_buffer = {0};
+	gcli_fetch_buffer  json_buffer = {0};
 	char               *url         = NULL;
 	char               *data        = NULL;
 	char               *e_owner     = NULL;
 	char               *e_repo      = NULL;
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url  = sn_asprintf(
 		"%s/projects/%s%%2F%s/issues/%d",
@@ -250,7 +250,7 @@ gitlab_issue_reopen(const char *owner, const char *repo, int issue_number)
 		issue_number);
 	data = sn_asprintf("{ \"state_event\": \"reopen\"}");
 
-	ghcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
+	gcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
 
 	free(data);
 	free(url);
@@ -261,11 +261,11 @@ gitlab_issue_reopen(const char *owner, const char *repo, int issue_number)
 
 void
 gitlab_perform_submit_issue(
-	ghcli_submit_issue_options  opts,
-	ghcli_fetch_buffer         *out)
+	gcli_submit_issue_options  opts,
+	gcli_fetch_buffer         *out)
 {
-	sn_sv e_owner = ghcli_urlencode_sv(opts.owner);
-	sn_sv e_repo  = ghcli_urlencode_sv(opts.repo);
+	sn_sv e_owner = gcli_urlencode_sv(opts.owner);
+	sn_sv e_repo  = gcli_urlencode_sv(opts.repo);
 
 	char *post_fields = sn_asprintf(
 		"{ \"title\": \""SV_FMT"\", \"description\": \""SV_FMT"\" }",
@@ -276,7 +276,7 @@ gitlab_perform_submit_issue(
 		SV_ARGS(e_owner),
 		SV_ARGS(e_repo));
 
-	ghcli_fetch_with_method("POST", url, post_fields, NULL, out);
+	gcli_fetch_with_method("POST", url, post_fields, NULL, out);
 
 	free(e_owner.data);
 	free(e_repo.data);
@@ -287,21 +287,21 @@ gitlab_perform_submit_issue(
 static int
 gitlab_user_id(const char *user_name)
 {
-	ghcli_fetch_buffer  buffer = {0};
+	gcli_fetch_buffer  buffer = {0};
 	struct json_stream  stream = {0};
 	char               *url    = NULL;
 	char               *e_username;
 	int                 uid    = -1;
 
-	e_username = ghcli_urlencode(user_name);
+	e_username = gcli_urlencode(user_name);
 
 	url = sn_asprintf("%s/users?username=%s", gitlab_get_apibase(), e_username);
 
-	ghcli_fetch(url, NULL, &buffer);
+	gcli_fetch(url, NULL, &buffer);
 	json_open_buffer(&stream, buffer.data, buffer.length);
 	json_set_streaming(&stream, 1);
 
-	ghcli_json_advance(&stream, "[{s", "id");
+	gcli_json_advance(&stream, "[{s", "id");
 	uid = get_int(&stream);
 
 	json_close(&stream);
@@ -321,7 +321,7 @@ gitlab_issue_assign(
 	const char *assignee)
 {
 	int                 assignee_uid = -1;
-	ghcli_fetch_buffer  buffer       = {0};
+	gcli_fetch_buffer  buffer       = {0};
 	char               *url          = NULL;
 	char               *post_data    = NULL;
 	char               *e_owner      = NULL;
@@ -329,14 +329,14 @@ gitlab_issue_assign(
 
 	assignee_uid = gitlab_user_id(assignee);
 
-	e_owner = ghcli_urlencode(owner);
-	e_repo  = ghcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%d",
 			  gitlab_get_apibase(),
 			  e_owner, e_repo, issue_number);
 	post_data = sn_asprintf("{ \"assignee_ids\": [ %d ] }", assignee_uid);
-	ghcli_fetch_with_method("PUT", url, post_data, NULL, &buffer);
+	gcli_fetch_with_method("PUT", url, post_data, NULL, &buffer);
 
 	free(e_owner);
 	free(e_repo);
@@ -356,7 +356,7 @@ gitlab_issue_add_labels(
 	char               *url    = NULL;
 	char               *data   = NULL;
 	char               *list   = NULL;
-	ghcli_fetch_buffer  buffer = {0};
+	gcli_fetch_buffer  buffer = {0};
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%d",
 			  gitlab_get_apibase(), owner, repo, issue);
@@ -364,7 +364,7 @@ gitlab_issue_add_labels(
 	list = sn_join_with(labels, labels_size, ",");
 	data = sn_asprintf("{ \"add_labels\": \"%s\"}", list);
 
-	ghcli_fetch_with_method("PUT", url, data, NULL, &buffer);
+	gcli_fetch_with_method("PUT", url, data, NULL, &buffer);
 
 	free(url);
 	free(data);
@@ -383,7 +383,7 @@ gitlab_issue_remove_labels(
 	char               *url    = NULL;
 	char               *data   = NULL;
 	char               *list   = NULL;
-	ghcli_fetch_buffer  buffer = {0};
+	gcli_fetch_buffer  buffer = {0};
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%d",
 			  gitlab_get_apibase(), owner, repo, issue);
@@ -391,7 +391,7 @@ gitlab_issue_remove_labels(
 	list = sn_join_with(labels, labels_size, ",");
 	data = sn_asprintf("{ \"remove_labels\": \"%s\"}", list);
 
-	ghcli_fetch_with_method("PUT", url, data, NULL, &buffer);
+	gcli_fetch_with_method("PUT", url, data, NULL, &buffer);
 
 	free(url);
 	free(data);

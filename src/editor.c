@@ -27,8 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ghcli/editor.h>
-#include <ghcli/config.h>
+#include <gcli/editor.h>
+#include <gcli/config.h>
 
 #include <sn/sn.h>
 
@@ -49,21 +49,21 @@ sv_append(sn_sv this, sn_sv that)
 }
 
 sn_sv
-ghcli_editor_get_user_message(
+gcli_editor_get_user_message(
 	void (*file_initializer)(FILE *, void *),
 	void *user_data)
 {
 	char *editor     = getenv("EDITOR");
 	char *env_editor = editor;
 	if (!editor) {
-		editor = ghcli_config_get_editor();
+		editor = gcli_config_get_editor();
 		if (!editor)
 			errx(1,
-			     "I have no editor. Either set editor=... in your config "
-			     "file or set the EDITOR environment variable.");
+				 "I have no editor. Either set editor=... in your config "
+				 "file or set the EDITOR environment variable.");
 	}
 
-	char   filename[31] = "/tmp/ghcli_message.XXXXXXX\0";
+	char   filename[31] = "/tmp/gcli_message.XXXXXXX\0";
 	int    fd           = mkstemp(filename);
 
 	FILE *file = fdopen(fd, "w");
@@ -85,7 +85,7 @@ ghcli_editor_get_user_message(
 
 		if (WEXITSTATUS(status) != 0)
 			errx(1, "Aborting PR. Editor command exited with code %d",
-			     WEXITSTATUS(status));
+				 WEXITSTATUS(status));
 	}
 
 	if (!env_editor)

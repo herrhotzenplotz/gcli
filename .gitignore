@@ -152,3 +152,6 @@
 /gcli
 /libgcli.a
 /src/gcli.c~
+/include/gcli/gitea/repos.h~
+/src/gitea/repos.c~
+/src/gitea/repos.o

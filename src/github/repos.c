@@ -60,6 +60,16 @@ parse_repo(json_stream *input, gcli_repo *out)
 			out->date = get_sv(input);
 		} else if (strncmp("visibility", key, len) == 0) {
 			out->visibility = get_sv(input);
+		} else if (strncmp("private", key, len) == 0) {
+			/* hack for gitea */
+			if (sn_sv_null(out->visibility)) {
+				char *v = NULL;
+				if (get_bool(input))
+					v = strdup("private");
+				else
+					v = strdup("public");
+				out->visibility = SV(v);
+			}
 		} else if (strncmp("fork", key, len) == 0) {
 			out->is_fork = get_bool(input);
 		} else {

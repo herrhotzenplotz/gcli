@@ -61,6 +61,7 @@
 #include <gcli/gitea/issues.h>
 #include <gcli/gitea/labels.h>
 #include <gcli/gitea/pulls.h>
+#include <gcli/gitea/repos.h>
 
 static gcli_forge_descriptor
 github_forge_descriptor =
@@ -184,8 +185,12 @@ gitea_forge_descriptor =
 	.print_pr_diff		  = gitea_print_pr_diff,
 
 	/* Same procedure as with Github (see comment up there) */
-	.pr_add_labels        = gitea_issue_add_labels,
-	.pr_remove_labels     = gitea_issue_remove_labels,
+	.pr_add_labels		  = gitea_issue_add_labels,
+	.pr_remove_labels	  = gitea_issue_remove_labels,
+	.get_repos			  = gitea_get_repos,
+	.get_own_repos		  = gitea_get_own_repos,
+	.repo_create		  = gitea_repo_create,
+	.repo_delete		  = gitea_repo_delete,
 
 	.get_authheader		  = gitea_get_authheader,
 	.get_account		  = gitea_get_account,

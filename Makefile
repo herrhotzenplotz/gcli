@@ -8,8 +8,10 @@ CFLAGS				=	-std=iso9899:1999		\
 						-Ithirdparty/pdjson/	\
 						-Ithirdparty/			\
 						-Iinclude/ -fPIC -fPIE
-LDFLAGS				=	-L. -lgcli -rdynamic -fPIC \
-						-fPIE
+# TODO: The cflags and ldflags don't really work all that well with
+# SunStudio
+LDFLAGS							=	-L. -lgcli -rdynamic -fPIC \
+									-fPIE
 CFLAGS_amd64-freebsd-clang		=	-pedantic \
 									-g -O0 -ggdb -Wall -Wextra
 CFLAGS_sparc-sunos-sunstudio	=	-pedantic -I/opt/bw/include \
@@ -75,13 +77,13 @@ LIBADD				=	libcurl
 
 # Leave this undefined if you don't have any manpages that need to be
 # installed.
-MAN				=	docs/gcli.1			\
+MAN				=	docs/gcli.1				\
 					docs/gcli-repos.1		\
 					docs/gcli-forks.1		\
 					docs/gcli-releases.1	\
 					docs/gcli-issues.1		\
 					docs/gcli-pulls.1		\
-					docs/gcli-comment.1	\
+					docs/gcli-comment.1		\
 					docs/gcli-gists.1		\
 					docs/gcli-snippets.1	\
 					docs/gcli-status.1		\

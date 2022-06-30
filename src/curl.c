@@ -140,8 +140,10 @@ gcli_curl_test_success(const char *url)
 	curl_easy_setopt(gcli_curl_session, CURLOPT_MAXREDIRS, 50L);
 	curl_easy_setopt(gcli_curl_session, CURLOPT_FTP_SKIP_PASV_IP, 1L);
 	curl_easy_setopt(gcli_curl_session, CURLOPT_USERAGENT, "curl/7.78.0");
+#if defined(CURL_HTTP_VERSION_2TLS)
 	curl_easy_setopt(
 		gcli_curl_session, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
+#endif
 	curl_easy_setopt(gcli_curl_session, CURLOPT_TCP_KEEPALIVE, 1L);
 	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEDATA, &buffer);
 	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
@@ -192,8 +194,10 @@ gcli_curl(FILE *stream, const char *url, const char *content_type)
 	curl_easy_setopt(gcli_curl_session, CURLOPT_FTP_SKIP_PASV_IP, 1L);
 	curl_easy_setopt(gcli_curl_session, CURLOPT_HTTPHEADER, headers);
 	curl_easy_setopt(gcli_curl_session, CURLOPT_USERAGENT, "curl/7.78.0");
+#if defined(CURL_HTTP_VERSION_2TLS)
 	curl_easy_setopt(
 		gcli_curl_session, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
+#endif
 	curl_easy_setopt(gcli_curl_session, CURLOPT_TCP_KEEPALIVE, 1L);
 	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEDATA, &buffer);
 	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEFUNCTION, fetch_write_callback);

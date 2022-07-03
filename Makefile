@@ -1,3 +1,15 @@
+# If you are having problems compiling gcli, try to build an SCU version:
+#
+#    cc -O3 -o gcli -Iinclude -Ithirdparty -DGCLI_VERSION_STRING="\"Manual SCU build\"" \
+#           -I/usr/local/include `find . -type f -name \*.c | grep -v test` \
+#           -L/usr/local/lib -lcurl
+#
+#    Adapt the linker- and include paths to your system.
+#
+#  Please report such cases to me. If the problem arises from GNU make, please see my
+#  rant in default.mk. Likely you want to fix the problem by using something other than
+#  GNU make.
+
 # Declare the list of programs
 PROGS				=	gcli
 LIBS				=	libgcli.a

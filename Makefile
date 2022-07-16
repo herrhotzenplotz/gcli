@@ -62,6 +62,7 @@ libgcli.a_SRCS		=	src/comments.c				\
 						src/gitea/comments.c		\
 						src/gitea/labels.c			\
 						src/gitea/pulls.c			\
+						src/gitea/repos.c			\
 						src/issues.c				\
 						src/json_util.c				\
 						src/pulls.c					\

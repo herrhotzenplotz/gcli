@@ -1336,12 +1336,12 @@ releasemsg_init(FILE *f, void *_data)
 
 	fprintf(
 		f,
-		"# Enter your release notes below, save and exit.\n"
-		"# All lines with a leading '#' are discarded and will not\n"
-		"# appear in the final release note.\n"
-		"#       IN : %s/%s\n"
-		"# TAG NAME : %s\n"
-		"#     NAME : %s\n",
+		"! Enter your release notes above, save and exit.\n"
+		"! All lines with a leading '!' are discarded and will not\n"
+		"! appear in the final release note.\n"
+		"!       IN : %s/%s\n"
+		"! TAG NAME : %s\n"
+		"!     NAME : %s\n",
 		info->owner, info->repo, info->tag, info->name);
 }
 

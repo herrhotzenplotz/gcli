@@ -120,10 +120,10 @@ comment_init(FILE *f, void *_data)
 
 	fprintf(
 		f,
-		"# Enter your comment below, save and exit.\n"
-		"# All lines with a leading '#' are discarded and will not\n"
-		"# appear in your comment.\n"
-		"# COMMENT IN : %s/%s %s #%d\n",
+		"! Enter your comment above, save and exit.\n"
+		"! All lines with a leading '!' are discarded and will not\n"
+		"! appear in your comment.\n"
+		"! COMMENT IN : %s/%s %s #%d\n",
 		info->owner, info->repo, target_type, info->target_id);
 }
 

@@ -315,11 +315,10 @@ pr_init_user_file(FILE *stream, void *_opts)
 	gcli_submit_pull_options *opts = _opts;
 	fprintf(
 		stream,
-		"# PR TITLE : "SV_FMT"\n"
-		"# Enter PR comments below.\n"
-		"# All lines starting with '#' will be discarded.\n",
-		SV_ARGS(opts->title)
-		);
+		"! PR TITLE : "SV_FMT"\n"
+		"! Enter PR comments above.\n"
+		"! All lines starting with '!' will be discarded.\n",
+		SV_ARGS(opts->title));
 }
 
 static sn_sv

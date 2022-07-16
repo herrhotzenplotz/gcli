@@ -184,9 +184,9 @@ issue_init_user_file(FILE *stream, void *_opts)
 	gcli_submit_issue_options *opts = _opts;
 	fprintf(
 		stream,
-		"# ISSUE TITLE : "SV_FMT"\n"
-		"# Enter issue description below.\n"
-		"# All lines starting with '#' will be discarded.\n",
+		"! ISSUE TITLE : "SV_FMT"\n"
+		"! Enter issue description above.\n"
+		"! All lines starting with '!' will be discarded.\n",
 		SV_ARGS(opts->title));
 }
 

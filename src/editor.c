@@ -109,7 +109,7 @@ gcli_editor_get_user_message(
 			line.length   += 1;
 		}
 
-		if (line.length > 0 && line.data[0] == '#')
+		if (line.length > 0 && line.data[0] == '!')
 			continue;
 
 		result = sv_append(result, line);

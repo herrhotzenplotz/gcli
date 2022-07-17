@@ -52,7 +52,7 @@ Tested Operating Systems so far:
 - FreeBSD 13.0-RELEASE amd64 and arm64
 - Solaris 10 sparc64
 - Devuan GNU/Linux Chimaera x86_64
-- Debian GNU/Linux 5.15.5-1 ppc64
+- Debian GNU/Linux 5.18.11 ppc64
 - Fedora 34 x86_64
 - Haiku x86_64
 - Minix 3.4.0 (GENERIC) i386

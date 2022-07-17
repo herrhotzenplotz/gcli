@@ -16,7 +16,7 @@ test: ${TESTNAME}
 	@echo "[SUCCESS] ${TESTNAME}"
 
 ${TESTNAME}: ${TESTNAME}.o
-	${CC} -o ${TESTNAME} ${LINK_FLAGS} ${TESTNAME}.o ../../libgcli.a
+	${CC} -o ${TESTNAME} ${TESTNAME}.o ../../libgcli.a ${LINK_FLAGS}
 
 ${TESTNAME}.o: ${TESTNAME}.c
 	${CC} -c -o ${TESTNAME}.o ${COMPILE_FLAGS} ${TESTNAME}.c

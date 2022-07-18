@@ -35,15 +35,28 @@
 #include <gcli/json_util.h>
 #include <sn/sn.h>
 
-void
-gcli_issues_free(gcli_issue *it, int size)
+static void
+gcli_issue_free(gcli_issue *it)
 {
-	for (int i = 0; i < size; ++i) {
-		free((void *)it[i].title);
-		free((void *)it[i].state);
-	}
+	free(it->title.data);
+	free(it->created_at.data);
+	free(it->author.data);
+	free(it->state.data);
+	free(it->body.data);
 
-	free(it);
+	for (size_t i = 0; i < it->labels_size; ++i)
+		free(it->labels[i].data);
+
+	free(it->labels);
+}
+
+void
+gcli_issues_free(gcli_issue *issues, int issues_size)
+{
+	for (int i = 0; i < issues_size; ++i)
+		gcli_issue_free(&issues[i]);
+
+	free(issues);
 }
 
 int
@@ -73,27 +86,32 @@ gcli_print_issues_table(
 	if (order == OUTPUT_ORDER_SORTED) {
 		for (int i = issues_size; i > 0; --i) {
 			printf(
-				"%6d  %s%7.7s%s  %-s\n",
+				"%6d  %s%7.*s%s  %-.*s\n",
 				issues[i - 1].number,
-				gcli_state_color_str(issues[i-1].state),
-				issues[i-1].state,
+				gcli_state_color_sv(issues[i-1].state),
+				(int)issues[i-1].state.length,
+				issues[i-1].state.data,
 				gcli_resetcolor(),
-				issues[i - 1].title);
+				(int)issues[i - 1].title.length,
+				issues[i - 1].title.data);
 		}
 	} else {
 		for (int i = 0; i < issues_size; ++i) {
-			printf("%6d  %s%7.7s%s  %-s\n",
-				   issues[i].number,
-				   gcli_state_color_str(issues[i].state),
-				   issues[i].state,
-				   gcli_resetcolor(),
-				   issues[i].title);
+			printf(
+				"%6d  %s%7.*s%s  %-.*s\n",
+				issues[i].number,
+				gcli_state_color_sv(issues[i].state),
+				(int)issues[i].state.length,
+				issues[i].state.data,
+				gcli_resetcolor(),
+				(int)issues[i].title.length,
+				issues[i].title.data);
 		}
 	}
 }
 
 static void
-gcli_print_issue_summary(gcli_issue_details *it)
+gcli_print_issue_summary(gcli_issue *it)
 {
 	printf("   NUMBER : %d\n"
 		   "    TITLE : "SV_FMT"\n"
@@ -138,32 +156,17 @@ gcli_print_issue_summary(gcli_issue_details *it)
 	}
 }
 
-static void
-gcli_issue_details_free(gcli_issue_details *it)
-{
-	free(it->title.data);
-	free(it->created_at.data);
-	free(it->author.data);
-	free(it->state.data);
-	free(it->body.data);
-
-	for (size_t i = 0; i < it->labels_size; ++i)
-		free(it->labels[i].data);
-
-	free(it->labels);
-}
-
 void
 gcli_issue_summary(
 	const char *owner,
 	const char *repo,
 	int         issue_number)
 {
-	gcli_issue_details  details = {0};
+	gcli_issue details = {0};
 
 	gcli_forge()->get_issue_summary(owner, repo, issue_number, &details);
 	gcli_print_issue_summary(&details);
-	gcli_issue_details_free(&details);
+	gcli_issue_free(&details);
 }
 
 void

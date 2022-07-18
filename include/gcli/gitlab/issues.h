@@ -41,10 +41,10 @@ int gitlab_get_issues(
 	gcli_issue **out);
 
 void gitlab_get_issue_summary(
-	const char          *owner,
-	const char          *repo,
-	int                  issue_number,
-	gcli_issue_details *out);
+	const char  *owner,
+	const char  *repo,
+	int          issue_number,
+	gcli_issue	*out);
 
 void gitlab_issue_close(
 	const char *owner,

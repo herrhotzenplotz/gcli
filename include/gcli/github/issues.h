@@ -38,13 +38,13 @@ int github_get_issues(
 	const char   *repo,
 	bool          all,
 	int           max,
-	gcli_issue **out);
+	gcli_issue	**out);
 
 void github_get_issue_summary(
-	const char          *owner,
-	const char          *repo,
-	int                  issue_number,
-	gcli_issue_details *out);
+	const char  *owner,
+	const char  *repo,
+	int          issue_number,
+	gcli_issue	*out);
 
 void github_issue_close(
 	const char *owner,

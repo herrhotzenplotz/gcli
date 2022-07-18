@@ -22,6 +22,14 @@ also works with Tor.
 
 ## Building
 
+### Download
+
+Recent tarballs can be downloaded here:
+
+[https://herrhotzenplotz.de/gcli/releases/](https://herrhotzenplotz.de/gcli/releases/)
+
+### Dependencies
+
 Required dependencies:
 - libcurl
 - pkg-config
@@ -32,6 +40,7 @@ Required dependencies:
 	order and spitting out incorrect warnings or causing builds to
 	fail. You may want to use smake or bmake instead.
 
+### Compile
 In order to perform a build, do:
 ```console
 $ make
@@ -50,7 +59,7 @@ rebuild the project. You will need
 
 Tested Operating Systems so far:
 - FreeBSD 13.0-RELEASE amd64 and arm64
-- Solaris 10 sparc64
+- Solaris 10 and 11, sparc64
 - Devuan GNU/Linux Chimaera x86_64
 - Debian GNU/Linux 5.18.11 ppc64
 - Fedora 34 x86_64
@@ -76,5 +85,5 @@ BSD-2 CLAUSE (aka. FreeBSD License). Please see the LICENSE file
 attached.
 
 
-									 herrhotzenplotz aka. Nico Sonack
-														 October 2021
+						 herrhotzenplotz aka. Nico Sonack
+											 October 2021

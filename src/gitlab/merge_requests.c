@@ -418,12 +418,15 @@ gitlab_perform_submit_mr(
 	/* Note: this doesn't really allow merging into repos with
 	 * different names. We need to figure out a way to make this
 	 * better for both github and gitlab. */
-	gcli_repo target        = {0};
-	sn_sv      target_owner  = {0};
-	sn_sv      target_branch = {0};
-	sn_sv      source_owner  = {0};
-	sn_sv      repo          = {0};
-	sn_sv      source_branch = {0};
+	gcli_repo	target        = {0};
+	sn_sv		target_owner  = {0};
+	sn_sv		target_branch = {0};
+	sn_sv		source_owner  = {0};
+	sn_sv		repo          = {0};
+	sn_sv		source_branch = {0};
+
+	/* json escaped variants */
+	sn_sv e_source_branch, e_target_branch, e_title, e_body;
 
 	repo                  = opts.in;
 	target_owner          = sn_sv_chop_until(&repo, '/');
@@ -438,17 +441,24 @@ gitlab_perform_submit_mr(
 	/* Figure out the project id */
 	gitlab_get_repo(target_owner, repo, &target);
 
-	/* TODO : JSON Injection */
+	/* escape things in the post payload */
+	e_source_branch = gcli_json_escape(source_branch);
+	e_target_branch = gcli_json_escape(target_branch);
+	e_title			= gcli_json_escape(opts.title);
+	e_body			= gcli_json_escape(opts.body);
+
+	/* prepare payload */
 	char *post_fields = sn_asprintf(
 		"{\"source_branch\":\""SV_FMT"\",\"target_branch\":\""SV_FMT"\", "
 		"\"title\": \""SV_FMT"\", \"description\": \""SV_FMT"\", "
 		"\"target_project_id\": %d }",
-		SV_ARGS(source_branch),
-		SV_ARGS(target_branch),
-		SV_ARGS(opts.title),
-		SV_ARGS(opts.body),
+		SV_ARGS(e_source_branch),
+		SV_ARGS(e_target_branch),
+		SV_ARGS(e_title),
+		SV_ARGS(e_body),
 		target.id);
 
+	/* construct url */
 	sn_sv e_owner = gcli_urlencode_sv(source_owner);
 	sn_sv e_repo  = gcli_urlencode_sv(repo);
 
@@ -457,8 +467,14 @@ gitlab_perform_submit_mr(
 		gitlab_get_apibase(),
 		SV_ARGS(e_owner), SV_ARGS(e_repo));
 
+	/* perform request */
 	gcli_fetch_with_method("POST", url, post_fields, NULL, out);
 
+	/* cleanup */
+	free(e_source_branch.data);
+	free(e_target_branch.data);
+	free(e_title.data);
+	free(e_body.data);
 	free(e_owner.data);
 	free(e_repo.data);
 	free(post_fields);

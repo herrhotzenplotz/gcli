@@ -267,10 +267,12 @@ github_perform_submit_issue(
 {
 	sn_sv e_owner = gcli_urlencode_sv(opts.owner);
 	sn_sv e_repo  = gcli_urlencode_sv(opts.repo);
+	sn_sv e_title = gcli_json_escape(opts.title);
+	sn_sv e_body  = gcli_json_escape(opts.body);
 
 	char *post_fields = sn_asprintf(
 		"{ \"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
-		SV_ARGS(opts.title), SV_ARGS(opts.body));
+		SV_ARGS(e_title), SV_ARGS(e_body));
 	char *url         = sn_asprintf(
 		"%s/repos/"SV_FMT"/"SV_FMT"/issues",
 		gcli_get_apibase(),
@@ -281,6 +283,8 @@ github_perform_submit_issue(
 
 	free(e_owner.data);
 	free(e_repo.data);
+	free(e_title.data);
+	free(e_body.data);
 	free(post_fields);
 	free(url);
 }

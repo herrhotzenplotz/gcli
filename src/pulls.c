@@ -330,10 +330,9 @@ gcli_pr_get_user_message(gcli_submit_pull_options *opts)
 void
 gcli_pr_submit(gcli_submit_pull_options opts)
 {
-	gcli_fetch_buffer  json_buffer  = {0};
+	gcli_fetch_buffer	json_buffer = {0};
 
-	sn_sv body = gcli_pr_get_user_message(&opts);
-	opts.body = gcli_json_escape(body);
+	opts.body = gcli_pr_get_user_message(&opts);
 
 	fprintf(stdout,
 		"The following PR will be created:\n"
@@ -345,7 +344,7 @@ gcli_pr_submit(gcli_submit_pull_options opts)
 		"MESSAGE :\n"SV_FMT"\n",
 		SV_ARGS(opts.title),SV_ARGS(opts.to),
 		SV_ARGS(opts.from), SV_ARGS(opts.in),
-		SV_ARGS(body));
+		SV_ARGS(opts.body));
 
 	fputc('\n', stdout);
 
@@ -357,7 +356,6 @@ gcli_pr_submit(gcli_submit_pull_options opts)
 
 	gcli_print_html_url(json_buffer);
 
-	free(body.data);
 	free(opts.body.data);
 	free(json_buffer.data);
 }

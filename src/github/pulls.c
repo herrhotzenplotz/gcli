@@ -295,20 +295,31 @@ github_perform_submit_pr(
 	gcli_submit_pull_options  opts,
 	gcli_fetch_buffer        *out)
 {
-	/* TODO : JSON Injection */
+	sn_sv e_head, e_base, e_title, e_body;
+
+	e_head	= gcli_json_escape(opts.from);
+	e_base	= gcli_json_escape(opts.to);
+	e_title = gcli_json_escape(opts.title);
+	e_body  = gcli_json_escape(opts.body);
+
 	char *post_fields = sn_asprintf(
 		"{\"head\":\""SV_FMT"\",\"base\":\""SV_FMT"\", "
 		"\"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
-		SV_ARGS(opts.from),
-		SV_ARGS(opts.to),
-		SV_ARGS(opts.title),
-		SV_ARGS(opts.body));
+		SV_ARGS(e_head),
+		SV_ARGS(e_base),
+		SV_ARGS(e_title),
+		SV_ARGS(e_body));
 	char *url         = sn_asprintf(
 		"%s/repos/"SV_FMT"/pulls",
 		gcli_get_apibase(),
 		SV_ARGS(opts.in));
 
 	gcli_fetch_with_method("POST", url, post_fields, NULL, out);
+
+	free(e_head.data);
+	free(e_base.data);
+	free(e_title.data);
+	free(e_body.data);
 	free(post_fields);
 	free(url);
 }

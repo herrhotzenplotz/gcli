@@ -36,17 +36,9 @@
 #include <stdbool.h>
 
 typedef struct gcli_issue gcli_issue;
-typedef struct gcli_issue_details gcli_issue_details;
 typedef struct gcli_submit_issue_options gcli_submit_issue_options;
 
 struct gcli_issue {
-	const char *title;
-	const char *state;
-	int         number;
-	int         id;
-};
-
-struct gcli_issue_details {
 	int     number;
 	sn_sv   title;
 	sn_sv   created_at;
@@ -81,7 +73,7 @@ void gcli_issues_free(
 void gcli_print_issues_table(
 	enum gcli_output_order  order,
 	gcli_issue             *issues,
-	int                      issues_size);
+	int                     issues_size);
 void gcli_issue_summary(
 	const char *owner,
 	const char *reponame,

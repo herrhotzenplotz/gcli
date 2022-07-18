@@ -99,7 +99,7 @@ struct gcli_forge_descriptor {
 		const char          *owner,
 		const char          *repo,
 		int                  issue_number,
-		gcli_issue_details *out);
+		gcli_issue			*out);
 
 	/**
 	 * Close the given issue */

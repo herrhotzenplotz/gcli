@@ -50,10 +50,10 @@ gitea_get_issues(
 
 void
 gitea_get_issue_summary(
-	const char          *owner,
-	const char          *repo,
-	int                  issue_number,
-	gcli_issue_details *out)
+	const char  *owner,
+	const char  *repo,
+	int          issue_number,
+	gcli_issue	*out)
 {
 	github_get_issue_summary(owner, repo, issue_number, out);
 }

@@ -199,11 +199,9 @@ gcli_issue_get_user_message(gcli_submit_issue_options *opts)
 void
 gcli_issue_submit(gcli_submit_issue_options opts)
 {
-	gcli_fetch_buffer  json_buffer  = {0};
+	gcli_fetch_buffer	json_buffer = {0};
 
-	sn_sv body = gcli_issue_get_user_message(&opts);
-
-	opts.body = gcli_json_escape(body);
+	opts.body = gcli_issue_get_user_message(&opts);
 
 	printf("The following issue will be created:\n"
 		   "\n"
@@ -212,7 +210,7 @@ gcli_issue_submit(gcli_submit_issue_options opts)
 		   "REPO    : "SV_FMT"\n"
 		   "MESSAGE :\n"SV_FMT"\n",
 		   SV_ARGS(opts.title), SV_ARGS(opts.owner),
-		   SV_ARGS(opts.repo), SV_ARGS(body));
+		   SV_ARGS(opts.repo), SV_ARGS(opts.body));
 
 	putchar('\n');
 
@@ -224,7 +222,7 @@ gcli_issue_submit(gcli_submit_issue_options opts)
 	gcli_forge()->perform_submit_issue(opts, &json_buffer);
 	gcli_print_html_url(json_buffer);
 
-	free(body.data);
+	free(opts.body.data);
 	free(opts.body.data);
 	free(json_buffer.data);
 }

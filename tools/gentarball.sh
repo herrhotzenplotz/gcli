@@ -20,9 +20,9 @@ stage() {
 	info "Creating staging directory..."
 	mkdir -p ${STAGEDIR}
 
-	find . -type f \
-		 ! -path \./\.git/\* \
-		 ! -name \.gitignore \
+	star -copy -find . -type f \
+		 ! -path .git/\* \
+		 ! -name .gitignore \
 		 ! -name \*.o \
 		 ! -name \*.d \
 		 ! -name \*~ \
@@ -32,9 +32,9 @@ stage() {
 		 ! -name config.mk \
 		 ! -name TAGS \
 		 ! -name \*.gz \
-		 ! -path \./tools/\* \
+		 ! -path tools/\* \
 		 ! -name y.tab.h \
-		 -exec cp {} ${STAGEDIR} \;
+		 ${STAGEDIR}
 }
 
 
@@ -47,12 +47,8 @@ if [ ! -f Makefile ]; then
 	die "Please change to the source top"
 fi
 
-pushd .. > /dev/null 2>&1
-
 info "Staging into ${STAGEDIR} ..."
-pushd gcli > /dev/null 2>&1
 stage
-popd > /dev/null 2>&1
 
 info "Creating base tarball ${TARFBASE} ..."
 pushd /tmp > /dev/null 2>&1
@@ -75,5 +71,3 @@ mv "${TARFBASE}".* "${STAGEDIR}"
 popd > /dev/null 2>&1
 
 info "Tarballs are at ${STAGEDIR}"
-
-popd > /dev/null 2>&1

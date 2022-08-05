@@ -424,6 +424,7 @@ gitlab_perform_submit_mr(
 	sn_sv		source_owner  = {0};
 	sn_sv		repo          = {0};
 	sn_sv		source_branch = {0};
+	char       *labels        = NULL;
 
 	/* json escaped variants */
 	sn_sv e_source_branch, e_target_branch, e_title, e_body;
@@ -447,16 +448,30 @@ gitlab_perform_submit_mr(
 	e_title			= gcli_json_escape(opts.title);
 	e_body			= gcli_json_escape(opts.body);
 
+	/* Prepare the label list if needed */
+	if (opts.labels_size) {
+		char *joined_items = NULL;
+
+		/* Join by "," */
+		joined_items = sn_join_with(
+			opts.labels, opts.labels_size, "\",\"");
+
+		/* Construct something we can shove into the payload below */
+		labels = sn_asprintf(", \"labels\": [\"%s\"]", joined_items);
+		free(joined_items);
+	}
+
 	/* prepare payload */
 	char *post_fields = sn_asprintf(
 		"{\"source_branch\":\""SV_FMT"\",\"target_branch\":\""SV_FMT"\", "
 		"\"title\": \""SV_FMT"\", \"description\": \""SV_FMT"\", "
-		"\"target_project_id\": %d }",
+		"\"target_project_id\": %d %s }",
 		SV_ARGS(e_source_branch),
 		SV_ARGS(e_target_branch),
 		SV_ARGS(e_title),
 		SV_ARGS(e_body),
-		target.id);
+		target.id,
+		labels ? labels : "");
 
 	/* construct url */
 	sn_sv e_owner = gcli_urlencode_sv(source_owner);
@@ -477,6 +492,7 @@ gitlab_perform_submit_mr(
 	free(e_body.data);
 	free(e_owner.data);
 	free(e_repo.data);
+	free(labels);
 	free(post_fields);
 	free(url);
 }

@@ -247,10 +247,14 @@ subcommand_pull_create(int argc, char *argv[])
 		  .has_arg = no_argument,
 		  .flag = &opts.draft,
 		  .val = 1   },
+		{ .name = "label",
+		  .has_arg = required_argument,
+		  .flag = NULL,
+		  .val = 'l' },
 		{0},
 	};
 
-	while ((ch = getopt_long(argc, argv, "yf:t:di:", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "yf:t:di:l:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'f':
 			opts.from  = SV(optarg);
@@ -263,6 +267,11 @@ subcommand_pull_create(int argc, char *argv[])
 			break;
 		case 'i':
 			opts.in    = SV(optarg);
+			break;
+		case 'l': /* add a label */
+			opts.labels = realloc(
+				opts.labels, sizeof(*opts.labels) * (opts.labels_size + 1));
+			opts.labels[opts.labels_size++] = optarg;
 			break;
 		case 'y':
 			opts.always_yes = true;
@@ -297,6 +306,8 @@ subcommand_pull_create(int argc, char *argv[])
 	opts.title = SV(argv[0]);
 
 	gcli_pr_submit(opts);
+
+	free(opts.labels);
 
 	return EXIT_SUCCESS;
 }

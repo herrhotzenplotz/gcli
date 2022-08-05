@@ -78,13 +78,15 @@ struct gcli_commit {
 
 /* Options to submit to the gh api for creating a PR */
 struct gcli_submit_pull_options {
-	sn_sv in;
-	sn_sv from;
-	sn_sv to;
-	sn_sv title;
-	sn_sv body;
-	int   draft;
-	bool  always_yes;
+	sn_sv		  in;
+	sn_sv		  from;
+	sn_sv		  to;
+	sn_sv		  title;
+	sn_sv		  body;
+	const char	**labels;
+	size_t		  labels_size;
+	int			  draft;
+	bool		  always_yes;
 };
 
 int gcli_get_prs(

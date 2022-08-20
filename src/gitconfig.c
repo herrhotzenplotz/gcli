@@ -191,9 +191,12 @@ http_extractor(gcli_gitremote *remote, const char *prefix)
 	} else if (sn_sv_has_prefix(remote->url, "https://gitlab.com/")) {
 		prefix_size = sizeof("https://gitlab.com/") - 1;
 		remote->forge_type = GCLI_FORGE_GITLAB;
+	} else if (sn_sv_has_prefix(remote->url, "https://codeberg.org/")) {
+		prefix_size = sizeof("https://codeberg.org/") - 1;
+		remote->forge_type = GCLI_FORGE_GITEA;
 	} else {
-		warnx("non-github or non-gitlab https remotes are not supported "
-			  "and will likely cause bugs");
+		warnx("non-github, non-gitlab and non-codeberg https remotes are "
+			  "not supported and will likely cause bugs");
 	}
 
 	pair.length -= prefix_size;
@@ -218,6 +221,8 @@ ssh_extractor(gcli_gitremote *remote, const char *prefix)
 		remote->forge_type = GCLI_FORGE_GITHUB;
 	else if (sn_sv_has_prefix(remote->url, "git@gitlab.com"))
 		remote->forge_type = GCLI_FORGE_GITLAB;
+	else if (sn_sv_has_prefix(remote->url, "git@codeberg.org"))
+		remote->forge_type = GCLI_FORGE_GITEA;
 
 	sn_sv pair   = remote->url;
 	pair.length -= prefix_size;

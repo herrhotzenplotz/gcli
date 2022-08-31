@@ -63,8 +63,7 @@ void github_pr_close(
 	int         pr_number);
 
 void github_perform_submit_pr(
-	gcli_submit_pull_options  opts,
-	gcli_fetch_buffer        *out);
+	gcli_submit_pull_options opts);
 
 int github_get_pull_commits(
 	const char    *owner,

@@ -291,11 +291,10 @@ github_pr_reopen(const char *owner, const char *repo, int pr_number)
 }
 
 void
-github_perform_submit_pr(
-	gcli_submit_pull_options  opts,
-	gcli_fetch_buffer        *out)
+github_perform_submit_pr(gcli_submit_pull_options opts)
 {
-	sn_sv e_head, e_base, e_title, e_body;
+	sn_sv				e_head, e_base, e_title, e_body;
+	gcli_fetch_buffer	fetch_buffer = {0};
 
 	e_head	= gcli_json_escape(opts.from);
 	e_base	= gcli_json_escape(opts.to);
@@ -310,12 +309,13 @@ github_perform_submit_pr(
 		SV_ARGS(e_title),
 		SV_ARGS(e_body));
 	char *url         = sn_asprintf(
-		"%s/repos/"SV_FMT"/pulls",
+		"%s/repos/"SV_FMT"/"SV_FMT"/pulls",
 		gcli_get_apibase(),
-		SV_ARGS(opts.in));
+		SV_ARGS(opts.owner), SV_ARGS(opts.repo));
 
-	gcli_fetch_with_method("POST", url, post_fields, NULL, out);
+	gcli_fetch_with_method("POST", url, post_fields, NULL, &fetch_buffer);
 
+	free(fetch_buffer.data);
 	free(e_head.data);
 	free(e_base.data);
 	free(e_title.data);

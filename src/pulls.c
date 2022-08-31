@@ -330,21 +330,20 @@ gcli_pr_get_user_message(gcli_submit_pull_options *opts)
 void
 gcli_pr_submit(gcli_submit_pull_options opts)
 {
-	gcli_fetch_buffer	json_buffer = {0};
-
 	opts.body = gcli_pr_get_user_message(&opts);
 
 	fprintf(stdout,
-		"The following PR will be created:\n"
-		"\n"
-		"TITLE   : "SV_FMT"\n"
-		"BASE    : "SV_FMT"\n"
-		"HEAD    : "SV_FMT"\n"
-		"IN      : "SV_FMT"\n"
-		"MESSAGE :\n"SV_FMT"\n",
-		SV_ARGS(opts.title),SV_ARGS(opts.to),
-		SV_ARGS(opts.from), SV_ARGS(opts.in),
-		SV_ARGS(opts.body));
+			"The following PR will be created:\n"
+			"\n"
+			"TITLE   : "SV_FMT"\n"
+			"BASE    : "SV_FMT"\n"
+			"HEAD    : "SV_FMT"\n"
+			"IN      : "SV_FMT"/"SV_FMT"\n"
+			"MESSAGE :\n"SV_FMT"\n",
+			SV_ARGS(opts.title),SV_ARGS(opts.to),
+			SV_ARGS(opts.from),
+			SV_ARGS(opts.owner), SV_ARGS(opts.repo),
+			SV_ARGS(opts.body));
 
 	fputc('\n', stdout);
 
@@ -352,12 +351,7 @@ gcli_pr_submit(gcli_submit_pull_options opts)
 		if (!sn_yesno("Do you want to continue?"))
 			errx(1, "PR aborted.");
 
-	gcli_forge()->perform_submit_pr(opts, &json_buffer);
-
-	gcli_print_html_url(json_buffer);
-
-	free(opts.body.data);
-	free(json_buffer.data);
+	gcli_forge()->perform_submit_pr(opts);
 }
 
 void

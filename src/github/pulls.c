@@ -31,10 +31,16 @@
 #include <gcli/curl.h>
 #include <gcli/gitconfig.h>
 #include <gcli/github/config.h>
+#include <gcli/github/issues.h>
 #include <gcli/github/pulls.h>
 #include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
+
+/* Forward declaration */
+static void github_pull_parse_summary(
+	json_stream *input,
+	gcli_pull_summary *out);
 
 static char *
 get_branch_label(json_stream *input)
@@ -295,6 +301,8 @@ github_perform_submit_pr(gcli_submit_pull_options opts)
 {
 	sn_sv				e_head, e_base, e_title, e_body;
 	gcli_fetch_buffer	fetch_buffer = {0};
+	struct json_stream	json		 = {0};
+	gcli_pull_summary	pull		 = {0};
 
 	e_head	= gcli_json_escape(opts.from);
 	e_base	= gcli_json_escape(opts.to);
@@ -314,6 +322,24 @@ github_perform_submit_pr(gcli_submit_pull_options opts)
 		SV_ARGS(opts.owner), SV_ARGS(opts.repo));
 
 	gcli_fetch_with_method("POST", url, post_fields, NULL, &fetch_buffer);
+
+	/* Add labels if requested. GitHub doesn't allow us to do this all
+	 * with one request. */
+	if (opts.labels_size) {
+		json_open_buffer(&json, fetch_buffer.data, fetch_buffer.length);
+		github_pull_parse_summary(&json, &pull);
+
+		/* HACK: the string in the string view is passed from the
+		 *       command line and is thus null-terminated. We don't
+		 *       need to convert it into a C-string. Ideally,
+		 *       gcli_pulls_create_options.(repo|owner) should be a
+		 *       C-string to begin with. */
+		github_issue_add_labels(opts.owner.data, opts.repo.data,
+								pull.id, opts.labels, opts.labels_size);
+
+		gcli_pulls_summary_free(&pull);
+		json_close(&json);
+	}
 
 	free(fetch_buffer.data);
 	free(e_head.data);

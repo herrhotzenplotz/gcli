@@ -14,7 +14,7 @@
 PROGS				=	gcli
 LIBS				=	libgcli.a
 
-GCLI_VERSION		=	0.9.2-beta
+GCLI_VERSION		=	0.9.6-beta
 # These and LDFLAGS can be overwritten
 CFLAGS				=	-std=iso9899:1999		\
 						-Ithirdparty/pdjson/	\

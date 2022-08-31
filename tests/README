@@ -1,0 +1,17 @@
+README
+======
+
+This is the test suite for gcli. It is rather tiny as of now and only
+tests for known bugs.
+
+For it to run you will need:
+
+- Kyua
+- ATF-C
+
+These tools are basic testing utilities that are used on all BSDs.
+
+You can run the test suite by invoking `make check' in the toplevel
+directory. Please only run it from there as the toplevel makefile may
+need to compile the static library containing all the functions that
+will be tested.

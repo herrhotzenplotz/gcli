@@ -634,11 +634,11 @@ gcli_config_get_repo(const char **owner, const char **repo)
 	ensure_config();
 
 	if (config.override_remote) {
-		gcli_forge_type forge = gcli_gitconfig_repo_by_remote(
+		int forge = gcli_gitconfig_repo_by_remote(
 			config.override_remote, owner, repo);
 
 		if (forge >= 0) {
-			if (gcli_config_get_forge_type() != forge)
+			if ((int)(gcli_config_get_forge_type()) != forge)
 				errx(1, "error: forge types are inconsistent");
 		}
 

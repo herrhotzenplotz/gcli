@@ -16,8 +16,11 @@
 .Ar actions...
 .Nm
 .Cm create
-.Op Fl i Ar owner/repo
+.Op Fl o Ar owner Fl r Ar repo
+.Op Fl t Ar branch
+.Op Fl f Ar owner:branch
 .Op Fl y
+.Ar "PR title..."
 .Sh DESCRIPTION
 Use
 .Nm
@@ -65,8 +68,10 @@ will come up and ask you to enter the PR message.
 
 The following flags can be specified:
 .Bl -tag -width indent
-.It Fl i , -in Ar owner/repo
-Specify in which repository the PR is to be created.
+.It Fl o , -owner Ar owner
+Specify the owner of the repository where the PR is to be created.
+.It Fl r , -repo Ar repository
+Specify the name of the repository where the PR is to be created.
 .It Fl t , -to Ar branch
 The target (base) branch of the PR. This is the branch the commits are
 to be merged into. You may omit this flag if you have set pr.base in
@@ -77,6 +82,8 @@ the commits that are to be merged into the target repository. You may
 omit this flag and gcli will try to infer this information.
 .It Fl y , -yes
 Do not ask for confirmation before creating the PR. Assume yes.
+.It Ar "PR Title..."
+The title of the Pull Request or Merge Request.
 .El
 .El
 .Sh ACTIONS

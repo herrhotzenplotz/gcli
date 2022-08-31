@@ -411,27 +411,21 @@ gitlab_mr_reopen(const char *owner, const char *repo, int pr_number)
 }
 
 void
-gitlab_perform_submit_mr(
-	gcli_submit_pull_options  opts,
-	gcli_fetch_buffer        *out)
+gitlab_perform_submit_mr(gcli_submit_pull_options opts)
 {
 	/* Note: this doesn't really allow merging into repos with
 	 * different names. We need to figure out a way to make this
 	 * better for both github and gitlab. */
-	gcli_repo	target        = {0};
-	sn_sv		target_owner  = {0};
-	sn_sv		target_branch = {0};
-	sn_sv		source_owner  = {0};
-	sn_sv		repo          = {0};
-	sn_sv		source_branch = {0};
+	gcli_repo			 target        = {0};
+	sn_sv				 target_branch = {0};
+	sn_sv				 source_owner  = {0};
+	sn_sv				 source_branch = {0};
+	char				*labels        = NULL;
+	gcli_fetch_buffer	 buffer		   = {0};
 
 	/* json escaped variants */
 	sn_sv e_source_branch, e_target_branch, e_title, e_body;
 
-	repo                  = opts.in;
-	target_owner          = sn_sv_chop_until(&repo, '/');
-	repo.data            += 1;
-	repo.length          -= 1;
 	target_branch         = opts.to;
 	source_branch         = opts.from;
 	source_owner          = sn_sv_chop_until(&source_branch, ':');
@@ -439,7 +433,7 @@ gitlab_perform_submit_mr(
 	source_branch.data   += 1;
 
 	/* Figure out the project id */
-	gitlab_get_repo(target_owner, repo, &target);
+	gitlab_get_repo(opts.owner, opts.repo, &target);
 
 	/* escape things in the post payload */
 	e_source_branch = gcli_json_escape(source_branch);
@@ -447,20 +441,34 @@ gitlab_perform_submit_mr(
 	e_title			= gcli_json_escape(opts.title);
 	e_body			= gcli_json_escape(opts.body);
 
+	/* Prepare the label list if needed */
+	if (opts.labels_size) {
+		char *joined_items = NULL;
+
+		/* Join by "," */
+		joined_items = sn_join_with(
+			opts.labels, opts.labels_size, "\",\"");
+
+		/* Construct something we can shove into the payload below */
+		labels = sn_asprintf(", \"labels\": [\"%s\"]", joined_items);
+		free(joined_items);
+	}
+
 	/* prepare payload */
 	char *post_fields = sn_asprintf(
 		"{\"source_branch\":\""SV_FMT"\",\"target_branch\":\""SV_FMT"\", "
 		"\"title\": \""SV_FMT"\", \"description\": \""SV_FMT"\", "
-		"\"target_project_id\": %d }",
+		"\"target_project_id\": %d %s }",
 		SV_ARGS(e_source_branch),
 		SV_ARGS(e_target_branch),
 		SV_ARGS(e_title),
 		SV_ARGS(e_body),
-		target.id);
+		target.id,
+		labels ? labels : "");
 
 	/* construct url */
 	sn_sv e_owner = gcli_urlencode_sv(source_owner);
-	sn_sv e_repo  = gcli_urlencode_sv(repo);
+	sn_sv e_repo  = gcli_urlencode_sv(opts.repo);
 
 	char *url         = sn_asprintf(
 		"%s/projects/"SV_FMT"%%2F"SV_FMT"/merge_requests",
@@ -468,15 +476,17 @@ gitlab_perform_submit_mr(
 		SV_ARGS(e_owner), SV_ARGS(e_repo));
 
 	/* perform request */
-	gcli_fetch_with_method("POST", url, post_fields, NULL, out);
+	gcli_fetch_with_method("POST", url, post_fields, NULL, &buffer);
 
 	/* cleanup */
+	free(buffer.data);
 	free(e_source_branch.data);
 	free(e_target_branch.data);
 	free(e_title.data);
 	free(e_body.data);
 	free(e_owner.data);
 	free(e_repo.data);
+	free(labels);
 	free(post_fields);
 	free(url);
 }

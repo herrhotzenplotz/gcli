@@ -63,13 +63,11 @@ gitea_get_pull_commits(
 }
 
 void
-gitea_pull_submit(
-	gcli_submit_pull_options  opts,
-	gcli_fetch_buffer        *out)
+gitea_pull_submit(gcli_submit_pull_options opts)
 {
 	warnx("In case the following process errors out, see: "
 		  "https://github.com/go-gitea/gitea/issues/20175");
-	github_perform_submit_pr(opts, out);
+	github_perform_submit_pr(opts);
 }
 
 void

@@ -189,8 +189,7 @@ struct gcli_forge_descriptor {
 	/**
 	 * Submit PR/MR */
 	void (*perform_submit_pr)(
-		gcli_submit_pull_options  opts,
-		gcli_fetch_buffer        *out);
+		gcli_submit_pull_options  opts);
 
 	/**
 	 * Get a list of commits in the given PR/MR */

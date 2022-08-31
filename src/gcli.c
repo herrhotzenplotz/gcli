@@ -239,18 +239,26 @@ subcommand_pull_create(int argc, char *argv[])
 		  .has_arg = required_argument,
 		  .flag = NULL,
 		  .val = 't' },
-		{ .name = "in",
+		{ .name = "owner",
 		  .has_arg = required_argument,
 		  .flag = NULL,
-		  .val = 'i' },
+		  .val = 'o' },
+		{ .name = "repo",
+		  .has_arg = required_argument,
+		  .flag = NULL,
+		  .val = 'r' },
 		{ .name = "draft",
 		  .has_arg = no_argument,
 		  .flag = &opts.draft,
 		  .val = 1   },
+		{ .name = "label",
+		  .has_arg = required_argument,
+		  .flag = NULL,
+		  .val = 'l' },
 		{0},
 	};
 
-	while ((ch = getopt_long(argc, argv, "yf:t:di:", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "yf:t:do:r:l:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'f':
 			opts.from  = SV(optarg);
@@ -261,8 +269,16 @@ subcommand_pull_create(int argc, char *argv[])
 		case 'd':
 			opts.draft = 1;
 			break;
-		case 'i':
-			opts.in    = SV(optarg);
+		case 'o':
+			opts.owner = SV(optarg);
+			break;
+		case 'r':
+			opts.repo = SV(optarg);
+			break;
+		case 'l': /* add a label */
+			opts.labels = realloc(
+				opts.labels, sizeof(*opts.labels) * (opts.labels_size + 1));
+			opts.labels[opts.labels_size++] = optarg;
 			break;
 		case 'y':
 			opts.always_yes = true;
@@ -285,8 +301,9 @@ subcommand_pull_create(int argc, char *argv[])
 				 "--to branch-name or set pr.base in .gcli.");
 	}
 
-	if (!opts.in.length) {
-		if (!(opts.in = gcli_config_get_upstream()).length)
+	if (!opts.owner.length || !opts.repo.length) {
+		gcli_config_get_upstream_parts(&opts.owner, &opts.repo);
+		if (!opts.owner.length || !opts.repo.length)
 			errx(1, "error: PR target repo is missing. Please either "
 				 "specify --in owner/repo or set pr.upstream in .gcli.");
 	}
@@ -297,6 +314,8 @@ subcommand_pull_create(int argc, char *argv[])
 	opts.title = SV(argv[0]);
 
 	gcli_pr_submit(opts);
+
+	free(opts.labels);
 
 	return EXIT_SUCCESS;
 }

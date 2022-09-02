@@ -3,7 +3,7 @@
 .Os
 .Sh NAME
 .Nm gcli
-.Nd interact with GitHub and GitLab without using a web-browser
+.Nd interact with git forges without using a web-browser
 .Sh SYNOPSIS
 
 .Nm
@@ -47,8 +47,10 @@
 .Cm status
 .Sh DESCRIPTION
 .Nm
-can be used to interact with both GitHub and GitLab from the command
-line in order to make many tasks easier.
+can be used to interact with
+.Xr git 1
+forges like GitHub, GitLab and Gitea from the command line in order to
+make many tasks like managing issues and pull requests easier.
 
 Calls to
 .Nm
@@ -60,7 +62,7 @@ may be summarized, comments fetched and a diff printed all in one
 command).
 .Sh SUBCOMMANDS
 Most of these subcommands are documented in dedicated man pages.
-.Bl -tag -width indent
+.Bl -tag -width pipelines
 .It Cm issues
 Issues in repositories. See
 .Xr gcli-issues 1 .
@@ -119,9 +121,10 @@ Forcefully override the forge type if it can't be inferred
 correctly. Set
 .Ar forge-type
 to
-.Sq github
-or
+.Sq github ,
 .Sq gitlab
+or
+.Sq gitea
 to connect to the corresponding services.
 .El
 
@@ -161,7 +164,7 @@ man pages.
 .\" .Sh IMPLEMENTATION NOTES
 .\" Not used in OpenBSD.
 .Sh ENVIRONMENT
-.Bl -tag -width indent
+.Bl -tag -width XDG_CONFIG_DIR
 .It Ev EDITOR
 If the gcli config file does not name an editor,
 .Nm
@@ -288,7 +291,7 @@ decent, sufficiently portable and secure version of a cli utility to
 interact with the GitHub world without using the inconvenient web
 interface.
 
-Later, GitLab support was added.
+Later, support for GitLab and Gitea (Codeberg) were added.
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
 .Sh CAVEATS

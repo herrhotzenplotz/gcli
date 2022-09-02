@@ -3,7 +3,7 @@
 .Os
 .Sh NAME
 .Nm gcli forks
-.Nd Manage repository forks on GitHub and GitLab
+.Nd Manage repository forks in git forges
 .Sh SYNOPSIS
 .Nm
 .Op Fl n Ar n
@@ -18,7 +18,9 @@
 .Sh DESCRIPTION
 Use
 .Nm
-to manage forks of other repositories on both GitHub and GitLab.
+to manage forks of other repositories in various
+.Xr git 1
+forges such as GitHub, GitLab and Gitea.
 .Sh OPTIONS
 .Bl -tag -width indent
 .It Fl o , -owner Ar owner
@@ -28,7 +30,7 @@ used in combination with
 .It Fl r , -repo Ar repo
 Operate on the given repository. This option can only be used in
 combination with
-.Fl r o
+.Fl o .
 .It Fl y , -yes
 Do not ask for confirmation. Assume yes.
 .It Fl s , -sorted
@@ -43,7 +45,7 @@ forks. Setting
 .Ar n
 to -1 will fetch all forks. Default: 30. Note that on repositories
 with many forks fetching all forks can take a considerable amount of
-time and may result in rate limiting by the GitHub/GitLab API.
+time and may result in rate limiting by the respective API.
 .El
 .El
 .Sh ACTIONS

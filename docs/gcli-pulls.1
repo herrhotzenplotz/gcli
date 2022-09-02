@@ -3,7 +3,7 @@
 .Os
 .Sh NAME
 .Nm gcli pulls
-.Nd Manage GitHub Pull Requests and GitLab Merge Requests
+.Nd Manage Pull Requests on Git Forges
 .Sh SYNOPSIS
 .Nm
 .Op Fl a
@@ -25,7 +25,9 @@
 Use
 .Nm
 to list, create, edit or delete Pull Requests (PRs) in repositories on
-GitHub or GitLab. Without any action specified,
+various
+.Xr git 1
+forges such as GitLab, Gitea or GitHub. Without any action specified,
 .Nm
 will list open PRs in the given or autodetected repository.
 .Sh OPTIONS
@@ -52,7 +54,7 @@ pull requests. Default: 30. If
 .Ar n
 is set to -1 this will fetch all pull requests. Note that on large
 repositories fetching all pull requests can take a considerable amount
-of time and may result in rate limiting by the GitHub/GitLab API.
+of time and may result in rate limiting by the respective API.
 .It Fl p , -pull Ar PR
 execute the given
 .Ar actions

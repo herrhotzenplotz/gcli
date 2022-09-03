@@ -3,7 +3,7 @@
 .Os
 .Sh NAME
 .Nm gcli releases
-.Nd manage releases on GitHub and GitLab
+.Nd manage releases on git forges
 .Sh SYNOPSIS
 
 .Nm
@@ -30,8 +30,10 @@
 .Sh DESCRIPTION
 Use
 .Nm
-to list, create or delete releases for repositories on GitHub and GitLab.
-Without a subcommand specified,
+to list, create or delete releases for repositories on
+.Xr git 1
+forges such as GitLab, Gitea or GitHub. Without a subcommand
+specified,
 .Nm
 will list releases in the given or autodetected repository. If you are
 the owner of that repo, you will also see draft releases. You will not

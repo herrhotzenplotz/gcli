@@ -74,13 +74,13 @@ version(void)
 		" - a command line utility to interact with various git forges.\n"
 		"Copyright 2021 Nico Sonack <nsonack@herrhotzenplotz.de>\n"
 		"This program is licensed under the BSD2CLAUSE license. You should\n"
-		"received a copy of it with its distribution.\n");
+		"have received a copy of it with its distribution.\n");
 }
 
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: gcli [subcommand] [options] ...\n");
+	fprintf(stderr, "usage: gcli [options] [subcommand] [options] ...\n");
 	version();
 	exit(1);
 }

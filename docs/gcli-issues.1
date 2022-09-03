@@ -3,7 +3,7 @@
 .Os
 .Sh NAME
 .Nm gcli issues
-.Nd Manage GitHub and GitLab issues
+.Nd Manage issues in various git forges
 .Sh SYNOPSIS
 .Nm
 .Op Fl n Ar n
@@ -21,8 +21,9 @@
 .Sh DESCRIPTION
 Use
 .Nm
-to list, create, edit or delete issues in repositories on both GitHub
-and GitLab. Without any action specified,
+to list, create, edit or delete issues in repositories in various
+.Xr git 1
+forges such as GitHub, GitLab and Gitea. Without any action specified,
 .Nm
 will list issues in the given or autodetected repository.
 .Sh OPTIONS
@@ -47,11 +48,11 @@ Fetch at least
 .Ar n
 issues. Setting
 .Ar n
-to -1 will fetch all issues. Default: 30. Note that
-on large repositories fetching all issues can take a considerable
-amount of time and may result in rate limiting by the GitHub/GitLab API.
+to -1 will fetch all issues. Default: 30. Note that on large
+repositories fetching all issues can take a considerable amount of
+time and may result in rate limiting by the respective API.
 .It Fl i , -issue Ar issue
-execcute the given
+execute the given
 .Ar actions
 for the specified
 .Ar issue .

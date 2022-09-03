@@ -3,7 +3,7 @@
 .Os
 .Sh NAME
 .Nm gcli comment
-.Nd Submit comments on GitHub and GitLab issues and PRs
+.Nd Comment on tickets in git forges
 .Sh SYNOPSIS
 .Nm
 .Op Fl y
@@ -12,8 +12,10 @@
 .Sh DESCRIPTION
 .Nm
 can be used to add comments in the discussion under issues and pull
-requests on both GitHub and GitLab. Note that PRs are treated as
-issues on GitHub, making the
+requests on
+.Xr git 1
+forges such as Github, Gitlab and Gitea. Note that PRs are treated as
+issues on GitHub and Gitea, making the
 .Fl i
 and
 .Fl p
@@ -22,10 +24,8 @@ comment.
 .Nm
 will open an editor, either specified in your environment through
 .Ev EDITOR
-or the one set in your global config file
-.Pa gcli.conf ,
-to enter the comment. See
-.Xr gcli 1
+or the one set in your global config file to enter the comment. See
+.Xr gcli 1 .
 .Sh OPTIONS
 .Bl -tag -width indent
 .It Fl o , -owner Ar owner

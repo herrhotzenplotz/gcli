@@ -1670,7 +1670,7 @@ subcommand_labels_create(int argc, char *argv[])
 		{0}
 	};
 
-	while ((ch = getopt_long(argc, argv, "n:o:r:", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "n:o:r:d:c:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
 			owner = optarg;

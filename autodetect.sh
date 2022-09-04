@@ -67,7 +67,14 @@ compiler_flags() {
 			;;
 	esac
 
-	dump "COMPILE_FLAGS=${COMPILER_FLAGS} \${\${@}_CFLAGS} \${LIB_CFLAGS}"
+	dump "COMPILE_FLAGS=	${COMPILER_FLAGS}"
+	dump "COMPILE_FLAGS	+=	\${\${@}_CFLAGS}"
+	dump "COMPILE_FLAGS	+=	\${LIB_CFLAGS}"
+	dump "COMPILE_FLAGS	+=	\${CFLAGS_${CCNAME}}"
+	dump "COMPILE_FLAGS	+=	\${CFLAGS_${HOSTOS}}"
+	dump "COMPILE_FLAGS	+=	\${CFLAGS_${HOSTCPU}}"
+	dump "COMPILE_FLAGS	+=	\${CFLAGS_${HOSTOS}-${CCNAME}}"
+	dump "COMPILE_FLAGS	+=	\${CFLAGS_${HOSTOS}-${HOSTCPU}}"
 	dump "MKDEPS_FLAGS=${MKDEPS_FLAGS}"
 	checking_result "ok"
 }
@@ -84,7 +91,16 @@ linker_flags() {
 			;;
 	esac
 
-	dump "LINK_FLAGS=${LINK_FLAGS} \${LDFLAGS} \${LDFLAGS_${TARGET}} \${LIB_LDFLAGS} \${\${@}_LDFLAGS}"
+	dump "LINK_FLAGS=	${LINK_FLAGS}"
+	dump "LINK_FLAGS	+=	\${LDFLAGS}"
+	dump "LINK_FLAGS	+=	\${LDFLAGS_${TARGET}}"
+	dump "LINK_FLAGS	+=	\${LIB_LDFLAGS}"
+	dump "LINK_FLAGS	+=	\${\${@}_LDFLAGS}"
+	dump "LINK_FLAGS	+=	\${LDFLAGS_${CCNAME}}"
+	dump "LINK_FLAGS	+=	\${LDFLAGS_${HOSTOS}}"
+	dump "LINK_FLAGS	+=	\${LDFLAGS_${HOSTCPU}}"
+	dump "LINK_FLAGS	+=	\${LDFLAGS_${HOSTOS}-${CCNAME}}"
+	dump "LINK_FLAGS	+=	\${LDFLAGS_${HOSTOS}-${HOSTCPU}}"
 	checking_result "ok"
 }
 

@@ -1,37 +1,49 @@
-# If you are having problems compiling gcli, try to build an SCU version:
+# If you are having problems compiling gcli, try to build an SCU
+# version:
 #
-#    cc -O3 -o gcli -Iinclude -Ithirdparty -DGCLI_VERSION_STRING="\"Manual SCU build\"" \
-#           -I/usr/local/include `find . -type f -name \*.c | grep -v test` \
-#           -L/usr/local/lib -lcurl
+#    cc -O3 -o gcli -Iinclude -Ithirdparty \
+#    -DGCLI_VERSION_STRING="\"Manual SCU build\"" \
+#    -I/usr/local/include `find . -type f -name \*.c | grep -v test` \
+#    -L/usr/local/lib -lcurl
 #
 #    Adapt the linker- and include paths to your system.
 #
-#  Please report such cases to me. If the problem arises from GNU make, please see my
-#  rant in default.mk. Likely you want to fix the problem by using something other than
-#  GNU make.
+#  Please report such cases to me. If the problem arises from GNU
+#  make, please see my rant in default.mk. Likely you want to fix the
+#  problem by using something other than GNU make.
 
 # Declare the list of programs
-PROGS				=	gcli
-LIBS				=	libgcli.a
+PROGS							=	gcli
+LIBS							=	libgcli.a
 
-GCLI_VERSION		=	0.9.7-beta
-# These and LDFLAGS can be overwritten
-CFLAGS				=	-std=iso9899:1999		\
-						-Ithirdparty/pdjson/	\
-						-Ithirdparty/			\
-						-Iinclude/ -fPIC -fPIE
-# TODO: The cflags and ldflags don't really work all that well with
-# SunStudio
-LDFLAGS							=	-L. -lgcli -rdynamic -fPIC \
-									-fPIE
-CFLAGS_amd64-freebsd-clang		=	-pedantic \
-									-g -O0 -ggdb -Wall -Wextra
-CFLAGS_sparc-sunos-sunstudio	=	-pedantic -I/opt/bw/include \
-									-g -xO0
-LDFLAGS_sparc-sunos-sunstudio	=	-L/opt/bw/lib -lcurl -R/opt/bw/lib
+GCLI_VERSION					=	0.9.7-beta
+
+#########################################################################
+# CPPFLAGS
 CPPFLAGS						=	-D_XOPEN_SOURCE=600 \
 									-DGCLI_VERSION_STRING=\"${GCLI_VERSION}\"
 
+#########################################################################
+# CFLAGS
+CFLAGS							=	-std=iso9899:1999		\
+									-Ithirdparty/pdjson/	\
+									-Ithirdparty/			\
+									-Iinclude/
+CFLAGS_gcc						=	-fPIC -fPIE -pedantic -g -O0 -ggdb \
+									-Wall -Wextra
+CFLAGS_clang					=	${CFLAGS_gcc}
+
+CFLAGS_sparc-sunos-sunstudio	=	-pedantic -I/opt/bw/include \
+									-g -xO0
+
+#########################################################################
+# LDFLAGS
+LDFLAGS							=	-L. -lgcli
+LDFLAGS_gcc						=	-rdynamic -fPIC -fPIE
+LDFLAGS_clang					=	${LDFLAGS_gcc}
+LDFLAGS_sparc-sunos-sunstudio	=	-L/opt/bw/lib -lcurl -R/opt/bw/lib
+
+#########################################################################
 # List the source files for each binary to be built
 gcli_SRCS			=	src/gcli.c
 

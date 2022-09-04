@@ -161,8 +161,10 @@ linker() {
 	checking_result "${LD}"
 }
 
-PKG_CONFIG=${PKG_CONFIG-`which pkg-config 2>/dev/null`}
-[ ${PKG_CONFIG} ] || die "Cannot find pkg-config"
+check_pkgconfig() {
+	PKG_CONFIG=${PKG_CONFIG-`which pkg-config 2>/dev/null`}
+	[ x${PKG_CONFIG} != x ] || die "Cannot find pkg-config"
+}
 
 check_library() {
 	checking "for ${1}"
@@ -176,6 +178,18 @@ check_library() {
 	dump "LIB_LDFLAGS	+=	${ldflags}"
 
 	checking_result "found"
+}
+
+sunos_hacks() {
+	info "   > Searching for common library locations on SunOS..."
+	for extra_opt_dir in bw csw;
+	do
+		if [ -d /opt/${extra_opt_dir}/lib ];
+		then
+			dump "CFLAGS	+=	-I/opt/${extra_opt_dir}/include"
+			dump "LDFLAGS	+=	-L/opt/${extra_opt_dir}/lib -R/opt/${extra_opt_dir}/lib"
+		fi
+	done
 }
 
 warn_gnu_make() {
@@ -199,9 +213,26 @@ main() {
 	# again and prints out that it is going to do a recursion even tho
 	# the .SILENT target is defined...This does not break bmake and
 	# smake.
-	for lib in `${MAKE} -s snmk-libdeps`; do
-		check_library "${lib}"
-	done
+	#
+	# Also, we don't check for pkg-config on Solaris as it is likely
+	# just not there. Instead we sort of rely on the user to give us
+	# proper LDFLAGS that point to the right place. However,
+	# sunos_hacks checks for a few common places that may contain
+	# libraries we look for.
+	#
+	REQUIRED_LIBS="`${MAKE} -s snmk-libdeps`"
+	if [ x${REQUIRED_LIBS} != x ];
+	then
+		if [ ${HOSTOS} = sunos ];
+		then
+			sunos_hacks
+		else
+			check_pkgconfig
+			for lib in ${REQUIRED_LIBS}; do
+				check_library "${lib}"
+			done
+		fi
+	fi
 }
 
 MAKE="${1}"

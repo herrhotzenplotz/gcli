@@ -33,15 +33,14 @@ CFLAGS_gcc						=	-fPIC -fPIE -pedantic -g -O0 -ggdb \
 									-Wall -Wextra
 CFLAGS_clang					=	${CFLAGS_gcc}
 
-CFLAGS_sparc-sunos-sunstudio	=	-pedantic -I/opt/bw/include \
-									-g -xO0
+CFLAGS_sparc-sunos-sunstudio	=	-pedantic -g -xO0
 
 #########################################################################
 # LDFLAGS
 LDFLAGS							=	-L. -lgcli
 LDFLAGS_gcc						=	-rdynamic -fPIC -fPIE
 LDFLAGS_clang					=	${LDFLAGS_gcc}
-LDFLAGS_sparc-sunos-sunstudio	=	-L/opt/bw/lib -lcurl -R/opt/bw/lib
+LDFLAGS_sparc-sunos-sunstudio	=	-lcurl
 
 #########################################################################
 # List the source files for each binary to be built

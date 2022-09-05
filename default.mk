@@ -32,6 +32,11 @@ SRCS	?=	${${PROGS:=_SRCS}} ${${LIBS:=_SRCS}}
 OBJS	=	${SRCS:.c=.o}
 DEPS	=	${SRCS:.c=.d}
 
+# The 'all' target needs to be put here such that is recognized as the
+# default target on things like schily make
+all: Makefile config.mk
+	${MAKE} -f Makefile depend
+
 # Unfortunately GNU make is a buggy piece of crap, so we have to do a
 # dance around it and include stuff in this specific order (yes,
 # otherwise GNU make is too fucking stupid to run the makefile at
@@ -46,9 +51,6 @@ DEPS	=	${SRCS:.c=.d}
 # special. Thank you! </rant>
 -include config.mk
 -include ${DEPS}
-
-all: Makefile config.mk
-	${MAKE} -f Makefile depend
 
 config.mk: autodetect.sh
 	rm -f config.mk

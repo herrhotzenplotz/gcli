@@ -67,7 +67,14 @@ compiler_flags() {
 			;;
 	esac
 
-	dump "COMPILE_FLAGS=${COMPILER_FLAGS} \${\${@}_CFLAGS} \${LIB_CFLAGS}"
+	dump "COMPILE_FLAGS=	${COMPILER_FLAGS}"
+	dump "COMPILE_FLAGS	+=	\${\${@}_CFLAGS}"
+	dump "COMPILE_FLAGS	+=	\${LIB_CFLAGS}"
+	dump "COMPILE_FLAGS	+=	\${CFLAGS_${CCNAME}}"
+	dump "COMPILE_FLAGS	+=	\${CFLAGS_${HOSTOS}}"
+	dump "COMPILE_FLAGS	+=	\${CFLAGS_${HOSTCPU}}"
+	dump "COMPILE_FLAGS	+=	\${CFLAGS_${HOSTOS}-${CCNAME}}"
+	dump "COMPILE_FLAGS	+=	\${CFLAGS_${HOSTOS}-${HOSTCPU}}"
 	dump "MKDEPS_FLAGS=${MKDEPS_FLAGS}"
 	checking_result "ok"
 }
@@ -84,7 +91,16 @@ linker_flags() {
 			;;
 	esac
 
-	dump "LINK_FLAGS=${LINK_FLAGS} \${LDFLAGS} \${LDFLAGS_${TARGET}} \${LIB_LDFLAGS} \${\${@}_LDFLAGS}"
+	dump "LINK_FLAGS=	${LINK_FLAGS}"
+	dump "LINK_FLAGS	+=	\${LDFLAGS}"
+	dump "LINK_FLAGS	+=	\${LDFLAGS_${TARGET}}"
+	dump "LINK_FLAGS	+=	\${LIB_LDFLAGS}"
+	dump "LINK_FLAGS	+=	\${\${@}_LDFLAGS}"
+	dump "LINK_FLAGS	+=	\${LDFLAGS_${CCNAME}}"
+	dump "LINK_FLAGS	+=	\${LDFLAGS_${HOSTOS}}"
+	dump "LINK_FLAGS	+=	\${LDFLAGS_${HOSTCPU}}"
+	dump "LINK_FLAGS	+=	\${LDFLAGS_${HOSTOS}-${CCNAME}}"
+	dump "LINK_FLAGS	+=	\${LDFLAGS_${HOSTOS}-${HOSTCPU}}"
 	checking_result "ok"
 }
 
@@ -145,8 +161,10 @@ linker() {
 	checking_result "${LD}"
 }
 
-PKG_CONFIG=${PKG_CONFIG-`which pkg-config 2>/dev/null`}
-[ ${PKG_CONFIG} ] || die "Cannot find pkg-config"
+check_pkgconfig() {
+	PKG_CONFIG=${PKG_CONFIG-`which pkg-config 2>/dev/null`}
+	[ x${PKG_CONFIG} != x ] || die "Cannot find pkg-config"
+}
 
 check_library() {
 	checking "for ${1}"
@@ -162,6 +180,18 @@ check_library() {
 	checking_result "found"
 }
 
+sunos_hacks() {
+	info "   > Searching for common library locations on SunOS..."
+	for extra_opt_dir in bw csw;
+	do
+		if [ -d /opt/${extra_opt_dir}/lib ];
+		then
+			dump "CFLAGS	+=	-I/opt/${extra_opt_dir}/include"
+			dump "LDFLAGS	+=	-L/opt/${extra_opt_dir}/lib -R/opt/${extra_opt_dir}/lib"
+		fi
+	done
+}
+
 warn_gnu_make() {
 	barf="`${MAKE} -v 2>&1 | grep GNU`"
 	if [ "${barf}" != "" ]; then
@@ -172,20 +202,50 @@ warn_gnu_make() {
 	fi
 }
 
+git_version() {
+	GIT=${GIT-`which git 2>/dev/null`}
+
+	# Check whether we have the .git directory and we have git
+	# available.
+	if [ -d .git ] && [ x${GIT} != x ]; then
+		GIT_VERSION="`git rev-parse --short @`"
+		info "   > Embedding git version \`${GIT_VERSION}'"
+		dump "GIT_VERSION	=	\-${GIT_VERSION}"
+	fi
+}
+
 main() {
 	warn_gnu_make
 	target_triplet
 	linker
 	compiler_flags
 	linker_flags
+	git_version
 
 	# Provide -s flag because GNU make is behaving abnormally yet
 	# again and prints out that it is going to do a recursion even tho
 	# the .SILENT target is defined...This does not break bmake and
 	# smake.
-	for lib in `${MAKE} -s snmk-libdeps`; do
-		check_library "${lib}"
-	done
+	#
+	# Also, we don't check for pkg-config on Solaris as it is likely
+	# just not there. Instead we sort of rely on the user to give us
+	# proper LDFLAGS that point to the right place. However,
+	# sunos_hacks checks for a few common places that may contain
+	# libraries we look for.
+	#
+	REQUIRED_LIBS="`${MAKE} -s snmk-libdeps`"
+	if [ x${REQUIRED_LIBS} != x ];
+	then
+		if [ ${HOSTOS} = sunos ];
+		then
+			sunos_hacks
+		else
+			check_pkgconfig
+			for lib in ${REQUIRED_LIBS}; do
+				check_library "${lib}"
+			done
+		fi
+	fi
 }
 
 MAKE="${1}"

@@ -1709,6 +1709,7 @@ subcommand_labels_create(int argc, char *argv[])
 
 	gcli_create_label(owner, repo, &label);
 	gcli_print_labels(&label, 1);
+	gcli_free_label(&label);
 
 	return EXIT_SUCCESS;
 }

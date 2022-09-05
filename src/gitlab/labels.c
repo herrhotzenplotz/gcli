@@ -40,12 +40,11 @@ gitlab_get_color(struct json_stream *input)
 	char *endptr = NULL;
 	long  code   = 0;
 
-	/* Skip # */
-	color += 1;
-
-	code = strtol(color, &endptr, 16);
-	if (endptr != color + strlen(color))
+	code = strtol(color + 1, &endptr, 16);
+	if (endptr != (color + 1 + strlen(color + 1)))
 		err(1, "error: color code is invalid");
+
+	free(color);
 
 	return ((uint32_t)(code) << 8);
 }
@@ -122,22 +121,27 @@ gitlab_get_labels(
 void
 gitlab_create_label(const char *owner, const char *repo, gcli_label *label)
 {
-	char               *url    = NULL;
-	char               *data   = NULL;
-	gcli_fetch_buffer  buffer = {0};
-	struct json_stream  stream = {0};
+	char				*url			= NULL;
+	char				*data			= NULL;
+	char                *colour_string  = NULL;
+	sn_sv				 lname_escaped	= SV_NULL;
+	sn_sv				 ldesc_escaped	= SV_NULL;
+	gcli_fetch_buffer	 buffer			= {0};
+	struct json_stream	 stream			= {0};
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/labels",
 			  gitlab_get_apibase(),
 			  owner, repo);
-	/* TODO: fix leaks */
+	lname_escaped = gcli_json_escape(SV(label->name));
+	ldesc_escaped = gcli_json_escape(SV(label->description));
+	colour_string = sn_asprintf("%06X", (label->color>>8)&0xFFFFFF);
 	data = sn_asprintf(
 		"{\"name\": \""SV_FMT"\","
 		"\"color\":\"#%s\","
 		"\"description\":\""SV_FMT"\"}",
-		SV_ARGS(gcli_json_escape(SV(label->name))),
-		sn_asprintf("%06X", (label->color>>8)&0xFFFFFF),
-		SV_ARGS(gcli_json_escape(SV(label->description))));
+		SV_ARGS(lname_escaped),
+		colour_string,
+		SV_ARGS(ldesc_escaped));
 
 	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
 
@@ -147,6 +151,9 @@ gitlab_create_label(const char *owner, const char *repo, gcli_label *label)
 	gitlab_parse_label(&stream, label);
 
 	json_close(&stream);
+	free(lname_escaped.data);
+	free(ldesc_escaped.data);
+	free(colour_string);
 	free(data);
 	free(url);
 	free(buffer.data);

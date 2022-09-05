@@ -42,12 +42,17 @@ gcli_get_labels(
 }
 
 void
+gcli_free_label(gcli_label *label)
+{
+	free(label->name);
+	free(label->description);
+}
+
+void
 gcli_free_labels(gcli_label *labels, size_t labels_size)
 {
-	for (size_t i = 0; i < labels_size; ++i) {
-		free(labels[i].name);
-		free(labels[i].description);
-	}
+	for (size_t i = 0; i < labels_size; ++i)
+		gcli_free_label(&labels[i]);
 	free(labels);
 }
 

@@ -48,6 +48,7 @@ size_t gcli_get_labels(
 	const char   *reponame,
 	int           max,
 	gcli_label **out);
+void gcli_free_label(gcli_label *label);
 void gcli_free_labels(gcli_label *labels, size_t labels_size);
 void gcli_print_labels(
 	const gcli_label *labels,

@@ -202,12 +202,25 @@ warn_gnu_make() {
 	fi
 }
 
+git_version() {
+	GIT=${GIT-`which git 2>/dev/null`}
+
+	# Check whether we have the .git directory and we have git
+	# available.
+	if [ -d .git ] && [ x${GIT} != x ]; then
+		GIT_VERSION="`git rev-parse --short @`"
+		info "   > Embedding git version \`${GIT_VERSION}'"
+		dump "GIT_VERSION	=	\-${GIT_VERSION}"
+	fi
+}
+
 main() {
 	warn_gnu_make
 	target_triplet
 	linker
 	compiler_flags
 	linker_flags
+	git_version
 
 	# Provide -s flag because GNU make is behaving abnormally yet
 	# again and prints out that it is going to do a recursion even tho

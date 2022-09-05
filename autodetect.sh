@@ -40,6 +40,13 @@ target_triplet() {
 		HOSTCPU=`uname -m | awk '{ print(tolower($0)) }'`
 	fi
 
+	# CPU substitutions
+	case "${HOSTCPU}" in
+		x86_64|x64)
+			HOSTCPU=amd64
+			;;
+	esac
+
 	c_compiler
 
 	HOSTCC=${CC}

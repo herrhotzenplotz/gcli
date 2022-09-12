@@ -180,6 +180,7 @@ gitea_forge_descriptor =
 	.pr_merge				= gitea_pull_merge,
 	.pr_reopen				= gitea_pull_reopen,
 	.pr_close				= gitea_pull_close,
+	.get_pull_comments      = gitea_get_comments,
 	.get_pull_summary		= gitea_get_pull_summary,
 	.get_pull_commits		= gitea_get_pull_commits,
 	.perform_submit_pr		= gitea_pull_submit,

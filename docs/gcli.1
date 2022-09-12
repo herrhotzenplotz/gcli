@@ -175,6 +175,14 @@ environment variable points to where
 .Nm
 will go looking for its configuration file. See
 .Sx FILES .
+.It Ev GCLI_ACCOUNT
+Specifies an account name that should be used instead of an inferred
+one. The value of
+.Ev GCLI_ACCOUNT
+can be overridden again by using
+.Fl a Ar account-name .
+This is helpful in cases where you have multiple accounts of the same
+forge-type configured and you don't want to use the default.
 .El
 .Sh FILES
 .Bl -tag -width ${XDG_CONFIG_DIR}/gcli/config -compact

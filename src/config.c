@@ -397,6 +397,19 @@ ensure_config(void)
 	return 0;
 }
 
+/* readenv: Read values of environment variables and pre-populate the
+ *          config structure. */
+static void
+readenv(void)
+{
+	char *tmp;
+
+	/* A default override account. Can be overridden again by
+	 * specifying -a <account-name> */
+	if ((tmp = getenv("GCLI_ACCOUNT")))
+		config.override_default_account = tmp;
+}
+
 void
 gcli_config_init(int *argc, char ***argv)
 {
@@ -433,6 +446,9 @@ gcli_config_init(int *argc, char ***argv)
 	/* Before we parse options, invalidate the override type so it
 	 * doesn't get confused later */
 	config.override_forgetype = -1;
+
+	/* Start off by pre-populating the config structure */
+	readenv();
 
 	while ((ch = getopt_long(*argc, *argv, "+a:r:cqt:", options, NULL)) != -1) {
 		switch (ch) {

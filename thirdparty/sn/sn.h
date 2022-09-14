@@ -77,8 +77,8 @@ int  sn_mmap_file(const char *path, void **buffer);
 typedef struct sn_sv sn_sv;
 
 struct sn_sv {
-	char   *data;
-	size_t  length;
+    char   *data;
+    size_t  length;
 };
 
 #define SV(x) (sn_sv) { .data = x, .length = strlen(x) }
@@ -89,7 +89,7 @@ struct sn_sv {
 static inline sn_sv
 sn_sv_from_parts(char *buf, size_t len)
 {
-	return (sn_sv) { .data = buf, .length = len };
+    return (sn_sv) { .data = buf, .length = len };
 }
 
 sn_sv  sn_sv_trim_front(sn_sv);
@@ -105,16 +105,16 @@ sn_sv  sn_sv_strip_suffix(sn_sv, const char *suffix);
 static inline bool
 sn_sv_null(sn_sv it)
 {
-	return it.data == NULL && it.length == 0;
+    return it.data == NULL && it.length == 0;
 }
 
 /* interactive user functions */
-bool   sn_yesno(const char *fmt, ...) PRINTF_FORMAT(1, 2);
+bool sn_yesno(const char *fmt, ...) PRINTF_FORMAT(1, 2);
 
 static inline const char *
 sn_bool_yesno(bool x)
 {
-	return x ? "yes" : "no";
+    return x ? "yes" : "no";
 }
 
 char *sn_join_with(const char *items[], size_t items_size, const char *sep);

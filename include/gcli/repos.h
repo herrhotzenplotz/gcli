@@ -37,29 +37,44 @@ typedef struct gcli_repo gcli_repo;
 typedef struct gcli_repo_create_options gcli_repo_create_options;
 
 struct gcli_repo {
-	int   id;
-	sn_sv full_name;
-	sn_sv name;
-	sn_sv owner;
-	sn_sv date;
-	sn_sv visibility;
-	bool  is_fork;
+    int   id;
+    sn_sv full_name;
+    sn_sv name;
+    sn_sv owner;
+    sn_sv date;
+    sn_sv visibility;
+    bool  is_fork;
 };
 
 struct gcli_repo_create_options {
-	sn_sv name;
-	sn_sv description;
-	bool  private;
+    sn_sv name;
+    sn_sv description;
+    bool  private;
 };
 
-int		gcli_get_repos		(const char *owner, int max,
-					 gcli_repo **out);
-int		gcli_get_own_repos	(int max, gcli_repo **out);
-void		gcli_repos_free	(gcli_repo *, size_t);
-void		gcli_print_repos_table	(enum gcli_output_order  order,
-					 gcli_repo              *repos,
-					 size_t                   repos_size);
-void		gcli_repo_delete	(const char *owner, const char *repo);
-gcli_repo	*gcli_repo_create	(const gcli_repo_create_options *);
+int gcli_get_repos(
+    const char  *owner,
+    int          max,
+    gcli_repo  **out);
+
+int gcli_get_own_repos(
+    int         max,
+    gcli_repo **out);
+
+void gcli_repos_free(
+    gcli_repo *,
+    size_t);
+
+void gcli_print_repos_table(
+    enum gcli_output_order  order,
+    gcli_repo              *repos,
+    size_t                  repos_size);
+
+void gcli_repo_delete(
+    const char *owner,
+    const char *repo);
+
+gcli_repo *gcli_repo_create(
+    const gcli_repo_create_options *);
 
 #endif /* REPOS_H */

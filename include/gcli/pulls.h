@@ -42,120 +42,120 @@ typedef struct gcli_commit              gcli_commit;
 typedef struct gcli_pull_summary        gcli_pull_summary;
 
 struct gcli_pull {
-	const char *title, *state, *creator;
-	int number, id;
-	bool merged;
+    const char *title, *state, *creator;
+    int number, id;
+    bool merged;
 };
 
 struct gcli_pull_summary {
-	char	*author;
-	char    *state;
-	char    *title;
-	char    *body;
-	char    *created_at;
-	char    *commits_link;
-	char	*head_label;
-	char    *base_label;
-	char    *head_sha;
-	int      id;
-	int      number;
-	int      comments;
-	int      additions;
-	int      deletions;
-	int      commits;
-	int      changed_files;
-	int      head_pipeline_id;	/* This is GitLab specific */
-	sn_sv   *labels;
-	size_t   labels_size;
-	bool     merged;
-	bool     mergeable;
-	bool     draft;
+    char   *author;
+    char   *state;
+    char   *title;
+    char   *body;
+    char   *created_at;
+    char   *commits_link;
+    char   *head_label;
+    char   *base_label;
+    char   *head_sha;
+    int     id;
+    int     number;
+    int     comments;
+    int     additions;
+    int     deletions;
+    int     commits;
+    int     changed_files;
+    int     head_pipeline_id;   /* This is GitLab specific */
+    sn_sv  *labels;
+    size_t  labels_size;
+    bool    merged;
+    bool    mergeable;
+    bool    draft;
 };
 
 struct gcli_commit {
-	const char *sha, *message, *date, *author, *email;
+    const char *sha, *message, *date, *author, *email;
 };
 
 /* Options to submit to the gh api for creating a PR */
 struct gcli_submit_pull_options {
-	sn_sv		  owner;
-	sn_sv		  repo;
-	sn_sv		  from;
-	sn_sv		  to;
-	sn_sv		  title;
-	sn_sv		  body;
-	const char	**labels;
-	size_t		  labels_size;
-	int			  draft;
-	bool		  always_yes;
+    sn_sv        owner;
+    sn_sv        repo;
+    sn_sv        from;
+    sn_sv        to;
+    sn_sv        title;
+    sn_sv        body;
+    const char **labels;
+    size_t       labels_size;
+    int          draft;
+    bool         always_yes;
 };
 
 int gcli_get_prs(
-	const char  *owner,
-	const char  *reponame,
-	bool         all,
-	int          max,
-	gcli_pull **out);
+    const char  *owner,
+    const char  *reponame,
+    bool         all,
+    int          max,
+    gcli_pull  **out);
 
 void gcli_pulls_free(
-	gcli_pull *it,
-	int         n);
+    gcli_pull *it,
+    int        n);
 
 void gcli_pulls_summary_free(
-	gcli_pull_summary *it);
+    gcli_pull_summary *it);
 
 void gcli_print_pr_table(
-	enum gcli_output_order  order,
-	gcli_pull              *pulls,
-	int                      pulls_size);
+    enum gcli_output_order  order,
+    gcli_pull              *pulls,
+    int                     pulls_size);
 
 void gcli_print_pr_diff(
-	FILE       *stream,
-	const char *owner,
-	const char *reponame,
-	int         pr_number);
+    FILE       *stream,
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
 
 void gcli_pr_summary(
-	const char *owner,
-	const char *reponame,
-	int         pr_number);
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
 
 void gcli_pr_status(
-	const char *owner,
-	const char *reponame,
-	int         pr_number);
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
 
 void gcli_pr_submit(
-	gcli_submit_pull_options);
+    gcli_submit_pull_options);
 
 void gcli_pr_merge(
-	const char *owner,
-	const char *reponame,
-	int         pr_number,
-	bool        squash);
+    const char *owner,
+    const char *reponame,
+    int         pr_number,
+    bool        squash);
 
 void gcli_pr_close(
-	const char *owner,
-	const char *reponame,
-	int         pr_number);
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
 
 void gcli_pr_reopen(
-	const char *owner,
-	const char *reponame,
-	int         pr_number);
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
 
 void gcli_pr_add_labels(
-	const char *owner,
-	const char *repo,
-	int         pr_number,
-	const char *labels[],
-	size_t      labels_size);
+    const char *owner,
+    const char *repo,
+    int         pr_number,
+    const char *labels[],
+    size_t      labels_size);
 
 void gcli_pr_remove_labels(
-	const char *owner,
-	const char *repo,
-	int         pr_number,
-	const char *labels[],
-	size_t      labels_size);
+    const char *owner,
+    const char *repo,
+    int         pr_number,
+    const char *labels[],
+    size_t      labels_size);
 
 #endif /* PULLS_H */

@@ -33,9 +33,9 @@
 enum gcli_output_order { OUTPUT_ORDER_UNSORTED, OUTPUT_ORDER_SORTED };
 
 typedef enum gcli_forge_type {
-	GCLI_FORGE_GITHUB,
-	GCLI_FORGE_GITLAB,
-	GCLI_FORGE_GITEA,
+    GCLI_FORGE_GITHUB,
+    GCLI_FORGE_GITLAB,
+    GCLI_FORGE_GITEA,
 } gcli_forge_type;
 
 #endif /* GCLI_H */

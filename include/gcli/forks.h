@@ -36,27 +36,27 @@
 typedef struct gcli_fork gcli_fork;
 
 struct gcli_fork {
-	sn_sv full_name;
-	sn_sv owner;
-	sn_sv date;
-	int   forks;
+    sn_sv full_name;
+    sn_sv owner;
+    sn_sv date;
+    int   forks;
 };
 
 int gcli_get_forks(
-	const char  *owner,
-	const char  *reponame,
-	int          max,
-	gcli_fork **out);
+    const char  *owner,
+    const char  *reponame,
+    int          max,
+    gcli_fork  **out);
 void gcli_fork_create(
-	const char *owner,
-	const char *repo,
-	const char *in);
+    const char *owner,
+    const char *repo,
+    const char *in);
 void gcli_print_forks(
-	enum gcli_output_order  order,
-	gcli_fork              *forks,
-	size_t                   forks_size);
+    enum gcli_output_order  order,
+    gcli_fork              *forks,
+    size_t                  forks_size);
 void gcli_fork_delete(
-	const char *owner,
-	const char *repo);
+    const char *owner,
+    const char *repo);
 
 #endif /* FORK_H */

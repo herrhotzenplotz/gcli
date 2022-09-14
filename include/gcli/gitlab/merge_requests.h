@@ -33,61 +33,61 @@
 #include <gcli/pulls.h>
 
 int gitlab_get_mrs(
-	const char  *owner,
-	const char  *reponame,
-	bool         all,
-	int          max,
-	gcli_pull **out);
+    const char  *owner,
+    const char  *reponame,
+    bool         all,
+    int          max,
+    gcli_pull  **out);
 
 void gitlab_print_pr_diff(
-	FILE       *stream,
-	const char *owner,
-	const char *reponame,
-	int         pr_number);
+    FILE       *stream,
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
 
 void gitlab_mr_merge(
-	const char *owner,
-	const char *reponame,
-	int         mr_number,
-	bool        squash);
+    const char *owner,
+    const char *reponame,
+    int         mr_number,
+    bool        squash);
 
 void gitlab_mr_close(
-	const char *owner,
-	const char *reponame,
-	int         pr_number);
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
 
 void gitlab_mr_reopen(
-	const char *owner,
-	const char *reponame,
-	int         pr_number);
+    const char *owner,
+    const char *reponame,
+    int         pr_number);
 
 void gitlab_get_pull_summary(
-	const char         *owner,
-	const char         *repo,
-	int                 pr_number,
-	gcli_pull_summary *out);
+    const char        *owner,
+    const char        *repo,
+    int                pr_number,
+    gcli_pull_summary *out);
 
 int gitlab_get_pull_commits(
-	const char    *owner,
-	const char    *repo,
-	int            pr_number,
-	gcli_commit **out);
+    const char   *owner,
+    const char   *repo,
+    int           pr_number,
+    gcli_commit **out);
 
 void gitlab_perform_submit_mr(
-	gcli_submit_pull_options opts);
+    gcli_submit_pull_options opts);
 
 void gitlab_mr_add_labels(
-	const char *owner,
-	const char *repo,
-	int         mr,
-	const char *labels[],
-	size_t      labels_size);
+    const char *owner,
+    const char *repo,
+    int         mr,
+    const char *labels[],
+    size_t      labels_size);
 
 void gitlab_mr_remove_labels(
-	const char *owner,
-	const char *repo,
-	int         mr,
-	const char *labels[],
-	size_t      labels_size);
+    const char *owner,
+    const char *repo,
+    int         mr,
+    const char *labels[],
+    size_t      labels_size);
 
 #endif /* GITLAB_MERGE_REQUESTS_H */

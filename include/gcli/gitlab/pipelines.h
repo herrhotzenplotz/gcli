@@ -34,87 +34,87 @@ typedef struct gitlab_pipeline gitlab_pipeline;
 typedef struct gitlab_job      gitlab_job;
 
 struct gitlab_pipeline {
-	long	 id;
-	char	*status;
-	char    *created_at;
-	char    *updated_at;
-	char    *ref;
-	char    *sha;
-	char    *source;
+    long  id;
+    char *status;
+    char *created_at;
+    char *updated_at;
+    char *ref;
+    char *sha;
+    char *source;
 };
 
 struct gitlab_job {
-	long	 id;
-	char	*status;
-	char	*stage;
-	char	*name;
-	char	*ref;
-	char	*created_at;
-	char	*started_at;
-	char	*finished_at;
-	double	 duration;
-	char	*runner_name;
-	char	*runner_description;
+    long    id;
+    char   *status;
+    char   *stage;
+    char   *name;
+    char   *ref;
+    char   *created_at;
+    char   *started_at;
+    char   *finished_at;
+    double  duration;
+    char   *runner_name;
+    char   *runner_description;
 };
 
 int gitlab_get_pipelines(
-	const char		 *owner,
-	const char		 *repo,
-	int				  max,
-	gitlab_pipeline **out);
+    const char       *owner,
+    const char       *repo,
+    int               max,
+    gitlab_pipeline **out);
 
 void gitlab_print_pipelines(
-	gitlab_pipeline *pipelines,
-	int              pipelines_size);
+    gitlab_pipeline *pipelines,
+    int              pipelines_size);
 
 void gitlab_free_pipelines(
-	gitlab_pipeline *pipelines,
-	int              pipelines_size);
+    gitlab_pipeline *pipelines,
+    int              pipelines_size);
 
 void gitlab_pipelines(
-	const char *owner,
-	const char *repo,
-	int         count);
+    const char *owner,
+    const char *repo,
+    int         count);
 
 void gitlab_pipeline_jobs(
-	const char *owner,
-	const char *repo,
-	long        pipeline,
-	int         count);
+    const char *owner,
+    const char *repo,
+    long        pipeline,
+    int         count);
 
 int gitlab_get_pipeline_jobs(
-	const char	 *owner,
-	const char	 *repo,
-	long		  pipeline,
-	int			  count,
-	gitlab_job	**jobs);
+    const char  *owner,
+    const char  *repo,
+    long         pipeline,
+    int          count,
+    gitlab_job **jobs);
 
 void gitlab_print_jobs(
-	gitlab_job	*jobs,
-	int			 jobs_size);
+    gitlab_job *jobs,
+    int         jobs_size);
 
 void gitlab_free_jobs(
-	gitlab_job	*jobs,
-	int			 jobs_size);
+    gitlab_job *jobs,
+    int         jobs_size);
 
 void gitlab_job_get_log(
-	const char *owner,
-	const char *repo,
-	long        job_id);
+    const char *owner,
+    const char *repo,
+    long        job_id);
 
 void gitlab_job_status(
-	const char *owner,
-	const char *repo,
-	long        job_id);
+    const char *owner,
+    const char *repo,
+    long        job_id);
 
 void gitlab_job_cancel(
-	const char *owner,
-	const char *repo,
-	long        job_id);
+    const char *owner,
+    const char *repo,
+    long        job_id);
 
 void gitlab_job_retry(
-	const char *owner,
-	const char *repo,
-	long        job_id);
+    const char *owner,
+    const char *repo,
+    long        job_id);
 
 #endif /* GITLAB_PIPELINES_H */

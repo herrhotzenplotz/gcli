@@ -35,32 +35,32 @@
 typedef struct gcli_snippet gcli_snippet;
 
 struct gcli_snippet {
-	int   id;
-	char *title;
-	char *filename;
-	char *date;
-	char *author;
-	char *visibility;
-	char *raw_url;
+    int   id;
+    char *title;
+    char *filename;
+    char *date;
+    char *author;
+    char *visibility;
+    char *raw_url;
 };
 
 void gcli_snippets_free(
-	gcli_snippet  *list,
-	int             list_size);
+    gcli_snippet *list,
+    int           list_size);
 
 int gcli_snippets_get(
-	int             max,
-	gcli_snippet **out);
+    int            max,
+    gcli_snippet **out);
 
 void gcli_snippets_print(
-	enum gcli_output_order  order,
-	gcli_snippet           *list,
-	int                      list_size);
+    enum gcli_output_order  order,
+    gcli_snippet           *list,
+    int                     list_size);
 
 void gcli_snippet_delete(
-	const char *snippet_id);
+    const char *snippet_id);
 
 void gcli_snippet_get(
-	const char *snippet_id);
+    const char *snippet_id);
 
 #endif /* SNIPPETS_H */

@@ -34,16 +34,16 @@
 #include <gcli/gcli.h>
 
 void gcli_config_init(
-	int    *argc,
-	char ***argv);
+    int    *argc,
+    char ***argv);
 
 void gcli_config_get_upstream_parts(
-	sn_sv *owner,
-	sn_sv *repo);
+    sn_sv *owner,
+    sn_sv *repo);
 
 sn_sv gcli_config_find_by_key(
-	sn_sv       section_name,
-	const char *key);
+    sn_sv       section_name,
+    const char *key);
 
 char            *gcli_config_get_editor(void);
 char            *gcli_config_get_authheader(void);
@@ -54,6 +54,6 @@ gcli_forge_type  gcli_config_get_forge_type(void);
 sn_sv            gcli_config_get_override_default_account(void);
 void             gcli_config_get_repo(const char **, const char **);
 int              gcli_config_have_colors(void);
-char			*gcli_get_apibase(void);
+char            *gcli_get_apibase(void);
 
 #endif /* CONFIG_H */

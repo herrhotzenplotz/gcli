@@ -35,33 +35,33 @@
 typedef struct gcli_github_check gcli_github_check;
 
 struct gcli_github_check {
-	char *name;
-	char *status;
-	char *conclusion;
-	char *started_at;
-	char *completed_at;
-	long  id;
+    char *name;
+    char *status;
+    char *conclusion;
+    char *started_at;
+    char *completed_at;
+    long  id;
 };
 
 int github_get_checks(
-	const char			 *owner,
-	const char			 *repo,
-	const char			 *ref,
-	int					  max,
-	gcli_github_check	**out);
+    const char         *owner,
+    const char         *repo,
+    const char         *ref,
+    int                 max,
+    gcli_github_check **out);
 
 void github_print_checks(
-	gcli_github_check	*checks,
-	int					 checks_size);
+    gcli_github_check *checks,
+    int                checks_size);
 
 void github_free_checks(
-	gcli_github_check *checks,
-	int                 checks_size);
+    gcli_github_check *checks,
+    int                checks_size);
 
 void github_checks(
-	const char	*owner,
-	const char	*repo,
-	const char	*ref,
-	int			 max);
+    const char *owner,
+    const char *repo,
+    const char *ref,
+    int         max);
 
 #endif /* GITHUB_CHECKS_H */

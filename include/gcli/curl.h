@@ -39,32 +39,32 @@
 typedef struct gcli_fetch_buffer gcli_fetch_buffer;
 
 struct gcli_fetch_buffer {
-	char   *data;
-	size_t  length;
+    char   *data;
+    size_t  length;
 };
 
 void gcli_fetch(
-	const char          *url,
-	char               **pagination_next,
-	gcli_fetch_buffer  *out);
+    const char         *url,
+    char              **pagination_next,
+    gcli_fetch_buffer  *out);
 void gcli_curl(
-	FILE *stream,
-	const char *url,
-	const char *content_type);
+    FILE       *stream,
+    const char *url,
+    const char *content_type);
 void gcli_fetch_with_method(
-	const char  *method,
-	const char  *url,
-	const char  *data,
-	char       **pagination_next,
-	gcli_fetch_buffer *out);
+    const char         *method,
+    const char         *url,
+    const char         *data,
+    char              **pagination_next,
+    gcli_fetch_buffer  *out);
 void gcli_post_upload(
-	const char         *url,
-	const char         *content_type,
-	void               *buffer,
-	size_t              buffer_size,
-	gcli_fetch_buffer *out);
+    const char        *url,
+    const char        *content_type,
+    void              *buffer,
+    size_t             buffer_size,
+    gcli_fetch_buffer *out);
 bool gcli_curl_test_success(
-	const char *url);
+    const char *url);
 char *gcli_urlencode(const char *);
 sn_sv gcli_urlencode_sv(sn_sv);
 

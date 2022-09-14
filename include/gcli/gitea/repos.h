@@ -33,19 +33,19 @@
 #include <gcli/repos.h>
 
 int gitea_get_repos(
-	const char	 *owner,
-	int			  max,
-	gcli_repo	**out);
+    const char	*owner,
+    int			 max,
+    gcli_repo  **out);
 
 int gitea_get_own_repos(
-	int			  max,
-	gcli_repo	**out);
+    int			max,
+    gcli_repo **out);
 
 gcli_repo *gitea_repo_create(
-	const gcli_repo_create_options *options);
+    const gcli_repo_create_options *options);
 
 void gitea_repo_delete(
-	const char *owner,
-	const char *repo);
+    const char *owner,
+    const char *repo);
 
 #endif /* GITEA_REPOS_H */

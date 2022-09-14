@@ -33,17 +33,17 @@
 #include <gcli/releases.h>
 
 int gitlab_get_releases(
-	const char     *owner,
-	const char     *repo,
-	int             max,
-	gcli_release **out);
+    const char    *owner,
+    const char    *repo,
+    int            max,
+    gcli_release **out);
 
 void gitlab_create_release(
-	const gcli_new_release *release);
+    const gcli_new_release *release);
 
 void gitlab_delete_release(
-	const char *owner,
-	const char *repo,
-	const char *id);
+    const char *owner,
+    const char *repo,
+    const char *id);
 
 #endif /* GITLAB_RELEASES_H */

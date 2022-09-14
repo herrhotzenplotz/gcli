@@ -33,143 +33,143 @@
 
 void
 gitlab_perform_submit_comment(
-	gcli_submit_comment_opts  opts,
-	gcli_fetch_buffer        *out)
+    gcli_submit_comment_opts  opts,
+    gcli_fetch_buffer        *out)
 {
-	const char *type    = NULL;
-	char       *e_owner = NULL;
-	char       *e_repo  = NULL;
+    const char *type    = NULL;
+    char       *e_owner = NULL;
+    char       *e_repo  = NULL;
 
-	e_owner = gcli_urlencode(opts.owner);
-	e_repo  = gcli_urlencode(opts.repo);
+    e_owner = gcli_urlencode(opts.owner);
+    e_repo  = gcli_urlencode(opts.repo);
 
-	switch (opts.target_type) {
-	case ISSUE_COMMENT:
-		type = "issues";
-		break;
-	case PR_COMMENT:
-		type = "merge_requests";
-		break;
-	}
+    switch (opts.target_type) {
+    case ISSUE_COMMENT:
+        type = "issues";
+        break;
+    case PR_COMMENT:
+        type = "merge_requests";
+        break;
+    }
 
-	char *post_fields = sn_asprintf(
-		"{ \"body\": \""SV_FMT"\" }",
-		SV_ARGS(opts.message));
-	char *url         = sn_asprintf(
-		"%s/projects/%s%%2F%s/%s/%d/notes",
-		gitlab_get_apibase(),
-		e_owner, e_repo, type, opts.target_id);
+    char *post_fields = sn_asprintf(
+        "{ \"body\": \""SV_FMT"\" }",
+        SV_ARGS(opts.message));
+    char *url         = sn_asprintf(
+        "%s/projects/%s%%2F%s/%s/%d/notes",
+        gitlab_get_apibase(),
+        e_owner, e_repo, type, opts.target_id);
 
-	gcli_fetch_with_method("POST", url, post_fields, NULL, out);
-	free(post_fields);
-	free(e_owner);
-	free(e_repo);
-	free(url);
+    gcli_fetch_with_method("POST", url, post_fields, NULL, out);
+    free(post_fields);
+    free(e_owner);
+    free(e_repo);
+    free(url);
 }
 
 static void
 gitlab_parse_comment(json_stream *input, gcli_comment *it)
 {
-	if (json_next(input) != JSON_OBJECT)
-		errx(1, "Expected Comment Object");
+    if (json_next(input) != JSON_OBJECT)
+        errx(1, "Expected Comment Object");
 
-	enum json_type key_type;
-	while ((key_type = json_next(input)) == JSON_STRING) {
-		size_t      len = 0;
-		const char *key = json_get_string(input, &len);
+    enum json_type key_type;
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t      len = 0;
+        const char *key = json_get_string(input, &len);
 
-		if (strncmp("created_at", key, len) == 0)
-			it->date = get_string(input);
-		else if (strncmp("body", key, len) == 0)
-			it->body = get_string(input);
-		else if (strncmp("author", key, len) == 0)
-			it->author = get_user(input);
-		else
-			SKIP_OBJECT_VALUE(input);
-	}
+        if (strncmp("created_at", key, len) == 0)
+            it->date = get_string(input);
+        else if (strncmp("body", key, len) == 0)
+            it->body = get_string(input);
+        else if (strncmp("author", key, len) == 0)
+            it->author = get_user(input);
+        else
+            SKIP_OBJECT_VALUE(input);
+    }
 }
 
 static int
 gitlab_perform_get_comments(const char *_url, gcli_comment **comments)
 {
-	int                 count       = 0;
-	json_stream         stream      = {0};
-	gcli_fetch_buffer  json_buffer = {0};
-	char               *url         = (char *)_url;
-	char               *next_url    = NULL;
+    int                count       = 0;
+    json_stream        stream      = {0};
+    gcli_fetch_buffer  json_buffer = {0};
+    char              *url         = (char *)_url;
+    char              *next_url    = NULL;
 
-	do {
-		gcli_fetch(url, &next_url, &json_buffer);
-		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-		json_set_streaming(&stream, true);
+    do {
+        gcli_fetch(url, &next_url, &json_buffer);
+        json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+        json_set_streaming(&stream, true);
 
-		enum json_type next_token = json_next(&stream);
+        enum json_type next_token = json_next(&stream);
 
-		while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
-			if (next_token != JSON_OBJECT)
-				errx(1, "Unexpected non-object in comment list");
+        while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
+            if (next_token != JSON_OBJECT)
+                errx(1, "Unexpected non-object in comment list");
 
-			*comments = realloc(*comments, (count + 1) * sizeof(gcli_comment));
-			gcli_comment *it = &(*comments)[count];
-			gitlab_parse_comment(&stream, it);
-			count += 1;
-		}
+            *comments = realloc(*comments, (count + 1) * sizeof(gcli_comment));
+            gcli_comment *it = &(*comments)[count];
+            gitlab_parse_comment(&stream, it);
+            count += 1;
+        }
 
-		json_close(&stream);
-		free(json_buffer.data);
+        json_close(&stream);
+        free(json_buffer.data);
 
-		if (url != _url)
-			free(url);
+        if (url != _url)
+            free(url);
 
-	} while ((url = next_url));
+    } while ((url = next_url));
 
-	return count;
+    return count;
 }
 
 int
 gitlab_get_mr_comments(
-	const char     *owner,
-	const char     *repo,
-	int             mr,
-	gcli_comment **out)
+    const char    *owner,
+    const char    *repo,
+    int            mr,
+    gcli_comment **out)
 {
-	char *e_owner = gcli_urlencode(owner);
-	char *e_repo  = gcli_urlencode(repo);
+    char *e_owner = gcli_urlencode(owner);
+    char *e_repo  = gcli_urlencode(repo);
 
-	char *url = sn_asprintf(
-		"%s/projects/%s%%2F%s/merge_requests/%d/notes",
-		gitlab_get_apibase(),
-		e_owner, e_repo, mr);
+    char *url = sn_asprintf(
+        "%s/projects/%s%%2F%s/merge_requests/%d/notes",
+        gitlab_get_apibase(),
+        e_owner, e_repo, mr);
 
-	int n = gitlab_perform_get_comments(url, out);
+    int n = gitlab_perform_get_comments(url, out);
 
-	free(url);
-	free(e_owner);
-	free(e_repo);
+    free(url);
+    free(e_owner);
+    free(e_repo);
 
-	return n;
+    return n;
 }
 
 int
 gitlab_get_issue_comments(
-	const char     *owner,
-	const char     *repo,
-	int             issue,
-	gcli_comment **out)
+    const char    *owner,
+    const char    *repo,
+    int            issue,
+    gcli_comment **out)
 {
-	char *e_owner = gcli_urlencode(owner);
-	char *e_repo  = gcli_urlencode(repo);
+    char *e_owner = gcli_urlencode(owner);
+    char *e_repo  = gcli_urlencode(repo);
 
-	char *url = sn_asprintf(
-		"%s/projects/%s%%2F%s/issues/%d/notes",
-		gitlab_get_apibase(),
-		e_owner, e_repo, issue);
+    char *url = sn_asprintf(
+        "%s/projects/%s%%2F%s/issues/%d/notes",
+        gitlab_get_apibase(),
+        e_owner, e_repo, issue);
 
-	int n = gitlab_perform_get_comments(url, out);
+    int n = gitlab_perform_get_comments(url, out);
 
-	free(url);
-	free(e_owner);
-	free(e_repo);
+    free(url);
+    free(e_owner);
+    free(e_repo);
 
-	return n;
+    return n;
 }

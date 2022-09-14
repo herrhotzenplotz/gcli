@@ -37,105 +37,105 @@
 static void
 github_parse_comment(json_stream *input, gcli_comment *it)
 {
-	if (json_next(input) != JSON_OBJECT)
-		errx(1, "Expected Comment Object");
+    if (json_next(input) != JSON_OBJECT)
+        errx(1, "Expected Comment Object");
 
-	enum json_type key_type;
-	while ((key_type = json_next(input)) == JSON_STRING) {
-		size_t      len = 0;
-		const char *key = json_get_string(input, &len);
+    enum json_type key_type;
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t      len = 0;
+        const char *key = json_get_string(input, &len);
 
-		if (strncmp("created_at", key, len) == 0)
-			it->date = get_string(input);
-		else if (strncmp("body", key, len) == 0)
-			it->body = get_string(input);
-		else if (strncmp("user", key, len) == 0)
-			it->author = get_user(input);
-		else
-			SKIP_OBJECT_VALUE(input);
-	}
+        if (strncmp("created_at", key, len) == 0)
+            it->date = get_string(input);
+        else if (strncmp("body", key, len) == 0)
+            it->body = get_string(input);
+        else if (strncmp("user", key, len) == 0)
+            it->author = get_user(input);
+        else
+            SKIP_OBJECT_VALUE(input);
+    }
 }
 
 void
 github_perform_submit_comment(
-	gcli_submit_comment_opts  opts,
-	gcli_fetch_buffer        *out)
+    gcli_submit_comment_opts  opts,
+    gcli_fetch_buffer        *out)
 {
-	char *e_owner = gcli_urlencode(opts.owner);
-	char *e_repo  = gcli_urlencode(opts.repo);
-	char *post_fields = sn_asprintf(
-		"{ \"body\": \""SV_FMT"\" }",
-		SV_ARGS(opts.message));
-	char *url         = sn_asprintf(
-		"%s/repos/%s/%s/issues/%d/comments",
-		gcli_get_apibase(),
-		e_owner, e_repo, opts.target_id);
+    char *e_owner     = gcli_urlencode(opts.owner);
+    char *e_repo      = gcli_urlencode(opts.repo);
+    char *post_fields = sn_asprintf(
+        "{ \"body\": \""SV_FMT"\" }",
+        SV_ARGS(opts.message));
+    char *url         = sn_asprintf(
+        "%s/repos/%s/%s/issues/%d/comments",
+        gcli_get_apibase(),
+        e_owner, e_repo, opts.target_id);
 
-	gcli_fetch_with_method("POST", url, post_fields, NULL, out);
-	free(post_fields);
-	free(e_owner);
-	free(e_repo);
-	free(url);
+    gcli_fetch_with_method("POST", url, post_fields, NULL, out);
+    free(post_fields);
+    free(e_owner);
+    free(e_repo);
+    free(url);
 }
 
 static int
 github_perform_get_comments(const char *_url, gcli_comment **comments)
 {
-	int                 count       = 0;
-	json_stream         stream      = {0};
-	gcli_fetch_buffer  json_buffer = {0};
-	char               *next_url    = NULL;
-	char               *url         = (char *)(_url);
+    int                count       = 0;
+    json_stream        stream      = {0};
+    gcli_fetch_buffer  json_buffer = {0};
+    char              *next_url    = NULL;
+    char              *url         = (char *)(_url);
 
-	do {
-		gcli_fetch(url, &next_url, &json_buffer);
-		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-		json_set_streaming(&stream, true);
+    do {
+        gcli_fetch(url, &next_url, &json_buffer);
+        json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+        json_set_streaming(&stream, true);
 
-		enum json_type next_token = json_next(&stream);
+        enum json_type next_token = json_next(&stream);
 
-		while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
-			if (next_token != JSON_OBJECT)
-				errx(1, "Unexpected non-object in comment list");
+        while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
+            if (next_token != JSON_OBJECT)
+                errx(1, "Unexpected non-object in comment list");
 
-			*comments = realloc(*comments, (count + 1) * sizeof(gcli_comment));
-			gcli_comment *it = &(*comments)[count];
-			github_parse_comment(&stream, it);
-			count += 1;
-		}
+            *comments = realloc(*comments, (count + 1) * sizeof(gcli_comment));
+            gcli_comment *it = &(*comments)[count];
+            github_parse_comment(&stream, it);
+            count += 1;
+        }
 
-		json_close(&stream);
-		free(json_buffer.data);
+        json_close(&stream);
+        free(json_buffer.data);
 
-		if (url != _url)
-			free(url);
-	} while ((url = next_url));
+        if (url != _url)
+            free(url);
+    } while ((url = next_url));
 
-	return count;
+    return count;
 }
 
 int
 github_get_comments(
-	const char     *owner,
-	const char     *repo,
-	int             issue,
-	gcli_comment **out)
+    const char    *owner,
+    const char    *repo,
+    int            issue,
+    gcli_comment **out)
 {
-	char *e_owner = NULL;
-	char *e_repo  = NULL;
-	char *url     = NULL;
+    char *e_owner = NULL;
+    char *e_repo  = NULL;
+    char *url     = NULL;
 
-	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
+    e_owner = gcli_urlencode(owner);
+    e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf(
-		"%s/repos/%s/%s/issues/%d/comments",
-		gcli_get_apibase(),
-		e_owner, e_repo, issue);
-	int n = github_perform_get_comments(url, out);
+    url = sn_asprintf(
+        "%s/repos/%s/%s/issues/%d/comments",
+        gcli_get_apibase(),
+        e_owner, e_repo, issue);
+    int n = github_perform_get_comments(url, out);
 
-	free(e_owner);
-	free(e_repo);
-	free(url);
-	return n;
+    free(e_owner);
+    free(e_repo);
+    free(url);
+    return n;
 }

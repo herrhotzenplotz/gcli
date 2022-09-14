@@ -37,146 +37,146 @@
 static sn_sv
 parse_namespace(struct json_stream *input)
 {
-	enum json_type  key_type = JSON_NULL;
-	sn_sv           result   = {0};
-	const char     *key      = NULL;
+    enum json_type  key_type = JSON_NULL;
+    sn_sv           result   = {0};
+    const char     *key      = NULL;
 
-	if (json_next(input) != JSON_OBJECT)
-		errx(1, "Expected an object for a namespace");
+    if (json_next(input) != JSON_OBJECT)
+        errx(1, "Expected an object for a namespace");
 
-	while ((key_type = json_next(input)) == JSON_STRING) {
-		size_t len;
-		key = json_get_string(input, &len);
-		if (strncmp("full_path", key, len) == 0)
-			result = get_sv(input);
-		else
-			json_next(input);
-	}
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t len;
+        key = json_get_string(input, &len);
+        if (strncmp("full_path", key, len) == 0)
+            result = get_sv(input);
+        else
+            json_next(input);
+    }
 
-	if (key_type != JSON_OBJECT_END)
-		errx(1, "Namespace object not closed");
+    if (key_type != JSON_OBJECT_END)
+        errx(1, "Namespace object not closed");
 
-	return result;
+    return result;
 }
 
 static void
 parse_fork(struct json_stream *input, gcli_fork *out)
 {
-	enum json_type  key_type   = JSON_NULL;
-	const char     *key        = NULL;
+    enum json_type  key_type = JSON_NULL;
+    const char     *key      = NULL;
 
-	if (json_next(input) != JSON_OBJECT)
-		errx(1, "Expected an object for a fork");
+    if (json_next(input) != JSON_OBJECT)
+        errx(1, "Expected an object for a fork");
 
-	while ((key_type = json_next(input)) == JSON_STRING) {
-		size_t len;
-		key = json_get_string(input, &len);
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t len;
+        key = json_get_string(input, &len);
 
-		if (strncmp("path_with_namespace", key, len) == 0)
-			out->full_name = get_sv(input);
-		else if (strncmp("namespace", key, len) == 0)
-			out->owner = parse_namespace(input);
-		else if (strncmp("created_at", key, len) == 0)
-			out->date = get_sv(input);
-		else if (strncmp("forks_count", key, len) == 0)
-			out->forks = get_int(input);
-		else
-			SKIP_OBJECT_VALUE(input);
-	}
+        if (strncmp("path_with_namespace", key, len) == 0)
+            out->full_name = get_sv(input);
+        else if (strncmp("namespace", key, len) == 0)
+            out->owner = parse_namespace(input);
+        else if (strncmp("created_at", key, len) == 0)
+            out->date = get_sv(input);
+        else if (strncmp("forks_count", key, len) == 0)
+            out->forks = get_int(input);
+        else
+            SKIP_OBJECT_VALUE(input);
+    }
 
-	if (key_type != JSON_OBJECT_END)
-		errx(1, "Fork object not closed");
+    if (key_type != JSON_OBJECT_END)
+        errx(1, "Fork object not closed");
 }
 
 int
 gitlab_get_forks(
-	const char  *owner,
-	const char  *repo,
-	int          max,
-	gcli_fork **out)
+    const char  *owner,
+    const char  *repo,
+    int          max,
+    gcli_fork  **out)
 {
-	gcli_fetch_buffer  buffer   = {0};
-	char               *url      = NULL;
-	char               *e_owner  = NULL;
-	char               *e_repo   = NULL;
-	char               *next_url = NULL;
-	enum   json_type    next     = JSON_NULL;
-	struct json_stream  stream   = {0};
-	int                 size     = 0;
+    gcli_fetch_buffer   buffer   = {0};
+    char               *url      = NULL;
+    char               *e_owner  = NULL;
+    char               *e_repo   = NULL;
+    char               *next_url = NULL;
+    enum   json_type    next     = JSON_NULL;
+    struct json_stream  stream   = {0};
+    int                 size     = 0;
 
-	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
+    e_owner = gcli_urlencode(owner);
+    e_repo  = gcli_urlencode(repo);
 
-	*out = NULL;
+    *out = NULL;
 
-	url = sn_asprintf(
-		"%s/projects/%s%%2F%s/forks",
-		gitlab_get_apibase(),
-		e_owner, e_repo);
+    url = sn_asprintf(
+        "%s/projects/%s%%2F%s/forks",
+        gitlab_get_apibase(),
+        e_owner, e_repo);
 
-	do {
-		gcli_fetch(url, &next_url, &buffer);
+    do {
+        gcli_fetch(url, &next_url, &buffer);
 
-		json_open_buffer(&stream, buffer.data, buffer.length);
-		json_set_streaming(&stream, 1);
+        json_open_buffer(&stream, buffer.data, buffer.length);
+        json_set_streaming(&stream, 1);
 
-		// TODO: Poor error message
-		if ((next = json_next(&stream)) != JSON_ARRAY)
-			errx(1,
-				 "Expected array in response from API "
-				 "but got something else instead");
+        // TODO: Poor error message
+        if ((next = json_next(&stream)) != JSON_ARRAY)
+            errx(1,
+                 "Expected array in response from API "
+                 "but got something else instead");
 
-		while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
-			*out = realloc(*out, sizeof(gcli_fork) * (size + 1));
-			gcli_fork *it = &(*out)[size++];
-			parse_fork(&stream, it);
+        while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
+            *out = realloc(*out, sizeof(gcli_fork) * (size + 1));
+            gcli_fork *it = &(*out)[size++];
+            parse_fork(&stream, it);
 
-			if (size == max)
-				break;
-		}
+            if (size == max)
+                break;
+        }
 
-		json_close(&stream);
-		free(buffer.data);
-		free(url);
-	} while ((url = next_url) && (max == -1 || size < max));
+        json_close(&stream);
+        free(buffer.data);
+        free(url);
+    } while ((url = next_url) && (max == -1 || size < max));
 
-	free(next_url);
-	free(e_owner);
-	free(e_repo);
+    free(next_url);
+    free(e_owner);
+    free(e_repo);
 
-	return size;
+    return size;
 }
 
 void
 gitlab_fork_create(const char *owner, const char *repo, const char *_in)
 {
-	char               *url       = NULL;
-	char               *e_owner   = NULL;
-	char               *e_repo    = NULL;
-	char               *post_data = NULL;
-	sn_sv               in        = SV_NULL;
-	gcli_fetch_buffer  buffer    = {0};
+    char              *url       = NULL;
+    char              *e_owner   = NULL;
+    char              *e_repo    = NULL;
+    char              *post_data = NULL;
+    sn_sv              in        = SV_NULL;
+    gcli_fetch_buffer  buffer    = {0};
 
-	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
+    e_owner = gcli_urlencode(owner);
+    e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf(
-		"%s/projects/%s%%2F%s/fork",
-		gitlab_get_apibase(),
-		e_owner, e_repo);
-	if (_in) {
-		in        = gcli_json_escape(SV((char *)_in));
-		post_data = sn_asprintf("{\"namespace_path\":\""SV_FMT"\"}",
-					SV_ARGS(in));
-	}
+    url = sn_asprintf(
+        "%s/projects/%s%%2F%s/fork",
+        gitlab_get_apibase(),
+        e_owner, e_repo);
+    if (_in) {
+        in        = gcli_json_escape(SV((char *)_in));
+        post_data = sn_asprintf("{\"namespace_path\":\""SV_FMT"\"}",
+                                SV_ARGS(in));
+    }
 
-	gcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
-	gcli_print_html_url(buffer);
+    gcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
+    gcli_print_html_url(buffer);
 
-	free(in.data);
-	free(url);
-	free(post_data);
-	free(e_owner);
-	free(e_repo);
-	free(buffer.data);
+    free(in.data);
+    free(url);
+    free(post_data);
+    free(e_owner);
+    free(e_repo);
+    free(buffer.data);
 }

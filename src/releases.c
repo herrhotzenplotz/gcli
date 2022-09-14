@@ -36,92 +36,92 @@
 
 int
 gcli_get_releases(
-	const char     *owner,
-	const char     *repo,
-	int             max,
-	gcli_release **out)
+    const char    *owner,
+    const char    *repo,
+    int            max,
+    gcli_release **out)
 {
-	return gcli_forge()->get_releases(owner, repo, max, out);
+    return gcli_forge()->get_releases(owner, repo, max, out);
 }
 
 static void
 gcli_print_release(gcli_release *it)
 {
-	printf("        ID : "SV_FMT"\n"
-		   "      NAME : "SV_FMT"\n"
-		   "    AUTHOR : "SV_FMT"\n"
-		   "      DATE : "SV_FMT"\n"
-		   "     DRAFT : %s\n"
-		   "PRERELEASE : %s\n"
-		   "   TARBALL : "SV_FMT"\n"
-		   "      BODY :\n",
-		   SV_ARGS(it->id),
-		   SV_ARGS(it->name),
-		   SV_ARGS(it->author),
-		   SV_ARGS(it->date),
-		   sn_bool_yesno(it->draft),
-		   sn_bool_yesno(it->prerelease),
-		   SV_ARGS(it->tarball_url));
+    printf("        ID : "SV_FMT"\n"
+           "      NAME : "SV_FMT"\n"
+           "    AUTHOR : "SV_FMT"\n"
+           "      DATE : "SV_FMT"\n"
+           "     DRAFT : %s\n"
+           "PRERELEASE : %s\n"
+           "   TARBALL : "SV_FMT"\n"
+           "      BODY :\n",
+           SV_ARGS(it->id),
+           SV_ARGS(it->name),
+           SV_ARGS(it->author),
+           SV_ARGS(it->date),
+           sn_bool_yesno(it->draft),
+           sn_bool_yesno(it->prerelease),
+           SV_ARGS(it->tarball_url));
 
-	pretty_print(it->body.data, 13, 80, stdout);
+    pretty_print(it->body.data, 13, 80, stdout);
 
-	putchar('\n');
+    putchar('\n');
 }
 
 void
 gcli_print_releases(
-	enum gcli_output_order  order,
-	gcli_release           *releases,
-	int                      releases_size)
+    enum gcli_output_order  order,
+    gcli_release           *releases,
+    int                     releases_size)
 {
-	if (releases_size == 0) {
-		puts("No releases");
-		return;
-	}
+    if (releases_size == 0) {
+        puts("No releases");
+        return;
+    }
 
-	if (order == OUTPUT_ORDER_SORTED) {
-		for (int i = releases_size; i > 0; --i)
-			gcli_print_release(&releases[i - 1]);
-	} else {
-		for (int i = 0; i < releases_size; ++i)
-			gcli_print_release(&releases[i]);
-	}
+    if (order == OUTPUT_ORDER_SORTED) {
+        for (int i = releases_size; i > 0; --i)
+            gcli_print_release(&releases[i - 1]);
+    } else {
+        for (int i = 0; i < releases_size; ++i)
+            gcli_print_release(&releases[i]);
+    }
 }
 
 void
 gcli_free_releases(gcli_release *releases, int releases_size)
 {
-	if (!releases)
-		return;
+    if (!releases)
+        return;
 
-	for (int i = 0; i < releases_size; ++i) {
-		free(releases[i].tarball_url.data);
-		free(releases[i].name.data);
-		free(releases[i].body.data);
-		free(releases[i].author.data);
-		free(releases[i].date.data);
-	}
+    for (int i = 0; i < releases_size; ++i) {
+        free(releases[i].tarball_url.data);
+        free(releases[i].name.data);
+        free(releases[i].body.data);
+        free(releases[i].author.data);
+        free(releases[i].date.data);
+    }
 
-	free(releases);
+    free(releases);
 }
 
 void
 gcli_create_release(const gcli_new_release *release)
 {
-	gcli_forge()->create_release(release);
+    gcli_forge()->create_release(release);
 }
 
 void
 gcli_release_push_asset(gcli_new_release *release, gcli_release_asset asset)
 {
-	if (release->assets_size == GCLI_RELEASE_MAX_ASSETS)
-		errx(1, "Too many assets");
+    if (release->assets_size == GCLI_RELEASE_MAX_ASSETS)
+        errx(1, "Too many assets");
 
-	release->assets[release->assets_size++] = asset;
+    release->assets[release->assets_size++] = asset;
 }
 
 void
 gcli_delete_release(const char *owner, const char *repo, const char *id)
 {
-	gcli_forge()->delete_release(owner, repo, id);
+    gcli_forge()->delete_release(owner, repo, id);
 }

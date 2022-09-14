@@ -35,64 +35,64 @@
 static sn_sv
 gitlab_default_account_name(void)
 {
-	sn_sv section_name;
+    sn_sv section_name;
 
-	/* Use default override account */
-	section_name = gcli_config_get_override_default_account();
+    /* Use default override account */
+    section_name = gcli_config_get_override_default_account();
 
-	/* If not manually overridden */
-	if (sn_sv_null(section_name)) {
-		section_name = gcli_config_find_by_key(
-			SV("defaults"),
-			"gitlab-default-account");
+    /* If not manually overridden */
+    if (sn_sv_null(section_name)) {
+        section_name = gcli_config_find_by_key(
+            SV("defaults"),
+            "gitlab-default-account");
 
-		/* Welp, no luck here */
-		if (sn_sv_null(section_name))
-			warnx("Config file does not name a default GitLab account name.");
-	}
+        /* Welp, no luck here */
+        if (sn_sv_null(section_name))
+            warnx("Config file does not name a default GitLab account name.");
+    }
 
-	return section_name;
+    return section_name;
 }
 
 char *
 gitlab_get_apibase(void)
 {
-	sn_sv account = gitlab_default_account_name();
-	if (sn_sv_null(account))
-		goto default_val;
+    sn_sv account = gitlab_default_account_name();
+    if (sn_sv_null(account))
+        goto default_val;
 
-	sn_sv api_base = gcli_config_find_by_key(account, "apibase");
-	if (sn_sv_null(api_base))
-		goto default_val;
+    sn_sv api_base = gcli_config_find_by_key(account, "apibase");
+    if (sn_sv_null(api_base))
+        goto default_val;
 
-	return sn_sv_to_cstr(api_base);
+    return sn_sv_to_cstr(api_base);
 
 default_val:
-	return "https://gitlab.com/api/v4";
+    return "https://gitlab.com/api/v4";
 }
 
 char *
 gitlab_get_authheader(void)
 {
-	sn_sv account = gitlab_default_account_name();
-	if (sn_sv_null(account))
-		return NULL;
+    sn_sv account = gitlab_default_account_name();
+    if (sn_sv_null(account))
+        return NULL;
 
-	sn_sv token = gcli_config_find_by_key(account, "token");
-	if (sn_sv_null(token))
-		errx(1, "Missing GitLab token");
-	return sn_asprintf("PRIVATE-TOKEN: "SV_FMT, SV_ARGS(token));
+    sn_sv token = gcli_config_find_by_key(account, "token");
+    if (sn_sv_null(token))
+        errx(1, "Missing GitLab token");
+    return sn_asprintf("PRIVATE-TOKEN: "SV_FMT, SV_ARGS(token));
 }
 
 sn_sv
 gitlab_get_account(void)
 {
-	sn_sv section = gitlab_default_account_name();
-	if (sn_sv_null(section))
-		return SV_NULL;
+    sn_sv section = gitlab_default_account_name();
+    if (sn_sv_null(section))
+        return SV_NULL;
 
-	sn_sv account = gcli_config_find_by_key(section, "account");;
-	if (sn_sv_null(account))
-		errx(1, "Missing GitLab account name");
-	return account;
+    sn_sv account = gcli_config_find_by_key(section, "account");;
+    if (sn_sv_null(account))
+        errx(1, "Missing GitLab account name");
+    return account;
 }

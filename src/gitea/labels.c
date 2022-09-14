@@ -37,59 +37,59 @@
 
 size_t
 gitea_get_labels(
-	const char   *owner,
-	const char   *reponame,
-	int           max,
-	gcli_label **out)
+    const char  *owner,
+    const char  *reponame,
+    int          max,
+    gcli_label **out)
 {
-	return github_get_labels(owner, reponame, max, out);
+    return github_get_labels(owner, reponame, max, out);
 }
 
 void
 gitea_create_label(
-	const char  *owner,
-	const char  *repo,
-	gcli_label *label)
+    const char *owner,
+    const char *repo,
+    gcli_label *label)
 {
-	github_create_label(owner, repo, label);
+    github_create_label(owner, repo, label);
 }
 
 void
 gitea_delete_label(
-	const char *owner,
-	const char *repo,
-	const char *label)
+    const char *owner,
+    const char *repo,
+    const char *label)
 {
-	char				*url		 = NULL;
-	gcli_fetch_buffer	 buffer		 = {0};
-	gcli_label			*labels		 = NULL;
-	size_t				 labels_size = 0;
-	int                  id			 = -1;
+    char              *url         = NULL;
+    gcli_fetch_buffer  buffer      = {0};
+    gcli_label        *labels      = NULL;
+    size_t             labels_size = 0;
+    int                id          = -1;
 
-	/* Gitea wants the id of the label, not its name. thus fetch all
-	 * the labels first to then find out what the id is we need. */
-	labels_size = gitea_get_labels(owner, repo, -1, &labels);
+    /* Gitea wants the id of the label, not its name. thus fetch all
+     * the labels first to then find out what the id is we need. */
+    labels_size = gitea_get_labels(owner, repo, -1, &labels);
 
-	/* Search for the id */
-	for (size_t i = 0; i < labels_size; ++i) {
-		if (strcmp(labels[i].name, label) == 0) {
-			id = labels[i].id;
-			break;
-		}
-	}
+    /* Search for the id */
+    for (size_t i = 0; i < labels_size; ++i) {
+        if (strcmp(labels[i].name, label) == 0) {
+            id = labels[i].id;
+            break;
+        }
+    }
 
-	/* did we find a label? */
-	if (id < 0)
-		errx(1, "error: label '%s' does not exist", label);
+    /* did we find a label? */
+    if (id < 0)
+        errx(1, "error: label '%s' does not exist", label);
 
-	/* DELETE /repos/{owner}/{repo}/labels/{} */
-	url = sn_asprintf("%s/repos/%s/%s/labels/%d",
-					  gitea_get_apibase(),
-					  owner, repo, id);
+    /* DELETE /repos/{owner}/{repo}/labels/{} */
+    url = sn_asprintf("%s/repos/%s/%s/labels/%d",
+                      gitea_get_apibase(),
+                      owner, repo, id);
 
-	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+    gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
-	gcli_free_labels(labels, labels_size);
-	free(url);
-	free(buffer.data);
+    gcli_free_labels(labels, labels_size);
+    free(url);
+    free(buffer.data);
 }

@@ -32,32 +32,32 @@
 
 int
 gitea_get_repos(
-	const char	 *owner,
-	int			  max,
-	gcli_repo	**out)
+    const char  *owner,
+    int          max,
+    gcli_repo  **out)
 {
-	return github_get_repos(owner, max, out);
+    return github_get_repos(owner, max, out);
 }
 
 int
 gitea_get_own_repos(
-	int			  max,
-	gcli_repo	**out)
+    int         max,
+    gcli_repo **out)
 {
-	return github_get_own_repos(max, out);
+    return github_get_own_repos(max, out);
 }
 
 gcli_repo *
 gitea_repo_create(
-	const gcli_repo_create_options *options)
+    const gcli_repo_create_options *options)
 {
-	return github_repo_create(options);
+    return github_repo_create(options);
 }
 
 void
 gitea_repo_delete(
-	const char *owner,
-	const char *repo)
+    const char *owner,
+    const char *repo)
 {
-	github_repo_delete(owner, repo);
+    github_repo_delete(owner, repo);
 }

@@ -32,18 +32,18 @@
 
 int
 gitea_get_comments(
-	const char     *owner,
-	const char     *repo,
-	int             issue,
-	gcli_comment **out)
+    const char    *owner,
+    const char    *repo,
+    int            issue,
+    gcli_comment **out)
 {
-	return github_get_comments(owner, repo, issue, out);
+    return github_get_comments(owner, repo, issue, out);
 }
 
 void
 gitea_perform_submit_comment(
-	gcli_submit_comment_opts  opts,
-	gcli_fetch_buffer        *out)
+    gcli_submit_comment_opts  opts,
+    gcli_fetch_buffer        *out)
 {
-	github_perform_submit_comment(opts, out);
+    github_perform_submit_comment(opts, out);
 }

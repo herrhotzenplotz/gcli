@@ -37,125 +37,125 @@
 
 static void
 github_notification_parse_subject(
-	struct json_stream *input,
-	gcli_notification *it)
+    struct json_stream *input,
+    gcli_notification  *it)
 {
-	if (json_next(input) != JSON_OBJECT)
-		errx(1, "Expected Notification Subject Object");
+    if (json_next(input) != JSON_OBJECT)
+        errx(1, "Expected Notification Subject Object");
 
-	enum json_type key_type;
-	while ((key_type = json_next(input)) == JSON_STRING) {
-		size_t      len = 0;
-		const char *key = json_get_string(input, &len);
+    enum json_type key_type;
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t      len = 0;
+        const char *key = json_get_string(input, &len);
 
-		if (strncmp("title", key, len) == 0)
-			it->title = get_string(input);
-		else if (strncmp("type", key, len) == 0)
-			it->type = get_string(input);
-		else
-			SKIP_OBJECT_VALUE(input);
-	}
+        if (strncmp("title", key, len) == 0)
+            it->title = get_string(input);
+        else if (strncmp("type", key, len) == 0)
+            it->type = get_string(input);
+        else
+            SKIP_OBJECT_VALUE(input);
+    }
 }
 
 static void
 github_notification_parse_repository(
-	struct json_stream *input,
-	gcli_notification *it)
+    struct json_stream *input,
+    gcli_notification  *it)
 {
-	if (json_next(input) != JSON_OBJECT)
-		errx(1, "Expected Notification Repository Object");
+    if (json_next(input) != JSON_OBJECT)
+        errx(1, "Expected Notification Repository Object");
 
-	enum json_type key_type;
-	while ((key_type = json_next(input)) == JSON_STRING) {
-		size_t      len = 0;
-		const char *key = json_get_string(input, &len);
+    enum json_type key_type;
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t      len = 0;
+        const char *key = json_get_string(input, &len);
 
-		if (strncmp("full_name", key, len) == 0)
-			it->repository = get_string(input);
-		else
-			SKIP_OBJECT_VALUE(input);
-	}
+        if (strncmp("full_name", key, len) == 0)
+            it->repository = get_string(input);
+        else
+            SKIP_OBJECT_VALUE(input);
+    }
 }
 
 static void
 parse_github_notification(
-	struct json_stream *input,
-	gcli_notification *it)
+    struct json_stream *input,
+    gcli_notification  *it)
 {
-	if (json_next(input) != JSON_OBJECT)
-		errx(1, "Expected Notification Object");
+    if (json_next(input) != JSON_OBJECT)
+        errx(1, "Expected Notification Object");
 
-	enum json_type key_type;
-	while ((key_type = json_next(input)) == JSON_STRING) {
-		size_t      len = 0;
-		const char *key = json_get_string(input, &len);
+    enum json_type key_type;
+    while ((key_type = json_next(input)) == JSON_STRING) {
+        size_t      len = 0;
+        const char *key = json_get_string(input, &len);
 
-		if (strncmp("updated_at", key, len) == 0)
-			it->date = get_string(input);
-		else if (strncmp("id", key, len) == 0)
-			it->id = get_string(input);
-		else if (strncmp("reason", key, len) == 0)
-			it->reason = get_string(input);
-		else if (strncmp("subject", key, len) == 0)
-			github_notification_parse_subject(input, it);
-		else if (strncmp("repository", key, len) == 0)
-			github_notification_parse_repository(input, it);
-		else
-			SKIP_OBJECT_VALUE(input);
-	}
+        if (strncmp("updated_at", key, len) == 0)
+            it->date = get_string(input);
+        else if (strncmp("id", key, len) == 0)
+            it->id = get_string(input);
+        else if (strncmp("reason", key, len) == 0)
+            it->reason = get_string(input);
+        else if (strncmp("subject", key, len) == 0)
+            github_notification_parse_subject(input, it);
+        else if (strncmp("repository", key, len) == 0)
+            github_notification_parse_repository(input, it);
+        else
+            SKIP_OBJECT_VALUE(input);
+    }
 }
 
 size_t
 github_get_notifications(gcli_notification **notifications, int count)
 {
-	char               *url                = NULL;
-	char               *next_url           = NULL;
-	gcli_fetch_buffer  buffer             = {0};
-	struct json_stream  stream             = {0};
-	size_t              notifications_size = 0;
+    char               *url                = NULL;
+    char               *next_url           = NULL;
+    gcli_fetch_buffer   buffer             = {0};
+    struct json_stream  stream             = {0};
+    size_t              notifications_size = 0;
 
-	url = sn_asprintf("%s/notifications", gcli_get_apibase());
+    url = sn_asprintf("%s/notifications", gcli_get_apibase());
 
-	do {
-		gcli_fetch(url, &next_url, &buffer);
+    do {
+        gcli_fetch(url, &next_url, &buffer);
 
-		json_open_buffer(&stream, buffer.data, buffer.length);
-		json_set_streaming(&stream, 1);
+        json_open_buffer(&stream, buffer.data, buffer.length);
+        json_set_streaming(&stream, 1);
 
-		enum json_type next_token = json_next(&stream);
+        enum json_type next_token = json_next(&stream);
 
-		while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
-			if (next_token != JSON_OBJECT)
-				errx(1, "Unexpected non-object in notifications list");
+        while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
+            if (next_token != JSON_OBJECT)
+                errx(1, "Unexpected non-object in notifications list");
 
-			*notifications = realloc(
-				*notifications,
-				(notifications_size + 1) * sizeof(gcli_notification));
-			gcli_notification *it = &(*notifications)[notifications_size];
-			parse_github_notification(&stream, it);
-			notifications_size += 1;
-		}
+            *notifications = realloc(
+                *notifications,
+                (notifications_size + 1) * sizeof(gcli_notification));
+            gcli_notification *it = &(*notifications)[notifications_size];
+            parse_github_notification(&stream, it);
+            notifications_size += 1;
+        }
 
-		json_close(&stream);
-		free(url);
-		free(buffer.data);
-	} while ((url = next_url) && (count < 0 || ((int)notifications_size < count)));
+        json_close(&stream);
+        free(url);
+        free(buffer.data);
+    } while ((url = next_url) && (count < 0 || ((int)notifications_size < count)));
 
-	return notifications_size;
+    return notifications_size;
 }
 
 void
 github_notification_mark_as_read(const char *id)
 {
-	char               *url    = NULL;
-	gcli_fetch_buffer  buffer = {0};
+    char              *url    = NULL;
+    gcli_fetch_buffer  buffer = {0};
 
-	url = sn_asprintf(
-		"%s/notifications/threads/%s",
-		gcli_get_apibase(),
-		id);
-	gcli_fetch_with_method("PATCH", url, NULL, NULL, &buffer);
+    url = sn_asprintf(
+        "%s/notifications/threads/%s",
+        gcli_get_apibase(),
+        id);
+    gcli_fetch_with_method("PATCH", url, NULL, NULL, &buffer);
 
-	free(url);
-	free(buffer.data);
+    free(url);
+    free(buffer.data);
 }

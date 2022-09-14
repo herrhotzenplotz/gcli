@@ -34,49 +34,49 @@
 
 int
 gcli_get_forks(
-	const char  *owner,
-	const char  *repo,
-	int          max,
-	gcli_fork **out)
+    const char  *owner,
+    const char  *repo,
+    int          max,
+    gcli_fork  **out)
 {
-	return gcli_forge()->get_forks(owner, repo, max, out);
+    return gcli_forge()->get_forks(owner, repo, max, out);
 }
 
 void
 gcli_print_forks(
-	enum gcli_output_order  order,
-	gcli_fork              *forks,
-	size_t                   forks_size)
+    enum gcli_output_order  order,
+    gcli_fork              *forks,
+    size_t                  forks_size)
 {
-	if (forks_size == 0) {
-		puts("No forks");
-		return;
-	}
+    if (forks_size == 0) {
+        puts("No forks");
+        return;
+    }
 
-	printf("%-20.20s  %-20.20s  %-5.5s  %s\n",
-		   "OWNER", "DATE", "FORKS", "FULLNAME");
+    printf("%-20.20s  %-20.20s  %-5.5s  %s\n",
+           "OWNER", "DATE", "FORKS", "FULLNAME");
 
-	if (order == OUTPUT_ORDER_SORTED) {
-		for (size_t i = forks_size; i > 0; --i) {
-			printf("%s%-20.20s%s  %-20.20s  %5d  %s\n",
-				   gcli_setbold(), forks[i - 1].owner.data, gcli_resetbold(),
-				   forks[i - 1].date.data,
-				   forks[i - 1].forks,
-				   forks[i - 1].full_name.data);
-		}
-	} else {
-		for (size_t i = 0; i < forks_size; ++i) {
-			printf("%s%-20.20s%s  %-20.20s  %5d  %s\n",
-				   gcli_setbold(), forks[i].owner.data, gcli_resetbold(),
-				   forks[i].date.data,
-				   forks[i].forks,
-				   forks[i].full_name.data);
-		}
-	}
+    if (order == OUTPUT_ORDER_SORTED) {
+        for (size_t i = forks_size; i > 0; --i) {
+            printf("%s%-20.20s%s  %-20.20s  %5d  %s\n",
+                   gcli_setbold(), forks[i - 1].owner.data, gcli_resetbold(),
+                   forks[i - 1].date.data,
+                   forks[i - 1].forks,
+                   forks[i - 1].full_name.data);
+        }
+    } else {
+        for (size_t i = 0; i < forks_size; ++i) {
+            printf("%s%-20.20s%s  %-20.20s  %5d  %s\n",
+                   gcli_setbold(), forks[i].owner.data, gcli_resetbold(),
+                   forks[i].date.data,
+                   forks[i].forks,
+                   forks[i].full_name.data);
+        }
+    }
 }
 
 void
 gcli_fork_create(const char *owner, const char *repo, const char *_in)
 {
-	gcli_forge()->fork_create(owner, repo, _in);
+    gcli_forge()->fork_create(owner, repo, _in);
 }

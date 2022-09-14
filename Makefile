@@ -25,9 +25,9 @@ CPPFLAGS						=	-D_XOPEN_SOURCE=600 \
 
 #########################################################################
 # CFLAGS
-CFLAGS							=	-std=iso9899:1999		\
-									-Ithirdparty/pdjson/	\
-									-Ithirdparty/			\
+CFLAGS							=	-std=iso9899:1999	\
+									-Ithirdparty/pdjson	\
+									-Ithirdparty		\
 									-Iinclude/
 CFLAGS_gcc						=	-fPIC -fPIE -pedantic -g -O0 -ggdb \
 									-Wall -Wextra

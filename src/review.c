@@ -41,92 +41,92 @@
 
 void
 gcli_review_print_review_table(
-	gcli_pr_review *headers,
-	size_t headers_size)
+    gcli_pr_review *headers,
+    size_t          headers_size)
 {
-	for (size_t i = 0; i < headers_size; ++i) {
-		if (headers[i].state) {
-			printf("   %s%s%s - %s - %s%s%s\n",
-				   gcli_setbold(), headers[i].author, gcli_resetbold(),
-				   headers[i].date,
-				   gcli_state_color_str(headers[i].state),
-				   headers[i].state,
-				   gcli_resetcolor());
-		} else {
-			printf("   %s%s%s - %s\n",
-				   gcli_setbold(), headers[i].author, gcli_resetbold(),
-				   headers[i].date);
-		}
+    for (size_t i = 0; i < headers_size; ++i) {
+        if (headers[i].state) {
+            printf("   %s%s%s - %s - %s%s%s\n",
+                   gcli_setbold(), headers[i].author, gcli_resetbold(),
+                   headers[i].date,
+                   gcli_state_color_str(headers[i].state),
+                   headers[i].state,
+                   gcli_resetcolor());
+        } else {
+            printf("   %s%s%s - %s\n",
+                   gcli_setbold(), headers[i].author, gcli_resetbold(),
+                   headers[i].date);
+        }
 
-		pretty_print(headers[i].body, 9, 80, stdout);
+        pretty_print(headers[i].body, 9, 80, stdout);
 
-		gcli_review_print_comments(
-			headers[i].comments,
-			headers[i].comments_size);
+        gcli_review_print_comments(
+            headers[i].comments,
+            headers[i].comments_size);
 
-		putchar('\n');
-	}
+        putchar('\n');
+    }
 }
 
 void
 gcli_review_print_comments(
-	gcli_pr_review_comment *comments,
-	size_t                   comments_size)
+    gcli_pr_review_comment *comments,
+    size_t                  comments_size)
 {
-	for (size_t i = 0; i < comments_size; ++i) {
-		putchar('\n');
-		printf("         PATH : %s\n"
-			   "         DIFF :\n",
-			   comments[i].path);
+    for (size_t i = 0; i < comments_size; ++i) {
+        putchar('\n');
+        printf("         PATH : %s\n"
+               "         DIFF :\n",
+               comments[i].path);
 
-		pretty_print(comments[i].diff, 20, INT_MAX, stdout);
-		putchar('\n');
-		pretty_print(comments[i].body, 16, 80, stdout);
-	}
+        pretty_print(comments[i].diff, 20, INT_MAX, stdout);
+        putchar('\n');
+        pretty_print(comments[i].body, 16, 80, stdout);
+    }
 }
 
 void
 gcli_review_reviews_free(gcli_pr_review *it, size_t size)
 {
-	if (!it)
-		return;
+    if (!it)
+        return;
 
-	for (size_t i = 0; i < size; ++i) {
-		free(it[i].author);
-		free(it[i].date);
-		free(it[i].state);
-		free(it[i].body);
-		free(it[i].id);
-	}
+    for (size_t i = 0; i < size; ++i) {
+        free(it[i].author);
+        free(it[i].date);
+        free(it[i].state);
+        free(it[i].body);
+        free(it[i].id);
+    }
 
-	gcli_review_comments_free(it->comments, it->comments_size);
+    gcli_review_comments_free(it->comments, it->comments_size);
 
-	free(it);
+    free(it);
 }
 
 void
 gcli_review_comments_free(gcli_pr_review_comment *it, size_t size)
 {
-	if (!it)
-		return;
+    if (!it)
+        return;
 
-	for (size_t i = 0; i < size; ++i) {
-		free(it[i].id);
-		free(it[i].author);
-		free(it[i].date);
-		free(it[i].diff);
-		free(it[i].path);
-		free(it[i].body);
-	}
+    for (size_t i = 0; i < size; ++i) {
+        free(it[i].id);
+        free(it[i].author);
+        free(it[i].date);
+        free(it[i].diff);
+        free(it[i].path);
+        free(it[i].body);
+    }
 
-	free(it);
+    free(it);
 }
 
 size_t gcli_review_get_reviews(
-	const char       *owner,
-	const char       *repo,
-	int               pr,
-	gcli_pr_review **out)
+    const char      *owner,
+    const char      *repo,
+    int              pr,
+    gcli_pr_review **out)
 {
-	return gcli_forge()->get_reviews(owner, repo, pr, out);
+    return gcli_forge()->get_reviews(owner, repo, pr, out);
 }

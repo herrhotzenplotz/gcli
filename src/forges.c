@@ -58,6 +58,7 @@
 
 #include <gcli/gitea/comments.h>
 #include <gcli/gitea/config.h>
+#include <gcli/gitea/forks.h>
 #include <gcli/gitea/issues.h>
 #include <gcli/gitea/labels.h>
 #include <gcli/gitea/pulls.h>
@@ -185,6 +186,7 @@ gitea_forge_descriptor =
     .get_pull_commits       = gitea_get_pull_commits,
     .perform_submit_pr      = gitea_pull_submit,
     .print_pr_diff          = gitea_print_pr_diff,
+    .get_forks              = gitea_get_forks,
 
     /* Same procedure as with Github (see comment up there) */
     .pr_add_labels    = gitea_issue_add_labels,

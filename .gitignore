@@ -156,3 +156,6 @@
 /src/gitea/repos.c~
 /src/gitea/repos.o
 /tools/gentarball.sh~
+/include/gcli/gitea/forks.h~
+/src/gitea/forks.c~
+/src/gitea/forks.o

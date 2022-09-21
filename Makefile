@@ -80,9 +80,10 @@ libgcli.a_SRCS		=	src/comments.c				\
 						src/gitlab/repos.c			\
 						src/gitlab/review.c			\
 						src/gitlab/status.c			\
-						src/gitea/issues.c			\
-						src/gitea/config.c			\
 						src/gitea/comments.c		\
+						src/gitea/config.c			\
+						src/gitea/forks.c			\
+						src/gitea/issues.c			\
 						src/gitea/labels.c			\
 						src/gitea/pulls.c			\
 						src/gitea/repos.c			\

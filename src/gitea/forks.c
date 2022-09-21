@@ -41,3 +41,12 @@ gitea_get_forks(
 {
     return github_get_forks(owner, repo, max, out);
 }
+
+void
+gitea_fork_create(
+    const char *owner,
+    const char *repo,
+    const char *_in)
+{
+    return github_fork_create(owner, repo, _in);
+}

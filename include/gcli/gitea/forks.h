@@ -38,4 +38,9 @@ int gitea_get_forks(
     int          max,
     gcli_fork  **out);
 
+void gitea_fork_create(
+    const char *owner,
+    const char *repo,
+    const char *_in);
+
 #endif /* GITEA_FORKS_H */

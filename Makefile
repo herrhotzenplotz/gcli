@@ -16,7 +16,7 @@
 PROGS							=	gcli
 LIBS							=	libgcli.a
 
-GCLI_VERSION					=	0.9.7-beta${GIT_VERSION}
+GCLI_VERSION					=	0.9.8-beta${GIT_VERSION}
 
 #########################################################################
 # CPPFLAGS

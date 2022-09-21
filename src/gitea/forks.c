@@ -48,5 +48,5 @@ gitea_fork_create(
     const char *repo,
     const char *_in)
 {
-    return github_fork_create(owner, repo, _in);
+    github_fork_create(owner, repo, _in);
 }

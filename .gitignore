@@ -159,3 +159,5 @@
 /include/gcli/gitea/forks.h~
 /src/gitea/forks.c~
 /src/gitea/forks.o
+/tests/json-escape
+/tests/url-encode

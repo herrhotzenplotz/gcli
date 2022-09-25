@@ -1,14 +1,23 @@
-TESTS	=	json_escape \
-		url-encode
+TESTS	=	json-escape \
+			url-encode
 
-.PHONY: all clean ${TESTS:=-clean} ${TESTS}
+LDFLAGS_sparc-sunos-sunstudio	+=	-L/opt/bw/lib -lcurl -R/opt/bw/lib
+CFLAGS							+=	-I../include -I../thirdparty
+LDFLAGS							+=	-latf-c
 
-all: ${TESTS}
+-include ../config.mk
 
-clean: ${TESTS:=-clean}
+.PHONY: all clean ${TESTS:=-clean}
 
-${TESTS}:
-	${MAKE} -C ${@} test
+all: build-tests run-tests
 
-${TESTS:=-clean}:
-	${MAKE} -C ${@:-clean=} clean
+clean:
+	rm -f ${TESTS}
+
+build-tests: ${TESTS}
+
+.c:
+	${CC} -o $@ ${COMPILE_FLAGS} $< ../libgcli.a ${LINK_FLAGS}
+
+run-tests: Kyuafile ${TESTS}
+	kyua test

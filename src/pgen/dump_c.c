@@ -29,9 +29,50 @@
 
 #include <gcli/pgen.h>
 
+static void
+pregen_array_parser(struct objparser *p, struct objentry *it)
+{
+    fprintf(outfile,
+            "static void\n"
+            "parse_%s_%s_array(struct json_stream *stream, %s *out)\n",
+            p->name, it->name, p->returntype);
+    fprintf(outfile, "{\n");
+    fprintf(outfile, "\tif (json_peek(stream) == JSON_NULL) {\n");
+    fprintf(outfile, "\t\tjson_next(stream);\n");
+    fprintf(outfile, "\t\tout->%s = NULL;\n", it->name);
+    fprintf(outfile, "\t\tout->%s_size = 0;\n", it->name);
+    fprintf(outfile, "\t\treturn;\n");
+    fprintf(outfile, "\t}\n\n");
+
+    fprintf(outfile, "\tif (json_next(stream) != JSON_ARRAY)\n");
+    fprintf(outfile, "\t\terrx(1, \"Expected array for %s array in %s\");\n\n",
+            it->name, p->name);
+
+    fprintf(outfile, "\twhile (json_peek(stream) != JSON_ARRAY_END) {\n");
+    fprintf(outfile, "\t\tout->%s = realloc(out->%s, sizeof(*out->%s) * (out->%s_size + 1));\n",
+            it->name, it->name, it->name, it->name);
+    fprintf(outfile, "\t\t%s(stream, &out->%s[out->%s_size++]);\n",
+            it->parser, it->name, it->name);
+    fprintf(outfile, "\t}\n\n");
+
+    fprintf(outfile, "\tassert(json_next(stream) == JSON_ARRAY_END);\n");
+    fprintf(outfile, "}\n\n");
+}
+
+static void
+objparser_pregen_array_parsers(struct objparser *p)
+{
+    for (struct objentry *it = p->entries; it; it = it->next) {
+        if (it->kind == OBJENTRY_ARRAY)
+            pregen_array_parser(p, it);
+    }
+}
+
 void
 objparser_dump_c(struct objparser *p)
 {
+    objparser_pregen_array_parsers(p);
+
     fprintf(outfile,
             "void parse_%s(struct json_stream *stream, struct %s *out)\n",
             p->name, p->returntype);
@@ -54,7 +95,7 @@ objparser_dump_c(struct objparser *p)
             else
                 fprintf(outfile, "\t\t\tout->%s = get_%s(stream);\n", it->name, it->type);
 
-        } else if (it->kind = OBJENTRY_ARRAY) {
+        } else if (it->kind == OBJENTRY_ARRAY) {
             fprintf(outfile, "\t\t\tparse_%s_%s_array(stream, out);\n",
                     p->name, it->name);
             /* TODO: generate these functions */

@@ -1,5 +1,6 @@
 TESTS	=	json-escape \
-			url-encode
+			url-encode \
+			github-tests
 
 LDFLAGS_sparc-sunos-sunstudio	+=	-L/opt/bw/lib -lcurl -R/opt/bw/lib
 CFLAGS							+=	-I../include -I../thirdparty

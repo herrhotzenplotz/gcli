@@ -36,7 +36,9 @@
 
 #include <assert.h>
 
-static void
+#include <gcli/github/parsers/issues.h>
+
+void
 github_parse_issue(json_stream *input, gcli_issue *out)
 {
     enum json_type  key_type;

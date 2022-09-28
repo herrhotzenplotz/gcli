@@ -18,4 +18,6 @@ struct objparser {
     struct objentry *entries;
 };
 
+void yyerror(const char *message);
+
 #endif /* PGEN_H */

@@ -9,12 +9,14 @@
 
 int yycol = 1, yyrow = 1;
 char *yyfile = NULL;
-int
+
+void
 yyerror(const char *msg)
 {
 	fprintf(stderr, "%s:%d:%d: error: %s\n", yyfile, yyrow, yycol, msg);
 	exit(1);
 }
+
 %}
 
 %%

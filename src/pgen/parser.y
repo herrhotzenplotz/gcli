@@ -1,8 +1,6 @@
 %{
 #include <stdio.h>
 
-extern int yyerror(const char *message);
-
 #include <gcli/pgen.h>
 
 %}

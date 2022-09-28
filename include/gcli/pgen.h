@@ -12,4 +12,10 @@ struct objentry {
     struct objentry *next; /* linked list */
 };
 
+struct objparser {
+    char            *name;
+    char            *returntype;
+    struct objentry *entries;
+};
+
 #endif /* PGEN_H */

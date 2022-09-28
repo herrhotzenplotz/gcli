@@ -15,6 +15,7 @@ extern int yyerror(const char *message);
 	struct ident		ident;
 	struct objentry		objentry;
 	struct objentry     *objentries;
+	struct objparser    objparser;
 }
 
 %token	<strlit>		STRLIT
@@ -22,17 +23,25 @@ extern int yyerror(const char *message);
 
 %type	<objentry>		obj_entry
 %type	<objentries>	obj_entries
+%type	<objparser>		parser
 
 %%
 input:			parser
-		;
-parser:			PARSER IDENT IS OBJECT OF IDENT WITH OPAREN obj_entries CPAREN SEMICOLON
 				{
-					printf("object parser: name = %s, type = %s\n", $2.text, $6.text);
-					for (struct objentry *it = $9; it != NULL; it = it->next)
+					printf("object parser: name = %s, type = %s\n",
+						   $1.name,
+						   $1.returntype);
+					for (struct objentry *it = $1.entries; it != NULL; it = it->next)
 						printf("  entry: kind = %s, name = %s, type = %s, parser = %s\n",
 							   it->kind == OBJENTRY_SIMPLE ? "simple" : "array",
 							   it->name, it->type, it->parser);
+				}
+		;
+parser:			PARSER IDENT IS OBJECT OF IDENT WITH OPAREN obj_entries CPAREN SEMICOLON
+				{
+					$$.name		  = $2.text;
+					$$.returntype = $6.text;
+					$$.entries	  = $9;
 				}
 		;
 

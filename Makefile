@@ -140,7 +140,7 @@ pgen: src/pgen/parser.o src/pgen/lexer.o
 
 .PHONY: pgen-clean
 pgen-clean:
-	${RM} -f y.tab.h src/pgen/*.c src/pgen/*.o pgen
+	-${RM} -f y.tab.h src/pgen/*.c src/pgen/*.o pgen
 
 clean: pgen-clean
 check build: pgen

@@ -46,8 +46,19 @@ objparser_dump_c(struct objparser *p)
     for (struct objentry *it = p->entries; it; it = it->next)
     {
         fprintf(outfile, "\t\tif (strncmp(\"%s\", key, len) == 0)\n", it->jsonname);
-        fprintf(outfile, "\t\t\tout->%s = get_%s(stream);\n", it->name, it->type);
-        /* TODO: handle other parser */
+
+        if (it->kind == OBJENTRY_SIMPLE) {
+
+            if (it->parser)
+                fprintf(outfile, "\t\t\t%s(stream, &out->%s);\n", it->parser, it->name);
+            else
+                fprintf(outfile, "\t\t\tout->%s = get_%s(stream);\n", it->name, it->type);
+
+        } else if (it->kind = OBJENTRY_ARRAY) {
+            fprintf(outfile, "\t\t\tparse_%s_%s_array(stream, out);\n",
+                    p->name, it->name);
+            /* TODO: generate these functions */
+        }
         fprintf(outfile, "\t\telse ");
     }
 

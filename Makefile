@@ -119,6 +119,33 @@ MAN				=	docs/gcli.1				\
 # Important: the autodetect.sh script needs to be in place
 include default.mk
 
+###################################################################
+# PGEN
+###################################################################
+.y.o:
+	@echo " ==> Shaving the yak $<"
+	${YACC} ${YFLAGS} $<
+	${CC} ${COMPILE_FLAGS} -o $@ -c y.tab.c
+	${RM} y.tab.c
+
+.l.o:
+	@echo " ==> Lexing $<"
+	${LEX} ${LFLAGS} $<
+	${CC} ${COMPILE_FLAGS} -o $@ -c lex.yy.c
+	${RM} lex.yy.c
+
+pgen: src/pgen/parser.o src/pgen/lexer.o
+	@echo " ==> Linking pgen"
+	${CC} ${COMPILE_FLAGS} -o pgen src/pgen/parser.o src/pgen/lexer.o ${LINK_FLAGS}
+
+.PHONY: pgen-clean
+pgen-clean:
+	${RM} -f y.tab.h src/pgen/*.c src/pgen/*.o pgen
+
+clean: pgen-clean
+build: pgen
+###################################################################
+
 gcli: libgcli.a
 
 .PHONY: TAGS

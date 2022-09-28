@@ -163,3 +163,9 @@
 /tests/url-encode
 /tests/github-tests
 /include/gcli/github/parsers/issues.h~
+/include/gcli/pgen.h
+/src/pgen/lexer.o
+/src/pgen/parser.o
+/include/gcli/pgen.h~
+/pgen
+/y.tab.h

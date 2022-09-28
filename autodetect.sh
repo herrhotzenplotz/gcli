@@ -221,12 +221,40 @@ git_version() {
 	fi
 }
 
+find_program() {
+	PROGNAME=$1
+
+	checking "for $PROGNAME"
+	shift
+	while :; do
+		if [ x$1 = x ]; then
+			break
+		fi
+
+		PROGPATH=`which $1 2>/dev/null`
+		if [ x$PROGPATH != x ]; then
+			echo "$PROGPATH"
+			checking_result "$PROGPATH"
+			return
+		fi
+	done
+
+	die "Could not find $PROGNAME"
+}
+
+programs() {
+	[ x$YACC != x ] || dump "YACC	=	"$(find_program yacc yacc byacc bison)
+	[ x$LEX != x ]  || dump "LEX	=	"$(find_program lex lex flex)
+	[ x$RM != x ]   || dump "RM	=	"$(find_program rm rm)
+}
+
 main() {
 	warn_gnu_make
 	target_triplet
 	linker
 	compiler_flags
 	linker_flags
+	programs
 	git_version
 
 	# Provide -s flag because GNU make is behaving abnormally yet

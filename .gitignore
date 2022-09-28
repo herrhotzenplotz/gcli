@@ -169,3 +169,6 @@
 /include/gcli/pgen.h~
 /pgen
 /y.tab.h
+/src/pgen/dump_plain.o
+/src/pgen/dump_c.o
+/foo

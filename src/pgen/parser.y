@@ -30,13 +30,7 @@ int		 dumptype	 = 0;
 %%
 input:			parser
 				{
-					printf("object parser: name = %s, type = %s\n",
-						   $1.name,
-						   $1.returntype);
-					for (struct objentry *it = $1.entries; it != NULL; it = it->next)
-						printf("  entry: kind = %s, name = %s, type = %s, parser = %s\n",
-							   it->kind == OBJENTRY_SIMPLE ? "simple" : "array",
-							   it->name, it->type, it->parser);
+					objparser_dump(&($1));
 				}
 		;
 parser:			PARSER IDENT IS OBJECT OF IDENT WITH OPAREN obj_entries CPAREN SEMICOLON
@@ -63,28 +57,32 @@ obj_entries:	obj_entries COMMA obj_entry
 
 obj_entry:		STRLIT FATARROW IDENT AS IDENT
 				{
-					$$.kind	  = OBJENTRY_SIMPLE;
-					$$.name	  = $3.text;
-					$$.type	  = $5.text;
-					$$.parser = NULL;
+					$$.jsonname = $1.text;
+					$$.kind		= OBJENTRY_SIMPLE;
+					$$.name		= $3.text;
+					$$.type		= $5.text;
+					$$.parser	= NULL;
 				}
 		|		STRLIT FATARROW IDENT AS IDENT USE IDENT
 				{
-					$$.kind	  = OBJENTRY_SIMPLE;
-					$$.name	  = $3.text;
-					$$.type	  = $5.text;
-					$$.parser = $7.text;
+					$$.jsonname = $1.text;
+					$$.kind		= OBJENTRY_SIMPLE;
+					$$.name		= $3.text;
+					$$.type		= $5.text;
+					$$.parser	= $7.text;
 				}
 		|		STRLIT FATARROW IDENT AS ARRAY OF IDENT USE IDENT
 				{
-					$$.kind	  = OBJENTRY_ARRAY;
-					$$.name	  = $3.text;
-					$$.type	  = $7.text;
-					$$.parser = $9.text;
+					$$.jsonname = $1.text;
+					$$.kind		= OBJENTRY_ARRAY;
+					$$.name		= $3.text;
+					$$.type		= $7.text;
+					$$.parser	= $9.text;
 				}
 		;
 %%
 
+#include <assert.h>
 #include <err.h>
 #include <stdlib.h>
 #include <string.h>
@@ -92,6 +90,17 @@ obj_entry:		STRLIT FATARROW IDENT AS IDENT
 
 extern FILE *yyin;
 extern char *yyfile;
+
+void
+objparser_dump(struct objparser *p)
+{
+	switch (dumptype) {
+	case DUMP_PLAIN: objparser_dump_plain(p); break;
+	case DUMP_C:     objparser_dump_c(p); break;
+	default:
+		assert(0 && "not reached");
+	}
+}
 
 static void
 usage(void)
@@ -139,6 +148,11 @@ main(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
+	if (!outfile) {
+		outfile = stdout;
+		outfilename = "<stdout>";
+	}
+
 	if (argc) {
 		for (int i = 0; i < argc; ++i) {
 			yyfile = argv[i];
@@ -151,6 +165,8 @@ main(int argc, char *argv[])
 		yyin = stdin;
 		yyparse();
 	}
+
+	fclose(outfile);
 
 	return 0;
 }

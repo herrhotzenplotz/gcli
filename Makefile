@@ -134,13 +134,17 @@ include default.mk
 	${CC} ${COMPILE_FLAGS} -o $@ -c lex.yy.c
 	${RM} lex.yy.c
 
-pgen: src/pgen/parser.o src/pgen/lexer.o
+pgen: src/pgen/parser.o src/pgen/lexer.o src/pgen/dump_c.o src/pgen/dump_plain.o
 	@echo " ==> Linking pgen"
-	${CC} ${COMPILE_FLAGS} -o pgen src/pgen/parser.o src/pgen/lexer.o ${LINK_FLAGS}
+	${CC} ${COMPILE_FLAGS} -o pgen \
+		src/pgen/parser.o src/pgen/lexer.o \
+		src/pgen/dump_c.o src/pgen/dump_plain.o \
+		${LINK_FLAGS}
 
 .PHONY: pgen-clean
 pgen-clean:
-	-${RM} -f y.tab.h src/pgen/*.c src/pgen/*.o pgen
+	-${RM} -f y.tab.h src/pgen/parser.c src/pgen/lexer.c \
+		src/pgen/parser.o src/pgen/lexer.o pgen
 
 clean: pgen-clean
 check build: pgen

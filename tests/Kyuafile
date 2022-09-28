@@ -37,5 +37,8 @@ test_suite('gcli')
 atf_test_program{name='url-encode'}
 atf_test_program{name='json-escape'}
 
+-- PGen tests
+atf_test_program{name='pgen-simple'}
+
 -- Parser tests
 atf_test_program{name='github'}

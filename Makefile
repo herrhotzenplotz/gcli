@@ -143,7 +143,7 @@ pgen-clean:
 	${RM} -f y.tab.h src/pgen/*.c src/pgen/*.o pgen
 
 clean: pgen-clean
-build: pgen
+check build: pgen
 ###################################################################
 
 gcli: libgcli.a

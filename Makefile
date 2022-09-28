@@ -37,7 +37,7 @@ CFLAGS_sparc-sunos-sunstudio	=	-pedantic -g -xO0
 
 #########################################################################
 # LDFLAGS
-LDFLAGS							=	-L. -lgcli
+gcli_LDFLAGS						=	-L. -lgcli
 LDFLAGS_gcc						=	-pie -rdynamic -fPIC
 LDFLAGS_clang					=	${LDFLAGS_gcc}
 LDFLAGS_sparc-sunos-sunstudio	=	-lcurl

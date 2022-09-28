@@ -1,6 +1,13 @@
 #ifndef PGEN_H
 #define PGEN_H
 
+/* PGen command line options */
+enum { DUMP_PLAIN = 0, DUMP_C = 1 };
+extern int   dumptype;
+extern FILE *outfile;
+extern char *outfilename;
+
+
 /* Types used in the parser to represent nodes in the AST */
 struct strlit { char *text; };
 struct ident { char *text; };

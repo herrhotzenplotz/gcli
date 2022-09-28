@@ -3,6 +3,10 @@
 
 #include <gcli/pgen.h>
 
+FILE	*outfile	 = NULL;
+char	*outfilename = NULL;
+int		 dumptype	 = 0;
+
 %}
 
 %token PARSER IS OBJECT WITH AS USE FATARROW
@@ -81,14 +85,72 @@ obj_entry:		STRLIT FATARROW IDENT AS IDENT
 		;
 %%
 
+#include <err.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
 extern FILE *yyin;
 extern char *yyfile;
 
-int
-main(void)
+static void
+usage(void)
 {
-	yyfile = "<stdin>";
-	yyin = stdin;
-	yyparse();
+	fprintf(stderr, "usage: pgen [-v] [-o outputfile] [-t c|plain] [...]\n");
+	fprintf(stderr, "OPTIONS:\n");
+	fprintf(stderr, "   -v       Print version and exit\n");
+	fprintf(stderr, "   -o file  Dump output into the given file\n");
+	fprintf(stderr, "   -t type  Type of the output. Can be either C or plain.\n");
+}
+
+int
+main(int argc, char *argv[])
+{
+	int ch;
+
+	while ((ch = getopt(argc, argv, "hvo:t:")) != -1) {
+		switch (ch) {
+		case 'o': {
+			if (outfile)
+				errx(1, "cannot specify -o more than once");
+			outfile = fopen(optarg, "w");
+			outfilename = optarg;
+		} break;
+		case 'v': {
+			fprintf(stderr, "pgen version 0.1\n");
+			exit(0);
+		} break;
+		case 't': {
+			if (strcmp(optarg, "plain") == 0)
+				dumptype = DUMP_PLAIN;
+			else if (strcmp(optarg, "c") == 0)
+				dumptype = DUMP_C;
+			else
+				errx(1, "invalid dump type %s", optarg);
+		} break;
+		case '?':
+		case '-':
+		default:
+			usage();
+			exit(1);
+		}
+	}
+
+	argc -= optind;
+	argv += optind;
+
+	if (argc) {
+		for (int i = 0; i < argc; ++i) {
+			yyfile = argv[i];
+			yyin = fopen(argv[i], "r");
+			yyparse();
+			fclose(yyin);
+		}
+	} else  {
+		yyfile = "<stdin>";
+		yyin = stdin;
+		yyparse();
+	}
+
 	return 0;
 }

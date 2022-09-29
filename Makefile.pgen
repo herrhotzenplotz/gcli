@@ -1,0 +1,38 @@
+# -*- makefile -*-
+
+.POSIX:
+
+.SILENT:
+
+CFLAGS	+=	-Iinclude -I.
+
+-include config.mk
+
+###################################################################
+# PGEN
+###################################################################
+.SUFFIXES: .y .o .c .l
+.y.c:
+	@echo " ==> Yaccing $<"
+	${YACC} -d ${YFLAGS} $<
+	mv y.tab.c $@
+
+.l.c:
+	@echo " ==> Lexing $<"
+	$(LEX) $(LFLAGS) $<
+	mv lex.yy.c $@
+
+.c.o:
+	${CC} ${COMPILE_FLAGS} -o $@ -c $<
+
+pgen: src/pgen/parser.o src/pgen/lexer.o src/pgen/dump_c.o src/pgen/dump_plain.o
+	@echo " ==> Linking pgen"
+	${CC} ${COMPILE_FLAGS} -o pgen \
+		src/pgen/parser.o src/pgen/lexer.o \
+		src/pgen/dump_c.o src/pgen/dump_plain.o \
+		${LINK_FLAGS}
+
+.PHONY: pgen-clean
+pgen-clean:
+	${RM} -f y.tab.h src/pgen/parser.c src/pgen/lexer.c \
+		src/pgen/parser.o src/pgen/lexer.o pgen

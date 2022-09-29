@@ -92,6 +92,7 @@ simple_issue_body()
 	${CC} -c \
 		  -I$(atf_get_srcdir)/../include \
 		  -I$(atf_get_srcdir)/../thirdparty \
+		  -Werror \
 		  -o ${OFILE} \
 		  ${CFILE} \
 		|| atf_fail "Compiler step failed"

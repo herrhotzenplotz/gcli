@@ -46,6 +46,8 @@ LDFLAGS_sparc-sunos-sunstudio	=	-lcurl
 # List the source files for each binary to be built
 gcli_SRCS			=	src/gcli.c
 
+TEMPLATES			=	templates/github/issues.t
+
 libgcli.a_SRCS		=	src/comments.c				\
 						src/config.c				\
 						src/color.c					\
@@ -96,7 +98,8 @@ libgcli.a_SRCS		=	src/comments.c				\
 						src/snippets.c				\
 						src/status.c				\
 						thirdparty/pdjson/pdjson.c	\
-						thirdparty/sn/sn.c
+						thirdparty/sn/sn.c			\
+						${TEMPLATES:.t=.c}
 
 LIBADD				=	libcurl
 
@@ -122,32 +125,28 @@ include default.mk
 ###################################################################
 # PGEN
 ###################################################################
-.y.o:
-	@echo " ==> Shaving the yak $<"
-	${YACC} ${YFLAGS} $<
-	${CC} ${COMPILE_FLAGS} -o $@ -c y.tab.c
-	${RM} y.tab.c
-
-.l.o:
-	@echo " ==> Lexing $<"
-	${LEX} ${LFLAGS} $<
-	${CC} ${COMPILE_FLAGS} -o $@ -c lex.yy.c
-	${RM} lex.yy.c
-
-pgen: src/pgen/parser.o src/pgen/lexer.o src/pgen/dump_c.o src/pgen/dump_plain.o
-	@echo " ==> Linking pgen"
-	${CC} ${COMPILE_FLAGS} -o pgen \
-		src/pgen/parser.o src/pgen/lexer.o \
-		src/pgen/dump_c.o src/pgen/dump_plain.o \
-		${LINK_FLAGS}
+.PHONY: pgen
+pgen:
+	@echo " ==> Building pgen"
+	${MAKE} -f Makefile.pgen pgen
 
 .PHONY: pgen-clean
 pgen-clean:
-	-${RM} -f y.tab.h src/pgen/parser.c src/pgen/lexer.c \
-		src/pgen/parser.o src/pgen/lexer.o pgen
+	${MAKE} -f Makefile.pgen pgen-clean
 
-clean: pgen-clean
-check build: pgen
+clean: pgen-clean clean-templates
+check: pgen
+###################################################################
+.SUFFIXES: .t .c
+
+${TEMPLATES:.t=.c}: pgen
+.t.c:
+	@echo " ==> Transpiling $<"
+	./pgen -tc -o $@ $<
+
+clean-templates:
+	-${RM} -f ${TEMPLATES:.t=.c}
+
 ###################################################################
 
 gcli: libgcli.a

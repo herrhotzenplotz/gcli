@@ -172,3 +172,5 @@
 /src/pgen/dump_plain.o
 /src/pgen/dump_c.o
 /foo
+/templates/github/issues.c
+/templates/github/issues.o

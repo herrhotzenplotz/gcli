@@ -243,9 +243,9 @@ find_program() {
 }
 
 programs() {
-	[ x$YACC != x ] || dump "YACC	=	"$(find_program yacc yacc byacc bison)
-	[ x$LEX != x ]  || dump "LEX	=	"$(find_program lex lex flex)
-	[ x$RM != x ]   || dump "RM	=	"$(find_program rm rm)
+	[ "x$YACC" != x ] || dump "YACC	=	"$(find_program yacc yacc byacc bison)
+	[ "x$LEX" != x ]  || dump "LEX	=	"$(find_program lex lex flex)
+	[ "x$RM" != x ]   || dump "RM	=	"$(find_program rm rm)
 }
 
 main() {

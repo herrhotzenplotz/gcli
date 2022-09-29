@@ -174,3 +174,5 @@
 /foo
 /templates/github/issues.c
 /templates/github/issues.o
+/src/pgen/lexer.c
+/src/pgen/parser.c

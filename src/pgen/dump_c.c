@@ -29,6 +29,8 @@
 
 #include <gcli/pgen.h>
 
+#include <assert.h>
+
 static void
 pregen_array_parser(struct objparser *p, struct objentry *it)
 {
@@ -68,18 +70,9 @@ objparser_pregen_array_parsers(struct objparser *p)
     }
 }
 
-void
-objparser_dump_c(struct objparser *p)
+static void
+objparser_dump_entries(struct objparser *p)
 {
-    objparser_pregen_array_parsers(p);
-
-    fprintf(outfile,
-            "void parse_%s(struct json_stream *stream, struct %s *out)\n",
-            p->name, p->returntype);
-    fprintf(outfile, "{\n");
-    fprintf(outfile, "\tenum json_type key_type;\n");
-    fprintf(outfile, "\tconst char *key;\n\n");
-    fprintf(outfile, "\tjson_next(stream);\n\n");
     fprintf(outfile, "\twhile ((key_type = json_next(stream)) == JSON_STRING) {\n");
     fprintf(outfile, "\t\tsize_t len;\n");
     fprintf(outfile, "\t\tkey = json_get_string(stream, &len);\n");
@@ -98,7 +91,6 @@ objparser_dump_c(struct objparser *p)
         } else if (it->kind == OBJENTRY_ARRAY) {
             fprintf(outfile, "\t\t\tparse_%s_%s_array(stream, out);\n",
                     p->name, it->name);
-            /* TODO: generate these functions */
         }
         fprintf(outfile, "\t\telse ");
     }
@@ -106,7 +98,56 @@ objparser_dump_c(struct objparser *p)
     fprintf(outfile, "\n\t\t\tSKIP_OBJECT_VALUE(stream);\n");
 
     fprintf(outfile, "\t}\n");
+}
+
+static void
+objparser_dump_select(struct objparser *p)
+{
+    fprintf(outfile, "\twhile ((key_type = json_next(stream)) == JSON_STRING) {\n");
+    fprintf(outfile, "\t\tsize_t len;\n");
+    fprintf(outfile, "\t\tkey = json_get_string(stream, &len);\n");
+    fprintf(outfile, "\t\tif (strncmp(\"%s\", key, len) == 0)\n", p->select.fieldname);
+    fprintf(outfile, "\t\t\t*out = get_%s(stream);\n", p->select.fieldtype);
+    fprintf(outfile, "\t\telse ");
+    fprintf(outfile, "\n\t\t\tSKIP_OBJECT_VALUE(stream);\n");
+    fprintf(outfile, "\t}\n");
+}
+
+void
+objparser_dump_c(struct objparser *p)
+{
+    objparser_pregen_array_parsers(p);
+
+    fprintf(outfile,
+            "void\n"
+            "parse_%s(struct json_stream *stream, %s *out)\n",
+            p->name, p->returntype);
+    fprintf(outfile, "{\n");
+    fprintf(outfile, "\tenum json_type key_type;\n");
+    fprintf(outfile, "\tconst char *key;\n\n");
+    fprintf(outfile, "\tjson_next(stream);\n\n");
+
+    switch (p->kind) {
+    case OBJPARSER_ENTRIES: objparser_dump_entries(p); break;
+    case OBJPARSER_SELECT: objparser_dump_select(p); break;
+    default: assert(0 && "unreached");
+    }
+
     fprintf(outfile, "\tif (key_type != JSON_OBJECT_END)\n");
     fprintf(outfile, "\t\terrx(1, \"unexpected object key type\");\n");
     fprintf(outfile, "}\n\n");
+}
+
+void
+include_dump_c(const char *file)
+{
+    fprintf(outfile, "#include <%s>\n", file);
+}
+
+void
+header_dump_c(void)
+{
+    fprintf(outfile, "#include <pdjson/pdjson.h>\n");
+    fprintf(outfile, "#include <assert.h>\n");
+    fprintf(outfile, "#include <stdlib.h>\n");
 }

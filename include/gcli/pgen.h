@@ -23,15 +23,28 @@ struct objentry {
 };
 
 struct objparser {
+    enum { OBJPARSER_ENTRIES, OBJPARSER_SELECT } kind;
     char            *name;
     char            *returntype;
     struct objentry *entries;
+    struct {
+        char *fieldtype;
+        char *fieldname;
+    } select;
 };
 
 void yyerror(const char *message);
 
-void objparser_dump(struct objparser *);
+/* Functions to dump data before starting the actual parser */
+void header_dump_c(void);
+
+/* Functions called while parsing */
 void objparser_dump_c(struct objparser *);
 void objparser_dump_plain(struct objparser *);
+
+void include_dump_c(const char *);
+
+/* Functions called after parsing */
+/* <none yet> */
 
 #endif /* PGEN_H */

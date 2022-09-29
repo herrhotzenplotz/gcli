@@ -7,10 +7,15 @@ FILE	*outfile	 = NULL;
 char	*outfilename = NULL;
 int		 dumptype	 = 0;
 
+static void objparser_dump(struct objparser *);
+static void include_dump(const char *);
+static void header_dump(void);
+static void footer_dump(void);
+
 %}
 
-%token PARSER IS OBJECT WITH AS USE FATARROW
-%token OPAREN CPAREN SEMICOLON ARRAY OF COMMA
+%token PARSER IS OBJECT WITH AS USE FATARROW INCLUDE
+%token OPAREN CPAREN SEMICOLON ARRAY OF COMMA SELECT
 
 %union {
 	struct strlit		strlit;
@@ -25,19 +30,37 @@ int		 dumptype	 = 0;
 
 %type	<objentry>		obj_entry
 %type	<objentries>	obj_entries
-%type	<objparser>		parser
+%type	<objparser>		objparser
 
 %%
-input:			parser
+input:			instruction input
+		|
+		;
+
+instruction:	objparser SEMICOLON
 				{
 					objparser_dump(&($1));
 				}
-		;
-parser:			PARSER IDENT IS OBJECT OF IDENT WITH OPAREN obj_entries CPAREN SEMICOLON
+		|		INCLUDE STRLIT SEMICOLON
 				{
+					include_dump($2.text);
+				}
+		;
+
+objparser:		PARSER IDENT IS OBJECT OF IDENT WITH OPAREN obj_entries CPAREN
+				{
+					$$.kind = OBJPARSER_ENTRIES;
 					$$.name		  = $2.text;
 					$$.returntype = $6.text;
 					$$.entries	  = $9;
+				}
+		|		PARSER IDENT IS OBJECT OF IDENT SELECT STRLIT AS IDENT
+				{
+					$$.kind = OBJPARSER_SELECT;
+					$$.name = $2.text;
+					$$.returntype = $6.text;
+					$$.select.fieldname = $8.text;
+					$$.select.fieldtype = $10.text;
 				}
 		;
 
@@ -91,17 +114,58 @@ obj_entry:		STRLIT FATARROW IDENT AS IDENT
 extern FILE *yyin;
 extern char *yyfile;
 
-void
+/******************************************************************************/
+
+/* Table of functions to call when dumping various parts of the output
+ * file */
+struct {
+	void (*dump_header)(void);
+	void (*dump_footer)(void);
+	void (*dump_objparser)(struct objparser *);
+	void (*dump_include)(const char *);
+} dumpers[] = {
+	[DUMP_PLAIN] = {
+		.dump_objparser = objparser_dump_plain
+	},
+	[DUMP_C] = {
+		.dump_header	= header_dump_c,
+		.dump_objparser = objparser_dump_c,
+		.dump_include	= include_dump_c,
+	}
+};
+
+/* Helpers */
+static void
 objparser_dump(struct objparser *p)
 {
-	switch (dumptype) {
-	case DUMP_PLAIN: objparser_dump_plain(p); break;
-	case DUMP_C:     objparser_dump_c(p); break;
-	default:
-		assert(0 && "not reached");
-	}
+	if (dumpers[dumptype].dump_objparser)
+		dumpers[dumptype].dump_objparser(p);
+	else
+		yyerror("internal error: don't know how to dump an object parser");
 }
 
+static void
+include_dump(const char *file)
+{
+	if (dumpers[dumptype].dump_include)
+		dumpers[dumptype].dump_include(file);
+}
+
+static void
+header_dump(void)
+{
+	if (dumpers[dumptype].dump_header)
+		dumpers[dumptype].dump_header();
+}
+
+static void
+footer_dump(void)
+{
+	if (dumpers[dumptype].dump_footer)
+		dumpers[dumptype].dump_footer();
+}
+
+/******************************************************************************/
 static void
 usage(void)
 {
@@ -153,6 +217,8 @@ main(int argc, char *argv[])
 		outfilename = "<stdout>";
 	}
 
+	header_dump();
+
 	if (argc) {
 		for (int i = 0; i < argc; ++i) {
 			yyfile = argv[i];
@@ -165,6 +231,8 @@ main(int argc, char *argv[])
 		yyin = stdin;
 		yyparse();
 	}
+
+	footer_dump();
 
 	fclose(outfile);
 

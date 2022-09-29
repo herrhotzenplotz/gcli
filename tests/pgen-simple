@@ -76,6 +76,29 @@ EOF
 
 ########################################################################
 #
+atf_test_case simple_issue
+simple_issue_head()
+{
+	atf_set "descr" "generate a parser for a simple github issue and run it on a sample data set"
+}
+simple_issue_body()
+{
+	BASEDIR=$(atf_get_srcdir)/samples
+	TMPLFILE=${BASEDIR}/github_issue.t
+	CFILE=github_issue.c
+	OFILE=${CFILE%.c}.o
+
+	${PGEN} -tc < ${TMPLFILE} > ${CFILE} || atf_fail "pgen step failed"
+	${CC} -c \
+		  -I$(atf_get_srcdir)/../include \
+		  -I$(atf_get_srcdir)/../thirdparty \
+		  -o ${OFILE} \
+		  ${CFILE} \
+		|| atf_fail "Compiler step failed"
+}
+
+########################################################################
+#
 atf_init_test_cases()
 {
 	PGEN=$(atf_get_srcdir)/../pgen
@@ -84,5 +107,6 @@ atf_init_test_cases()
 	atf_add_test_case simple_object
 	atf_add_test_case simple_object_no_entries
 	atf_add_test_case simple_object_trailing_comma
+	atf_add_test_case simple_issue
 }
 ########################################################################

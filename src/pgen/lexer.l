@@ -23,6 +23,7 @@ yyerror(const char *msg)
 \n                                 { yycol = 1; yyrow += 1;             }
 [ \t]                              { yycol += 1;                        }
 parser                             { yycol += yyleng; return PARSER;    }
+include                            { yycol += yyleng; return INCLUDE;   }
 is                                 { yycol += yyleng; return IS;        }
 object                             { yycol += yyleng; return OBJECT;    }
 with                               { yycol += yyleng; return WITH;      }
@@ -30,6 +31,7 @@ as                                 { yycol += yyleng; return AS;        }
 use                                { yycol += yyleng; return USE;       }
 array                              { yycol += yyleng; return ARRAY;     }
 of                                 { yycol += yyleng; return OF;        }
+select                             { yycol += yyleng; return SELECT;    }
 =>                                 { yycol += yyleng; return FATARROW;  }
 "("                                { yycol += yyleng; return OPAREN;    }
 ")"                                { yycol += yyleng; return CPAREN;    }

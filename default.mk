@@ -108,14 +108,6 @@ install: all ${PROGS:=-install} ${MAN:=-install}
 snmk-libdeps:
 	@echo ${LIBADD}
 
-snmk-update:
-	@echo " ==> Updating to the most recent version of SN Makefiles"
-	curl -L -O --url 'https://gitlab.com/herrhotzenplotz/makefile-template/-/raw/trunk/default.mk'
-	curl -L -O --url 'https://gitlab.com/herrhotzenplotz/makefile-template/-/raw/trunk/autodetect.sh'
-	@echo " ==> Updated. Rebuilding everything..."
-	${MAKE} clean
-	${MAKE} all
-
 check: Makefile config.mk
 	${MAKE} do-test
 

@@ -34,5 +34,4 @@ pgen: src/pgen/parser.o src/pgen/lexer.o src/pgen/dump_c.o src/pgen/dump_plain.o
 
 .PHONY: pgen-clean
 pgen-clean:
-	${RM} -f y.tab.h src/pgen/parser.c src/pgen/lexer.c \
-		src/pgen/parser.o src/pgen/lexer.o pgen
+	-${RM} -f y.tab.h src/pgen/parser.c src/pgen/lexer.c src/pgen/parser.o src/pgen/lexer.o pgen

@@ -8,6 +8,6 @@ parser github_issue
 is object of gcli_issue
 with
    ("title"  => title as sv,
-	"user"   => user as sv use parse_user,
-	"id"     => id as int,
+	"user"   => author as user_sv,
+	"number" => number as int,
 	"labels" => labels as array of github_label use parse_github_label);

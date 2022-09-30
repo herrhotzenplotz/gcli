@@ -194,3 +194,6 @@
 /templates/github/checks.c
 /templates/github/checks.o
 /templates/github/checks.t~
+/templates/github/releases.c
+/templates/github/releases.o
+/templates/github/releases.t~

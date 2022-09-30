@@ -188,3 +188,6 @@
 /templates/github/pulls.c
 /templates/github/pulls.o
 /templates/github/pulls.t~
+/templates/github/labels.c
+/templates/github/labels.o
+/templates/github/labels.t~

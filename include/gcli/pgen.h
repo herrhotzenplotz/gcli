@@ -14,7 +14,7 @@ extern char *outfilename;
 struct strlit { char *text; };
 struct ident { char *text; };
 struct objentry {
-    enum { OBJENTRY_SIMPLE, OBJENTRY_ARRAY } kind; /* either a simple field or an array */
+    enum { OBJENTRY_SIMPLE, OBJENTRY_ARRAY, OBJENTRY_CONTINUATION } kind; /* either a simple field or an array */
     char            *jsonname;
     char			*name;
     char			*type;

@@ -37,7 +37,7 @@ select                             { yycol += yyleng; return SELECT;    }
 ")"                                { yycol += yyleng; return CPAREN;    }
 ";"                                { yycol += yyleng; return SEMICOLON; }
 ","                                { yycol += yyleng; return COMMA;     }
-[A-Za-z][A-Za-z0-9_]*              {
+[A-Za-z][A-Za-z0-9_*]*             {
 									   yycol += yyleng;
 									   yylval.ident.text = strdup(yytext);
 									   return IDENT;

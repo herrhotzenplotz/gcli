@@ -2,7 +2,8 @@ include "gcli/issues.h";
 include "gcli/labels.h";
 include "gcli/json_util.h";
 
-parser github_label is object of sn_sv select "name" as sv;
+include "templates/github/labels.h";
+
 parser github_assignee is object of sn_sv select "name" as sv;
 
 parser github_issue

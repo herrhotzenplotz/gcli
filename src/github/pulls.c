@@ -39,36 +39,6 @@
 
 #include <templates/github/pulls.h>
 
-/* Forward declaration */
-static void github_pull_parse_summary(
-    json_stream       *input,
-    gcli_pull_summary *out);
-
-static char *
-get_branch_label(json_stream *input)
-{
-    enum json_type  key_type;
-    char           *label = NULL;
-
-    if (json_next(input) != JSON_OBJECT)
-        errx(1, "expected branch object");
-
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t          len        = 0;
-        const char     *key        = json_get_string(input, &len);
-
-        if (strncmp("label", key, len) == 0)
-            label = get_string(input);
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
-
-    if (key_type != JSON_OBJECT_END)
-        errx(1, "unexpected key type in branch object");
-
-    return label;
-}
-
 int
 github_get_prs(
     const char  *owner,
@@ -278,7 +248,7 @@ github_perform_submit_pr(gcli_submit_pull_options opts)
      * with one request. */
     if (opts.labels_size) {
         json_open_buffer(&json, fetch_buffer.data, fetch_buffer.length);
-        github_pull_parse_summary(&json, &pull);
+        parse_github_pull_summary(&json, &pull);
 
         /* HACK: the string in the string view is passed from the
          *       command line and is thus null-terminated. We don't
@@ -301,80 +271,6 @@ github_perform_submit_pr(gcli_submit_pull_options opts)
     free(url);
 }
 
-static void
-github_parse_commit_author_field(json_stream *input, gcli_commit *it)
-{
-    enum json_type  key_type;
-    const char     *key;
-
-    json_next(input);
-
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t len;
-        key = json_get_string(input, &len);
-
-        if (strncmp(key, "name", len) == 0)
-            it->author = get_string(input);
-        else if (strncmp(key, "email", len) == 0)
-            it->email = get_string(input);
-        else if (strncmp(key, "date", len) == 0)
-            it->date = get_string(input);
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
-
-    if (key_type != JSON_OBJECT_END)
-        errx(1, "Unexpected non-string object key");
-}
-
-static void
-github_parse_commit_commit_field(json_stream *input, gcli_commit *it)
-{
-    enum json_type  key_type;
-    const char     *key;
-
-    json_next(input);
-
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t len;
-        key = json_get_string(input, &len);
-
-        if (strncmp(key, "message", len) == 0)
-            it->message = get_string(input);
-        else if (strncmp(key, "author", len) == 0)
-            github_parse_commit_author_field(input, it);
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
-
-    if (key_type != JSON_OBJECT_END)
-        errx(1, "Unexpected non-string object key");
-}
-
-static void
-github_parse_commit(json_stream *input, gcli_commit *it)
-{
-    enum json_type  key_type;
-    const char     *key;
-
-    json_next(input);
-
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t len;
-        key = json_get_string(input, &len);
-
-        if (strncmp(key, "sha", len) == 0)
-            it->sha = get_string(input);
-        else if (strncmp(key, "commit", len) == 0)
-            github_parse_commit_commit_field(input, it);
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
-
-    if (key_type != JSON_OBJECT_END)
-        errx(1, "Unexpected non-string object key");
-}
-
 int
 github_get_pull_commits(
     const char   *owner,
@@ -386,7 +282,7 @@ github_get_pull_commits(
     char              *next_url    = NULL;
     char              *e_owner     = NULL;
     char              *e_repo      = NULL;
-    int                count       = 0;
+    size_t             count       = 0;
     json_stream        stream      = {0};
     gcli_fetch_buffer  json_buffer = {0};
 
@@ -401,19 +297,8 @@ github_get_pull_commits(
     do {
         gcli_fetch(url, &next_url, &json_buffer);
         json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-        json_set_streaming(&stream, true);
 
-        enum json_type next_token = json_next(&stream);
-
-        while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
-            if (next_token != JSON_OBJECT)
-                errx(1, "Unexpected non-object in commit list");
-
-            *out = realloc(*out, (count + 1) * sizeof(gcli_commit));
-            gcli_commit *it = &(*out)[count];
-            github_parse_commit(&stream, it);
-            count += 1;
-        }
+        parse_github_commits(&stream, out, &count);
 
         json_close(&stream);
         free(json_buffer.data);
@@ -423,86 +308,7 @@ github_get_pull_commits(
     free(e_owner);
     free(e_repo);
 
-    return count;
-}
-
-static void
-github_parse_pull_head(json_stream *input, gcli_pull_summary *out)
-{
-    enum json_type  key_type;
-    const char     *key;
-
-    json_next(input);
-
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t len;
-        key = json_get_string(input, &len);
-        if (strncmp("sha", key, len) == 0)
-            out->head_sha = get_string(input);
-        else if (strncmp("label", key, len) == 0)
-            out->head_label = get_string(input);
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
-
-    if (key_type != JSON_OBJECT_END)
-        errx(1, "Unexpected object key type");
-}
-
-static void
-github_pull_parse_summary(json_stream *input, gcli_pull_summary *out)
-{
-    enum json_type  key_type;
-    const char     *key;
-
-    json_next(input);
-
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t len;
-        key = json_get_string(input, &len);
-
-        if (strncmp("title", key, len) == 0)
-            out->title = get_string(input);
-        else if (strncmp("state", key, len) == 0)
-            out->state = get_string(input);
-        else if (strncmp("body", key, len) == 0)
-            out->body = get_string(input);
-        else if (strncmp("created_at", key, len) == 0)
-            out->created_at = get_string(input);
-        else if (strncmp("number", key, len) == 0)
-            out->number = get_int(input);
-        else if (strncmp("id", key, len) == 0)
-            out->id = get_int(input);
-        else if (strncmp("commits", key, len) == 0)
-            out->commits = get_int(input);
-        else if (strncmp("labels", key, len) == 0)
-            out->labels_size = gcli_read_label_list(input, &out->labels);
-        else if (strncmp("comments", key, len) == 0)
-            out->comments = get_int(input);
-        else if (strncmp("additions", key, len) == 0)
-            out->additions = get_int(input);
-        else if (strncmp("deletions", key, len) == 0)
-            out->deletions = get_int(input);
-        else if (strncmp("changed_files", key, len) == 0)
-            out->changed_files = get_int(input);
-        else if (strncmp("merged", key, len) == 0)
-            out->merged = get_bool(input);
-        else if (strncmp("mergeable", key, len) == 0)
-            out->mergeable = get_bool(input);
-        else if (strncmp("draft", key, len) == 0)
-            out->draft = get_bool(input);
-        else if (strncmp("user", key, len) == 0)
-            out->author = get_user(input);
-        else if (strncmp("head", key, len) == 0)
-            github_parse_pull_head(input, out);
-        else if (strncmp("base", key, len) == 0)
-            out->base_label = get_branch_label(input);
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
-
-    if (key_type != JSON_OBJECT_END)
-        errx(1, "Unexpected object key type");
+    return (int)count;
 }
 
 void
@@ -528,9 +334,9 @@ github_get_pull_summary(
     gcli_fetch(url, NULL, &json_buffer);
 
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-    json_set_streaming(&stream, true);
 
-    github_pull_parse_summary(&stream, out);
+    parse_github_pull_summary(&stream, out);
+
     json_close(&stream);
     free(url);
     free(e_owner);

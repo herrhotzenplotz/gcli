@@ -91,6 +91,8 @@ objparser_dump_entries(struct objparser *p)
         } else if (it->kind == OBJENTRY_ARRAY) {
             fprintf(outfile, "\t\t\tparse_%s_%s_array(stream, out);\n",
                     p->name, it->name);
+        } else if (it->kind == OBJENTRY_CONTINUATION) {
+            fprintf(outfile, "\t\t\t%s(stream, out);\n", it->parser);
         }
         fprintf(outfile, "\t\telse ");
     }

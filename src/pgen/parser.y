@@ -118,6 +118,12 @@ obj_entry:		STRLIT FATARROW IDENT AS IDENT
 					$$.type		= $7.text;
 					$$.parser	= $9.text;
 				}
+		|		STRLIT FATARROW USE IDENT
+				{
+					$$.jsonname = $1.text;
+					$$.kind		= OBJENTRY_CONTINUATION;
+					$$.parser	= $4.text;
+				}
 		;
 %%
 

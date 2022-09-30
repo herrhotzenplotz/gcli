@@ -229,6 +229,7 @@ build_pgen()
 		y.tab.c \
 		lex.yy.c \
 		src/pgen/dump_c.c \
+		src/pgen/dump_h.c \
 		src/pgen/dump_plain.c \
 		${LDFLAGS}
 	${RM} -f lex.yy.c y.tab.h y.tab.c

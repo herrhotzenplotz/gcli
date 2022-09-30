@@ -179,3 +179,4 @@
 /tests/github-tests.o
 /tests/json-escape.o
 /tests/url-encode.o
+/gen/

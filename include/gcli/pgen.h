@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 /* PGen command line options */
-enum { DUMP_PLAIN = 0, DUMP_C = 1 };
+enum { DUMP_PLAIN = 0, DUMP_C = 1, DUMP_H = 2 };
 extern int   dumptype;
 extern FILE *outfile;
 extern char *outfilename;
@@ -37,14 +37,17 @@ void yyerror(const char *message);
 
 /* Functions to dump data before starting the actual parser */
 void header_dump_c(void);
+void header_dump_h(void);
 
 /* Functions called while parsing */
 void objparser_dump_c(struct objparser *);
+void objparser_dump_h(struct objparser *);
 void objparser_dump_plain(struct objparser *);
 
 void include_dump_c(const char *);
+void include_dump_h(const char *);
 
 /* Functions called after parsing */
-/* <none yet> */
+void footer_dump_h(void);
 
 #endif /* PGEN_H */

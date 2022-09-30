@@ -131,6 +131,12 @@ struct {
 		.dump_header	= header_dump_c,
 		.dump_objparser = objparser_dump_c,
 		.dump_include	= include_dump_c,
+	},
+	[DUMP_H] = {
+		.dump_header = header_dump_h,
+		.dump_objparser = objparser_dump_h,
+		.dump_include = include_dump_h,
+		.dump_footer = footer_dump_h,
 	}
 };
 
@@ -198,6 +204,8 @@ main(int argc, char *argv[])
 				dumptype = DUMP_PLAIN;
 			else if (strcmp(optarg, "c") == 0)
 				dumptype = DUMP_C;
+			else if (strcmp(optarg, "h") == 0)
+				dumptype = DUMP_H;
 			else
 				errx(1, "invalid dump type %s", optarg);
 		} break;

@@ -35,35 +35,9 @@
 #include <gcli/curl.h>
 #include <gcli/json_util.h>
 
+#include <templates/github/checks.h>
+
 #include <pdjson/pdjson.h>
-
-static void
-github_parse_check(struct json_stream *input, gcli_github_check *it)
-{
-    if (json_next(input) != JSON_OBJECT)
-        errx(1, "Expected Check Object");
-
-    while (json_next(input) == JSON_STRING) {
-        size_t      len = 0;
-        const char *key = json_get_string(input, &len);
-
-        if (strncmp("name", key, len) == 0)
-            it->name = get_string(input);
-        else if (strncmp("status", key, len) == 0)
-            it->status = get_string(input);
-        else if (strncmp("conclusion", key, len) == 0)
-            it->conclusion = get_string(input);
-        else if (strncmp("started_at", key, len) == 0)
-            it->started_at = get_string(input);
-        else if (strncmp("completed_at", key, len) == 0)
-            it->completed_at = get_string(input);
-        else if (strncmp("id", key, len) == 0)
-            it->id = get_int(input);
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
-
-}
 
 int
 github_get_checks(
@@ -107,7 +81,7 @@ github_get_checks(
             it = &(*out)[out_size++];
 
             memset(it, 0, sizeof(*it));
-            github_parse_check(&stream, it);
+            parse_github_check(&stream, it);
 
             if (out_size == max) {
                 /* corner case: if this gets hit, we would never free

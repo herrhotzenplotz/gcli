@@ -7,5 +7,4 @@ clean:
 	@echo "If you run build.sh or make it will rebuild anyways."
 
 check:
-	./build.sh
-	${MAKE} -Ctests
+	./build.sh check

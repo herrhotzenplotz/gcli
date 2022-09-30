@@ -253,7 +253,7 @@ transpile()
 ########################################################################
 # Basic Build procedures
 ########################################################################
-main()
+build()
 {
 	configure
 	build_pgen
@@ -281,5 +281,38 @@ main()
 SRCS="src/*.c src/github/*.c src/gitlab/*.c src/gitea/*.c thirdparty/pdjson/pdjson.c thirdparty/sn/sn.c"
 TEMPLATES="templates/github/*.t"
 
+build_test_program()
+{
+	info " > Building $1"
+	compile $1.c
+	info " > Linking $1"
+	LCMD="$CC $CFLAGS $CPPFLAGS -o $1 $1.o libgcli.a $LDFLAGS -latf-c"
+	info "    $LCMD"
+	$LCMD || die "Linker command failed"
+}
+
+build_test_programs()
+{
+	info "Building test programs"
+	build_test_program tests/github-tests
+	build_test_program tests/json-escape
+	build_test_program tests/url-encode
+}
+
 # Start it!
-main
+
+case $1 in
+	build|"")
+		build
+		;;
+	check)
+		build
+		build_test_programs
+		cd tests
+		kyua test || die "Tests failed"
+		cd ..
+		;;
+	*)
+		die "unknown subcommand"
+		;;
+esac

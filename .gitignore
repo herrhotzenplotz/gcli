@@ -176,3 +176,6 @@
 /templates/github/issues.o
 /src/pgen/lexer.c
 /src/pgen/parser.c
+/tests/github-tests.o
+/tests/json-escape.o
+/tests/url-encode.o

@@ -245,7 +245,7 @@ compile()
 
 transpile_c()
 {
-	info " > Transpiling $1... into C"
+	info " > Transpiling $1 into C..."
 	TCMD="./pgen -tc -o ${1%.t}.c $1"
 	info "   $TCMD"
 	$TCMD || die "pgen command failed"
@@ -309,7 +309,6 @@ build_test_program()
 build_test_programs()
 {
 	info "Building test programs"
-	build_test_program tests/github-tests
 	build_test_program tests/json-escape
 	build_test_program tests/url-encode
 	build_test_program tests/pgen-tests

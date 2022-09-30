@@ -37,6 +37,8 @@
 
 #include <pdjson/pdjson.h>
 
+#include <templates/github/pulls.h>
+
 /* Forward declaration */
 static void github_pull_parse_summary(
     json_stream       *input,
@@ -67,34 +69,6 @@ get_branch_label(json_stream *input)
     return label;
 }
 
-static void
-parse_pull_entry(json_stream *input, gcli_pull *it)
-{
-    if (json_next(input) != JSON_OBJECT)
-        errx(1, "Expected Issue Object");
-
-    enum json_type key_type;
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t      len = 0;
-        const char *key = json_get_string(input, &len);
-
-        if (strncmp("title", key, len) == 0)
-            it->title = get_string(input);
-        else if (strncmp("state", key, len) == 0)
-            it->state = get_string(input);
-        else if (strncmp("number", key, len) == 0)
-            it->number = get_int(input);
-        else if (strncmp("id", key, len) == 0)
-            it->id = get_int(input);
-        else if (strncmp("merged_at", key, len) == 0)
-            it->merged = json_next(input) == JSON_STRING;
-        else if (strncmp("user", key, len) == 0)
-            it->creator = get_user(input);
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
-}
-
 int
 github_get_prs(
     const char  *owner,
@@ -103,7 +77,7 @@ github_get_prs(
     int          max,
     gcli_pull  **out)
 {
-    int                count       = 0;
+    size_t             count       = 0;
     json_stream        stream      = {0};
     gcli_fetch_buffer  json_buffer = {0};
     char              *url         = NULL;
@@ -123,31 +97,8 @@ github_get_prs(
         gcli_fetch(url, &next_url, &json_buffer);
 
         json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-        json_set_streaming(&stream, true);
 
-        enum json_type next_token = json_next(&stream);
-
-        while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
-
-            switch (next_token) {
-            case JSON_ERROR:
-                errx(1, "Parser error: %s", json_get_error(&stream));
-                break;
-            case JSON_OBJECT: {
-                *out = realloc(*out, sizeof(gcli_pull) * (count + 1));
-                gcli_pull *it = &(*out)[count];
-                memset(it, 0, sizeof(gcli_pull));
-                parse_pull_entry(&stream, it);
-                count += 1;
-            } break;
-            default:
-                errx(1, "Unexpected json type in response");
-                break;
-            }
-
-            if (count == max)
-                break;
-        }
+        parse_github_pulls(&stream, out, &count);
 
         free(json_buffer.data);
         free(url);
@@ -158,7 +109,7 @@ github_get_prs(
     free(e_owner);
     free(e_repo);
 
-    return count;
+    return (int)count;
 }
 
 void

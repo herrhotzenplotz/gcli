@@ -185,3 +185,6 @@
 /templates/github/forks.o
 /templates/github/forks.c
 /templates/github/forks.t~
+/templates/github/pulls.c
+/templates/github/pulls.o
+/templates/github/pulls.t~

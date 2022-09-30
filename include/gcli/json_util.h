@@ -46,6 +46,7 @@
 #define get_sv(input)        get_sv_(input, __func__)
 #define get_user(input)      get_user_(input, __func__)
 #define get_label(input)     get_label_(input, __func__)
+#define get_is_string(input) (json_next(input) == JSON_STRING)
 
 long        get_int_(json_stream *input, const char *function);
 double      get_double_(json_stream *input, const char *function);

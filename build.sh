@@ -34,8 +34,7 @@ find_program()
 			return
 		fi
 	done
-
-	die "Could not find $PROGNAME"
+	exit 1
 }
 
 #####################################################
@@ -168,10 +167,10 @@ find_curl()
 
 configure()
 {
-	[ "x$YACC" != "x" ] || YACC=`find_program yacc yacc byacc bison`
-	[ "x$LEX" != "x" ] || LEX=`find_program lex flex lex`
-	[ "x$RM" != "x" ] || RM=`find_program rm rm`
-	[ "x$AR" != "x" ] || AR=`find_program ar ar`
+	[ "x$YACC" != "x" ] || YACC=`find_program yacc yacc byacc bison` || die "Could not find yacc"
+	[ "x$LEX" != "x" ] || LEX=`find_program lex flex lex` || die "Could not find lex"
+	[ "x$RM" != "x" ] || RM=`find_program rm rm` || die "Could not find rm"
+	[ "x$AR" != "x" ] || AR=`find_program ar ar` || die "Could not find ar"
 
 	c_compiler
 	compiler_flags

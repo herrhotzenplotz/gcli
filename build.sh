@@ -275,20 +275,26 @@ build()
 	for TFILE in $TEMPLATES; do
 		transpile_c $TFILE
 		transpile_h $TFILE
-		SRCS="${TFILE%.t}.c ${SRCS}"
+	done
+
+	for TFILE in $TEMPLATES; do
+		compile "${TFILE%.t}.c"
 	done
 
 	for CFILE in $SRCS; do
 		compile $CFILE
 	done
 
+	TOBJS="`for TFILE in $TEMPLATES; do printf \"${TFILE%.t}.o \"; done`"
+	SOBJS="`for SRC in $SRCS; do [ $SRC = src/gcli.c ] || printf \"${SRC%.c}.o \"; done`"
+
 	info " > Archiving libgcli.a"
-	ARCMD="$AR -rc libgcli.a `for SRC in $SRCS; do [ $SRC = src/gcli.c ] || printf \"${SRC%.c}.o \"; done`"
+	ARCMD="$AR -rc libgcli.a $TOBJS $SOBJS"
 	info "    $ARCMD"
 	$ARCMD || die "Archiver command failed"
 
 	info " > Linking gcli"
-	LCMD="$CC $CFLAGS $CPPFLAGS -o gcli src/gcli.o libgcli.a ${LDFLAGS}"
+	LCMD="$CC $CFLAGS $CPPFLAGS -o gcli $TOBJS $SOBJS src/gcli.o ${LDFLAGS}"
 	info "   $LCMD"
 	$LCMD || die "Linker command failed"
 }

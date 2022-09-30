@@ -166,7 +166,6 @@ arrayparser_dump_c(struct arrayparser *p)
     fprintf(outfile, "\t}\n\n");
 
     fprintf(outfile, "\tassert(json_next(stream) == JSON_ARRAY_END);\n");
-    fprintf(outfile, "\treturn;\n");
     fprintf(outfile, "}\n\n");
 }
 

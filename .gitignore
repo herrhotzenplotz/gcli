@@ -182,3 +182,6 @@
 /gen/
 /tests/pgen-tests
 /tests/pgen-tests.o
+/templates/github/forks.o
+/templates/github/forks.c
+/templates/github/forks.t~

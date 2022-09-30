@@ -33,6 +33,12 @@ struct objparser {
     } select;
 };
 
+struct arrayparser {
+    char *name;
+    char *returntype;
+    char *parser;
+};
+
 void yyerror(const char *message);
 
 /* Functions to dump data before starting the actual parser */
@@ -43,6 +49,9 @@ void header_dump_h(void);
 void objparser_dump_c(struct objparser *);
 void objparser_dump_h(struct objparser *);
 void objparser_dump_plain(struct objparser *);
+
+void arrayparser_dump_c(struct arrayparser *);
+void arrayparser_dump_h(struct arrayparser *);
 
 void include_dump_c(const char *);
 void include_dump_h(const char *);

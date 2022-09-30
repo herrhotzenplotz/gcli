@@ -8,6 +8,7 @@ char	*outfilename = NULL;
 int		 dumptype	 = 0;
 
 static void objparser_dump(struct objparser *);
+static void arrayparser_dump(struct arrayparser *);
 static void include_dump(const char *);
 static void header_dump(void);
 static void footer_dump(void);
@@ -23,6 +24,7 @@ static void footer_dump(void);
 	struct objentry		objentry;
 	struct objentry     *objentries;
 	struct objparser    objparser;
+	struct arrayparser  arrayparser;
 }
 
 %token	<strlit>		STRLIT
@@ -32,6 +34,8 @@ static void footer_dump(void);
 %type	<objentries>	obj_entries
 %type	<objparser>		objparser
 
+%type	<arrayparser>	arrayparser;
+
 %%
 input:			instruction input
 		|
@@ -40,6 +44,10 @@ input:			instruction input
 instruction:	objparser SEMICOLON
 				{
 					objparser_dump(&($1));
+				}
+		|		arrayparser SEMICOLON
+				{
+					arrayparser_dump(&($1));
 				}
 		|		INCLUDE STRLIT SEMICOLON
 				{
@@ -61,6 +69,14 @@ objparser:		PARSER IDENT IS OBJECT OF IDENT WITH OPAREN obj_entries CPAREN
 					$$.returntype = $6.text;
 					$$.select.fieldname = $8.text;
 					$$.select.fieldtype = $10.text;
+				}
+		;
+
+arrayparser:	PARSER IDENT IS ARRAY OF IDENT USE IDENT
+				{
+					$$.name = $2.text;
+					$$.returntype = $6.text;
+					$$.parser = $8.text;
 				}
 		;
 
@@ -122,21 +138,24 @@ struct {
 	void (*dump_header)(void);
 	void (*dump_footer)(void);
 	void (*dump_objparser)(struct objparser *);
+	void (*dump_arrayparser)(struct arrayparser *);
 	void (*dump_include)(const char *);
 } dumpers[] = {
 	[DUMP_PLAIN] = {
 		.dump_objparser = objparser_dump_plain
 	},
 	[DUMP_C] = {
-		.dump_header	= header_dump_c,
-		.dump_objparser = objparser_dump_c,
-		.dump_include	= include_dump_c,
+		.dump_header	  = header_dump_c,
+		.dump_objparser	  = objparser_dump_c,
+		.dump_include	  = include_dump_c,
+		.dump_arrayparser = arrayparser_dump_c,
 	},
 	[DUMP_H] = {
-		.dump_header = header_dump_h,
-		.dump_objparser = objparser_dump_h,
-		.dump_include = include_dump_h,
-		.dump_footer = footer_dump_h,
+		.dump_header	  = header_dump_h,
+		.dump_objparser	  = objparser_dump_h,
+		.dump_include	  = include_dump_h,
+		.dump_footer	  = footer_dump_h,
+		.dump_arrayparser = arrayparser_dump_h,
 	}
 };
 
@@ -148,6 +167,15 @@ objparser_dump(struct objparser *p)
 		dumpers[dumptype].dump_objparser(p);
 	else
 		yyerror("internal error: don't know how to dump an object parser");
+}
+
+static void
+arrayparser_dump(struct arrayparser *p)
+{
+	if (dumpers[dumptype].dump_arrayparser)
+		dumpers[dumptype].dump_arrayparser(p);
+	else
+		yyerror("internal error: don't know how to dump an array parser");
 }
 
 static void

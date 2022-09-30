@@ -92,3 +92,10 @@ footer_dump_h(void)
 
     free(hname);
 }
+
+void
+arrayparser_dump_h(struct arrayparser *p)
+{
+    fprintf(outfile, "size_t parse_%s(struct json_stream *, %s **out, size_t *out_size);\n",
+            p->name, p->returntype);
+}

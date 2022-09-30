@@ -139,6 +139,38 @@ objparser_dump_c(struct objparser *p)
 }
 
 void
+arrayparser_dump_c(struct arrayparser *p)
+{
+    fprintf(outfile,
+            "void\n"
+            "parse_%s(struct json_stream *stream, %s **out, size_t *out_size)\n",
+            p->name, p->returntype);
+    fprintf(outfile, "{\n");
+    fprintf(outfile, "\tif (json_peek(stream) == JSON_NULL) {\n");
+    fprintf(outfile, "\t\tjson_next(stream);\n");
+    fprintf(outfile, "\t\t*out = NULL;\n");
+    fprintf(outfile, "\t\t*out_size = 0;\n");
+    fprintf(outfile, "\t\treturn;\n");
+    fprintf(outfile, "\t}\n\n");
+
+    fprintf(outfile, "\tif (json_next(stream) != JSON_ARRAY)\n");
+    fprintf(outfile, "\t\terrx(1, \"Expected array of %s array in parse_%s\");\n\n",
+            p->returntype, p->name);
+
+    fprintf(outfile, "\twhile (json_peek(stream) != JSON_ARRAY_END) {\n");
+    fprintf(outfile, "\t\t%s *it;\n", p->returntype);
+    fprintf(outfile, "\t\t*out = realloc(*out, sizeof(**out) * (*out_size + 1));\n");
+    fprintf(outfile, "\t\tit = &(*out)[(*out_size)++];\n");
+    fprintf(outfile, "\t\tmemset(it, 0, sizeof(*it));\n");
+    fprintf(outfile, "\t\t%s(stream, it);\n", p->parser);
+    fprintf(outfile, "\t}\n\n");
+
+    fprintf(outfile, "\tassert(json_next(stream) == JSON_ARRAY_END);\n");
+    fprintf(outfile, "\treturn;\n");
+    fprintf(outfile, "}\n\n");
+}
+
+void
 include_dump_c(const char *file)
 {
     fprintf(outfile, "#include <%s>\n", file);

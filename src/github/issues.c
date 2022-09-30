@@ -46,7 +46,7 @@ github_get_issues(
     int          max,
     gcli_issue **out)
 {
-    int                count       = 0;
+    size_t             count       = 0;
     json_stream        stream      = {0};
     gcli_fetch_buffer  json_buffer = {0};
     char              *url         = NULL;
@@ -67,30 +67,8 @@ github_get_issues(
         gcli_fetch(url, &next_url, &json_buffer);
 
         json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-        json_set_streaming(&stream, true);
 
-        enum json_type next_token = json_next(&stream);
-
-        while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
-            switch (next_token) {
-            case JSON_ERROR:
-                errx(1, "Parser error: %s", json_get_error(&stream));
-                break;
-            case JSON_OBJECT: {
-                *out = realloc(*out, sizeof(gcli_issue) * (count + 1));
-                gcli_issue *it = &(*out)[count];
-                memset(it, 0, sizeof(gcli_issue));
-                parse_github_issue(&stream, it);
-                count += 1;
-            } break;
-            default:
-                errx(1, "Unexpected json type in response");
-                break;
-            }
-
-            if (count == max)
-                break;
-        }
+        parse_github_issues(&stream, out, &count);
 
         free(json_buffer.data);
         free(url);
@@ -105,7 +83,7 @@ github_get_issues(
     free(e_owner);
     free(e_repo);
 
-    return count;
+    return (int)count;
 }
 
 void

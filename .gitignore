@@ -180,3 +180,5 @@
 /tests/json-escape.o
 /tests/url-encode.o
 /gen/
+/tests/pgen-tests
+/tests/pgen-tests.o

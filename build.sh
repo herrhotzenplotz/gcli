@@ -238,15 +238,23 @@ build_pgen()
 compile()
 {
 	info " > Compiling $1..."
-	CCMD="$CC $CFLAGS $CPPFLAGS -Iinclude -Ithirdparty -c -o ${1%.c}.o $1"
+	CCMD="$CC $CFLAGS $CPPFLAGS -Igen -Iinclude -Ithirdparty -c -o ${1%.c}.o $1"
 	info "   $CCMD"
 	$CCMD || die "Compilation command failed"
 }
 
-transpile()
+transpile_c()
 {
-	info " > Transpiling $1..."
+	info " > Transpiling $1... into C"
 	TCMD="./pgen -tc -o ${1%.t}.c $1"
+	info "   $TCMD"
+	$TCMD || die "pgen command failed"
+}
+
+transpile_h()
+{
+	info " > Generating C Header from $1..."
+	TCMD="./pgen -th -o gen/${1%.t}.h $1"
 	info "   $TCMD"
 	$TCMD || die "pgen command failed"
 }
@@ -259,8 +267,14 @@ build()
 	configure
 	build_pgen
 
+	GENDIRS="gen/templates/github gen/templates/gitlab gen/templates/gitea"
+	for DIR in $GENDIRS; do
+		[ -d $DIR ] || mkdir -p $DIR
+	done
+
 	for TFILE in $TEMPLATES; do
-		transpile $TFILE
+		transpile_c $TFILE
+		transpile_h $TFILE
 		SRCS="${TFILE%.t}.c ${SRCS}"
 	done
 
@@ -298,6 +312,7 @@ build_test_programs()
 	build_test_program tests/github-tests
 	build_test_program tests/json-escape
 	build_test_program tests/url-encode
+	build_test_program tests/pgen-tests
 }
 
 # Start it!

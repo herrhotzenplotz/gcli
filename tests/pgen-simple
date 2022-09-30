@@ -79,7 +79,7 @@ EOF
 atf_test_case simple_issue
 simple_issue_head()
 {
-	atf_set "descr" "generate a parser for a simple github issue and run it on a sample data set"
+	atf_set "descr" "generate a parser for a simple github issue and compile it"
 }
 simple_issue_body()
 {
@@ -100,6 +100,24 @@ simple_issue_body()
 
 ########################################################################
 #
+atf_test_case parse_simple_issue
+parse_simple_issue_head()
+{
+	atf_set "descr" "run a precompiled issue parser over a sample dataset"
+}
+parse_simple_issue_body()
+{
+	SRCDIR=$(atf_get_srcdir)
+	TMPFILE=$(mktemp)
+	$SRCDIR/pgen-tests < $SRCDIR/samples/github_simple_issue.json > $TMPFILE \
+		|| atf_fail "Parse Step failed"
+	diff -u $SRCDIR/samples/parse_simple_issue.dump $TMPFILE \
+		|| atf_fail "Unexpected output of parser"
+	rm -f $TMPFILE
+}
+
+########################################################################
+#
 atf_init_test_cases()
 {
 	PGEN=$(atf_get_srcdir)/../pgen
@@ -109,5 +127,6 @@ atf_init_test_cases()
 	atf_add_test_case simple_object_no_entries
 	atf_add_test_case simple_object_trailing_comma
 	atf_add_test_case simple_issue
+	atf_add_test_case parse_simple_issue
 }
 ########################################################################

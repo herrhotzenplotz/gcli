@@ -171,6 +171,7 @@ configure()
 	[ "x$YACC" != "x" ] || YACC=`find_program yacc yacc byacc bison`
 	[ "x$LEX" != "x" ] || LEX=`find_program lex flex lex`
 	[ "x$RM" != "x" ] || RM=`find_program rm rm`
+	[ "x$AR" != "x" ] || AR=`find_program ar ar`
 
 	c_compiler
 	compiler_flags
@@ -267,8 +268,13 @@ main()
 		compile $CFILE
 	done
 
+	info " > Archiving libgcli.a"
+	ARCMD="$AR -rc libgcli.a `for SRC in $SRCS; do [ $SRC = src/gcli.c ] || printf \"${SRC%.c}.o \"; done`"
+	info "    $ARCMD"
+	$ARCMD || die "Archiver command failed"
+
 	info " > Linking gcli"
-	LCMD="$CC $CFLAGS $CPPFLAGS -o gcli `for SRC in $SRCS; do printf \"${SRC%.c}.o \"; done` ${LDFLAGS}"
+	LCMD="$CC $CFLAGS $CPPFLAGS -o gcli src/gcli.o libgcli.a ${LDFLAGS}"
 	info "   $LCMD"
 	$LCMD || die "Linker command failed"
 }

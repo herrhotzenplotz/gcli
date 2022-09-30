@@ -22,8 +22,8 @@ find_program()
 {
 	PROGNAME=$1
 
-	shift
 	while :; do
+		shift
 		if [ x$1 = x ]; then
 			break
 		fi

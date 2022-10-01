@@ -33,28 +33,7 @@
 
 #include <pdjson/pdjson.h>
 
-static void
-github_parse_label(struct json_stream *input, gcli_label *out)
-{
-    if (json_next(input) != JSON_OBJECT)
-        errx(1, "Expected Issue Object");
-
-    while (json_next(input) == JSON_STRING) {
-        size_t      len = 0;
-        const char *key = json_get_string(input, &len);
-
-        if (strncmp("id", key, len) == 0)
-            out->id = get_int(input);
-        else if (strncmp("name", key, len) == 0)
-            out->name = get_string(input);
-        else if (strncmp("description", key, len) == 0)
-            out->description = get_string(input);
-        else if (strncmp("color", key, len) == 0)
-            out->color = get_github_style_color(input);
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
-}
+#include <templates/github/labels.h>
 
 size_t
 github_get_labels(
@@ -80,21 +59,8 @@ github_get_labels(
 
         gcli_fetch(url, &next_url, &buffer);
         json_open_buffer(&stream, buffer.data, buffer.length);
-        json_set_streaming(&stream, 1);
 
-        next = json_next(&stream);
-        if (next != JSON_ARRAY)
-            errx(1, "error: expected array of labels");
-
-        while (json_peek(&stream) != JSON_ARRAY_END) {
-            gcli_label *it = NULL;
-
-            *out = realloc(*out, sizeof(gcli_label) * (out_size + 1));
-            it = &(*out)[out_size++];
-
-            memset(it, 0, sizeof(*it));
-            github_parse_label(&stream, it);
-        }
+        parse_github_labels(&stream, out, &out_size);
 
         json_close(&stream);
         free(url);
@@ -146,7 +112,7 @@ github_create_label(
 
     gcli_fetch_with_method("POST", url, data, NULL, &buffer);
     json_open_buffer(&stream, buffer.data, buffer.length);
-    github_parse_label(&stream, label);
+    parse_github_label(&stream, label);
 
     json_close(&stream);
     free(url);

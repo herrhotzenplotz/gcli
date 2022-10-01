@@ -52,7 +52,7 @@ object of gcli_pull_summary with
 		"number" => number as int,
 		"id" => id as int,
 		"commits" => commits as int,
-		"labels" => labels as array of github_label use parse_github_label,
+		"labels" => labels as array of github_label use parse_github_label_text,
 		"comments" => comments as int,
 		"additions" => additions as int,
 		"deletions" => deletions as int,

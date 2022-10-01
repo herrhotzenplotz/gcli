@@ -200,3 +200,6 @@
 /templates/github/status.c
 /templates/github/status.o
 /templates/github/status.t~
+/templates/github/comments.c
+/templates/github/comments.o
+/templates/github/comments.t~

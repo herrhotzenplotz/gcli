@@ -46,6 +46,9 @@
 #define get_sv(input)        get_sv_(input, __func__)
 #define get_user(input)      get_user_(input, __func__)
 #define get_label(input)     get_label_(input, __func__)
+#define get_is_string(input) (json_next(input) == JSON_STRING)
+#define get_int_to_sv(input) (sn_sv_fmt("%ld", get_int(input)))
+
 
 long        get_int_(json_stream *input, const char *function);
 double      get_double_(json_stream *input, const char *function);
@@ -61,7 +64,8 @@ size_t      gcli_read_label_list(json_stream *, sn_sv **);
 size_t      gcli_read_user_list(json_stream *input, sn_sv **out);
 void        gcli_json_advance(json_stream *input, const char *fmt, ...);
 size_t      gcli_read_sv_list(json_stream *input, sn_sv **out);
-uint32_t    get_github_style_color(struct json_stream *input);
+uint32_t    get_github_style_color(json_stream *input);
+sn_sv       get_gitea_visibility(json_stream *input);
 
 static inline sn_sv
 get_user_sv(json_stream *input)

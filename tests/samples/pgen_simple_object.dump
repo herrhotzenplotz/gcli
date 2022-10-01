@@ -1,0 +1,5 @@
+object parser: name = github_issue, type = gcli_issue
+  entry: kind = array, jsonname = labels, name = labels, type = github_label, parser = parse_label
+  entry: kind = simple, jsonname = id, name = id, type = int, parser = (null)
+  entry: kind = simple, jsonname = user, name = user, type = sv, parser = parse_user
+  entry: kind = simple, jsonname = title, name = title, type = sv, parser = (null)

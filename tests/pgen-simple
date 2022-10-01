@@ -1,0 +1,132 @@
+#!/usr/bin/env atf-sh
+# -*- shell-script -*-
+
+########################################################################
+#
+atf_test_case simple_object
+simple_object_head()
+{
+	atf_set "descr" "Validate that we can parse a simple object"
+}
+simple_object_body()
+{
+	TMPFILE=$(mktemp)
+	cat <<EOF | ${PGEN} > $TMPFILE || atf_fail "parse failed"
+parser github_issue
+is object of gcli_issue
+with
+   ("title"  => title as sv,
+	"user"   => user as sv use parse_user,
+	"id"     => id as int,
+	"labels" => labels as array of github_label use parse_label);
+EOF
+
+	# Validate entries
+	diff -u $TMPFILE $(atf_get_srcdir)/samples/pgen_simple_object.dump \
+		|| atf_fail "unexpected parser dump"
+
+	rm -f $TMPFILE
+}
+
+########################################################################
+#
+atf_test_case simple_object_no_entries
+simple_object_no_entries_head()
+{
+	atf_set "descr" "fail on simple object with no entries"
+}
+simple_object_no_entries_body()
+{
+	atf_expect_fail "input is malformed"
+
+	TMPFILE=$(mktemp)
+	cat <<EOF | ${PGEN} > $TMPFILE || atf_fail "parse failed"
+parser github_issue
+is object of gcli_issue
+with
+   ();
+EOF
+}
+simple_object_no_entries_cleanup()
+{
+	rm -f $TMPFILE
+}
+
+
+########################################################################
+#
+atf_test_case simple_object_trailing_comma
+simple_object_trailing_comma_head()
+{
+	atf_set "descr" "fail on object with trailing comma in entry list"
+}
+simple_object_trailing_comma_body()
+{
+	atf_expect_fail "input is malformed"
+
+	TMPFILE=$(mktemp)
+	cat <<EOF | ${PGEN} > $TMPFILE || atf_fail "parse failed"
+parser github_issue
+is object of gcli_issue
+with
+   ("foo" => meh as string,
+   );
+EOF
+}
+
+########################################################################
+#
+atf_test_case simple_issue
+simple_issue_head()
+{
+	atf_set "descr" "generate a parser for a simple github issue and compile it"
+}
+simple_issue_body()
+{
+	BASEDIR=$(atf_get_srcdir)/samples
+	TMPLFILE=${BASEDIR}/github_issue.t
+	CFILE=github_issue.c
+	OFILE=${CFILE%.c}.o
+
+	${PGEN} -tc < ${TMPLFILE} > ${CFILE} || atf_fail "pgen step failed"
+	${CC} -c \
+		  -I$(atf_get_srcdir)/../include \
+		  -I$(atf_get_srcdir)/../thirdparty \
+		  -Werror \
+		  -o ${OFILE} \
+		  ${CFILE} \
+		|| atf_fail "Compiler step failed"
+}
+
+########################################################################
+#
+atf_test_case parse_simple_issue
+parse_simple_issue_head()
+{
+	atf_set "descr" "run a precompiled issue parser over a sample dataset"
+}
+parse_simple_issue_body()
+{
+	SRCDIR=$(atf_get_srcdir)
+	TMPFILE=$(mktemp)
+	$SRCDIR/pgen-tests < $SRCDIR/samples/github_simple_issue.json > $TMPFILE \
+		|| atf_fail "Parse Step failed"
+	diff -u $SRCDIR/samples/parse_simple_issue.dump $TMPFILE \
+		|| atf_fail "Unexpected output of parser"
+	rm -f $TMPFILE
+}
+
+########################################################################
+#
+atf_init_test_cases()
+{
+	PGEN=$(atf_get_srcdir)/../pgen
+	[ -x $PGEN ] || atf_fail "${PGEN} not found or is not executable"
+
+	atf_add_test_case simple_object
+	atf_add_test_case simple_object_no_entries
+	atf_add_test_case simple_object_trailing_comma
+	atf_add_test_case simple_issue
+	atf_add_test_case parse_simple_issue
+}
+########################################################################

@@ -27,43 +27,75 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GITHUB_CHECKS_H
-#define GITHUB_CHECKS_H
+#include <gcli/pgen.h>
 
-#include <sn/sn.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
 
-typedef struct gcli_github_check  gcli_github_check;
-typedef struct gcli_github_checks gcli_github_checks;
+static int
+should_replace(char c)
+{
+    return c == '_' || c == '/' || c == '.' || c == '-';
+}
 
-struct gcli_github_check {
-    char *name;
-    char *status;
-    char *conclusion;
-    char *started_at;
-    char *completed_at;
-    long  id;
-};
+static char *
+get_header_name(void)
+{
+    size_t len;
+    char *result;
 
-struct gcli_github_checks {
-    gcli_github_check *checks;
-    size_t             checks_size;
-};
+    len = strlen(outfilename);
+    result = calloc(len + 1, 1);
 
-void github_get_checks(
-    const char         *owner,
-    const char         *repo,
-    const char         *ref,
-    int                 max,
-    gcli_github_checks *checks);
+    for (size_t i = 0; i < len; ++i) {
+        if (should_replace(outfilename[i]))
+            result[i] = '_';
+        else
+            result[i] = toupper(outfilename[i]);
+    }
 
-void github_print_checks(const gcli_github_checks *checks);
+    return result;
+}
 
-void github_free_checks(gcli_github_checks *checks);
+void
+header_dump_h(void)
+{
+    char *hname = get_header_name();
 
-void github_checks(
-    const char *owner,
-    const char *repo,
-    const char *ref,
-    int         max);
+    fprintf(outfile, "#ifndef %s\n", hname);
+    fprintf(outfile, "#define %s\n\n", hname);
 
-#endif /* GITHUB_CHECKS_H */
+    fprintf(outfile, "#include <pdjson/pdjson.h>\n");
+    free(hname);
+}
+
+void
+objparser_dump_h(struct objparser *p)
+{
+    fprintf(outfile, "void parse_%s(struct json_stream *, %s *);\n",
+            p->name, p->returntype);
+}
+
+void
+include_dump_h(const char *file)
+{
+    fprintf(outfile, "#include <%s>\n", file);
+}
+
+void
+footer_dump_h(void)
+{
+    char *hname = get_header_name();
+
+    fprintf(outfile, "\n#endif /* %s */\n", hname);
+
+    free(hname);
+}
+
+void
+arrayparser_dump_h(struct arrayparser *p)
+{
+    fprintf(outfile, "void parse_%s(struct json_stream *, %s **out, size_t *out_size);\n",
+            p->name, p->returntype);
+}

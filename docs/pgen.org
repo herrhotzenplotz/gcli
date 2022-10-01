@@ -1,0 +1,299 @@
+# -*- org-confirm-babel-evaluate: nil; -*-
+#+TITLE: PGEN
+#+SUBTITLE: JSON Parser Generator for C
+#+AUTHOR: Nico Sonack
+#+EMAIL: nsonack@herrhotzenplotz.de
+#+OPTIONS: toc:nil
+
+* Motivation
+
+  GCLI needs to traverse and parse lots of JSON data because of the
+  nature of the web APIs it communicates with.
+
+  Initially most of this JSON traversal code was written by hand. It
+  contained lots of boilerplate that could be generated.
+
+  A language was invented to describe these parsers and generate C
+  Code and C headers from them.
+
+** Example
+
+   Suppose you have the following JSON object:
+
+   #+begin_src javascript
+	 {
+		 "title": "foo",
+		 "things": [
+			 {
+				 "id": 42,
+				 "name": "Alice"
+			 },
+			 {
+				 "id": 69,
+				 "name": "Bob"
+			 }
+		 ]
+	 }
+   #+end_src
+
+   You want to parse this into a C struct like the following:
+
+   #+begin_src C
+	 typedef struct thing
+	 {
+		 int id;
+		 const char *name;
+	 } thing;
+
+	 typedef struct thinglist
+	 {
+		 const char *title;
+		 struct thing *things;
+		 size_t things_size;
+	 } thinglist;
+   #+end_src
+
+   You can now use the following /PGEN/ code to describe the parser
+   that reads in JSON and dumps out C structs:
+
+   #+name: parser-def
+   #+begin_src prog
+	 parser thing is
+	 object of thing with
+			("id" => id as int,
+			 "name" => name as string);
+
+	 parser thinglist is
+	 object of thinglist with
+			("title" => title as string,
+			 "things" => things as array of thing use parse_thing);
+   #+end_src
+
+   This will generate two functions with the follwing signatures:
+
+   #+begin_src shell :exports results :results output
+	 ../pgen -th <<EOF
+	 parser thing is
+	 object of thing with
+			("id" => id as int,
+			 "name" => name as string);
+
+	 parser thinglist is
+	 object of thinglist with
+			("title" => title as string,
+			 "things" => things as array of thing use parse_thing);
+	 EOF
+   #+end_src
+
+   #+RESULTS:
+   : #ifndef <STDOUT>
+   : #define <STDOUT>
+   :
+   : #include <pdjson/pdjson.h>
+   : void parse_thing(struct json_stream *, thing *);
+   : void parse_thinglist(struct json_stream *, thinglist *);
+   :
+   : #endif /* <STDOUT> */
+
+   Whenever you call into the generated parsers, make sure the
+   pointers to your output variables point to zeroed memory.
+
+** Simple Object Parser
+
+   Use the following syntax to parse a simple object:
+
+   #+name: jsonin
+   #+begin_example javascript
+	 {
+		 "id": 42,
+		 "title": "test",
+		 "users": [ {"name":"user1"} ]
+	 }
+   #+end_example
+
+   #+begin_src C
+	 typedef struct user {
+		 char *name;
+	 } user;
+
+	 typedef struct thing {
+		 int id;
+		 char *title;
+		 user *users;
+		 size_t users_size;
+	 } thing;
+   #+end_src
+
+   #+name: parser_def_code
+   #+begin_example prog
+	 parser user is
+	 object of user with
+			("name" => name as string);
+
+	 parser thing is
+	 object of thing with
+			("id" => id as int,
+			 "title" => title as string,
+			 "users" => users as array of user use parse_user);
+   #+end_example
+
+   Then you can parse the object like so:
+
+   #+begin_src C :stdin so-testdata
+	 #include <stdio.h>
+	 #include <stdlib.h>
+
+	 #include <gcli/json_util.h>
+
+	 #include <pdjson/pdjson.h>
+
+	 int
+	 main(int argc, char *argv[])
+	 {
+		 struct json_stream input = {0};
+		 thing the_thing = {0};
+
+		 json_open_stream(&input, stdin);
+		 parse_thing(&input, &the_thing);
+		 json_close(&input);
+
+		 printf("id = %d\n", the_thing.id);
+		 printf("title = %s\n", the_thing.title);
+		 printf("users:\n");
+
+		 for (size_t i = 0; i < the_thing.users_size; ++i) {
+			 printf("  - name = %s\n", the_thing.users[i].name);
+		 }
+
+		 return 0;
+	 }
+   #+end_src
+
+   #+RESULTS:
+
+** Corner Cases
+
+   Suppose you have the following JSON data:
+
+   #+begin_src javascript
+	 {
+		 "foo": 420,
+		 "bar": {
+			 "id": 3.14,
+			 "deep": {
+				 "info": true
+			 }
+		 }
+	 }
+   #+end_src
+
+   Which you want to parse into the following struct:
+
+   #+begin_src C
+	 typedef struct whatever {
+		 int foo;
+		 float id;
+		 int info;
+	 } whatever;
+   #+end_src
+
+   You will have to dig into the layers of objects but output the data
+   into a flat struct.
+
+   To do this, you can use the *continuation-style* parsers:
+
+   #+begin_src prog
+	 parser whatever_deep is
+	 object of whatever with
+			("info" => info as bool);
+
+	 parser whatever_bar is
+	 object of whatever with
+			("deep" => use parse_whatever_deep,
+			 "id" => id as bool);
+
+	 parser whatever is
+	 object of whatever with
+			("foo" => foo as int,
+			 "bar" => use parse_whatever_bar);
+   #+end_src
+
+   As you can see, the parsers =whatever= and =whatever_bar= use other
+   object parsers to continue parsing the into the same struct in a
+   nested JSON object.
+
+   The code above generates the following header:
+
+   #+begin_src sh :exports results :results output
+	 ../pgen -th <<EOF
+	 parser whatever_deep is
+	 object of whatever with
+			("info" => info as bool);
+
+	 parser whatever_bar is
+	 object of whatever with
+			("deep" => use parse_whatever_deep,
+			 "id" => id as bool);
+
+	 parser whatever is
+	 object of whatever with
+			("foo" => foo as int,
+			 "bar" => use parse_whatever_bar);
+	 EOF
+   #+end_src
+
+   #+RESULTS:
+   : #ifndef <STDOUT>
+   : #define <STDOUT>
+   :
+   : #include <pdjson/pdjson.h>
+   : void parse_whatever_deep(struct json_stream *, whatever *);
+   : void parse_whatever_bar(struct json_stream *, whatever *);
+   : void parse_whatever(struct json_stream *, whatever *);
+   :
+   : #endif /* <STDOUT> */
+
+
+* Notes and experiments
+
+** Github Checks
+
+   #+name: jsondata
+   #+begin_src sh :results output verbatim :exports both
+	 curl -4 -L "https://api.github.com/repos/quick-lint/quick-lint-js/commits/b4cc317fab45960888d708edb41c1ccbc4a4dd21/check-runs" \
+		 | jq '.check_runs | .[].name'
+   #+end_src
+
+   #+RESULTS: jsondata
+   #+begin_example
+   "test npm package on Ubuntu with Yarn"
+   "test npm package on Ubuntu with npm (--global)"
+   "test npm package on Ubuntu with npm"
+   "test npm package on macOS 12 with Yarn"
+   "test npm package on macOS 12 with npm (--global)"
+   "test npm package on macOS 12 with npm"
+   "test npm package on macOS 11 with Yarn"
+   "test npm package on macOS 11 with npm (--global)"
+   "test npm package on macOS 11 with npm"
+   "test npm package on Windows with Yarn"
+   "test npm package on Windows with npm (--global)"
+   "test npm package on Windows with npm"
+   "npm package"
+   "winget manifests"
+   "test Chocolatey package"
+   "MSIX installer"
+   "test on Ubuntu 20.04 LTS Focal"
+   "test on Ubuntu 18.04 LTS Bionic"
+   "test on Fedora 36"
+   "test on Fedora 35"
+   "test on Debian 10 Buster"
+   "test on Debian 11 Bullseye"
+   "test on Arch Linux"
+   "test on macOS 12"
+   "test on macOS 11"
+   "test on Windows"
+   "Scoop package"
+   "Chocolatey package"
+   "test on Ubuntu 20.04 LTS Focal"
+   "test on Ubuntu 18.04 LTS Bionic"
+   #+end_example

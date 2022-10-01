@@ -1,5 +1,32 @@
 #+TITLE: gcli todos
 
+** TODO Convert Github stuff to generated parsers [90%]
+   - [X] Checks
+   - [X] Comments
+   - [X] Forks
+   - [X] Issues
+   - [X] Labels
+   - [X] Pulls
+	 - [X] Retrieve Pulls Info
+	 - [X] Get PR merge message
+   - [X] Releases
+   - [X] Repos
+   - [ ] Reviews
+	 - [ ] This is GraphQL!...needs to be solved later
+   - [X] Status
+
+** TODO Convert Gitlab stuff to generated parers [0%]
+   - [ ] Pipelines
+   - [ ] Merge Requests
+   - [ ] Comments
+   - [ ] Issues
+   - [ ] Review
+   - [ ] Labels
+   - [ ] Releases
+   - [ ] Forks
+   - [ ] Repos
+   - [ ] Status
+
 ** DONE handle errors from the github api
    - [[file:src/curl.c::ghcli_fetch(const char *url, ghcli_fetch_buffer *out)][gcli_fetch]]
    - [[file:src/curl.c::ghcli_curl(FILE *stream, const char *url, const char *content_type)][gcli_curl]]

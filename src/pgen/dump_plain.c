@@ -27,43 +27,19 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GITHUB_CHECKS_H
-#define GITHUB_CHECKS_H
+#include <gcli/pgen.h>
 
-#include <sn/sn.h>
-
-typedef struct gcli_github_check  gcli_github_check;
-typedef struct gcli_github_checks gcli_github_checks;
-
-struct gcli_github_check {
-    char *name;
-    char *status;
-    char *conclusion;
-    char *started_at;
-    char *completed_at;
-    long  id;
-};
-
-struct gcli_github_checks {
-    gcli_github_check *checks;
-    size_t             checks_size;
-};
-
-void github_get_checks(
-    const char         *owner,
-    const char         *repo,
-    const char         *ref,
-    int                 max,
-    gcli_github_checks *checks);
-
-void github_print_checks(const gcli_github_checks *checks);
-
-void github_free_checks(gcli_github_checks *checks);
-
-void github_checks(
-    const char *owner,
-    const char *repo,
-    const char *ref,
-    int         max);
-
-#endif /* GITHUB_CHECKS_H */
+void
+objparser_dump_plain(struct objparser *p)
+{
+    fprintf(outfile,
+            "object parser: name = %s, type = %s\n",
+            p->name, p->returntype);
+    for (struct objentry *it = p->entries; it != NULL; it = it->next) {
+        fprintf(outfile,
+                "  entry: kind = %s, jsonname = %s, name = %s, type = %s, "
+                "parser = %s\n",
+                it->kind == OBJENTRY_SIMPLE ? "simple" : "array",
+                it->name, it->jsonname, it->type, it->parser);
+    }
+}

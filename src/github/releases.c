@@ -36,48 +36,7 @@
 
 #include <assert.h>
 
-static void
-github_parse_release(struct json_stream *input, gcli_release *out)
-{
-    enum json_type  next = JSON_NULL;
-    const char     *key;
-
-    if ((next = json_next(input)) != JSON_OBJECT)
-        errx(1, "Expected Release Object");
-
-    while ((next = json_next(input)) == JSON_STRING) {
-        size_t len;
-        key = json_get_string(input, &len);
-
-        if (strncmp("name", key, len) == 0) {
-            out->name = get_sv(input);
-        } else if (strncmp("id", key, len) == 0) {
-            int id = get_int(input);
-            out->id = sn_sv_fmt("%d", id);
-        } else if (strncmp("body", key, len) == 0) {
-            out->body = get_sv(input);
-        } else if (strncmp("tarball_url", key, len) == 0) {
-            out->tarball_url = get_sv(input);
-        } else if (strncmp("author", key, len) == 0) {
-            out->author = get_user_sv(input);
-        } else if (strncmp("created_at", key, len) == 0) {
-            out->date = get_sv(input);
-        } else if (strncmp("draft", key, len) == 0) {
-            out->draft = get_bool(input);
-        } else if (strncmp("prerelease", key, len) == 0) {
-            out->prerelease = get_bool(input);
-        } else if (strncmp("upload_url", key, len) == 0) {
-            out->upload_url = get_sv(input);
-        } else if (strncmp("html_url", key, len) == 0) {
-            out->html_url = get_sv(input);
-        } else {
-            SKIP_OBJECT_VALUE(input);
-        }
-    }
-
-    if (next != JSON_OBJECT_END)
-        errx(1, "Unclosed Release Object");
-}
+#include <templates/github/releases.h>
 
 int
 github_get_releases(
@@ -93,7 +52,7 @@ github_get_releases(
     gcli_fetch_buffer   buffer   = {0};
     struct json_stream  stream   = {0};
     enum json_type      next     = JSON_NULL;
-    int                 size     = 0;
+    size_t              size     = 0;
 
     *out = NULL;
 
@@ -109,19 +68,8 @@ github_get_releases(
         gcli_fetch(url, &next_url, &buffer);
 
         json_open_buffer(&stream, buffer.data, buffer.length);
-        json_set_streaming(&stream, 1);
 
-        if ((next = json_next(&stream)) != JSON_ARRAY)
-            errx(1, "Expected array of releses");
-
-        while ((next = json_peek(&stream)) == JSON_OBJECT) {
-            *out = realloc(*out, sizeof(**out) * (size + 1));
-            gcli_release *it = &(*out)[size++];
-            github_parse_release(&stream, it);
-
-            if (size == max)
-                break;
-        }
+        parse_github_releases(&stream, out, &size);
 
         json_close(&stream);
         free(url);
@@ -132,7 +80,7 @@ github_get_releases(
     free(e_owner);
     free(e_repo);
 
-    return size;
+    return (int)(size);
 }
 
 static void
@@ -142,7 +90,7 @@ github_parse_single_release(gcli_fetch_buffer buffer, gcli_release *out)
 
     json_open_buffer(&stream, buffer.data, buffer.length);
     json_set_streaming(&stream, 1);
-    github_parse_release(&stream, out);
+    parse_github_release(&stream, out);
     json_close(&stream);
 }
 

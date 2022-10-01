@@ -394,7 +394,7 @@ gcli_read_sv_list(json_stream *input, sn_sv **out)
 }
 
 uint32_t
-get_github_style_color(struct json_stream *input)
+get_github_style_color(json_stream *input)
 {
     char *color_str = get_string(input);
     char *endptr    = NULL;
@@ -407,4 +407,15 @@ get_github_style_color(struct json_stream *input)
     free(color_str);
 
     return ((uint32_t)(color)) << 8;
+}
+
+sn_sv
+get_gitea_visibility(json_stream *input)
+{
+    char *v = NULL;
+    if (get_bool(input))
+        v = strdup("private");
+    else
+        v = strdup("public");
+    return SV(v);
 }

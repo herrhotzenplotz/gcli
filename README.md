@@ -1,16 +1,16 @@
 # GCLI
 
-Simple and portable CLI tool for interacting with GitHub and GitLab
-from the command line.
+Simple and portable CLI tool for interacting with GitHub, GitLab and
+Gitea from the command line.
 
 ![](docs/screenshot-02.png)
 
 ## Why?
 
 The official GitHub CLI tool only supports GitHub. I wanted a simple
-unified tool for both GitHub and GitLab because every forge does
-things differently yet all build on Git and purposefully break with
-its philosophy.
+unified tool for various git forges such as GitHub and GitLab because
+every forge does things differently yet all build on Git and
+purposefully break with its philosophy.
 
 Also, the official tool from Github is written in Go, which does
 manual [DNS
@@ -33,12 +33,10 @@ Recent tarballs can be downloaded here:
 Required dependencies:
 - libcurl
 - pkg-config
+- yacc (System V yacc, Berkeley Yacc or Bison should suffice)
+- lex (flex is preferred)
 - C99 Compiler and linker
-- make (bmake or smake is recommended)
-  + BUG WARNING: GNU make has two longstanding bugs in the include
-	directive. This may lead to it generating files in the incorrect
-	order and spitting out incorrect warnings or causing builds to
-	fail. You may want to use smake or bmake instead.
+- make
 
 ### Compile
 In order to perform a build, do:
@@ -51,11 +49,7 @@ You may leave out `DESTDIR` and `PREFIX`. The above are the default
 values.
 
 In case any of this does not work, please either report a bug, or
-submit a patch in case you managed to fix it. Please also try to do a
-`make snmk-update`, as I sometimes update my Makefile template without
-syncing it to this project. This target will pull the latest files and
-rebuild the project. You will need
-[cURL](https://github.com/curl/curl) for this to work.
+submit a patch in case you managed to fix it.
 
 Tested Operating Systems so far:
 - FreeBSD 13.0-RELEASE amd64 and arm64
@@ -76,14 +70,18 @@ at »man gcli«.
 ## Bugs and contributions
 
 Please report bugs to nsonack@herrhotzenplotz.de or on
-[GitHub](https://github.com/herrhotzenplotz/gcli). You can also
-submit patches this way using git-send-email.
+[GitLab](https://gitlab.com/herrhotzenplotz/gcli). You can also submit
+patches this way using git-send-email.
 
 ## License
 
 BSD-2 CLAUSE (aka. FreeBSD License). Please see the LICENSE file
 attached.
 
+## Credits
 
-						 herrhotzenplotz aka. Nico Sonack
-											 October 2021
+This program makes heavy use of both [libcurl](https://curl.haxx.se/)
+and [pdjson](https://github.com/skeeto/pdjson).
+
+herrhotzenplotz aka. Nico Sonack
+October 2021

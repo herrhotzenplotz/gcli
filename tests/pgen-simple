@@ -88,6 +88,8 @@ simple_issue_body()
 	CFILE=github_issue.c
 	OFILE=${CFILE%.c}.o
 
+	CC=${CC-cc}
+
 	${PGEN} -tc < ${TMPLFILE} > ${CFILE} || atf_fail "pgen step failed"
 	${CC} -c \
 		  -I$(atf_get_srcdir)/../include \

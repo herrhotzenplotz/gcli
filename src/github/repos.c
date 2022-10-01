@@ -35,51 +35,7 @@
 
 #include <pdjson/pdjson.h>
 
-static void
-parse_repo(json_stream *input, gcli_repo *out)
-{
-    enum json_type  next     = JSON_NULL;
-    enum json_type  key_type = JSON_NULL;
-    const char     *key      = NULL;
-
-    if ((next = json_next(input)) != JSON_OBJECT)
-        errx(1, "Expected an object for a repo");
-
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t len;
-        key = json_get_string(input, &len);
-
-        if (strncmp("full_name", key, len) == 0) {
-            out->full_name = get_sv(input);
-        } else if (strncmp("name", key, len) == 0) {
-            out->name = get_sv(input);
-        } else if (strncmp("owner", key, len) == 0) {
-            char *user = get_user(input);
-            out->owner = SV(user);
-        } else if (strncmp("created_at", key, len) == 0) {
-            out->date = get_sv(input);
-        } else if (strncmp("visibility", key, len) == 0) {
-            out->visibility = get_sv(input);
-        } else if (strncmp("private", key, len) == 0) {
-            /* hack for gitea */
-            if (sn_sv_null(out->visibility)) {
-                char *v = NULL;
-                if (get_bool(input))
-                    v = strdup("private");
-                else
-                    v = strdup("public");
-                out->visibility = SV(v);
-            }
-        } else if (strncmp("fork", key, len) == 0) {
-            out->is_fork = get_bool(input);
-        } else {
-            SKIP_OBJECT_VALUE(input);
-        }
-    }
-
-    if (key_type != JSON_OBJECT_END)
-        errx(1, "Repo object not closed");
-}
+#include <templates/github/repos.h>
 
 int
 github_get_repos(const char *owner, int max, gcli_repo **out)
@@ -90,7 +46,7 @@ github_get_repos(const char *owner, int max, gcli_repo **out)
     gcli_fetch_buffer   buffer   = {0};
     struct json_stream  stream   = {0};
     enum  json_type     next     = JSON_NULL;
-    int                 size     = 0;
+    size_t              size     = 0;
 
     e_owner = gcli_urlencode(owner);
 
@@ -116,22 +72,8 @@ github_get_repos(const char *owner, int max, gcli_repo **out)
         gcli_fetch(url, &next_url, &buffer);
 
         json_open_buffer(&stream, buffer.data, buffer.length);
-        json_set_streaming(&stream, 1);
 
-        // TODO: Poor error message
-        if ((next = json_next(&stream)) != JSON_ARRAY)
-            errx(1,
-                 "Expected array in response from API "
-                 "but got something else instead");
-
-        while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
-            *out = realloc(*out, sizeof(**out) * (size + 1));
-            gcli_repo *it = &(*out)[size++];
-            parse_repo(&stream, it);
-
-            if (size == max)
-                break;
-        }
+        parse_github_repos(&stream, out, &size);
 
         free(url);
         free(buffer.data);
@@ -141,7 +83,7 @@ github_get_repos(const char *owner, int max, gcli_repo **out)
     free(url);
     free(e_owner);
 
-    return size;
+    return (int)size;
 }
 
 int
@@ -153,29 +95,15 @@ github_get_own_repos(int max, gcli_repo **out)
     gcli_fetch_buffer   buffer   = {0};
     struct json_stream  stream   = {0};
     enum  json_type     next     = JSON_NULL;
-    int                 size     = 0;
+    size_t              size     = 0;
 
     do {
         buffer.length = 0;
         gcli_fetch(url, &next_url, &buffer);
 
         json_open_buffer(&stream, buffer.data, buffer.length);
-        json_set_streaming(&stream, 1);
 
-        // TODO: Poor error message
-        if ((next = json_next(&stream)) != JSON_ARRAY)
-            errx(1,
-                 "Expected array in response from API "
-                 "but got something else instead");
-
-        while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
-            *out = realloc(*out, sizeof(**out) * (size + 1));
-            gcli_repo *it = &(*out)[size++];
-            parse_repo(&stream, it);
-
-            if (size == max)
-                break;
-        }
+        parse_github_repos(&stream, out, &size);
 
         free(buffer.data);
         json_close(&stream);
@@ -184,7 +112,7 @@ github_get_own_repos(int max, gcli_repo **out)
 
     free(next_url);
 
-    return size;
+    return (int)size;
 }
 
 void
@@ -235,7 +163,7 @@ github_repo_create(
     /* Fetch and parse result */
     gcli_fetch_with_method("POST", url, data, NULL, &buffer);
     json_open_buffer(&stream, buffer.data, buffer.length);
-    parse_repo(&stream, repo);
+    parse_github_repo(&stream, repo);
 
     /* Cleanup */
     json_close(&stream);

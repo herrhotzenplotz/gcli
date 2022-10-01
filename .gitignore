@@ -203,3 +203,6 @@
 /templates/github/comments.c
 /templates/github/comments.o
 /templates/github/comments.t~
+/templates/github/repos.c
+/templates/github/repos.o
+/templates/github/repos.t~

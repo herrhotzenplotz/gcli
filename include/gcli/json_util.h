@@ -64,7 +64,8 @@ size_t      gcli_read_label_list(json_stream *, sn_sv **);
 size_t      gcli_read_user_list(json_stream *input, sn_sv **out);
 void        gcli_json_advance(json_stream *input, const char *fmt, ...);
 size_t      gcli_read_sv_list(json_stream *input, sn_sv **out);
-uint32_t    get_github_style_color(struct json_stream *input);
+uint32_t    get_github_style_color(json_stream *input);
+sn_sv       get_gitea_visibility(json_stream *input);
 
 static inline sn_sv
 get_user_sv(json_stream *input)

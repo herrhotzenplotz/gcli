@@ -53,6 +53,8 @@ pregen_array_parser(struct objparser *p, struct objentry *it)
     fprintf(outfile, "\twhile (json_peek(stream) != JSON_ARRAY_END) {\n");
     fprintf(outfile, "\t\tout->%s = realloc(out->%s, sizeof(*out->%s) * (out->%s_size + 1));\n",
             it->name, it->name, it->name, it->name);
+    fprintf(outfile, "\t\tmemset(&out->%s[out->%s_size], 0, sizeof(out->%s[out->%s_size]));\n",
+            it->name, it->name, it->name, it->name);
     fprintf(outfile, "\t\t%s(stream, &out->%s[out->%s_size++]);\n",
             it->parser, it->name, it->name);
     fprintf(outfile, "\t}\n\n");

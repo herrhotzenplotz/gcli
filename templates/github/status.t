@@ -1,5 +1,4 @@
 include "gcli/github/status.h";
-include "gcli/json_util.h";
 
 parser github_notification_subject is
 object of gcli_notification with

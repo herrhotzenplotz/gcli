@@ -1,5 +1,4 @@
 include "gcli/releases.h";
-include "gcli/json_util.h";
 
 parser github_release is
 object of gcli_release with

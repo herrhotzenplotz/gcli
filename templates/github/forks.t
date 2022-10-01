@@ -1,5 +1,4 @@
 include "gcli/forks.h";
-include "gcli/json_util.h";
 
 parser github_fork is
 object of gcli_fork with

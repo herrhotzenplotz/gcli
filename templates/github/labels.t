@@ -1,5 +1,3 @@
-include "gcli/json_util.h";
-
 include "gcli/github/labels.h";
 
 parser github_label_text is object of sn_sv select "name" as sv;

@@ -1,6 +1,4 @@
 include "gcli/pulls.h";
-include "gcli/json_util.h";
-
 include "templates/github/labels.h";
 
 parser github_pull is

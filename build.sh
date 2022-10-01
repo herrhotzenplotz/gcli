@@ -320,6 +320,34 @@ build_test_programs()
 	build_test_program tests/pgen-tests
 }
 
+#################################################################################
+# Install target
+#################################################################################
+doinstall()
+{
+	[ -x ./gcli ] || die "You need to build gcli first"
+
+	[ "x$PREFIX" != "x" ] || PREFIX="/usr/local"
+	[ "x$DESTDIR" != "x" ] || DESTDIR="/"
+
+	BINDIR=${DESTDIR}${PREFIX}/bin
+	MANDIR=${DESTDIR}${PREFIX}/man
+
+	[ -d $BINDIR ] || mkdir -p $BINDIR
+	[ -d $MANDIR ] || mkdir -p $MANDIR
+	[ -d $MANDIR/man1 ] || mkdir -p $MANDIR/man1
+
+	echo "Installing gcli"
+	echo "    cp gcli $BINDIR"
+	cp gcli $BINDIR || die "install command failed"
+
+	for MANPAGE in docs/gcli*.1; do
+		echo "Installing ${MANPAGE#docs/}"
+		echo "   gzip < $MANPAGE > $MANDIR/man1/${MANPAGE#docs/}.gz"
+		gzip < $MANPAGE > $MANDIR/man1/${MANPAGE#docs/}.gz || die "install command failed"
+	done
+}
+
 # Start it!
 
 case $1 in
@@ -332,6 +360,9 @@ case $1 in
 		cd tests
 		kyua test || die "Tests failed"
 		cd ..
+		;;
+	install)
+		doinstall
 		;;
 	*)
 		die "unknown subcommand"

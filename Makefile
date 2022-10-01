@@ -1,4 +1,4 @@
-.PHONY: all clean check
+.PHONY: all clean check install
 all:
 	./build.sh
 
@@ -8,3 +8,6 @@ clean:
 
 check:
 	./build.sh check
+
+install:
+	PREFIX="${PREFIX}" DESTDIR="${DESTDIR}" ./build.sh install

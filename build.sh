@@ -136,7 +136,7 @@ compiler_flags()
 
 gcli_version()
 {
-	GCLI_VERSION="0.9.8-beta"
+	GCLI_VERSION="0.9.9-beta"
 	CPPFLAGS="${CPPFLAGS} -DGCLI_VERSION_STRING=\"${GCLI_VERSION}\""
 }
 

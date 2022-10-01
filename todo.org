@@ -12,6 +12,7 @@
    - [X] Releases
    - [X] Repos
    - [ ] Reviews
+	 - [ ] This is GraphQL!...needs to be solved later
    - [X] Status
 
 ** TODO Convert Gitlab stuff to generated parers [0%]

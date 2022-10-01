@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021,2022 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -70,9 +70,9 @@ version(void)
 {
     fprintf(
         stderr,
-        "gcli version "GCLI_VERSION_STRING
-        " - a command line utility to interact with various git forges.\n"
-        "Copyright 2021 Nico Sonack <nsonack@herrhotzenplotz.de>\n"
+        "This is GCLI version "GCLI_VERSION_STRING"\n"
+        "A command line utility to interact with various git forges.\n"
+        "Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>\n"
         "This program is licensed under the BSD2CLAUSE license. You should\n"
         "have received a copy of it with its distribution.\n");
 }

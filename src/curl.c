@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
  * Copyright 2022 Aritra Sarkar <aritra1911@yahoo.com>
  *
  * Redistribution and use in source and binary forms, with or without

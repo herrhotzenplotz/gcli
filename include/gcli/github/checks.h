@@ -32,7 +32,8 @@
 
 #include <sn/sn.h>
 
-typedef struct gcli_github_check gcli_github_check;
+typedef struct gcli_github_check  gcli_github_check;
+typedef struct gcli_github_checks gcli_github_checks;
 
 struct gcli_github_check {
     char *name;
@@ -43,20 +44,21 @@ struct gcli_github_check {
     long  id;
 };
 
-int github_get_checks(
+struct gcli_github_checks {
+    gcli_github_check *checks;
+    size_t             checks_size;
+};
+
+void github_get_checks(
     const char         *owner,
     const char         *repo,
     const char         *ref,
     int                 max,
-    gcli_github_check **out);
+    gcli_github_checks *checks);
 
-void github_print_checks(
-    gcli_github_check *checks,
-    int                checks_size);
+void github_print_checks(const gcli_github_checks *checks);
 
-void github_free_checks(
-    gcli_github_check *checks,
-    int                checks_size);
+void github_free_checks(gcli_github_checks *checks);
 
 void github_checks(
     const char *owner,

@@ -197,3 +197,6 @@
 /templates/github/releases.c
 /templates/github/releases.o
 /templates/github/releases.t~
+/templates/github/status.c
+/templates/github/status.o
+/templates/github/status.t~

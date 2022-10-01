@@ -35,75 +35,7 @@
 #include <sn/sn.h>
 #include <pdjson/pdjson.h>
 
-static void
-github_notification_parse_subject(
-    struct json_stream *input,
-    gcli_notification  *it)
-{
-    if (json_next(input) != JSON_OBJECT)
-        errx(1, "Expected Notification Subject Object");
-
-    enum json_type key_type;
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t      len = 0;
-        const char *key = json_get_string(input, &len);
-
-        if (strncmp("title", key, len) == 0)
-            it->title = get_string(input);
-        else if (strncmp("type", key, len) == 0)
-            it->type = get_string(input);
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
-}
-
-static void
-github_notification_parse_repository(
-    struct json_stream *input,
-    gcli_notification  *it)
-{
-    if (json_next(input) != JSON_OBJECT)
-        errx(1, "Expected Notification Repository Object");
-
-    enum json_type key_type;
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t      len = 0;
-        const char *key = json_get_string(input, &len);
-
-        if (strncmp("full_name", key, len) == 0)
-            it->repository = get_string(input);
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
-}
-
-static void
-parse_github_notification(
-    struct json_stream *input,
-    gcli_notification  *it)
-{
-    if (json_next(input) != JSON_OBJECT)
-        errx(1, "Expected Notification Object");
-
-    enum json_type key_type;
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t      len = 0;
-        const char *key = json_get_string(input, &len);
-
-        if (strncmp("updated_at", key, len) == 0)
-            it->date = get_string(input);
-        else if (strncmp("id", key, len) == 0)
-            it->id = get_string(input);
-        else if (strncmp("reason", key, len) == 0)
-            it->reason = get_string(input);
-        else if (strncmp("subject", key, len) == 0)
-            github_notification_parse_subject(input, it);
-        else if (strncmp("repository", key, len) == 0)
-            github_notification_parse_repository(input, it);
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
-}
+#include <templates/github/status.h>
 
 size_t
 github_get_notifications(gcli_notification **notifications, int count)
@@ -120,21 +52,8 @@ github_get_notifications(gcli_notification **notifications, int count)
         gcli_fetch(url, &next_url, &buffer);
 
         json_open_buffer(&stream, buffer.data, buffer.length);
-        json_set_streaming(&stream, 1);
 
-        enum json_type next_token = json_next(&stream);
-
-        while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
-            if (next_token != JSON_OBJECT)
-                errx(1, "Unexpected non-object in notifications list");
-
-            *notifications = realloc(
-                *notifications,
-                (notifications_size + 1) * sizeof(gcli_notification));
-            gcli_notification *it = &(*notifications)[notifications_size];
-            parse_github_notification(&stream, it);
-            notifications_size += 1;
-        }
+        parse_github_notifications(&stream, notifications, &notifications_size);
 
         json_close(&stream);
         free(url);

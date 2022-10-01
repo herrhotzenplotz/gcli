@@ -1,14 +1,14 @@
 #+TITLE: gcli todos
 
-** TODO Convert Github stuff to generated parsers [40%]
+** TODO Convert Github stuff to generated parsers [50%]
    - [X] Checks
    - [ ] Comments
    - [X] Forks
    - [X] Issues
    - [X] Labels
-   - [-] Pulls
+   - [X] Pulls
 	 - [X] Retrieve Pulls Info
-	 - [ ] Get PR merge message
+	 - [X] Get PR merge message
    - [ ] Releases
    - [ ] Repos
    - [ ] Reviews

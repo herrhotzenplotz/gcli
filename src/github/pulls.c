@@ -120,10 +120,7 @@ github_pr_merge(
     char              *e_owner     = NULL;
     char              *e_repo      = NULL;
     const char        *data        = "{}";
-    enum json_type     next;
-    size_t             len;
-    const char        *message;
-    const char        *key;
+    char              *message;
 
     e_owner = gcli_urlencode(owner);
     e_repo  = gcli_urlencode(repo);
@@ -136,31 +133,17 @@ github_pr_merge(
 
     gcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-    json_set_streaming(&stream, true);
 
-    next = json_next(&stream);
+    parse_github_pr_merge_message(&stream, &message);
 
-    while ((next = json_next(&stream)) == JSON_STRING) {
-        key = json_get_string(&stream, &len);
+    puts(message);
 
-        if (strncmp(key, "message", len) == 0) {
-
-            next = json_next(&stream);
-            message  = json_get_string(&stream, &len);
-
-            printf("%.*s\n", (int)len, message);
-
-            json_close(&stream);
-            free(json_buffer.data);
-            free(url);
-            free(e_owner);
-            free(e_repo);
-
-            return;
-        } else {
-            next = json_next(&stream);
-        }
-    }
+    json_close(&stream);
+    free(message);
+    free(json_buffer.data);
+    free(url);
+    free(e_owner);
+    free(e_repo);
 }
 
 void

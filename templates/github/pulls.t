@@ -63,3 +63,5 @@ object of gcli_pull_summary with
 		"user" => author as user,
 		"head" => use parse_github_pull_head,
 		"base" => use parse_github_branch_label);
+
+parser github_pr_merge_message is object of char* select "message" as string;

@@ -329,9 +329,9 @@ doinstall()
 
 	[ "x$PREFIX" != "x" ] || PREFIX="/usr/local"
 	[ "x$DESTDIR" != "x" ] || DESTDIR="/"
+	[ "x$MANDIR" != "x" ] || MANDIR=${DESTDIR}${PREFIX}/man
 
 	BINDIR=${DESTDIR}${PREFIX}/bin
-	MANDIR=${DESTDIR}${PREFIX}/man
 
 	[ -d $BINDIR ] || mkdir -p $BINDIR
 	[ -d $MANDIR ] || mkdir -p $MANDIR

@@ -1,4 +1,5 @@
 #include <templates/github/issues.h>
+#include <templates/github/pulls.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,6 +22,21 @@ issues(struct json_stream *stream)
 	printf("comments\t%d\n", issue.comments);
 }
 
+static void
+pulls(struct json_stream *stream)
+{
+	gcli_pull pull = {0};
+
+	parse_github_pull(stream, &pull);
+
+	printf("title\t%s\n", pull.title);
+	printf("state\t%s\n", pull.state);
+	printf("author\t%s\n", pull.creator);
+	printf("number\t%d\n", pull.number);
+	printf("id\t%d\n", pull.id);
+	printf("merged\t%d\n", pull.merged);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -30,6 +46,8 @@ main(int argc, char *argv[])
 
 	if (strcmp(argv[1], "issues") == 0)
 		issues(&str);
+	else if (strcmp(argv[1], "pulls") == 0)
+		pulls(&str);
 	else
 		fprintf(stderr, "error: unknown subcommand\n");
 

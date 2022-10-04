@@ -116,6 +116,24 @@ parse_simple_issue_body()
 
 ########################################################################
 #
+atf_test_case parse_simple_pull
+parse_simple_pull_head()
+{
+	atf_set "descr" "run a precompiled pulls parser over a sample dataset"
+}
+parse_simple_pull_body()
+{
+	SRCDIR=$(atf_get_srcdir)
+	TMPFILE=$(mktemp)
+	$SRCDIR/pgen-tests pulls < $SRCDIR/samples/github_simple_pull.json > $TMPFILE \
+		|| atf_fail "Parse Step failed"
+	diff -u $SRCDIR/samples/parse_simple_pull.dump $TMPFILE \
+		|| atf_fail "Unexpected output of parser"
+	rm -f $TMPFILE
+}
+
+########################################################################
+#
 atf_init_test_cases()
 {
 	PGEN=$(atf_get_srcdir)/../pgen
@@ -126,5 +144,6 @@ atf_init_test_cases()
 	atf_add_test_case simple_object_trailing_comma
 	atf_add_test_case simple_issue
 	atf_add_test_case parse_simple_issue
+	atf_add_test_case parse_simple_pull
 }
 ########################################################################

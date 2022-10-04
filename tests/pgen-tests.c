@@ -1,8 +1,10 @@
 #include <templates/github/issues.h>
 #include <templates/github/pulls.h>
+#include <templates/github/labels.h>
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 
 static void
 issues(struct json_stream *stream)
@@ -37,6 +39,19 @@ pulls(struct json_stream *stream)
 	printf("merged\t%d\n", pull.merged);
 }
 
+static void
+labels(struct json_stream *stream)
+{
+	gcli_label label = {0};
+
+	parse_github_label(stream, &label);
+
+	printf("id\t%ld\n", label.id);
+	printf("name\t%s\n", label.name);
+	printf("description\t%s\n", label.description);
+	printf("color\t%"PRIx32"\n", label.color);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -48,6 +63,8 @@ main(int argc, char *argv[])
 		issues(&str);
 	else if (strcmp(argv[1], "pulls") == 0)
 		pulls(&str);
+	else if (strcmp(argv[1], "labels") == 0)
+		labels(&str);
 	else
 		fprintf(stderr, "error: unknown subcommand\n");
 

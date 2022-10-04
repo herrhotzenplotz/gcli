@@ -49,7 +49,6 @@ simple_object_no_entries_cleanup()
 	rm -f $TMPFILE
 }
 
-
 ########################################################################
 #
 atf_test_case simple_object_trailing_comma
@@ -108,7 +107,7 @@ parse_simple_issue_body()
 {
 	SRCDIR=$(atf_get_srcdir)
 	TMPFILE=$(mktemp)
-	$SRCDIR/pgen-tests < $SRCDIR/samples/github_simple_issue.json > $TMPFILE \
+	$SRCDIR/pgen-tests issues < $SRCDIR/samples/github_simple_issue.json > $TMPFILE \
 		|| atf_fail "Parse Step failed"
 	diff -u $SRCDIR/samples/parse_simple_issue.dump $TMPFILE \
 		|| atf_fail "Unexpected output of parser"

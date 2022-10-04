@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int
-main(void)
+static void
+issues(struct json_stream *stream)
 {
 	struct json_stream str   = {0};
 	gcli_issue         issue = {0};
@@ -19,6 +19,19 @@ main(void)
 	printf("state\t"SV_FMT"\n", SV_ARGS(issue.state));
 	printf("labels_size\t%zu\n", issue.labels_size);
 	printf("comments\t%d\n", issue.comments);
+}
+
+int
+main(int argc, char *argv[])
+{
+	struct json_stream str   = {0};
+
+	json_open_stream(&str, stdin);
+
+	if (strcmp(argv[1], "issues") == 0)
+		issues(&str);
+	else
+		fprintf(stderr, "error: unknown subcommand\n");
 
 	return 0;
 }

@@ -245,7 +245,7 @@ compile()
 
 transpile_c()
 {
-	info " > Transpiling $1 into C..."
+	info " > Generating Parser from $1 ..."
 	TCMD="./pgen -tc -o ${1%.t}.c $1"
 	info "   $TCMD"
 	$TCMD || die "pgen command failed"
@@ -300,7 +300,7 @@ build()
 }
 
 SRCS="src/*.c src/github/*.c src/gitlab/*.c src/gitea/*.c thirdparty/pdjson/pdjson.c thirdparty/sn/sn.c"
-TEMPLATES="templates/github/*.t"
+TEMPLATES="templates/github/*.t templates/gitlab/*.t"
 
 build_test_program()
 {

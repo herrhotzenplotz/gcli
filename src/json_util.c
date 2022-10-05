@@ -419,3 +419,9 @@ get_gitea_visibility(json_stream *input)
         v = strdup("public");
     return SV(v);
 }
+
+bool
+get_gitlab_can_be_merged(json_stream *input)
+{
+    return sn_sv_eq_to(get_sv(input), "can_be_merged");
+}

@@ -15,11 +15,11 @@
 	 - [ ] This is GraphQL!...needs to be solved later
    - [X] Status
 
-** TODO Convert Gitlab stuff to generated parers [0%]
+** TODO Convert Gitlab stuff to generated parers [20%]
    - [ ] Pipelines
-   - [ ] Merge Requests
+   - [X] Merge Requests
    - [ ] Comments
-   - [ ] Issues
+   - [X] Issues
    - [ ] Review
    - [ ] Labels
    - [ ] Releases

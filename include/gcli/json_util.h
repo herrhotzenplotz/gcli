@@ -60,11 +60,9 @@ char       *get_user_(json_stream *input, const char *function);
 const char *get_label_(json_stream *input, const char *function);
 sn_sv       gcli_json_escape(sn_sv);
 void        gcli_print_html_url(gcli_fetch_buffer);
-size_t      gcli_read_label_list(json_stream *, sn_sv **);
-size_t      gcli_read_user_list(json_stream *input, sn_sv **out);
 void        gcli_json_advance(json_stream *input, const char *fmt, ...);
-size_t      gcli_read_sv_list(json_stream *input, sn_sv **out);
 uint32_t    get_github_style_color(json_stream *input);
+bool        get_gitlab_can_be_merged(json_stream *input);
 sn_sv       get_gitea_visibility(json_stream *input);
 
 static inline sn_sv
@@ -95,5 +93,11 @@ gcli_json_bool(bool it)
             break;                                      \
         }                                               \
     } while (0)
+
+static inline void
+parse_sv(json_stream *stream, sn_sv *out)
+{
+    *out = get_sv(stream);
+}
 
 #endif /* JSON_UTIL_H */

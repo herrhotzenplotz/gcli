@@ -55,7 +55,6 @@ github_get_labels(
 
     do {
         struct json_stream stream = {0};
-        enum   json_type   next   = JSON_NULL;
 
         gcli_fetch(url, &next_url, &buffer);
         json_open_buffer(&stream, buffer.data, buffer.length);

@@ -54,8 +54,6 @@ gitlab_get_labels(
                       gitlab_get_apibase(), owner, repo);
 
     do {
-        enum json_type next_type;
-
         gcli_fetch(url, &next_url, &buffer);
 
         json_open_buffer(&stream, buffer.data, buffer.length);

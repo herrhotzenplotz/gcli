@@ -48,7 +48,6 @@ gitlab_get_forks(
     char               *e_owner  = NULL;
     char               *e_repo   = NULL;
     char               *next_url = NULL;
-    enum   json_type    next     = JSON_NULL;
     struct json_stream  stream   = {0};
     size_t              size     = 0;
 
@@ -72,7 +71,7 @@ gitlab_get_forks(
         json_close(&stream);
         free(buffer.data);
         free(url);
-    } while ((url = next_url) && (max == -1 || size < max));
+    } while ((url = next_url) && (max == -1 || (int)size < max));
 
     free(next_url);
     free(e_owner);

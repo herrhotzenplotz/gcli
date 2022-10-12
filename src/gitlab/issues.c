@@ -73,7 +73,7 @@ gitlab_get_issues(
         free(url);
         json_close(&stream);
 
-    } while ((url = next_url) && (max == -1 || count < max));
+    } while ((url = next_url) && (max == -1 || (int)count < max));
     /* continue iterating if we have both a next_url and we are
      * supposed to fetch more issues (either max is -1 thus all issues
      * or we haven't fetched enough yet). */

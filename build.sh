@@ -126,7 +126,7 @@ compiler_flags()
 	info "Checking C Compiler Flags"
 
 	if [ $CCNAME = gcc ] || [ $CCNAME = clang ]; then
-		[ "x$CFLAGS" != "x" ] || CFLAGS="-std=iso9899:1999 -g -O0"
+		[ "x$CFLAGS" != "x" ] || CFLAGS="-std=iso9899:1999 -g -O0 -Wall -Wextra"
 	elif [ $CCNAME = sunstudio ]; then
 		[ "x$CFLAGS" != "x" ] || CFLAGS="-std=iso9899:1999 -g -xO0"
 	fi

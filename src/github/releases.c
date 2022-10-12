@@ -51,7 +51,6 @@ github_get_releases(
     char               *next_url = NULL;
     gcli_fetch_buffer   buffer   = {0};
     struct json_stream  stream   = {0};
-    enum json_type      next     = JSON_NULL;
     size_t              size     = 0;
 
     *out = NULL;
@@ -74,7 +73,7 @@ github_get_releases(
         json_close(&stream);
         free(url);
         free(buffer.data);
-    } while ((url = next_url) && (max == -1 || size < max));
+    } while ((url = next_url) && (max == -1 || (int)size < max));
 
     free(next_url);
     free(e_owner);

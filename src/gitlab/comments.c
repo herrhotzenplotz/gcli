@@ -31,6 +31,8 @@
 #include <gcli/gitlab/config.h>
 #include <gcli/json_util.h>
 
+#include <templates/gitlab/comments.h>
+
 void
 gitlab_perform_submit_comment(
     gcli_submit_comment_opts  opts,
@@ -67,32 +69,10 @@ gitlab_perform_submit_comment(
     free(url);
 }
 
-static void
-gitlab_parse_comment(json_stream *input, gcli_comment *it)
-{
-    if (json_next(input) != JSON_OBJECT)
-        errx(1, "Expected Comment Object");
-
-    enum json_type key_type;
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t      len = 0;
-        const char *key = json_get_string(input, &len);
-
-        if (strncmp("created_at", key, len) == 0)
-            it->date = get_string(input);
-        else if (strncmp("body", key, len) == 0)
-            it->body = get_string(input);
-        else if (strncmp("author", key, len) == 0)
-            it->author = get_user(input);
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
-}
-
 static int
 gitlab_perform_get_comments(const char *_url, gcli_comment **comments)
 {
-    int                count       = 0;
+    size_t             count       = 0;
     json_stream        stream      = {0};
     gcli_fetch_buffer  json_buffer = {0};
     char              *url         = (char *)_url;
@@ -101,19 +81,8 @@ gitlab_perform_get_comments(const char *_url, gcli_comment **comments)
     do {
         gcli_fetch(url, &next_url, &json_buffer);
         json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-        json_set_streaming(&stream, true);
 
-        enum json_type next_token = json_next(&stream);
-
-        while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
-            if (next_token != JSON_OBJECT)
-                errx(1, "Unexpected non-object in comment list");
-
-            *comments = realloc(*comments, (count + 1) * sizeof(gcli_comment));
-            gcli_comment *it = &(*comments)[count];
-            gitlab_parse_comment(&stream, it);
-            count += 1;
-        }
+        parse_gitlab_comments(&stream, comments, &count);
 
         json_close(&stream);
         free(json_buffer.data);
@@ -123,7 +92,7 @@ gitlab_perform_get_comments(const char *_url, gcli_comment **comments)
 
     } while ((url = next_url));
 
-    return count;
+    return (int)(count);
 }
 
 int

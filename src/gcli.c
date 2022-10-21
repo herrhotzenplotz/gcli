@@ -27,6 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
+
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -70,11 +72,12 @@ version(void)
 {
     fprintf(
         stderr,
-        "This is GCLI version "GCLI_VERSION_STRING"\n"
+        PACKAGE_STRING"\n"
         "A command line utility to interact with various git forges.\n"
         "Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>\n"
         "This program is licensed under the BSD2CLAUSE license. You should\n"
-        "have received a copy of it with its distribution.\n");
+        "have received a copy of it with its distribution.\n"
+        "Report bugs at "PACKAGE_URL".\n");
 }
 
 static void

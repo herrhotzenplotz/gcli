@@ -41,12 +41,12 @@ Required dependencies:
 ### Compile
 In order to perform a build, do:
 ```console
+$ ./configure
 $ make
-# make DESTDIR=/ PREFIX=/usr/local/ install
+# make DESTDIR=/ install
 ```
 
-You may leave out `DESTDIR` and `PREFIX`. The above are the default
-values.
+You may leave out `DESTDIR`. The above is the default value.
 
 In case any of this does not work, please either report a bug, or
 submit a patch in case you managed to fix it.

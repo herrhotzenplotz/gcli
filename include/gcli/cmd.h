@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,33 +27,44 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef GCLI_CMD_H
+#define GCLI_CMD_H
 
 #include <sn/sn.h>
-#include <gcli/gcli.h>
 
-int gcli_config_init(
-    int    *argc,
-    char ***argv);
+static inline char *
+shift(int *argc, char ***argv)
+{
+    if (*argc == 0)
+        errx(1, "error: Not enough arguments");
 
-void gcli_config_get_upstream_parts(
-    sn_sv *owner,
-    sn_sv *repo);
+    (*argc)--;
+    return *((*argv)++);
+}
 
-sn_sv gcli_config_find_by_key(
-    sn_sv       section_name,
-    const char *key);
+void version(void);
+void copyright(void);
+void check_owner_and_repo(const char **owner, const char **repo);
 
-char            *gcli_config_get_editor(void);
-char            *gcli_config_get_authheader(void);
-sn_sv            gcli_config_get_account(void);
-sn_sv            gcli_config_get_upstream(void);
-sn_sv            gcli_config_get_base(void);
-gcli_forge_type  gcli_config_get_forge_type(void);
-sn_sv            gcli_config_get_override_default_account(void);
-void             gcli_config_get_repo(const char **, const char **);
-int              gcli_config_have_colors(void);
-char            *gcli_get_apibase(void);
+void parse_labels_options(
+    int *argc, char ***argv,
+    const char ***_add_labels, size_t *_add_labels_size,
+    const char ***_remove_labels, size_t *_remove_labels_size);
 
-#endif /* CONFIG_H */
+void delete_repo(bool always_yes, const char *owner, const char *repo);
+
+/* List of subcommand entry points */
+int subcommand_ci(int argc, char *argv[]);
+int subcommand_comment(int argc, char *argv[]);
+int subcommand_forks(int argc, char *argv[]);
+int subcommand_gists(int argc, char *argv[]);
+int subcommand_issues(int argc, char *argv[]);
+int subcommand_labels(int argc, char *argv[]);
+int subcommand_pipelines(int argc, char *argv[]);
+int subcommand_pulls(int argc, char *argv[]);
+int subcommand_releases(int argc, char *argv[]);
+int subcommand_repos(int argc, char *argv[]);
+int subcommand_snippets(int argc, char *argv[]);
+int subcommand_status(int argc, char *argv[]);
+
+#endif /* GCLI_CMD_H */

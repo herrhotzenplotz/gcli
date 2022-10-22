@@ -46,6 +46,20 @@ dist_man_MANS = \
 	docs/gcli.1
 
 gcli_SOURCES = \
+	include/gcli/cmd.h \
+	src/cmd.c \
+	src/cmd/ci.c \
+	src/cmd/comment.c \
+	src/cmd/forks.c \
+	src/cmd/gists.c \
+	src/cmd/issues.c \
+	src/cmd/labels.c \
+	src/cmd/pipelines.c \
+	src/cmd/pulls.c \
+	src/cmd/releases.c \
+	src/cmd/repos.c \
+	src/cmd/snippets.c \
+	src/cmd/status.c \
 	include/gcli/gcli.h \
 	src/gcli.c
 

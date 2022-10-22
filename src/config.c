@@ -410,7 +410,7 @@ readenv(void)
         config.override_default_account = tmp;
 }
 
-void
+int
 gcli_config_init(int *argc, char ***argv)
 {
     /* These are the very first options passed to the gcli command
@@ -465,20 +465,22 @@ gcli_config_init(int *argc, char ***argv)
             sn_setquiet(1);
         } break;
         case 't': {
-            if (strcmp(optarg, "github") == 0)
+            if (strcmp(optarg, "github") == 0) {
                 config.override_forgetype = GCLI_FORGE_GITHUB;
-            else if (strcmp(optarg, "gitlab") == 0)
+            } else if (strcmp(optarg, "gitlab") == 0) {
                 config.override_forgetype = GCLI_FORGE_GITLAB;
-            else if (strcmp(optarg, "gitea") == 0)
+            } else if (strcmp(optarg, "gitea") == 0) {
                 config.override_forgetype = GCLI_FORGE_GITEA;
-            else
-                errx(1, "error: unknown forge type '%s'. "
-                     "Have either github, gitlab or gitea.", optarg);
+            } else {
+                fprintf(stderr, "error: unknown forge type '%s'. "
+                     "Have either github, gitlab or gitea.\n", optarg);
+                return EXIT_FAILURE;
+            }
         } break;
         case 0: break;
         case '?':
         default:
-            errx(1, "usage: gcli [options] subcommand ...");
+            return EXIT_FAILURE;
         }
     }
 
@@ -494,6 +496,8 @@ gcli_config_init(int *argc, char ***argv)
     optind = 0;
 
     config.inited = false;
+
+    return EXIT_SUCCESS;
 }
 
 static struct gcli_config_section *

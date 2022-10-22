@@ -49,11 +49,12 @@ gcli_SOURCES = \
 	include/gcli/cmd.h \
 	src/cmd.c \
 	src/cmd/comment.c \
-	src/cmd/issues.c \
 	src/cmd/forks.c \
+	src/cmd/issues.c \
 	src/cmd/labels.c \
 	src/cmd/pulls.c \
 	src/cmd/releases.c \
+	src/cmd/repos.c \
 	include/gcli/gcli.h \
 	src/gcli.c
 

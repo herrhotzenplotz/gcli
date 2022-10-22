@@ -65,5 +65,6 @@ int subcommand_gists(int argc, char *argv[]);
 int subcommand_snippets(int argc, char *argv[]);
 int subcommand_status(int argc, char *argv[]);
 int subcommand_ci(int argc, char *argv[]);
+int subcommand_pipelines(int argc, char *argv[]);
 
 #endif /* GCLI_CMD_H */

@@ -54,6 +54,7 @@ gcli_SOURCES = \
 	src/cmd/gists.c \
 	src/cmd/issues.c \
 	src/cmd/labels.c \
+	src/cmd/pipelines.c \
 	src/cmd/pulls.c \
 	src/cmd/releases.c \
 	src/cmd/repos.c \

@@ -65,62 +65,6 @@ usage(void)
 }
 
 static int
-subcommand_status(int argc, char *argv[])
-{
-    int   count  = 30;
-    int   ch     = 0;
-    char *endptr = NULL;
-    int   mark   = 0;
-
-    const struct option options[] = {
-        { .name    = "count",
-          .has_arg = required_argument,
-          .flag    = NULL,
-          .val     = 'n' },
-        { .name    = "mark",
-          .has_arg = no_argument,
-          .flag    = &mark,
-          .val     = 1 },
-        {0}
-    };
-
-    while ((ch = getopt_long(argc, argv, "n:m", options, NULL)) != -1) {
-        switch (ch) {
-        case 'n': {
-            count = strtol(optarg, &endptr, 10);
-            if (endptr != optarg + strlen(optarg))
-                err(1, "status: cannot parse parameter to -n");
-        } break;
-        case 'm': {
-            mark = 1;
-        } break;
-        default:
-            usage();
-        }
-    }
-
-    argc -= optind;
-    argv += optind;
-
-    if (!mark) {
-        gcli_status(count);
-    } else {
-        if (count != 30)
-            warnx("ignoring -n/--count argument");
-
-        if (argc > 1)
-            errx(1, "error: too many arguments for marking notifications");
-
-        if (argc < 1)
-            errx(1, "error: missing notification id to mark as read");
-
-        gcli_notification_mark_as_read(argv[0]);
-    }
-
-    return EXIT_SUCCESS;
-}
-
-static int
 subcommand_ci(int argc, char *argv[])
 {
     int         ch    = 0;

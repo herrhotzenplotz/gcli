@@ -37,38 +37,7 @@
 
 #include <stdlib.h>
 
-static void
-gitlab_parse_review_note(struct json_stream *input, gcli_pr_review *out)
-{
-    if (json_next(input) != JSON_OBJECT)
-        errx(1, "Expected object");
-
-    enum json_type key_type;
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t      len = 0;
-        const char *key = json_get_string(input, &len);
-
-        if (strncmp("created_at", key, len) == 0)
-            out->date = get_string(input);
-        else if (strncmp("body", key, len) == 0)
-            out->body = get_string(input);
-        else if (strncmp("author", key, len) == 0)
-            out->author = get_user(input);
-        else if (strncmp("id", key, len) == 0)
-            out->id = sn_asprintf("%ld", get_int(input));
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
-
-    if (key_type != JSON_OBJECT_END)
-        errx(1, "Expected object end");
-
-    /* Gitlab works a little different with comments on merge
-     * requests. Set it to 0. */
-    out->comments_size = 0;
-    out->comments      = NULL;
-    out->state         = NULL;
-}
+#include <templates/gitlab/review.h>
 
 size_t
 gitlab_review_get_reviews(
@@ -81,7 +50,7 @@ gitlab_review_get_reviews(
     struct json_stream  stream   = {0};
     char               *url      = NULL;
     char               *next_url = NULL;
-    int                 size     = 0;
+    size_t              size     = 0;
 
     url = sn_asprintf(
         "%s/projects/%s%%2F%s/merge_requests/%d/notes?sort=asc",
@@ -91,19 +60,8 @@ gitlab_review_get_reviews(
         gcli_fetch(url, &next_url, &buffer);
 
         json_open_buffer(&stream, buffer.data, buffer.length);
-        json_set_streaming(&stream, 1);
 
-        if (json_next(&stream) != JSON_ARRAY)
-            errx(1, "Expected array");
-
-        while (json_peek(&stream) == JSON_OBJECT) {
-            *out = realloc(*out, sizeof(gcli_pr_review) * (size + 1));
-            gcli_pr_review *it  = &(*out)[size++];
-            gitlab_parse_review_note(&stream, it);
-        }
-
-        if (json_next(&stream) != JSON_ARRAY_END)
-            errx(1, "Expected array end");
+        parse_gitlab_reviews(&stream, out, &size);
 
         json_close(&stream);
         free(url);

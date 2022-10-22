@@ -33,7 +33,7 @@
 #include <sn/sn.h>
 #include <gcli/gcli.h>
 
-void gcli_config_init(
+int gcli_config_init(
     int    *argc,
     char ***argv);
 

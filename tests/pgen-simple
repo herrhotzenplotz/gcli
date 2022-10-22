@@ -1,14 +1,11 @@
-#!/usr/bin/env atf-sh
+#!/bin/sh
 # -*- shell-script -*-
+
+set -ex
 
 ########################################################################
 #
-atf_test_case simple_object
-simple_object_head()
-{
-	atf_set "descr" "Validate that we can parse a simple object"
-}
-simple_object_body()
+simple_object()
 {
 	TMPFILE=$(mktemp)
 	cat <<EOF | ${PGEN} > $TMPFILE || atf_fail "parse failed"

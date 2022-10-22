@@ -49,6 +49,7 @@ gcli_SOURCES = \
 	include/gcli/cmd.h \
 	src/cmd.c \
 	src/cmd/issues.c \
+	src/cmd/pulls.c \
 	include/gcli/gcli.h \
 	src/gcli.c
 

@@ -43,5 +43,11 @@ AS_IF([test "x$OPT_LIBCURL" = "xcheck"],
 AC_CHECK_HEADER([curl/curl.h],,[AC_MSG_ERROR([Cannot find libcurl headers])])
 AC_CHECK_LIB([curl],[curl_easy_init],,[AC_MSG_ERROR([-lcurl doesn not contain curl_easy_init])])
 
+dnl Go looking for headers that may define getopt_long
+AC_CHECK_HEADERS([getopt.h unistd.h])
+
+dnl Check that the function is defined somewhere.
+AC_CHECK_FUNC([getopt_long])
+
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

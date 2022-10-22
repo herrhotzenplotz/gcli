@@ -32,8 +32,11 @@
 #include <gcli/gitlab/releases.h>
 #include <gcli/json_util.h>
 
+#include <templates/gitlab/releases.h>
+
 #include <pdjson/pdjson.h>
 
+/* TODO: Find a way to generate this code */
 static void
 gitlab_parse_assets_source(struct json_stream *input, gcli_release *out)
 {
@@ -71,7 +74,7 @@ gitlab_parse_assets_source(struct json_stream *input, gcli_release *out)
     }
 }
 
-static void
+void
 gitlab_parse_asset_sources(struct json_stream *stream, gcli_release *out)
 {
     enum json_type next = JSON_NULL;
@@ -87,74 +90,6 @@ gitlab_parse_asset_sources(struct json_stream *stream, gcli_release *out)
         errx(1, "unclosed release assets sources array");
 }
 
-static void
-gitlab_parse_assets(struct json_stream *input, gcli_release *out)
-{
-    enum json_type  next = JSON_NULL;
-    const char     *key;
-
-    if ((next = json_next(input)) != JSON_OBJECT)
-        errx(1, "expected release assets object");
-
-    while ((next = json_next(input)) == JSON_STRING) {
-        size_t len;
-        key = json_get_string(input, &len);
-
-        if (strncmp(key, "sources", len) == 0)
-            gitlab_parse_asset_sources(input, out);
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
-
-    if (next != JSON_OBJECT_END)
-        errx(1, "unclosed release assets object");
-}
-
-static void
-gitlab_parse_release(struct json_stream *input, gcli_release *out)
-{
-    enum json_type  next = JSON_NULL;
-    const char     *key;
-
-    if ((next = json_next(input)) != JSON_OBJECT)
-        errx(1, "expected release object");
-
-    memset(out, 0, sizeof(*out));
-
-    while ((next = json_next(input)) == JSON_STRING) {
-        size_t len;
-        key = json_get_string(input, &len);
-
-        if (strncmp("name", key, len) == 0)
-            out->name = get_sv(input);
-        else if (strncmp("tag_name", key, len) == 0)
-            out->id = get_sv(input);
-        else if (strncmp("description", key, len) == 0)
-            out->body = get_sv(input);
-        else if (strncmp("assets", key, len) == 0)
-            gitlab_parse_assets(input, out);
-        else if (strncmp("author", key, len) == 0)
-            out->author = get_user_sv(input);
-        else if (strncmp("created_at", key, len) == 0)
-            out->date = get_sv(input);
-#if 0
-        else if (strncmp("draft", key, len) == 0)
-            ;// Does not exist on gitlab
-        else if (strncmp("prerelease", key, len) == 0)
-            ;// check the released_at field
-        else if (strncmp("upload_url", key, len) == 0)
-            ;// doesn't exist on gitlab
-        else if (strncmp("html_url", key, len) == 0)
-            ;// good luck
-#endif
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
-
-    if (next != JSON_OBJECT_END)
-        errx(1, "unclosed release object");
-}
-
 int
 gitlab_get_releases(
     const char    *owner,
@@ -168,8 +103,7 @@ gitlab_get_releases(
     char               *e_repo   = NULL;
     gcli_fetch_buffer   buffer   = {0};
     struct json_stream  stream   = {0};
-    enum json_type      next     = JSON_NULL;
-    int                 size     = 0;
+    size_t              size     = 0;
 
     *out = NULL;
 
@@ -183,32 +117,19 @@ gitlab_get_releases(
 
     do {
         gcli_fetch(url, &next_url, &buffer);
-
         json_open_buffer(&stream, buffer.data, buffer.length);
-        json_set_streaming(&stream, 1);
 
-        if ((next = json_next(&stream)) != JSON_ARRAY)
-            errx(1, "expected array of releases");
+        parse_gitlab_releases(&stream, out, &size);
 
-        while ((next = json_peek(&stream)) == JSON_OBJECT) {
-            *out = realloc(*out, sizeof(**out) * (size + 1));
-            gcli_release *it = &(*out)[size++];
-            gitlab_parse_release(&stream, it);
-
-            if (size == max)
-                break;
-        }
-
-        json_close(&stream);
         free(url);
         free(buffer.data);
-    } while ((url = next_url) && (max == -1 || size < max));
+    } while ((url = next_url) && (max == -1 || (int)size < max));
 
     free(e_owner);
     free(e_repo);
     free(next_url);
 
-    return size;
+    return (int)(size);
 }
 
 void

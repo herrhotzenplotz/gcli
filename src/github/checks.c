@@ -59,7 +59,6 @@ github_get_checks(
 
     do {
         struct json_stream stream = {0};
-        enum   json_type   next   = JSON_NULL;
 
         gcli_fetch(url, &next_url, &buffer);
         json_open_buffer(&stream, buffer.data, buffer.length);
@@ -78,7 +77,7 @@ github_print_checks(const gcli_github_checks *list)
     printf("%10.10s  %10.10s  %10.10s  %16.16s  %16.16s  %-s\n",
            "ID", "STATUS", "CONCLUSION", "STARTED", "COMPLETED", "NAME");
 
-    for (int i = 0; i < list->checks_size; ++i) {
+    for (size_t i = 0; i < list->checks_size; ++i) {
         printf("%10ld  %10.10s  %s%10.10s%s  %16.16s  %16.16s  %-s\n",
                list->checks[i].id,
                list->checks[i].status,
@@ -94,7 +93,7 @@ github_print_checks(const gcli_github_checks *list)
 void
 github_free_checks(gcli_github_checks *list)
 {
-    for (int i = 0; i < list->checks_size; ++i) {
+    for (size_t i = 0; i < list->checks_size; ++i) {
         free(list->checks[i].name);
         free(list->checks[i].status);
         free(list->checks[i].conclusion);

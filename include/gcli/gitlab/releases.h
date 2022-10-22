@@ -46,4 +46,10 @@ void gitlab_delete_release(
     const char *repo,
     const char *id);
 
+/* HACK: Needed by the parser generator */
+#include <pdjson/pdjson.h>
+void gitlab_parse_asset_sources(
+    struct json_stream *input,
+    gcli_release       *out);
+
 #endif /* GITLAB_RELEASES_H */

@@ -409,6 +409,22 @@ get_github_style_color(json_stream *input)
     return ((uint32_t)(color)) << 8;
 }
 
+uint32_t
+get_gitlab_style_color(struct json_stream *input)
+{
+    char *color  = get_string(input);
+    char *endptr = NULL;
+    long  code   = 0;
+
+    code = strtol(color + 1, &endptr, 16);
+    if (endptr != (color + 1 + strlen(color + 1)))
+        err(1, "error: color code is invalid");
+
+    free(color);
+
+    return ((uint32_t)(code) << 8);
+}
+
 sn_sv
 get_gitea_visibility(json_stream *input)
 {
@@ -418,4 +434,10 @@ get_gitea_visibility(json_stream *input)
     else
         v = strdup("public");
     return SV(v);
+}
+
+bool
+get_gitlab_can_be_merged(json_stream *input)
+{
+    return sn_sv_eq_to(get_sv(input), "can_be_merged");
 }

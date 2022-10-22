@@ -34,59 +34,7 @@
 
 #include <pdjson/pdjson.h>
 
-static sn_sv
-parse_namespace(struct json_stream *input)
-{
-    enum json_type  key_type = JSON_NULL;
-    sn_sv           result   = {0};
-    const char     *key      = NULL;
-
-    if (json_next(input) != JSON_OBJECT)
-        errx(1, "Expected an object for a namespace");
-
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t len;
-        key = json_get_string(input, &len);
-        if (strncmp("full_path", key, len) == 0)
-            result = get_sv(input);
-        else
-            json_next(input);
-    }
-
-    if (key_type != JSON_OBJECT_END)
-        errx(1, "Namespace object not closed");
-
-    return result;
-}
-
-static void
-parse_fork(struct json_stream *input, gcli_fork *out)
-{
-    enum json_type  key_type = JSON_NULL;
-    const char     *key      = NULL;
-
-    if (json_next(input) != JSON_OBJECT)
-        errx(1, "Expected an object for a fork");
-
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t len;
-        key = json_get_string(input, &len);
-
-        if (strncmp("path_with_namespace", key, len) == 0)
-            out->full_name = get_sv(input);
-        else if (strncmp("namespace", key, len) == 0)
-            out->owner = parse_namespace(input);
-        else if (strncmp("created_at", key, len) == 0)
-            out->date = get_sv(input);
-        else if (strncmp("forks_count", key, len) == 0)
-            out->forks = get_int(input);
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
-
-    if (key_type != JSON_OBJECT_END)
-        errx(1, "Fork object not closed");
-}
+#include <templates/gitlab/forks.h>
 
 int
 gitlab_get_forks(
@@ -100,9 +48,8 @@ gitlab_get_forks(
     char               *e_owner  = NULL;
     char               *e_repo   = NULL;
     char               *next_url = NULL;
-    enum   json_type    next     = JSON_NULL;
     struct json_stream  stream   = {0};
-    int                 size     = 0;
+    size_t              size     = 0;
 
     e_owner = gcli_urlencode(owner);
     e_repo  = gcli_urlencode(repo);
@@ -118,33 +65,19 @@ gitlab_get_forks(
         gcli_fetch(url, &next_url, &buffer);
 
         json_open_buffer(&stream, buffer.data, buffer.length);
-        json_set_streaming(&stream, 1);
 
-        // TODO: Poor error message
-        if ((next = json_next(&stream)) != JSON_ARRAY)
-            errx(1,
-                 "Expected array in response from API "
-                 "but got something else instead");
-
-        while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
-            *out = realloc(*out, sizeof(gcli_fork) * (size + 1));
-            gcli_fork *it = &(*out)[size++];
-            parse_fork(&stream, it);
-
-            if (size == max)
-                break;
-        }
+        parse_gitlab_forks(&stream, out, &size);
 
         json_close(&stream);
         free(buffer.data);
         free(url);
-    } while ((url = next_url) && (max == -1 || size < max));
+    } while ((url = next_url) && (max == -1 || (int)size < max));
 
     free(next_url);
     free(e_owner);
     free(e_repo);
 
-    return size;
+    return (int)(size);
 }
 
 void

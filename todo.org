@@ -15,17 +15,17 @@
 	 - [ ] This is GraphQL!...needs to be solved later
    - [X] Status
 
-** TODO Convert Gitlab stuff to generated parers [0%]
-   - [ ] Pipelines
-   - [ ] Merge Requests
-   - [ ] Comments
-   - [ ] Issues
-   - [ ] Review
-   - [ ] Labels
-   - [ ] Releases
-   - [ ] Forks
-   - [ ] Repos
-   - [ ] Status
+** DONE Convert Gitlab stuff to generated parers [100%]
+   - [X] Pipelines
+   - [X] Merge Requests
+   - [X] Comments
+   - [X] Issues
+   - [X] Review
+   - [X] Labels
+   - [X] Releases
+   - [X] Forks
+   - [X] Repos
+   - [X] Status
 
 ** DONE handle errors from the github api
    - [[file:src/curl.c::ghcli_fetch(const char *url, ghcli_fetch_buffer *out)][gcli_fetch]]

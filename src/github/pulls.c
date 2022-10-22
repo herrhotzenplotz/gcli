@@ -73,7 +73,7 @@ github_get_prs(
         free(json_buffer.data);
         free(url);
         json_close(&stream);
-    } while ((url = next_url) && (max == -1 || count < max));
+    } while ((url = next_url) && (max == -1 || (int)count < max));
 
     free(url);
     free(e_owner);

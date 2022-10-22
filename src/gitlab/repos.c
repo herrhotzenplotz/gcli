@@ -34,41 +34,7 @@
 #include <pdjson/pdjson.h>
 #include <sn/sn.h>
 
-static void
-gitlab_parse_repo(json_stream *input, gcli_repo *out)
-{
-    enum json_type  next     = JSON_NULL;
-    enum json_type  key_type = JSON_NULL;
-    const char     *key      = NULL;
-
-    if ((next = json_next(input)) != JSON_OBJECT)
-        errx(1, "Expected an object for a repo");
-
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t len;
-        key = json_get_string(input, &len);
-
-        if (strncmp("path_with_namespace", key, len) == 0)
-            out->full_name = get_sv(input);
-        else if (strncmp("name", key, len) == 0)
-            out->name = get_sv(input);
-        else if (strncmp("owner", key, len) == 0)
-            out->owner = get_user_sv(input);
-        else if (strncmp("created_at", key, len) == 0)
-            out->date = get_sv(input);
-        else if (strncmp("visibility", key, len) == 0)
-            out->visibility = get_sv(input);
-        else if (strncmp("fork", key, len) == 0)
-            out->is_fork = get_bool(input);
-        else if (strncmp("id", key, len) == 0)
-            out->id = get_int(input);
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
-
-    if (key_type != JSON_OBJECT_END)
-        errx(1, "Repo object not closed");
-}
+#include <templates/gitlab/repos.h>
 
 void
 gitlab_get_repo(
@@ -94,7 +60,7 @@ gitlab_get_repo(
     gcli_fetch(url, NULL, &buffer);
     json_open_buffer(&stream, buffer.data, buffer.length);
 
-    gitlab_parse_repo(&stream, out);
+    parse_gitlab_repo(&stream, out);
 
     json_close(&stream);
     free(buffer.data);
@@ -114,8 +80,7 @@ gitlab_get_repos(
     char               *e_owner  = NULL;
     gcli_fetch_buffer   buffer   = {0};
     struct json_stream  stream   = {0};
-    enum  json_type     next     = JSON_NULL;
-    int                 size     = 0;
+    size_t              size     = 0;
 
     e_owner = gcli_urlencode(owner);
 
@@ -125,27 +90,13 @@ gitlab_get_repos(
         gcli_fetch(url, &next_url, &buffer);
 
         json_open_buffer(&stream, buffer.data, buffer.length);
-        json_set_streaming(&stream, 1);
 
-        // TODO: Poor error message
-        if ((next = json_next(&stream)) != JSON_ARRAY)
-            errx(1,
-                 "Expected array in response from API "
-                 "but got something else instead");
-
-        while ((next = json_peek(&stream)) != JSON_ARRAY_END) {
-            *out = realloc(*out, sizeof(**out) * (size + 1));
-            gcli_repo *it = &(*out)[size++];
-            gitlab_parse_repo(&stream, it);
-
-            if (size == max)
-                break;
-        }
+        parse_gitlab_repos(&stream, out, &size);
 
         free(url);
         free(buffer.data);
         json_close(&stream);
-    } while ((url = next_url) && (max == -1 || size < max));
+    } while ((url = next_url) && (max == -1 || (int)size < max));
 
     free(url);
     free(e_owner);
@@ -225,7 +176,7 @@ gitlab_repo_create(
     /* Fetch and parse result */
     gcli_fetch_with_method("POST", url, data, NULL, &buffer);
     json_open_buffer(&stream, buffer.data, buffer.length);
-    gitlab_parse_repo(&stream, repo);
+    parse_gitlab_repo(&stream, repo);
 
     /* Cleanup */
     json_close(&stream);

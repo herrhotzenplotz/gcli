@@ -45,7 +45,6 @@ github_get_repos(const char *owner, int max, gcli_repo **out)
     char               *e_owner  = NULL;
     gcli_fetch_buffer   buffer   = {0};
     struct json_stream  stream   = {0};
-    enum  json_type     next     = JSON_NULL;
     size_t              size     = 0;
 
     e_owner = gcli_urlencode(owner);
@@ -78,7 +77,7 @@ github_get_repos(const char *owner, int max, gcli_repo **out)
         free(url);
         free(buffer.data);
         json_close(&stream);
-    } while ((url = next_url) && (max == -1 || size < max));
+    } while ((url = next_url) && (max == -1 || (int)size < max));
 
     free(url);
     free(e_owner);
@@ -94,7 +93,6 @@ github_get_own_repos(int max, gcli_repo **out)
     char               *next_url = NULL;
     gcli_fetch_buffer   buffer   = {0};
     struct json_stream  stream   = {0};
-    enum  json_type     next     = JSON_NULL;
     size_t              size     = 0;
 
     do {
@@ -108,7 +106,7 @@ github_get_own_repos(int max, gcli_repo **out)
         free(buffer.data);
         json_close(&stream);
         free(url);
-    } while ((url = next_url) && (max == -1 || size < max));
+    } while ((url = next_url) && (max == -1 || (int)size < max));
 
     free(next_url);
 

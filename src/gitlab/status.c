@@ -35,51 +35,7 @@
 #include <sn/sn.h>
 #include <pdjson/pdjson.h>
 
-static void
-parse_gitlab_project(struct json_stream *input, gcli_notification *it)
-{
-    if (json_next(input) != JSON_OBJECT)
-        errx(1, "Expected Project Object");
-
-    enum json_type key_type;
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t      len = 0;
-        const char *key = json_get_string(input, &len);
-
-        if (strncmp("path_with_namespace", key, len) == 0)
-            it->repository = get_string(input);
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
-}
-
-static void
-parse_gitlab_todo(struct json_stream *input, gcli_notification *it)
-{
-    if (json_next(input) != JSON_OBJECT)
-        errx(1, "Expected Notification Object");
-
-    enum json_type key_type;
-    while ((key_type = json_next(input)) == JSON_STRING) {
-        size_t      len = 0;
-        const char *key = json_get_string(input, &len);
-
-        if (strncmp("updated_at", key, len) == 0)
-            it->date = get_string(input);
-        else if (strncmp("action_name", key, len) == 0)
-            it->reason = get_string(input);
-        else if (strncmp("id", key, len) == 0)
-            it->id = sn_asprintf("%ld", get_int(input));
-        else if (strncmp("body", key, len) == 0)
-            it->title = get_string(input);
-        else if (strncmp("target_type", key, len) == 0)
-            it->type = get_string(input);
-        else if (strncmp("project", key, len) == 0)
-            parse_gitlab_project(input, it);
-        else
-            SKIP_OBJECT_VALUE(input);
-    }
-}
+#include <templates/gitlab/status.h>
 
 size_t
 gitlab_get_notifications(gcli_notification **notifications, int count)
@@ -96,21 +52,8 @@ gitlab_get_notifications(gcli_notification **notifications, int count)
         gcli_fetch(url, &next_url, &buffer);
 
         json_open_buffer(&stream, buffer.data, buffer.length);
-        json_set_streaming(&stream, 1);
 
-        enum json_type next_token = json_next(&stream);
-
-        while ((next_token = json_peek(&stream)) != JSON_ARRAY_END) {
-            if (next_token != JSON_OBJECT)
-                errx(1, "Unexpected non-object in todo list");
-
-            *notifications = realloc(
-                *notifications,
-                (notifications_size + 1) * sizeof(gcli_notification));
-            gcli_notification *it = &(*notifications)[notifications_size];
-            parse_gitlab_todo(&stream, it);
-            notifications_size += 1;
-        }
+        parse_gitlab_todos(&stream, notifications, &notifications_size);
 
         json_close(&stream);
         free(url);

@@ -35,6 +35,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <gcli/cmd.h>
 #include <gcli/comments.h>
 #include <gcli/config.h>
 #include <gcli/curl.h>
@@ -55,48 +56,12 @@
 #include <gcli/github/checks.h>
 #include <gcli/gitlab/pipelines.h>
 
-#include <sn/sn.h>
-
-static char *
-shift(int *argc, char ***argv)
-{
-    if (*argc == 0)
-        errx(1, "error: Not enough arguments");
-
-    (*argc)--;
-    return *((*argv)++);
-}
-
-static void
-version(void)
-{
-    fprintf(
-        stderr,
-        PACKAGE_STRING"\n"
-        "A command line utility to interact with various git forges.\n"
-        "Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>\n"
-        "This program is licensed under the BSD2CLAUSE license. You should\n"
-        "have received a copy of it with its distribution.\n"
-        "Report bugs at "PACKAGE_URL".\n");
-}
-
 static void
 usage(void)
 {
     fprintf(stderr, "usage: gcli [options] [subcommand] [options] ...\n");
     version();
     exit(1);
-}
-
-static void
-check_owner_and_repo(const char **owner, const char **repo)
-{
-    /* If no remote was specified, try to autodetect */
-    if ((*owner == NULL) != (*repo == NULL))
-        errx(1, "error: missing either explicit owner or repo");
-
-    if (*owner == NULL)
-        gcli_config_get_repo(owner, repo);
 }
 
 static sn_sv

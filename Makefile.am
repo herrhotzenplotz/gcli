@@ -56,6 +56,7 @@ gcli_SOURCES = \
 	src/cmd/pulls.c \
 	src/cmd/releases.c \
 	src/cmd/repos.c \
+	src/cmd/snippets.c \
 	include/gcli/gcli.h \
 	src/gcli.c
 

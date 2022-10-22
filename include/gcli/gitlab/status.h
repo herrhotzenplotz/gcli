@@ -30,6 +30,10 @@
 #ifndef GITLAB_STATUS_H
 #define GITLAB_STATUS_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gcli/status.h>
 
 size_t gitlab_get_notifications(gcli_notification **notifications, int count);

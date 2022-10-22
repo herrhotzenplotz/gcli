@@ -37,11 +37,8 @@
 #include <getopt.h>
 #endif
 
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
 #include <stdlib.h>
+#include <unistd.h>
 
 static void
 usage(void)

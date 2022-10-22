@@ -30,6 +30,10 @@
 #ifndef EDITOR_H
 #define EDITOR_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <sn/sn.h>
 
 sn_sv gcli_editor_get_user_message(void (*initializer)(FILE *, void *), void *user_data);

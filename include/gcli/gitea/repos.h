@@ -30,6 +30,10 @@
 #ifndef GITEA_REPOS_H
 #define GITEA_REPOS_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gcli/repos.h>
 
 int gitea_get_repos(

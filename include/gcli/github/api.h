@@ -30,6 +30,10 @@
 #ifndef GITHUB_API_H
 #define GITHUB_API_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gcli/curl.h>
 
 const char *github_api_error_string(gcli_fetch_buffer *it);

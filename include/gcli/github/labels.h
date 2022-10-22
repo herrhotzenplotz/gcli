@@ -30,6 +30,10 @@
 #ifndef GITHUB_LABELS_H
 #define GITHUB_LABELS_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gcli/labels.h>
 
 size_t github_get_labels(

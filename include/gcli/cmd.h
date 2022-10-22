@@ -30,6 +30,10 @@
 #ifndef GCLI_CMD_H
 #define GCLI_CMD_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <sn/sn.h>
 
 static inline char *

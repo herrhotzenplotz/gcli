@@ -30,6 +30,10 @@
 #ifndef GITLAB_RELEASES_H
 #define GITLAB_RELEASES_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gcli/releases.h>
 
 int gitlab_get_releases(

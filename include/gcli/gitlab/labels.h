@@ -30,6 +30,10 @@
 #ifndef GITLAB_LABELS_H
 #define GITLAB_LABELS_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gcli/labels.h>
 
 size_t gitlab_get_labels(

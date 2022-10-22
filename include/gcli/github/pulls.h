@@ -30,6 +30,10 @@
 #ifndef GITHUB_PULLS_H
 #define GITHUB_PULLS_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gcli/curl.h>
 #include <gcli/pulls.h>
 

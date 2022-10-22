@@ -45,6 +45,10 @@ AC_CHECK_LIB([curl],[curl_easy_init],,[AC_MSG_ERROR([-lcurl doesn not contain cu
 
 dnl Go looking for headers that may define getopt_long
 AC_CHECK_HEADERS([getopt.h unistd.h])
+dnl Other headers that we require
+AC_CHECK_HEADERS([string.h signal.h sys/wait.h unistd.h sys/mman.h sys/types.h],
+                 ,
+                 [AC_MSG_ERROR([Required header not found])])
 
 dnl Check that the function is defined somewhere.
 AC_CHECK_FUNC([getopt_long])

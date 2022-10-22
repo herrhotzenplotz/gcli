@@ -30,6 +30,10 @@
 #ifndef REVIEW_H
 #define REVIEW_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <sn/sn.h>
 
 typedef struct gcli_pr_review         gcli_pr_review;

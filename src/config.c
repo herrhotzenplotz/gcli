@@ -27,6 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
+
 #include <gcli/config.h>
 #include <gcli/github/config.h>
 #include <gcli/gitlab/config.h>
@@ -37,7 +39,9 @@
 #include <assert.h>
 #include <ctype.h>
 #include <dirent.h>
+#ifdef HAVE_GETOPT_H
 #include <getopt.h>
+#endif
 #include <stdlib.h>
 #include <unistd.h>
 

@@ -30,6 +30,10 @@
 #ifndef JSON_UTIL_H
 #define JSON_UTIL_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gcli/curl.h>
 
 #include <pdjson/pdjson.h>

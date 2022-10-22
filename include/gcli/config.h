@@ -30,6 +30,10 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <sn/sn.h>
 #include <gcli/gcli.h>
 

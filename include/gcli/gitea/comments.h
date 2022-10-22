@@ -30,6 +30,10 @@
 #ifndef GITEA_COMMENTS_H
 #define GITEA_COMMENTS_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gcli/comments.h>
 #include <gcli/curl.h>
 

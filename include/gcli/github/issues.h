@@ -30,6 +30,10 @@
 #ifndef GCLI_ISSUES_H
 #define GCLI_ISSUES_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gcli/curl.h>
 #include <gcli/issues.h>
 

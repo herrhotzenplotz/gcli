@@ -30,6 +30,10 @@
 #ifndef GITHUB_RELEASES_H
 #define GITHUB_RELEASES_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gcli/releases.h>
 
 int github_get_releases(

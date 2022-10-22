@@ -30,6 +30,10 @@
 #ifndef GITLAB_PIPELINES_H
 #define GITLAB_PIPELINES_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 typedef struct gitlab_pipeline gitlab_pipeline;
 typedef struct gitlab_job      gitlab_job;
 

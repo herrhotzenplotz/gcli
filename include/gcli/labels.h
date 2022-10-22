@@ -30,6 +30,10 @@
 #ifndef LABELS_H
 #define LABELS_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>

@@ -30,6 +30,10 @@
 #ifndef GITLAB_COMMENTS_H
 #define GITLAB_COMMENTS_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gcli/comments.h>
 #include <gcli/curl.h>
 

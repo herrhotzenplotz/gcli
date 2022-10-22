@@ -30,6 +30,10 @@
 #ifndef GCLI_H
 #define GCLI_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 enum gcli_output_order { OUTPUT_ORDER_UNSORTED, OUTPUT_ORDER_SORTED };
 
 typedef enum gcli_forge_type {

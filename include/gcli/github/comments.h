@@ -30,6 +30,10 @@
 #ifndef GITHUB_COMMENTS_H
 #define GITHUB_COMMENTS_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gcli/comments.h>
 #include <gcli/curl.h>
 

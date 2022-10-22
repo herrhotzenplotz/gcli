@@ -30,6 +30,10 @@
 #ifndef GITEA_LABELS_H
 #define GITEA_LABELS_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gcli/labels.h>
 
 size_t gitea_get_labels(

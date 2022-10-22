@@ -30,6 +30,10 @@
 #ifndef GITLAB_MERGE_REQUESTS_H
 #define GITLAB_MERGE_REQUESTS_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gcli/pulls.h>
 
 int gitlab_get_mrs(

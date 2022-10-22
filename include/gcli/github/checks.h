@@ -30,6 +30,10 @@
 #ifndef GITHUB_CHECKS_H
 #define GITHUB_CHECKS_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <sn/sn.h>
 
 typedef struct gcli_github_check  gcli_github_check;

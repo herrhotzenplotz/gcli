@@ -30,6 +30,10 @@
 #ifndef SNIPPETS_H
 #define SNIPPETS_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gcli/gcli.h>
 
 typedef struct gcli_snippet gcli_snippet;

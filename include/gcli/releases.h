@@ -30,6 +30,10 @@
 #ifndef RELEASES_H
 #define RELEASES_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <sn/sn.h>
 #include <gcli/gcli.h>
 

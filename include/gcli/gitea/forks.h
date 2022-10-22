@@ -30,6 +30,10 @@
 #ifndef GITEA_FORKS_H
 #define GITEA_FORKS_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gcli/forks.h>
 
 int gitea_get_forks(

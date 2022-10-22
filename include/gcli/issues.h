@@ -30,6 +30,10 @@
 #ifndef ISSUES_H
 #define ISSUES_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <sn/sn.h>
 #include <gcli/gcli.h>
 #include <stdio.h>

@@ -1,6 +1,10 @@
 #ifndef PGEN_H
 #define PGEN_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 
 /* PGen command line options */

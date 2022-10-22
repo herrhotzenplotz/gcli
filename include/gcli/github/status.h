@@ -30,6 +30,10 @@
 #ifndef GITHUB_STATUS_H
 #define GITHUB_STATUS_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gcli/status.h>
 
 size_t github_get_notifications(gcli_notification **notifications, int count);

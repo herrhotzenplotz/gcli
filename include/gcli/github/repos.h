@@ -30,6 +30,10 @@
 #ifndef GITHUB_REPOS_H
 #define GITHUB_REPOS_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gcli/repos.h>
 
 int github_get_repos(

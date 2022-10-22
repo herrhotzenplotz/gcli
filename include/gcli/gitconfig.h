@@ -30,6 +30,10 @@
 #ifndef GITCONFIG_H
 #define GITCONFIG_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <sn/sn.h>
 
 typedef struct gcli_gitremote gcli_gitremote;

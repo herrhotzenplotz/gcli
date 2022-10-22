@@ -30,6 +30,10 @@
 #ifndef STATUS_H
 #define STATUS_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdlib.h>
 
 struct gcli_notification {

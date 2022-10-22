@@ -30,6 +30,10 @@
 #ifndef GITLAB_REVIEW_H
 #define GITLAB_REVIEW_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <gcli/review.h>
 
 size_t gitlab_review_get_reviews(

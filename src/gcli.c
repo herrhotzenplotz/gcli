@@ -65,69 +65,6 @@ usage(void)
 }
 
 static int
-subcommand_ci(int argc, char *argv[])
-{
-    int         ch    = 0;
-    const char *owner = NULL, *repo = NULL;
-    const char *ref   = NULL;
-    int         count = -1;     /* fetch all checks by default */
-
-    /* Parse options */
-    const struct option options[] = {
-        {.name = "repo",  .has_arg = required_argument, .flag = NULL, .val = 'r'},
-        {.name = "owner", .has_arg = required_argument, .flag = NULL, .val = 'o'},
-        {.name = "count", .has_arg = required_argument, .flag = NULL, .val = 'c'},
-        {0}
-    };
-
-    while ((ch = getopt_long(argc, argv, "n:o:r:", options, NULL)) != -1) {
-        switch (ch) {
-        case 'o':
-            owner = optarg;
-            break;
-        case 'r':
-            repo = optarg;
-            break;
-        case 'n': {
-            char *endptr = NULL;
-            count        = strtol(optarg, &endptr, 10);
-            if (endptr != (optarg + strlen(optarg)))
-                err(1, "ci: cannot parse argument to -n");
-        } break;
-        case '?':
-        default:
-            usage();
-        }
-    }
-
-    argc -= optind;
-    argv += optind;
-
-    /* Check that we have exactly one left argument and print proper
-     * error messages */
-    if (argc < 1)
-        errx(1, "error: missing ref");
-
-    if (argc > 1)
-        errx(1, "error: stray arguments");
-
-    /* Save the ref */
-    ref = argv[0];
-
-    check_owner_and_repo(&owner, &repo);
-
-    /* Make sure we are actually talking about a github remote because
-     * we might be incorrectly inferring it */
-    if (gcli_config_get_forge_type() != GCLI_FORGE_GITHUB)
-        errx(1, "error: The ci subcommand only works for GitHub. "
-             "Use gcli -t github ... to force a GitHub remote.");
-
-    github_checks(owner, repo, ref, count);
-
-    return EXIT_SUCCESS;
-}
-
-static int
 subcommand_pipelines(int argc, char *argv[])
 {
     int         ch    = 0;

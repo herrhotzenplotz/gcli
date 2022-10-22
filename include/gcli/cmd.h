@@ -46,4 +46,9 @@ void version(void);
 void copyright(void);
 void check_owner_and_repo(const char **owner, const char **repo);
 
+void parse_labels_options(
+    int *argc, char ***argv,
+    const char ***_add_labels, size_t *_add_labels_size,
+    const char ***_remove_labels, size_t *_remove_labels_size);
+
 #endif /* GCLI_CMD_H */

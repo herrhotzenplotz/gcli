@@ -34,6 +34,8 @@
 #include <gcli/cmd.h>
 #include <gcli/config.h>
 
+#include <stdlib.h>
+
 void
 copyright(void)
 {
@@ -60,4 +62,45 @@ check_owner_and_repo(const char **owner, const char **repo)
 
     if (*owner == NULL)
         gcli_config_get_repo(owner, repo);
+}
+
+/* Parses (and updates) the given argument list into two seperate lists:
+ *
+ *   --add    -> add_labels
+ *   --remove -> remove_labels
+ */
+void
+parse_labels_options(int *argc, char ***argv,
+                     const char ***_add_labels,    size_t *_add_labels_size,
+                     const char ***_remove_labels, size_t *_remove_labels_size)
+{
+    const char **add_labels = NULL, **remove_labels = NULL;
+    size_t       add_labels_size = 0, remove_labels_size = 0;
+
+    /* Collect add/delete labels */
+    while (*argc > 0) {
+        if (strcmp(**argv, "--add") == 0) {
+            shift(argc, argv);
+
+            add_labels = realloc(
+                add_labels,
+                (add_labels_size + 1) * sizeof(*add_labels));
+            add_labels[add_labels_size++] = shift(argc, argv);
+        } else if (strcmp(**argv, "--remove") == 0) {
+            shift(argc, argv);
+
+            remove_labels = realloc(
+                remove_labels,
+                (remove_labels_size + 1) * sizeof(*remove_labels));
+            remove_labels[remove_labels_size++] = shift(argc, argv);
+        } else {
+            break;
+        }
+    }
+
+    *_add_labels      = add_labels;
+    *_add_labels_size = add_labels_size;
+
+    *_remove_labels      = remove_labels;
+    *_remove_labels_size = remove_labels_size;
 }

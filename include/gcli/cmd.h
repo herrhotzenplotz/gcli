@@ -57,5 +57,6 @@ int subcommand_issues(int argc, char *argv[]);
 int subcommand_pulls(int argc, char *argv[]);
 int subcommand_labels(int argc, char *argv[]);
 int subcommand_releases(int argc, char *argv[]);
+int subcommand_comment(int argc, char *argv[]);
 
 #endif /* GCLI_CMD_H */

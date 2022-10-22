@@ -51,4 +51,8 @@ void parse_labels_options(
     const char ***_add_labels, size_t *_add_labels_size,
     const char ***_remove_labels, size_t *_remove_labels_size);
 
+
+/* List of subcommand entry points */
+int subcommand_issues(int argc, char *argv[]);
+
 #endif /* GCLI_CMD_H */

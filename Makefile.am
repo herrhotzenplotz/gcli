@@ -48,6 +48,7 @@ dist_man_MANS = \
 gcli_SOURCES = \
 	include/gcli/cmd.h \
 	src/cmd.c \
+	src/cmd/issues.c \
 	include/gcli/gcli.h \
 	src/gcli.c
 

@@ -33,6 +33,7 @@
 
 #include <gcli/cmd.h>
 #include <gcli/config.h>
+#include <gcli/repos.h>
 
 #include <stdlib.h>
 
@@ -103,4 +104,24 @@ parse_labels_options(int *argc, char ***argv,
 
     *_remove_labels      = remove_labels;
     *_remove_labels_size = remove_labels_size;
+}
+
+/* delete the repo (and ask for confirmation) */
+void
+delete_repo(bool always_yes, const char *owner, const char *repo)
+{
+    bool delete = false;
+
+    if (!always_yes) {
+        delete = sn_yesno(
+            "Are you sure you want to delete %s/%s?",
+            owner, repo);
+    } else {
+        delete = true;
+    }
+
+    if (delete)
+        gcli_repo_delete(owner, repo);
+    else
+        errx(1, "Operation aborted");
 }

@@ -51,6 +51,7 @@ void parse_labels_options(
     const char ***_add_labels, size_t *_add_labels_size,
     const char ***_remove_labels, size_t *_remove_labels_size);
 
+void delete_repo(bool always_yes, const char *owner, const char *repo);
 
 /* List of subcommand entry points */
 int subcommand_issues(int argc, char *argv[]);
@@ -58,5 +59,6 @@ int subcommand_pulls(int argc, char *argv[]);
 int subcommand_labels(int argc, char *argv[]);
 int subcommand_releases(int argc, char *argv[]);
 int subcommand_comment(int argc, char *argv[]);
+int subcommand_forks(int argc, char *argv[]);
 
 #endif /* GCLI_CMD_H */

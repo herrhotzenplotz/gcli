@@ -143,6 +143,10 @@ BUILT_SOURCES = \
 
 CLEANFILES = $(BUILT_SOURCES)
 
+EXTRA_DIST = \
+	LICENSE \
+	README.md
+
 ###########################################
 # Tests
 check_PROGRAMS = \

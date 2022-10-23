@@ -44,18 +44,18 @@
 
 #include <sn/sn.h>
 
-static int quiet_mode = 0;
+static int verbosity = VERBOSITY_NORMAL;
 
 void
-sn_setquiet(int quiet)
+sn_setverbosity(int level)
 {
-    quiet_mode = quiet;
+    verbosity = level;
 }
 
 int
-sn_getquiet(void)
+sn_getverbosity(void)
 {
-    return quiet_mode;
+    return verbosity;
 }
 
 
@@ -88,7 +88,7 @@ err(int code, const char *fmt, ...)
 void
 warnx(const char *fmt, ...)
 {
-    if (quiet_mode)
+    if (!sn_verbose())
         return;
 
     fputs("warning: ", stderr);
@@ -104,7 +104,7 @@ warnx(const char *fmt, ...)
 void
 warn(const char *fmt, ...)
 {
-    if (quiet_mode)
+    if (!sn_verbose())
         return;
 
     fputs("warning: ", stderr);

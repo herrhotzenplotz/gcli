@@ -114,8 +114,11 @@ formatting. Default is to output colors unless stdout is not a
 tty. See
 .Xr isatty 3 .
 .It Fl q , -quiet
-Suppress warning messages about missing config files and various other
-things.
+Surpresses most output of
+.Nm .
+.It Fl v , -verbose
+Be very verbose. This means that warnings about missing config files
+and request steps are printed to stderr.
 .It Fl t , -type Ar forge-type
 Forcefully override the forge type if it can't be inferred
 correctly. Set

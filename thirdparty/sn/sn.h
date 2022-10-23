@@ -45,9 +45,33 @@
 #define PRINTF_FORMAT(STRING_INDEX, FIRST_TO_CHECK)
 #endif
 
-/* Make warn and warnx silent if quiet = 1 */
-void sn_setquiet(int quiet);
-int  sn_getquiet(void);
+enum {
+    VERBOSITY_NORMAL  = 0,
+    VERBOSITY_QUIET   = 1,
+    VERBOSITY_VERBOSE = 2,
+};
+
+/* mostly concerning warn(x) */
+void sn_setverbosity(int verbosity);
+int  sn_getverbosity(void);
+
+static inline int
+sn_verbose(void)
+{
+    return sn_getverbosity() == VERBOSITY_VERBOSE;
+}
+
+static inline int
+sn_normal(void)
+{
+    return sn_getverbosity() == VERBOSITY_NORMAL;
+}
+
+static inline int
+sn_quiet(void)
+{
+    return sn_getverbosity() == VERBOSITY_QUIET;
+}
 
 /* error functions */
 /* print a formatted error message and exit with code */

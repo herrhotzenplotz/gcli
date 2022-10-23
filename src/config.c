@@ -444,8 +444,15 @@ gcli_config_init(int *argc, char ***argv)
           .has_arg = no_argument,
           .flag    = NULL,
           .val     = 'q' },
+        { .name    = "verbose",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'v' },
         {0},
     };
+
+    /* by default we are not verbose */
+    sn_setverbosity(VERBOSITY_NORMAL);
 
     /* Before we parse options, invalidate the override type so it
      * doesn't get confused later */
@@ -454,7 +461,7 @@ gcli_config_init(int *argc, char ***argv)
     /* Start off by pre-populating the config structure */
     readenv();
 
-    while ((ch = getopt_long(*argc, *argv, "+a:r:cqt:", options, NULL)) != -1) {
+    while ((ch = getopt_long(*argc, *argv, "+a:r:cqvt:", options, NULL)) != -1) {
         switch (ch) {
         case 'a': {
             config.override_default_account = optarg;
@@ -466,7 +473,10 @@ gcli_config_init(int *argc, char ***argv)
             config.colors_disabled = 1;
         } break;
         case 'q': {
-            sn_setquiet(1);
+            sn_setverbosity(VERBOSITY_QUIET);
+        } break;
+        case 'v': {
+            sn_setverbosity(VERBOSITY_VERBOSE);
         } break;
         case 't': {
             if (strcmp(optarg, "github") == 0) {

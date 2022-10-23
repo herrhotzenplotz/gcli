@@ -113,7 +113,8 @@ usage(void)
     fprintf(stderr, "                    - gitlab (default: gitlab.com)\n");
     fprintf(stderr, "                    - gitea (default: codeberg.org)\n");
     fprintf(stderr, "  -c             Disable colors\n");
-    fprintf(stderr, "  -q             Silence warning\n\n");
+    fprintf(stderr, "  -q             Be quiet. (Not implemented yet)\n\n");
+    fprintf(stderr, "  -v             Be verbose.\n\n");
     fprintf(stderr, "SUBCOMMANDS:\n");
     for (size_t i = 0; i < ARRAY_SIZE(subcommands); ++i) {
         fprintf(stderr,

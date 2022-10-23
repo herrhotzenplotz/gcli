@@ -17,6 +17,8 @@ pgen_SOURCES = \
 
 noinst_LTLIBRARIES = libgcli.la libgclit.la
 
+.NOTPARALLEL: pgen $(builddir)/src/pgen/parser.c $(builddir)/src/pgen/parser.h $(builddir)/src/pgen/lexer.c
+
 libgclit_la_DEPENDENCIES = pgen
 
 $(BUILT_SOURCES): pgen

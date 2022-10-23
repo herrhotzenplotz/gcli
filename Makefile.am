@@ -15,11 +15,11 @@ pgen_SOURCES = \
 	src/pgen/parser.y \
 	src/pgen/lexer.l
 
-noinst_LTLIBRARIES = libgcli.la libgclit.la
+noinst_LTLIBRARIES = libgcli.la libsn.la libpdjson.la
 
 .NOTPARALLEL: pgen $(builddir)/src/pgen/parser.c $(builddir)/src/pgen/parser.h $(builddir)/src/pgen/lexer.c
 
-libgclit_la_DEPENDENCIES = pgen
+libgcli_la_DEPENDENCIES = pgen
 
 $(BUILT_SOURCES): pgen
 
@@ -31,7 +31,7 @@ SUFFIXES = .t
 	$(AM_V_GEN)./pgen -tc -o $@ $<
 
 bin_PROGRAMS = gcli
-gcli_LDADD = libgcli.la libgclit.la
+gcli_LDADD = libgcli.la libpdjson.la libsn.la
 
 dist_man_MANS = \
 	docs/gcli-comment.1 \
@@ -65,6 +65,35 @@ gcli_SOURCES = \
 	include/gcli/gcli.h \
 	src/gcli.c
 
+libsn_la_SOURCES = \
+	thirdparty/sn/sn.c \
+	thirdparty/sn/sn.h
+
+libpdjson_la_SOURCES = \
+	thirdparty/pdjson/pdjson.c \
+	thirdparty/pdjson/pdjson.h
+
+TEMPLATES = \
+	templates/github/checks.t \
+	templates/github/comments.t \
+	templates/github/forks.t \
+	templates/github/issues.t \
+	templates/github/labels.t \
+	templates/github/pulls.t \
+	templates/github/releases.t \
+	templates/github/repos.t \
+	templates/github/status.t \
+	templates/gitlab/comments.t \
+	templates/gitlab/forks.t \
+	templates/gitlab/issues.t \
+	templates/gitlab/labels.t \
+	templates/gitlab/merge_requests.t \
+	templates/gitlab/pipelines.t \
+	templates/gitlab/releases.t \
+	templates/gitlab/repos.t \
+	templates/gitlab/review.t \
+	templates/gitlab/status.t
+
 libgcli_la_SOURCES = \
 	src/color.c include/gcli/color.h \
 	src/comments.c include/gcli/comments.h \
@@ -84,8 +113,6 @@ libgcli_la_SOURCES = \
 	src/review.c include/gcli/review.h \
 	src/snippets.c include/gcli/snippets.h \
 	src/status.c include/gcli/status.h \
-	thirdparty/pdjson/pdjson.c thirdparty/pdjson/pdjson.h \
-	thirdparty/sn/sn.c thirdparty/sn/sn.h \
 	src/gitlab/api.c include/gcli/gitlab/api.h \
 	src/gitlab/comments.c include/gcli/gitlab/comments.h \
 	src/gitlab/config.c include/gcli/gitlab/config.h \
@@ -116,32 +143,12 @@ libgcli_la_SOURCES = \
 	src/gitea/comments.c include/gcli/gitea/comments.h \
 	src/gitea/config.c include/gcli/gitea/config.h \
 	src/gitea/pulls.c include/gcli/gitea/pulls.h \
-	src/gitea/repos.c include/gcli/gitea/repos.h
-
-libgclit_la_SOURCES = \
-	templates/github/checks.t \
-	templates/github/comments.t \
-	templates/github/forks.t \
-	templates/github/issues.t \
-	templates/github/labels.t \
-	templates/github/pulls.t \
-	templates/github/releases.t \
-	templates/github/repos.t \
-	templates/github/status.t \
-	templates/gitlab/comments.t \
-	templates/gitlab/forks.t \
-	templates/gitlab/issues.t \
-	templates/gitlab/labels.t \
-	templates/gitlab/merge_requests.t \
-	templates/gitlab/pipelines.t \
-	templates/gitlab/releases.t \
-	templates/gitlab/repos.t \
-	templates/gitlab/review.t \
-	templates/gitlab/status.t
+	src/gitea/repos.c include/gcli/gitea/repos.h \
+	$(TEMPLATES)
 
 BUILT_SOURCES = \
-	$(libgclit_la_SOURCES:.t=.c) \
-	$(libgclit_la_SOURCES:.t=.h)
+	$(TEMPLATES:.t=.c) \
+	$(TEMPLATES:.t=.h)
 
 CLEANFILES = $(BUILT_SOURCES)
 
@@ -163,8 +170,8 @@ TESTS = \
 XFAIL_TESTS = tests/pgen-simple
 
 tests_json_escape_LDADD = \
-	$(noinst_LTLIBRARIES)
+	libgcli.la libpdjson.la libsn.la
 tests_pgen_tests_LDADD = \
-	$(noinst_LTLIBRARIES)
+	libgcli.la libpdjson.la libsn.la
 tests_url_encode_LDADD = \
-	$(noinst_LTLIBRARIES)
+	libgcli.la libpdjson.la libsn.la

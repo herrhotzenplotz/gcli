@@ -38,6 +38,10 @@ Required dependencies:
 - C99 Compiler and linker
 - make
 
+If you are building from Git you will also need:
+- autoconf
+- automake
+
 ### Compile
 In order to perform a build, do:
 ```console
@@ -47,6 +51,12 @@ $ make
 ```
 
 You may leave out `DESTDIR`. The above is the default value.
+
+If you are building from Git you need to generate the configure script
+first:
+```console
+$ autoreconf -i
+```
 
 In case any of this does not work, please either report a bug, or
 submit a patch in case you managed to fix it.

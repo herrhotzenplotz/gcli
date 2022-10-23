@@ -154,7 +154,8 @@ CLEANFILES = $(BUILT_SOURCES)
 
 EXTRA_DIST = \
 	LICENSE \
-	README.md
+	README.md \
+	autogen.sh
 
 ###########################################
 # Tests

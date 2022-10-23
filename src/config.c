@@ -616,8 +616,8 @@ gcli_config_get_override_default_account(void)
         return SV_NULL;
 }
 
-gcli_forge_type
-gcli_config_get_forge_type(void)
+static gcli_forge_type
+gcli_config_get_forge_type_internal(void)
 {
     /* Hard override */
     if (config.override_forgetype >= 0)
@@ -657,7 +657,29 @@ gcli_config_get_forge_type(void)
              "use -t <forge-type> to overrride manually.");
 
     return type;
+}
 
+gcli_forge_type
+gcli_config_get_forge_type(void)
+{
+    gcli_forge_type result = gcli_config_get_forge_type_internal();
+
+    /* print the type if verbose */
+    if (sn_verbose()) {
+        static int have_printed_forge_type = 0;
+        static const char *const ftype_name[] = {
+            [GCLI_FORGE_GITHUB] = "GitHub",
+            [GCLI_FORGE_GITLAB] = "Gitlab",
+            [GCLI_FORGE_GITEA]  = "Gitea",
+        };
+
+        if (!have_printed_forge_type) {
+            have_printed_forge_type = 1;
+            fprintf(stderr, "info: forge type is %s\n", ftype_name[result]);
+        }
+    }
+
+    return result;
 }
 
 void

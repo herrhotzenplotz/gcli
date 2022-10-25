@@ -129,7 +129,8 @@ objparser_dump_c(struct objparser *p)
     fprintf(outfile, "{\n");
     fprintf(outfile, "\tenum json_type key_type;\n");
     fprintf(outfile, "\tconst char *key;\n\n");
-    fprintf(outfile, "\tjson_next(stream);\n\n");
+    fprintf(outfile, "\tif(json_next(stream) == JSON_NULL)\n");
+    fprintf(outfile, "\t\treturn;\n\n");
 
     switch (p->kind) {
     case OBJPARSER_ENTRIES: objparser_dump_entries(p); break;

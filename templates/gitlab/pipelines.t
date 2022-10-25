@@ -25,6 +25,7 @@ object of gitlab_job with
 		"name" => name as string,
 		"ref" => ref as string,
 		"created_at" => created_at as string,
+		"started_at" => started_at as string,
 		"finished_at" => finished_at as string,
 		"runner" => use parse_gitlab_job_runner,
 		"duration" => duration as double,

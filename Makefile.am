@@ -155,7 +155,8 @@ CLEANFILES = $(BUILT_SOURCES)
 EXTRA_DIST = \
 	LICENSE \
 	README.md \
-	autogen.sh
+	autogen.sh \
+	tests/pgen-simple
 
 ###########################################
 # Tests

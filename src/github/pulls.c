@@ -134,12 +134,14 @@ github_pr_merge(
     gcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
     json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 
-    parse_github_pr_merge_message(&stream, &message);
-
-    puts(message);
+    /* only print the merge message if we haven't been quieted */
+    if (!sn_quiet()) {
+        parse_github_pr_merge_message(&stream, &message);
+        puts(message);
+        free(message);
+    }
 
     json_close(&stream);
-    free(message);
     free(json_buffer.data);
     free(url);
     free(e_owner);

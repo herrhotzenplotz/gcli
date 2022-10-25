@@ -122,7 +122,9 @@ gitlab_mr_merge(
 
     gcli_fetch_with_method("PUT", url, data, NULL, &buffer);
 
-    gcli_print_html_url(buffer);
+    /* if verbose or normal noise level, print the url */
+    if (!sn_quiet())
+        gcli_print_html_url(buffer);
 
     free(buffer.data);
     free(url);

@@ -302,6 +302,9 @@ gcli_fetch_with_method(
 
     char *auth_header = gcli_config_get_authheader();
 
+    if (sn_verbose())
+        fprintf(stderr, "info: cURL request %s %s...\n", method, url);
+
     headers = NULL;
     headers = curl_slist_append(
         headers,
@@ -369,6 +372,9 @@ gcli_post_upload(
     char *contentsize_header = sn_asprintf(
         "Content-Length: %zu",
         buffer_size);
+
+    if (sn_verbose())
+        fprintf(stderr, "info: cURL upload POST %s...\n", url);
 
     headers = NULL;
     headers = curl_slist_append(

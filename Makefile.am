@@ -166,6 +166,7 @@ check_PROGRAMS = \
 
 TESTS = \
 	tests/json-escape \
+	tests/pgen-simple \
 	tests/url-encode
 
 XFAIL_TESTS = tests/pgen-simple

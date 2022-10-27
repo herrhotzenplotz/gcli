@@ -57,7 +57,7 @@ int gcli_snippets_get(
     gcli_snippet **out);
 
 void gcli_snippets_print(
-    enum gcli_output_order  order,
+    enum gcli_output_flags  flags,
     gcli_snippet           *list,
     int                     list_size);
 

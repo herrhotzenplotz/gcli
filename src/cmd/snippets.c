@@ -117,7 +117,7 @@ subcommand_snippets(int argc, char *argv[])
     gcli_snippet           *snippets      = NULL;
     int                     snippets_size = 0;
     int                     count         = 30;
-    enum gcli_output_order  order         = OUTPUT_ORDER_UNSORTED;
+    enum gcli_output_flags  flags         = OUTPUT_LONG;
 
     for (size_t i = 0; i < ARRAY_SIZE(snippet_subcommands); ++i) {
         if (argc > 1 && strcmp(argv[1], snippet_subcommands[i].name) == 0) {
@@ -148,7 +148,7 @@ subcommand_snippets(int argc, char *argv[])
                 err(1, "snippets: cannot parse snippets count");
         } break;
         case 's':
-            order = OUTPUT_ORDER_SORTED;
+            flags |= OUTPUT_SORTED;
             break;
         case '?':
         default:
@@ -161,7 +161,7 @@ subcommand_snippets(int argc, char *argv[])
     argv += optind;
 
     snippets_size = gcli_snippets_get(count, &snippets);
-    gcli_snippets_print(order, snippets, snippets_size);
+    gcli_snippets_print(flags, snippets, snippets_size);
 
     return EXIT_SUCCESS;
 }

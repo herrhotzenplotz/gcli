@@ -207,7 +207,7 @@ subcommand_pulls(int argc, char *argv[])
     int                     pulls_size = 0;
     int                     n          = 30; /* how many prs to fetch at least */
     bool                    all        = false;
-    enum gcli_output_order  order      = OUTPUT_ORDER_UNSORTED;
+    enum gcli_output_flags  flags      = 0;
 
     /* detect whether we wanna create a PR */
     if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
@@ -272,7 +272,7 @@ subcommand_pulls(int argc, char *argv[])
             all = true;
         } break;
         case 's': {
-            order = OUTPUT_ORDER_SORTED;
+            flags |= OUTPUT_SORTED;
         } break;
         case '?':
         default:
@@ -290,7 +290,7 @@ subcommand_pulls(int argc, char *argv[])
      * open PRs and exit */
     if (pr < 0) {
         pulls_size = gcli_get_prs(owner, repo, all, n, &pulls);
-        gcli_print_pr_table(order, pulls, pulls_size);
+        gcli_print_pr_table(flags, pulls, pulls_size);
 
         gcli_pulls_free(pulls, pulls_size);
         free(pulls);

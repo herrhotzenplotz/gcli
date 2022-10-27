@@ -161,7 +161,7 @@ gcli_print_snippet(gcli_snippet *it)
 
 void
 gcli_snippets_print(
-    enum gcli_output_order  order,
+    enum gcli_output_flags  flags,
     gcli_snippet           *list,
     int                     list_size)
 {
@@ -171,7 +171,7 @@ gcli_snippets_print(
     }
 
     /* output in reverse order if the sorted flag was enabled */
-    if (order == OUTPUT_ORDER_SORTED) {
+    if (flags & OUTPUT_SORTED) {
         for (int i = list_size; i > 0; --i) {
             gcli_print_snippet(&list[i - 1]);
             putchar('\n');

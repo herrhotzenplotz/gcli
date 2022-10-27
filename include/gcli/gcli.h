@@ -34,7 +34,10 @@
 #include "config.h"
 #endif
 
-enum gcli_output_order { OUTPUT_ORDER_UNSORTED, OUTPUT_ORDER_SORTED };
+enum gcli_output_flags {
+    OUTPUT_SORTED   = (1 << 0),
+    OUTPUT_LONG     = (1 << 1),
+};
 
 typedef enum gcli_forge_type {
     GCLI_FORGE_GITHUB,

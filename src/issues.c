@@ -70,9 +70,24 @@ gcli_get_issues(
     return gcli_forge()->get_issues(owner, repo, all, max, out);
 }
 
+static void
+gcli_print_issue(const enum gcli_output_flags flags, const gcli_issue *const issue)
+{
+    (void) flags;
+
+    printf("%6d  %s%7.*s%s  %-.*s\n",
+           issue->number,
+           gcli_state_color_sv(issue->state),
+           (int)issue->state.length,
+           issue->state.data,
+           gcli_resetcolor(),
+           (int)issue->title.length,
+           issue->title.data);
+}
+
 void
 gcli_print_issues_table(
-    enum gcli_output_order  order,
+    enum gcli_output_flags  flags,
     gcli_issue             *issues,
     int                     issues_size)
 {
@@ -83,31 +98,12 @@ gcli_print_issues_table(
 
     printf("%6.6s  %7.7s  %-s\n", "NUMBER", "STATE", "TITLE");
 
-    if (order == OUTPUT_ORDER_SORTED) {
-        for (int i = issues_size; i > 0; --i) {
-            printf(
-                "%6d  %s%7.*s%s  %-.*s\n",
-                issues[i - 1].number,
-                gcli_state_color_sv(issues[i-1].state),
-                (int)issues[i-1].state.length,
-                issues[i-1].state.data,
-                gcli_resetcolor(),
-                (int)issues[i - 1].title.length,
-                issues[i - 1].title.data);
-        }
-    } else {
-        for (int i = 0; i < issues_size; ++i) {
-            printf(
-                "%6d  %s%7.*s%s  %-.*s\n",
-                issues[i].number,
-                gcli_state_color_sv(issues[i].state),
-                (int)issues[i].state.length,
-                issues[i].state.data,
-                gcli_resetcolor(),
-                (int)issues[i].title.length,
-                issues[i].title.data);
-        }
-    }
+    if (flags & OUTPUT_SORTED)
+        for (int i = issues_size; i > 0; --i)
+            gcli_print_issue(flags, &issues[i-1]);
+    else
+        for (int i = 0; i < issues_size; ++i)
+            gcli_print_issue(flags, &issues[i]);
 }
 
 static void

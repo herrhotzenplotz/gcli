@@ -249,7 +249,7 @@ print_gist_file(gcli_gist_file *file)
 }
 
 static void
-print_gist(gcli_gist *gist)
+print_gist(const gcli_gist *const gist)
 {
     printf("   ID : %s"SV_FMT"%s\n"
            "OWNER : %s"SV_FMT"%s\n"
@@ -272,7 +272,7 @@ print_gist(gcli_gist *gist)
 
 void
 gcli_print_gists_table(
-    enum gcli_output_order  order,
+    enum gcli_output_flags  flags,
     gcli_gist              *gists,
     int                     gists_size)
 {
@@ -282,7 +282,7 @@ gcli_print_gists_table(
     }
 
     /* output in reverse order if the sorted flag was enabled */
-    if (order == OUTPUT_ORDER_SORTED) {
+    if (flags & OUTPUT_SORTED) {
         for (int i = gists_size; i > 0; --i) {
             print_gist(&gists[i - 1]);
             putchar('\n');

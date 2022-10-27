@@ -75,7 +75,7 @@ void gcli_issues_free(
     gcli_issue *it,
     int         size);
 void gcli_print_issues_table(
-    enum gcli_output_order  order,
+    enum gcli_output_flags  flags,
     gcli_issue             *issues,
     int                     issues_size);
 void gcli_issue_summary(

@@ -80,7 +80,7 @@ int gcli_get_releases(
     int            max,
     gcli_release **out);
 void gcli_print_releases(
-    enum gcli_output_order  order,
+    enum gcli_output_flags  flags,
     gcli_release           *releases,
     int                     releases_size);
 void gcli_free_releases(

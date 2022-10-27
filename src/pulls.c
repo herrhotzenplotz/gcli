@@ -58,9 +58,22 @@ gcli_get_prs(
     return gcli_forge()->get_prs(owner, repo, all, max, out);
 }
 
+static void
+gcli_print_pr(const enum gcli_output_flags flags, const gcli_pull *const pr)
+{
+    (void) flags;
+
+    printf("%6d  %s%6.6s%s  %6.6s  %s%20.20s%s  %-s\n",
+           pr->number,
+           gcli_state_color_str(pr->state), pr->state, gcli_resetcolor(),
+           sn_bool_yesno(pr->merged),
+           gcli_setbold(), pr->creator, gcli_resetbold(),
+           pr->title);
+}
+
 void
 gcli_print_pr_table(
-    enum gcli_output_order  order,
+    enum gcli_output_flags  flags,
     gcli_pull              *pulls,
     int                     pulls_size)
 {
@@ -72,33 +85,12 @@ gcli_print_pr_table(
     printf("%-6.6s  %6.6s  %6.6s  %20.20s  %-s\n",
            "NUMBER", "STATE", "MERGED", "CREATOR", "TITLE");
 
-    if (order == OUTPUT_ORDER_SORTED) {
-        for (int i = pulls_size; i > 0; --i) {
-            printf("%6d  %s%6.6s%s  %6.6s  %s%20.20s%s  %-s\n",
-                   pulls[i - 1].number,
-                   gcli_state_color_str(pulls[i - 1].state),
-                   pulls[i - 1].state,
-                   gcli_resetcolor(),
-                   sn_bool_yesno(pulls[i - 1].merged),
-                   gcli_setbold(),
-                   pulls[i - 1].creator,
-                   gcli_resetbold(),
-                   pulls[i - 1].title);
-        }
-    } else {
-        for (int i = 0; i < pulls_size; ++i) {
-            printf("%6d  %s%6.6s%s  %6.6s  %s%20.20s%s  %-s\n",
-                   pulls[i].number,
-                   gcli_state_color_str(pulls[i].state),
-                   pulls[i].state,
-                   gcli_resetcolor(),
-                   sn_bool_yesno(pulls[i].merged),
-                   gcli_setbold(),
-                   pulls[i].creator,
-                   gcli_resetbold(),
-                   pulls[i].title);
-        }
-    }
+    if (flags & OUTPUT_SORTED)
+        for (int i = pulls_size; i > 0; --i)
+            gcli_print_pr(flags, &pulls[i-1]);
+    else
+        for (int i = 0; i < pulls_size; ++i)
+            gcli_print_pr(flags, &pulls[i]);
 }
 
 void

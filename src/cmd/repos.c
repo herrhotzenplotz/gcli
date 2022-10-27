@@ -109,7 +109,7 @@ subcommand_repos_create(int argc, char *argv[])
 
     created_repo = gcli_repo_create(&create_options);
 
-    gcli_print_repos_table(OUTPUT_ORDER_UNSORTED, created_repo, 1);
+    gcli_print_repos_table(0, created_repo, 1);
     gcli_repos_free(created_repo, 1);
 
     return EXIT_SUCCESS;
@@ -123,7 +123,7 @@ subcommand_repos(int argc, char *argv[])
     const char             *repo              = NULL;
     gcli_repo              *repos             = NULL;
     bool                    always_yes        = false;
-    enum gcli_output_order  order             = OUTPUT_ORDER_UNSORTED;
+    enum gcli_output_flags  flags             = 0;
 
     /* detect whether we wanna create a repo */
     if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
@@ -167,7 +167,7 @@ subcommand_repos(int argc, char *argv[])
             always_yes = true;
             break;
         case 's':
-            order = OUTPUT_ORDER_SORTED;
+            flags |= OUTPUT_SORTED;
             break;
         case 'n': {
             char *endptr = NULL;
@@ -198,7 +198,7 @@ subcommand_repos(int argc, char *argv[])
         else
             repos_size = gcli_get_repos(owner, n, &repos);
 
-        gcli_print_repos_table(order, repos, (size_t)repos_size);
+        gcli_print_repos_table(flags, repos, (size_t)repos_size);
         gcli_repos_free(repos, repos_size);
     } else {
         check_owner_and_repo(&owner, &repo);

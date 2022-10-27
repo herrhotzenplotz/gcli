@@ -52,7 +52,7 @@ gcli_print_repo(gcli_repo *repo)
 
 void
 gcli_print_repos_table(
-    enum gcli_output_order  order,
+    enum gcli_output_flags  flags,
     gcli_repo              *repos,
     size_t                  repos_size)
 {
@@ -64,7 +64,7 @@ gcli_print_repos_table(
     printf("%-4.4s  %-10.10s  %-16.16s  %-s\n",
            "FORK", "VISBLTY", "DATE", "FULLNAME");
 
-    if (order == OUTPUT_ORDER_SORTED) {
+    if (flags & OUTPUT_SORTED) {
         for (size_t i = repos_size; i > 0; --i)
             gcli_print_repo(&repos[i - 1]);
     } else {

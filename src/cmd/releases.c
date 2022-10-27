@@ -275,7 +275,7 @@ subcommand_releases(int argc, char *argv[])
     const char             *owner    = NULL;
     const char             *repo     = NULL;
     gcli_release           *releases = NULL;
-    enum gcli_output_order  order    = OUTPUT_ORDER_UNSORTED;
+    enum gcli_output_flags  flags    = 0;
 
     if (argc > 1) {
         for (size_t i = 0; i < ARRAY_SIZE(releases_subcommands); ++i) {
@@ -321,7 +321,7 @@ subcommand_releases(int argc, char *argv[])
                 err(1, "releases: cannot parse release count");
         } break;
         case 's':
-            order = OUTPUT_ORDER_SORTED;
+            flags |= OUTPUT_SORTED;
             break;
         case '?':
         default:
@@ -343,7 +343,7 @@ subcommand_releases(int argc, char *argv[])
     check_owner_and_repo(&owner, &repo);
 
     releases_size = gcli_get_releases(owner, repo, count, &releases);
-    gcli_print_releases(order, releases, releases_size);
+    gcli_print_releases(flags, releases, releases_size);
     gcli_free_releases(releases, releases_size);
 
     return EXIT_SUCCESS;

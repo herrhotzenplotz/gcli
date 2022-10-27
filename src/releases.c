@@ -45,8 +45,11 @@ gcli_get_releases(
 }
 
 static void
-gcli_print_release(gcli_release *it)
+gcli_print_release(const enum gcli_output_flags flags,
+                   const gcli_release *const it)
 {
+    (void) flags;
+
     printf("        ID : "SV_FMT"\n"
            "      NAME : "SV_FMT"\n"
            "    AUTHOR : "SV_FMT"\n"
@@ -70,7 +73,7 @@ gcli_print_release(gcli_release *it)
 
 void
 gcli_print_releases(
-    enum gcli_output_order  order,
+    enum gcli_output_flags  flags,
     gcli_release           *releases,
     int                     releases_size)
 {
@@ -79,12 +82,12 @@ gcli_print_releases(
         return;
     }
 
-    if (order == OUTPUT_ORDER_SORTED) {
+    if (flags & OUTPUT_SORTED) {
         for (int i = releases_size; i > 0; --i)
-            gcli_print_release(&releases[i - 1]);
+            gcli_print_release(flags, &releases[i - 1]);
     } else {
         for (int i = 0; i < releases_size; ++i)
-            gcli_print_release(&releases[i]);
+            gcli_print_release(flags, &releases[i]);
     }
 }
 

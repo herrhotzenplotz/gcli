@@ -109,7 +109,7 @@ void gcli_pulls_summary_free(
     gcli_pull_summary *it);
 
 void gcli_print_pr_table(
-    enum gcli_output_order  order,
+    enum gcli_output_flags  flags,
     gcli_pull              *pulls,
     int                     pulls_size);
 

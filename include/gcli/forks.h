@@ -56,7 +56,7 @@ void gcli_fork_create(
     const char *repo,
     const char *in);
 void gcli_print_forks(
-    enum gcli_output_order  order,
+    enum gcli_output_flags  flags,
     gcli_fork              *forks,
     size_t                  forks_size);
 void gcli_fork_delete(

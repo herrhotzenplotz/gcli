@@ -144,7 +144,7 @@ subcommand_issues(int argc, char *argv[])
     int                     issue       = -1;
     int                     n           = 30;
     bool                    all         = false;
-    enum gcli_output_order  order       = OUTPUT_ORDER_UNSORTED;
+    enum gcli_output_flags  flags       = 0;
 
     /* detect whether we wanna create an issue */
     if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
@@ -210,7 +210,7 @@ subcommand_issues(int argc, char *argv[])
             all = true;
             break;
         case 's':
-            order = OUTPUT_ORDER_SORTED;
+            flags |= OUTPUT_SORTED;
             break;
         case '?':
         default:
@@ -228,7 +228,7 @@ subcommand_issues(int argc, char *argv[])
     /* No issue number was given, so list all open issues */
     if (issue < 0) {
         issues_size = gcli_get_issues(owner, repo, all, n, &issues);
-        gcli_print_issues_table(order, issues, issues_size);
+        gcli_print_issues_table(flags, issues, issues_size);
 
         gcli_issues_free(issues, issues_size);
         return EXIT_SUCCESS;

@@ -73,7 +73,7 @@ int gcli_get_gists(
 gcli_gist *gcli_get_gist(
     const char *gist_id);
 void gcli_print_gists_table(
-    enum gcli_output_order  order,
+    enum gcli_output_flags  flags,
     gcli_gist              *gists,
     int                     gists_size);
 void gcli_create_gist(

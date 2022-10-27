@@ -46,13 +46,14 @@ usage(void)
             "[-y] [-d] [-p] [-a asset]\n");
     fprintf(stderr, "                            [-c commitish] [-t tag]\n");
     fprintf(stderr, "       gcli releases delete [-o owner -r repo] [-y] id\n");
-    fprintf(stderr, "       gcli releases [-o owner -r repo] [-n number] [-s]\n");
+    fprintf(stderr, "       gcli releases [-o owner -r repo] [-n number] [-s] [-l]\n");
     fprintf(stderr, "OPTIONS:\n");
     fprintf(stderr, "  -o owner        The repository owner\n");
     fprintf(stderr, "  -r repo         The repository name\n");
     fprintf(stderr, "  -a asset        Path to file to upload as release asset\n");
     fprintf(stderr, "  -c committish   A ref/commit/branch that the release is created from\n");
     fprintf(stderr, "  -d              Mark as a release draft\n");
+    fprintf(stderr, "  -l              Print a long list instead of a short table\n");
     fprintf(stderr, "  -n name         Name of the created release\n");
     fprintf(stderr, "  -n number       Number of releases to fetch (-1 = everything)\n");
     fprintf(stderr, "  -p              Mark as a prerelease\n");
@@ -299,6 +300,10 @@ subcommand_releases(int argc, char *argv[])
           .has_arg = required_argument,
           .flag    = NULL,
           .val     = 'n' },
+        { .name    = "long",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'l' },
         { .name    = "sorted",
           .has_arg = no_argument,
           .flag    = NULL,
@@ -306,7 +311,7 @@ subcommand_releases(int argc, char *argv[])
         {0}
     };
 
-    while ((ch = getopt_long(argc, argv, "sn:o:r:", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "sn:o:r:l", options, NULL)) != -1) {
         switch (ch) {
         case 'o':
             owner = optarg;
@@ -322,6 +327,9 @@ subcommand_releases(int argc, char *argv[])
         } break;
         case 's':
             flags |= OUTPUT_SORTED;
+            break;
+        case 'l':
+            flags |= OUTPUT_LONG;
             break;
         case '?':
         default:

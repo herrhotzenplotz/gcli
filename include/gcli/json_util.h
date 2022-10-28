@@ -78,6 +78,12 @@ get_user_sv(json_stream *input)
     return SV(user_str);
 }
 
+static inline void
+parse_user(json_stream *input, sn_sv *out)
+{
+    *out = get_user_sv(input);
+}
+
 static inline const char *
 gcli_json_bool(bool it)
 {

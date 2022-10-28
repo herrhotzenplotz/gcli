@@ -3,8 +3,6 @@ include "gcli/labels.h";
 
 include "templates/github/labels.h";
 
-parser github_assignee is object of sn_sv select "name" as sv;
-
 parser github_issue
 is object of gcli_issue
 with
@@ -17,6 +15,6 @@ with
 	"user"   => author as user_sv,
 	"locked" => locked as bool,
 	"labels" => labels as array of github_label use parse_github_label_text,
-	"assignees" => assignees as array of github_assignees use parse_github_assignee);
+	"assignees" => assignees as array of sn_sv use parse_user);
 
 parser github_issues is array of gcli_issue use parse_github_issue;

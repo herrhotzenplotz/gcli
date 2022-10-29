@@ -37,6 +37,8 @@
 
 #include <stdlib.h>
 
+#include <templates/gitlab/snippets.h>
+
 void
 gcli_snippets_free(
     gcli_snippet *list,
@@ -54,54 +56,6 @@ gcli_snippets_free(
     free(list);
 }
 
-static void
-gitlab_parse_snippet(struct json_stream *stream, gcli_snippet *out)
-{
-    enum json_type  next       = JSON_NULL;
-    enum json_type  value_type = JSON_NULL;
-    const char     *key        = NULL;
-
-    if ((next = json_next(stream)) != JSON_OBJECT)
-        errx(1, "Expected snippet object");
-
-    while ((next = json_next(stream)) == JSON_STRING) {
-        size_t len;
-        key = json_get_string(stream, &len);
-
-        if (strncmp("title", key, len) == 0) {
-            out->title = get_string(stream);
-        } else if (strncmp("id", key, len) == 0) {
-            out->id = get_int(stream);
-        } else if (strncmp("raw_url", key, len) == 0) {
-            out->raw_url = get_string(stream);
-        } else if (strncmp("created_at", key, len) == 0) {
-            out->date = get_string(stream);
-        } else if (strncmp("file_name", key, len) == 0) {
-            out->filename = get_string(stream);
-        } else if (strncmp("author", key, len) == 0) {
-            out->author = get_user(stream);
-        } else if (strncmp("visibility", key, len) == 0) {
-            out->visibility = get_string(stream);
-        } else {
-            value_type = json_next(stream);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(stream, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(stream, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
-    }
-
-    if (next != JSON_OBJECT_END)
-        errx(1, "Unclosed snippet object");
-}
-
 int
 gcli_snippets_get(int max, gcli_snippet **out)
 {
@@ -109,7 +63,7 @@ gcli_snippets_get(int max, gcli_snippet **out)
     char               *next_url = NULL;
     gcli_fetch_buffer   buffer   = {0};
     struct json_stream  stream   = {0};
-    int                 size     = 0;
+    size_t              size     = 0;
 
     *out = NULL;
 
@@ -119,32 +73,17 @@ gcli_snippets_get(int max, gcli_snippet **out)
         gcli_fetch(url, &next_url, &buffer);
 
         json_open_buffer(&stream, buffer.data, buffer.length);
-        json_set_streaming(&stream, 1);
 
-        if (json_next(&stream) != JSON_ARRAY)
-            errx(1, "Expected array");
+        parse_gitlab_snippets(&stream, out, &size);
 
-        while (json_peek(&stream) == JSON_OBJECT) {
-            *out = realloc(*out, sizeof(**out) * (size + 1));
-            gcli_snippet *it = &(*out)[size++];
-            gitlab_parse_snippet(&stream, it);
-
-            if (size == max)
-                goto enough;
-        }
-
-        if (json_next(&stream) != JSON_ARRAY_END)
-            errx(1, "Expected end of array");
-
-    enough:
         json_close(&stream);
         free(url);
         free(buffer.data);
-    } while ((url = next_url) && (max == -1 || size < max));
+    } while ((url = next_url) && (max == -1 || (int)size < max));
 
     free(next_url);
 
-    return size;
+    return (int)size;
 }
 
 static void

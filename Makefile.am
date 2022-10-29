@@ -92,7 +92,8 @@ TEMPLATES = \
 	templates/gitlab/releases.t \
 	templates/gitlab/repos.t \
 	templates/gitlab/review.t \
-	templates/gitlab/status.t
+	templates/gitlab/status.t \
+	templates/gitlab/snippets.t
 
 libgcli_la_SOURCES = \
 	src/color.c include/gcli/color.h \

@@ -50,6 +50,7 @@ usage(void)
     fprintf(stderr, "OPTIONS:\n");
     fprintf(stderr, "  -d description  Description of the gist\n");
     fprintf(stderr, "  -f file         Path to file to upload (otherwise stdin)\n");
+    fprintf(stderr, "  -l              Print a long list instead of a short table\n");
     fprintf(stderr, "  -n number       Number of gists to fetch\n");
     fprintf(stderr, "  -s              Print (sort) in reverse order\n");
     fprintf(stderr, "  -u user         User for whom to list gists\n");
@@ -205,7 +206,7 @@ subcommand_gists(int argc, char *argv[])
     gcli_gist              *gists      = NULL;
     int                     gists_size = 0;
     int                     count      = 30;
-    enum gcli_output_flags  flags      = OUTPUT_LONG;
+    enum gcli_output_flags  flags      = 0;
 
     for (size_t i = 0; i < ARRAY_SIZE(gist_subcommands); ++i) {
         if (argc > 1 && strcmp(argv[1], gist_subcommands[i].name) == 0) {
@@ -228,10 +229,14 @@ subcommand_gists(int argc, char *argv[])
           .has_arg = no_argument,
           .flag    = NULL,
           .val     = 's' },
+        { .name    = "long",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'l' },
         {0},
     };
 
-    while ((ch = getopt_long(argc, argv, "sn:u:", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "lsn:u:", options, NULL)) != -1) {
         switch (ch) {
         case 'u':
             user = optarg;
@@ -245,6 +250,9 @@ subcommand_gists(int argc, char *argv[])
         case 's':
             flags |= OUTPUT_SORTED;
             break;
+        case 'l':
+            flags |= OUTPUT_LONG;
+            break;
         case '?':
         default:
             usage();
@@ -256,7 +264,7 @@ subcommand_gists(int argc, char *argv[])
     argv += optind;
 
     gists_size = gcli_get_gists(user, count, &gists);
-    gcli_print_gists_table(flags, gists, gists_size);
+    gcli_print_gists(flags, gists, gists_size);
 
     return EXIT_SUCCESS;
 }

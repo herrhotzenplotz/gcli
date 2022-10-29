@@ -141,29 +141,40 @@ print_gist_file(gcli_gist_file *file)
 }
 
 static void
-print_gist(const gcli_gist *const gist)
+print_gist(enum gcli_output_flags const flags, const gcli_gist *const gist)
 {
-    printf("   ID : %s"SV_FMT"%s\n"
-           "OWNER : %s"SV_FMT"%s\n"
-           "DESCR : "SV_FMT"\n"
-           " DATE : "SV_FMT"\n"
-           "  URL : "SV_FMT"\n"
-           " PULL : "SV_FMT"\n",
-           gcli_setcolor(GCLI_COLOR_YELLOW), SV_ARGS(gist->id), gcli_resetcolor(),
-           gcli_setbold(), SV_ARGS(gist->owner), gcli_resetbold(),
-           SV_ARGS(gist->description),
-           SV_ARGS(gist->date),
-           SV_ARGS(gist->url),
-           SV_ARGS(gist->git_pull_url));
-    printf("FILES : %-15.15s  %-8.8s  %-s\n",
-           "LANGUAGE", "SIZE", "FILENAME");
+    if (flags & OUTPUT_LONG) {
+        printf("   ID : %s"SV_FMT"%s\n"
+               "OWNER : %s"SV_FMT"%s\n"
+               "DESCR : "SV_FMT"\n"
+               " DATE : "SV_FMT"\n"
+               "  URL : "SV_FMT"\n"
+               " PULL : "SV_FMT"\n",
+               gcli_setcolor(GCLI_COLOR_YELLOW), SV_ARGS(gist->id), gcli_resetcolor(),
+               gcli_setbold(), SV_ARGS(gist->owner), gcli_resetbold(),
+               SV_ARGS(gist->description),
+               SV_ARGS(gist->date),
+               SV_ARGS(gist->url),
+               SV_ARGS(gist->git_pull_url));
+        printf("FILES : %-15.15s  %-8.8s  %-s\n",
+               "LANGUAGE", "SIZE", "FILENAME");
 
-    for (size_t i = 0; i < gist->files_size; ++i)
-        print_gist_file(&gist->files[i]);
+        for (size_t i = 0; i < gist->files_size; ++i)
+            print_gist_file(&gist->files[i]);
+
+        printf("\n");
+    } else {
+        printf("%32.*s  %s%-20.*s%s  %-20.*s  %-5zu  "SV_FMT"\n",
+               SV_ARGS(gist->id),
+               gcli_setbold(), SV_ARGS(gist->owner), gcli_resetbold(),
+               SV_ARGS(gist->date),
+               gist->files_size,
+               SV_ARGS(gist->description));
+    }
 }
 
 void
-gcli_print_gists_table(
+gcli_print_gists(
     enum gcli_output_flags  flags,
     gcli_gist              *gists,
     int                     gists_size)
@@ -173,17 +184,18 @@ gcli_print_gists_table(
         return;
     }
 
+    if (!(flags & OUTPUT_LONG)) {
+        printf("%-32.32s  %-20.20s  %-20.20s  %-5.5s  %s\n",
+               "ID", "OWNER", "DATE", "FILES", "DESCRIPTION");
+    }
+
     /* output in reverse order if the sorted flag was enabled */
     if (flags & OUTPUT_SORTED) {
-        for (int i = gists_size; i > 0; --i) {
-            print_gist(&gists[i - 1]);
-            putchar('\n');
-        }
+        for (int i = gists_size; i > 0; --i)
+            print_gist(flags, &gists[i - 1]);
     } else {
-        for (int i = 0; i < gists_size; ++i) {
-            print_gist(&gists[i]);
-            putchar('\n');
-        }
+        for (int i = 0; i < gists_size; ++i)
+            print_gist(flags, &gists[i]);
     }
 }
 

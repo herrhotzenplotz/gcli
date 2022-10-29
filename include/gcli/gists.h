@@ -74,7 +74,7 @@ int gcli_get_gists(
     gcli_gist  **out);
 gcli_gist *gcli_get_gist(
     const char *gist_id);
-void gcli_print_gists_table(
+void gcli_print_gists(
     enum gcli_output_flags  flags,
     gcli_gist              *gists,
     int                     gists_size);

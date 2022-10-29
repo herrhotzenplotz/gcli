@@ -77,6 +77,7 @@ TEMPLATES = \
 	templates/github/checks.t \
 	templates/github/comments.t \
 	templates/github/forks.t \
+	templates/github/gists.t \
 	templates/github/issues.t \
 	templates/github/labels.t \
 	templates/github/pulls.t \

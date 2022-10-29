@@ -34,8 +34,10 @@
 #include "config.h"
 #endif
 
-#include <sn/sn.h>
 #include <gcli/gcli.h>
+
+#include <pdjson/pdjson.h>
+#include <sn/sn.h>
 
 typedef struct gcli_gist      gcli_gist;
 typedef struct gcli_gist_file gcli_gist_file;
@@ -81,5 +83,13 @@ void gcli_create_gist(
 void gcli_delete_gist(
     const char *gist_id,
     bool        always_yes);
+
+/**
+ * NOTE(Nico): Because of idiots designing a web API, we get a list of
+ * files in a gist NOT as an array but as an object whose keys are the
+ * file names. The objects describing the files obviously contain the
+ * file name again. Whatever...here's a hack. Blame GitHub.
+ */
+void parse_github_gist_files_idiot_hack(json_stream *stream, gcli_gist *gist);
 
 #endif /* GISTS_H */

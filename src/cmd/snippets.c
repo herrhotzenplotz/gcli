@@ -41,11 +41,13 @@
 static void
 usage(void)
 {
-    fprintf(stderr, "usage: gcli snippets [-n number] [-s]\n");
+    fprintf(stderr, "usage: gcli snippets [-n number] [-sl]\n");
     fprintf(stderr, "       gcli snippets delete id\n");
     fprintf(stderr, "       gcli snippets get id\n");
     fprintf(stderr, "OPTIONS:\n");
+    fprintf(stderr, "  -l              Print a long list instead of a short table\n");
     fprintf(stderr, "  -n number       Number of snippets to fetch\n");
+    fprintf(stderr, "  -s              Sort the output in reverse order\n");
     fprintf(stderr, "  -u user         User for whom to list gists\n");
     fprintf(stderr, "\n");
     version();
@@ -117,7 +119,7 @@ subcommand_snippets(int argc, char *argv[])
     gcli_snippet           *snippets      = NULL;
     int                     snippets_size = 0;
     int                     count         = 30;
-    enum gcli_output_flags  flags         = OUTPUT_LONG;
+    enum gcli_output_flags  flags         = 0;
 
     for (size_t i = 0; i < ARRAY_SIZE(snippet_subcommands); ++i) {
         if (argc > 1 && strcmp(argv[1], snippet_subcommands[i].name) == 0) {
@@ -136,10 +138,14 @@ subcommand_snippets(int argc, char *argv[])
           .has_arg = no_argument,
           .flag    = NULL,
           .val     = 's' },
+        { .name    = "long",
+          .has_arg = no_argument,
+          .flag    = NULL,
+          .val     = 'l' },
         {0},
     };
 
-    while ((ch = getopt_long(argc, argv, "sn:", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "sn:l", options, NULL)) != -1) {
         switch (ch) {
         case 'n': {
             char *endptr = NULL;
@@ -149,6 +155,9 @@ subcommand_snippets(int argc, char *argv[])
         } break;
         case 's':
             flags |= OUTPUT_SORTED;
+            break;
+        case 'l':
+            flags |= OUTPUT_LONG;
             break;
         case '?':
         default:

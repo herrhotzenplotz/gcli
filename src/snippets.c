@@ -87,15 +87,21 @@ gcli_snippets_get(int max, gcli_snippet **out)
 }
 
 static void
-gcli_print_snippet(gcli_snippet *it)
+gcli_print_snippet(enum gcli_output_flags const flags,
+                   const gcli_snippet *const it)
 {
-    printf("    ID : %d\n", it->id);
-    printf(" TITLE : %s\n", it->title);
-    printf("AUTHOR : %s\n", it->author);
-    printf("  FILE : %s\n", it->filename);
-    printf("  DATE : %s\n", it->date);
-    printf("VSBLTY : %s\n", it->visibility);
-    printf("   URL : %s\n", it->raw_url);
+    if (flags & OUTPUT_LONG) {
+        printf("    ID : %d\n", it->id);
+        printf(" TITLE : %s\n", it->title);
+        printf("AUTHOR : %s\n", it->author);
+        printf("  FILE : %s\n", it->filename);
+        printf("  DATE : %s\n", it->date);
+        printf("VSBLTY : %s\n", it->visibility);
+        printf("   URL : %s\n\n", it->raw_url);
+    } else {
+        printf("%-10d  %-16.16s  %-10.10s  %-20.20s  %s\n",
+               it->id, it->date, it->visibility, it->author, it->title);
+    }
 }
 
 void
@@ -109,17 +115,18 @@ gcli_snippets_print(
         return;
     }
 
+    if (!(flags & OUTPUT_LONG)) {
+        printf("%-10.10s  %-16.16s  %-10.10s  %-20.20s  %s\n",
+               "ID", "DATE", "VISIBILITY", "AUTHOR", "TITLE");
+    }
+
     /* output in reverse order if the sorted flag was enabled */
     if (flags & OUTPUT_SORTED) {
-        for (int i = list_size; i > 0; --i) {
-            gcli_print_snippet(&list[i - 1]);
-            putchar('\n');
-        }
+        for (int i = list_size; i > 0; --i)
+            gcli_print_snippet(flags, &list[i - 1]);
     } else {
-        for (int i = 0; i < list_size; ++i) {
-            gcli_print_snippet(&list[i]);
-            putchar('\n');
-        }
+        for (int i = 0; i < list_size; ++i)
+            gcli_print_snippet(flags, &list[i]);
     }
 }
 

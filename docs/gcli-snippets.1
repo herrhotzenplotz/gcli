@@ -6,6 +6,7 @@
 .Nd manage Gitlab snippets
 .Sh SYNOPSIS
 .Nm
+.Op Fl l
 .Op Fl s
 .Op Fl n Ar n
 .Nm
@@ -23,6 +24,8 @@ Without a subcommand specified,
 will list all of your own snippets.
 .Sh OPTIONS
 .Bl -tag -width indent
+.It Fl l , -long
+Print a long list instead of a short table.
 .It Fl s , -sorted
 Reverse the output such that most recent items appear at the bottom.
 .It Fl n , -count Ar n

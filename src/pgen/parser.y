@@ -36,6 +36,9 @@ FILE	*outfile	 = NULL;
 char	*outfilename = NULL;
 int		 dumptype	 = 0;
 
+/* Forward declaration. Is in generated lexer.c */
+extern int yylex (void);
+
 static void objparser_dump(struct objparser *);
 static void arrayparser_dump(struct arrayparser *);
 static void include_dump(const char *);

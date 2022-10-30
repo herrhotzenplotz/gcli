@@ -45,32 +45,42 @@ gcli_get_releases(
 }
 
 static void
-gcli_print_release(gcli_release *it)
+gcli_print_release(const enum gcli_output_flags flags,
+                   const gcli_release *const it)
 {
-    printf("        ID : "SV_FMT"\n"
-           "      NAME : "SV_FMT"\n"
-           "    AUTHOR : "SV_FMT"\n"
-           "      DATE : "SV_FMT"\n"
-           "     DRAFT : %s\n"
-           "PRERELEASE : %s\n"
-           "   TARBALL : "SV_FMT"\n"
-           "      BODY :\n",
-           SV_ARGS(it->id),
-           SV_ARGS(it->name),
-           SV_ARGS(it->author),
-           SV_ARGS(it->date),
-           sn_bool_yesno(it->draft),
-           sn_bool_yesno(it->prerelease),
-           SV_ARGS(it->tarball_url));
+    if (flags & OUTPUT_LONG) {
+        printf("        ID : "SV_FMT"\n"
+               "      NAME : "SV_FMT"\n"
+               "    AUTHOR : "SV_FMT"\n"
+               "      DATE : "SV_FMT"\n"
+               "     DRAFT : %s\n"
+               "PRERELEASE : %s\n"
+               "   TARBALL : "SV_FMT"\n"
+               "      BODY :\n",
+               SV_ARGS(it->id),
+               SV_ARGS(it->name),
+               SV_ARGS(it->author),
+               SV_ARGS(it->date),
+               sn_bool_yesno(it->draft),
+               sn_bool_yesno(it->prerelease),
+               SV_ARGS(it->tarball_url));
 
-    pretty_print(it->body.data, 13, 80, stdout);
+        pretty_print(it->body.data, 13, 80, stdout);
 
-    putchar('\n');
+        putchar('\n');
+    } else {
+        printf("%13.*s  %-24.*s  %-5.5s  %-10.10s  "SV_FMT"\n",
+               SV_ARGS(it->id),
+               SV_ARGS(it->date),
+               sn_bool_yesno(it->draft),
+               sn_bool_yesno(it->prerelease),
+               SV_ARGS(it->name));
+    }
 }
 
 void
 gcli_print_releases(
-    enum gcli_output_order  order,
+    enum gcli_output_flags  flags,
     gcli_release           *releases,
     int                     releases_size)
 {
@@ -79,12 +89,16 @@ gcli_print_releases(
         return;
     }
 
-    if (order == OUTPUT_ORDER_SORTED) {
+    if (!(flags & OUTPUT_LONG))
+        printf("%13.13s  %-24.24s  %-5.5s  %-10.10s  %s\n",
+               "ID", "DATE", "DRAFT", "PRERELEASE", "NAME");
+
+    if (flags & OUTPUT_SORTED) {
         for (int i = releases_size; i > 0; --i)
-            gcli_print_release(&releases[i - 1]);
+            gcli_print_release(flags, &releases[i - 1]);
     } else {
         for (int i = 0; i < releases_size; ++i)
-            gcli_print_release(&releases[i]);
+            gcli_print_release(flags, &releases[i]);
     }
 }
 

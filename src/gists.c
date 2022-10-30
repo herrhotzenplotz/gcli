@@ -37,122 +37,28 @@
 
 #include <pdjson/pdjson.h>
 
-static void
-parse_gist_file(struct json_stream *stream, gcli_gist_file *file)
-{
-    enum json_type  next       = JSON_NULL;
-    enum json_type  value_type = JSON_NULL;
-    const char     *key;
+#include <templates/github/gists.h>
 
-    if ((next = json_next(stream)) != JSON_OBJECT)
-        errx(1, "Expected Gist File Object");
-
-    while ((next = json_next(stream)) == JSON_STRING) {
-        size_t len;
-        key = json_get_string(stream, &len);
-
-        if (strncmp("filename", key, len) == 0) {
-            file->filename = get_sv(stream);
-        } else if (strncmp("language", key, len) == 0) {
-            file->language = get_sv(stream);
-        } else if (strncmp("raw_url", key, len) == 0) {
-            file->url = get_sv(stream);
-        } else if (strncmp("size", key, len) == 0) {
-            file->size = get_int(stream);
-        } else if (strncmp("type", key, len) == 0) {
-            file->type = get_sv(stream);
-        } else {
-            value_type = json_next(stream);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(stream, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(stream, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
-    }
-
-    if (next != JSON_OBJECT_END)
-        errx(1, "Unclosed Gist File Object");
-}
-
-static void
-parse_gist_files(
-    struct json_stream  *stream,
-    gcli_gist_file     **files,
-    size_t              *files_size)
+/* /!\ Before changing this, see comment in gists.h /!\ */
+void
+parse_github_gist_files_idiot_hack(json_stream *stream, gcli_gist *gist)
 {
     enum json_type next = JSON_NULL;
-    size_t         size = 0;
 
-    *files = NULL;
+    gist->files = NULL;
+    gist->files_size = 0;
 
     if ((next = json_next(stream)) != JSON_OBJECT)
         errx(1, "Expected Gist Files Object");
 
     while ((next = json_next(stream)) == JSON_STRING) {
-        *files = realloc(*files, sizeof(gcli_gist_file) * (size + 1));
-        gcli_gist_file *it = &(*files)[size++];
-        parse_gist_file(stream, it);
+        gist->files = realloc(gist->files, sizeof(*gist->files) * (gist->files_size + 1));
+        gcli_gist_file *it = &gist->files[gist->files_size++];
+        parse_github_gist_file(stream, it);
     }
-
-    *files_size = size;
 
     if (next != JSON_OBJECT_END)
         errx(1, "Unclosed Gist Files Object");
-}
-
-static void
-parse_gist(struct json_stream *stream, gcli_gist *out)
-{
-    enum json_type  next       = JSON_NULL;
-    enum json_type  value_type = JSON_NULL;
-    const char     *key        = NULL;
-
-    if ((next = json_next(stream)) != JSON_OBJECT)
-        errx(1, "Expected Gist Object");
-
-    while ((next = json_next(stream)) == JSON_STRING) {
-        size_t len;
-        key = json_get_string(stream, &len);
-
-        if (strncmp("owner", key, len) == 0) {
-            out->owner = get_user_sv(stream);
-        } else if (strncmp("html_url", key, len) == 0) {
-            out->url = get_sv(stream);
-        } else if (strncmp("id", key, len) == 0) {
-            out->id = get_sv(stream);
-        } else if (strncmp("created_at", key, len) == 0) {
-            out->date = get_sv(stream);
-        } else if (strncmp("git_pull_url", key, len) == 0) {
-            out->git_pull_url = get_sv(stream);
-        } else if (strncmp("description", key, len) == 0) {
-            out->description = get_sv(stream);
-        } else if (strncmp("files", key, len) == 0) {
-            parse_gist_files(stream, &out->files, &out->files_size);
-        } else {
-            value_type = json_next(stream);
-
-            switch (value_type) {
-            case JSON_ARRAY:
-                json_skip_until(stream, JSON_ARRAY_END);
-                break;
-            case JSON_OBJECT:
-                json_skip_until(stream, JSON_OBJECT_END);
-                break;
-            default:
-                break;
-            }
-        }
-    }
-
-    if (next != JSON_OBJECT_END)
-        errx(1, "Unclosed Gist Object");
 }
 
 int
@@ -163,7 +69,7 @@ gcli_get_gists(const char *user, int max, gcli_gist **out)
     gcli_fetch_buffer   buffer   = {0};
     struct json_stream  stream   = {0};
     enum   json_type    next     = JSON_NULL;
-    int                 size     = 0;
+    size_t              size     = 0;
 
     if (user)
         url = sn_asprintf(
@@ -177,31 +83,17 @@ gcli_get_gists(const char *user, int max, gcli_gist **out)
         gcli_fetch(url, &next_url, &buffer);
 
         json_open_buffer(&stream, buffer.data, buffer.length);
-        json_set_streaming(&stream, 1);
 
-        if ((next = json_next(&stream)) != JSON_ARRAY)
-            errx(1, "Expected array in response");
-
-        while ((next = json_peek(&stream)) == JSON_OBJECT) {
-            *out = realloc(*out, sizeof(gcli_gist) * (size + 1));
-            gcli_gist *it = &(*out)[size++];
-            parse_gist(&stream, it);
-
-            if (size == max)
-                break;
-        }
-
-        if ((next = json_next(&stream)) != JSON_ARRAY_END)
-            errx(1, "Expected end of array in response");
+        parse_github_gists(&stream, out, &size);
 
         json_close(&stream);
         free(buffer.data);
         free(url);
-    } while ((url = next_url) && (max == -1 || size < max));
+    } while ((url = next_url) && (max == -1 || (int)size < max));
 
     free(next_url);
 
-    return size;
+    return (int)size;
 }
 
 static const char *
@@ -249,30 +141,41 @@ print_gist_file(gcli_gist_file *file)
 }
 
 static void
-print_gist(gcli_gist *gist)
+print_gist(enum gcli_output_flags const flags, const gcli_gist *const gist)
 {
-    printf("   ID : %s"SV_FMT"%s\n"
-           "OWNER : %s"SV_FMT"%s\n"
-           "DESCR : "SV_FMT"\n"
-           " DATE : "SV_FMT"\n"
-           "  URL : "SV_FMT"\n"
-           " PULL : "SV_FMT"\n",
-           gcli_setcolor(GCLI_COLOR_YELLOW), SV_ARGS(gist->id), gcli_resetcolor(),
-           gcli_setbold(), SV_ARGS(gist->owner), gcli_resetbold(),
-           SV_ARGS(gist->description),
-           SV_ARGS(gist->date),
-           SV_ARGS(gist->url),
-           SV_ARGS(gist->git_pull_url));
-    printf("FILES : %-15.15s  %-8.8s  %-s\n",
-           "LANGUAGE", "SIZE", "FILENAME");
+    if (flags & OUTPUT_LONG) {
+        printf("   ID : %s"SV_FMT"%s\n"
+               "OWNER : %s"SV_FMT"%s\n"
+               "DESCR : "SV_FMT"\n"
+               " DATE : "SV_FMT"\n"
+               "  URL : "SV_FMT"\n"
+               " PULL : "SV_FMT"\n",
+               gcli_setcolor(GCLI_COLOR_YELLOW), SV_ARGS(gist->id), gcli_resetcolor(),
+               gcli_setbold(), SV_ARGS(gist->owner), gcli_resetbold(),
+               SV_ARGS(gist->description),
+               SV_ARGS(gist->date),
+               SV_ARGS(gist->url),
+               SV_ARGS(gist->git_pull_url));
+        printf("FILES : %-15.15s  %-8.8s  %-s\n",
+               "LANGUAGE", "SIZE", "FILENAME");
 
-    for (size_t i = 0; i < gist->files_size; ++i)
-        print_gist_file(&gist->files[i]);
+        for (size_t i = 0; i < gist->files_size; ++i)
+            print_gist_file(&gist->files[i]);
+
+        printf("\n");
+    } else {
+        printf("%32.*s  %s%-20.*s%s  %-20.*s  %-5zu  "SV_FMT"\n",
+               SV_ARGS(gist->id),
+               gcli_setbold(), SV_ARGS(gist->owner), gcli_resetbold(),
+               SV_ARGS(gist->date),
+               gist->files_size,
+               SV_ARGS(gist->description));
+    }
 }
 
 void
-gcli_print_gists_table(
-    enum gcli_output_order  order,
+gcli_print_gists(
+    enum gcli_output_flags  flags,
     gcli_gist              *gists,
     int                     gists_size)
 {
@@ -281,17 +184,18 @@ gcli_print_gists_table(
         return;
     }
 
+    if (!(flags & OUTPUT_LONG)) {
+        printf("%-32.32s  %-20.20s  %-20.20s  %-5.5s  %s\n",
+               "ID", "OWNER", "DATE", "FILES", "DESCRIPTION");
+    }
+
     /* output in reverse order if the sorted flag was enabled */
-    if (order == OUTPUT_ORDER_SORTED) {
-        for (int i = gists_size; i > 0; --i) {
-            print_gist(&gists[i - 1]);
-            putchar('\n');
-        }
+    if (flags & OUTPUT_SORTED) {
+        for (int i = gists_size; i > 0; --i)
+            print_gist(flags, &gists[i - 1]);
     } else {
-        for (int i = 0; i < gists_size; ++i) {
-            print_gist(&gists[i]);
-            putchar('\n');
-        }
+        for (int i = 0; i < gists_size; ++i)
+            print_gist(flags, &gists[i]);
     }
 }
 
@@ -311,7 +215,7 @@ gcli_get_gist(const char *gist_id)
     json_set_streaming(&stream, 1);
 
     it = calloc(sizeof(gcli_gist), 1);
-    parse_gist(&stream, it);
+    parse_github_gist(&stream, it);
 
     json_close(&stream);
     free(buffer.data);

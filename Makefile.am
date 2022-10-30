@@ -77,6 +77,7 @@ TEMPLATES = \
 	templates/github/checks.t \
 	templates/github/comments.t \
 	templates/github/forks.t \
+	templates/github/gists.t \
 	templates/github/issues.t \
 	templates/github/labels.t \
 	templates/github/pulls.t \
@@ -92,7 +93,8 @@ TEMPLATES = \
 	templates/gitlab/releases.t \
 	templates/gitlab/repos.t \
 	templates/gitlab/review.t \
-	templates/gitlab/status.t
+	templates/gitlab/status.t \
+	templates/gitlab/snippets.t
 
 libgcli_la_SOURCES = \
 	src/color.c include/gcli/color.h \

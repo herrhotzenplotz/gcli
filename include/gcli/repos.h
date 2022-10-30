@@ -70,7 +70,7 @@ void gcli_repos_free(
     size_t);
 
 void gcli_print_repos_table(
-    enum gcli_output_order  order,
+    enum gcli_output_flags  flags,
     gcli_repo              *repos,
     size_t                  repos_size);
 

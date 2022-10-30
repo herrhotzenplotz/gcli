@@ -134,7 +134,7 @@ subcommand_forks(int argc, char *argv[])
     int                     ch         = 0;
     int                     count      = 30;
     bool                    always_yes = false;
-    enum gcli_output_order  order      = OUTPUT_ORDER_UNSORTED;
+    enum gcli_output_flags  flags      = 0;
 
     /* detect whether we wanna create a fork */
     if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
@@ -184,7 +184,7 @@ subcommand_forks(int argc, char *argv[])
                 err(1, "forks: unable to parse forks count argument");
         } break;
         case 's':
-            order = OUTPUT_ORDER_SORTED;
+            flags |= OUTPUT_SORTED;
             break;
         case '?':
         default:
@@ -200,7 +200,7 @@ subcommand_forks(int argc, char *argv[])
 
     if (argc == 0) {
         forks_size = gcli_get_forks(owner, repo, count, &forks);
-        gcli_print_forks(order, forks, forks_size);
+        gcli_print_forks(flags, forks, forks_size);
         return EXIT_SUCCESS;
     }
 

@@ -55,7 +55,7 @@ You may leave out `DESTDIR`. The above is the default value.
 If you are building from Git you need to generate the configure script
 first:
 ```console
-$ autoreconf -i
+$ ./autogen.sh
 ```
 
 In case any of this does not work, please either report a bug, or

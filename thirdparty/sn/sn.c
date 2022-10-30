@@ -417,7 +417,7 @@ sn_sv_strip_suffix(sn_sv input, const char *suffix)
 }
 
 char *
-sn_join_with(const char *items[], size_t items_size, const char *sep)
+sn_join_with(char const *const items[], size_t const items_size, char const *sep)
 {
     char   *buffer      = NULL;
     size_t  buffer_size = 0;

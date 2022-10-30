@@ -45,7 +45,7 @@ clean_color_table(void)
         free(color_table[i].sequence);
 }
 
-static char const *const
+static char const *
 color_cache_lookup(uint32_t const code)
 {
     for (size_t i = 0; i < color_table_size; ++i) {

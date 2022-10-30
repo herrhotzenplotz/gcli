@@ -38,7 +38,8 @@
 #include <templates/github/status.h>
 
 size_t
-github_get_notifications(gcli_notification **notifications, int count)
+github_get_notifications(gcli_notification **const notifications,
+                         int const count)
 {
     char               *url                = NULL;
     char               *next_url           = NULL;
@@ -64,7 +65,7 @@ github_get_notifications(gcli_notification **notifications, int count)
 }
 
 void
-github_notification_mark_as_read(const char *id)
+github_notification_mark_as_read(char const *id)
 {
     char              *url    = NULL;
     gcli_fetch_buffer  buffer = {0};

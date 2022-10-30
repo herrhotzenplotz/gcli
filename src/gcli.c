@@ -56,8 +56,8 @@ subcommand_version(int argc, char *argv[])
 }
 
 static struct subcommand {
-    const char *const cmd_name;
-    const char *const docstring;
+    char const *const cmd_name;
+    char const *const docstring;
     int (*fn)(int, char **);
 } subcommands[] = {
     { .cmd_name = "ci",

@@ -37,17 +37,16 @@
 #include <templates/gitlab/repos.h>
 
 void
-gitlab_get_repo(
-    sn_sv      owner,
-    sn_sv      repo,
-    gcli_repo *out)
+gitlab_get_repo(sn_sv owner,
+                sn_sv repo,
+                gcli_repo *const out)
 {
     /* GET /projects/:id */
-    char               *url     = NULL;
-    gcli_fetch_buffer   buffer  = {0};
-    struct json_stream  stream  = {0};
-    sn_sv               e_owner = {0};
-    sn_sv               e_repo  = {0};
+    char              *url     = NULL;
+    gcli_fetch_buffer  buffer  = {0};
+    json_stream        stream  = {0};
+    sn_sv              e_owner = {0};
+    sn_sv              e_repo  = {0};
 
     e_owner = gcli_urlencode_sv(owner);
     e_repo  = gcli_urlencode_sv(repo);
@@ -70,17 +69,16 @@ gitlab_get_repo(
 }
 
 int
-gitlab_get_repos(
-    const char  *owner,
-    int          max,
-    gcli_repo  **out)
+gitlab_get_repos(char const *owner,
+                 int const max,
+                 gcli_repo **const out)
 {
-    char               *url      = NULL;
-    char               *next_url = NULL;
-    char               *e_owner  = NULL;
-    gcli_fetch_buffer   buffer   = {0};
-    struct json_stream  stream   = {0};
-    size_t              size     = 0;
+    char              *url      = NULL;
+    char              *next_url = NULL;
+    char              *e_owner  = NULL;
+    gcli_fetch_buffer  buffer   = {0};
+    json_stream        stream   = {0};
+    size_t             size     = 0;
 
     e_owner = gcli_urlencode(owner);
 
@@ -105,9 +103,7 @@ gitlab_get_repos(
 }
 
 int
-gitlab_get_own_repos(
-    int         max,
-    gcli_repo **out)
+gitlab_get_own_repos(int const max, gcli_repo **const out)
 {
     char  *_account = NULL;
     sn_sv  account  = {0};
@@ -127,9 +123,7 @@ gitlab_get_own_repos(
 }
 
 void
-gitlab_repo_delete(
-    const char *owner,
-    const char *repo)
+gitlab_repo_delete(char const *owner, char const *repo)
 {
     char              *url     = NULL;
     char              *e_owner = NULL;
@@ -152,13 +146,12 @@ gitlab_repo_delete(
 }
 
 gcli_repo *
-gitlab_repo_create(
-    const gcli_repo_create_options *options) /* Options descriptor */
+gitlab_repo_create(gcli_repo_create_options const *options) /* Options descriptor */
 {
-    gcli_repo          *repo;
-    char               *url, *data;
-    gcli_fetch_buffer   buffer = {0};
-    struct json_stream  stream = {0};
+    gcli_repo         *repo;
+    char              *url, *data;
+    gcli_fetch_buffer  buffer = {0};
+    json_stream        stream = {0};
 
     /* Will be freed by the caller with gcli_repos_free */
     repo = calloc(1, sizeof(gcli_repo));

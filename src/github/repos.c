@@ -38,7 +38,7 @@
 #include <templates/github/repos.h>
 
 int
-github_get_repos(const char *owner, int max, gcli_repo **out)
+github_get_repos(char const *owner, int const max, gcli_repo **const out)
 {
     char               *url      = NULL;
     char               *next_url = NULL;
@@ -86,14 +86,15 @@ github_get_repos(const char *owner, int max, gcli_repo **out)
 }
 
 int
-github_get_own_repos(int max, gcli_repo **out)
+github_get_own_repos(int const max, gcli_repo **const out)
 {
-    char               *url      = sn_asprintf("%s/user/repos",
-                                               gcli_get_apibase());
+    char               *url      = NULL;
     char               *next_url = NULL;
     gcli_fetch_buffer   buffer   = {0};
     struct json_stream  stream   = {0};
     size_t              size     = 0;
+
+    url = sn_asprintf("%s/user/repos", gcli_get_apibase());
 
     do {
         buffer.length = 0;
@@ -114,7 +115,7 @@ github_get_own_repos(int max, gcli_repo **out)
 }
 
 void
-github_repo_delete(const char *owner, const char *repo)
+github_repo_delete(char const *owner, char const *repo)
 {
     char              *url     = NULL;
     char              *e_owner = NULL;
@@ -137,8 +138,7 @@ github_repo_delete(const char *owner, const char *repo)
 }
 
 gcli_repo *
-github_repo_create(
-    const gcli_repo_create_options *options) /* Options descriptor */
+github_repo_create(gcli_repo_create_options const *options) /* Options descriptor */
 {
     gcli_repo          *repo;
     char               *url, *data;

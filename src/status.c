@@ -31,7 +31,7 @@
 #include <gcli/forges.h>
 
 void
-gcli_status(int count)
+gcli_status(int const count)
 {
     gcli_notification *notifications      = NULL;
     size_t             notifications_size = 0;
@@ -44,22 +44,21 @@ gcli_status(int count)
         gcli_print_notifications(
             notifications,
             count < (int)notifications_size
-            ? count : notifications_size);
+            ? (size_t)count : notifications_size);
     }
 
     gcli_free_notifications(notifications, notifications_size);
 }
 
 size_t
-gcli_get_notifications(gcli_notification **out, int count)
+gcli_get_notifications(gcli_notification **const out, int const count)
 {
     return gcli_forge()->get_notifications(out, count);
 }
 
 void
-gcli_free_notifications(
-    gcli_notification *notifications,
-    size_t             notifications_size)
+gcli_free_notifications(gcli_notification *notifications,
+                        size_t const notifications_size)
 {
     for (size_t i = 0; i < notifications_size; ++i) {
         free(notifications[i].id);
@@ -74,9 +73,8 @@ gcli_free_notifications(
 }
 
 void
-gcli_print_notifications(
-    gcli_notification *notifications,
-    size_t             notifications_size)
+gcli_print_notifications(gcli_notification const *const notifications,
+                         size_t const notifications_size)
 {
     for (size_t i = 0; i < notifications_size; ++i) {
         printf(
@@ -91,7 +89,7 @@ gcli_print_notifications(
 }
 
 void
-gcli_notification_mark_as_read(const char *id)
+gcli_notification_mark_as_read(char const *id)
 {
     gcli_forge()->notification_mark_as_read(id);
 }

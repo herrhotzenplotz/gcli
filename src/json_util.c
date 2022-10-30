@@ -37,7 +37,7 @@
 #include <stdarg.h>
 
 static inline void
-barf(const char *message, const char *where)
+barf(char const *message, char const *where)
 {
     errx(1,
          "error: %s.\n"
@@ -50,7 +50,7 @@ barf(const char *message, const char *where)
 }
 
 long
-get_int_(json_stream *input, const char *where)
+get_int_(json_stream *const input, char const *where)
 {
     if (json_next(input) != JSON_NUMBER)
         barf("unexpected non-integer field", where);
@@ -59,7 +59,7 @@ get_int_(json_stream *input, const char *where)
 }
 
 double
-get_double_(json_stream *input, const char *where)
+get_double_(json_stream *const input, char const *where)
 {
     enum json_type type = json_next(input);
 
@@ -74,9 +74,9 @@ get_double_(json_stream *input, const char *where)
 }
 
 char *
-get_string_(json_stream *input, const char *where)
+get_string_(json_stream *const input, char const *where)
 {
-    enum json_type type = json_next(input);
+    enum json_type const type = json_next(input);
     if (type == JSON_NULL)
         return strdup("<empty>");
 
@@ -84,12 +84,12 @@ get_string_(json_stream *input, const char *where)
         barf("unexpected non-string field", where);
 
     size_t len;
-    const char *it = json_get_string(input, &len);
+    char const *it = json_get_string(input, &len);
     return sn_strndup(it, len);
 }
 
 bool
-get_bool_(json_stream *input, const char *where)
+get_bool_(json_stream *const input, char const *where)
 {
     enum json_type value_type = json_next(input);
     if (value_type == JSON_TRUE)
@@ -104,17 +104,17 @@ get_bool_(json_stream *input, const char *where)
 }
 
 char *
-get_user_(json_stream *input, const char *where)
+get_user_(json_stream *const input, char const *where)
 {
     if (json_next(input) != JSON_OBJECT)
         barf("user field is not an object", where);
 
-    const char *expected_key = gcli_forge()->user_object_key;
+    char const *expected_key = gcli_forge()->user_object_key;
 
     char *result = NULL;
     while (json_next(input) == JSON_STRING) {
         size_t      len = 0;
-        const char *key = json_get_string(input, &len);
+        char const *key = json_get_string(input, &len);
 
         if (strncmp(expected_key, key, len) == 0) {
             if (json_next(input) != JSON_STRING)
@@ -122,7 +122,7 @@ get_user_(json_stream *input, const char *where)
                     "login of the pull request creator is not a string",
                     where);
 
-            const char *tmp = json_get_string(input, &len);
+            char const *tmp = json_get_string(input, &len);
             result = sn_strndup(tmp, len);
         } else {
             json_next(input);
@@ -134,7 +134,7 @@ get_user_(json_stream *input, const char *where)
 
 static struct {
     char        c;
-    const char *with;
+    char const *with;
 } json_escape_table[] = {
     { .c = '\n', .with = "\\n"  },
     { .c = '\t', .with = "\\t"  },
@@ -144,7 +144,7 @@ static struct {
 };
 
 sn_sv
-gcli_json_escape(sn_sv it)
+gcli_json_escape(sn_sv const it)
 {
     sn_sv result = {0};
 
@@ -155,7 +155,7 @@ gcli_json_escape(sn_sv it)
     for (size_t i = 0; i < it.length; ++i) {
         for (size_t c = 0; c < ARRAY_SIZE(json_escape_table); ++c) {
             if (json_escape_table[c].c == it.data[i]) {
-                size_t len     = strlen(json_escape_table[c].with);
+                size_t const len = strlen(json_escape_table[c].with);
                 memcpy(result.data + result.length,
                        json_escape_table[c].with,
                        len);
@@ -174,7 +174,7 @@ gcli_json_escape(sn_sv it)
 }
 
 sn_sv
-get_sv_(json_stream *input, const char *where)
+get_sv_(json_stream *const input, char const *where)
 {
     enum json_type type = json_next(input);
     if (type == JSON_NULL)
@@ -184,26 +184,26 @@ get_sv_(json_stream *input, const char *where)
         barf("unexpected non-string field", where);
 
     size_t len;
-    const char *it   = json_get_string(input, &len);
+    char const *it   = json_get_string(input, &len);
     char       *copy = sn_strndup(it, len);
     return SV(copy);
 }
 
 void
-gcli_print_html_url(gcli_fetch_buffer buffer)
+gcli_print_html_url(gcli_fetch_buffer const buffer)
 {
     json_stream stream = {0};
 
     json_open_buffer(&stream, buffer.data, buffer.length);
     json_set_streaming(&stream, true);
 
-    enum json_type  next         = json_next(&stream);
-    const char     *expected_key = gcli_forge()->html_url_key;
+    enum json_type next = json_next(&stream);
+    char const *expected_key = gcli_forge()->html_url_key;
 
     while ((next = json_next(&stream)) == JSON_STRING) {
         size_t len;
 
-        const char *key = json_get_string(&stream, &len);
+        char const *key = json_get_string(&stream, &len);
         if (strncmp(key, expected_key, len) == 0) {
             char *url = get_string(&stream);
             puts(url);
@@ -231,16 +231,16 @@ gcli_print_html_url(gcli_fetch_buffer buffer)
 }
 
 
-const char *
-get_label_(json_stream *input, const char *where)
+char const *
+get_label_(json_stream *const input, char const *where)
 {
     if (json_next(input) != JSON_OBJECT)
         barf("label field is not an object", where);
 
-    const char *result = NULL;
+    char const *result = NULL;
     while (json_next(input) == JSON_STRING) {
         size_t      len = 0;
-        const char *key = json_get_string(input, &len);
+        char const *key = json_get_string(input, &len);
 
         if (strncmp("name", key, len) == 0) {
             if (json_next(input) != JSON_STRING)
@@ -257,63 +257,8 @@ get_label_(json_stream *input, const char *where)
 }
 
 
-size_t
-gcli_read_label_list(json_stream *stream, sn_sv **out)
-{
-    enum json_type next;
-    size_t         size;
-
-    next = json_next(stream);
-    if (next == JSON_NULL) {
-        *out = NULL;
-        return 0;
-    }
-
-    if (next != JSON_ARRAY)
-        barf("expected begin of array in label list", __func__);
-
-    size = 0;
-    while ((next = json_peek(stream)) != JSON_ARRAY_END) {
-        *out           = realloc(*out, sizeof(sn_sv) * (size + 1));
-        const char *l  = get_label(stream);
-        (*out)[size++] = SV((char *)l);
-    }
-
-    if (json_next(stream) != JSON_ARRAY_END)
-        barf("expected end of array in label list", __func__);
-
-    return size;
-}
-
-size_t
-gcli_read_user_list(json_stream *input, sn_sv **out)
-{
-    size_t n = 0;
-
-    /* Hack for Gitea because it returns NULL instead of an empty
-     * array */
-    if (json_peek(input) == JSON_NULL) {
-        json_next(input);
-        *out = NULL;
-        return 0;
-    }
-
-    if (json_next(input) != JSON_ARRAY)
-        errx(1, "Expected array for user list");
-
-    while (json_peek(input) == JSON_OBJECT) {
-        *out = realloc(*out, sizeof(**out) * (n + 1));
-        (*out)[n++] = get_user_sv(input);
-    }
-
-    if (json_next(input) != JSON_ARRAY_END)
-        errx(1, "Expected end of array for user list");
-
-    return n;
-}
-
 void
-gcli_json_advance(struct json_stream *stream, const char *fmt, ...)
+gcli_json_advance(json_stream *const stream, char const *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -334,7 +279,7 @@ gcli_json_advance(struct json_stream *stream, const char *fmt, ...)
 
             char       *it    = va_arg(ap, char *);
             size_t      len   = 0;
-            const char *other = json_get_string(stream, &len);
+            char const *other = json_get_string(stream, &len);
             if (strncmp(it, other, len))
                 errx(1, "String unmatched");
         } break;
@@ -357,7 +302,7 @@ gcli_json_advance(struct json_stream *stream, const char *fmt, ...)
 }
 
 long
-get_parse_int_(json_stream *input, const char *function)
+get_parse_int_(json_stream *const input, char const *function)
 {
     long  result = 0;
     char *endptr = NULL;
@@ -371,30 +316,8 @@ get_parse_int_(json_stream *input, const char *function)
     return result;
 }
 
-size_t
-gcli_read_sv_list(json_stream *input, sn_sv **out)
-{
-    enum json_type next;
-    size_t         size;
-
-    next = json_next(input);
-    if (next != JSON_ARRAY)
-        errx(1, "expected begin of array in string list");
-
-    size = 0;
-    while ((next = json_peek(input)) != JSON_ARRAY_END) {
-        *out           = realloc(*out, sizeof(sn_sv) * (size + 1));
-        (*out)[size++] = get_sv(input);
-    }
-
-    if (json_next(input) != JSON_ARRAY_END)
-        errx(1, "expected end of array in string list");
-
-    return size;
-}
-
 uint32_t
-get_github_style_color(json_stream *input)
+get_github_style_color(json_stream *const input)
 {
     char *color_str = get_string(input);
     char *endptr    = NULL;
@@ -410,7 +333,7 @@ get_github_style_color(json_stream *input)
 }
 
 uint32_t
-get_gitlab_style_color(struct json_stream *input)
+get_gitlab_style_color(json_stream *const input)
 {
     char *color  = get_string(input);
     char *endptr = NULL;
@@ -426,7 +349,7 @@ get_gitlab_style_color(struct json_stream *input)
 }
 
 sn_sv
-get_gitea_visibility(json_stream *input)
+get_gitea_visibility(json_stream *const input)
 {
     char *v = NULL;
     if (get_bool(input))
@@ -437,7 +360,7 @@ get_gitea_visibility(json_stream *input)
 }
 
 bool
-get_gitlab_can_be_merged(json_stream *input)
+get_gitlab_can_be_merged(json_stream *const input)
 {
     return sn_sv_eq_to(get_sv(input), "can_be_merged");
 }

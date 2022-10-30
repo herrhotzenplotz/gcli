@@ -38,13 +38,14 @@
 #include <templates/gitlab/status.h>
 
 size_t
-gitlab_get_notifications(gcli_notification **notifications, int count)
+gitlab_get_notifications(gcli_notification **const notifications,
+                         int const count)
 {
-    char               *url                = NULL;
-    char               *next_url           = NULL;
-    gcli_fetch_buffer   buffer             = {0};
-    struct json_stream  stream             = {0};
-    size_t              notifications_size = 0;
+    char              *url                = NULL;
+    char              *next_url           = NULL;
+    gcli_fetch_buffer  buffer             = {0};
+    json_stream        stream             = {0};
+    size_t             notifications_size = 0;
 
     url = sn_asprintf("%s/todos", gitlab_get_apibase());
 
@@ -64,7 +65,7 @@ gitlab_get_notifications(gcli_notification **notifications, int count)
 }
 
 void
-gitlab_notification_mark_as_read(const char *id)
+gitlab_notification_mark_as_read(char const *id)
 {
     char              *url    = NULL;
     gcli_fetch_buffer  buffer = {0};

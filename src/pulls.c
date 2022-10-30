@@ -38,7 +38,7 @@
 #include <sn/sn.h>
 
 void
-gcli_pulls_free(gcli_pull *it, int n)
+gcli_pulls_free(gcli_pull *const it, int const n)
 {
     for (int i = 0; i < n; ++i) {
         free((void *)it[i].title);
@@ -48,18 +48,17 @@ gcli_pulls_free(gcli_pull *it, int n)
 }
 
 int
-gcli_get_prs(
-    const char  *owner,
-    const char  *repo,
-    bool         all,
-    int          max,
-    gcli_pull  **out)
+gcli_get_prs(char const *owner,
+             char const *repo,
+             bool const all,
+             int const max,
+             gcli_pull **const out)
 {
     return gcli_forge()->get_prs(owner, repo, all, max, out);
 }
 
 static void
-gcli_print_pr(const enum gcli_output_flags flags, const gcli_pull *const pr)
+gcli_print_pr(enum gcli_output_flags const flags, gcli_pull const *const pr)
 {
     (void) flags;
 
@@ -73,9 +72,9 @@ gcli_print_pr(const enum gcli_output_flags flags, const gcli_pull *const pr)
 
 void
 gcli_print_pr_table(
-    enum gcli_output_flags  flags,
-    gcli_pull              *pulls,
-    int                     pulls_size)
+    enum gcli_output_flags const flags,
+    gcli_pull const *const       pulls,
+    int const                    pulls_size)
 {
     if (pulls_size == 0) {
         puts("No Pull Requests");
@@ -94,17 +93,16 @@ gcli_print_pr_table(
 }
 
 void
-gcli_print_pr_diff(
-    FILE       *stream,
-    const char *owner,
-    const char *reponame,
-    int         pr_number)
+gcli_print_pr_diff(FILE *stream,
+                   char const *owner,
+                   char const *reponame,
+                   int const pr_number)
 {
     gcli_forge()->print_pr_diff(stream, owner, reponame, pr_number);
 }
 
 static void
-gcli_print_pr_summary(gcli_pull_summary *it)
+gcli_print_pr_summary(gcli_pull_summary const *const it)
 {
 #define SANITIZE(x) (x ? x : "N/A")
     printf("   NUMBER : %d\n"
@@ -153,11 +151,10 @@ gcli_print_pr_summary(gcli_pull_summary *it)
 }
 
 static int
-gcli_get_pull_commits(
-    const char   *owner,
-    const char   *repo,
-    int           pr_number,
-    gcli_commit **out)
+gcli_get_pull_commits(char const *owner,
+                      char const *repo,
+                      int const pr_number,
+                      gcli_commit **const out)
 {
     return gcli_forge()->get_pull_commits(owner, repo, pr_number, out);
 }
@@ -166,7 +163,7 @@ gcli_get_pull_commits(
  * Get a copy of the first line of the passed string.
  */
 static char *
-cut_newline(const char *_it)
+cut_newline(char const *const _it)
 {
     char *it = strdup(_it);
     char *foo = it;
@@ -182,7 +179,8 @@ cut_newline(const char *_it)
 }
 
 static void
-gcli_print_commits_table(gcli_commit *commits, int commits_size)
+gcli_print_commits_table(gcli_commit const *const commits,
+                         int const commits_size)
 {
     if (commits_size == 0) {
         puts("No commits");
@@ -209,7 +207,7 @@ gcli_print_commits_table(gcli_commit *commits, int commits_size)
 }
 
 static void
-gcli_commits_free(gcli_commit *it, int size)
+gcli_commits_free(gcli_commit *it, int const size)
 {
     for (int i = 0; i < size; ++i) {
         free((void *)it[i].sha);
@@ -223,7 +221,7 @@ gcli_commits_free(gcli_commit *it, int size)
 }
 
 void
-gcli_pulls_summary_free(gcli_pull_summary *it)
+gcli_pulls_summary_free(gcli_pull_summary *const it)
 {
     free(it->author);
     free(it->state);
@@ -240,25 +238,23 @@ gcli_pulls_summary_free(gcli_pull_summary *it)
 }
 
 static void
-gcli_get_pull_summary(
-    const char        *owner,
-    const char        *repo,
-    int                pr_number,
-    gcli_pull_summary *out)
+gcli_get_pull_summary(char const *owner,
+                      char const *repo,
+                      int const pr_number,
+                      gcli_pull_summary *const out)
 {
     gcli_forge()->get_pull_summary(owner, repo, pr_number, out);
 }
 
 static void
-gcli_pr_info(
-    const char *owner,
-    const char *repo,
-    int         pr_number,
-    bool        is_status)
+gcli_pr_info(char const *owner,
+             char const *repo,
+             int const pr_number,
+             bool const is_status)
 {
     gcli_pull_summary  summary      = {0};
     gcli_commit       *commits      = NULL;
-    int                 commits_size = 0;
+    int                commits_size = 0;
 
     /* Summary header */
     gcli_get_pull_summary(owner, repo, pr_number, &summary);
@@ -284,19 +280,17 @@ gcli_pr_info(
 }
 
 void
-gcli_pr_status(
-    const char *owner,
-    const char *repo,
-    int         pr_number)
+gcli_pr_status(char const *owner,
+               char const *repo,
+               int const pr_number)
 {
     gcli_pr_info(owner, repo, pr_number, true);
 }
 
 void
-gcli_pr_summary(
-    const char *owner,
-    const char *repo,
-    int         pr_number)
+gcli_pr_summary(char const *owner,
+                char const *repo,
+                int const pr_number)
 {
     gcli_pr_info(owner, repo, pr_number, false);
 }
@@ -347,46 +341,43 @@ gcli_pr_submit(gcli_submit_pull_options opts)
 }
 
 void
-gcli_pr_merge(
-    const char *owner,
-    const char *reponame,
-    int         pr_number,
-    bool        squash)
+gcli_pr_merge(char const *owner,
+              char const *reponame,
+              int const pr_number,
+              bool const squash)
 {
     gcli_forge()->pr_merge(owner, reponame, pr_number, squash);
 }
 
 void
-gcli_pr_close(const char *owner, const char *reponame, int pr_number)
+gcli_pr_close(char const *owner, char const *reponame, int const pr_number)
 {
     gcli_forge()->pr_close(owner, reponame, pr_number);
 }
 
 void
-gcli_pr_reopen(const char *owner, const char *reponame, int pr_number)
+gcli_pr_reopen(char const *owner, char const *reponame, int const pr_number)
 {
     gcli_forge()->pr_reopen(owner, reponame, pr_number);
 }
 
 void
-gcli_pr_add_labels(
-    const char *owner,
-    const char *repo,
-    int         pr_number,
-    const char *labels[],
-    size_t      labels_size)
+gcli_pr_add_labels(char const *owner,
+                   char const *repo,
+                   int const pr_number,
+                   char const *const labels[],
+                   size_t const labels_size)
 {
     gcli_forge()->pr_add_labels(
         owner, repo, pr_number, labels, labels_size);
 }
 
 void
-gcli_pr_remove_labels(
-    const char *owner,
-    const char *repo,
-    int         pr_number,
-    const char *labels[],
-    size_t      labels_size)
+gcli_pr_remove_labels(char const *owner,
+                      char const *repo,
+                      int const pr_number,
+                      char const *const labels[],
+                      size_t const labels_size)
 {
     gcli_forge()->pr_remove_labels(
         owner, repo, pr_number, labels, labels_size);

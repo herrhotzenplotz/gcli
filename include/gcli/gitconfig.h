@@ -47,11 +47,10 @@ struct gcli_gitremote {
 };
 
 sn_sv gcli_gitconfig_get_current_branch(void);
-void  gcli_gitconfig_add_fork_remote(const char *org, const char *repo);
-int   gcli_gitconfig_get_forgetype(const char *remote_name);
-int   gcli_gitconfig_repo_by_remote(
-    const char *remote_name,
-    const char **owner,
-    const char **repo);
+void  gcli_gitconfig_add_fork_remote(char const *org, char const *repo);
+int   gcli_gitconfig_get_forgetype(char const *const remote_name);
+int   gcli_gitconfig_repo_by_remote(char const *const remote_name,
+                                    char const **const owner,
+                                    char const **const repo);
 
 #endif /* GITCONFIG_H */

@@ -39,11 +39,10 @@
 #include <templates/gitlab/pipelines.h>
 
 int
-gitlab_get_pipelines(
-    const char       *owner,
-    const char       *repo,
-    int               max,
-    gitlab_pipeline **out)
+gitlab_get_pipelines(char const *owner,
+                     char const *repo,
+                     int const max,
+                     gitlab_pipeline **const out)
 {
     char               *url      = NULL;
     char               *next_url = NULL;
@@ -73,9 +72,8 @@ gitlab_get_pipelines(
 }
 
 void
-gitlab_print_pipelines(
-    gitlab_pipeline *pipelines,
-    int              pipelines_size)
+gitlab_print_pipelines(gitlab_pipeline const *const pipelines,
+                       int const pipelines_size)
 {
     if (pipelines_size) {
         printf("%10.10s  %10.10s  %16.16s  %16.16s %-s\n",
@@ -96,9 +94,8 @@ gitlab_print_pipelines(
 }
 
 void
-gitlab_free_pipelines(
-    gitlab_pipeline *pipelines,
-    int              pipelines_size)
+gitlab_free_pipelines(gitlab_pipeline *pipelines,
+                      int const pipelines_size)
 {
     for (int i = 0; i < pipelines_size; ++i) {
         free(pipelines[i].status);
@@ -112,10 +109,10 @@ gitlab_free_pipelines(
 }
 
 void
-gitlab_pipelines(const char *owner, const char *repo, int count)
+gitlab_pipelines(char const *owner, char const *repo, int const count)
 {
     gitlab_pipeline *pipelines = NULL;
-    int pipelines_size = gitlab_get_pipelines(
+    int const pipelines_size = gitlab_get_pipelines(
         owner, repo, count, &pipelines);
 
     gitlab_print_pipelines(pipelines, pipelines_size);
@@ -123,21 +120,23 @@ gitlab_pipelines(const char *owner, const char *repo, int count)
 }
 
 void
-gitlab_pipeline_jobs(const char *owner, const char *repo, long id, int count)
+gitlab_pipeline_jobs(char const *owner,
+                     char const *repo,
+                     long const id,
+                     int const count)
 {
     gitlab_job *jobs = NULL;
-    int jobs_size = gitlab_get_pipeline_jobs(owner, repo, id, count, &jobs);
+    int const jobs_size = gitlab_get_pipeline_jobs(owner, repo, id, count, &jobs);
     gitlab_print_jobs(jobs, jobs_size);
     gitlab_free_jobs(jobs, jobs_size);
 }
 
 int
-gitlab_get_pipeline_jobs(
-    const char  *owner,
-    const char  *repo,
-    long         pipeline,
-    int          max,
-    gitlab_job **out)
+gitlab_get_pipeline_jobs(char const *owner,
+                         char const *repo,
+                         long const pipeline,
+                         int const max,
+                         gitlab_job **const out)
 {
     char   *url      = NULL;
     char   *next_url = NULL;
@@ -155,13 +154,13 @@ gitlab_get_pipeline_jobs(
 
         parse_gitlab_jobs(&stream, out, &out_size);
 
-    } while ((next_url = url) && ((int)out_size < max || max == -1), false);
+    } while ((next_url = url) && (((int)out_size < max) || (max == -1)));
 
     return (int)out_size;
 }
 
 void
-gitlab_print_jobs(gitlab_job *jobs, int jobs_size)
+gitlab_print_jobs(gitlab_job const *const jobs, int const jobs_size)
 {
     if (jobs_size) {
         printf("%10.10s  %10.10s  %10.10s  %16.16s  %16.16s  %12.12s  %-s\n",
@@ -184,7 +183,7 @@ gitlab_print_jobs(gitlab_job *jobs, int jobs_size)
 }
 
 static void
-gitlab_free_job_data(gitlab_job *job)
+gitlab_free_job_data(gitlab_job *const job)
 {
     free(job->status);
     free(job->stage);
@@ -198,7 +197,7 @@ gitlab_free_job_data(gitlab_job *job)
 }
 
 void
-gitlab_free_jobs(gitlab_job *jobs, int jobs_size)
+gitlab_free_jobs(gitlab_job *jobs, int const jobs_size)
 {
     for (int i = 0; i < jobs_size; ++i) {
         gitlab_free_job_data(&jobs[i]);
@@ -207,7 +206,7 @@ gitlab_free_jobs(gitlab_job *jobs, int jobs_size)
 }
 
 void
-gitlab_job_get_log(const char *owner, const char *repo, long job_id)
+gitlab_job_get_log(char const *owner, char const *repo, long const job_id)
 {
     gcli_fetch_buffer  buffer = {0};
     char              *url    = NULL;
@@ -224,7 +223,10 @@ gitlab_job_get_log(const char *owner, const char *repo, long job_id)
 }
 
 static void
-gitlab_get_job(const char *owner, const char *repo, long jid, gitlab_job *out)
+gitlab_get_job(char const *owner,
+               char const *repo,
+               long const jid,
+               gitlab_job *const out)
 {
     gcli_fetch_buffer   buffer = {0};
     char               *url    = NULL;
@@ -245,7 +247,7 @@ gitlab_get_job(const char *owner, const char *repo, long jid, gitlab_job *out)
 }
 
 static void
-gitlab_print_job_status(gitlab_job *job)
+gitlab_print_job_status(gitlab_job const *const job)
 {
     printf("          ID : %ld\n",     job->id);
     printf("      STATUS : %s%s%s\n",
@@ -267,7 +269,7 @@ gitlab_print_job_status(gitlab_job *job)
 }
 
 void
-gitlab_job_status(const char *owner, const char *repo, long jid)
+gitlab_job_status(char const *owner, char const *repo, long const jid)
 {
     gitlab_job job = {0};
 
@@ -278,7 +280,7 @@ gitlab_job_status(const char *owner, const char *repo, long jid)
 
 /* TODO: Maybe devise a macro for these things ? */
 void
-gitlab_job_cancel(const char *owner, const char *repo, long jid)
+gitlab_job_cancel(char const *owner, char const *repo, long const jid)
 {
     gcli_fetch_buffer  buffer = {0};
     char              *url    = NULL;
@@ -292,7 +294,7 @@ gitlab_job_cancel(const char *owner, const char *repo, long jid)
 }
 
 void
-gitlab_job_retry(const char *owner, const char *repo, long jid)
+gitlab_job_retry(char const *owner, char const *repo, long const jid)
 {
     gcli_fetch_buffer  buffer = {0};
     char              *url    = NULL;

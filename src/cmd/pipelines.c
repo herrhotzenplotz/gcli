@@ -66,7 +66,7 @@ int
 subcommand_pipelines(int argc, char *argv[])
 {
     int         ch    = 0;
-    const char *owner = NULL, *repo = NULL;
+    char const *owner = NULL, *repo = NULL;
     int         count = 30;
     long        pid   = -1;     /* pipeline id                           */
     long        jid   = -1;     /* job id. these are mutually exclusive. */
@@ -169,8 +169,8 @@ subcommand_pipelines(int argc, char *argv[])
 
     /* Definition of the action list */
     struct {
-        const char *name;                               /* Name on the cli */
-        void (*fn)(const char *, const char *, long);   /* Function to be invoked for this action */
+        char const *name;                               /* Name on the cli */
+        void (*fn)(char const *, char const *, long);   /* Function to be invoked for this action */
     } job_actions[] = {
         { .name = "log",    .fn = gitlab_job_get_log },
         { .name = "status", .fn = gitlab_job_status  },
@@ -180,7 +180,7 @@ subcommand_pipelines(int argc, char *argv[])
 
 next_action:
     while (argc) {
-        const char *action = shift(&argc, &argv);
+        char const *action = shift(&argc, &argv);
 
         /* Find the action and invoke it */
         for (size_t i = 0; i < ARRAY_SIZE(job_actions); ++i) {

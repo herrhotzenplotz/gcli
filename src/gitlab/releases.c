@@ -38,10 +38,10 @@
 
 /* TODO: Find a way to generate this code */
 static void
-gitlab_parse_assets_source(struct json_stream *input, gcli_release *out)
+gitlab_parse_assets_source(json_stream *input, gcli_release *const out)
 {
     enum json_type  next       = JSON_NULL;
-    const char     *key;
+    char const     *key        = NULL;
     sn_sv           url        = {0};
     bool            is_tarball = false;
 
@@ -75,7 +75,7 @@ gitlab_parse_assets_source(struct json_stream *input, gcli_release *out)
 }
 
 void
-gitlab_parse_asset_sources(struct json_stream *stream, gcli_release *out)
+gitlab_parse_asset_sources(json_stream *stream, gcli_release *const out)
 {
     enum json_type next = JSON_NULL;
 
@@ -91,19 +91,18 @@ gitlab_parse_asset_sources(struct json_stream *stream, gcli_release *out)
 }
 
 int
-gitlab_get_releases(
-    const char    *owner,
-    const char    *repo,
-    int            max,
-    gcli_release **out)
+gitlab_get_releases(char const *owner,
+                    char const *repo,
+                    int const max,
+                    gcli_release **const out)
 {
-    char               *url      = NULL;
-    char               *next_url = NULL;
-    char               *e_owner  = NULL;
-    char               *e_repo   = NULL;
-    gcli_fetch_buffer   buffer   = {0};
-    struct json_stream  stream   = {0};
-    size_t              size     = 0;
+    char              *url      = NULL;
+    char              *next_url = NULL;
+    char              *e_owner  = NULL;
+    char              *e_repo   = NULL;
+    gcli_fetch_buffer  buffer   = {0};
+    json_stream        stream   = {0};
+    size_t             size     = 0;
 
     *out = NULL;
 
@@ -133,7 +132,7 @@ gitlab_get_releases(
 }
 
 void
-gitlab_create_release(const gcli_new_release *release)
+gitlab_create_release(gcli_new_release const *release)
 {
     char              *url            = NULL;
     char              *upload_url     = NULL;
@@ -201,7 +200,7 @@ gitlab_create_release(const gcli_new_release *release)
 }
 
 void
-gitlab_delete_release(const char *owner, const char *repo, const char *id)
+gitlab_delete_release(char const *owner, char const *repo, char const *id)
 {
     char              *url     = NULL;
     char              *e_owner = NULL;

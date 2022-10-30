@@ -42,7 +42,7 @@ github_parse_review_comment(json_stream *input, gcli_pr_review_comment *it)
     enum json_type key_type;
     while ((key_type = json_next(input)) == JSON_STRING) {
         size_t      len = 0;
-        const char *key = json_get_string(input, &len);
+        char const *key = json_get_string(input, &len);
 
         if (strncmp("bodyText", key, len) == 0)
             it->body = get_string(input);
@@ -87,7 +87,7 @@ github_parse_review_header(json_stream *input, gcli_pr_review *it)
     enum json_type key_type;
     while ((key_type = json_next(input)) == JSON_STRING) {
         size_t      len = 0;
-        const char *key = json_get_string(input, &len);
+        char const *key = json_get_string(input, &len);
 
         if (strncmp("bodyText", key, len) == 0)
             it->body = get_string(input);
@@ -106,7 +106,7 @@ github_parse_review_header(json_stream *input, gcli_pr_review *it)
     }
 }
 
-static const char *get_reviews_fmt =
+static char const *get_reviews_fmt =
     "query {"
     "  repository(owner: \"%s\", name: \"%s\") {"
     "    pullRequest(number: %d) {"
@@ -140,11 +140,10 @@ static const char *get_reviews_fmt =
     "}";
 
 size_t
-github_review_get_reviews(
-    const char      *owner,
-    const char      *repo,
-    int              pr,
-    gcli_pr_review **out)
+github_review_get_reviews(char const *owner,
+                          char const *repo,
+                          int const pr,
+                          gcli_pr_review **const out)
 {
     gcli_fetch_buffer   buffer        = {0};
     char               *url           = NULL;

@@ -31,19 +31,17 @@
 #include <gcli/github/comments.h>
 
 int
-gitea_get_comments(
-    const char    *owner,
-    const char    *repo,
-    int            issue,
-    gcli_comment **out)
+gitea_get_comments(char const *owner,
+                   char const *repo,
+                   int const issue,
+                   gcli_comment **const out)
 {
     return github_get_comments(owner, repo, issue, out);
 }
 
 void
-gitea_perform_submit_comment(
-    gcli_submit_comment_opts  opts,
-    gcli_fetch_buffer        *out)
+gitea_perform_submit_comment(gcli_submit_comment_opts opts,
+                             gcli_fetch_buffer *const out)
 {
     github_perform_submit_comment(opts, out);
 }

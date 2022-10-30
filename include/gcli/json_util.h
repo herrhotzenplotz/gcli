@@ -55,17 +55,17 @@
 #define get_int_to_string(input) (sn_asprintf("%ld", get_int(input)))
 
 
-long        get_int_(json_stream *input, const char *function);
-double      get_double_(json_stream *input, const char *function);
-long        get_parse_int_(json_stream *input, const char *function);
-bool        get_bool_(json_stream *input, const char *function);
-char       *get_string_(json_stream *input, const char *function);
-sn_sv       get_sv_(json_stream *input, const char *function);
-char       *get_user_(json_stream *input, const char *function);
-const char *get_label_(json_stream *input, const char *function);
+long        get_int_(json_stream *input, char const *function);
+double      get_double_(json_stream *input, char const *function);
+long        get_parse_int_(json_stream *input, char const *function);
+bool        get_bool_(json_stream *input, char const *function);
+char       *get_string_(json_stream *input, char const *function);
+sn_sv       get_sv_(json_stream *input, char const *function);
+char       *get_user_(json_stream *input, char const *function);
+char const *get_label_(json_stream *input, char const *function);
 sn_sv       gcli_json_escape(sn_sv);
 void        gcli_print_html_url(gcli_fetch_buffer);
-void        gcli_json_advance(json_stream *input, const char *fmt, ...);
+void        gcli_json_advance(json_stream *input, char const *fmt, ...);
 uint32_t    get_github_style_color(json_stream *input);
 uint32_t    get_gitlab_style_color(json_stream *input);
 bool        get_gitlab_can_be_merged(json_stream *input);
@@ -84,7 +84,7 @@ parse_user(json_stream *input, sn_sv *out)
     *out = get_user_sv(input);
 }
 
-static inline const char *
+static inline char const *
 gcli_json_bool(bool it)
 {
     return it ? "true" : "false";

@@ -38,12 +38,11 @@
 #include <pdjson/pdjson.h>
 
 int
-gitlab_get_mrs(
-    const char  *owner,
-    const char  *repo,
-    bool         all,
-    int          max,
-    gcli_pull  **out)
+gitlab_get_mrs(char const *owner,
+               char const *repo,
+               bool const all,
+               int const max,
+               gcli_pull **const out)
 {
     size_t             count       = 0;
     json_stream        stream      = {0};
@@ -82,11 +81,10 @@ gitlab_get_mrs(
 }
 
 void
-gitlab_print_pr_diff(
-    FILE       *stream,
-    const char *owner,
-    const char *repo,
-    int         pr_number)
+gitlab_print_pr_diff(FILE *stream,
+                     char const *owner,
+                     char const *repo,
+                     int const pr_number)
 {
     (void)owner;
     (void)repo;
@@ -98,17 +96,16 @@ gitlab_print_pr_diff(
 }
 
 void
-gitlab_mr_merge(
-    const char *owner,
-    const char *repo,
-    int         mr_number,
-    bool        squash)
+gitlab_mr_merge(char const *owner,
+                char const *repo,
+                int const mr_number,
+                bool const squash)
 {
     gcli_fetch_buffer  buffer  = {0};
     char              *url     = NULL;
     char              *e_owner = NULL;
     char              *e_repo  = NULL;
-    const char        *data    = "{}";
+    char const        *data    = "{}";
 
     e_owner = gcli_urlencode(owner);
     e_repo  = gcli_urlencode(repo);
@@ -133,11 +130,10 @@ gitlab_mr_merge(
 }
 
 void
-gitlab_get_pull_summary(
-    const char        *owner,
-    const char        *repo,
-    int                pr_number,
-    gcli_pull_summary *out)
+gitlab_get_pull_summary(char const *owner,
+                        char const *repo,
+                        int const pr_number,
+                        gcli_pull_summary *const out)
 {
     json_stream        stream      = {0};
     gcli_fetch_buffer  json_buffer = {0};
@@ -167,11 +163,10 @@ gitlab_get_pull_summary(
 }
 
 int
-gitlab_get_pull_commits(
-    const char   *owner,
-    const char   *repo,
-    int           pr_number,
-    gcli_commit **out)
+gitlab_get_pull_commits(char const *owner,
+                        char const *repo,
+                        int const pr_number,
+                        gcli_commit **const out)
 {
     char              *url         = NULL;
     char              *next_url    = NULL;
@@ -207,7 +202,7 @@ gitlab_get_pull_commits(
 }
 
 void
-gitlab_mr_close(const char *owner, const char *repo, int pr_number)
+gitlab_mr_close(char const *owner, char const *repo, int const pr_number)
 {
     gcli_fetch_buffer  json_buffer = {0};
     char              *url         = NULL;
@@ -234,7 +229,7 @@ gitlab_mr_close(const char *owner, const char *repo, int pr_number)
 }
 
 void
-gitlab_mr_reopen(const char *owner, const char *repo, int pr_number)
+gitlab_mr_reopen(char const *owner, char const *repo, int const pr_number)
 {
     gcli_fetch_buffer  json_buffer = {0};
     char              *url         = NULL;
@@ -342,12 +337,11 @@ gitlab_perform_submit_mr(gcli_submit_pull_options opts)
 }
 
 void
-gitlab_mr_add_labels(
-    const char *owner,
-    const char *repo,
-    int         mr,
-    const char *labels[],
-    size_t      labels_size)
+gitlab_mr_add_labels(char const *owner,
+                     char const *repo,
+                     int const mr,
+                     char const *const labels[],
+                     size_t const labels_size)
 {
     char              *url    = NULL;
     char              *data   = NULL;
@@ -369,12 +363,11 @@ gitlab_mr_add_labels(
 }
 
 void
-gitlab_mr_remove_labels(
-    const char *owner,
-    const char *repo,
-    int         mr,
-    const char *labels[],
-    size_t      labels_size)
+gitlab_mr_remove_labels(char const *owner,
+                        char const *repo,
+                        int const mr,
+                        char const *const labels[],
+                        size_t const labels_size)
 {
     char              *url    = NULL;
     char              *data   = NULL;

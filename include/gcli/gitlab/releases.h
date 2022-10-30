@@ -36,24 +36,20 @@
 
 #include <gcli/releases.h>
 
-int gitlab_get_releases(
-    const char    *owner,
-    const char    *repo,
-    int            max,
-    gcli_release **out);
+int gitlab_get_releases(char const *owner,
+                        char const *repo,
+                        int const max,
+                        gcli_release **const out);
 
-void gitlab_create_release(
-    const gcli_new_release *release);
+void gitlab_create_release(gcli_new_release const *const release);
 
-void gitlab_delete_release(
-    const char *owner,
-    const char *repo,
-    const char *id);
+void gitlab_delete_release(char const *owner,
+                           char const *repo,
+                           char const *id);
 
 /* HACK: Needed by the parser generator */
 #include <pdjson/pdjson.h>
-void gitlab_parse_asset_sources(
-    struct json_stream *input,
-    gcli_release       *out);
+void gitlab_parse_asset_sources(struct json_stream *input,
+                                gcli_release *const out);
 
 #endif /* GITLAB_RELEASES_H */

@@ -31,33 +31,25 @@
 #include <gcli/github/repos.h>
 
 int
-gitea_get_repos(
-    const char  *owner,
-    int          max,
-    gcli_repo  **out)
+gitea_get_repos(char const *owner, int const max, gcli_repo **const out)
 {
     return github_get_repos(owner, max, out);
 }
 
 int
-gitea_get_own_repos(
-    int         max,
-    gcli_repo **out)
+gitea_get_own_repos(int const max, gcli_repo **const out)
 {
     return github_get_own_repos(max, out);
 }
 
 gcli_repo *
-gitea_repo_create(
-    const gcli_repo_create_options *options)
+gitea_repo_create(gcli_repo_create_options const *options)
 {
     return github_repo_create(options);
 }
 
 void
-gitea_repo_delete(
-    const char *owner,
-    const char *repo)
+gitea_repo_delete(char const *owner, char const *repo)
 {
     github_repo_delete(owner, repo);
 }

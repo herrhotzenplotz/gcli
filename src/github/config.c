@@ -71,11 +71,11 @@ default_val:
 char *
 github_get_authheader(void)
 {
-    sn_sv account = github_default_account_name();
+    sn_sv const account = github_default_account_name();
     if (sn_sv_null(account))
         return NULL;
 
-    sn_sv token = gcli_config_find_by_key(account, "token");;
+    sn_sv const token = gcli_config_find_by_key(account, "token");;
     if (sn_sv_null(token))
         errx(1, "Missing Github token");
     return sn_asprintf("Authorization: token "SV_FMT, SV_ARGS(token));
@@ -84,11 +84,11 @@ github_get_authheader(void)
 sn_sv
 github_get_account(void)
 {
-    sn_sv section = github_default_account_name();
+    sn_sv const section = github_default_account_name();
     if (sn_sv_null(section))
         return SV_NULL;
 
-    sn_sv account = gcli_config_find_by_key(section, "account");;
+    sn_sv const account = gcli_config_find_by_key(section, "account");;
     if (!account.length)
         errx(1, "Missing Github account name");
     return account;

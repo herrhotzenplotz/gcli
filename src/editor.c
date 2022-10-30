@@ -39,7 +39,7 @@
 #include <sys/wait.h>
 
 static sn_sv
-sv_append(sn_sv this, sn_sv that)
+sv_append(sn_sv this, sn_sv const that)
 {
     this.data = realloc(this.data, this.length + that.length);
     memcpy(this.data + this.length, that.data, that.length);

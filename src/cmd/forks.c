@@ -61,10 +61,10 @@ static int
 subcommand_forks_create(int argc, char *argv[])
 {
     int         ch;
-    const char *owner      = NULL, *repo = NULL, *in = NULL;
+    char const *owner      = NULL, *repo = NULL, *in = NULL;
     bool        always_yes = false;
 
-    const struct option options[] = {
+    struct option const options[] = {
         { .name    = "repo",
           .has_arg = required_argument,
           .flag    = NULL,
@@ -129,7 +129,7 @@ int
 subcommand_forks(int argc, char *argv[])
 {
     gcli_fork              *forks      = NULL;
-    const char             *owner      = NULL, *repo = NULL;
+    char const             *owner      = NULL, *repo = NULL;
     int                     forks_size = 0;
     int                     ch         = 0;
     int                     count      = 30;
@@ -142,7 +142,7 @@ subcommand_forks(int argc, char *argv[])
         return subcommand_forks_create(argc, argv);
     }
 
-    const struct option options[] = {
+    struct option const options[] = {
         { .name    = "repo",
           .has_arg = required_argument,
           .flag    = NULL,
@@ -205,7 +205,7 @@ subcommand_forks(int argc, char *argv[])
     }
 
     for (size_t i = 0; i < (size_t)argc; ++i) {
-        const char *action = argv[i];
+        char const *action = argv[i];
 
         if (strcmp(action, "delete") == 0) {
             delete_repo(always_yes, owner, repo);

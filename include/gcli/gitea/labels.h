@@ -36,18 +36,17 @@
 
 #include <gcli/labels.h>
 
-size_t gitea_get_labels(
-    const char  *owner,
-    const char  *reponame,
-    int          max,
-    gcli_label **out);
-void gitea_create_label(
-    const char *owner,
-    const char *repo,
-    gcli_label *label);
-void gitea_delete_label(
-    const char *owner,
-    const char *repo,
-    const char *label);
+size_t gitea_get_labels(char const *owner,
+                        char const *reponame,
+                        int const max,
+                        gcli_label **const out);
+
+void gitea_create_label(char const *owner,
+                        char const *repo,
+                        gcli_label *const label);
+
+void gitea_delete_label(char const *owner,
+                        char const *repo,
+                        char const *const label);
 
 #endif /* GITEA_LABELS_H */

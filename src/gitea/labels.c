@@ -36,29 +36,26 @@
 #include <sn/sn.h>
 
 size_t
-gitea_get_labels(
-    const char  *owner,
-    const char  *reponame,
-    int          max,
-    gcli_label **out)
+gitea_get_labels(char const *owner,
+                 char const *reponame,
+                 int max,
+                 gcli_label **const out)
 {
     return github_get_labels(owner, reponame, max, out);
 }
 
 void
-gitea_create_label(
-    const char *owner,
-    const char *repo,
-    gcli_label *label)
+gitea_create_label(char const *owner,
+                   char const *repo,
+                   gcli_label *const label)
 {
     github_create_label(owner, repo, label);
 }
 
 void
-gitea_delete_label(
-    const char *owner,
-    const char *repo,
-    const char *label)
+gitea_delete_label(char const *owner,
+                   char const *repo,
+                   char const *label)
 {
     char              *url         = NULL;
     gcli_fetch_buffer  buffer      = {0};

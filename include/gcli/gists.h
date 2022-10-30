@@ -64,25 +64,20 @@ struct gcli_gist {
 
 struct gcli_new_gist {
     FILE       *file;
-    const char *file_name;
-    const char *gist_description;
+    char const *file_name;
+    char const *gist_description;
 };
 
-int gcli_get_gists(
-    const char  *user,
-    int          max,
-    gcli_gist  **out);
-gcli_gist *gcli_get_gist(
-    const char *gist_id);
-void gcli_print_gists(
-    enum gcli_output_flags  flags,
-    gcli_gist              *gists,
-    int                     gists_size);
-void gcli_create_gist(
-    gcli_new_gist);
-void gcli_delete_gist(
-    const char *gist_id,
-    bool        always_yes);
+int        gcli_get_gists(char const *user,
+                          int const max,
+                          gcli_gist **const out);
+gcli_gist *gcli_get_gist(char const *gist_id);
+void       gcli_print_gists(enum gcli_output_flags const flags,
+                            gcli_gist const *const gists,
+                            int const gists_size);
+void       gcli_create_gist(gcli_new_gist);
+void       gcli_delete_gist(char const *gist_id,
+                            bool const always_yes);
 
 /**
  * NOTE(Nico): Because of idiots designing a web API, we get a list of

@@ -101,6 +101,7 @@ subcommand_issue_create(int argc, char *argv[])
             break;
         case 'y':
             opts.always_yes = true;
+            break;
         default:
             usage();
             return EXIT_FAILURE;
@@ -137,8 +138,8 @@ subcommand_issues(int argc, char *argv[])
 {
     gcli_issue             *issues      = NULL;
     int                     issues_size = 0;
-    const char             *owner       = NULL;
-    const char             *repo        = NULL;
+    char const             *owner       = NULL;
+    char const             *repo        = NULL;
     char                   *endptr      = NULL;
     int                     ch          = 0;
     int                     issue       = -1;
@@ -243,7 +244,7 @@ subcommand_issues(int argc, char *argv[])
 
     /* execute all operations on the given issue */
     while (argc > 0) {
-        const char *operation = shift(&argc, &argv);
+        char const *operation = shift(&argc, &argv);
 
         if (strcmp("comments", operation) == 0) {
             gcli_issue_comments(owner, repo, issue);
@@ -255,12 +256,12 @@ subcommand_issues(int argc, char *argv[])
         } else if (strcmp("reopen", operation) == 0) {
             gcli_issue_reopen(owner, repo, issue);
         } else if (strcmp("assign", operation) == 0) {
-            const char *assignee = shift(&argc, &argv);
+            char const *assignee = shift(&argc, &argv);
             gcli_issue_assign(owner, repo, issue, assignee);
         } else if (strcmp("labels", operation) == 0) {
-            const char **add_labels         = NULL;
+            char const **add_labels         = NULL;
             size_t       add_labels_size    = 0;
-            const char **remove_labels      = NULL;
+            char const **remove_labels      = NULL;
             size_t       remove_labels_size = 0;
 
             if (argc == 0) {

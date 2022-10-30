@@ -47,20 +47,20 @@ struct gcli_fork {
 };
 
 int gcli_get_forks(
-    const char  *owner,
-    const char  *reponame,
-    int          max,
-    gcli_fork  **out);
+    char const        *owner,
+    char const        *reponame,
+    int const          max,
+    gcli_fork **const  out);
 void gcli_fork_create(
-    const char *owner,
-    const char *repo,
-    const char *in);
+    char const *owner,
+    char const *repo,
+    char const *in);
 void gcli_print_forks(
-    enum gcli_output_flags  flags,
-    gcli_fork              *forks,
-    size_t                  forks_size);
+    enum gcli_output_flags const flags,
+    const gcli_fork *const       forks,
+    size_t const                 forks_size);
 void gcli_fork_delete(
-    const char *owner,
-    const char *repo);
+    char const *owner,
+    char const *repo);
 
 #endif /* FORK_H */

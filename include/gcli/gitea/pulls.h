@@ -37,41 +37,40 @@
 #include <gcli/curl.h>
 #include <gcli/pulls.h>
 
-int gitea_get_pulls(
-    const char  *owner,
-    const char  *reponame,
-    bool         all,
-    int          max,
-    gcli_pull  **out);
-void gitea_get_pull_summary(
-    const char		  *owner,
-    const char		  *repo,
-    int				   pr_number,
-    gcli_pull_summary *out);
-int gitea_get_pull_commits(
-    const char	 *owner,
-    const char	 *repo,
-    int			  pr_number,
-    gcli_commit	**out);
-void gitea_pull_submit(
-    gcli_submit_pull_options opts);
-void gitea_pull_merge(
-    const char *owner,
-    const char *reponame,
-    int			pr_number,
-    bool		squash);
-void gitea_pull_close(
-    const char *owner,
-    const char *repo,
-    int			pr_number);
-void gitea_pull_reopen(
-    const char *owner,
-    const char *repo,
-    int			pr_number);
-void gitea_print_pr_diff(
-    FILE       *stream,
-    const char *owner,
-    const char *repo,
-    int         pr_number);
+int gitea_get_pulls(char const *owner,
+                    char const *reponame,
+                    bool const all,
+                    int const max,
+                    gcli_pull **const out);
+
+void gitea_get_pull_summary(char const *owner,
+                            char const *repo,
+                            int	const pr_number,
+                            gcli_pull_summary *const out);
+
+int gitea_get_pull_commits(char const *owner,
+                           char const *repo,
+                           int const pr_number,
+                           gcli_commit **const out);
+
+void gitea_pull_submit(gcli_submit_pull_options opts);
+
+void gitea_pull_merge(char const *owner,
+                      char const *reponame,
+                      int const pr_number,
+                      bool const squash);
+
+void gitea_pull_close(char const *owner,
+                      char const *repo,
+                      int const pr_number);
+
+void gitea_pull_reopen(char const *owner,
+                       char const *repo,
+                       int const pr_number);
+
+void gitea_print_pr_diff(FILE *stream,
+                         char const *owner,
+                         char const *repo,
+                         int const pr_number);
 
 #endif /* GITEA_PULLS_H */

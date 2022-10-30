@@ -54,11 +54,11 @@ int
 subcommand_comment(int argc, char *argv[])
 {
     int                       ch, target_id  = -1;
-    const char               *repo       = NULL, *owner = NULL;
+    char const               *repo       = NULL, *owner = NULL;
     bool                      always_yes = false;
     enum comment_target_type  target_type;
 
-    const struct option options[] = {
+    struct option const options[] = {
         { .name    = "yes",
           .has_arg = no_argument,
           .flag    = NULL,

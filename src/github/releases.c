@@ -39,11 +39,10 @@
 #include <templates/github/releases.h>
 
 int
-github_get_releases(
-    const char    *owner,
-    const char    *repo,
-    int            max,
-    gcli_release **out)
+github_get_releases(char const *owner,
+                    char const *repo,
+                    int const max,
+                    gcli_release **const out)
 {
     char               *url      = NULL;
     char               *e_owner  = NULL;
@@ -83,7 +82,7 @@ github_get_releases(
 }
 
 static void
-github_parse_single_release(gcli_fetch_buffer buffer, gcli_release *out)
+github_parse_single_release(gcli_fetch_buffer buffer, gcli_release *const out)
 {
     struct json_stream stream = {0};
 
@@ -94,7 +93,7 @@ github_parse_single_release(gcli_fetch_buffer buffer, gcli_release *out)
 }
 
 static char *
-github_get_upload_url(gcli_release *it)
+github_get_upload_url(gcli_release *const it)
 {
     char *delim = strchr(it->upload_url.data, '{');
     if (delim == NULL)
@@ -105,7 +104,7 @@ github_get_upload_url(gcli_release *it)
 }
 
 static void
-github_upload_release_asset(const char *url, gcli_release_asset asset)
+github_upload_release_asset(char const *url, gcli_release_asset const asset)
 {
     char              *req          = NULL;
     sn_sv              file_content = {0};
@@ -130,7 +129,7 @@ github_upload_release_asset(const char *url, gcli_release_asset asset)
 }
 
 void
-github_create_release(const gcli_new_release *release)
+github_create_release(gcli_new_release const *release)
 {
     char              *url            = NULL;
     char              *e_owner        = NULL;
@@ -205,7 +204,7 @@ github_create_release(const gcli_new_release *release)
 }
 
 void
-github_delete_release(const char *owner, const char *repo, const char *id)
+github_delete_release(char const *owner, char const *repo, char const *id)
 {
     char              *url     = NULL;
     char              *e_owner = NULL;

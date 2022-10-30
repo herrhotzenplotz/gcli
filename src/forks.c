@@ -33,17 +33,16 @@
 #include <gcli/github/forks.h>
 
 int
-gcli_get_forks(
-    const char  *owner,
-    const char  *repo,
-    int          max,
-    gcli_fork  **out)
+gcli_get_forks(char const *owner,
+               char const *repo,
+               int const max,
+               gcli_fork **const out)
 {
     return gcli_forge()->get_forks(owner, repo, max, out);
 }
 
 static void
-gcli_print_fork(const enum gcli_output_flags flags, const gcli_fork *const fork)
+gcli_print_fork(enum gcli_output_flags const flags, gcli_fork const *const fork)
 {
     (void) flags;
 
@@ -55,10 +54,9 @@ gcli_print_fork(const enum gcli_output_flags flags, const gcli_fork *const fork)
 }
 
 void
-gcli_print_forks(
-    enum gcli_output_flags  flags,
-    gcli_fork              *forks,
-    size_t                  forks_size)
+gcli_print_forks(enum gcli_output_flags const flags,
+                 gcli_fork const *const forks,
+                 size_t const forks_size)
 {
     if (forks_size == 0) {
         puts("No forks");
@@ -77,7 +75,7 @@ gcli_print_forks(
 }
 
 void
-gcli_fork_create(const char *owner, const char *repo, const char *_in)
+gcli_fork_create(char const *owner, char const *repo, char const *_in)
 {
     gcli_forge()->fork_create(owner, repo, _in);
 }

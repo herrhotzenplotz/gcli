@@ -43,32 +43,23 @@ typedef struct gcli_comment gcli_comment;
 typedef struct gcli_submit_comment_opts gcli_submit_comment_opts;
 
 struct gcli_comment {
-    const char *author;    /* Login name of the comment author */
-    const char *date;      /* Creation date of the comment     */
+    char const *author;    /* Login name of the comment author */
+    char const *date;      /* Creation date of the comment     */
     int         id;        /* id of the comment                */
-    const char *body;      /* Raw text of the comment          */
+    char const *body;      /* Raw text of the comment          */
 };
 
 struct gcli_submit_comment_opts {
     enum comment_target_type { ISSUE_COMMENT, PR_COMMENT }  target_type;
-    const char                                             *owner, *repo;
+    char const                                             *owner, *repo;
     int                                                     target_id;
     sn_sv                                                   message;
     bool                                                    always_yes;
 };
 
-void gcli_print_comment_list(
-    gcli_comment *comments,
-    size_t comments_size);
-void gcli_issue_comments(
-    const char *owner,
-    const char *repo,
-    int issue);
-void gcli_pull_comments(
-    const char *owner,
-    const char *repo,
-    int issue);
-void gcli_comment_submit(
-    gcli_submit_comment_opts opts);
+void gcli_print_comment_list(gcli_comment const *comments, size_t const comments_size);
+void gcli_issue_comments(char const *owner, char const *repo, int const issue);
+void gcli_pull_comments(char const *owner, char const *repo, int const issue);
+void gcli_comment_submit(gcli_submit_comment_opts opts);
 
 #endif /* COMMENTS_H */

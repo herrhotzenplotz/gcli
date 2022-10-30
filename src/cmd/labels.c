@@ -61,7 +61,7 @@ static int
 subcommand_labels_delete(int argc, char *argv[])
 {
     int         ch;
-    const char *owner = NULL, *repo = NULL;
+    char const *owner = NULL, *repo = NULL;
     const struct option options[] = {
         {.name = "repo",  .has_arg = required_argument, .val = 'r'},
         {.name = "owner", .has_arg = required_argument, .val = 'o'},
@@ -103,7 +103,7 @@ static int
 subcommand_labels_create(int argc, char *argv[])
 {
     gcli_label  label = {0};
-    const char *owner = NULL, *repo = NULL;
+    char const *owner = NULL, *repo = NULL;
     int         ch;
 
     const struct option options[] = {
@@ -171,7 +171,7 @@ subcommand_labels_create(int argc, char *argv[])
 }
 
 static struct {
-    const char *name;
+    char const *name;
     int (*fn)(int, char **);
 } labels_subcommands[] = {
     { .name = "delete", .fn = subcommand_labels_delete },
@@ -183,7 +183,7 @@ subcommand_labels(int argc, char *argv[])
 {
     int         count = 30;
     int         ch;
-    const char *owner = NULL, *repo = NULL;
+    char const *owner = NULL, *repo = NULL;
     size_t      labels_count;
     gcli_label *labels;
 

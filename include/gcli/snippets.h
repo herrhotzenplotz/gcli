@@ -48,23 +48,16 @@ struct gcli_snippet {
     char *raw_url;
 };
 
-void gcli_snippets_free(
-    gcli_snippet *list,
-    int           list_size);
+void gcli_snippets_free(gcli_snippet *list, int const list_size);
 
-int gcli_snippets_get(
-    int            max,
-    gcli_snippet **out);
+int gcli_snippets_get(int const max, gcli_snippet **const out);
 
-void gcli_snippets_print(
-    enum gcli_output_flags  flags,
-    gcli_snippet           *list,
-    int                     list_size);
+void gcli_snippets_print(enum gcli_output_flags const flags,
+                         gcli_snippet const *const list,
+                         int const list_size);
 
-void gcli_snippet_delete(
-    const char *snippet_id);
+void gcli_snippet_delete(char const *snippet_id);
 
-void gcli_snippet_get(
-    const char *snippet_id);
+void gcli_snippet_get(char const *snippet_id);
 
 #endif /* SNIPPETS_H */

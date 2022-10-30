@@ -65,8 +65,8 @@ subcommand_gist_get(int argc, char *argv[])
 {
     shift(&argc, &argv); /* Discard the *get* */
 
-    const char     *gist_id   = shift(&argc, &argv);
-    const char     *file_name = shift(&argc, &argv);
+    char const     *gist_id   = shift(&argc, &argv);
+    char const     *file_name = shift(&argc, &argv);
     gcli_gist      *gist      = NULL;
     gcli_gist_file *file      = NULL;
 
@@ -98,9 +98,9 @@ subcommand_gist_create(int argc, char *argv[])
 {
     int            ch;
     gcli_new_gist  opts = {0};
-    const char    *file = NULL;
+    char const    *file = NULL;
 
-    const struct option options[] = {
+    struct option const options[] = {
         { .name    = "file",
           .has_arg = required_argument,
           .flag    = NULL,
@@ -158,9 +158,9 @@ subcommand_gist_delete(int argc, char *argv[])
 {
     int         ch;
     bool        always_yes = false;
-    const char *gist_id    = NULL;
+    char const *gist_id    = NULL;
 
-    const struct option options[] = {
+    struct option const options[] = {
         { .name    = "yes",
           .has_arg = no_argument,
           .flag    = NULL,
@@ -190,7 +190,7 @@ subcommand_gist_delete(int argc, char *argv[])
 }
 
 static struct {
-    const char *name;
+    char const *name;
     int (*fn)(int, char **);
 } gist_subcommands[] = {
     { .name = "get",    .fn = subcommand_gist_get    },
@@ -202,7 +202,7 @@ int
 subcommand_gists(int argc, char *argv[])
 {
     int                     ch;
-    const char             *user       = NULL;
+    char const             *user       = NULL;
     gcli_gist              *gists      = NULL;
     int                     gists_size = 0;
     int                     count      = 30;
@@ -216,7 +216,7 @@ subcommand_gists(int argc, char *argv[])
         }
     }
 
-    const struct option options[] = {
+    struct option const options[] = {
         { .name    = "user",
           .has_arg = required_argument,
           .flag    = NULL,

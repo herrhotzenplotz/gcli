@@ -32,24 +32,23 @@
 #include <gcli/labels.h>
 
 size_t
-gcli_get_labels(
-    const char  *owner,
-    const char  *reponame,
-    int          max,
-    gcli_label **out)
+gcli_get_labels(char const *owner,
+                char const *reponame,
+                int const max,
+                gcli_label **const out)
 {
     return gcli_forge()->get_labels(owner, reponame, max, out);
 }
 
 void
-gcli_free_label(gcli_label *label)
+gcli_free_label(gcli_label *const label)
 {
     free(label->name);
     free(label->description);
 }
 
 void
-gcli_free_labels(gcli_label *labels, size_t labels_size)
+gcli_free_labels(gcli_label *labels, size_t const labels_size)
 {
     for (size_t i = 0; i < labels_size; ++i)
         gcli_free_label(&labels[i]);
@@ -57,7 +56,7 @@ gcli_free_labels(gcli_label *labels, size_t labels_size)
 }
 
 void
-gcli_print_labels(const gcli_label *labels, size_t labels_size)
+gcli_print_labels(gcli_label const *const labels, size_t const labels_size)
 {
     printf("%10.10s %-15.15s %s\n", "ID", "NAME", "DESCRIPTION");
 
@@ -71,13 +70,13 @@ gcli_print_labels(const gcli_label *labels, size_t labels_size)
 }
 
 void
-gcli_create_label(const char *owner, const char *repo, gcli_label *label)
+gcli_create_label(char const *owner, char const *repo, gcli_label *const label)
 {
     gcli_forge()->create_label(owner, repo, label);
 }
 
 void
-gcli_delete_label(const char *owner, const char *repo, const char *label)
+gcli_delete_label(char const *owner, char const *repo, char const *const label)
 {
     gcli_forge()->delete_label(owner, repo, label);
 }

@@ -56,29 +56,15 @@ struct gcli_repo_create_options {
     bool  private;
 };
 
-int gcli_get_repos(
-    const char  *owner,
-    int          max,
-    gcli_repo  **out);
-
-int gcli_get_own_repos(
-    int         max,
-    gcli_repo **out);
-
-void gcli_repos_free(
-    gcli_repo *,
-    size_t);
-
-void gcli_print_repos_table(
-    enum gcli_output_flags  flags,
-    gcli_repo              *repos,
-    size_t                  repos_size);
-
-void gcli_repo_delete(
-    const char *owner,
-    const char *repo);
-
-gcli_repo *gcli_repo_create(
-    const gcli_repo_create_options *);
+int        gcli_get_repos(char const *owner,
+                          int const max,
+                          gcli_repo **const out);
+int        gcli_get_own_repos(int const max, gcli_repo **const out);
+void       gcli_repos_free(gcli_repo *, size_t const);
+void       gcli_print_repos_table(enum gcli_output_flags const flags,
+                                  gcli_repo const *const repos,
+                                  size_t const repos_size);
+void       gcli_repo_delete(char const *owner, char const *repo);
+gcli_repo *gcli_repo_create(gcli_repo_create_options const *);
 
 #endif /* REPOS_H */

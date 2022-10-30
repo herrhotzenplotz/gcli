@@ -37,7 +37,7 @@
 #include <sn/sn.h>
 
 static void
-gcli_issue_comment_free(gcli_comment *it)
+gcli_issue_comment_free(gcli_comment *const it)
 {
     free((void *)it->author);
     free((void *)it->date);
@@ -45,9 +45,8 @@ gcli_issue_comment_free(gcli_comment *it)
 }
 
 void
-gcli_print_comment_list(
-    gcli_comment *comments,
-    size_t        comments_size)
+gcli_print_comment_list(gcli_comment const *const comments,
+                        size_t const comments_size)
 {
     for (size_t i = 0; i < comments_size; ++i) {
         printf("AUTHOR : %s%s%s\n"
@@ -60,10 +59,7 @@ gcli_print_comment_list(
 }
 
 void
-gcli_issue_comments(
-    const char *owner,
-    const char *repo,
-    int         issue)
+gcli_issue_comments(char const *owner, char const *repo, int const issue)
 {
     gcli_comment *comments = NULL;
     int           n        = -1;
@@ -78,10 +74,7 @@ gcli_issue_comments(
 }
 
 void
-gcli_pull_comments(
-    const char *owner,
-    const char *repo,
-    int         issue)
+gcli_pull_comments(char const *owner, char const *repo, int const issue)
 {
     gcli_comment *comments = NULL;
     int           n        = -1;
@@ -137,8 +130,8 @@ void
 gcli_comment_submit(gcli_submit_comment_opts opts)
 {
     gcli_fetch_buffer buffer = {0};
-    sn_sv message = gcli_comment_get_message(&opts);
-    opts.message  = gcli_json_escape(message);
+    sn_sv const message = gcli_comment_get_message(&opts);
+    opts.message = gcli_json_escape(message);
 
     fprintf(
         stdout,

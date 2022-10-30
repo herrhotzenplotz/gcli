@@ -36,10 +36,9 @@
 
 #include <gcli/review.h>
 
-size_t gitlab_review_get_reviews(
-    const char      *owner,
-    const char      *repo,
-    int              pr,
-    gcli_pr_review **out);
+size_t gitlab_review_get_reviews(char const *owner,
+                                 char const *repo,
+                                 int const pr,
+                                 gcli_pr_review **const out);
 
 #endif /* GITLAB_REVIEW_H */

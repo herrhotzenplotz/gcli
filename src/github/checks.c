@@ -40,12 +40,11 @@
 #include <pdjson/pdjson.h>
 
 void
-github_get_checks(
-    const char         *owner,
-    const char         *repo,
-    const char         *ref,
-    int                 max,
-    gcli_github_checks *out)
+github_get_checks(char const *owner,
+                  char const *repo,
+                  char const *ref,
+                  int const max,
+                  gcli_github_checks *const out)
 {
     gcli_fetch_buffer  buffer   = {0};
     char              *url      = NULL;
@@ -72,7 +71,7 @@ github_get_checks(
 }
 
 void
-github_print_checks(const gcli_github_checks *list)
+github_print_checks(gcli_github_checks const *const list)
 {
     printf("%10.10s  %10.10s  %10.10s  %16.16s  %16.16s  %-s\n",
            "ID", "STATUS", "CONCLUSION", "STARTED", "COMPLETED", "NAME");
@@ -91,7 +90,7 @@ github_print_checks(const gcli_github_checks *list)
 }
 
 void
-github_free_checks(gcli_github_checks *list)
+github_free_checks(gcli_github_checks *const list)
 {
     for (size_t i = 0; i < list->checks_size; ++i) {
         free(list->checks[i].name);
@@ -107,11 +106,7 @@ github_free_checks(gcli_github_checks *list)
 }
 
 void
-github_checks(
-    const char *owner,
-    const char *repo,
-    const char *ref,
-    int         max)
+github_checks(char const *owner, char const *repo, char const *ref, int const max)
 {
     gcli_github_checks checks = {0};
 

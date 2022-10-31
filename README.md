@@ -64,6 +64,7 @@ submit a patch in case you managed to fix it.
 Tested Operating Systems so far:
 - FreeBSD 13.0-RELEASE amd64 and arm64
 - Solaris 10 and 11, sparc64
+- SunOS 5.11 i86pc (OmniOS)
 - Devuan GNU/Linux Chimaera x86_64
 - Debian GNU/Linux 5.18.11 ppc64
 - Fedora 34 x86_64

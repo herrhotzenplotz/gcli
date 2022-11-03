@@ -48,22 +48,27 @@ gcli_print_release(enum gcli_output_flags const flags,
                    gcli_release const *const it)
 {
     if (flags & OUTPUT_LONG) {
+        /* General information */
         printf("        ID : "SV_FMT"\n"
                "      NAME : "SV_FMT"\n"
                "    AUTHOR : "SV_FMT"\n"
                "      DATE : "SV_FMT"\n"
                "     DRAFT : %s\n"
                "PRERELEASE : %s\n"
-               "   TARBALL : "SV_FMT"\n"
-               "      BODY :\n",
+               "    ASSETS :\n",
                SV_ARGS(it->id),
                SV_ARGS(it->name),
                SV_ARGS(it->author),
                SV_ARGS(it->date),
                sn_bool_yesno(it->draft),
-               sn_bool_yesno(it->prerelease),
-               SV_ARGS(it->tarball_url));
+               sn_bool_yesno(it->prerelease));
 
+        /* asset urls */
+        for (size_t i = 0; i < it->asset_urls_size; ++i)
+            printf("           : • "SV_FMT"\n", SV_ARGS(it->asset_urls[i]));
+
+        /* body */
+        printf("      BODY :\n");
         pretty_print(it->body.data, 13, 80, stdout);
 
         putchar('\n');
@@ -107,11 +112,16 @@ gcli_free_releases(gcli_release *releases, int const releases_size)
         return;
 
     for (int i = 0; i < releases_size; ++i) {
-        free(releases[i].tarball_url.data);
         free(releases[i].name.data);
         free(releases[i].body.data);
         free(releases[i].author.data);
         free(releases[i].date.data);
+
+        for (size_t j = 0; j < releases[i].asset_urls_size; ++j) {
+            free(releases[i].asset_urls[j].data);
+        }
+
+        free(releases[i].asset_urls);
     }
 
     free(releases);

@@ -42,16 +42,17 @@ typedef struct gcli_new_release   gcli_new_release;
 typedef struct gcli_release_asset gcli_release_asset;
 
 struct gcli_release {
-    sn_sv id;                   /* Probably shouldn't be called id */
-    sn_sv tarball_url;
-    sn_sv name;
-    sn_sv body;
-    sn_sv author;
-    sn_sv date;
-    sn_sv upload_url;
-    sn_sv html_url;
-    bool  draft;
-    bool  prerelease;
+    sn_sv   id;                 /* Probably shouldn't be called id */
+    sn_sv  *asset_urls;
+    size_t  asset_urls_size;
+    sn_sv   name;
+    sn_sv   body;
+    sn_sv   author;
+    sn_sv   date;
+    sn_sv   upload_url;
+    sn_sv   html_url;
+    bool    draft;
+    bool    prerelease;
 };
 
 struct gcli_release_asset {

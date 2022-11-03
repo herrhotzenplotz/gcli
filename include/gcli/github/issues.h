@@ -37,51 +37,43 @@
 #include <gcli/curl.h>
 #include <gcli/issues.h>
 
-int github_get_issues(
-    const char  *owner,
-    const char  *repo,
-    bool         all,
-    int          max,
-    gcli_issue **out);
+int github_get_issues(char const *owner,
+                      char const *repo,
+                      bool const all,
+                      int const max,
+                      gcli_issue **const out);
 
-void github_get_issue_summary(
-    const char *owner,
-    const char *repo,
-    int         issue_number,
-    gcli_issue *out);
+void github_get_issue_summary(char const *owner,
+                              char const *repo,
+                              int const issue_number,
+                              gcli_issue *const out);
 
-void github_issue_close(
-    const char *owner,
-    const char *repo,
-    int         issue_number);
+void github_issue_close(char const *owner,
+                        char const *repo,
+                        int const issue_number);
 
-void github_issue_reopen(
-    const char *owner,
-    const char *repo,
-    int         issue_number);
+void github_issue_reopen(char const *owner,
+                         char const *repo,
+                         int const issue_number);
 
-void github_perform_submit_issue(
-    gcli_submit_issue_options  opts,
-    gcli_fetch_buffer         *out);
+void github_perform_submit_issue(gcli_submit_issue_options opts,
+                                 gcli_fetch_buffer *out);
 
-void github_issue_assign(
-    const char *owner,
-    const char *repo,
-    int         issue_number,
-    const char *assignee);
+void github_issue_assign(char const *owner,
+                         char const *repo,
+                         int const issue_number,
+                         char const *assignee);
 
-void github_issue_add_labels(
-    const char *owner,
-    const char *repo,
-    int         issue,
-    const char *labels[],
-    size_t      labels_size);
+void github_issue_add_labels(char const *owner,
+                             char const *repo,
+                             int const issue,
+                             char const *const labels[],
+                             size_t const labels_size);
 
-void github_issue_remove_labels(
-    const char *owner,
-    const char *repo,
-    int         issue,
-    const char *labels[],
-    size_t      labels_size);
+void github_issue_remove_labels(char const *owner,
+                                char const *repo,
+                                int const issue,
+                                char const *const labels[],
+                                size_t const labels_size);
 
 #endif /* GCLI_ISSUES_H */

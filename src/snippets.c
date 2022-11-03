@@ -40,9 +40,7 @@
 #include <templates/gitlab/snippets.h>
 
 void
-gcli_snippets_free(
-    gcli_snippet *list,
-    int           list_size)
+gcli_snippets_free(gcli_snippet *list, int const list_size)
 {
     for (int i = 0; i < list_size; ++i) {
         free(list[i].title);
@@ -57,7 +55,7 @@ gcli_snippets_free(
 }
 
 int
-gcli_snippets_get(int max, gcli_snippet **out)
+gcli_snippets_get(int const max, gcli_snippet **const out)
 {
     char               *url      = NULL;
     char               *next_url = NULL;
@@ -105,10 +103,9 @@ gcli_print_snippet(enum gcli_output_flags const flags,
 }
 
 void
-gcli_snippets_print(
-    enum gcli_output_flags  flags,
-    gcli_snippet           *list,
-    int                     list_size)
+gcli_snippets_print(enum gcli_output_flags const flags,
+                    gcli_snippet const *const list,
+                    int const list_size)
 {
     if (list_size == 0) {
         puts("No Snippets");
@@ -131,7 +128,7 @@ gcli_snippets_print(
 }
 
 void
-gcli_snippet_delete(const char *snippet_id)
+gcli_snippet_delete(char const *snippet_id)
 {
     gcli_fetch_buffer buffer = {0};
     char *url = sn_asprintf("%s/snippets/%s", gitlab_get_apibase(), snippet_id);
@@ -143,7 +140,7 @@ gcli_snippet_delete(const char *snippet_id)
 }
 
 void
-gcli_snippet_get(const char *snippet_id)
+gcli_snippet_get(char const *snippet_id)
 {
     char *url = sn_asprintf("%s/snippets/%s/raw",
                             gitlab_get_apibase(),

@@ -34,11 +34,10 @@
 #include <templates/gitlab/comments.h>
 
 void
-gitlab_perform_submit_comment(
-    gcli_submit_comment_opts  opts,
-    gcli_fetch_buffer        *out)
+gitlab_perform_submit_comment(gcli_submit_comment_opts opts,
+                              gcli_fetch_buffer *const out)
 {
-    const char *type    = NULL;
+    char const *type    = NULL;
     char       *e_owner = NULL;
     char       *e_repo  = NULL;
 
@@ -70,7 +69,7 @@ gitlab_perform_submit_comment(
 }
 
 static int
-gitlab_perform_get_comments(const char *_url, gcli_comment **comments)
+gitlab_perform_get_comments(char const *_url, gcli_comment **const comments)
 {
     size_t             count       = 0;
     json_stream        stream      = {0};
@@ -96,11 +95,10 @@ gitlab_perform_get_comments(const char *_url, gcli_comment **comments)
 }
 
 int
-gitlab_get_mr_comments(
-    const char    *owner,
-    const char    *repo,
-    int            mr,
-    gcli_comment **out)
+gitlab_get_mr_comments(char const *owner,
+                       char const *repo,
+                       int const mr,
+                       gcli_comment **const out)
 {
     char *e_owner = gcli_urlencode(owner);
     char *e_repo  = gcli_urlencode(repo);
@@ -120,11 +118,10 @@ gitlab_get_mr_comments(
 }
 
 int
-gitlab_get_issue_comments(
-    const char    *owner,
-    const char    *repo,
-    int            issue,
-    gcli_comment **out)
+gitlab_get_issue_comments(char const *owner,
+                          char const *repo,
+                          int const issue,
+                          gcli_comment **const out)
 {
     char *e_owner = gcli_urlencode(owner);
     char *e_repo  = gcli_urlencode(repo);

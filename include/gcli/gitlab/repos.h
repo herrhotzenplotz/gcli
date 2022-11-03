@@ -36,25 +36,19 @@
 
 #include <gcli/repos.h>
 
-void gitlab_get_repo(
-    sn_sv      owner,
-    sn_sv      repo,
-    gcli_repo *out);
+void gitlab_get_repo(sn_sv const owner,
+                     sn_sv const repo,
+                     gcli_repo *const out);
 
-int gitlab_get_repos(
-    const char  *owner,
-    int          max,
-    gcli_repo  **out);
+int gitlab_get_repos(char const  *owner,
+                     int const max,
+                     gcli_repo **const out);
 
-int gitlab_get_own_repos(
-    int         max,
-    gcli_repo **out);
+int gitlab_get_own_repos(int const max, gcli_repo **const out);
 
-void gitlab_repo_delete(
-    const char *owner,
-    const char *repo);
+void gitlab_repo_delete(char const *owner,
+                        char const *repo);
 
-gcli_repo *gitlab_repo_create(
-    const gcli_repo_create_options *options);
+gcli_repo *gitlab_repo_create(gcli_repo_create_options const *options);
 
 #endif /* GITLAB_REPOS_H */

@@ -61,8 +61,8 @@ static struct gcli_config {
     struct gcli_config_section sections[CONFIG_MAX_SECTIONS];
     size_t                     sections_size;
 
-    const char *override_default_account;
-    const char *override_remote;
+    char const *override_default_account;
+    char const *override_remote;
     int         override_forgetype;
     int         colors_disabled;
 
@@ -88,7 +88,7 @@ should_init_dotgcli(void)
         (local_config.has_been_searched_for && !local_config.has_been_found);
 }
 
-static const char *
+static char const *
 find_dotgcli(void)
 {
     char          *curr_dir_path = NULL;
@@ -166,7 +166,7 @@ init_local_config(void)
     if (!should_init_dotgcli())
         return;
 
-    const char *path = find_dotgcli();
+    char const *path = find_dotgcli();
     if (!path) {
         local_config.has_been_searched_for = true;
         local_config.has_been_found        = false;
@@ -226,7 +226,7 @@ init_local_config(void)
 struct config_parser {
     sn_sv       buffer;
     int         line;
-    const char *filename;
+    char const *filename;
 };
 
 static void
@@ -237,6 +237,7 @@ again:
         switch (input->buffer.data[0]) {
         case '\n':
             input->line++;
+            /* fallthrough */
         case ' ':
         case '\t':
         case '\r':
@@ -514,7 +515,7 @@ gcli_config_init(int *argc, char ***argv)
     return EXIT_SUCCESS;
 }
 
-static struct gcli_config_section *
+static struct gcli_config_section const *
 find_section(sn_sv name)
 {
     for (size_t i = 0; i < config.sections_size; ++i) {
@@ -525,11 +526,12 @@ find_section(sn_sv name)
 }
 
 sn_sv
-gcli_config_find_by_key(sn_sv section_name, const char *key)
+gcli_config_find_by_key(sn_sv const section_name, char const *key)
 {
     ensure_config();
 
-    struct gcli_config_section *section = find_section(section_name);
+    struct gcli_config_section const *const section =
+        find_section(section_name);
 
     if (!section) {
         warnx("no config section with name '"SV_FMT"'", SV_ARGS(section_name));
@@ -544,7 +546,7 @@ gcli_config_find_by_key(sn_sv section_name, const char *key)
 }
 
 static sn_sv
-gcli_local_config_find_by_key(const char *key)
+gcli_local_config_find_by_key(char const *const key)
 {
     for (size_t i = 0; i < local_config.entries_size; ++i)
         if (sn_sv_eq_to(local_config.entries[i].key, key))
@@ -585,7 +587,7 @@ gcli_config_get_upstream(void)
 }
 
 void
-gcli_config_get_upstream_parts(sn_sv *owner, sn_sv *repo)
+gcli_config_get_upstream_parts(sn_sv *const owner, sn_sv *const repo)
 {
     ensure_config();
 
@@ -629,7 +631,7 @@ gcli_config_get_forge_type_internal(void)
     sn_sv entry = {0};
 
     if (config.override_default_account) {
-        sn_sv section = SV((char *)config.override_default_account);
+        sn_sv const section = SV((char *)config.override_default_account);
         entry = gcli_config_find_by_key(section, "forge-type");
         if (sn_sv_null(entry))
             errx(1,
@@ -651,7 +653,7 @@ gcli_config_get_forge_type_internal(void)
     }
 
     /* As a last resort, try to infer from the git remote */
-    int type = gcli_gitconfig_get_forgetype(config.override_remote);
+    int const type = gcli_gitconfig_get_forgetype(config.override_remote);
     if (type < 0)
         errx(1, "error: cannot infer forge type. "
              "use -t <forge-type> to overrride manually.");
@@ -662,12 +664,12 @@ gcli_config_get_forge_type_internal(void)
 gcli_forge_type
 gcli_config_get_forge_type(void)
 {
-    gcli_forge_type result = gcli_config_get_forge_type_internal();
+    gcli_forge_type const result = gcli_config_get_forge_type_internal();
 
     /* print the type if verbose */
     if (sn_verbose()) {
         static int have_printed_forge_type = 0;
-        static const char *const ftype_name[] = {
+        static char const *const ftype_name[] = {
             [GCLI_FORGE_GITHUB] = "GitHub",
             [GCLI_FORGE_GITLAB] = "Gitlab",
             [GCLI_FORGE_GITEA]  = "Gitea",
@@ -683,14 +685,14 @@ gcli_config_get_forge_type(void)
 }
 
 void
-gcli_config_get_repo(const char **owner, const char **repo)
+gcli_config_get_repo(char const **const owner, char const **const repo)
 {
     sn_sv upstream = {0};
 
     ensure_config();
 
     if (config.override_remote) {
-        int forge = gcli_gitconfig_repo_by_remote(
+        int const forge = gcli_gitconfig_repo_by_remote(
             config.override_remote, owner, repo);
 
         if (forge >= 0) {
@@ -702,8 +704,8 @@ gcli_config_get_repo(const char **owner, const char **repo)
     }
 
     if ((upstream = gcli_config_get_upstream()).length != 0) {
-        sn_sv owner_sv = sn_sv_chop_until(&upstream, '/');
-        sn_sv repo_sv  = sn_sv_from_parts(
+        sn_sv const owner_sv = sn_sv_chop_until(&upstream, '/');
+        sn_sv const repo_sv  = sn_sv_from_parts(
             upstream.data + 1,
             upstream.length - 1);
 
@@ -735,7 +737,7 @@ gcli_config_have_colors(void)
     return !config.colors_disabled;
 }
 
-char *
+char const *
 gcli_get_apibase(void)
 {
     switch (gcli_config_get_forge_type()) {

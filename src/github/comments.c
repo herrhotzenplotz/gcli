@@ -37,9 +37,8 @@
 #include <templates/github/comments.h>
 
 void
-github_perform_submit_comment(
-    gcli_submit_comment_opts  opts,
-    gcli_fetch_buffer        *out)
+github_perform_submit_comment(gcli_submit_comment_opts opts,
+                              gcli_fetch_buffer *out)
 {
     char *e_owner     = gcli_urlencode(opts.owner);
     char *e_repo      = gcli_urlencode(opts.repo);
@@ -59,7 +58,7 @@ github_perform_submit_comment(
 }
 
 static int
-github_perform_get_comments(const char *_url, gcli_comment **comments)
+github_perform_get_comments(char const *_url, gcli_comment **const comments)
 {
     size_t             count       = 0;
     json_stream        stream      = {0};
@@ -84,11 +83,10 @@ github_perform_get_comments(const char *_url, gcli_comment **comments)
 }
 
 int
-github_get_comments(
-    const char    *owner,
-    const char    *repo,
-    int            issue,
-    gcli_comment **out)
+github_get_comments(char const *owner,
+                    char const *repo,
+                    int const issue,
+                    gcli_comment **const out)
 {
     char *e_owner = NULL;
     char *e_repo  = NULL;

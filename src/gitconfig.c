@@ -44,10 +44,10 @@
 
 #define MAX_REMOTES 64
 static gcli_gitremote remotes[MAX_REMOTES];
-static size_t          remotes_size;
+static size_t         remotes_size;
 
-static const char *
-find_file_in_dotgit(const char *fname)
+static char const *
+find_file_in_dotgit(char const *fname)
 {
     DIR           *curr_dir    = NULL;
     struct dirent *ent;
@@ -143,7 +143,7 @@ find_file_in_dotgit(const char *fname)
     return NULL;
 }
 
-const char *
+char const *
 gcli_find_gitconfig(void)
 {
     return find_file_in_dotgit("config");
@@ -152,7 +152,7 @@ gcli_find_gitconfig(void)
 sn_sv
 gcli_gitconfig_get_current_branch(void)
 {
-    const char *HEAD;
+    char const *HEAD;
     void       *mmap_pointer;
     sn_sv       buffer;
     char        prefix[] = "ref: refs/heads/";
@@ -180,7 +180,7 @@ gcli_gitconfig_get_current_branch(void)
 }
 
 static void
-http_extractor(gcli_gitremote *remote, const char *prefix)
+http_extractor(gcli_gitremote *const remote, char const *prefix)
 {
     size_t prefix_size = strlen(prefix);
     sn_sv  pair        = remote->url;
@@ -213,7 +213,7 @@ http_extractor(gcli_gitremote *remote, const char *prefix)
 }
 
 static void
-ssh_extractor(gcli_gitremote *remote, const char *prefix)
+ssh_extractor(gcli_gitremote *const remote, char const *prefix)
 {
     size_t prefix_size = strlen(prefix);
 
@@ -243,8 +243,8 @@ ssh_extractor(gcli_gitremote *remote, const char *prefix)
 }
 
 struct forge_ex_def {
-    const char *prefix;
-    void (*extractor)(gcli_gitremote *, const char *);
+    char const *prefix;
+    void (*extractor)(gcli_gitremote *const, char const *);
 } url_extractors[] = {
     { .prefix = "git@",     .extractor = ssh_extractor  },
     { .prefix = "ssh://",   .extractor = ssh_extractor  },
@@ -276,7 +276,7 @@ gitconfig_parse_remote(sn_sv section_title, sn_sv entry)
             if (remotes_size == MAX_REMOTES)
                 errx(1, "error: too many remotes");
 
-            gcli_gitremote *remote = &remotes[remotes_size++];
+            gcli_gitremote *const remote = &remotes[remotes_size++];
 
             remote->name = remote_name;
 
@@ -313,7 +313,7 @@ gcli_gitconfig_read_gitconfig(void)
 
     has_read_gitconfig = 1;
 
-    const char *path   = NULL;
+    char const *path   = NULL;
     sn_sv       buffer = {0};
 
     path = gcli_find_gitconfig();
@@ -350,7 +350,7 @@ gcli_gitconfig_read_gitconfig(void)
 }
 
 void
-gcli_gitconfig_add_fork_remote(const char *org, const char *repo)
+gcli_gitconfig_add_fork_remote(char const *org, char const *repo)
 {
     char  remote[64]  = {0};
     FILE *remote_list = popen("git remote", "r");
@@ -389,7 +389,7 @@ gcli_gitconfig_add_fork_remote(const char *org, const char *repo)
     {
         pid_t pid = 0;
         if ((pid = fork()) == 0) {
-            const char *remote_url = sn_asprintf(
+            char const *remote_url = sn_asprintf(
                 "git@github.com:%s/%s",
                 org, repo);
             printf("[INFO] git remote add origin %s\n", remote_url);
@@ -410,7 +410,7 @@ gcli_gitconfig_add_fork_remote(const char *org, const char *repo)
  * Return the gcli_forge_type for the given remote or -1 if
  * unknown */
 int
-gcli_gitconfig_get_forgetype(const char *remote_name)
+gcli_gitconfig_get_forgetype(char const *const remote_name)
 {
     gcli_gitconfig_read_gitconfig();
 
@@ -431,9 +431,9 @@ gcli_gitconfig_get_forgetype(const char *remote_name)
 
 int
 gcli_gitconfig_repo_by_remote(
-    const char  *remote_name,
-    const char **owner,
-    const char **repo)
+    char const *const  remote_name,
+    char const **const owner,
+    char const **const repo)
 {
     gcli_gitconfig_read_gitconfig();
 

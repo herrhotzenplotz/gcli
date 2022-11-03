@@ -42,12 +42,12 @@ int gcli_config_init(
     char ***argv);
 
 void gcli_config_get_upstream_parts(
-    sn_sv *owner,
-    sn_sv *repo);
+    sn_sv *const owner,
+    sn_sv *const repo);
 
 sn_sv gcli_config_find_by_key(
-    sn_sv       section_name,
-    const char *key);
+    sn_sv const  section_name,
+    char const  *key);
 
 char            *gcli_config_get_editor(void);
 char            *gcli_config_get_authheader(void);
@@ -56,8 +56,8 @@ sn_sv            gcli_config_get_upstream(void);
 sn_sv            gcli_config_get_base(void);
 gcli_forge_type  gcli_config_get_forge_type(void);
 sn_sv            gcli_config_get_override_default_account(void);
-void             gcli_config_get_repo(const char **, const char **);
+void             gcli_config_get_repo(const char **const, const char **const);
 int              gcli_config_have_colors(void);
-char            *gcli_get_apibase(void);
+char const      *gcli_get_apibase(void);
 
 #endif /* CONFIG_H */

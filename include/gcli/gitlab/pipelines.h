@@ -61,64 +61,52 @@ struct gitlab_job {
     char   *runner_description;
 };
 
-int gitlab_get_pipelines(
-    const char       *owner,
-    const char       *repo,
-    int               max,
-    gitlab_pipeline **out);
+int gitlab_get_pipelines(char const *owner,
+                         char const *repo,
+                         int const max,
+                         gitlab_pipeline **const out);
 
-void gitlab_print_pipelines(
-    gitlab_pipeline *pipelines,
-    int              pipelines_size);
+void gitlab_print_pipelines(gitlab_pipeline const *const pipelines,
+                            int const pipelines_size);
 
-void gitlab_free_pipelines(
-    gitlab_pipeline *pipelines,
-    int              pipelines_size);
+void gitlab_free_pipelines(gitlab_pipeline *pipelines,
+                           int const pipelines_size);
 
-void gitlab_pipelines(
-    const char *owner,
-    const char *repo,
-    int         count);
+void gitlab_pipelines(char const *owner,
+                      char const *repo,
+                      int const count);
 
-void gitlab_pipeline_jobs(
-    const char *owner,
-    const char *repo,
-    long        pipeline,
-    int         count);
+void gitlab_pipeline_jobs(char const *owner,
+                          char const *repo,
+                          long const pipeline,
+                          int const count);
 
-int gitlab_get_pipeline_jobs(
-    const char  *owner,
-    const char  *repo,
-    long         pipeline,
-    int          count,
-    gitlab_job **jobs);
+int gitlab_get_pipeline_jobs(char const *owner,
+                             char const *repo,
+                             long const pipeline,
+                             int const count,
+                             gitlab_job **const jobs);
 
-void gitlab_print_jobs(
-    gitlab_job *jobs,
-    int         jobs_size);
+void gitlab_print_jobs(gitlab_job const *const jobs,
+                       int const jobs_size);
 
-void gitlab_free_jobs(
-    gitlab_job *jobs,
-    int         jobs_size);
+void gitlab_free_jobs(gitlab_job *jobs,
+                      int const jobs_size);
 
-void gitlab_job_get_log(
-    const char *owner,
-    const char *repo,
-    long        job_id);
+void gitlab_job_get_log(char const *owner,
+                        char const *repo,
+                        long const job_id);
 
-void gitlab_job_status(
-    const char *owner,
-    const char *repo,
-    long        job_id);
+void gitlab_job_status(char const *owner,
+                       char const *repo,
+                       long const job_id);
 
-void gitlab_job_cancel(
-    const char *owner,
-    const char *repo,
-    long        job_id);
+void gitlab_job_cancel(char const *owner,
+                       char const *repo,
+                       long const job_id);
 
-void gitlab_job_retry(
-    const char *owner,
-    const char *repo,
-    long        job_id);
+void gitlab_job_retry(char const *owner,
+                      char const *repo,
+                      long const job_id);
 
 #endif /* GITLAB_PIPELINES_H */

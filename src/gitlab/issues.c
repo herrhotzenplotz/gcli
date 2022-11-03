@@ -38,12 +38,11 @@
 #include <pdjson/pdjson.h>
 
 int
-gitlab_get_issues(
-    const char  *owner,
-    const char  *repo,
-    bool         all,
-    int          max,
-    gcli_issue **out)
+gitlab_get_issues(char const *owner,
+                  char const *repo,
+                  bool const all,
+                  int const max,
+                  gcli_issue **const out)
 {
     size_t             count       = 0;
     json_stream        stream      = {0};
@@ -86,11 +85,10 @@ gitlab_get_issues(
 }
 
 void
-gitlab_get_issue_summary(
-    const char *owner,
-    const char *repo,
-    int         issue_number,
-    gcli_issue *out)
+gitlab_get_issue_summary(char const *owner,
+                         char const *repo,
+                         int const issue_number,
+                         gcli_issue *const out)
 {
     char              *url     = NULL;
     char              *e_owner = NULL;
@@ -122,7 +120,7 @@ gitlab_get_issue_summary(
 
 
 void
-gitlab_issue_close(const char *owner, const char *repo, int issue_number)
+gitlab_issue_close(char const *owner, char const *repo, int const issue_number)
 {
     gcli_fetch_buffer  json_buffer = {0};
     char              *url         = NULL;
@@ -150,7 +148,7 @@ gitlab_issue_close(const char *owner, const char *repo, int issue_number)
 }
 
 void
-gitlab_issue_reopen(const char *owner, const char *repo, int issue_number)
+gitlab_issue_reopen(char const *owner, char const *repo, int const issue_number)
 {
     gcli_fetch_buffer  json_buffer = {0};
     char              *url         = NULL;
@@ -178,9 +176,8 @@ gitlab_issue_reopen(const char *owner, const char *repo, int issue_number)
 }
 
 void
-gitlab_perform_submit_issue(
-    gcli_submit_issue_options  opts,
-    gcli_fetch_buffer         *out)
+gitlab_perform_submit_issue(gcli_submit_issue_options opts,
+                            gcli_fetch_buffer *const out)
 {
     sn_sv e_owner = gcli_urlencode_sv(opts.owner);
     sn_sv e_repo  = gcli_urlencode_sv(opts.repo);
@@ -207,7 +204,7 @@ gitlab_perform_submit_issue(
 }
 
 static int
-gitlab_user_id(const char *user_name)
+gitlab_user_id(char const *user_name)
 {
     gcli_fetch_buffer   buffer = {0};
     struct json_stream  stream = {0};
@@ -236,11 +233,10 @@ gitlab_user_id(const char *user_name)
 }
 
 void
-gitlab_issue_assign(
-    const char *owner,
-    const char *repo,
-    int         issue_number,
-    const char *assignee)
+gitlab_issue_assign(char const *owner,
+                    char const *repo,
+                    int const issue_number,
+                    char const *assignee)
 {
     int                assignee_uid = -1;
     gcli_fetch_buffer  buffer       = {0};
@@ -268,12 +264,11 @@ gitlab_issue_assign(
 }
 
 void
-gitlab_issue_add_labels(
-    const char *owner,
-    const char *repo,
-    int         issue,
-    const char *labels[],
-    size_t      labels_size)
+gitlab_issue_add_labels(char const *owner,
+                        char const *repo,
+                        int const issue,
+                        char const *const labels[],
+                        size_t const labels_size)
 {
     char              *url    = NULL;
     char              *data   = NULL;
@@ -295,12 +290,11 @@ gitlab_issue_add_labels(
 }
 
 void
-gitlab_issue_remove_labels(
-    const char *owner,
-    const char *repo,
-    int         issue,
-    const char *labels[],
-    size_t      labels_size)
+gitlab_issue_remove_labels(char const *owner,
+                           char const *repo,
+                           int const issue,
+                           char const *const labels[],
+                           size_t const labels_size)
 {
     char              *url    = NULL;
     char              *data   = NULL;

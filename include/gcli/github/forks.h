@@ -23,7 +23,7 @@
  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+p * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
@@ -36,15 +36,13 @@
 
 #include <gcli/forks.h>
 
-int github_get_forks(
-    const char  *owner,
-    const char  *repo,
-    int          max,
-    gcli_fork  **out);
+int github_get_forks(char const *owner,
+                     char const *repo,
+                     int const max,
+                     gcli_fork **const out);
 
-void github_fork_create(
-    const char *owner,
-    const char *repo,
-    const char *_in);
+void github_fork_create(char const *owner,
+                        char const *repo,
+                        char const *_in);
 
 #endif /* GITHUB_FORKS_H */

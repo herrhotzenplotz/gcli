@@ -60,90 +60,90 @@ struct gcli_forge_descriptor {
     /**
      * List comments on the given issue */
     int (*get_issue_comments)(
-        const char    *owner,
-        const char    *repo,
-        int            issue,
+        char const    *owner,
+        char const    *repo,
+        int const      issue,
         gcli_comment **out);
 
     /**
      * List comments on the given PR */
     int (*get_pull_comments)(
-        const char    *owner,
-        const char    *repo,
-        int            pr,
-        gcli_comment **out);
+        char const           *owner,
+        char const           *repo,
+        int const             pr,
+        gcli_comment **const  out);
 
     /**
      * List forks of the given repo */
     int (*get_forks)(
-        const char  *owner,
-        const char  *repo,
-        int          max,
-        gcli_fork  **out);
+        char const        *owner,
+        char const        *repo,
+        int const          max,
+        gcli_fork **const  out);
 
     /**
      * Fork the given repo into the owner _in */
     void (*fork_create)(
-        const char *owner,
-        const char *repo,
-        const char *_in);
+        char const *owner,
+        char const *repo,
+        char const *_in);
 
     /**
      * Get a list of issues on the given repo */
     int (*get_issues)(
-        const char  *owner,
-        const char  *repo,
-        bool         all,
-        int          max,
-        gcli_issue **out);
+        char const         *owner,
+        char const         *repo,
+        bool const          all,
+        int const           max,
+        gcli_issue **const  out);
 
     /**
      * Get a summary of an issue */
     void (*get_issue_summary)(
-        const char *owner,
-        const char *repo,
-        int         issue_number,
-        gcli_issue *out);
+        char const        *owner,
+        char const        *repo,
+        int const          issue_number,
+        gcli_issue *const  out);
 
     /**
      * Close the given issue */
     void (*issue_close)(
-        const char *owner,
-        const char *repo,
-        int         issue_number);
+        char const *owner,
+        char const *repo,
+        int const   issue_number);
 
     /**
      * Reopen the given issue */
     void (*issue_reopen)(
-        const char *owner,
-        const char *repo,
-        int         issue_number);
+        char const *owner,
+        char const *repo,
+        int const   issue_number);
 
     /**
      * Assign an issue to a user */
     void (*issue_assign)(
-        const char *owner,
-        const char *repo,
-        int         issue_number,
-        const char *assignee);
+        char const *owner,
+        char const *repo,
+        int const   issue_number,
+        char const *assignee);
 
     /**
      * Add labels to issues */
     void (*issue_add_labels)(
-        const char *owner,
-        const char *repo,
-        int         issue,
-        const char *labels[],
-        size_t      labels_size);
+        char const        *owner,
+        char const        *repo,
+        int const          issue,
+        char const *const  labels[],
+        size_t const       labels_size);
 
     /**
      * Removes labels from issues */
     void (*issue_remove_labels)(
-        const char *owner,
-        const char *repo,
-        int         issue,
-        const char *labels[],
-        size_t      labels_size);
+        char const        *owner,
+        char const        *repo,
+        int const          issue,
+        char const *const  labels[],
+        size_t const       labels_size);
 
     /**
      * Submit an issue */
@@ -154,41 +154,41 @@ struct gcli_forge_descriptor {
     /**
      * Get a list of PRs/MRs on the given repo */
     int (*get_prs)(
-        const char  *owner,
-        const char  *reponame,
-        bool         all,
-        int          max,
-        gcli_pull  **out);
+        char const        *owner,
+        char const        *reponame,
+        bool const         all,
+        int const          max,
+        gcli_pull **const  out);
 
     /**
      * Print a diff of the changes of a PR/MR to the stream */
     void (*print_pr_diff)(
         FILE       *stream,
-        const char *owner,
-        const char *reponame,
-        int         pr_number);
+        char const *owner,
+        char const *reponame,
+        int const   pr_number);
 
     /**
      * Merge the given PR/MR */
     void (*pr_merge)(
-        const char *owner,
-        const char *reponame,
-        int         pr_number,
-        bool        squash);
+        char const *owner,
+        char const *reponame,
+        int const   pr_number,
+        bool const  squash);
 
     /**
      * Reopen the given PR/MR */
     void (*pr_reopen)(
-        const char *owner,
-        const char *reponame,
-        int         pr_number);
+        char const *owner,
+        char const *reponame,
+        int const   pr_number);
 
     /**
      * Close the given PR/MR */
     void (*pr_close)(
-        const char *owner,
-        const char *reponame,
-        int         pr_number);
+        char const *owner,
+        char const *reponame,
+        int const   pr_number);
 
     /**
      * Submit PR/MR */
@@ -198,87 +198,87 @@ struct gcli_forge_descriptor {
     /**
      * Get a list of commits in the given PR/MR */
     int (*get_pull_commits)(
-        const char   *owner,
-        const char   *repo,
-        int           pr_number,
-        gcli_commit **out);
+        char const          *owner,
+        char const          *repo,
+        int const            pr_number,
+        gcli_commit **const  out);
 
     /**
      * Get a summary of the given PR/MR */
     void (*get_pull_summary)(
-        const char        *owner,
-        const char        *repo,
-        int                pr_number,
-        gcli_pull_summary *out);
+        char const               *owner,
+        char const               *repo,
+        int const                 pr_number,
+        gcli_pull_summary *const  out);
 
     /**
      * Add labels to Pull Requests */
     void (*pr_add_labels)(
-        const char *owner,
-        const char *repo,
-        int         pr,
-        const char *labels[],
-        size_t      labels_size);
+        char const        *owner,
+        char const        *repo,
+        int const          pr,
+        char const *const  labels[],
+        size_t const       labels_size);
 
     /**
      * Removes labels from Pull Requests */
     void (*pr_remove_labels)(
-        const char *owner,
-        const char *repo,
-        int         pr,
-        const char *labels[],
-        size_t      labels_size);
+        char const        *owner,
+        char const        *repo,
+        int const          pr,
+        char const *const  labels[],
+        size_t const       labels_size);
 
     /**
      * Get a list of releases in the given repo */
     int (*get_releases)(
-        const char    *owner,
-        const char    *repo,
-        int            max,
-        gcli_release **out);
+        char const           *owner,
+        char const           *repo,
+        int const             max,
+        gcli_release **const  out);
 
     /**
      * Create a new release */
     void (*create_release)(
-        const gcli_new_release *release);
+        gcli_new_release const *release);
 
     /**
      * Delete the release */
     void (*delete_release)(
-        const char *owner,
-        const char *repo,
-        const char *id);
+        char const *owner,
+        char const *repo,
+        char const *id);
 
     /**
      * Get a list of labels that are valid in the given repository */
     size_t (*get_labels)(
-        const char  *owner,
-        const char  *repo,
-        int          max,
-        gcli_label **out);
+        char const         *owner,
+        char const         *repo,
+        int const           max,
+        gcli_label **const  out);
 
     /**
      * Create the given label
      *
      * The ID will be filled in for you */
     void (*create_label)(
-        const char *owner,
-        const char *repo,
-        gcli_label *label);
+        char const        *owner,
+        char const        *repo,
+        gcli_label *const  label);
 
     /**
      * Delete the given label */
     void (*delete_label)(
-        const char *owner,
-        const char *repo,
-        const char *label);
+        char const *owner,
+        char const *repo,
+        char const *label);
 
     /**
      * Get a list of repos of the given owner */
     int (*get_repos)(
-        const char  *owner,
-        int          max,
-        gcli_repo  **out);
+        char const        *owner,
+        int const          max,
+        gcli_repo **const  out);
 
     /**
      * Get a list of your own repos */
@@ -289,19 +289,19 @@ struct gcli_forge_descriptor {
     /**
      * Create the given repo */
     gcli_repo *(*repo_create)(
-        const gcli_repo_create_options *options);
+        gcli_repo_create_options const *options);
 
     /**
      * Delete the given repo */
     void (*repo_delete)(
-        const char *owner,
-        const char *repo);
+        char const *owner,
+        char const *repo);
 
     /**
      * Fetch MR/PR reviews including comments */
     size_t (*get_reviews)(
-        const char      *owner,
-        const char      *repo,
+        char const      *owner,
+        char const      *repo,
         int              pr,
         gcli_pr_review **out);
 
@@ -313,7 +313,7 @@ struct gcli_forge_descriptor {
      * Mark notification with the given id as read
      *
      * Returns 0 on success or negative code on failure. */
-    void (*notification_mark_as_read)(const char *id);
+    void (*notification_mark_as_read)(char const *id);
 
     /**
      * Get an the http authentication header for use by curl */
@@ -325,17 +325,17 @@ struct gcli_forge_descriptor {
 
     /**
      * Get the error string from the API */
-    const char *(*get_api_error_string)(gcli_fetch_buffer *);
+    char const *(*get_api_error_string)(gcli_fetch_buffer *);
 
     /**
      * A key in the user json object sent by the API that represents
      * the user name */
-    const char *user_object_key;
+    char const *user_object_key;
 
     /**
      * A key in responses by the API that represents the URL for the
      * object being operated on */
-    const char *html_url_key;
+    char const *html_url_key;
 };
 
 const gcli_forge_descriptor *gcli_forge(void);

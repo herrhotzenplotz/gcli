@@ -57,12 +57,12 @@ int
 subcommand_ci(int argc, char *argv[])
 {
     int         ch    = 0;
-    const char *owner = NULL, *repo = NULL;
-    const char *ref   = NULL;
+    char const *owner = NULL, *repo = NULL;
+    char const *ref   = NULL;
     int         count = -1;     /* fetch all checks by default */
 
     /* Parse options */
-    const struct option options[] = {
+    struct option const options[] = {
         {.name = "repo",  .has_arg = required_argument, .flag = NULL, .val = 'r'},
         {.name = "owner", .has_arg = required_argument, .flag = NULL, .val = 'o'},
         {.name = "count", .has_arg = required_argument, .flag = NULL, .val = 'c'},

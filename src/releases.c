@@ -35,18 +35,17 @@
 #include <stdlib.h>
 
 int
-gcli_get_releases(
-    const char    *owner,
-    const char    *repo,
-    int            max,
-    gcli_release **out)
+gcli_get_releases(char const *owner,
+                  char const *repo,
+                  int const max,
+                  gcli_release **const out)
 {
     return gcli_forge()->get_releases(owner, repo, max, out);
 }
 
 static void
-gcli_print_release(const enum gcli_output_flags flags,
-                   const gcli_release *const it)
+gcli_print_release(enum gcli_output_flags const flags,
+                   gcli_release const *const it)
 {
     if (flags & OUTPUT_LONG) {
         printf("        ID : "SV_FMT"\n"
@@ -79,10 +78,9 @@ gcli_print_release(const enum gcli_output_flags flags,
 }
 
 void
-gcli_print_releases(
-    enum gcli_output_flags  flags,
-    gcli_release           *releases,
-    int                     releases_size)
+gcli_print_releases(enum gcli_output_flags const flags,
+                    gcli_release const *const releases,
+                    int const releases_size)
 {
     if (releases_size == 0) {
         puts("No releases");
@@ -103,7 +101,7 @@ gcli_print_releases(
 }
 
 void
-gcli_free_releases(gcli_release *releases, int releases_size)
+gcli_free_releases(gcli_release *releases, int const releases_size)
 {
     if (!releases)
         return;
@@ -120,13 +118,14 @@ gcli_free_releases(gcli_release *releases, int releases_size)
 }
 
 void
-gcli_create_release(const gcli_new_release *release)
+gcli_create_release(gcli_new_release const *release)
 {
     gcli_forge()->create_release(release);
 }
 
 void
-gcli_release_push_asset(gcli_new_release *release, gcli_release_asset asset)
+gcli_release_push_asset(gcli_new_release *const release,
+                        gcli_release_asset const asset)
 {
     if (release->assets_size == GCLI_RELEASE_MAX_ASSETS)
         errx(1, "Too many assets");
@@ -135,7 +134,9 @@ gcli_release_push_asset(gcli_new_release *release, gcli_release_asset asset)
 }
 
 void
-gcli_delete_release(const char *owner, const char *repo, const char *id)
+gcli_delete_release(char const *const owner,
+                    char const *const repo,
+                    char const *const id)
 {
     gcli_forge()->delete_release(owner, repo, id);
 }

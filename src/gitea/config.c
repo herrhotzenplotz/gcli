@@ -57,11 +57,11 @@ gitea_default_account_name(void)
 char *
 gitea_get_apibase(void)
 {
-    sn_sv account = gitea_default_account_name();
+    sn_sv const account = gitea_default_account_name();
     if (sn_sv_null(account))
         goto default_val;
 
-    sn_sv api_base = gcli_config_find_by_key(account, "apibase");
+    sn_sv const api_base = gcli_config_find_by_key(account, "apibase");
     if (sn_sv_null(api_base))
         goto default_val;
 
@@ -74,11 +74,11 @@ default_val:
 char *
 gitea_get_authheader(void)
 {
-    sn_sv account = gitea_default_account_name();
+    sn_sv const account = gitea_default_account_name();
     if (sn_sv_null(account))
         return NULL;
 
-    sn_sv token = gcli_config_find_by_key(account, "token");;
+    sn_sv const token = gcli_config_find_by_key(account, "token");;
     if (sn_sv_null(token)) {
         warnx("Missing Gitea token");
         return NULL;
@@ -90,11 +90,11 @@ gitea_get_authheader(void)
 sn_sv
 gitea_get_account(void)
 {
-    sn_sv section = gitea_default_account_name();
+    sn_sv const section = gitea_default_account_name();
     if (sn_sv_null(section))
         return SV_NULL;
 
-    sn_sv account = gcli_config_find_by_key(section, "account");;
+    sn_sv const account = gcli_config_find_by_key(section, "account");;
     if (!account.length)
         errx(1, "Missing Gitea account name");
     return account;

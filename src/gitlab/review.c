@@ -40,17 +40,16 @@
 #include <templates/gitlab/review.h>
 
 size_t
-gitlab_review_get_reviews(
-    const char      *owner,
-    const char      *repo,
-    int              pr,
-    gcli_pr_review **out)
+gitlab_review_get_reviews(char const *owner,
+                          char const *repo,
+                          int const pr,
+                          gcli_pr_review **const out)
 {
-    gcli_fetch_buffer   buffer   = {0};
-    struct json_stream  stream   = {0};
-    char               *url      = NULL;
-    char               *next_url = NULL;
-    size_t              size     = 0;
+    gcli_fetch_buffer  buffer   = {0};
+    json_stream        stream   = {0};
+    char              *url      = NULL;
+    char              *next_url = NULL;
+    size_t             size     = 0;
 
     url = sn_asprintf(
         "%s/projects/%s%%2F%s/merge_requests/%d/notes?sort=asc",

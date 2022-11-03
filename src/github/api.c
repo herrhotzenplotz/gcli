@@ -32,8 +32,8 @@
 
 #include <pdjson/pdjson.h>
 
-const char *
-github_api_error_string(gcli_fetch_buffer *it)
+char const *
+github_api_error_string(gcli_fetch_buffer *const it)
 {
     struct json_stream stream = {0};
     enum json_type     next   = JSON_NULL;

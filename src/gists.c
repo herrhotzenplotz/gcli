@@ -41,7 +41,7 @@
 
 /* /!\ Before changing this, see comment in gists.h /!\ */
 void
-parse_github_gist_files_idiot_hack(json_stream *stream, gcli_gist *gist)
+parse_github_gist_files_idiot_hack(json_stream *stream, gcli_gist *const gist)
 {
     enum json_type next = JSON_NULL;
 
@@ -62,13 +62,12 @@ parse_github_gist_files_idiot_hack(json_stream *stream, gcli_gist *gist)
 }
 
 int
-gcli_get_gists(const char *user, int max, gcli_gist **out)
+gcli_get_gists(char const *user, int const max, gcli_gist **const out)
 {
     char               *url      = NULL;
     char               *next_url = NULL;
     gcli_fetch_buffer   buffer   = {0};
     struct json_stream  stream   = {0};
-    enum   json_type    next     = JSON_NULL;
     size_t              size     = 0;
 
     if (user)
@@ -96,8 +95,8 @@ gcli_get_gists(const char *user, int max, gcli_gist **out)
     return (int)size;
 }
 
-static const char *
-human_readable_size(size_t s)
+static char const *
+human_readable_size(size_t const s)
 {
     if (s < 1024) {
         return sn_asprintf(
@@ -122,8 +121,8 @@ human_readable_size(size_t s)
         s / (1024 * 1024 * 1024));
 }
 
-static inline const char *
-language_fmt(const char *it)
+static inline char const *
+language_fmt(char const *it)
 {
     if (it)
         return it;
@@ -132,7 +131,7 @@ language_fmt(const char *it)
 }
 
 static void
-print_gist_file(gcli_gist_file *file)
+print_gist_file(gcli_gist_file const *const file)
 {
     printf("      • %-15.15s  %-8.8s  %-s\n",
            language_fmt(file->language.data),
@@ -141,7 +140,7 @@ print_gist_file(gcli_gist_file *file)
 }
 
 static void
-print_gist(enum gcli_output_flags const flags, const gcli_gist *const gist)
+print_gist(enum gcli_output_flags const flags, gcli_gist const *const gist)
 {
     if (flags & OUTPUT_LONG) {
         printf("   ID : %s"SV_FMT"%s\n"
@@ -174,10 +173,9 @@ print_gist(enum gcli_output_flags const flags, const gcli_gist *const gist)
 }
 
 void
-gcli_print_gists(
-    enum gcli_output_flags  flags,
-    gcli_gist              *gists,
-    int                     gists_size)
+gcli_print_gists(enum gcli_output_flags const flags,
+                 gcli_gist const *const gists,
+                 int const gists_size)
 {
     if (gists_size == 0) {
         puts("No Gists");
@@ -200,7 +198,7 @@ gcli_print_gists(
 }
 
 gcli_gist *
-gcli_get_gist(const char *gist_id)
+gcli_get_gist(char const *gist_id)
 {
     char               *url    = NULL;
     gcli_fetch_buffer   buffer = {0};
@@ -292,7 +290,7 @@ gcli_create_gist(gcli_new_gist opts)
 }
 
 void
-gcli_delete_gist(const char *gist_id, bool always_yes)
+gcli_delete_gist(char const *gist_id, bool const always_yes)
 {
     char              *url    = NULL;
     gcli_fetch_buffer  buffer = {0};

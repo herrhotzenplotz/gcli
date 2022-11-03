@@ -34,14 +34,14 @@
 #include <stdlib.h>
 
 int
-gcli_get_repos(const char *owner, int max, gcli_repo **out)
+gcli_get_repos(char const *owner, int const max, gcli_repo **const out)
 {
     return gcli_forge()->get_repos(owner, max, out);
 }
 
 
 static void
-gcli_print_repo(gcli_repo *repo)
+gcli_print_repo(gcli_repo const *const repo)
 {
     printf("%-4.4s  %-10.10s  %-16.16s  %-s\n",
            sn_bool_yesno(repo->is_fork),
@@ -51,10 +51,9 @@ gcli_print_repo(gcli_repo *repo)
 }
 
 void
-gcli_print_repos_table(
-    enum gcli_output_flags  flags,
-    gcli_repo              *repos,
-    size_t                  repos_size)
+gcli_print_repos_table(enum gcli_output_flags const flags,
+                       gcli_repo const *const repos,
+                       size_t const repos_size)
 {
     if (repos_size == 0) {
         puts("No repos");
@@ -74,7 +73,7 @@ gcli_print_repos_table(
 }
 
 void
-gcli_repos_free(gcli_repo *repos, size_t repos_size)
+gcli_repos_free(gcli_repo *repos, size_t const repos_size)
 {
     for (size_t i = 0; i < repos_size; ++i) {
         free(repos[i].full_name.data);
@@ -88,20 +87,20 @@ gcli_repos_free(gcli_repo *repos, size_t repos_size)
 }
 
 int
-gcli_get_own_repos(int max, gcli_repo **out)
+gcli_get_own_repos(int const max, gcli_repo **const out)
 {
     return gcli_forge()->get_own_repos(max, out);
 }
 
 void
-gcli_repo_delete(const char *owner, const char *repo)
+gcli_repo_delete(char const *owner, char const *repo)
 {
     gcli_forge()->repo_delete(owner, repo);
 }
 
 gcli_repo *
 gcli_repo_create(
-    const gcli_repo_create_options *options) /* Options descriptor */
+    gcli_repo_create_options const *options) /* Options descriptor */
 {
     return gcli_forge()->repo_create(options);
 }

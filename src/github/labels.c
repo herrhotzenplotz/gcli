@@ -36,11 +36,10 @@
 #include <templates/github/labels.h>
 
 size_t
-github_get_labels(
-    const char  *owner,
-    const char  *reponame,
-    int          max,
-    gcli_label **out)
+github_get_labels(char const *owner,
+                  char const *reponame,
+                  int const max,
+                  gcli_label **const out)
 {
     size_t             out_size = 0;
     char              *url      = NULL;
@@ -70,10 +69,9 @@ github_get_labels(
 }
 
 void
-github_create_label(
-    const char *owner,
-    const char *repo,
-    gcli_label *label)
+github_create_label(char const *owner,
+                    char const *repo,
+                    gcli_label *const label)
 {
     char               *url         = NULL;
     char               *data        = NULL;
@@ -126,10 +124,9 @@ github_create_label(
 }
 
 void
-github_delete_label(
-    const char *owner,
-    const char *repo,
-    const char *label)
+github_delete_label(char const *owner,
+                    char const *repo,
+                    char const *label)
 {
     char              *url     = NULL;
     char              *e_label = NULL;

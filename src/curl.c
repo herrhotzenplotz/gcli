@@ -71,10 +71,9 @@ gcli_curl_ensure(void)
 /* Check the given curl code for an OK result. If not, print an
  * appropriate error message and exit */
 static void
-gcli_curl_check_api_error(
-    CURLcode           code,
-    const char        *url,
-    gcli_fetch_buffer *result)
+gcli_curl_check_api_error(CURLcode code,
+                          char const *url,
+                          gcli_fetch_buffer *const result)
 {
     long status_code = 0;
 
@@ -116,16 +115,16 @@ fetch_write_callback(char *in, size_t size, size_t nmemb, void *data)
  * Results are placed into the gcli_fetch_buffer. */
 void
 gcli_fetch(
-    const char         *url,
-    char              **pagination_next,
-    gcli_fetch_buffer  *out)
+    char const        *url,
+    char **const       pagination_next,
+    gcli_fetch_buffer *out)
 {
     gcli_fetch_with_method("GET", url, NULL, pagination_next, out);
 }
 
 /* Check the given url for a successful query */
 bool
-gcli_curl_test_success(const char *url)
+gcli_curl_test_success(char const *url)
 {
     CURLcode          ret;
     gcli_fetch_buffer buffer     = {0};
@@ -170,7 +169,7 @@ gcli_curl_test_success(const char *url)
  *
  * content_type may be NULL. */
 void
-gcli_curl(FILE *stream, const char *url, const char *content_type)
+gcli_curl(FILE *stream, char const *url, char const *content_type)
 {
     CURLcode           ret;
     struct curl_slist *headers;
@@ -290,11 +289,11 @@ parse_link_header(char *_header)
  * will be set to NULL. */
 void
 gcli_fetch_with_method(
-    const char  *method,        /* HTTP method. e.g. POST, GET, DELETE etc. */
-    const char  *url,           /* Endpoint                                 */
-    const char  *data,          /* Form data                                */
-    char       **pagination_next, /* Next URL for pagination                  */
-    gcli_fetch_buffer *out)     /* output buffer                            */
+    char const   *method,       /* HTTP method. e.g. POST, GET, DELETE etc. */
+    char const   *url,          /* Endpoint                                 */
+    char const   *data,         /* Form data                                */
+    char **const  pagination_next, /* Next URL for pagination                  */
+    gcli_fetch_buffer *const out) /* output buffer                            */
 {
     CURLcode           ret;
     struct curl_slist *headers;
@@ -355,12 +354,11 @@ gcli_fetch_with_method(
  * content_type may not be NULL.
  */
 void
-gcli_post_upload(
-    const char        *url,
-    const char        *content_type,
-    void              *buffer,
-    size_t             buffer_size,
-    gcli_fetch_buffer *out)
+gcli_post_upload(char const *url,
+                 char const *content_type,
+                 void *buffer,
+                 size_t const buffer_size,
+                 gcli_fetch_buffer *const out)
 {
     CURLcode              ret;
     struct curl_slist    *headers;
@@ -408,7 +406,7 @@ gcli_post_upload(
 }
 
 sn_sv
-gcli_urlencode_sv(sn_sv _input)
+gcli_urlencode_sv(sn_sv const _input)
 {
     size_t  input_len;
     size_t  output_len;
@@ -435,7 +433,7 @@ gcli_urlencode_sv(sn_sv _input)
 }
 
 char *
-gcli_urlencode(const char *input)
+gcli_urlencode(char const *input)
 {
     sn_sv encoded = gcli_urlencode_sv(SV((char *)input));
     return encoded.data;

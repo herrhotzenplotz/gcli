@@ -36,7 +36,7 @@
 #include <sn/sn.h>
 
 static void
-gcli_issue_free(gcli_issue *it)
+gcli_issue_free(gcli_issue *const it)
 {
     free(it->title.data);
     free(it->created_at.data);
@@ -51,7 +51,7 @@ gcli_issue_free(gcli_issue *it)
 }
 
 void
-gcli_issues_free(gcli_issue *issues, int issues_size)
+gcli_issues_free(gcli_issue *issues, int const issues_size)
 {
     for (int i = 0; i < issues_size; ++i)
         gcli_issue_free(&issues[i]);
@@ -60,18 +60,18 @@ gcli_issues_free(gcli_issue *issues, int issues_size)
 }
 
 int
-gcli_get_issues(
-    const char  *owner,
-    const char  *repo,
-    bool         all,
-    int          max,
-    gcli_issue **out)
+gcli_get_issues(char const *owner,
+                char const *repo,
+                bool const all,
+                int const max,
+                gcli_issue **const out)
 {
     return gcli_forge()->get_issues(owner, repo, all, max, out);
 }
 
 static void
-gcli_print_issue(const enum gcli_output_flags flags, const gcli_issue *const issue)
+gcli_print_issue(enum gcli_output_flags const flags,
+                 gcli_issue const *const issue)
 {
     (void) flags;
 
@@ -86,10 +86,9 @@ gcli_print_issue(const enum gcli_output_flags flags, const gcli_issue *const iss
 }
 
 void
-gcli_print_issues_table(
-    enum gcli_output_flags  flags,
-    gcli_issue             *issues,
-    int                     issues_size)
+gcli_print_issues_table(enum gcli_output_flags const flags,
+                        gcli_issue const *const issues,
+                        int const issues_size)
 {
     if (issues_size == 0) {
         puts("No issues");
@@ -107,7 +106,7 @@ gcli_print_issues_table(
 }
 
 static void
-gcli_print_issue_summary(gcli_issue *it)
+gcli_print_issue_summary(gcli_issue const *const it)
 {
     printf("   NUMBER : %d\n"
            "    TITLE : "SV_FMT"\n"
@@ -153,10 +152,9 @@ gcli_print_issue_summary(gcli_issue *it)
 }
 
 void
-gcli_issue_summary(
-    const char *owner,
-    const char *repo,
-    int         issue_number)
+gcli_issue_summary(char const *owner,
+                   char const *repo,
+                   int const issue_number)
 {
     gcli_issue details = {0};
 
@@ -166,13 +164,13 @@ gcli_issue_summary(
 }
 
 void
-gcli_issue_close(const char *owner, const char *repo, int issue_number)
+gcli_issue_close(char const *owner, char const *repo, int const issue_number)
 {
     gcli_forge()->issue_close(owner, repo, issue_number);
 }
 
 void
-gcli_issue_reopen(const char *owner, const char *repo, int issue_number)
+gcli_issue_reopen(char const *owner, char const *repo, int const issue_number)
 {
     gcli_forge()->issue_reopen(owner, repo, issue_number);
 }
@@ -227,33 +225,30 @@ gcli_issue_submit(gcli_submit_issue_options opts)
 }
 
 void
-gcli_issue_assign(
-    const char *owner,
-    const char *repo,
-    int         issue_number,
-    const char *assignee)
+gcli_issue_assign(char const *owner,
+                  char const *repo,
+                  int const issue_number,
+                  char const *assignee)
 {
     gcli_forge()->issue_assign(owner, repo, issue_number, assignee);
 }
 
 void
-gcli_issue_add_labels(
-    const char *owner,
-    const char *repo,
-    int         issue,
-    const char *labels[],
-    size_t      labels_size)
+gcli_issue_add_labels(char const *owner,
+                      char const *repo,
+                      int const issue,
+                      char const *const labels[],
+                      size_t const labels_size)
 {
     gcli_forge()->issue_add_labels(owner, repo, issue, labels, labels_size);
 }
 
 void
-gcli_issue_remove_labels(
-    const char *owner,
-    const char *repo,
-    int         issue,
-    const char *labels[],
-    size_t      labels_size)
+gcli_issue_remove_labels(char const *owner,
+                         char const *repo,
+                         int const issue,
+                         char const *const labels[],
+                         size_t const labels_size)
 {
     gcli_forge()->issue_remove_labels(owner, repo, issue, labels, labels_size);
 }

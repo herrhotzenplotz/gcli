@@ -37,11 +37,10 @@
 #include <templates/gitlab/forks.h>
 
 int
-gitlab_get_forks(
-    const char  *owner,
-    const char  *repo,
-    int          max,
-    gcli_fork  **out)
+gitlab_get_forks(char const *owner,
+                 char const *repo,
+                 int const max,
+                 gcli_fork **const out)
 {
     gcli_fetch_buffer   buffer   = {0};
     char               *url      = NULL;
@@ -81,7 +80,7 @@ gitlab_get_forks(
 }
 
 void
-gitlab_fork_create(const char *owner, const char *repo, const char *_in)
+gitlab_fork_create(char const *owner, char const *repo, char const *_in)
 {
     char              *url       = NULL;
     char              *e_owner   = NULL;

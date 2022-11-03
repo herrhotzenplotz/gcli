@@ -64,7 +64,7 @@
 #include <gcli/gitea/pulls.h>
 #include <gcli/gitea/repos.h>
 
-static gcli_forge_descriptor
+static gcli_forge_descriptor const
 github_forge_descriptor =
 {
     .perform_submit_comment    = github_perform_submit_comment,
@@ -115,7 +115,7 @@ github_forge_descriptor =
     .html_url_key              = "html_url",
 };
 
-static gcli_forge_descriptor
+static gcli_forge_descriptor const
 gitlab_forge_descriptor =
 {
     .perform_submit_comment    = gitlab_perform_submit_comment,
@@ -161,7 +161,7 @@ gitlab_forge_descriptor =
     .html_url_key              = "web_url",
 };
 
-static gcli_forge_descriptor
+static gcli_forge_descriptor const
 gitea_forge_descriptor =
 {
     .get_issues             = gitea_get_issues,
@@ -203,7 +203,7 @@ gitea_forge_descriptor =
     .html_url_key         = "web_url",
 };
 
-const gcli_forge_descriptor *
+gcli_forge_descriptor const *
 gcli_forge(void)
 {
     switch (gcli_config_get_forge_type()) {

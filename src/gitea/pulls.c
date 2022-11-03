@@ -32,32 +32,29 @@
 #include <gcli/github/pulls.h>
 
 int
-gitea_get_pulls(
-    const char  *owner,
-    const char  *repo,
-    bool         all,
-    int          max,
-    gcli_pull  **out)
+gitea_get_pulls(char const *owner,
+                char const *repo,
+                bool const all,
+                int const max,
+                gcli_pull **const out)
 {
     return github_get_prs(owner, repo, all, max, out);
 }
 
 void
-gitea_get_pull_summary(
-    const char        *owner,
-    const char        *repo,
-    int                pr_number,
-    gcli_pull_summary *out)
+gitea_get_pull_summary(char const *owner,
+                       char const *repo,
+                       int const pr_number,
+                       gcli_pull_summary *const out)
 {
     github_get_pull_summary(owner, repo, pr_number, out);
 }
 
 int
-gitea_get_pull_commits(
-    const char   *owner,
-    const char   *repo,
-    int           pr_number,
-    gcli_commit **out)
+gitea_get_pull_commits(char const *owner,
+                       char const *repo,
+                       int const pr_number,
+                       gcli_commit **const out)
 {
     return github_get_pull_commits(owner, repo, pr_number, out);
 }
@@ -71,11 +68,10 @@ gitea_pull_submit(gcli_submit_pull_options opts)
 }
 
 void
-gitea_pull_merge(
-    const char *owner,
-    const char *repo,
-    int         pr_number,
-    bool        squash)
+gitea_pull_merge(char const *owner,
+                 char const *repo,
+                 int const pr_number,
+                 bool const squash)
 {
     char              *url     = NULL;
     char              *e_owner = NULL;
@@ -99,11 +95,10 @@ gitea_pull_merge(
 }
 
 static void
-gitea_pulls_patch_state(
-    const char *owner,
-    const char *repo,
-    int         pr_number,
-    const char *state)
+gitea_pulls_patch_state(char const *owner,
+                        char const *repo,
+                        int const pr_number,
+                        char const *state)
 {
     gcli_fetch_buffer  json_buffer = {0};
     char              *url         = NULL;
@@ -131,29 +126,26 @@ gitea_pulls_patch_state(
 }
 
 void
-gitea_pull_close(
-    const char *owner,
-    const char *repo,
-    int         pr_number)
+gitea_pull_close(char const *owner,
+                 char const *repo,
+                 int const pr_number)
 {
     gitea_pulls_patch_state(owner, repo, pr_number, "closed");
 }
 
 void
-gitea_pull_reopen(
-    const char *owner,
-    const char *repo,
-    int         pr_number)
+gitea_pull_reopen(char const *owner,
+                  char const *repo,
+                  int const pr_number)
 {
     gitea_pulls_patch_state(owner, repo, pr_number, "open");
 }
 
 void
-gitea_print_pr_diff(
-    FILE       *stream,
-    const char *owner,
-    const char *repo,
-    int         pr_number)
+gitea_print_pr_diff(FILE *const stream,
+                    char const *owner,
+                    char const *repo,
+                    int const pr_number)
 {
     char *url     = NULL;
     char *e_owner = NULL;

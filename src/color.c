@@ -45,8 +45,8 @@ clean_color_table(void)
         free(color_table[i].sequence);
 }
 
-static char *
-color_cache_lookup(uint32_t code)
+static char const *
+color_cache_lookup(uint32_t const code)
 {
     for (size_t i = 0; i < color_table_size; ++i) {
         if (color_table[i].code == code)
@@ -56,17 +56,18 @@ color_cache_lookup(uint32_t code)
 }
 
 static void
-color_cache_insert(uint32_t code, char *sequence)
+color_cache_insert(uint32_t const code, char *sequence)
 {
     color_table[color_table_size].code     = code;
     color_table[color_table_size].sequence = sequence;
     color_table_size++;
 }
 
-const char *
-gcli_setcolor256(uint32_t code)
+char const *
+gcli_setcolor256(uint32_t const code)
 {
-    char *result = NULL;
+    char       *result    = NULL;
+    char const *oldresult = NULL;
 
     if (!gcli_config_have_colors())
         return "";
@@ -74,9 +75,9 @@ gcli_setcolor256(uint32_t code)
     if (color_table_size == 0)
         atexit(clean_color_table);
 
-    result = color_cache_lookup(code);
-    if (result)
-        return result;
+    oldresult = color_cache_lookup(code);
+    if (oldresult)
+        return oldresult;
 
     /* TODO: This is inherently screwed */
     result = sn_asprintf("\033[38;2;%02d;%02d;%02dm",
@@ -120,7 +121,7 @@ gcli_setcolor(int code)
     return NULL;
 }
 
-const char *
+char const *
 gcli_setbold(void)
 {
     if (!gcli_config_have_colors())
@@ -129,7 +130,7 @@ gcli_setbold(void)
         return "\033[1m";
 }
 
-const char *
+char const *
 gcli_resetbold(void)
 {
     if (!gcli_config_have_colors())
@@ -138,8 +139,8 @@ gcli_resetbold(void)
         return "\033[22m";
 }
 
-const char *
-gcli_state_color_str(const char *it)
+char const *
+gcli_state_color_str(char const *it)
 {
     if (it)
         return gcli_state_color_sv(SV((char *)it));
@@ -148,7 +149,7 @@ gcli_state_color_str(const char *it)
 }
 
 /* TODO: Probably a hash table would be more suitable */
-static const struct { const char *name; int code; }
+static const struct { char const *name; int code; }
     state_color_table[] =
 {
     { .name = "open",      .code = GCLI_COLOR_GREEN   },
@@ -163,8 +164,8 @@ static const struct { const char *name; int code; }
     { .name = "COMMENTED", .code = GCLI_COLOR_BLUE    },
 };
 
-const char *
-gcli_state_color_sv(sn_sv state)
+char const *
+gcli_state_color_sv(sn_sv const state)
 {
     if (!sn_sv_null(state)) {
         for (size_t i = 0; i < ARRAY_SIZE(state_color_table); ++i) {

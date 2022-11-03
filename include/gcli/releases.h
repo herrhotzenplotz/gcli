@@ -62,38 +62,30 @@ struct gcli_release_asset {
 
 #define GCLI_RELEASE_MAX_ASSETS 16
 struct gcli_new_release {
-    const char         *owner;
-    const char         *repo;
-    const char         *tag;
-    const char         *name;
+    char const         *owner;
+    char const         *repo;
+    char const         *tag;
+    char const         *name;
     sn_sv               body;
-    const char         *commitish;
+    char const         *commitish;
     bool                draft;
     bool                prerelease;
     gcli_release_asset  assets[GCLI_RELEASE_MAX_ASSETS];
     size_t              assets_size;
 };
 
-int gcli_get_releases(
-    const char    *owner,
-    const char    *repo,
-    int            max,
-    gcli_release **out);
-void gcli_print_releases(
-    enum gcli_output_flags  flags,
-    gcli_release           *releases,
-    int                     releases_size);
-void gcli_free_releases(
-    gcli_release *,
-    int);
-void gcli_create_release(
-    const gcli_new_release *);
-void gcli_release_push_asset(
-    gcli_new_release *,
-    gcli_release_asset);
-void gcli_delete_release(
-    const char *owner,
-    const char *repo,
-    const char *id);
+int gcli_get_releases(char const           *owner,
+                      char const           *repo,
+                      int const             max,
+                      gcli_release **const  out);
+void gcli_print_releases(enum gcli_output_flags const flags,
+                         gcli_release const *const    releases,
+                         int const                    releases_size);
+void gcli_free_releases(gcli_release *, int const);
+void gcli_create_release(gcli_new_release const *);
+void gcli_release_push_asset(gcli_new_release *const, gcli_release_asset);
+void gcli_delete_release(char const *const owner,
+                         char const *const repo,
+                         char const *const id);
 
 #endif /* RELEASES_H */

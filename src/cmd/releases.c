@@ -67,7 +67,7 @@ usage(void)
 static void
 releasemsg_init(FILE *f, void *_data)
 {
-    const gcli_new_release *info = _data;
+    gcli_new_release const *info = _data;
 
     fprintf(
         f,
@@ -81,7 +81,7 @@ releasemsg_init(FILE *f, void *_data)
 }
 
 static sn_sv
-get_release_message(const gcli_new_release *info)
+get_release_message(gcli_new_release const *info)
 {
     return gcli_editor_get_user_message(releasemsg_init, (void *)info);
 }
@@ -93,7 +93,7 @@ subcommand_releases_create(int argc, char *argv[])
     int              ch;
     bool             always_yes = false;
 
-    const struct option options[] = {
+    struct option const options[] = {
         { .name    = "yes",
           .has_arg = no_argument,
           .flag    = NULL,
@@ -201,10 +201,10 @@ static int
 subcommand_releases_delete(int argc, char *argv[])
 {
     int         ch;
-    const char *owner      = NULL, *repo = NULL;
+    char const *owner      = NULL, *repo = NULL;
     bool        always_yes = false;
 
-    const struct option options[] = {
+    struct option const options[] = {
         { .name    = "repo",
           .has_arg = required_argument,
           .flag    = NULL,
@@ -260,7 +260,7 @@ subcommand_releases_delete(int argc, char *argv[])
 }
 
 static struct {
-    const char *name;
+    char const *name;
     int (*fn)(int, char **);
 } releases_subcommands[] = {
     { .name = "delete", .fn = subcommand_releases_delete },
@@ -273,8 +273,8 @@ subcommand_releases(int argc, char *argv[])
     int                     ch;
     int                     releases_size;
     int                     count    = 30;
-    const char             *owner    = NULL;
-    const char             *repo     = NULL;
+    char const             *owner    = NULL;
+    char const             *repo     = NULL;
     gcli_release           *releases = NULL;
     enum gcli_output_flags  flags    = 0;
 
@@ -287,7 +287,7 @@ subcommand_releases(int argc, char *argv[])
 
     /* List releases if none of the subcommands matched */
 
-    const struct option options[] = {
+    struct option const options[] = {
         { .name    = "repo",
           .has_arg = required_argument,
           .flag    = NULL,

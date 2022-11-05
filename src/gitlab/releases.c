@@ -36,60 +36,6 @@
 
 #include <pdjson/pdjson.h>
 
-/* TODO: Find a way to generate this code */
-static void
-gitlab_parse_assets_source(json_stream *input, gcli_release *const out)
-{
-    enum json_type  next       = JSON_NULL;
-    char const     *key        = NULL;
-    sn_sv           url        = {0};
-    bool            is_tarball = false;
-
-    if ((next = json_next(input)) != JSON_OBJECT)
-        errx(1, "expected asset source object");
-
-    while ((next = json_next(input)) == JSON_STRING) {
-        size_t len;
-        key = json_get_string(input, &len);
-
-        if (strncmp(key, "format", len) == 0) {
-            sn_sv format_name = get_sv(input);
-            if (sn_sv_eq_to(format_name, "tar.bz2"))
-                is_tarball = true;
-            free(format_name.data);
-        } else if (strncmp(key, "url", len) == 0) {
-            url = get_sv(input);
-        } else {
-            SKIP_OBJECT_VALUE(input);
-        }
-    }
-
-    if (next != JSON_OBJECT_END)
-        errx(1, "unclosed asset source object");
-
-    if (is_tarball) {
-        out->tarball_url = url;
-    } else {
-        free(url.data);
-    }
-}
-
-void
-gitlab_parse_asset_sources(json_stream *stream, gcli_release *const out)
-{
-    enum json_type next = JSON_NULL;
-
-    if ((next = json_next(stream)) != JSON_ARRAY)
-        errx(1, "expected release assets sources array");
-
-    while ((next = json_peek(stream)) == JSON_OBJECT) {
-        gitlab_parse_assets_source(stream, out);
-    }
-
-    if (json_next(stream) != JSON_ARRAY_END)
-        errx(1, "unclosed release assets sources array");
-}
-
 int
 gitlab_get_releases(char const *owner,
                     char const *repo,

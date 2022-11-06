@@ -186,6 +186,7 @@ gitea_forge_descriptor =
     .get_pull_summary       = gitea_get_pull_summary,
     .get_pull_commits       = gitea_get_pull_commits,
     .get_releases           = gitea_get_releases,
+    .create_release         = gitea_create_release,
     .perform_submit_pr      = gitea_pull_submit,
     .print_pr_diff          = gitea_print_pr_diff,
     .get_forks              = gitea_get_forks,

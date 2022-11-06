@@ -53,7 +53,8 @@ gitea_parse_release(gcli_fetch_buffer const *const buffer,
 }
 
 static void
-gitea_upload_release_asset(char *const url, gcli_release_asset const asset)
+gitea_upload_release_asset(char *const url,
+                           gcli_release_asset_upload const asset)
 {
     char              *e_assetname  = NULL;
     char              *request      = NULL;

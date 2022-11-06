@@ -104,7 +104,8 @@ github_get_upload_url(gcli_release *const it)
 }
 
 static void
-github_upload_release_asset(char const *url, gcli_release_asset const asset)
+github_upload_release_asset(char const *url,
+                            gcli_release_asset_upload const asset)
 {
     char              *req          = NULL;
     sn_sv              file_content = {0};

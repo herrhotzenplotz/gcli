@@ -36,6 +36,29 @@
 
 #include <pdjson/pdjson.h>
 
+#include <string.h>
+
+static void
+fixup_asset_name(gcli_release_asset *const asset)
+{
+    if (!asset->name) {
+        asset->name = gcli_urldecode(strrchr(asset->url, '/') + 1);
+    }
+}
+
+static void
+fixup_release_asset_names(gcli_release *const releases,
+                          size_t const releases_size)
+{
+    /* Iterate over releases */
+    for (size_t j = 0; j < releases_size; ++j) {
+        /* iterate over releases */
+        for (size_t i = 0; i < releases[j].assets_size; ++i) {
+            fixup_asset_name(&releases[j].assets[i]);
+        }
+    }
+}
+
 int
 gitlab_get_releases(char const *owner,
                     char const *repo,
@@ -73,6 +96,8 @@ gitlab_get_releases(char const *owner,
     free(e_owner);
     free(e_repo);
     free(next_url);
+
+    fixup_release_asset_names(*out, size);
 
     return (int)(size);
 }

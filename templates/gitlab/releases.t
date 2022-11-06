@@ -1,10 +1,12 @@
 include "gcli/gitlab/releases.h";
 
-parser gitlab_release_asset is object of sn_sv select "url" as sv;
+parser gitlab_release_asset is
+object of gcli_release_asset with
+       ("url" => url as string);
 
 parser gitlab_release_assets is
 object of gcli_release with
-       ("sources" => asset_urls as array of sn_sv use parse_gitlab_release_asset);
+       ("sources" => assets as array of gcli_release_asset use parse_gitlab_release_asset);
 
 parser gitlab_release is
 object of gcli_release with

@@ -1,6 +1,9 @@
 include "gcli/releases.h";
 
-parser github_release_asset is object of sn_sv select "browser_download_url" as sv;
+parser github_release_asset is
+object of gcli_release_asset with
+       ("browser_download_url" => url as string,
+        "name" => name as string);
 
 parser github_release is
 object of gcli_release with
@@ -11,7 +14,7 @@ object of gcli_release with
         "created_at" => date as sv,
         "draft"      => draft as bool,
         "prerelease" => prerelease as bool,
-        "assets"     => asset_urls as array of sn_sv use parse_github_release_asset,
+        "assets"     => assets as array of gcli_release_asset use parse_github_release_asset,
         "html_url"   => html_url as sv);
 
 parser github_releases is

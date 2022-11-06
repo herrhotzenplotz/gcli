@@ -158,7 +158,7 @@ subcommand_releases_create(int argc, char *argv[])
             release.owner = optarg;
             break;
         case 'a': {
-            gcli_release_asset asset = {
+            gcli_release_asset_upload asset = {
                 .path  = optarg,
                 .name  = optarg,
                 .label = "unused",

@@ -64,8 +64,10 @@ gcli_print_release(enum gcli_output_flags const flags,
                sn_bool_yesno(it->prerelease));
 
         /* asset urls */
-        for (size_t i = 0; i < it->asset_urls_size; ++i)
-            printf("           : • "SV_FMT"\n", SV_ARGS(it->asset_urls[i]));
+        for (size_t i = 0; i < it->assets_size; ++i) {
+            printf("           : • %s\n", it->assets[i].name);
+            printf("           :   %s\n", it->assets[i].url);
+        }
 
         /* body */
         printf("      BODY :\n");
@@ -117,11 +119,12 @@ gcli_free_releases(gcli_release *releases, int const releases_size)
         free(releases[i].author.data);
         free(releases[i].date.data);
 
-        for (size_t j = 0; j < releases[i].asset_urls_size; ++j) {
-            free(releases[i].asset_urls[j].data);
+        for (size_t j = 0; j < releases[i].assets_size; ++j) {
+            free(releases[i].assets[j].name);
+            free(releases[i].assets[j].url);
         }
 
-        free(releases[i].asset_urls);
+        free(releases[i].assets);
     }
 
     free(releases);
@@ -135,7 +138,7 @@ gcli_create_release(gcli_new_release const *release)
 
 void
 gcli_release_push_asset(gcli_new_release *const release,
-                        gcli_release_asset const asset)
+                        gcli_release_asset_upload const asset)
 {
     if (release->assets_size == GCLI_RELEASE_MAX_ASSETS)
         errx(1, "Too many assets");

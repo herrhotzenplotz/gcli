@@ -67,6 +67,10 @@ void gcli_post_upload(
     void              *buffer,
     size_t             buffer_size,
     gcli_fetch_buffer *out);
+void gcli_curl_gitea_upload_attachment(
+    char const               *url,
+    char const               *filename,
+    gcli_fetch_buffer *const  out);
 bool gcli_curl_test_success(
     char const *url);
 char *gcli_urlencode(char const *);

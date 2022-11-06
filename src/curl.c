@@ -497,3 +497,21 @@ gcli_urlencode(char const *input)
     sn_sv encoded = gcli_urlencode_sv(SV((char *)input));
     return encoded.data;
 }
+
+char *
+gcli_urldecode(char const *input)
+{
+    char *curlresult, *result;
+
+    gcli_curl_ensure();
+
+    curlresult = curl_easy_unescape(gcli_curl_session, input, 0, NULL);
+    if (!curlresult)
+        errx(1, "error: could not url decode");
+
+    result = strdup(curlresult);
+
+    curl_free(curlresult);
+
+    return result;
+}

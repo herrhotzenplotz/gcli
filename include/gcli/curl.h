@@ -75,5 +75,6 @@ bool gcli_curl_test_success(
     char const *url);
 char *gcli_urlencode(char const *);
 sn_sv gcli_urlencode_sv(sn_sv const);
+char *gcli_urldecode(char const *input);
 
 #endif /* CURL_H */

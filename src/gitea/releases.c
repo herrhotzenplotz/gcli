@@ -144,3 +144,9 @@ gitea_create_release(gcli_new_release const *release)
     free(name_json);
     free(commitish_json);
 }
+
+void
+gitea_delete_release(char const *owner, char const *repo, char const *id)
+{
+    github_delete_release(owner, repo, id);
+}

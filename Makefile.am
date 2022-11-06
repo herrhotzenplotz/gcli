@@ -145,6 +145,7 @@ libgcli_la_SOURCES = \
 	src/gitea/comments.c include/gcli/gitea/comments.h \
 	src/gitea/config.c include/gcli/gitea/config.h \
 	src/gitea/pulls.c include/gcli/gitea/pulls.h \
+	src/gitea/releases.c include/gcli/gitea/releases.h \
 	src/gitea/repos.c include/gcli/gitea/repos.h \
 	$(TEMPLATES)
 

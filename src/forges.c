@@ -62,6 +62,7 @@
 #include <gcli/gitea/issues.h>
 #include <gcli/gitea/labels.h>
 #include <gcli/gitea/pulls.h>
+#include <gcli/gitea/releases.h>
 #include <gcli/gitea/repos.h>
 
 static gcli_forge_descriptor const
@@ -184,6 +185,9 @@ gitea_forge_descriptor =
     .get_pull_comments      = gitea_get_comments,
     .get_pull_summary       = gitea_get_pull_summary,
     .get_pull_commits       = gitea_get_pull_commits,
+    .get_releases           = gitea_get_releases,
+    .create_release         = gitea_create_release,
+    .delete_release         = gitea_delete_release,
     .perform_submit_pr      = gitea_pull_submit,
     .print_pr_diff          = gitea_print_pr_diff,
     .get_forks              = gitea_get_forks,

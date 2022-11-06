@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,53 +27,22 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CURL_H
-#define CURL_H
+#ifndef GITEA_RELEASES_H
+#define GITEA_RELEASES_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <gcli/releases.h>
 
-#include <sn/sn.h>
+int gitea_get_releases(char const *owner,
+                       char const *repo,
+                       int const max,
+                       gcli_release **const out);
 
-typedef struct gcli_fetch_buffer gcli_fetch_buffer;
+void gitea_create_release(gcli_new_release const *release);
 
-struct gcli_fetch_buffer {
-    char   *data;
-    size_t  length;
-};
+void gitea_delete_release(char const *owner, char const *repo, char const *id);
 
-void gcli_fetch(
-    char const        *url,
-    char **const       pagination_next,
-    gcli_fetch_buffer *out);
-void gcli_curl(
-    FILE       *stream,
-    char const *url,
-    char const *content_type);
-void gcli_fetch_with_method(
-    char const               *method,
-    char const               *url,
-    char const               *data,
-    char **const              pagination_next,
-    gcli_fetch_buffer *const  out);
-void gcli_post_upload(
-    char const        *url,
-    char const        *content_type,
-    void              *buffer,
-    size_t             buffer_size,
-    gcli_fetch_buffer *out);
-void gcli_curl_gitea_upload_attachment(
-    char const               *url,
-    char const               *filename,
-    gcli_fetch_buffer *const  out);
-bool gcli_curl_test_success(
-    char const *url);
-char *gcli_urlencode(char const *);
-sn_sv gcli_urlencode_sv(sn_sv const);
-
-#endif /* CURL_H */
+#endif /* GITEA_RELEASES_H */

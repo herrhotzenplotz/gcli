@@ -405,6 +405,65 @@ gcli_post_upload(char const *url,
     free(contenttype_header);
 }
 
+/** gcli_gitea_upload_attachment:
+ *
+ *  Upload the given file to the given url. This is gitea-specific
+ *  code.
+ */
+void
+gcli_curl_gitea_upload_attachment(char const *url,
+                                  char const *filename,
+                                  gcli_fetch_buffer *const out)
+{
+    CURLcode           ret;
+    curl_mime         *mime;
+    curl_mimepart     *contentpart;
+    struct curl_slist *headers;
+
+    char *auth_header = gcli_config_get_authheader();
+
+    if (sn_verbose())
+        fprintf(stderr, "info: cURL upload POST %s...\n", url);
+
+    headers = NULL;
+    headers = curl_slist_append(
+        headers,
+        "Accept: application/json");
+    headers = curl_slist_append(headers, auth_header);
+
+    gcli_curl_ensure();
+
+    /* The docs say we should be using this mime thing. */
+    mime = curl_mime_init(gcli_curl_session);
+    contentpart = curl_mime_addpart(mime);
+
+    /* Attach the file. It will be read when curl_easy_perform is
+     * called. This allows us to upload large files without reading or
+     * mapping them into memory in one chunk. */
+    curl_mime_name(contentpart, "attachment");
+    ret = curl_mime_filedata(contentpart, filename);
+    if (ret != CURLE_OK) {
+        errx(1, "error: could not set attachment for upload: %s",
+             curl_easy_strerror(ret));
+    }
+
+    curl_easy_setopt(gcli_curl_session, CURLOPT_URL, url);
+    curl_easy_setopt(gcli_curl_session, CURLOPT_MIMEPOST, mime);
+
+    curl_easy_setopt(gcli_curl_session, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEDATA, out);
+    curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
+
+    ret = curl_easy_perform(gcli_curl_session);
+    gcli_curl_check_api_error(ret, url, out);
+
+    /* Cleanup */
+    curl_slist_free_all(headers);
+    headers = NULL;
+    curl_mime_free(mime);
+    free(auth_header);
+}
+
 sn_sv
 gcli_urlencode_sv(sn_sv const _input)
 {

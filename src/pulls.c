@@ -271,12 +271,14 @@ gcli_pr_info(char const *owner,
 
     /* Only print checks if the user issued the 'status' action */
     if (is_status) {
-        if (gcli_config_get_forge_type() == GCLI_FORGE_GITHUB) {
+        switch (gcli_config_get_forge_type()) {
+        case GCLI_FORGE_GITHUB:
+        case GCLI_FORGE_GITLAB:
             puts("\nCHECKS");
-            github_checks(owner, repo, summary.head_sha, -1);
-        } else if (gcli_config_get_forge_type() == GCLI_FORGE_GITLAB) {
-            puts("\nCHECKS");
-            gitlab_mr_pipelines(owner, repo, pr_number);
+            gcli_pr_checks(owner, repo, pr_number);
+            break;
+        default:
+            break;
         }
     }
 
@@ -297,6 +299,12 @@ gcli_pr_summary(char const *owner,
                 int const pr_number)
 {
     gcli_pr_info(owner, repo, pr_number, false);
+}
+
+void
+gcli_pr_checks(char const *owner, char const *repo, int const pr_number)
+{
+    gcli_forge()->print_pr_checks(owner, repo, pr_number);
 }
 
 static void

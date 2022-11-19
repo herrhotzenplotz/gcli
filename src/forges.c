@@ -83,6 +83,7 @@ github_forge_descriptor =
     .perform_submit_issue      = github_perform_submit_issue,
     .get_prs                   = github_get_prs,
     .print_pr_diff             = github_print_pr_diff,
+    .print_pr_checks           = github_pr_checks,
     .pr_merge                  = github_pr_merge,
     .pr_reopen                 = github_pr_reopen,
     .pr_close                  = github_pr_close,

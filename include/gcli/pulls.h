@@ -129,6 +129,11 @@ void gcli_pr_status(
     char const *reponame,
     int const pr_number);
 
+void gcli_pr_checks(
+    char const *owner,
+    char const *repo,
+    int const pr_number);
+
 void gcli_pr_submit(
     gcli_submit_pull_options);
 

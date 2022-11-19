@@ -78,7 +78,7 @@ gitlab_get_pipelines(char const *owner,
 }
 
 static int
-gitlab_get_mr_pipelines(char const *owner, char const *repo, long const mr_id,
+gitlab_get_mr_pipelines(char const *owner, char const *repo, int const mr_id,
                         gitlab_pipeline **const out)
 {
     char *url = NULL;
@@ -327,7 +327,7 @@ gitlab_job_retry(char const *owner, char const *repo, long const jid)
 }
 
 void
-gitlab_mr_pipelines(char const *owner, char const *repo, long const mr_id)
+gitlab_mr_pipelines(char const *owner, char const *repo, int const mr_id)
 {
     gitlab_pipeline *pipelines;
     int pipelines_size;

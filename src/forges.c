@@ -182,6 +182,7 @@ gitea_forge_descriptor =
     .create_label           = gitea_create_label,
     .delete_label           = gitea_delete_label,
     .get_prs                = gitea_get_pulls,
+    .print_pr_checks        = gitea_pull_checks, /* stub */
     .pr_merge               = gitea_pull_merge,
     .pr_reopen              = gitea_pull_reopen,
     .pr_close               = gitea_pull_close,

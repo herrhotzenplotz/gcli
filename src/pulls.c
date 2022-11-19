@@ -33,6 +33,7 @@
 #include <gcli/forges.h>
 #include <gcli/github/pulls.h>
 #include <gcli/github/checks.h>
+#include <gcli/gitlab/pipelines.h>
 #include <gcli/json_util.h>
 #include <gcli/pulls.h>
 #include <sn/sn.h>
@@ -273,6 +274,9 @@ gcli_pr_info(char const *owner,
         if (gcli_config_get_forge_type() == GCLI_FORGE_GITHUB) {
             puts("\nCHECKS");
             github_checks(owner, repo, summary.head_sha, -1);
+        } else if (gcli_config_get_forge_type() == GCLI_FORGE_GITLAB) {
+            puts("\nCHECKS");
+            gitlab_mr_pipelines(owner, repo, pr_number);
         }
     }
 

@@ -109,4 +109,8 @@ void gitlab_job_retry(char const *owner,
                       char const *repo,
                       long const job_id);
 
+void gitlab_mr_pipelines(char const *owner,
+                         char const *repo,
+                         long const mr_id);
+
 #endif /* GITLAB_PIPELINES_H */

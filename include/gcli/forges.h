@@ -169,6 +169,13 @@ struct gcli_forge_descriptor {
         int const   pr_number);
 
     /**
+     * Print a list of checks associated with the given pull. */
+    void (*print_pr_checks)(
+        char const *owner,
+        char const *reponame,
+        int const pr_number);
+
+    /**
      * Merge the given PR/MR */
     void (*pr_merge)(
         char const *owner,

@@ -38,23 +38,15 @@
 
 #include <templates/gitlab/pipelines.h>
 
-int
-gitlab_get_pipelines(char const *owner,
-                     char const *repo,
-                     int const max,
-                     gitlab_pipeline **const out)
+static int
+fetch_pipelines(char *url, int const max, gitlab_pipeline **const out)
 {
-    char               *url      = NULL;
     char               *next_url = NULL;
     gcli_fetch_buffer   buffer   = {0};
     struct json_stream  stream   = {0};
     size_t              out_size = 0;
 
-    assert(out);
     *out = NULL;
-
-    url = sn_asprintf("%s/projects/%s%%2F%s/pipelines",
-                      gitlab_get_apibase(), owner, repo);
 
     do {
         gcli_fetch(url, &next_url, &buffer);
@@ -69,6 +61,33 @@ gitlab_get_pipelines(char const *owner,
     } while ((url = next_url) && (max == -1 || (int)out_size < max));
 
     return (int)out_size;
+}
+
+int
+gitlab_get_pipelines(char const *owner,
+                     char const *repo,
+                     int const max,
+                     gitlab_pipeline **const out)
+{
+    char *url = NULL;
+
+    url = sn_asprintf("%s/projects/%s%%2F%s/pipelines",
+                      gitlab_get_apibase(), owner, repo);
+
+    return fetch_pipelines(url, max, out);
+}
+
+static int
+gitlab_get_mr_pipelines(char const *owner, char const *repo, int const mr_id,
+                        gitlab_pipeline **const out)
+{
+    char *url = NULL;
+
+    url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%ld/pipelines",
+                      gitlab_get_apibase(), owner, repo, mr_id);
+
+    /* fetch everything */
+    return fetch_pipelines(url, -1, out);
 }
 
 void
@@ -305,4 +324,15 @@ gitlab_job_retry(char const *owner, char const *repo, long const jid)
 
     free(url);
     free(buffer.data);
+}
+
+void
+gitlab_mr_pipelines(char const *owner, char const *repo, int const mr_id)
+{
+    gitlab_pipeline *pipelines;
+    int pipelines_size;
+
+    pipelines_size = gitlab_get_mr_pipelines(owner, repo, mr_id, &pipelines);
+    gitlab_print_pipelines(pipelines, pipelines_size);
+    gitlab_free_pipelines(pipelines, pipelines_size);
 }

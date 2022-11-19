@@ -51,6 +51,7 @@
 #include <gcli/gitlab/issues.h>
 #include <gcli/gitlab/labels.h>
 #include <gcli/gitlab/merge_requests.h>
+#include <gcli/gitlab/pipelines.h>
 #include <gcli/gitlab/releases.h>
 #include <gcli/gitlab/repos.h>
 #include <gcli/gitlab/review.h>
@@ -83,6 +84,7 @@ github_forge_descriptor =
     .perform_submit_issue      = github_perform_submit_issue,
     .get_prs                   = github_get_prs,
     .print_pr_diff             = github_print_pr_diff,
+    .print_pr_checks           = github_pr_checks,
     .pr_merge                  = github_pr_merge,
     .pr_reopen                 = github_pr_reopen,
     .pr_close                  = github_pr_close,
@@ -134,6 +136,7 @@ gitlab_forge_descriptor =
     .perform_submit_issue      = gitlab_perform_submit_issue,
     .get_prs                   = gitlab_get_mrs,
     .print_pr_diff             = gitlab_print_pr_diff,
+    .print_pr_checks           = gitlab_mr_pipelines,
     .pr_merge                  = gitlab_mr_merge,
     .pr_reopen                 = gitlab_mr_reopen,
     .pr_close                  = gitlab_mr_close,
@@ -179,6 +182,7 @@ gitea_forge_descriptor =
     .create_label           = gitea_create_label,
     .delete_label           = gitea_delete_label,
     .get_prs                = gitea_get_pulls,
+    .print_pr_checks        = gitea_pull_checks, /* stub */
     .pr_merge               = gitea_pull_merge,
     .pr_reopen              = gitea_pull_reopen,
     .pr_close               = gitea_pull_close,

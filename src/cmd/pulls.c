@@ -61,6 +61,7 @@ usage(void)
     fprintf(stderr, "ACTIONS:\n");
     fprintf(stderr, "  summary|status  Display status information\n");
     fprintf(stderr, "  comments        Display comments\n");
+    fprintf(stderr, "  checks          Display CI/Pipeline status information about the PR\n");
     fprintf(stderr, "  merge [-s]      Merge the PR (-s = squash commits)\n");
     fprintf(stderr, "  close           Close the PR\n");
     fprintf(stderr, "  reopen          Reopen a closed PR\n");
@@ -318,6 +319,8 @@ subcommand_pulls(int argc, char *argv[])
             gcli_pr_status(owner, repo, pr);
         } else if (strcmp(operation, "comments") == 0) {
             gcli_pull_comments(owner, repo, pr);
+        } else if (strcmp(operation, "checks") == 0) {
+            gcli_pr_checks(owner, repo, pr);
         } else if (strcmp(operation, "merge") == 0) {
             /* Check whether the user intends a squash-merge */
             if (argc > 0 && (strcmp(argv[0], "-s") == 0 || strcmp(argv[0], "--squash") == 0)) {

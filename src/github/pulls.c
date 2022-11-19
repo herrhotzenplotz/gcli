@@ -30,6 +30,7 @@
 #include <gcli/config.h>
 #include <gcli/curl.h>
 #include <gcli/gitconfig.h>
+#include <gcli/github/checks.h>
 #include <gcli/github/config.h>
 #include <gcli/github/issues.h>
 #include <gcli/github/pulls.h>
@@ -322,4 +323,14 @@ github_get_pull_summary(char const *owner,
     free(e_owner);
     free(e_repo);
     free(json_buffer.data);
+}
+
+void
+github_pr_checks(char const *owner, char const *repo, int const pr_number)
+{
+    char refname[64] = {0};
+
+    /* This is kind of a hack, but it works! */
+    snprintf(refname, sizeof refname, "refs%%2Fpull%%2F%d%%2Fhead", pr_number);
+    github_checks(owner, repo, refname, -1);
 }

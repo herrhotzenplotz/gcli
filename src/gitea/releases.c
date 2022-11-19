@@ -56,10 +56,9 @@ static void
 gitea_upload_release_asset(char *const url,
                            gcli_release_asset_upload const asset)
 {
-    char              *e_assetname  = NULL;
-    char              *request      = NULL;
-    sn_sv              file_content = {0};
-    gcli_fetch_buffer  buffer       = {0};
+    char              *e_assetname = NULL;
+    char              *request     = NULL;
+    gcli_fetch_buffer  buffer      = {0};
 
     e_assetname = gcli_urlencode(asset.name);
     request = sn_asprintf("%s?name=%s", url, e_assetname);

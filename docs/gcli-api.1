@@ -1,0 +1,36 @@
+.Dd $Mdocdate$
+.Dt GCLI-API 1
+.Os
+.Sh NAME
+.Nm gcli api
+.Nd Perform API Calls to Git Forges and retrieve results
+.Sh SYNOPSIS
+.Nm
+.Op Fl a
+.Ar path
+.Sh DESCRIPTION
+The
+.Nm
+is used to debug API calls. It will autodetect the current forge and
+perform a request to its REST API. The response is printed to stdout.
+The API base URL is automatically prepended to the given
+.Ar path .
+.Sh OPTIONS
+.Bl -tag -width "-a, --all"
+.It Fl a , -all
+Fetch all pages of data (follow the pagination link).
+.El
+.Sh EXAMPLES
+Fetch all pages of data from the issues endpoint of the gcli
+project. Dump the data into /tmp/foo and be verbose. This will print
+the queries that are performed to stderr:
+.Bd -literal -offset indent
+$ gcli -v api -a /projects/herrhotzenplotz%2Fgcli/issues >/tmp/foo
+.Ed
+.Sh SEE ALSO
+.Xr git 1 ,
+.Xr gcli 1
+.Sh AUTHORS
+.An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+.Sh BUGS
+Please report issues preferably via e-mail, on GitLab or on GitHub.

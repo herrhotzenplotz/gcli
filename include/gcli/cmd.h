@@ -58,6 +58,7 @@ void parse_labels_options(
 void delete_repo(bool always_yes, const char *owner, const char *repo);
 
 /* List of subcommand entry points */
+int subcommand_api(int argc, char *argv[]);
 int subcommand_ci(int argc, char *argv[]);
 int subcommand_comment(int argc, char *argv[]);
 int subcommand_forks(int argc, char *argv[]);

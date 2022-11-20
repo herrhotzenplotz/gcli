@@ -34,6 +34,7 @@ bin_PROGRAMS = gcli
 gcli_LDADD = libgcli.la libpdjson.la libsn.la
 
 dist_man_MANS = \
+	docs/gcli-api.1 \
 	docs/gcli-comment.1 \
 	docs/gcli-forks.1 \
 	docs/gcli-gists.1 \
@@ -50,6 +51,7 @@ dist_man_MANS = \
 gcli_SOURCES = \
 	include/gcli/cmd.h \
 	src/cmd.c \
+	src/cmd/api.c \
 	src/cmd/ci.c \
 	src/cmd/comment.c \
 	src/cmd/forks.c \

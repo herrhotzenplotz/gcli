@@ -7,44 +7,9 @@
 .Sh SYNOPSIS
 
 .Nm
-.Op common\ options
-.Cm issues Op Ar options
-.Nm
-.Op common\ options
-.Cm pulls Op Ar options
-.Nm
-.Op common\ options
-.Cm labels Op Ar options
-.Nm
-.Op common\ options
-.Cm comment Op Ar options
-.Nm
-.Op common\ options
-.Cm review Op Ar options
-.Nm
-.Op common\ options
-.Cm forks Op Ar options
-.Nm
-.Op common\ options
-.Cm repos Op Ar options
-.Nm
-.Cm gists Op Ar options
-.Nm
-.Cm snippets Op Ar options
-.Nm
-.Op common\ options
-.Cm releases Op Ar options
-.Nm
-.Op common\ options
-.Cm comment Op Ar options
-.Nm
-.Op common\ options
-.Cm pipelines Op Ar options
-.Nm
-.Cm version
-.Nm
-.Op common\ options
-.Cm status
+.Op common options
+.Cm subcommand
+.Op options
 .Sh DESCRIPTION
 .Nm
 can be used to interact with
@@ -95,6 +60,10 @@ Print a list of TODOs and/or notifications. See
 .Xr gcli-status 1 .
 .It Cm pipelines
 Inspect and manage Gitlab Pipelines.
+.It Cm api
+Perform direct queries to the API and dump the JSON response to
+stdout. This is primarily inteded to assist debugging gcli. See
+.Xr gcli-api 1 .
 .El
 .Sh OPTIONS
 Common options are:

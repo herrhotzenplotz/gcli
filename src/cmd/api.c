@@ -44,26 +44,53 @@
 static void
 usage(void)
 {
-    fprintf(stderr, "usage: gcli api <path>\n");
+    fprintf(stderr, "usage: gcli api [-a] <path>\n");
     fprintf(stderr, "OPTIONS:\n");
+    fprintf(stderr, "  -a            Fetch all pages of data\n");
     fprintf(stderr, "  path          Path to put after the API base URL\n");
     fprintf(stderr, "\n");
     version();
     copyright();
 }
 
+static void
+fetch_all(char *_url)
+{
+    char *url = NULL, *next_url = NULL;
+
+    url = _url;
+
+    do {
+        gcli_fetch_buffer buffer = {0};
+
+        gcli_fetch(url, &next_url, &buffer);
+
+        fwrite(buffer.data, buffer.length, 1, stdout);
+
+        free(buffer.data);
+
+        if (url != _url)
+            free(url);
+
+    } while ((url = next_url));
+}
+
 int
 subcommand_api(int argc, char *argv[])
 {
     char *url = NULL, *path = NULL;
-    int ch;
+    int ch, do_all = 0;
 
     struct option options[] = {
+        { .name = "all", .has_arg = no_argument, .flag = NULL, .val = 'a' },
         {0}
     };
 
-    while ((ch = getopt_long(argc, argv, "", options, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "+a", options, NULL)) != -1) {
         switch (ch) {
+        case 'a':
+            do_all = 1;
+            break;
         default:
             usage();
             return EXIT_FAILURE;
@@ -87,7 +114,10 @@ subcommand_api(int argc, char *argv[])
     else
         url = sn_asprintf("%s/%s", gcli_get_apibase(), path);
 
-    gcli_curl(stdout, url, "application/json");
+    if (do_all)
+        fetch_all(url);
+    else
+        gcli_curl(stdout, url, "application/json");
 
     free(url);
 

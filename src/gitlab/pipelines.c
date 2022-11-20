@@ -83,7 +83,7 @@ gitlab_get_mr_pipelines(char const *owner, char const *repo, int const mr_id,
 {
     char *url = NULL;
 
-    url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%ld/pipelines",
+    url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%d/pipelines",
                       gitlab_get_apibase(), owner, repo, mr_id);
 
     /* fetch everything */

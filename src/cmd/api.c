@@ -27,49 +27,15 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GCLI_CMD_H
-#define GCLI_CMD_H
+#include <gcli/cmd.h>
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <stdio.h>
+#include <stdlib.h>
 
-#include <sn/sn.h>
-
-static inline char *
-shift(int *argc, char ***argv)
+int
+subcommand_api(int argc, char *argv[])
 {
-    if (*argc == 0)
-        errx(1, "error: Not enough arguments");
+    fprintf(stderr, "info: this subcommand is not yet implemented\n");
 
-    (*argc)--;
-    return *((*argv)++);
+    return EXIT_SUCCESS;
 }
-
-void version(void);
-void copyright(void);
-void check_owner_and_repo(const char **owner, const char **repo);
-
-void parse_labels_options(
-    int *argc, char ***argv,
-    const char ***_add_labels, size_t *_add_labels_size,
-    const char ***_remove_labels, size_t *_remove_labels_size);
-
-void delete_repo(bool always_yes, const char *owner, const char *repo);
-
-/* List of subcommand entry points */
-int subcommand_api(int argc, char *argv[]);
-int subcommand_ci(int argc, char *argv[]);
-int subcommand_comment(int argc, char *argv[]);
-int subcommand_forks(int argc, char *argv[]);
-int subcommand_gists(int argc, char *argv[]);
-int subcommand_issues(int argc, char *argv[]);
-int subcommand_labels(int argc, char *argv[]);
-int subcommand_pipelines(int argc, char *argv[]);
-int subcommand_pulls(int argc, char *argv[]);
-int subcommand_releases(int argc, char *argv[]);
-int subcommand_repos(int argc, char *argv[]);
-int subcommand_snippets(int argc, char *argv[]);
-int subcommand_status(int argc, char *argv[]);
-
-#endif /* GCLI_CMD_H */

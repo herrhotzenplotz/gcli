@@ -27,15 +27,69 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <gcli/cmd.h>
+#include <gcli/curl.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
+
+static void
+usage(void)
+{
+    fprintf(stderr, "usage: gcli api <path>\n");
+    fprintf(stderr, "OPTIONS:\n");
+    fprintf(stderr, "  path          Path to put after the API base URL\n");
+    fprintf(stderr, "\n");
+    version();
+    copyright();
+}
+
 int
 subcommand_api(int argc, char *argv[])
 {
-    fprintf(stderr, "info: this subcommand is not yet implemented\n");
+    char *url = NULL, *path = NULL;
+    int ch;
+
+    struct option options[] = {
+        {0}
+    };
+
+    while ((ch = getopt_long(argc, argv, "", options, NULL)) != -1) {
+        switch (ch) {
+        default:
+            usage();
+            return EXIT_FAILURE;
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    if (argc == 1) {
+        path = shift(&argc, &argv);
+    } else {
+        if (!argc)
+            errx(1, "error: missing path");
+        else
+            errx(1, "error: too many arguments");
+    }
+
+    if (path[0] == '/')
+        url = sn_asprintf("%s%s", gcli_get_apibase(), path);
+    else
+        url = sn_asprintf("%s/%s", gcli_get_apibase(), path);
+
+    gcli_curl(stdout, url, "application/json");
+
+    free(url);
 
     return EXIT_SUCCESS;
 }

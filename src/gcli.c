@@ -98,7 +98,7 @@ static struct subcommand {
       .docstring = "General user status and notifications" },
     { .cmd_name = "api",
       .fn = subcommand_api,
-      .docstring = "Fetch plain JSON info from an API" },
+      .docstring = "Fetch plain JSON info from an API (for debugging purposes)" },
     { .cmd_name = "version",
       .fn = subcommand_version,
       .docstring = "Print version" },

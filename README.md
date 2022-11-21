@@ -28,6 +28,18 @@ Recent tarballs can be downloaded here:
 
 [https://herrhotzenplotz.de/gcli/releases/](https://herrhotzenplotz.de/gcli/releases/)
 
+Please note that the tarballs provided by Github and Gitlab will not
+work without you having autoconf and automake installed. So please
+consider using the link above.
+
+There are official packages available:
+
+- [FreeBSD](https://freshports.org/devel/gcli)
+
+Packages that are work-in-progress:
+
+- [Debian and Devuan](https://herrhotzenplotz.de/gcli/pkg/Debian)
+
 ### Dependencies
 
 Required dependencies:

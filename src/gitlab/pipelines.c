@@ -173,7 +173,8 @@ gitlab_get_pipeline_jobs(char const *owner,
 
         parse_gitlab_jobs(&stream, out, &out_size);
 
-    } while ((next_url = url) && (((int)out_size < max) || (max == -1)));
+        free(url);
+    } while ((url = next_url) && (((int)out_size < max) || (max == -1)));
 
     return (int)out_size;
 }

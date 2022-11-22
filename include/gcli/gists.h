@@ -44,40 +44,41 @@ typedef struct gcli_gist_file gcli_gist_file;
 typedef struct gcli_new_gist  gcli_new_gist;
 
 struct gcli_gist_file {
-    sn_sv  filename;
-    sn_sv  language;
-    sn_sv  url;
-    sn_sv  type;
-    size_t size;
+	sn_sv  filename;
+	sn_sv  language;
+	sn_sv  url;
+	sn_sv  type;
+	size_t size;
 };
 
 struct gcli_gist {
-    sn_sv           id;
-    sn_sv           owner;
-    sn_sv           url;
-    sn_sv           date;
-    sn_sv           git_pull_url;
-    sn_sv           description;
-    gcli_gist_file *files;
-    size_t          files_size;
+	sn_sv           id;
+	sn_sv           owner;
+	sn_sv           url;
+	sn_sv           date;
+	sn_sv           git_pull_url;
+	sn_sv           description;
+	gcli_gist_file *files;
+	size_t          files_size;
 };
 
 struct gcli_new_gist {
-    FILE       *file;
-    char const *file_name;
-    char const *gist_description;
+	FILE       *file;
+	char const *file_name;
+	char const *gist_description;
 };
 
-int        gcli_get_gists(char const *user,
-                          int const max,
-                          gcli_gist **const out);
+int gcli_get_gists(char const *user, int const max, gcli_gist **const out);
+
 gcli_gist *gcli_get_gist(char const *gist_id);
-void       gcli_print_gists(enum gcli_output_flags const flags,
-                            gcli_gist const *const gists,
-                            int const gists_size);
-void       gcli_create_gist(gcli_new_gist);
-void       gcli_delete_gist(char const *gist_id,
-                            bool const always_yes);
+
+void gcli_print_gists(enum gcli_output_flags const flags,
+                      gcli_gist const *const gists,
+                      int const gists_size);
+
+void gcli_create_gist(gcli_new_gist);
+
+void gcli_delete_gist(char const *gist_id, bool const always_yes);
 
 /**
  * NOTE(Nico): Because of idiots designing a web API, we get a list of

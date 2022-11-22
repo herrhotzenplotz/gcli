@@ -45,29 +45,29 @@ gitlab_review_get_reviews(char const *owner,
                           int const pr,
                           gcli_pr_review **const out)
 {
-    gcli_fetch_buffer  buffer   = {0};
-    json_stream        stream   = {0};
-    char              *url      = NULL;
-    char              *next_url = NULL;
-    size_t             size     = 0;
+	gcli_fetch_buffer  buffer   = {0};
+	json_stream        stream   = {0};
+	char              *url      = NULL;
+	char              *next_url = NULL;
+	size_t             size     = 0;
 
-    url = sn_asprintf(
-        "%s/projects/%s%%2F%s/merge_requests/%d/notes?sort=asc",
-        gitlab_get_apibase(), owner, repo, pr);
+	url = sn_asprintf(
+		"%s/projects/%s%%2F%s/merge_requests/%d/notes?sort=asc",
+		gitlab_get_apibase(), owner, repo, pr);
 
-    do {
-        gcli_fetch(url, &next_url, &buffer);
+	do {
+		gcli_fetch(url, &next_url, &buffer);
 
-        json_open_buffer(&stream, buffer.data, buffer.length);
+		json_open_buffer(&stream, buffer.data, buffer.length);
 
-        parse_gitlab_reviews(&stream, out, &size);
+		parse_gitlab_reviews(&stream, out, &size);
 
-        json_close(&stream);
-        free(url);
-        free(buffer.data);
-    } while ((url = next_url)); /* I hope this doesn't cause any issues */
+		json_close(&stream);
+		free(url);
+		free(buffer.data);
+	} while ((url = next_url)); /* I hope this doesn't cause any issues */
 
-    free(next_url);
+	free(next_url);
 
-    return size;
+	return size;
 }

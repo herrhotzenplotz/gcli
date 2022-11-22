@@ -32,14 +32,14 @@
 void
 objparser_dump_plain(struct objparser *p)
 {
-    fprintf(outfile,
-            "object parser: name = %s, type = %s\n",
-            p->name, p->returntype);
-    for (struct objentry *it = p->entries; it != NULL; it = it->next) {
-        fprintf(outfile,
-                "  entry: kind = %s, jsonname = %s, name = %s, type = %s, "
-                "parser = %s\n",
-                it->kind == OBJENTRY_SIMPLE ? "simple" : "array",
-                it->name, it->jsonname, it->type, it->parser);
-    }
+	fprintf(outfile,
+	        "object parser: name = %s, type = %s\n",
+	        p->name, p->returntype);
+	for (struct objentry *it = p->entries; it != NULL; it = it->next) {
+		fprintf(outfile,
+		        "  entry: kind = %s, jsonname = %s, name = %s, type = %s, "
+		        "parser = %s\n",
+		        it->kind == OBJENTRY_SIMPLE ? "simple" : "array",
+		        it->name, it->jsonname, it->type, it->parser);
+	}
 }

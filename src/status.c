@@ -33,63 +33,62 @@
 void
 gcli_status(int const count)
 {
-    gcli_notification *notifications      = NULL;
-    size_t             notifications_size = 0;
+	gcli_notification *notifications      = NULL;
+	size_t             notifications_size = 0;
 
-    notifications_size = gcli_get_notifications(&notifications, count);
+	notifications_size = gcli_get_notifications(&notifications, count);
 
-    if (count < 0) {
-        gcli_print_notifications(notifications, notifications_size);
-    } else {
-        gcli_print_notifications(
-            notifications,
-            count < (int)notifications_size
-            ? (size_t)count : notifications_size);
-    }
+	if (count < 0) {
+		gcli_print_notifications(notifications, notifications_size);
+	} else {
+		gcli_print_notifications(
+			notifications,
+			count < (int)notifications_size
+			? (size_t)count : notifications_size);
+	}
 
-    gcli_free_notifications(notifications, notifications_size);
+	gcli_free_notifications(notifications, notifications_size);
 }
 
 size_t
 gcli_get_notifications(gcli_notification **const out, int const count)
 {
-    return gcli_forge()->get_notifications(out, count);
+	return gcli_forge()->get_notifications(out, count);
 }
 
 void
 gcli_free_notifications(gcli_notification *notifications,
                         size_t const notifications_size)
 {
-    for (size_t i = 0; i < notifications_size; ++i) {
-        free(notifications[i].id);
-        free(notifications[i].title);
-        free(notifications[i].reason);
-        free(notifications[i].date);
-        free(notifications[i].type);
-        free(notifications[i].repository);
-    }
+	for (size_t i = 0; i < notifications_size; ++i) {
+		free(notifications[i].id);
+		free(notifications[i].title);
+		free(notifications[i].reason);
+		free(notifications[i].date);
+		free(notifications[i].type);
+		free(notifications[i].repository);
+	}
 
-    free(notifications);
+	free(notifications);
 }
 
 void
 gcli_print_notifications(gcli_notification const *const notifications,
                          size_t const notifications_size)
 {
-    for (size_t i = 0; i < notifications_size; ++i) {
-        printf(
-            "%s - %s - %s - %s - %s\n",
-            notifications[i].id, notifications[i].repository,
-            notifications[i].type, notifications[i].date,
-            notifications[i].reason);
+	for (size_t i = 0; i < notifications_size; ++i) {
+		printf("%s - %s - %s - %s - %s\n",
+		       notifications[i].id, notifications[i].repository,
+		       notifications[i].type, notifications[i].date,
+		       notifications[i].reason);
 
-        pretty_print(notifications[i].title, 4, 80, stdout);
-        putchar('\n');
-    }
+		pretty_print(notifications[i].title, 4, 80, stdout);
+		putchar('\n');
+	}
 }
 
 void
 gcli_notification_mark_as_read(char const *id)
 {
-    gcli_forge()->notification_mark_as_read(id);
+	gcli_forge()->notification_mark_as_read(id);
 }

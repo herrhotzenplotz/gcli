@@ -35,14 +35,14 @@
 #endif
 
 enum gcli_output_flags {
-    OUTPUT_SORTED   = (1 << 0),
-    OUTPUT_LONG     = (1 << 1),
+	OUTPUT_SORTED = (1 << 0),
+	OUTPUT_LONG   = (1 << 1),
 };
 
 typedef enum gcli_forge_type {
-    GCLI_FORGE_GITHUB,
-    GCLI_FORGE_GITLAB,
-    GCLI_FORGE_GITEA,
+	GCLI_FORGE_GITHUB,
+	GCLI_FORGE_GITLAB,
+	GCLI_FORGE_GITEA,
 } gcli_forge_type;
 
 #endif /* GCLI_H */

@@ -37,10 +37,10 @@
 #include <gcli/repos.h>
 
 int gitea_get_repos(char const *owner,
-                    int	const max,
+                    int const max,
                     gcli_repo **const out);
 
-int gitea_get_own_repos(int	const max,
+int gitea_get_own_repos(int const max,
                         gcli_repo **const out);
 
 gcli_repo *gitea_repo_create(gcli_repo_create_options const *options);

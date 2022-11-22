@@ -39,75 +39,75 @@
 static void
 usage(void)
 {
-    fprintf(stderr, "usage: gcli status -m id\n");
-    fprintf(stderr, "       gcli status [-n number]\n");
-    fprintf(stderr, "OPTIONS:\n");
-    fprintf(stderr, "  -n number       Number of messages to fetch\n");
-    fprintf(stderr, "  -m id           Mark the given message as read\n");
-    fprintf(stderr, "\n");
-    version();
-    copyright();
+	fprintf(stderr, "usage: gcli status -m id\n");
+	fprintf(stderr, "       gcli status [-n number]\n");
+	fprintf(stderr, "OPTIONS:\n");
+	fprintf(stderr, "  -n number       Number of messages to fetch\n");
+	fprintf(stderr, "  -m id           Mark the given message as read\n");
+	fprintf(stderr, "\n");
+	version();
+	copyright();
 }
 
 int
 subcommand_status(int argc, char *argv[])
 {
-    int   count  = 30;
-    int   ch     = 0;
-    char *endptr = NULL;
-    int   mark   = 0;
+	int   count  = 30;
+	int   ch     = 0;
+	char *endptr = NULL;
+	int   mark   = 0;
 
-    const struct option options[] = {
-        { .name    = "count",
-          .has_arg = required_argument,
-          .flag    = NULL,
-          .val     = 'n' },
-        { .name    = "mark",
-          .has_arg = no_argument,
-          .flag    = &mark,
-          .val     = 1 },
-        {0}
-    };
+	const struct option options[] = {
+		{ .name    = "count",
+		  .has_arg = required_argument,
+		  .flag    = NULL,
+		  .val     = 'n' },
+		{ .name    = "mark",
+		  .has_arg = no_argument,
+		  .flag    = &mark,
+		  .val     = 1 },
+		{0}
+	};
 
-    while ((ch = getopt_long(argc, argv, "n:m", options, NULL)) != -1) {
-        switch (ch) {
-        case 'n': {
-            count = strtol(optarg, &endptr, 10);
-            if (endptr != optarg + strlen(optarg))
-                err(1, "status: cannot parse parameter to -n");
-        } break;
-        case 'm': {
-            mark = 1;
-        } break;
-        default:
-            usage();
-            return EXIT_FAILURE;
-        }
-    }
+	while ((ch = getopt_long(argc, argv, "n:m", options, NULL)) != -1) {
+		switch (ch) {
+		case 'n': {
+			count = strtol(optarg, &endptr, 10);
+			if (endptr != optarg + strlen(optarg))
+				err(1, "status: cannot parse parameter to -n");
+		} break;
+		case 'm': {
+			mark = 1;
+		} break;
+		default:
+			usage();
+			return EXIT_FAILURE;
+		}
+	}
 
-    argc -= optind;
-    argv += optind;
+	argc -= optind;
+	argv += optind;
 
-    if (!mark) {
-        gcli_status(count);
-    } else {
-        if (count != 30)
-            warnx("ignoring -n/--count argument");
+	if (!mark) {
+		gcli_status(count);
+	} else {
+		if (count != 30)
+			warnx("ignoring -n/--count argument");
 
-        if (argc > 1) {
-            fprintf(stderr, "error: too many arguments for marking notifications\n");
-            usage();
-            return EXIT_FAILURE;
-        }
+		if (argc > 1) {
+			fprintf(stderr, "error: too many arguments for marking notifications\n");
+			usage();
+			return EXIT_FAILURE;
+		}
 
-        if (argc < 1) {
-            fprintf(stderr, "error: missing notification id to mark as read\n");
-            usage();
-            return EXIT_FAILURE;
-        }
+		if (argc < 1) {
+			fprintf(stderr, "error: missing notification id to mark as read\n");
+			usage();
+			return EXIT_FAILURE;
+		}
 
-        gcli_notification_mark_as_read(argv[0]);
-    }
+		gcli_notification_mark_as_read(argv[0]);
+	}
 
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }

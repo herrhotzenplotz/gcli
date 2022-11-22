@@ -38,6 +38,7 @@
 
 size_t gitlab_get_notifications(gcli_notification **const notifications,
                                 int const count);
-void   gitlab_notification_mark_as_read(char const *id);
+
+void gitlab_notification_mark_as_read(char const *id);
 
 #endif /* GITLAB_STATUS_H */

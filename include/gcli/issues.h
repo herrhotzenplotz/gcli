@@ -43,26 +43,26 @@ typedef struct gcli_issue gcli_issue;
 typedef struct gcli_submit_issue_options gcli_submit_issue_options;
 
 struct gcli_issue {
-    int     number;
-    sn_sv   title;
-    sn_sv   created_at;
-    sn_sv   author;
-    sn_sv   state;
-    int     comments;
-    bool    locked;
-    sn_sv   body;
-    sn_sv  *labels;
-    size_t  labels_size;
-    sn_sv  *assignees;
-    size_t  assignees_size;
+	int     number;
+	sn_sv   title;
+	sn_sv   created_at;
+	sn_sv   author;
+	sn_sv   state;
+	int     comments;
+	bool    locked;
+	sn_sv   body;
+	sn_sv  *labels;
+	size_t  labels_size;
+	sn_sv  *assignees;
+	size_t  assignees_size;
 };
 
 struct gcli_submit_issue_options {
-    sn_sv owner;
-    sn_sv repo;
-    sn_sv title;
-    sn_sv body;
-    bool  always_yes;
+	sn_sv owner;
+	sn_sv repo;
+	sn_sv title;
+	sn_sv body;
+	bool  always_yes;
 };
 
 int gcli_get_issues(char const *owner,

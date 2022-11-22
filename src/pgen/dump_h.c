@@ -36,66 +36,66 @@
 static int
 should_replace(char c)
 {
-    return c == '_' || c == '/' || c == '.' || c == '-';
+	return c == '_' || c == '/' || c == '.' || c == '-';
 }
 
 static char *
 get_header_name(void)
 {
-    size_t len;
-    char *result;
+	size_t len;
+	char *result;
 
-    len = strlen(outfilename);
-    result = calloc(len + 1, 1);
+	len = strlen(outfilename);
+	result = calloc(len + 1, 1);
 
-    for (size_t i = 0; i < len; ++i) {
-        if (should_replace(outfilename[i]))
-            result[i] = '_';
-        else
-            result[i] = toupper(outfilename[i]);
-    }
+	for (size_t i = 0; i < len; ++i) {
+		if (should_replace(outfilename[i]))
+			result[i] = '_';
+		else
+			result[i] = toupper(outfilename[i]);
+	}
 
-    return result;
+	return result;
 }
 
 void
 header_dump_h(void)
 {
-    char *hname = get_header_name();
+	char *hname = get_header_name();
 
-    fprintf(outfile, "#ifndef %s\n", hname);
-    fprintf(outfile, "#define %s\n\n", hname);
+	fprintf(outfile, "#ifndef %s\n", hname);
+	fprintf(outfile, "#define %s\n\n", hname);
 
-    fprintf(outfile, "#include <pdjson/pdjson.h>\n");
-    free(hname);
+	fprintf(outfile, "#include <pdjson/pdjson.h>\n");
+	free(hname);
 }
 
 void
 objparser_dump_h(struct objparser *p)
 {
-    fprintf(outfile, "void parse_%s(struct json_stream *, %s *);\n",
-            p->name, p->returntype);
+	fprintf(outfile, "void parse_%s(struct json_stream *, %s *);\n",
+	        p->name, p->returntype);
 }
 
 void
 include_dump_h(const char *file)
 {
-    fprintf(outfile, "#include <%s>\n", file);
+	fprintf(outfile, "#include <%s>\n", file);
 }
 
 void
 footer_dump_h(void)
 {
-    char *hname = get_header_name();
+	char *hname = get_header_name();
 
-    fprintf(outfile, "\n#endif /* %s */\n", hname);
+	fprintf(outfile, "\n#endif /* %s */\n", hname);
 
-    free(hname);
+	free(hname);
 }
 
 void
 arrayparser_dump_h(struct arrayparser *p)
 {
-    fprintf(outfile, "void parse_%s(struct json_stream *, %s **out, size_t *out_size);\n",
-            p->name, p->returntype);
+	fprintf(outfile, "void parse_%s(struct json_stream *, %s **out, size_t *out_size);\n",
+	        p->name, p->returntype);
 }

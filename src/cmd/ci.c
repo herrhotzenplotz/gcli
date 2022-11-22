@@ -43,82 +43,82 @@
 static void
 usage(void)
 {
-    fprintf(stderr, "usage: gcli ci [-o owner -r repo] [-n number] ref\n");
-    fprintf(stderr, "OPTIONS:\n");
-    fprintf(stderr, "  -o owner        The repository owner\n");
-    fprintf(stderr, "  -r repo         The repository name\n");
-    fprintf(stderr, "  -n number       Number of check runs to fetch (-1 = everything)\n");
-    fprintf(stderr, "\n");
-    version();
-    copyright();
+	fprintf(stderr, "usage: gcli ci [-o owner -r repo] [-n number] ref\n");
+	fprintf(stderr, "OPTIONS:\n");
+	fprintf(stderr, "  -o owner        The repository owner\n");
+	fprintf(stderr, "  -r repo         The repository name\n");
+	fprintf(stderr, "  -n number       Number of check runs to fetch (-1 = everything)\n");
+	fprintf(stderr, "\n");
+	version();
+	copyright();
 }
 
 int
 subcommand_ci(int argc, char *argv[])
 {
-    int         ch    = 0;
-    char const *owner = NULL, *repo = NULL;
-    char const *ref   = NULL;
-    int         count = -1;     /* fetch all checks by default */
+	int         ch    = 0;
+	char const *owner = NULL, *repo = NULL;
+	char const *ref   = NULL;
+	int         count = -1;     /* fetch all checks by default */
 
-    /* Parse options */
-    struct option const options[] = {
-        {.name = "repo",  .has_arg = required_argument, .flag = NULL, .val = 'r'},
-        {.name = "owner", .has_arg = required_argument, .flag = NULL, .val = 'o'},
-        {.name = "count", .has_arg = required_argument, .flag = NULL, .val = 'c'},
-        {0}
-    };
+	/* Parse options */
+	struct option const options[] = {
+		{.name = "repo",  .has_arg = required_argument, .flag = NULL, .val = 'r'},
+		{.name = "owner", .has_arg = required_argument, .flag = NULL, .val = 'o'},
+		{.name = "count", .has_arg = required_argument, .flag = NULL, .val = 'c'},
+		{0}
+	};
 
-    while ((ch = getopt_long(argc, argv, "n:o:r:", options, NULL)) != -1) {
-        switch (ch) {
-        case 'o':
-            owner = optarg;
-            break;
-        case 'r':
-            repo = optarg;
-            break;
-        case 'n': {
-            char *endptr = NULL;
-            count        = strtol(optarg, &endptr, 10);
-            if (endptr != (optarg + strlen(optarg)))
-                err(1, "ci: cannot parse argument to -n");
-        } break;
-        case '?':
-        default:
-            usage();
-            return EXIT_FAILURE;
-        }
-    }
+	while ((ch = getopt_long(argc, argv, "n:o:r:", options, NULL)) != -1) {
+		switch (ch) {
+		case 'o':
+			owner = optarg;
+			break;
+		case 'r':
+			repo = optarg;
+			break;
+		case 'n': {
+			char *endptr = NULL;
+			count = strtol(optarg, &endptr, 10);
+			if (endptr != (optarg + strlen(optarg)))
+				err(1, "ci: cannot parse argument to -n");
+		} break;
+		case '?':
+		default:
+			usage();
+			return EXIT_FAILURE;
+		}
+	}
 
-    argc -= optind;
-    argv += optind;
+	argc -= optind;
+	argv += optind;
 
-    /* Check that we have exactly one left argument and print proper
-     * error messages */
-    if (argc < 1) {
-        fprintf(stderr, "error: missing ref\n");
-        usage();
-        return EXIT_FAILURE;
-    }
+	/* Check that we have exactly one left argument and print proper
+	 * error messages */
+	if (argc < 1) {
+		fprintf(stderr, "error: missing ref\n");
+		usage();
+		return EXIT_FAILURE;
+	}
 
-    if (argc > 1) {
-        fprintf(stderr, "error: stray arguments\n");
-        usage();
-        return EXIT_FAILURE;
-    }
+	if (argc > 1) {
+		fprintf(stderr, "error: stray arguments\n");
+		usage();
+		return EXIT_FAILURE;
+	}
 
-    /* Save the ref */
-    ref = argv[0];
+	/* Save the ref */
+	ref = argv[0];
 
-    check_owner_and_repo(&owner, &repo);
+	check_owner_and_repo(&owner, &repo);
 
-    /* Make sure we are actually talking about a github remote because
-     * we might be incorrectly inferring it */
-    if (gcli_config_get_forge_type() != GCLI_FORGE_GITHUB)
-        errx(1, "error: The ci subcommand only works for GitHub. "
-             "Use gcli -t github ... to force a GitHub remote.");
+	/* Make sure we are actually talking about a github remote because
+	 * we might be incorrectly inferring it */
+	if (gcli_config_get_forge_type() != GCLI_FORGE_GITHUB)
+		errx(1, "error: The ci subcommand only works for GitHub. "
+		     "Use gcli -t github ... to force a GitHub remote.");
 
-    github_checks(owner, repo, ref, count);
+	github_checks(owner, repo, ref, count);
 
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }

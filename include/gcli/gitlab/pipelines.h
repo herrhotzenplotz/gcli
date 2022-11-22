@@ -38,27 +38,27 @@ typedef struct gitlab_pipeline gitlab_pipeline;
 typedef struct gitlab_job      gitlab_job;
 
 struct gitlab_pipeline {
-    long  id;
-    char *status;
-    char *created_at;
-    char *updated_at;
-    char *ref;
-    char *sha;
-    char *source;
+	long  id;
+	char *status;
+	char *created_at;
+	char *updated_at;
+	char *ref;
+	char *sha;
+	char *source;
 };
 
 struct gitlab_job {
-    long    id;
-    char   *status;
-    char   *stage;
-    char   *name;
-    char   *ref;
-    char   *created_at;
-    char   *started_at;
-    char   *finished_at;
-    double  duration;
-    char   *runner_name;
-    char   *runner_description;
+	long    id;
+	char   *status;
+	char   *stage;
+	char   *name;
+	char   *ref;
+	char   *created_at;
+	char   *started_at;
+	char   *finished_at;
+	double  duration;
+	char   *runner_name;
+	char   *runner_description;
 };
 
 int gitlab_get_pipelines(char const *owner,

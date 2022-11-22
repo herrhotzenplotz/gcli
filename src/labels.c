@@ -37,46 +37,46 @@ gcli_get_labels(char const *owner,
                 int const max,
                 gcli_label **const out)
 {
-    return gcli_forge()->get_labels(owner, reponame, max, out);
+	return gcli_forge()->get_labels(owner, reponame, max, out);
 }
 
 void
 gcli_free_label(gcli_label *const label)
 {
-    free(label->name);
-    free(label->description);
+	free(label->name);
+	free(label->description);
 }
 
 void
 gcli_free_labels(gcli_label *labels, size_t const labels_size)
 {
-    for (size_t i = 0; i < labels_size; ++i)
-        gcli_free_label(&labels[i]);
-    free(labels);
+	for (size_t i = 0; i < labels_size; ++i)
+		gcli_free_label(&labels[i]);
+	free(labels);
 }
 
 void
 gcli_print_labels(gcli_label const *const labels, size_t const labels_size)
 {
-    printf("%10.10s %-15.15s %s\n", "ID", "NAME", "DESCRIPTION");
+	printf("%10.10s %-15.15s %s\n", "ID", "NAME", "DESCRIPTION");
 
-    for (size_t i = 0; i < labels_size; ++i) {
-        printf(
-            "%10.10ld %s%-15.15s%s %s\n",
-            labels[i].id,
-            gcli_setcolor256(labels[i].color), labels[i].name, gcli_resetcolor(),
-            labels[i].description);
-    }
+	for (size_t i = 0; i < labels_size; ++i) {
+		printf(
+			"%10.10ld %s%-15.15s%s %s\n",
+			labels[i].id,
+			gcli_setcolor256(labels[i].color), labels[i].name, gcli_resetcolor(),
+			labels[i].description);
+	}
 }
 
 void
 gcli_create_label(char const *owner, char const *repo, gcli_label *const label)
 {
-    gcli_forge()->create_label(owner, repo, label);
+	gcli_forge()->create_label(owner, repo, label);
 }
 
 void
 gcli_delete_label(char const *owner, char const *repo, char const *const label)
 {
-    gcli_forge()->delete_label(owner, repo, label);
+	gcli_forge()->delete_label(owner, repo, label);
 }

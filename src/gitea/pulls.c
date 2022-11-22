@@ -38,7 +38,7 @@ gitea_get_pulls(char const *owner,
                 int const max,
                 gcli_pull **const out)
 {
-    return github_get_prs(owner, repo, all, max, out);
+	return github_get_prs(owner, repo, all, max, out);
 }
 
 void
@@ -47,7 +47,7 @@ gitea_get_pull_summary(char const *owner,
                        int const pr_number,
                        gcli_pull_summary *const out)
 {
-    github_get_pull_summary(owner, repo, pr_number, out);
+	github_get_pull_summary(owner, repo, pr_number, out);
 }
 
 int
@@ -56,15 +56,15 @@ gitea_get_pull_commits(char const *owner,
                        int const pr_number,
                        gcli_commit **const out)
 {
-    return github_get_pull_commits(owner, repo, pr_number, out);
+	return github_get_pull_commits(owner, repo, pr_number, out);
 }
 
 void
 gitea_pull_submit(gcli_submit_pull_options opts)
 {
-    warnx("In case the following process errors out, see: "
-          "https://github.com/go-gitea/gitea/issues/20175");
-    github_perform_submit_pr(opts);
+	warnx("In case the following process errors out, see: "
+	      "https://github.com/go-gitea/gitea/issues/20175");
+	github_perform_submit_pr(opts);
 }
 
 void
@@ -73,25 +73,25 @@ gitea_pull_merge(char const *owner,
                  int const pr_number,
                  bool const squash)
 {
-    char              *url     = NULL;
-    char              *e_owner = NULL;
-    char              *e_repo  = NULL;
-    char              *data    = NULL;
-    gcli_fetch_buffer  buffer  = {0};
+	char              *url     = NULL;
+	char              *e_owner = NULL;
+	char              *e_repo  = NULL;
+	char              *data    = NULL;
+	gcli_fetch_buffer  buffer  = {0};
 
-    e_owner = gcli_urlencode(owner);
-    e_repo  = gcli_urlencode(repo);
-    url     = sn_asprintf("%s/repos/%s/%s/pulls/%d/merge",
-                          gcli_get_apibase(), e_owner, e_repo, pr_number);
-    data    = sn_asprintf("{ \"Do\": \"%s\" }", squash ? "squash" : "merge");
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
+	url     = sn_asprintf("%s/repos/%s/%s/pulls/%d/merge",
+	                      gcli_get_apibase(), e_owner, e_repo, pr_number);
+	data    = sn_asprintf("{ \"Do\": \"%s\" }", squash ? "squash" : "merge");
 
-    gcli_fetch_with_method("POST", url, data, NULL, &buffer);
+	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
 
-    free(url);
-    free(e_owner);
-    free(e_repo);
-    free(data);
-    free(buffer.data);
+	free(url);
+	free(e_owner);
+	free(e_repo);
+	free(data);
+	free(buffer.data);
 }
 
 static void
@@ -100,29 +100,29 @@ gitea_pulls_patch_state(char const *owner,
                         int const pr_number,
                         char const *state)
 {
-    gcli_fetch_buffer  json_buffer = {0};
-    char              *url         = NULL;
-    char              *data        = NULL;
-    char              *e_owner     = NULL;
-    char              *e_repo      = NULL;
+	gcli_fetch_buffer  json_buffer = {0};
+	char              *url         = NULL;
+	char              *data        = NULL;
+	char              *e_owner     = NULL;
+	char              *e_repo      = NULL;
 
-    e_owner = gcli_urlencode(owner);
-    e_repo  = gcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
-    url = sn_asprintf(
-        "%s/repos/%s/%s/pulls/%d",
-        gcli_get_apibase(),
-        e_owner, e_repo,
-        pr_number);
-    data = sn_asprintf("{ \"state\": \"%s\"}", state);
+	url = sn_asprintf(
+		"%s/repos/%s/%s/pulls/%d",
+		gcli_get_apibase(),
+		e_owner, e_repo,
+		pr_number);
+	data = sn_asprintf("{ \"state\": \"%s\"}", state);
 
-    gcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
+	gcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
 
-    free(data);
-    free(url);
-    free(e_owner);
-    free(e_repo);
-    free(json_buffer.data);
+	free(data);
+	free(url);
+	free(e_owner);
+	free(e_repo);
+	free(json_buffer.data);
 }
 
 void
@@ -130,7 +130,7 @@ gitea_pull_close(char const *owner,
                  char const *repo,
                  int const pr_number)
 {
-    gitea_pulls_patch_state(owner, repo, pr_number, "closed");
+	gitea_pulls_patch_state(owner, repo, pr_number, "closed");
 }
 
 void
@@ -138,7 +138,7 @@ gitea_pull_reopen(char const *owner,
                   char const *repo,
                   int const pr_number)
 {
-    gitea_pulls_patch_state(owner, repo, pr_number, "open");
+	gitea_pulls_patch_state(owner, repo, pr_number, "open");
 }
 
 void
@@ -147,22 +147,22 @@ gitea_print_pr_diff(FILE *const stream,
                     char const *repo,
                     int const pr_number)
 {
-    char *url     = NULL;
-    char *e_owner = NULL;
-    char *e_repo  = NULL;
+	char *url     = NULL;
+	char *e_owner = NULL;
+	char *e_repo  = NULL;
 
-    e_owner = gcli_urlencode(owner);
-    e_repo  = gcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
-    url = sn_asprintf(
-        "%s/repos/%s/%s/pulls/%d.patch",
-        gcli_get_apibase(),
-        e_owner, e_repo, pr_number);
-    gcli_curl(stream, url, NULL);
+	url = sn_asprintf(
+		"%s/repos/%s/%s/pulls/%d.patch",
+		gcli_get_apibase(),
+		e_owner, e_repo, pr_number);
+	gcli_curl(stream, url, NULL);
 
-    free(e_owner);
-    free(e_repo);
-    free(url);
+	free(e_owner);
+	free(e_repo);
+	free(url);
 }
 
 void
@@ -170,9 +170,9 @@ gitea_pull_checks(char const *owner,
                   char const *repo,
                   int const pr_number)
 {
-    (void) owner;
-    (void) repo;
-    (void) pr_number;
+	(void) owner;
+	(void) repo;
+	(void) pr_number;
 
-    warnx("PR checks are not available on Gitea");
+	warnx("PR checks are not available on Gitea");
 }

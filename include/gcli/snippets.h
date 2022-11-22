@@ -39,13 +39,13 @@
 typedef struct gcli_snippet gcli_snippet;
 
 struct gcli_snippet {
-    int   id;
-    char *title;
-    char *filename;
-    char *date;
-    char *author;
-    char *visibility;
-    char *raw_url;
+	int   id;
+	char *title;
+	char *filename;
+	char *date;
+	char *author;
+	char *visibility;
+	char *raw_url;
 };
 
 void gcli_snippets_free(gcli_snippet *list, int const list_size);

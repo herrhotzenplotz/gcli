@@ -37,20 +37,24 @@
 #include <stdlib.h>
 
 struct gcli_notification {
-    char *id;
-    char *title;
-    char *reason;
-    char *date;
-    char *type;
-    char *repository;
+	char *id;
+	char *title;
+	char *reason;
+	char *date;
+	char *type;
+	char *repository;
 };
 
 typedef struct gcli_notification gcli_notification;
 
-void   gcli_status(int const count);
+void gcli_status(int const count);
+
 size_t gcli_get_notifications(gcli_notification **const out, int const count);
-void   gcli_notification_mark_as_read(const char *id);
-void   gcli_free_notifications(gcli_notification *, size_t);
-void   gcli_print_notifications(gcli_notification const *const, size_t const);
+
+void gcli_notification_mark_as_read(const char *id);
+
+void gcli_free_notifications(gcli_notification *, size_t);
+
+void gcli_print_notifications(gcli_notification const *const, size_t const);
 
 #endif /* STATUS_H */

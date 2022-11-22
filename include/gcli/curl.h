@@ -43,36 +43,35 @@
 typedef struct gcli_fetch_buffer gcli_fetch_buffer;
 
 struct gcli_fetch_buffer {
-    char   *data;
-    size_t  length;
+	char   *data;
+	size_t  length;
 };
 
-void gcli_fetch(
-    char const        *url,
-    char **const       pagination_next,
-    gcli_fetch_buffer *out);
-void gcli_curl(
-    FILE       *stream,
-    char const *url,
-    char const *content_type);
-void gcli_fetch_with_method(
-    char const               *method,
-    char const               *url,
-    char const               *data,
-    char **const              pagination_next,
-    gcli_fetch_buffer *const  out);
-void gcli_post_upload(
-    char const        *url,
-    char const        *content_type,
-    void              *buffer,
-    size_t             buffer_size,
-    gcli_fetch_buffer *out);
-void gcli_curl_gitea_upload_attachment(
-    char const               *url,
-    char const               *filename,
-    gcli_fetch_buffer *const  out);
-bool gcli_curl_test_success(
-    char const *url);
+void gcli_fetch(char const *url,
+                char **const pagination_next,
+                gcli_fetch_buffer *out);
+
+void gcli_curl(FILE *stream,
+               char const *url,
+               char const *content_type);
+
+void gcli_fetch_with_method(char const *method,
+                            char const *url,
+                            char const *data,
+                            char **const pagination_next,
+                            gcli_fetch_buffer *const out);
+
+void gcli_post_upload(char const *url,
+                      char const *content_type,
+                      void *buffer,
+                      size_t buffer_size,
+                      gcli_fetch_buffer *out);
+
+void gcli_curl_gitea_upload_attachment(char const *url,
+                                       char const *filename,
+                                       gcli_fetch_buffer *const out);
+
+bool gcli_curl_test_success(char const *url);
 char *gcli_urlencode(char const *);
 sn_sv gcli_urlencode_sv(sn_sv const);
 char *gcli_urldecode(char const *input);

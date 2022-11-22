@@ -38,19 +38,19 @@ gcli_get_forks(char const *owner,
                int const max,
                gcli_fork **const out)
 {
-    return gcli_forge()->get_forks(owner, repo, max, out);
+	return gcli_forge()->get_forks(owner, repo, max, out);
 }
 
 static void
 gcli_print_fork(enum gcli_output_flags const flags, gcli_fork const *const fork)
 {
-    (void) flags;
+	(void) flags;
 
-    printf("%s%-20.20s%s  %-20.20s  %5d  %s\n",
-           gcli_setbold(), fork->owner.data, gcli_resetbold(),
-           fork->date.data,
-           fork->forks,
-           fork->full_name.data);
+	printf("%s%-20.20s%s  %-20.20s  %5d  %s\n",
+	       gcli_setbold(), fork->owner.data, gcli_resetbold(),
+	       fork->date.data,
+	       fork->forks,
+	       fork->full_name.data);
 }
 
 void
@@ -58,24 +58,24 @@ gcli_print_forks(enum gcli_output_flags const flags,
                  gcli_fork const *const forks,
                  size_t const forks_size)
 {
-    if (forks_size == 0) {
-        puts("No forks");
-        return;
-    }
+	if (forks_size == 0) {
+		puts("No forks");
+		return;
+	}
 
-    printf("%-20.20s  %-20.20s  %-5.5s  %s\n",
-           "OWNER", "DATE", "FORKS", "FULLNAME");
+	printf("%-20.20s  %-20.20s  %-5.5s  %s\n",
+	       "OWNER", "DATE", "FORKS", "FULLNAME");
 
-    if (flags & OUTPUT_SORTED)
-        for (size_t i = forks_size; i > 0; --i)
-            gcli_print_fork(flags, &forks[i-1]);
-    else
-        for (size_t i = 0; i < forks_size; ++i)
-            gcli_print_fork(flags, &forks[i]);
+	if (flags & OUTPUT_SORTED)
+		for (size_t i = forks_size; i > 0; --i)
+			gcli_print_fork(flags, &forks[i-1]);
+	else
+		for (size_t i = 0; i < forks_size; ++i)
+			gcli_print_fork(flags, &forks[i]);
 }
 
 void
 gcli_fork_create(char const *owner, char const *repo, char const *_in)
 {
-    gcli_forge()->fork_create(owner, repo, _in);
+	gcli_forge()->fork_create(owner, repo, _in);
 }

@@ -18,29 +18,29 @@ extern char *outfilename;
 struct strlit { char *text; };
 struct ident { char *text; };
 struct objentry {
-    enum { OBJENTRY_SIMPLE, OBJENTRY_ARRAY, OBJENTRY_CONTINUATION } kind; /* either a simple field or an array */
-    char            *jsonname;
-    char			*name;
-    char			*type;
-    char			*parser;
-    struct objentry *next; /* linked list */
+	enum { OBJENTRY_SIMPLE, OBJENTRY_ARRAY, OBJENTRY_CONTINUATION } kind; /* either a simple field or an array */
+	char            *jsonname;
+	char            *name;
+	char            *type;
+	char            *parser;
+	struct objentry *next;      /* linked list */
 };
 
 struct objparser {
-    enum { OBJPARSER_ENTRIES, OBJPARSER_SELECT } kind;
-    char            *name;
-    char            *returntype;
-    struct objentry *entries;
-    struct {
-        char *fieldtype;
-        char *fieldname;
-    } select;
+	enum { OBJPARSER_ENTRIES, OBJPARSER_SELECT } kind;
+	char            *name;
+	char            *returntype;
+	struct objentry *entries;
+	struct {
+		char *fieldtype;
+		char *fieldname;
+	} select;
 };
 
 struct arrayparser {
-    char *name;
-    char *returntype;
-    char *parser;
+	char *name;
+	char *returntype;
+	char *parser;
 };
 
 void yyerror(const char *message);

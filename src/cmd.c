@@ -40,29 +40,29 @@
 void
 copyright(void)
 {
-    fprintf(
-        stderr,
-        "Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>"
-        " and contributors.\n");
+	fprintf(
+		stderr,
+		"Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>"
+		" and contributors.\n");
 }
 
 void
 version(void)
 {
-    fprintf(stderr,
-            PACKAGE_STRING"\n"
-            "Report bugs at "PACKAGE_URL".\n");
+	fprintf(stderr,
+	        PACKAGE_STRING"\n"
+	        "Report bugs at "PACKAGE_URL".\n");
 }
 
 void
 check_owner_and_repo(const char **owner, const char **repo)
 {
-    /* If no remote was specified, try to autodetect */
-    if ((*owner == NULL) != (*repo == NULL))
-        errx(1, "error: missing either explicit owner or repo");
+	/* If no remote was specified, try to autodetect */
+	if ((*owner == NULL) != (*repo == NULL))
+		errx(1, "error: missing either explicit owner or repo");
 
-    if (*owner == NULL)
-        gcli_config_get_repo(owner, repo);
+	if (*owner == NULL)
+		gcli_config_get_repo(owner, repo);
 }
 
 /* Parses (and updates) the given argument list into two seperate lists:
@@ -75,53 +75,53 @@ parse_labels_options(int *argc, char ***argv,
                      const char ***_add_labels,    size_t *_add_labels_size,
                      const char ***_remove_labels, size_t *_remove_labels_size)
 {
-    const char **add_labels = NULL, **remove_labels = NULL;
-    size_t       add_labels_size = 0, remove_labels_size = 0;
+	const char **add_labels = NULL, **remove_labels = NULL;
+	size_t       add_labels_size = 0, remove_labels_size = 0;
 
-    /* Collect add/delete labels */
-    while (*argc > 0) {
-        if (strcmp(**argv, "--add") == 0) {
-            shift(argc, argv);
+	/* Collect add/delete labels */
+	while (*argc > 0) {
+		if (strcmp(**argv, "--add") == 0) {
+			shift(argc, argv);
 
-            add_labels = realloc(
-                add_labels,
-                (add_labels_size + 1) * sizeof(*add_labels));
-            add_labels[add_labels_size++] = shift(argc, argv);
-        } else if (strcmp(**argv, "--remove") == 0) {
-            shift(argc, argv);
+			add_labels = realloc(
+				add_labels,
+				(add_labels_size + 1) * sizeof(*add_labels));
+			add_labels[add_labels_size++] = shift(argc, argv);
+		} else if (strcmp(**argv, "--remove") == 0) {
+			shift(argc, argv);
 
-            remove_labels = realloc(
-                remove_labels,
-                (remove_labels_size + 1) * sizeof(*remove_labels));
-            remove_labels[remove_labels_size++] = shift(argc, argv);
-        } else {
-            break;
-        }
-    }
+			remove_labels = realloc(
+				remove_labels,
+				(remove_labels_size + 1) * sizeof(*remove_labels));
+			remove_labels[remove_labels_size++] = shift(argc, argv);
+		} else {
+			break;
+		}
+	}
 
-    *_add_labels      = add_labels;
-    *_add_labels_size = add_labels_size;
+	*_add_labels      = add_labels;
+	*_add_labels_size = add_labels_size;
 
-    *_remove_labels      = remove_labels;
-    *_remove_labels_size = remove_labels_size;
+	*_remove_labels      = remove_labels;
+	*_remove_labels_size = remove_labels_size;
 }
 
 /* delete the repo (and ask for confirmation) */
 void
 delete_repo(bool always_yes, const char *owner, const char *repo)
 {
-    bool delete = false;
+	bool delete = false;
 
-    if (!always_yes) {
-        delete = sn_yesno(
-            "Are you sure you want to delete %s/%s?",
-            owner, repo);
-    } else {
-        delete = true;
-    }
+	if (!always_yes) {
+		delete = sn_yesno(
+			"Are you sure you want to delete %s/%s?",
+			owner, repo);
+	} else {
+		delete = true;
+	}
 
-    if (delete)
-        gcli_repo_delete(owner, repo);
-    else
-        errx(1, "Operation aborted");
+	if (delete)
+		gcli_repo_delete(owner, repo);
+	else
+		errx(1, "Operation aborted");
 }

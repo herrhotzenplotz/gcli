@@ -41,87 +41,87 @@ gitlab_get_labels(char const *owner,
                   int const max,
                   gcli_label **const out)
 {
-    size_t              out_size = 0;
-    char               *url      = NULL;
-    char               *next_url = NULL;
-    gcli_fetch_buffer   buffer   = {0};
-    struct json_stream  stream   = {0};
+	size_t              out_size = 0;
+	char               *url      = NULL;
+	char               *next_url = NULL;
+	gcli_fetch_buffer   buffer   = {0};
+	struct json_stream  stream   = {0};
 
-    *out = NULL;
+	*out = NULL;
 
-    url = sn_asprintf("%s/projects/%s%%2F%s/labels",
-                      gitlab_get_apibase(), owner, repo);
+	url = sn_asprintf("%s/projects/%s%%2F%s/labels",
+	                  gitlab_get_apibase(), owner, repo);
 
-    do {
-        gcli_fetch(url, &next_url, &buffer);
+	do {
+		gcli_fetch(url, &next_url, &buffer);
 
-        json_open_buffer(&stream, buffer.data, buffer.length);
+		json_open_buffer(&stream, buffer.data, buffer.length);
 
-        parse_gitlab_labels(&stream, out, &out_size);
+		parse_gitlab_labels(&stream, out, &out_size);
 
-        free(buffer.data);
-        free(url);
-        json_close(&stream);
-    } while ((url = next_url) && (max == -1 || (int)out_size < max));
+		free(buffer.data);
+		free(url);
+		json_close(&stream);
+	} while ((url = next_url) && (max == -1 || (int)out_size < max));
 
-    return out_size;
+	return out_size;
 }
 
 void
 gitlab_create_label(char const *owner, char const *repo, gcli_label *const label)
 {
-    char               *url           = NULL;
-    char               *data          = NULL;
-    char               *colour_string = NULL;
-    sn_sv               lname_escaped = SV_NULL;
-    sn_sv               ldesc_escaped = SV_NULL;
-    gcli_fetch_buffer   buffer        = {0};
-    struct json_stream  stream        = {0};
+	char               *url           = NULL;
+	char               *data          = NULL;
+	char               *colour_string = NULL;
+	sn_sv               lname_escaped = SV_NULL;
+	sn_sv               ldesc_escaped = SV_NULL;
+	gcli_fetch_buffer   buffer        = {0};
+	struct json_stream  stream        = {0};
 
-    url = sn_asprintf("%s/projects/%s%%2F%s/labels",
-                      gitlab_get_apibase(),
-                      owner, repo);
-    lname_escaped = gcli_json_escape(SV(label->name));
-    ldesc_escaped = gcli_json_escape(SV(label->description));
-    colour_string = sn_asprintf("%06X", (label->color>>8)&0xFFFFFF);
-    data = sn_asprintf(
-        "{\"name\": \""SV_FMT"\","
-        "\"color\":\"#%s\","
-        "\"description\":\""SV_FMT"\"}",
-        SV_ARGS(lname_escaped),
-        colour_string,
-        SV_ARGS(ldesc_escaped));
+	url = sn_asprintf("%s/projects/%s%%2F%s/labels",
+	                  gitlab_get_apibase(),
+	                  owner, repo);
+	lname_escaped = gcli_json_escape(SV(label->name));
+	ldesc_escaped = gcli_json_escape(SV(label->description));
+	colour_string = sn_asprintf("%06X", (label->color>>8)&0xFFFFFF);
+	data = sn_asprintf(
+		"{\"name\": \""SV_FMT"\","
+		"\"color\":\"#%s\","
+		"\"description\":\""SV_FMT"\"}",
+		SV_ARGS(lname_escaped),
+		colour_string,
+		SV_ARGS(ldesc_escaped));
 
-    gcli_fetch_with_method("POST", url, data, NULL, &buffer);
+	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
 
-    json_open_buffer(&stream, buffer.data, buffer.length);
-    json_set_streaming(&stream, 1);
+	json_open_buffer(&stream, buffer.data, buffer.length);
+	json_set_streaming(&stream, 1);
 
-    parse_gitlab_label(&stream, label);
+	parse_gitlab_label(&stream, label);
 
-    json_close(&stream);
-    free(lname_escaped.data);
-    free(ldesc_escaped.data);
-    free(colour_string);
-    free(data);
-    free(url);
-    free(buffer.data);
+	json_close(&stream);
+	free(lname_escaped.data);
+	free(ldesc_escaped.data);
+	free(colour_string);
+	free(data);
+	free(url);
+	free(buffer.data);
 }
 
 void
 gitlab_delete_label(char const *owner, char const *repo, char const *label)
 {
-    char              *url     = NULL;
-    char              *e_label = NULL;
-    gcli_fetch_buffer  buffer  = {0};
+	char              *url     = NULL;
+	char              *e_label = NULL;
+	gcli_fetch_buffer  buffer  = {0};
 
-    e_label = gcli_urlencode(label);
-    url     = sn_asprintf("%s/projects/%s%%2F%s/labels/%s",
-                          gitlab_get_apibase(),
-                          owner, repo, e_label);
+	e_label = gcli_urlencode(label);
+	url = sn_asprintf("%s/projects/%s%%2F%s/labels/%s",
+	                  gitlab_get_apibase(),
+	                  owner, repo, e_label);
 
-    gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
-    free(url);
-    free(buffer.data);
-    free(e_label);
+	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	free(url);
+	free(buffer.data);
+	free(e_label);
 }

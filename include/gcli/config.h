@@ -38,16 +38,16 @@
 #include <gcli/gcli.h>
 
 int gcli_config_init(
-    int    *argc,
-    char ***argv);
+	int    *argc,
+	char ***argv);
 
 void gcli_config_get_upstream_parts(
-    sn_sv *const owner,
-    sn_sv *const repo);
+	sn_sv *const owner,
+	sn_sv *const repo);
 
 sn_sv gcli_config_find_by_key(
-    sn_sv const  section_name,
-    char const  *key);
+	sn_sv const  section_name,
+	char const  *key);
 
 char            *gcli_config_get_editor(void);
 char            *gcli_config_get_authheader(void);

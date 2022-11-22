@@ -39,11 +39,11 @@
 static inline char *
 shift(int *argc, char ***argv)
 {
-    if (*argc == 0)
-        errx(1, "error: Not enough arguments");
+	if (*argc == 0)
+		errx(1, "error: Not enough arguments");
 
-    (*argc)--;
-    return *((*argv)++);
+	(*argc)--;
+	return *((*argv)++);
 }
 
 void version(void);
@@ -51,9 +51,9 @@ void copyright(void);
 void check_owner_and_repo(const char **owner, const char **repo);
 
 void parse_labels_options(
-    int *argc, char ***argv,
-    const char ***_add_labels, size_t *_add_labels_size,
-    const char ***_remove_labels, size_t *_remove_labels_size);
+	int *argc, char ***argv,
+	const char ***_add_labels, size_t *_add_labels_size,
+	const char ***_remove_labels, size_t *_remove_labels_size);
 
 void delete_repo(bool always_yes, const char *owner, const char *repo);
 

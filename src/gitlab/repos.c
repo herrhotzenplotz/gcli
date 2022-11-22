@@ -41,31 +41,31 @@ gitlab_get_repo(sn_sv owner,
                 sn_sv repo,
                 gcli_repo *const out)
 {
-    /* GET /projects/:id */
-    char              *url     = NULL;
-    gcli_fetch_buffer  buffer  = {0};
-    json_stream        stream  = {0};
-    sn_sv              e_owner = {0};
-    sn_sv              e_repo  = {0};
+	/* GET /projects/:id */
+	char              *url     = NULL;
+	gcli_fetch_buffer  buffer  = {0};
+	json_stream        stream  = {0};
+	sn_sv              e_owner = {0};
+	sn_sv              e_repo  = {0};
 
-    e_owner = gcli_urlencode_sv(owner);
-    e_repo  = gcli_urlencode_sv(repo);
+	e_owner = gcli_urlencode_sv(owner);
+	e_repo  = gcli_urlencode_sv(repo);
 
-    url = sn_asprintf(
-        "%s/projects/"SV_FMT"%%2F"SV_FMT,
-        gitlab_get_apibase(),
-        SV_ARGS(e_owner), SV_ARGS(e_repo));
+	url = sn_asprintf(
+		"%s/projects/"SV_FMT"%%2F"SV_FMT,
+		gitlab_get_apibase(),
+		SV_ARGS(e_owner), SV_ARGS(e_repo));
 
-    gcli_fetch(url, NULL, &buffer);
-    json_open_buffer(&stream, buffer.data, buffer.length);
+	gcli_fetch(url, NULL, &buffer);
+	json_open_buffer(&stream, buffer.data, buffer.length);
 
-    parse_gitlab_repo(&stream, out);
+	parse_gitlab_repo(&stream, out);
 
-    json_close(&stream);
-    free(buffer.data);
-    free(e_owner.data);
-    free(e_repo.data);
-    free(url);
+	json_close(&stream);
+	free(buffer.data);
+	free(e_owner.data);
+	free(e_repo.data);
+	free(url);
 }
 
 int
@@ -73,109 +73,109 @@ gitlab_get_repos(char const *owner,
                  int const max,
                  gcli_repo **const out)
 {
-    char              *url      = NULL;
-    char              *next_url = NULL;
-    char              *e_owner  = NULL;
-    gcli_fetch_buffer  buffer   = {0};
-    json_stream        stream   = {0};
-    size_t             size     = 0;
+	char              *url      = NULL;
+	char              *next_url = NULL;
+	char              *e_owner  = NULL;
+	gcli_fetch_buffer  buffer   = {0};
+	json_stream        stream   = {0};
+	size_t             size     = 0;
 
-    e_owner = gcli_urlencode(owner);
+	e_owner = gcli_urlencode(owner);
 
-    url = sn_asprintf("%s/users/%s/projects", gitlab_get_apibase(), e_owner);
+	url = sn_asprintf("%s/users/%s/projects", gitlab_get_apibase(), e_owner);
 
-    do {
-        gcli_fetch(url, &next_url, &buffer);
+	do {
+		gcli_fetch(url, &next_url, &buffer);
 
-        json_open_buffer(&stream, buffer.data, buffer.length);
+		json_open_buffer(&stream, buffer.data, buffer.length);
 
-        parse_gitlab_repos(&stream, out, &size);
+		parse_gitlab_repos(&stream, out, &size);
 
-        free(url);
-        free(buffer.data);
-        json_close(&stream);
-    } while ((url = next_url) && (max == -1 || (int)size < max));
+		free(url);
+		free(buffer.data);
+		json_close(&stream);
+	} while ((url = next_url) && (max == -1 || (int)size < max));
 
-    free(url);
-    free(e_owner);
+	free(url);
+	free(e_owner);
 
-    return size;
+	return size;
 }
 
 int
 gitlab_get_own_repos(int const max, gcli_repo **const out)
 {
-    char  *_account = NULL;
-    sn_sv  account  = {0};
-    int    n;
+	char  *_account = NULL;
+	sn_sv  account  = {0};
+	int    n;
 
-    account = gitlab_get_account();
-    if (!account.length)
-        errx(1, "error: gitlab.account is not set");
+	account = gitlab_get_account();
+	if (!account.length)
+		errx(1, "error: gitlab.account is not set");
 
-    _account = sn_sv_to_cstr(account);
+	_account = sn_sv_to_cstr(account);
 
-    n = gitlab_get_repos(_account, max, out);
+	n = gitlab_get_repos(_account, max, out);
 
-    free(_account);
+	free(_account);
 
-    return n;
+	return n;
 }
 
 void
 gitlab_repo_delete(char const *owner, char const *repo)
 {
-    char              *url     = NULL;
-    char              *e_owner = NULL;
-    char              *e_repo  = NULL;
-    gcli_fetch_buffer  buffer  = {0};
+	char              *url     = NULL;
+	char              *e_owner = NULL;
+	char              *e_repo  = NULL;
+	gcli_fetch_buffer  buffer  = {0};
 
-    e_owner = gcli_urlencode(owner);
-    e_repo  = gcli_urlencode(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
-    url = sn_asprintf("%s/projects/%s%%2F%s",
-                      gitlab_get_apibase(),
-                      e_owner, e_repo);
+	url = sn_asprintf("%s/projects/%s%%2F%s",
+	                  gitlab_get_apibase(),
+	                  e_owner, e_repo);
 
-    gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
-    free(buffer.data);
-    free(url);
-    free(e_owner);
-    free(e_repo);
+	free(buffer.data);
+	free(url);
+	free(e_owner);
+	free(e_repo);
 }
 
 gcli_repo *
 gitlab_repo_create(gcli_repo_create_options const *options) /* Options descriptor */
 {
-    gcli_repo         *repo;
-    char              *url, *data;
-    gcli_fetch_buffer  buffer = {0};
-    json_stream        stream = {0};
+	gcli_repo         *repo;
+	char              *url, *data;
+	gcli_fetch_buffer  buffer = {0};
+	json_stream        stream = {0};
 
-    /* Will be freed by the caller with gcli_repos_free */
-    repo = calloc(1, sizeof(gcli_repo));
+	/* Will be freed by the caller with gcli_repos_free */
+	repo = calloc(1, sizeof(gcli_repo));
 
-    /* Request preparation */
-    url = sn_asprintf("%s/projects", gitlab_get_apibase());
-    /* TODO: escape the repo name and the description */
-    data = sn_asprintf("{\"name\": \""SV_FMT"\","
-                       " \"description\": \""SV_FMT"\","
-                       " \"visibility\": \"%s\" }",
-                       SV_ARGS(options->name),
-                       SV_ARGS(options->description),
-                       options->private ? "private" : "public");
+	/* Request preparation */
+	url = sn_asprintf("%s/projects", gitlab_get_apibase());
+	/* TODO: escape the repo name and the description */
+	data = sn_asprintf("{\"name\": \""SV_FMT"\","
+	                   " \"description\": \""SV_FMT"\","
+	                   " \"visibility\": \"%s\" }",
+	                   SV_ARGS(options->name),
+	                   SV_ARGS(options->description),
+	                   options->private ? "private" : "public");
 
-    /* Fetch and parse result */
-    gcli_fetch_with_method("POST", url, data, NULL, &buffer);
-    json_open_buffer(&stream, buffer.data, buffer.length);
-    parse_gitlab_repo(&stream, repo);
+	/* Fetch and parse result */
+	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
+	json_open_buffer(&stream, buffer.data, buffer.length);
+	parse_gitlab_repo(&stream, repo);
 
-    /* Cleanup */
-    json_close(&stream);
-    free(buffer.data);
-    free(data);
-    free(url);
+	/* Cleanup */
+	json_close(&stream);
+	free(buffer.data);
+	free(data);
+	free(url);
 
-    return repo;
+	return repo;
 }

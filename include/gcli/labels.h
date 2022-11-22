@@ -41,29 +41,30 @@
 typedef struct gcli_label gcli_label;
 
 struct gcli_label {
-    long      id;
-    char     *name;
-    char     *description;
-    uint32_t  color;
+	long      id;
+	char     *name;
+	char     *description;
+	uint32_t  color;
 };
 
-size_t gcli_get_labels(
-    char const         *owner,
-    char const         *reponame,
-    int const           max,
-    gcli_label **const  out);
+size_t gcli_get_labels(char const *owner,
+                       char const *reponame,
+                       int const max,
+                       gcli_label **const out);
+
 void gcli_free_label(gcli_label *const label);
+
 void gcli_free_labels(gcli_label *labels, size_t const labels_size);
-void gcli_print_labels(
-    gcli_label const *const labels,
-    size_t const            labels_size);
-void gcli_create_label(
-    char const        *owner,
-    char const        *repo,
-    gcli_label *const  label);
-void gcli_delete_label(
-    char const        *owner,
-    char const        *repo,
-    char const *const  label);
+
+void gcli_print_labels(gcli_label const *const labels,
+                       size_t const labels_size);
+
+void gcli_create_label(char const *owner,
+                       char const *repo,
+                       gcli_label *const label);
+
+void gcli_delete_label(char const *owner,
+                       char const *repo,
+                       char const *const label);
 
 #endif /* LABELS_H */

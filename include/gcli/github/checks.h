@@ -40,17 +40,17 @@ typedef struct gcli_github_check  gcli_github_check;
 typedef struct gcli_github_checks gcli_github_checks;
 
 struct gcli_github_check {
-    char *name;
-    char *status;
-    char *conclusion;
-    char *started_at;
-    char *completed_at;
-    long  id;
+	char *name;
+	char *status;
+	char *conclusion;
+	char *started_at;
+	char *completed_at;
+	long  id;
 };
 
 struct gcli_github_checks {
-    gcli_github_check *checks;
-    size_t             checks_size;
+	gcli_github_check *checks;
+	size_t             checks_size;
 };
 
 void github_get_checks(char const *owner,

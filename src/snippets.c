@@ -42,64 +42,64 @@
 void
 gcli_snippets_free(gcli_snippet *list, int const list_size)
 {
-    for (int i = 0; i < list_size; ++i) {
-        free(list[i].title);
-        free(list[i].filename);
-        free(list[i].date);
-        free(list[i].author);
-        free(list[i].visibility);
-        free(list[i].raw_url);
-    }
+	for (int i = 0; i < list_size; ++i) {
+		free(list[i].title);
+		free(list[i].filename);
+		free(list[i].date);
+		free(list[i].author);
+		free(list[i].visibility);
+		free(list[i].raw_url);
+	}
 
-    free(list);
+	free(list);
 }
 
 int
 gcli_snippets_get(int const max, gcli_snippet **const out)
 {
-    char               *url      = NULL;
-    char               *next_url = NULL;
-    gcli_fetch_buffer   buffer   = {0};
-    struct json_stream  stream   = {0};
-    size_t              size     = 0;
+	char               *url      = NULL;
+	char               *next_url = NULL;
+	gcli_fetch_buffer   buffer   = {0};
+	struct json_stream  stream   = {0};
+	size_t              size     = 0;
 
-    *out = NULL;
+	*out = NULL;
 
-    url = sn_asprintf("%s/snippets", gitlab_get_apibase());
+	url = sn_asprintf("%s/snippets", gitlab_get_apibase());
 
-    do {
-        gcli_fetch(url, &next_url, &buffer);
+	do {
+		gcli_fetch(url, &next_url, &buffer);
 
-        json_open_buffer(&stream, buffer.data, buffer.length);
+		json_open_buffer(&stream, buffer.data, buffer.length);
 
-        parse_gitlab_snippets(&stream, out, &size);
+		parse_gitlab_snippets(&stream, out, &size);
 
-        json_close(&stream);
-        free(url);
-        free(buffer.data);
-    } while ((url = next_url) && (max == -1 || (int)size < max));
+		json_close(&stream);
+		free(url);
+		free(buffer.data);
+	} while ((url = next_url) && (max == -1 || (int)size < max));
 
-    free(next_url);
+	free(next_url);
 
-    return (int)size;
+	return (int)size;
 }
 
 static void
 gcli_print_snippet(enum gcli_output_flags const flags,
                    const gcli_snippet *const it)
 {
-    if (flags & OUTPUT_LONG) {
-        printf("    ID : %d\n", it->id);
-        printf(" TITLE : %s\n", it->title);
-        printf("AUTHOR : %s\n", it->author);
-        printf("  FILE : %s\n", it->filename);
-        printf("  DATE : %s\n", it->date);
-        printf("VSBLTY : %s\n", it->visibility);
-        printf("   URL : %s\n\n", it->raw_url);
-    } else {
-        printf("%-10d  %-16.16s  %-10.10s  %-20.20s  %s\n",
-               it->id, it->date, it->visibility, it->author, it->title);
-    }
+	if (flags & OUTPUT_LONG) {
+		printf("    ID : %d\n", it->id);
+		printf(" TITLE : %s\n", it->title);
+		printf("AUTHOR : %s\n", it->author);
+		printf("  FILE : %s\n", it->filename);
+		printf("  DATE : %s\n", it->date);
+		printf("VSBLTY : %s\n", it->visibility);
+		printf("   URL : %s\n\n", it->raw_url);
+	} else {
+		printf("%-10d  %-16.16s  %-10.10s  %-20.20s  %s\n",
+		       it->id, it->date, it->visibility, it->author, it->title);
+	}
 }
 
 void
@@ -107,44 +107,44 @@ gcli_snippets_print(enum gcli_output_flags const flags,
                     gcli_snippet const *const list,
                     int const list_size)
 {
-    if (list_size == 0) {
-        puts("No Snippets");
-        return;
-    }
+	if (list_size == 0) {
+		puts("No Snippets");
+		return;
+	}
 
-    if (!(flags & OUTPUT_LONG)) {
-        printf("%-10.10s  %-16.16s  %-10.10s  %-20.20s  %s\n",
-               "ID", "DATE", "VISIBILITY", "AUTHOR", "TITLE");
-    }
+	if (!(flags & OUTPUT_LONG)) {
+		printf("%-10.10s  %-16.16s  %-10.10s  %-20.20s  %s\n",
+		       "ID", "DATE", "VISIBILITY", "AUTHOR", "TITLE");
+	}
 
-    /* output in reverse order if the sorted flag was enabled */
-    if (flags & OUTPUT_SORTED) {
-        for (int i = list_size; i > 0; --i)
-            gcli_print_snippet(flags, &list[i - 1]);
-    } else {
-        for (int i = 0; i < list_size; ++i)
-            gcli_print_snippet(flags, &list[i]);
-    }
+	/* output in reverse order if the sorted flag was enabled */
+	if (flags & OUTPUT_SORTED) {
+		for (int i = list_size; i > 0; --i)
+			gcli_print_snippet(flags, &list[i - 1]);
+	} else {
+		for (int i = 0; i < list_size; ++i)
+			gcli_print_snippet(flags, &list[i]);
+	}
 }
 
 void
 gcli_snippet_delete(char const *snippet_id)
 {
-    gcli_fetch_buffer buffer = {0};
-    char *url = sn_asprintf("%s/snippets/%s", gitlab_get_apibase(), snippet_id);
+	gcli_fetch_buffer buffer = {0};
+	char *url = sn_asprintf("%s/snippets/%s", gitlab_get_apibase(), snippet_id);
 
-    gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
-    free(url);
-    free(buffer.data);
+	free(url);
+	free(buffer.data);
 }
 
 void
 gcli_snippet_get(char const *snippet_id)
 {
-    char *url = sn_asprintf("%s/snippets/%s/raw",
-                            gitlab_get_apibase(),
-                            snippet_id);
-    gcli_curl(stdout, url, NULL);
-    free(url);
+	char *url = sn_asprintf("%s/snippets/%s/raw",
+	                        gitlab_get_apibase(),
+	                        snippet_id);
+	gcli_curl(stdout, url, NULL);
+	free(url);
 }

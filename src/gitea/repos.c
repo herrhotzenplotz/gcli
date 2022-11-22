@@ -33,23 +33,23 @@
 int
 gitea_get_repos(char const *owner, int const max, gcli_repo **const out)
 {
-    return github_get_repos(owner, max, out);
+	return github_get_repos(owner, max, out);
 }
 
 int
 gitea_get_own_repos(int const max, gcli_repo **const out)
 {
-    return github_get_own_repos(max, out);
+	return github_get_own_repos(max, out);
 }
 
 gcli_repo *
 gitea_repo_create(gcli_repo_create_options const *options)
 {
-    return github_repo_create(options);
+	return github_repo_create(options);
 }
 
 void
 gitea_repo_delete(char const *owner, char const *repo)
 {
-    github_repo_delete(owner, repo);
+	github_repo_delete(owner, repo);
 }

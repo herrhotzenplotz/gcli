@@ -41,41 +41,41 @@ size_t
 github_get_notifications(gcli_notification **const notifications,
                          int const count)
 {
-    char               *url                = NULL;
-    char               *next_url           = NULL;
-    gcli_fetch_buffer   buffer             = {0};
-    struct json_stream  stream             = {0};
-    size_t              notifications_size = 0;
+	char               *url                = NULL;
+	char               *next_url           = NULL;
+	gcli_fetch_buffer   buffer             = {0};
+	struct json_stream  stream             = {0};
+	size_t              notifications_size = 0;
 
-    url = sn_asprintf("%s/notifications", gcli_get_apibase());
+	url = sn_asprintf("%s/notifications", gcli_get_apibase());
 
-    do {
-        gcli_fetch(url, &next_url, &buffer);
+	do {
+		gcli_fetch(url, &next_url, &buffer);
 
-        json_open_buffer(&stream, buffer.data, buffer.length);
+		json_open_buffer(&stream, buffer.data, buffer.length);
 
-        parse_github_notifications(&stream, notifications, &notifications_size);
+		parse_github_notifications(&stream, notifications, &notifications_size);
 
-        json_close(&stream);
-        free(url);
-        free(buffer.data);
-    } while ((url = next_url) && (count < 0 || ((int)notifications_size < count)));
+		json_close(&stream);
+		free(url);
+		free(buffer.data);
+	} while ((url = next_url) && (count < 0 || ((int)notifications_size < count)));
 
-    return notifications_size;
+	return notifications_size;
 }
 
 void
 github_notification_mark_as_read(char const *id)
 {
-    char              *url    = NULL;
-    gcli_fetch_buffer  buffer = {0};
+	char              *url    = NULL;
+	gcli_fetch_buffer  buffer = {0};
 
-    url = sn_asprintf(
-        "%s/notifications/threads/%s",
-        gcli_get_apibase(),
-        id);
-    gcli_fetch_with_method("PATCH", url, NULL, NULL, &buffer);
+	url = sn_asprintf(
+		"%s/notifications/threads/%s",
+		gcli_get_apibase(),
+		id);
+	gcli_fetch_with_method("PATCH", url, NULL, NULL, &buffer);
 
-    free(url);
-    free(buffer.data);
+	free(url);
+	free(buffer.data);
 }

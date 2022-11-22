@@ -46,71 +46,74 @@ github_get_checks(char const *owner,
                   int const max,
                   gcli_github_checks *const out)
 {
-    gcli_fetch_buffer  buffer   = {0};
-    char              *url      = NULL;
-    char              *next_url = NULL;
+	gcli_fetch_buffer  buffer   = {0};
+	char              *url      = NULL;
+	char              *next_url = NULL;
 
-    assert(out);
+	assert(out);
 
-    url = sn_asprintf("%s/repos/%s/%s/commits/%s/check-runs",
-                      gcli_get_apibase(),
-                      owner, repo, ref);
+	url = sn_asprintf("%s/repos/%s/%s/commits/%s/check-runs",
+	                  gcli_get_apibase(),
+	                  owner, repo, ref);
 
-    do {
-        struct json_stream stream = {0};
+	do {
+		struct json_stream stream = {0};
 
-        gcli_fetch(url, &next_url, &buffer);
-        json_open_buffer(&stream, buffer.data, buffer.length);
+		gcli_fetch(url, &next_url, &buffer);
+		json_open_buffer(&stream, buffer.data, buffer.length);
 
-        parse_github_checks(&stream, out);
+		parse_github_checks(&stream, out);
 
-        json_close(&stream);
-        free(url);
-        free(buffer.data);
-    } while ((url = next_url) && ((int)(out->checks_size) < max || max < 0));
+		json_close(&stream);
+		free(url);
+		free(buffer.data);
+	} while ((url = next_url) && ((int)(out->checks_size) < max || max < 0));
 }
 
 void
 github_print_checks(gcli_github_checks const *const list)
 {
-    printf("%10.10s  %10.10s  %10.10s  %16.16s  %16.16s  %-s\n",
-           "ID", "STATUS", "CONCLUSION", "STARTED", "COMPLETED", "NAME");
+	printf("%10.10s  %10.10s  %10.10s  %16.16s  %16.16s  %-s\n",
+	       "ID", "STATUS", "CONCLUSION", "STARTED", "COMPLETED", "NAME");
 
-    for (size_t i = 0; i < list->checks_size; ++i) {
-        printf("%10ld  %10.10s  %s%10.10s%s  %16.16s  %16.16s  %-s\n",
-               list->checks[i].id,
-               list->checks[i].status,
-               gcli_state_color_str(list->checks[i].conclusion),
-               list->checks[i].conclusion,
-               gcli_resetcolor(),
-               list->checks[i].started_at,
-               list->checks[i].completed_at,
-               list->checks[i].name);
-    }
+	for (size_t i = 0; i < list->checks_size; ++i) {
+		printf("%10ld  %10.10s  %s%10.10s%s  %16.16s  %16.16s  %-s\n",
+		       list->checks[i].id,
+		       list->checks[i].status,
+		       gcli_state_color_str(list->checks[i].conclusion),
+		       list->checks[i].conclusion,
+		       gcli_resetcolor(),
+		       list->checks[i].started_at,
+		       list->checks[i].completed_at,
+		       list->checks[i].name);
+	}
 }
 
 void
 github_free_checks(gcli_github_checks *const list)
 {
-    for (size_t i = 0; i < list->checks_size; ++i) {
-        free(list->checks[i].name);
-        free(list->checks[i].status);
-        free(list->checks[i].conclusion);
-        free(list->checks[i].started_at);
-        free(list->checks[i].completed_at);
-    }
+	for (size_t i = 0; i < list->checks_size; ++i) {
+		free(list->checks[i].name);
+		free(list->checks[i].status);
+		free(list->checks[i].conclusion);
+		free(list->checks[i].started_at);
+		free(list->checks[i].completed_at);
+	}
 
-    free(list->checks);
-    list->checks = NULL;
-    list->checks_size = 0;
+	free(list->checks);
+	list->checks = NULL;
+	list->checks_size = 0;
 }
 
 void
-github_checks(char const *owner, char const *repo, char const *ref, int const max)
+github_checks(char const *owner,
+              char const *repo,
+              char const *ref,
+              int const max)
 {
-    gcli_github_checks checks = {0};
+	gcli_github_checks checks = {0};
 
-    github_get_checks(owner, repo, ref, max, &checks);
-    github_print_checks(&checks);
-    github_free_checks(&checks);
+	github_get_checks(owner, repo, ref, max, &checks);
+	github_print_checks(&checks);
+	github_free_checks(&checks);
 }

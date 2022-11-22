@@ -39,94 +39,94 @@
 static void
 usage(void)
 {
-    fprintf(stderr, "usage: gcli comment [-o owner -r repo] [-p pr | -i issue] [-y]\n");
-    fprintf(stderr, "OPTIONS:\n");
-    fprintf(stderr, "  -o owner        The repository owner\n");
-    fprintf(stderr, "  -r repo         The repository name\n");
-    fprintf(stderr, "  -p pr           PR id to comment under\n");
-    fprintf(stderr, "  -i issue        issue id to comment under\n");
-    fprintf(stderr, "  -y              Do not ask for confirmation\n");
-    version();
-    copyright();
+	fprintf(stderr, "usage: gcli comment [-o owner -r repo] [-p pr | -i issue] [-y]\n");
+	fprintf(stderr, "OPTIONS:\n");
+	fprintf(stderr, "  -o owner        The repository owner\n");
+	fprintf(stderr, "  -r repo         The repository name\n");
+	fprintf(stderr, "  -p pr           PR id to comment under\n");
+	fprintf(stderr, "  -i issue        issue id to comment under\n");
+	fprintf(stderr, "  -y              Do not ask for confirmation\n");
+	version();
+	copyright();
 }
 
 int
 subcommand_comment(int argc, char *argv[])
 {
-    int                       ch, target_id  = -1;
-    char const               *repo       = NULL, *owner = NULL;
-    bool                      always_yes = false;
-    enum comment_target_type  target_type;
+	int                       ch, target_id = -1;
+	char const               *repo = NULL, *owner = NULL;
+	bool                      always_yes = false;
+	enum comment_target_type  target_type;
 
-    struct option const options[] = {
-        { .name    = "yes",
-          .has_arg = no_argument,
-          .flag    = NULL,
-          .val     = 'y' },
-        { .name    = "repo",
-          .has_arg = required_argument,
-          .flag    = NULL,
-          .val     = 'r' },
-        { .name    = "owner",
-          .has_arg = required_argument,
-          .flag    = NULL,
-          .val     = 'o' },
-        { .name    = "issue",
-          .has_arg = required_argument,
-          .flag    = NULL,
-          .val     = 'i' },
-        { .name    = "pull",
-          .has_arg = required_argument,
-          .flag    = NULL,
-          .val     = 'p' },
-        {0},
-    };
+	struct option const options[] = {
+		{ .name    = "yes",
+		  .has_arg = no_argument,
+		  .flag    = NULL,
+		  .val     = 'y' },
+		{ .name    = "repo",
+		  .has_arg = required_argument,
+		  .flag    = NULL,
+		  .val     = 'r' },
+		{ .name    = "owner",
+		  .has_arg = required_argument,
+		  .flag    = NULL,
+		  .val     = 'o' },
+		{ .name    = "issue",
+		  .has_arg = required_argument,
+		  .flag    = NULL,
+		  .val     = 'i' },
+		{ .name    = "pull",
+		  .has_arg = required_argument,
+		  .flag    = NULL,
+		  .val     = 'p' },
+		{0},
+	};
 
-    while ((ch = getopt_long(argc, argv, "yr:o:i:p:", options, NULL)) != -1) {
-        switch (ch) {
-        case 'r':
-            repo = optarg;
-            break;
-        case 'o':
-            owner = optarg;
-            break;
-        case 'p':
-            target_type = PR_COMMENT;
-            goto parse_target_id;
-        case 'i':
-            target_type = ISSUE_COMMENT;
-        parse_target_id: {
-                char *endptr;
-                target_id = strtoul(optarg, &endptr, 10);
-                if (endptr != optarg + strlen(optarg))
-                    err(1, "error: Cannot parse issue/PR number");
-            } break;
-        case 'y':
-            always_yes = true;
-            break;
-        default:
-            usage();
-            return EXIT_FAILURE;
-        }
-    }
+	while ((ch = getopt_long(argc, argv, "yr:o:i:p:", options, NULL)) != -1) {
+		switch (ch) {
+		case 'r':
+			repo = optarg;
+			break;
+		case 'o':
+			owner = optarg;
+			break;
+		case 'p':
+			target_type = PR_COMMENT;
+			goto parse_target_id;
+		case 'i':
+			target_type = ISSUE_COMMENT;
+		parse_target_id: {
+				char *endptr;
+				target_id = strtoul(optarg, &endptr, 10);
+				if (endptr != optarg + strlen(optarg))
+					err(1, "error: Cannot parse issue/PR number");
+			} break;
+		case 'y':
+			always_yes = true;
+			break;
+		default:
+			usage();
+			return EXIT_FAILURE;
+		}
+	}
 
-    argc -= optind;
-    argv += optind;
+	argc -= optind;
+	argv += optind;
 
-    check_owner_and_repo(&owner, &repo);
+	check_owner_and_repo(&owner, &repo);
 
-    if (target_id < 0) {
-        fprintf(stderr, "error: missing issue/PR number (use -i/-p)\n");
-        usage();
-        return EXIT_FAILURE;
-    }
+	if (target_id < 0) {
+		fprintf(stderr, "error: missing issue/PR number (use -i/-p)\n");
+		usage();
+		return EXIT_FAILURE;
+	}
 
-    gcli_comment_submit((gcli_submit_comment_opts) {
-            .owner       = owner,
-            .repo        = repo,
-            .target_type = target_type,
-            .target_id   = target_id,
-            .always_yes  = always_yes });
+	gcli_comment_submit((gcli_submit_comment_opts) {
+			.owner       = owner,
+			.repo        = repo,
+			.target_type = target_type,
+			.target_id   = target_id,
+			.always_yes  = always_yes });
 
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }

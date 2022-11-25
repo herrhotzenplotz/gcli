@@ -160,8 +160,7 @@ CLEANFILES = $(BUILT_SOURCES)
 EXTRA_DIST = \
 	LICENSE \
 	README.md \
-	autogen.sh \
-	tests/pgen-simple
+	autogen.sh
 
 ###########################################
 # Tests
@@ -172,10 +171,13 @@ check_PROGRAMS = \
 
 TESTS = \
 	tests/json-escape \
-	tests/pgen-simple \
-	tests/url-encode
-
-XFAIL_TESTS = tests/pgen-simple
+	tests/url-encode \
+	tests/01_pgen_simple_object.sh \
+	tests/02_pgen_error_no_entries.sh \
+	tests/03_pgen_error_trailing_comma.sh \
+	tests/04_pgen_simple_issue.sh \
+	tests/05_pgen_simple_pull.sh \
+	tests/06_pgen_simple_label.sh
 
 tests_json_escape_LDADD = \
 	libgcli.la libpdjson.la libsn.la

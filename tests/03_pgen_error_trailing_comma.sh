@@ -4,7 +4,7 @@
 
 TMPFILE=$(mktemp)
 
-cat <<EOF | ! ${PGEN} > $TMPFILE || fail "parse succeeded"
+cat <<EOF | ( ! ${PGEN} > $TMPFILE ) || fail "parse succeeded"
 parser github_issue
 is object of gcli_issue
 with

@@ -58,6 +58,7 @@ usage(void)
 	fprintf(stderr, "  -n number       Number of PRs to fetch (-1 = everything)\n");
 	fprintf(stderr, "  -p id           ID of PR to perform actions on\n");
 	fprintf(stderr, "  -l label        Add the given label when creating the PR\n");
+	fprintf(stderr, "  -f owner:branch Specify the owner and branch of the fork that is the head of a PR.\n");
 	fprintf(stderr, "ACTIONS:\n");
 	fprintf(stderr, "  summary|status  Display status information\n");
 	fprintf(stderr, "  comments        Display comments\n");

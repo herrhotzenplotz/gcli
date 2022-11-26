@@ -33,6 +33,7 @@
 #include <gcli/github/issues.h>
 #include <gcli/issues.h>
 #include <gcli/json_util.h>
+#include <gcli/table.h>
 #include <sn/sn.h>
 
 static void
@@ -69,40 +70,41 @@ gcli_get_issues(char const *owner,
 	return gcli_forge()->get_issues(owner, repo, all, max, out);
 }
 
-static void
-gcli_print_issue(enum gcli_output_flags const flags,
-                 gcli_issue const *const issue)
-{
-	(void) flags;
-
-	printf("%6d  %s%7.*s%s  %-.*s\n",
-	       issue->number,
-	       gcli_state_color_sv(issue->state),
-	       (int)issue->state.length,
-	       issue->state.data,
-	       gcli_resetcolor(),
-	       (int)issue->title.length,
-	       issue->title.data);
-}
-
 void
 gcli_print_issues_table(enum gcli_output_flags const flags,
                         gcli_issue const *const issues,
                         int const issues_size)
 {
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "NUMBER", .type = GCLI_TBLCOLTYPE_INT, .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "STATE",  .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_STATECOLOURED },
+		{ .name = "TITLE",  .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
+	};
+
 	if (issues_size == 0) {
 		puts("No issues");
 		return;
 	}
 
-	printf("%6.6s  %7.7s  %-s\n", "NUMBER", "STATE", "TITLE");
+	if (gcli_tbl_init(cols, ARRAY_SIZE(cols), &table) < 0)
+		errx(1, "could not init table printer");
 
-	if (flags & OUTPUT_SORTED)
-		for (int i = issues_size; i > 0; --i)
-			gcli_print_issue(flags, &issues[i-1]);
-	else
-		for (int i = 0; i < issues_size; ++i)
-			gcli_print_issue(flags, &issues[i]);
+	if (flags & OUTPUT_SORTED) {
+		for (int i = issues_size; i > 0; --i) {
+			gcli_tbl_add_row(&table, issues[i - 1].number, issues[i - 1].state,
+			                 issues[i - 1].title);
+		}
+	} else {
+		for (int i = 0; i < issues_size; ++i) {
+			gcli_tbl_add_row(&table, issues[i].number, issues[i].state,
+			                 issues[i].title);
+		}
+	}
+
+	gcli_tbl_dump(&table);
+
+	gcli_tbl_free(&table);
 }
 
 static void

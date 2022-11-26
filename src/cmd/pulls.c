@@ -59,6 +59,7 @@ usage(void)
 	fprintf(stderr, "  -p id           ID of PR to perform actions on\n");
 	fprintf(stderr, "  -l label        Add the given label when creating the PR\n");
 	fprintf(stderr, "  -t branch       Specify target branch of the PR\n");
+	fprintf(stderr, "  -d              Mark newly created PR as a draft\n");
 	fprintf(stderr, "  -f owner:branch Specify the owner and branch of the fork that is the head of a PR.\n");
 	fprintf(stderr, "ACTIONS:\n");
 	fprintf(stderr, "  summary|status  Display status information\n");

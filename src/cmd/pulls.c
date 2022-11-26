@@ -178,7 +178,7 @@ subcommand_pull_create(int argc, char *argv[])
 		gcli_config_get_upstream_parts(&opts.owner, &opts.repo);
 		if (!opts.owner.length || !opts.repo.length)
 			errx(1, "error: PR target repo is missing. Please either "
-			     "specify --in owner/repo or set pr.upstream in .gcli.");
+			     "specify -o owner and -r repo or set pr.upstream in .gcli.");
 	}
 
 	if (argc != 1) {

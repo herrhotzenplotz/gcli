@@ -31,11 +31,12 @@
 #include <gcli/config.h>
 #include <gcli/editor.h>
 #include <gcli/forges.h>
-#include <gcli/github/pulls.h>
 #include <gcli/github/checks.h>
+#include <gcli/github/pulls.h>
 #include <gcli/gitlab/pipelines.h>
 #include <gcli/json_util.h>
 #include <gcli/pulls.h>
+#include <gcli/table.h>
 #include <sn/sn.h>
 
 void
@@ -58,39 +59,44 @@ gcli_get_prs(char const *owner,
 	return gcli_forge()->get_prs(owner, repo, all, max, out);
 }
 
-static void
-gcli_print_pr(enum gcli_output_flags const flags, gcli_pull const *const pr)
-{
-	(void) flags;
-
-	printf("%6d  %s%6.6s%s  %6.6s  %s%20.20s%s  %-s\n",
-	       pr->number,
-	       gcli_state_color_str(pr->state), pr->state, gcli_resetcolor(),
-	       sn_bool_yesno(pr->merged),
-	       gcli_setbold(), pr->creator, gcli_resetbold(),
-	       pr->title);
-}
-
 void
-gcli_print_pr_table(
-	enum gcli_output_flags const flags,
-	gcli_pull const *const       pulls,
-	int const                    pulls_size)
+gcli_print_pr_table(enum gcli_output_flags const flags,
+                    gcli_pull const *const pulls,
+                    int const pulls_size)
 {
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "NUMBER",  .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "STATE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
+		{ .name = "MERGED",  .type = GCLI_TBLCOLTYPE_BOOL,   .flags = 0 },
+		{ .name = "CREATOR", .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_BOLD },
+		{ .name = "TITLE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+	};
+
 	if (pulls_size == 0) {
 		puts("No Pull Requests");
 		return;
 	}
 
-	printf("%-6.6s  %6.6s  %6.6s  %20.20s  %-s\n",
-	       "NUMBER", "STATE", "MERGED", "CREATOR", "TITLE");
 
-	if (flags & OUTPUT_SORTED)
-		for (int i = pulls_size; i > 0; --i)
-			gcli_print_pr(flags, &pulls[i-1]);
-	else
-		for (int i = 0; i < pulls_size; ++i)
-			gcli_print_pr(flags, &pulls[i]);
+	if (gcli_tbl_init(cols, ARRAY_SIZE(cols), &table) < 0)
+		errx(1, "error: cannot init table");
+
+	if (flags & OUTPUT_SORTED) {
+		for (int i = pulls_size; i > 0; --i) {
+			gcli_tbl_add_row(table, pulls[i-1].number, pulls[i-1].state,
+			                 pulls[i-1].merged, pulls[i-1].creator,
+			                 pulls[i-1].title);
+		}
+	} else {
+		for (int i = 0; i < pulls_size; ++i) {
+			gcli_tbl_add_row(table, pulls[i].number, pulls[i].state,
+			                 pulls[i].merged, pulls[i].creator, pulls[i].title);
+		}
+	}
+
+	gcli_tbl_dump(table);
+	gcli_tbl_free(table);
 }
 
 void

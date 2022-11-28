@@ -231,8 +231,9 @@ dump_row(struct gcli_tbl const *const table, size_t const i)
 		if (table->cols[col].flags & GCLI_TBLCOL_BOLD)
 			printf("%s", gcli_setbold());
 
-		/* Print cell */
-		printf("%s  ", row->cells[col].text);
+		/* Print cell if it is not NULL, otherwise indicate it by
+		 * printing <empty> */
+		printf("%s  ", row->cells[col].text ? row->cells[col].text : "<empty>");
 
 		/* End color */
 		if (table->cols[col].flags &

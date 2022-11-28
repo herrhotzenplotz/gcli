@@ -31,6 +31,7 @@
 #include <gcli/forges.h>
 #include <gcli/forks.h>
 #include <gcli/github/forks.h>
+#include <gcli/table.h>
 
 int
 gcli_get_forks(char const *owner,
@@ -41,37 +42,42 @@ gcli_get_forks(char const *owner,
 	return gcli_forge()->get_forks(owner, repo, max, out);
 }
 
-static void
-gcli_print_fork(enum gcli_output_flags const flags, gcli_fork const *const fork)
-{
-	(void) flags;
-
-	printf("%s%-20.20s%s  %-20.20s  %5d  %s\n",
-	       gcli_setbold(), fork->owner.data, gcli_resetbold(),
-	       fork->date.data,
-	       fork->forks,
-	       fork->full_name.data);
-}
-
 void
 gcli_print_forks(enum gcli_output_flags const flags,
                  gcli_fork const *const forks,
                  size_t const forks_size)
 {
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "OWNER",    .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_BOLD },
+		{ .name = "DATE",     .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
+		{ .name = "FORKS",    .type = GCLI_TBLCOLTYPE_INT, .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "FULLNAME", .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
+	};
+
 	if (forks_size == 0) {
 		puts("No forks");
 		return;
 	}
 
-	printf("%-20.20s  %-20.20s  %-5.5s  %s\n",
-	       "OWNER", "DATE", "FORKS", "FULLNAME");
 
-	if (flags & OUTPUT_SORTED)
-		for (size_t i = forks_size; i > 0; --i)
-			gcli_print_fork(flags, &forks[i-1]);
-	else
-		for (size_t i = 0; i < forks_size; ++i)
-			gcli_print_fork(flags, &forks[i]);
+	if (gcli_tbl_init(cols, ARRAY_SIZE(cols), &table) < 0)
+		errx(1, "error: could not initialize table");
+
+	if (flags & OUTPUT_SORTED) {
+		for (size_t i = forks_size; i > 0; --i) {
+			gcli_tbl_add_row(table, forks[i-1].owner, forks[i-1].date,
+			                 forks[i-1].forks, forks[i-1].full_name);
+		}
+	} else {
+		for (size_t i = 0; i < forks_size; ++i) {
+			gcli_tbl_add_row(table, forks[i].owner, forks[i].date,
+			                 forks[i].forks, forks[i].full_name);
+		}
+	}
+
+	gcli_tbl_dump(table);
+	gcli_tbl_free(table);
 }
 
 void

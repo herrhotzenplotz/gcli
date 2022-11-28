@@ -30,6 +30,10 @@
 #ifndef GCLI_TABLE_H
 #define GCLI_TABLE_H
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <stdlib.h>
 
 typedef struct gcli_tblcoldef gcli_tblcoldef;

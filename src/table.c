@@ -125,8 +125,9 @@ tablerow_add_cell(struct gcli_tbl *const table,
 		cell_size = strlen(row->cells[col]);
 	} break;
 	case GCLI_TBLCOLTYPE_STRING: {
-		row->cells[col] = strdup(va_arg(vp, char *));
-		cell_size = strlen(row->cells[col]);
+		char *it = va_arg(vp, char *);
+		row->cells[col] = strdup(it);
+		cell_size = strlen(it);
 	} break;
 	case GCLI_TBLCOLTYPE_SV: {
 		sn_sv src = va_arg(vp, sn_sv);
@@ -207,26 +208,34 @@ dump_row(struct gcli_tbl const *const table, size_t const i)
 	struct gcli_tblrow const *const row = &table->rows[i];
 
 	for (size_t col = 0; col < table->cols_size; ++col) {
-		/* State color */
-		if (table->cols[col].flags & GCLI_TBLCOL_STATECOLOURED)
-			printf("%s", gcli_state_color_str(row->cells[col]));
-
 		/* If right justified and not last column, print padding */
 		if ((table->cols[col].flags & GCLI_TBLCOL_JUSTIFYR) &&
 		    (col + 1) < table->cols_size)
 			pad(table->col_widths[col] - strlen(row->cells[col]));
 
+		/* State color */
+		if (table->cols[col].flags & GCLI_TBLCOL_STATECOLOURED)
+			printf("%s", gcli_state_color_str(row->cells[col]));
+
+		/* Bold */
+		if (table->cols[col].flags & GCLI_TBLCOL_BOLD)
+			printf("%s", gcli_setbold());
+
 		/* Print cell */
 		printf("%s  ", row->cells[col]);
+
+		/* End color */
+		if (table->cols[col].flags & GCLI_TBLCOL_STATECOLOURED)
+			printf("%s", gcli_resetcolor());
+
+		/* Stop printing in bold */
+		if (table->cols[col].flags & GCLI_TBLCOL_BOLD)
+			printf("%s", gcli_resetbold());
 
 		/* If left-justified and not last column, print padding */
 		if (!(table->cols[col].flags & GCLI_TBLCOL_JUSTIFYR) &&
 		    (col + 1) < table->cols_size)
 			pad(table->col_widths[col] - strlen(row->cells[col]));
-
-		/* End color */
-		if (table->cols[col].flags & GCLI_TBLCOL_STATECOLOURED)
-			printf("%s", gcli_resetcolor());
 	}
 	putchar('\n');
 }

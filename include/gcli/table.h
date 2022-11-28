@@ -38,9 +38,11 @@ typedef void *gcli_tbl;
 /** Flags for table column definitions */
 enum gcli_tblcol_flags {
 	/* column is as string and color is derived from its contents. */
-	GCLI_TBLCOL_STATECOLOURED = 1,
+	GCLI_TBLCOL_STATECOLOURED  = 1,
 	/* Right-justify the column */
 	GCLI_TBLCOL_JUSTIFYR       = 2,
+	/* Make it bold */
+	GCLI_TBLCOL_BOLD           = 4,
 };
 
 enum gcli_tblcoltype {

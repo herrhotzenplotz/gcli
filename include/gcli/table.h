@@ -43,6 +43,9 @@ enum gcli_tblcol_flags {
 	GCLI_TBLCOL_JUSTIFYR       = 2,
 	/* Make it bold */
 	GCLI_TBLCOL_BOLD           = 4,
+	/* Explicit colour - provide the colour to gcli_tbl_add_row first
+	 * and second the content of the cell. */
+	GCLI_TBLCOL_COLOUREXPL     = 8,
 };
 
 enum gcli_tblcoltype {

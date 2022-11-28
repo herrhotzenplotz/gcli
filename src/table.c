@@ -52,7 +52,10 @@ struct gcli_tbl {
 };
 
 struct gcli_tblrow {
-	char **cells;               /* text of the cells */
+	struct {
+		char *text;             /* the text in the cell */
+		int colour;             /* colour if explicit fixed colour was given */
+	} *cells;
 };
 
 /* Push a row into the table state */
@@ -106,7 +109,7 @@ static void
 table_freerow(struct gcli_tblrow *row, size_t const cols)
 {
 	for (size_t i = 0; i < cols; ++i)
-		free(row->cells[i]);
+		free(row->cells[i].text);
 
 	free(row->cells);
 	row->cells = NULL;
@@ -119,34 +122,39 @@ tablerow_add_cell(struct gcli_tbl *const table,
 {
 	int cell_size = 0;
 
+	/* Extract the explicit colour code */
+	if (table->cols[col].flags & GCLI_TBLCOL_COLOUREXPL)
+		row->cells[col].colour = va_arg(vp, int);
+
+	/* Process the content */
 	switch (table->cols[col].type) {
 	case GCLI_TBLCOLTYPE_INT: {
-		row->cells[col] = sn_asprintf("%d", va_arg(vp, int));
-		cell_size = strlen(row->cells[col]);
+		row->cells[col].text = sn_asprintf("%d", va_arg(vp, int));
+		cell_size = strlen(row->cells[col].text);
 	} break;
 	case GCLI_TBLCOLTYPE_STRING: {
 		char *it = va_arg(vp, char *);
-		row->cells[col] = strdup(it);
+		row->cells[col].text = strdup(it);
 		cell_size = strlen(it);
 	} break;
 	case GCLI_TBLCOLTYPE_SV: {
 		sn_sv src = va_arg(vp, sn_sv);
-		row->cells[col] = sn_sv_to_cstr(src);
+		row->cells[col].text = sn_sv_to_cstr(src);
 		cell_size = src.length;
 	} break;
 	case GCLI_TBLCOLTYPE_DOUBLE: {
-		row->cells[col] = sn_asprintf("%lf", va_arg(vp, double));
-		cell_size = strlen(row->cells[col]);
+		row->cells[col].text = sn_asprintf("%lf", va_arg(vp, double));
+		cell_size = strlen(row->cells[col].text);
 	} break;
 	case GCLI_TBLCOLTYPE_BOOL: {
 		/* Do not use real _Bool type as it triggers a compiler bug in
 		 * LLVM clang 13 */
 		int val = va_arg(vp, int);
 		if (val) {
-			row->cells[col] = strdup("yes");
+			row->cells[col].text = strdup("yes");
 			cell_size = 3;
 		} else {
-			row->cells[col] = strdup("no");
+			row->cells[col].text = strdup("no");
 			cell_size = 2;
 		}
 	} break;
@@ -211,21 +219,24 @@ dump_row(struct gcli_tbl const *const table, size_t const i)
 		/* If right justified and not last column, print padding */
 		if ((table->cols[col].flags & GCLI_TBLCOL_JUSTIFYR) &&
 		    (col + 1) < table->cols_size)
-			pad(table->col_widths[col] - strlen(row->cells[col]));
+			pad(table->col_widths[col] - strlen(row->cells[col].text));
 
 		/* State color */
 		if (table->cols[col].flags & GCLI_TBLCOL_STATECOLOURED)
-			printf("%s", gcli_state_color_str(row->cells[col]));
+			printf("%s", gcli_state_color_str(row->cells[col].text));
+		else if (table->cols[col].flags & GCLI_TBLCOL_COLOUREXPL)
+			printf("%s", gcli_setcolor(row->cells[col].colour));
 
 		/* Bold */
 		if (table->cols[col].flags & GCLI_TBLCOL_BOLD)
 			printf("%s", gcli_setbold());
 
 		/* Print cell */
-		printf("%s  ", row->cells[col]);
+		printf("%s  ", row->cells[col].text);
 
 		/* End color */
-		if (table->cols[col].flags & GCLI_TBLCOL_STATECOLOURED)
+		if (table->cols[col].flags &
+		    (GCLI_TBLCOL_STATECOLOURED|GCLI_TBLCOL_COLOUREXPL))
 			printf("%s", gcli_resetcolor());
 
 		/* Stop printing in bold */
@@ -235,7 +246,7 @@ dump_row(struct gcli_tbl const *const table, size_t const i)
 		/* If left-justified and not last column, print padding */
 		if (!(table->cols[col].flags & GCLI_TBLCOL_JUSTIFYR) &&
 		    (col + 1) < table->cols_size)
-			pad(table->col_widths[col] - strlen(row->cells[col]));
+			pad(table->col_widths[col] - strlen(row->cells[col].text));
 	}
 	putchar('\n');
 }

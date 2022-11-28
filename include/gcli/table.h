@@ -67,9 +67,9 @@ int gcli_tbl_init(gcli_tblcoldef const *const cols,
 void gcli_tbl_free(gcli_tbl table);
 
 /* Add a single to an initialized table */
-int gcli_tbl_add_row(gcli_tbl *const table, ...);
+int gcli_tbl_add_row(gcli_tbl table, ...);
 
 /* Dump a table to stdout */
-int gcli_tbl_dump(gcli_tbl const *const table);
+int gcli_tbl_dump(gcli_tbl const table);
 
 #endif /* GCLI_TABLE_H */

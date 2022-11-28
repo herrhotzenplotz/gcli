@@ -92,19 +92,19 @@ gcli_print_issues_table(enum gcli_output_flags const flags,
 
 	if (flags & OUTPUT_SORTED) {
 		for (int i = issues_size; i > 0; --i) {
-			gcli_tbl_add_row(&table, issues[i - 1].number, issues[i - 1].state,
+			gcli_tbl_add_row(table, issues[i - 1].number, issues[i - 1].state,
 			                 issues[i - 1].title);
 		}
 	} else {
 		for (int i = 0; i < issues_size; ++i) {
-			gcli_tbl_add_row(&table, issues[i].number, issues[i].state,
+			gcli_tbl_add_row(table, issues[i].number, issues[i].state,
 			                 issues[i].title);
 		}
 	}
 
-	gcli_tbl_dump(&table);
+	gcli_tbl_dump(table);
 
-	gcli_tbl_free(&table);
+	gcli_tbl_free(table);
 }
 
 static void

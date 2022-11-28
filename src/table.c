@@ -161,11 +161,11 @@ tablerow_add_cell(struct gcli_tbl *const table,
 }
 
 int
-gcli_tbl_add_row(gcli_tbl *const _table, ...)
+gcli_tbl_add_row(gcli_tbl _table, ...)
 {
 	va_list vp;
 	struct gcli_tblrow row = {0};
-	struct gcli_tbl *table = *(struct gcli_tbl **)(_table);
+	struct gcli_tbl *table = (struct gcli_tbl *)(_table);
 
 	/* reserve array of cells */
 	row.cells = calloc(sizeof(*row.cells), table->cols_size);
@@ -232,10 +232,9 @@ dump_row(struct gcli_tbl const *const table, size_t const i)
 }
 
 int
-gcli_tbl_dump(gcli_tbl const *const _table)
+gcli_tbl_dump(gcli_tbl const _table)
 {
-	struct gcli_tbl const *const table =
-		*(struct gcli_tbl const *const *const)_table;
+	struct gcli_tbl const *const table = (struct gcli_tbl const *const)_table;
 
 	for (size_t i = 0; i < table->cols_size; ++i) {
 		printf("%s  ", table->cols[i].name);
@@ -255,7 +254,12 @@ gcli_tbl_dump(gcli_tbl const *const _table)
 void
 gcli_tbl_free(gcli_tbl _table)
 {
-	struct gcli_tbl *tbl = *(struct gcli_tbl **)_table;
+	struct gcli_tbl *tbl = (struct gcli_tbl *)_table;
 
-	/* TODO */
+	for (size_t row = 0; row < tbl->rows_size; ++row)
+		table_freerow(&tbl->rows[row], tbl->cols_size);
+
+	free(tbl->rows);
+	free(tbl->col_widths);
+	free(tbl);
 }

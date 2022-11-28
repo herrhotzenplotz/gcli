@@ -75,10 +75,10 @@
    - [X] attach files to release (aka assets)
    - [X] mark as prerelease or draft
 ** DONE pulls commit table header is weird
-** TODO Check unnecessary includes
-** TODO Valgrind again
-** TODO write colors test for big-endian machines
-** TODO Implement adding/removing labels from github prs
+** DONE Check unnecessary includes
+** DONE Valgrind again
+** DONE write colors test for big-endian machines
+** DONE Implement adding/removing labels from github prs
 ** TODO CI [83%]
    - [X] release resources properly
    - [X] check that we are connecting to github if we ever use the
@@ -93,12 +93,14 @@
 	 me any association from the checks api to the actions api. maybe
 	 I wanna add an actions subcommand that handles this very case for
 	 github.
-** TODO Unify Gitea and Github code
+** DONE Unify Gitea and Github code
 
    Probably we want to make wrappers around the GitHub code for the
    cases where it works. For this to work, we need to mess with
    =github_get_apibase()= to return the right thing if we are looking
    at gitea.
+
+** TODO Optimise =pad()= in [[file:src/table.c][file.c]]
 
 ** Label shit
 

@@ -30,6 +30,7 @@
 #include <gcli/forges.h>
 #include <gcli/github/releases.h>
 #include <gcli/releases.h>
+#include <gcli/table.h>
 
 #include <assert.h>
 #include <stdlib.h>
@@ -47,41 +48,81 @@ static void
 gcli_print_release(enum gcli_output_flags const flags,
                    gcli_release const *const it)
 {
-	if (flags & OUTPUT_LONG) {
-		/* General information */
-		printf("        ID : "SV_FMT"\n"
-		       "      NAME : "SV_FMT"\n"
-		       "    AUTHOR : "SV_FMT"\n"
-		       "      DATE : "SV_FMT"\n"
-		       "     DRAFT : %s\n"
-		       "PRERELEASE : %s\n"
-		       "    ASSETS :\n",
-		       SV_ARGS(it->id),
-		       SV_ARGS(it->name),
-		       SV_ARGS(it->author),
-		       SV_ARGS(it->date),
-		       sn_bool_yesno(it->draft),
-		       sn_bool_yesno(it->prerelease));
+	/* General information */
+	printf("        ID : "SV_FMT"\n"
+	       "      NAME : "SV_FMT"\n"
+	       "    AUTHOR : "SV_FMT"\n"
+	       "      DATE : "SV_FMT"\n"
+	       "     DRAFT : %s\n"
+	       "PRERELEASE : %s\n"
+	       "    ASSETS :\n",
+	       SV_ARGS(it->id),
+	       SV_ARGS(it->name),
+	       SV_ARGS(it->author),
+	       SV_ARGS(it->date),
+	       sn_bool_yesno(it->draft),
+	       sn_bool_yesno(it->prerelease));
 
-		/* asset urls */
-		for (size_t i = 0; i < it->assets_size; ++i) {
-			printf("           : • %s\n", it->assets[i].name);
-			printf("           :   %s\n", it->assets[i].url);
-		}
-
-		/* body */
-		printf("      BODY :\n");
-		pretty_print(it->body.data, 13, 80, stdout);
-
-		putchar('\n');
-	} else {
-		printf("%13.*s  %-24.*s  %-5.5s  %-10.10s  "SV_FMT"\n",
-		       SV_ARGS(it->id),
-		       SV_ARGS(it->date),
-		       sn_bool_yesno(it->draft),
-		       sn_bool_yesno(it->prerelease),
-		       SV_ARGS(it->name));
+	/* asset urls */
+	for (size_t i = 0; i < it->assets_size; ++i) {
+		printf("           : • %s\n", it->assets[i].name);
+		printf("           :   %s\n", it->assets[i].url);
 	}
+
+	/* body */
+	printf("      BODY :\n");
+	pretty_print(it->body.data, 13, 80, stdout);
+
+	putchar('\n');
+}
+
+static void
+gcli_print_releases_long(enum gcli_output_flags const flags,
+                         gcli_release const *const releases,
+                         int const releases_size)
+{
+	if (flags & OUTPUT_SORTED) {
+		for (int i = releases_size; i > 0; --i)
+			gcli_print_release(flags, &releases[i - 1]);
+	} else {
+		for (int i = 0; i < releases_size; ++i)
+			gcli_print_release(flags, &releases[i]);
+	}
+}
+
+static void
+gcli_print_releases_short(enum gcli_output_flags const flags,
+                          gcli_release const *const releases,
+                          int const releases_size)
+{
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
+		{ .name = "DATE",       .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
+		{ .name = "DRAFT",      .type = GCLI_TBLCOLTYPE_BOOL, .flags = 0 },
+		{ .name = "PRERELEASE", .type = GCLI_TBLCOLTYPE_BOOL, .flags = 0 },
+		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
+	};
+
+	if (gcli_tbl_init(cols, ARRAY_SIZE(cols), &table) < 0)
+		errx(1, "error: could not init table");
+
+	if (flags & OUTPUT_SORTED) {
+		for (int i = releases_size; i > 0; --i) {
+			gcli_tbl_add_row(table, releases[i-1].id, releases[i-1].date,
+			                 releases[i-1].draft, releases[i-1].prerelease,
+			                 releases[i-1].name);
+		}
+	} else {
+		for (int i = 0; i < releases_size; ++i) {
+			gcli_tbl_add_row(table, releases[i].id, releases[i].date,
+			                 releases[i].draft, releases[i].prerelease,
+			                 releases[i].name);
+		}
+	}
+
+	gcli_tbl_dump(table);
+	gcli_tbl_free(table);
 }
 
 void
@@ -94,17 +135,10 @@ gcli_print_releases(enum gcli_output_flags const flags,
 		return;
 	}
 
-	if (!(flags & OUTPUT_LONG))
-		printf("%13.13s  %-24.24s  %-5.5s  %-10.10s  %s\n",
-		       "ID", "DATE", "DRAFT", "PRERELEASE", "NAME");
-
-	if (flags & OUTPUT_SORTED) {
-		for (int i = releases_size; i > 0; --i)
-			gcli_print_release(flags, &releases[i - 1]);
-	} else {
-		for (int i = 0; i < releases_size; ++i)
-			gcli_print_release(flags, &releases[i]);
-	}
+	if (flags & OUTPUT_LONG)
+		gcli_print_releases_long(flags, releases, releases_size);
+	else
+		gcli_print_releases_short(flags, releases, releases_size);
 }
 
 void

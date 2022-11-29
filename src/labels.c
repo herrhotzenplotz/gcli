@@ -66,7 +66,8 @@ gcli_print_labels(gcli_label const *const labels, size_t const labels_size)
 		{ .name = "DESCRIPTION", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
-	if (gcli_tbl_init(cols, ARRAY_SIZE(cols), &table) < 0)
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
 		errx(1, "error: could not init table");
 
 	for (size_t i = 0; i < labels_size; ++i) {
@@ -74,8 +75,7 @@ gcli_print_labels(gcli_label const *const labels, size_t const labels_size)
 		                 labels[i].description);
 	}
 
-	gcli_tbl_dump(table);
-	gcli_tbl_free(table);
+	gcli_tbl_end(table);
 }
 
 void

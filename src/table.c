@@ -73,22 +73,21 @@ table_pushrow(struct gcli_tbl *const table, struct gcli_tblrow row)
 }
 
 /** Initialize the internal state structure of the table printer. */
-int
-gcli_tbl_init(gcli_tblcoldef const *const cols, size_t const cols_size,
-              gcli_tbl *out)
+gcli_tbl
+gcli_tbl_begin(gcli_tblcoldef const *const cols, size_t const cols_size)
 {
 	struct gcli_tbl *tbl;
 
     /* Allocate the structure and fill in the handle */
-	tbl = *out = calloc(sizeof(*tbl), 1);
+	tbl = calloc(sizeof(*tbl), 1);
 	if (!tbl)
-		return -1;
+		return NULL;
 
 	/* Reserve memory for the column sizes */
 	tbl->col_widths = calloc(sizeof(*tbl->col_widths), cols_size);
 	if (!tbl->col_widths) {
 		free(tbl);
-		return -1;
+		return NULL;
 	}
 
 	/* Store the list of columns */
@@ -103,7 +102,7 @@ gcli_tbl_init(gcli_tblcoldef const *const cols, size_t const cols_size,
 		tbl->col_widths[i] = strlen(cols[i].name);
 	}
 
-	return 0;
+	return tbl;
 }
 
 static void
@@ -266,7 +265,7 @@ dump_row(struct gcli_tbl const *const table, size_t const i)
 	putchar('\n');
 }
 
-int
+static int
 gcli_tbl_dump(gcli_tbl const _table)
 {
 	struct gcli_tbl const *const table = (struct gcli_tbl const *const)_table;
@@ -286,7 +285,7 @@ gcli_tbl_dump(gcli_tbl const _table)
 	return 0;
 }
 
-void
+static void
 gcli_tbl_free(gcli_tbl _table)
 {
 	struct gcli_tbl *tbl = (struct gcli_tbl *)_table;
@@ -297,4 +296,11 @@ gcli_tbl_free(gcli_tbl _table)
 	free(tbl->rows);
 	free(tbl->col_widths);
 	free(tbl);
+}
+
+void
+gcli_tbl_end(gcli_tbl tbl)
+{
+	gcli_tbl_dump(tbl);
+	gcli_tbl_free(tbl);
 }

@@ -126,7 +126,8 @@ gcli_print_snippets_short(enum gcli_output_flags const flags,
 		{ .name = "TITLE",      .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
-	if (gcli_tbl_init(cols, ARRAY_SIZE(cols), &table) < 0)
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
 		errx(1, "error: could not init table");
 
 
@@ -141,8 +142,7 @@ gcli_print_snippets_short(enum gcli_output_flags const flags,
 			                 list[i].visibility, list[i].author, list[i].title);
 	}
 
-	gcli_tbl_dump(table);
-	gcli_tbl_free(table);
+	gcli_tbl_end(table);
 }
 
 void

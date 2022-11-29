@@ -70,17 +70,14 @@ struct gcli_tblcoldef {
 };
 
 /* Init a table printer */
-int gcli_tbl_init(gcli_tblcoldef const *const cols,
-                  size_t const cols_size,
-                  gcli_tbl *const out);
+gcli_tbl gcli_tbl_begin(gcli_tblcoldef const *const cols,
+                        size_t const cols_size);
 
-/* Free all the resources allocated in the table */
-void gcli_tbl_free(gcli_tbl table);
+/* Print the table contents and free all the resources allocated in
+ * the table */
+void gcli_tbl_end(gcli_tbl table);
 
 /* Add a single to an initialized table */
 int gcli_tbl_add_row(gcli_tbl table, ...);
-
-/* Dump a table to stdout */
-int gcli_tbl_dump(gcli_tbl const table);
 
 #endif /* GCLI_TABLE_H */

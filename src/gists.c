@@ -182,7 +182,8 @@ gcli_print_gists_short(enum gcli_output_flags const flags,
 	};
 
 
-	if (gcli_tbl_init(cols, ARRAY_SIZE(cols), &table) < 0)
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
 		errx(1, "error: could not init table");
 
 	if (flags & OUTPUT_SORTED) {
@@ -200,8 +201,7 @@ gcli_print_gists_short(enum gcli_output_flags const flags,
 		}
 	}
 
-	gcli_tbl_dump(table);
-	gcli_tbl_free(table);
+	gcli_tbl_end(table);
 }
 
 void

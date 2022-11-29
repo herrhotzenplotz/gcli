@@ -79,7 +79,8 @@ gcli_print_pr_table(enum gcli_output_flags const flags,
 	}
 
 
-	if (gcli_tbl_init(cols, ARRAY_SIZE(cols), &table) < 0)
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
 		errx(1, "error: cannot init table");
 
 	if (flags & OUTPUT_SORTED) {
@@ -95,8 +96,7 @@ gcli_print_pr_table(enum gcli_output_flags const flags,
 		}
 	}
 
-	gcli_tbl_dump(table);
-	gcli_tbl_free(table);
+	gcli_tbl_end(table);
 }
 
 void
@@ -203,7 +203,8 @@ gcli_print_commits_table(gcli_commit const *const commits,
 		return;
 	}
 
-	if (gcli_tbl_init(cols, ARRAY_SIZE(cols), &table) < 0)
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
 		errx(1, "error: could not initialize table");
 
 	for (int i = 0; i < commits_size; ++i) {
@@ -214,8 +215,7 @@ gcli_print_commits_table(gcli_commit const *const commits,
 		free(message);          /* message is copied by the function above */
 	}
 
-	gcli_tbl_dump(table);
-	gcli_tbl_free(table);
+	gcli_tbl_end(table);
 }
 
 static void

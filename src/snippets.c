@@ -31,6 +31,7 @@
 #include <gcli/gitlab/config.h>
 #include <gcli/json_util.h>
 #include <gcli/snippets.h>
+#include <gcli/table.h>
 
 #include <pdjson/pdjson.h>
 #include <sn/sn.h>
@@ -86,20 +87,62 @@ gcli_snippets_get(int const max, gcli_snippet **const out)
 
 static void
 gcli_print_snippet(enum gcli_output_flags const flags,
-                   const gcli_snippet *const it)
+                   gcli_snippet const *const it)
 {
-	if (flags & OUTPUT_LONG) {
-		printf("    ID : %d\n", it->id);
-		printf(" TITLE : %s\n", it->title);
-		printf("AUTHOR : %s\n", it->author);
-		printf("  FILE : %s\n", it->filename);
-		printf("  DATE : %s\n", it->date);
-		printf("VSBLTY : %s\n", it->visibility);
-		printf("   URL : %s\n\n", it->raw_url);
+	printf("    ID : %d\n", it->id);
+	printf(" TITLE : %s\n", it->title);
+	printf("AUTHOR : %s\n", it->author);
+	printf("  FILE : %s\n", it->filename);
+	printf("  DATE : %s\n", it->date);
+	printf("VSBLTY : %s\n", it->visibility);
+	printf("   URL : %s\n\n", it->raw_url);
+}
+
+static void
+gcli_print_snippets_long(enum gcli_output_flags const flags,
+                         gcli_snippet const *const list,
+                         int const list_size)
+{
+	if (flags & OUTPUT_SORTED) {
+		for (int i = list_size; i > 0; --i)
+			gcli_print_snippet(flags, &list[i - 1]);
 	} else {
-		printf("%-10d  %-16.16s  %-10.10s  %-20.20s  %s\n",
-		       it->id, it->date, it->visibility, it->author, it->title);
+		for (int i = 0; i < list_size; ++i)
+			gcli_print_snippet(flags, &list[i]);
 	}
+}
+
+static void
+gcli_print_snippets_short(enum gcli_output_flags const flags,
+                          gcli_snippet const *const list,
+                          int const list_size)
+{
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "DATE",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "VISIBILITY", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "AUTHOR",     .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "TITLE",      .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+	};
+
+	if (gcli_tbl_init(cols, ARRAY_SIZE(cols), &table) < 0)
+		errx(1, "error: could not init table");
+
+
+	if (flags & OUTPUT_SORTED) {
+		for (int i = list_size; i > 0; --i)
+			gcli_tbl_add_row(table, list[i-1].id, list[i-1].date,
+			                 list[i-1].visibility, list[i-1].author,
+			                 list[i-1].title);
+	} else {
+		for (int i = 0; i < list_size; ++i)
+			gcli_tbl_add_row(table, list[i].id, list[i].date,
+			                 list[i].visibility, list[i].author, list[i].title);
+	}
+
+	gcli_tbl_dump(table);
+	gcli_tbl_free(table);
 }
 
 void
@@ -112,19 +155,10 @@ gcli_snippets_print(enum gcli_output_flags const flags,
 		return;
 	}
 
-	if (!(flags & OUTPUT_LONG)) {
-		printf("%-10.10s  %-16.16s  %-10.10s  %-20.20s  %s\n",
-		       "ID", "DATE", "VISIBILITY", "AUTHOR", "TITLE");
-	}
-
-	/* output in reverse order if the sorted flag was enabled */
-	if (flags & OUTPUT_SORTED) {
-		for (int i = list_size; i > 0; --i)
-			gcli_print_snippet(flags, &list[i - 1]);
-	} else {
-		for (int i = 0; i < list_size; ++i)
-			gcli_print_snippet(flags, &list[i]);
-	}
+	if (flags & OUTPUT_LONG)
+		gcli_print_snippets_long(flags, list, list_size);
+	else
+		gcli_print_snippets_short(flags, list, list_size);
 }
 
 void

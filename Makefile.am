@@ -117,6 +117,7 @@ libgcli_la_SOURCES = \
 	src/review.c include/gcli/review.h \
 	src/snippets.c include/gcli/snippets.h \
 	src/status.c include/gcli/status.h \
+	src/table.c include/gcli/table.h \
 	src/gitlab/api.c include/gcli/gitlab/api.h \
 	src/gitlab/comments.c include/gcli/gitlab/comments.h \
 	src/gitlab/config.c include/gcli/gitlab/config.h \

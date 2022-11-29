@@ -27,11 +27,12 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/gists.h>
-#include <gcli/config.h>
 #include <gcli/color.h>
+#include <gcli/config.h>
 #include <gcli/curl.h>
+#include <gcli/gists.h>
 #include <gcli/json_util.h>
+#include <gcli/table.h>
 
 #include <gcli/github/config.h>
 
@@ -131,34 +132,76 @@ print_gist_file(gcli_gist_file const *const file)
 static void
 print_gist(enum gcli_output_flags const flags, gcli_gist const *const gist)
 {
-	if (flags & OUTPUT_LONG) {
-		printf("   ID : %s"SV_FMT"%s\n"
-		       "OWNER : %s"SV_FMT"%s\n"
-		       "DESCR : "SV_FMT"\n"
-		       " DATE : "SV_FMT"\n"
-		       "  URL : "SV_FMT"\n"
-		       " PULL : "SV_FMT"\n",
-		       gcli_setcolor(GCLI_COLOR_YELLOW), SV_ARGS(gist->id), gcli_resetcolor(),
-		       gcli_setbold(), SV_ARGS(gist->owner), gcli_resetbold(),
-		       SV_ARGS(gist->description),
-		       SV_ARGS(gist->date),
-		       SV_ARGS(gist->url),
-		       SV_ARGS(gist->git_pull_url));
-		printf("FILES : %-15.15s  %-8.8s  %-s\n",
-		       "LANGUAGE", "SIZE", "FILENAME");
+	printf("   ID : %s"SV_FMT"%s\n"
+	       "OWNER : %s"SV_FMT"%s\n"
+	       "DESCR : "SV_FMT"\n"
+	       " DATE : "SV_FMT"\n"
+	       "  URL : "SV_FMT"\n"
+	       " PULL : "SV_FMT"\n",
+	       gcli_setcolor(GCLI_COLOR_YELLOW), SV_ARGS(gist->id), gcli_resetcolor(),
+	       gcli_setbold(), SV_ARGS(gist->owner), gcli_resetbold(),
+	       SV_ARGS(gist->description),
+	       SV_ARGS(gist->date),
+	       SV_ARGS(gist->url),
+	       SV_ARGS(gist->git_pull_url));
+	printf("FILES : %-15.15s  %-8.8s  %-s\n",
+	       "LANGUAGE", "SIZE", "FILENAME");
 
-		for (size_t i = 0; i < gist->files_size; ++i)
-			print_gist_file(&gist->files[i]);
+	for (size_t i = 0; i < gist->files_size; ++i)
+		print_gist_file(&gist->files[i]);
 
-		printf("\n");
+	printf("\n");
+}
+
+static void
+gcli_print_gists_long(enum gcli_output_flags const flags,
+                      gcli_gist const *const gists,
+                      int const gists_size)
+{
+	if (flags & OUTPUT_SORTED) {
+		for (int i = gists_size; i > 0; --i)
+			print_gist(flags, &gists[i - 1]);
 	} else {
-		printf("%32.*s  %s%-20.*s%s  %-20.*s  %-5zu  "SV_FMT"\n",
-		       SV_ARGS(gist->id),
-		       gcli_setbold(), SV_ARGS(gist->owner), gcli_resetbold(),
-		       SV_ARGS(gist->date),
-		       gist->files_size,
-		       SV_ARGS(gist->description));
+		for (int i = 0; i < gists_size; ++i)
+			print_gist(flags, &gists[i]);
 	}
+}
+
+static void
+gcli_print_gists_short(enum gcli_output_flags const flags,
+                       gcli_gist const *const gists,
+                       int const gists_size)
+{
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "ID",          .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_COLOUREXPL },
+		{ .name = "OWNER",       .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_BOLD },
+		{ .name = "DATE",        .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
+		{ .name = "FILES",       .type = GCLI_TBLCOLTYPE_INT, .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "DESCRIPTION", .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
+	};
+
+
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
+		errx(1, "error: could not init table");
+
+	if (flags & OUTPUT_SORTED) {
+		for (int i = gists_size; i > 0; --i) {
+			gcli_tbl_add_row(table, GCLI_COLOR_YELLOW, gists[i-1].id,
+			                 gists[i-1].owner, gists[i-1].date,
+			                 (int)gists[i-1].files_size, /* For safety pass it as int */
+			                 gists[i-1].description);
+		}
+	} else {
+		for (int i = 0; i < gists_size; ++i) {
+			gcli_tbl_add_row(table, GCLI_COLOR_YELLOW, gists[i].id,
+			                 gists[i].owner, gists[i].date,
+			                 (int)gists[i].files_size, gists[i].description);
+		}
+	}
+
+	gcli_tbl_end(table);
 }
 
 void
@@ -171,19 +214,10 @@ gcli_print_gists(enum gcli_output_flags const flags,
 		return;
 	}
 
-	if (!(flags & OUTPUT_LONG)) {
-		printf("%-32.32s  %-20.20s  %-20.20s  %-5.5s  %s\n",
-		       "ID", "OWNER", "DATE", "FILES", "DESCRIPTION");
-	}
-
-	/* output in reverse order if the sorted flag was enabled */
-	if (flags & OUTPUT_SORTED) {
-		for (int i = gists_size; i > 0; --i)
-			print_gist(flags, &gists[i - 1]);
-	} else {
-		for (int i = 0; i < gists_size; ++i)
-			print_gist(flags, &gists[i]);
-	}
+	if (flags & OUTPUT_LONG)	/* if we are in long mode (no pun intended) */
+		gcli_print_gists_long(flags, gists, gists_size);
+	else                        /* real mode (bad joke, I know) */
+		gcli_print_gists_short(flags, gists, gists_size);
 }
 
 gcli_gist *

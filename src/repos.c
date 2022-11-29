@@ -30,6 +30,7 @@
 #include <gcli/forges.h>
 #include <gcli/github/repos.h>
 #include <gcli/repos.h>
+#include <gcli/table.h>
 
 #include <stdlib.h>
 
@@ -40,36 +41,43 @@ gcli_get_repos(char const *owner, int const max, gcli_repo **const out)
 }
 
 
-static void
-gcli_print_repo(gcli_repo const *const repo)
-{
-	printf("%-4.4s  %-10.10s  %-16.16s  %-s\n",
-	       sn_bool_yesno(repo->is_fork),
-	       repo->visibility.data,
-	       repo->date.data,
-	       repo->full_name.data);
-}
-
 void
 gcli_print_repos_table(enum gcli_output_flags const flags,
                        gcli_repo const *const repos,
                        size_t const repos_size)
 {
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "FORK",     .type = GCLI_TBLCOLTYPE_BOOL, .flags = 0 },
+		{ .name = "VISBLTY",  .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
+		{ .name = "DATE",     .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
+		{ .name = "FULLNAME", .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
+	};
+
 	if (repos_size == 0) {
 		puts("No repos");
 		return;
 	}
 
-	printf("%-4.4s  %-10.10s  %-16.16s  %-s\n",
-	       "FORK", "VISBLTY", "DATE", "FULLNAME");
 
+	/* init table */
+	if (gcli_tbl_init(cols, ARRAY_SIZE(cols), &table) < 0)
+		errx(1, "error: could not init table");
+
+	/* put data into table */
 	if (flags & OUTPUT_SORTED) {
 		for (size_t i = repos_size; i > 0; --i)
-			gcli_print_repo(&repos[i - 1]);
+			gcli_tbl_add_row(table, repos[i-1].is_fork, repos[i-1].visibility,
+			                 repos[i-1].date, repos[i-1].full_name);
 	} else {
 		for (size_t i = 0; i < repos_size; ++i)
-			gcli_print_repo(&repos[i]);
+			gcli_tbl_add_row(table, repos[i].is_fork, repos[i].visibility,
+			                 repos[i].date, repos[i].full_name);
 	}
+
+	/* print it */
+	gcli_tbl_dump(table);
+	gcli_tbl_free(table);
 }
 
 void

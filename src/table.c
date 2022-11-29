@@ -54,7 +54,8 @@ struct gcli_tbl {
 struct gcli_tblrow {
 	struct {
 		char *text;             /* the text in the cell */
-		int colour;             /* colour if explicit fixed colour was given */
+		char const *colour;     /* colour (ansi escape sequence) if
+		                         * explicit fixed colour was given */
 	} *cells;
 };
 
@@ -123,8 +124,18 @@ tablerow_add_cell(struct gcli_tbl *const table,
 	int cell_size = 0;
 
 	/* Extract the explicit colour code */
-	if (table->cols[col].flags & GCLI_TBLCOL_COLOUREXPL)
-		row->cells[col].colour = va_arg(vp, int);
+	if (table->cols[col].flags & GCLI_TBLCOL_COLOUREXPL) {
+		int code = va_arg(vp, int);
+
+		/* don't free that! it's allocated and free'ed inside color.c */
+		row->cells[col].colour = gcli_setcolor(code);
+	} else if (table->cols[col].flags & GCLI_TBLCOL_256COLOUR) {
+		uint64_t hexcode = va_arg(vp, uint64_t);
+
+		/* see comment above */
+		row->cells[col].colour = gcli_setcolor256(hexcode);
+	}
+
 
 	/* Process the content */
 	switch (table->cols[col].type) {
@@ -224,8 +235,9 @@ dump_row(struct gcli_tbl const *const table, size_t const i)
 		/* State color */
 		if (table->cols[col].flags & GCLI_TBLCOL_STATECOLOURED)
 			printf("%s", gcli_state_color_str(row->cells[col].text));
-		else if (table->cols[col].flags & GCLI_TBLCOL_COLOUREXPL)
-			printf("%s", gcli_setcolor(row->cells[col].colour));
+		else if (table->cols[col].flags &
+		         (GCLI_TBLCOL_COLOUREXPL|GCLI_TBLCOL_256COLOUR))
+			printf("%s", row->cells[col].colour);
 
 		/* Bold */
 		if (table->cols[col].flags & GCLI_TBLCOL_BOLD)
@@ -237,7 +249,9 @@ dump_row(struct gcli_tbl const *const table, size_t const i)
 
 		/* End color */
 		if (table->cols[col].flags &
-		    (GCLI_TBLCOL_STATECOLOURED|GCLI_TBLCOL_COLOUREXPL))
+		    (GCLI_TBLCOL_STATECOLOURED
+		     |GCLI_TBLCOL_COLOUREXPL
+		     |GCLI_TBLCOL_256COLOUR))
 			printf("%s", gcli_resetcolor());
 
 		/* Stop printing in bold */

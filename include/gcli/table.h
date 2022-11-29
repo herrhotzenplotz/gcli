@@ -50,6 +50,8 @@ enum gcli_tblcol_flags {
 	/* Explicit colour - provide the colour to gcli_tbl_add_row first
 	 * and second the content of the cell. */
 	GCLI_TBLCOL_COLOUREXPL     = 8,
+	/* 256 color handling. Just like the above */
+	GCLI_TBLCOL_256COLOUR      = 16,
 };
 
 enum gcli_tblcoltype {

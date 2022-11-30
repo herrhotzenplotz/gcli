@@ -31,6 +31,7 @@
 #include <gcli/gitlab/config.h>
 #include <gcli/gitlab/pipelines.h>
 #include <gcli/json_util.h>
+#include <gcli/table.h>
 #include <pdjson/pdjson.h>
 #include <sn/sn.h>
 
@@ -94,22 +95,34 @@ void
 gitlab_print_pipelines(gitlab_pipeline const *const pipelines,
                        int const pipelines_size)
 {
-	if (pipelines_size) {
-		printf("%10.10s  %10.10s  %16.16s  %16.16s %-s\n",
-		       "ID", "STATUS", "CREATED", "UPDATED", "REF");
-		for (int i = 0; i < pipelines_size; ++i) {
-			printf("%10ld  %s%10.10s%s  %16.16s  %16.16s %-s\n",
-			       pipelines[i].id,
-			       gcli_state_color_str(pipelines[i].status),
-			       pipelines[i].status,
-			       gcli_resetcolor(),
-			       pipelines[i].created_at,
-			       pipelines[i].updated_at,
-			       pipelines[i].ref);
-		}
-	} else {
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "ID",      .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "STATUS",  .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
+		{ .name = "CREATED", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "UPDATED", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "REF",     .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+	};
+
+	if (!pipelines_size) {
 		printf("No pipelines\n");
+		return;
 	}
+
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
+		errx(1, "error: could not init table");
+
+	for (int i = 0; i < pipelines_size; ++i) {
+		gcli_tbl_add_row(table,
+		                 (int)(pipelines[i].id),
+		                 pipelines[i].status,
+		                 pipelines[i].created_at,
+		                 pipelines[i].updated_at,
+		                 pipelines[i].ref);
+	}
+
+	gcli_tbl_end(table);
 }
 
 void
@@ -182,24 +195,38 @@ gitlab_get_pipeline_jobs(char const *owner,
 void
 gitlab_print_jobs(gitlab_job const *const jobs, int const jobs_size)
 {
-	if (jobs_size) {
-		printf("%10.10s  %10.10s  %10.10s  %16.16s  %16.16s  %12.12s  %-s\n",
-		       "ID", "NAME", "STATUS", "STARTED", "FINISHED", "RUNNERDESC", "REF");
-		for (int i = 0; i < jobs_size; ++i) {
-			printf("%10ld  %10.10s  %s%10.10s%s  %16.16s  %16.16s  %12.12s  %-s\n",
-			       jobs[i].id,
-			       jobs[i].name,
-			       gcli_state_color_str(jobs[i].status),
-			       jobs[i].status,
-			       gcli_resetcolor(),
-			       jobs[i].started_at,
-			       jobs[i].finished_at,
-			       jobs[i].runner_description,
-			       jobs[i].ref);
-		}
-	} else {
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_LONG,   .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "STATUS",     .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
+		{ .name = "STARTED",    .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "FINISHED",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "RUNNERDESC", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "REF",        .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+	};
+
+	if (!jobs_size) {
 		printf("No jobs\n");
+		return;
 	}
+
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
+		errx(1, "error: could not initialize table");
+
+	for (int i = 0; i < jobs_size; ++i) {
+		gcli_tbl_add_row(table,
+		                 jobs[i].id,
+		                 jobs[i].name,
+		                 jobs[i].status,
+		                 jobs[i].started_at,
+		                 jobs[i].finished_at,
+		                 jobs[i].runner_description,
+		                 jobs[i].ref);
+	}
+
+	gcli_tbl_end(table);
 }
 
 static void

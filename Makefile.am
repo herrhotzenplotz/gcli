@@ -5,6 +5,8 @@ AM_YFLAGS = -d
 AM_CPPFLAGS = -I$(srcdir)/include
 AM_CPPFLAGS += -I$(srcdir)/thirdparty
 AM_CPPFLAGS += -I$(srcdir)
+AM_CPPFLAGS += -DYY_NO_INPUT
+AM_CPPFLAGS += -DYY_NO_UNPUT
 
 noinst_PROGRAMS = pgen
 pgen_SOURCES = \

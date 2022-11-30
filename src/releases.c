@@ -48,6 +48,8 @@ static void
 gcli_print_release(enum gcli_output_flags const flags,
                    gcli_release const *const it)
 {
+	(void) flags;
+
 	/* General information */
 	printf("        ID : "SV_FMT"\n"
 	       "      NAME : "SV_FMT"\n"

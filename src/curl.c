@@ -481,7 +481,7 @@ gcli_urlencode_sv(sn_sv const _input)
 	for (i = 0; i < input_len; ++i) {
 		if (!isalnum(input[i]) && input[i] != '-' && input[i] != '_') {
 			unsigned val = (input[i] & 0xFF);
-			snprintf(output + output_len, 4, "%%%02.2X", val);
+			snprintf(output + output_len, 4, "%%%2.2X", val);
 			output_len += 3;
 		} else {
 			output[output_len++] = input[i];

@@ -73,6 +73,11 @@ github_get_checks(char const *owner,
 void
 github_print_checks(gcli_github_checks const *const list)
 {
+	if (!list->checks_size) {
+		fprintf(stderr, "No checks\n");
+		return;
+	}
+
 	printf("%10.10s  %10.10s  %10.10s  %16.16s  %16.16s  %-s\n",
 	       "ID", "STATUS", "CONCLUSION", "STARTED", "COMPLETED", "NAME");
 

@@ -142,6 +142,10 @@ tablerow_add_cell(struct gcli_tbl *const table,
 		row->cells[col].text = sn_asprintf("%d", va_arg(vp, int));
 		cell_size = strlen(row->cells[col].text);
 	} break;
+	case GCLI_TBLCOLTYPE_LONG: {
+		row->cells[col].text = sn_asprintf("%ld", va_arg(vp, long));
+		cell_size = strlen(row->cells[col].text);
+	} break;
 	case GCLI_TBLCOLTYPE_STRING: {
 		char *it = va_arg(vp, char *);
 		row->cells[col].text = strdup(it);

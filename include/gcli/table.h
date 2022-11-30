@@ -56,6 +56,7 @@ enum gcli_tblcol_flags {
 
 enum gcli_tblcoltype {
 	GCLI_TBLCOLTYPE_INT,        /* integer */
+	GCLI_TBLCOLTYPE_LONG,       /* signed long int */
 	GCLI_TBLCOLTYPE_STRING,     /* C string */
 	GCLI_TBLCOLTYPE_SV,         /* sn_sv */
 	GCLI_TBLCOLTYPE_DOUBLE,     /* double precision float */

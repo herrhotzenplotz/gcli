@@ -29,11 +29,12 @@
 
 #include <assert.h>
 
-#include <gcli/github/checks.h>
-#include <gcli/config.h>
 #include <gcli/color.h>
+#include <gcli/config.h>
 #include <gcli/curl.h>
+#include <gcli/github/checks.h>
 #include <gcli/json_util.h>
+#include <gcli/table.h>
 
 #include <templates/github/checks.h>
 
@@ -73,20 +74,33 @@ github_get_checks(char const *owner,
 void
 github_print_checks(gcli_github_checks const *const list)
 {
-	printf("%10.10s  %10.10s  %10.10s  %16.16s  %16.16s  %-s\n",
-	       "ID", "STATUS", "CONCLUSION", "STARTED", "COMPLETED", "NAME");
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_LONG,   .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "STATUS",     .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "CONCLUSION", .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
+		{ .name = "STARTED",    .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "COMPLETED",  .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+	};
+
+
+	if (!list->checks_size) {
+		fprintf(stderr, "No checks\n");
+		return;
+	}
+
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
+		errx(1, "error: could not init table");
 
 	for (size_t i = 0; i < list->checks_size; ++i) {
-		printf("%10ld  %10.10s  %s%10.10s%s  %16.16s  %16.16s  %-s\n",
-		       list->checks[i].id,
-		       list->checks[i].status,
-		       gcli_state_color_str(list->checks[i].conclusion),
-		       list->checks[i].conclusion,
-		       gcli_resetcolor(),
-		       list->checks[i].started_at,
-		       list->checks[i].completed_at,
-		       list->checks[i].name);
+		gcli_tbl_add_row(table, list->checks[i].id, list->checks[i].status,
+		                 list->checks[i].conclusion, list->checks[i].started_at,
+		                 list->checks[i].completed_at, list->checks[i].name);
 	}
+
+	gcli_tbl_end(table);
 }
 
 void

@@ -132,6 +132,8 @@ print_gist_file(gcli_gist_file const *const file)
 static void
 print_gist(enum gcli_output_flags const flags, gcli_gist const *const gist)
 {
+	(void) flags;
+
 	printf("   ID : %s"SV_FMT"%s\n"
 	       "OWNER : %s"SV_FMT"%s\n"
 	       "DESCR : "SV_FMT"\n"

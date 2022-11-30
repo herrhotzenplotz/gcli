@@ -89,6 +89,8 @@ static void
 gcli_print_snippet(enum gcli_output_flags const flags,
                    gcli_snippet const *const it)
 {
+	(void) flags;
+
 	printf("    ID : %d\n", it->id);
 	printf(" TITLE : %s\n", it->title);
 	printf("AUTHOR : %s\n", it->author);

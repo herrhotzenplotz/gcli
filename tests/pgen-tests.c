@@ -49,7 +49,7 @@ labels(struct json_stream *stream)
 	printf("id\t%ld\n", label.id);
 	printf("name\t%s\n", label.name);
 	printf("description\t%s\n", label.description);
-	printf("color\t%"PRIx32"\n", label.color);
+	printf("colour\t%"PRIx32"\n", label.colour);
 }
 
 int

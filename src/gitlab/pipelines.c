@@ -27,7 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/color.h>
+#include <gcli/colour.h>
 #include <gcli/gitlab/config.h>
 #include <gcli/gitlab/pipelines.h>
 #include <gcli/json_util.h>
@@ -298,15 +298,15 @@ gitlab_print_job_status(gitlab_job const *const job)
 {
 	printf("          ID : %ld\n",     job->id);
 	printf("      STATUS : %s%s%s\n",
-	       gcli_state_color_str(job->status),
+	       gcli_state_colour_str(job->status),
 	       job->status,
-	       gcli_resetcolor());
+	       gcli_resetcolour());
 	printf("       STAGE : %s\n",      job->stage);
 	printf("        NAME : %s\n",      job->name);
 	printf("         REF : %s%s%s\n",
-	       gcli_setcolor(GCLI_COLOR_YELLOW),
+	       gcli_setcolour(GCLI_COLOR_YELLOW),
 	       job->ref,
-	       gcli_resetcolor());
+	       gcli_resetcolour());
 	printf("     CREATED : %s\n",      job->created_at);
 	printf("     STARTED : %s\n",      job->started_at);
 	printf("    FINISHED : %s\n",      job->finished_at);

@@ -83,10 +83,10 @@ gitlab_create_label(char const *owner, char const *repo, gcli_label *const label
 	                  owner, repo);
 	lname_escaped = gcli_json_escape(SV(label->name));
 	ldesc_escaped = gcli_json_escape(SV(label->description));
-	colour_string = sn_asprintf("%06X", (label->color>>8)&0xFFFFFF);
+	colour_string = sn_asprintf("%06X", (label->colour>>8)&0xFFFFFF);
 	data = sn_asprintf(
 		"{\"name\": \""SV_FMT"\","
-		"\"color\":\"#%s\","
+		"\"colour\":\"#%s\","
 		"\"description\":\""SV_FMT"\"}",
 		SV_ARGS(lname_escaped),
 		colour_string,

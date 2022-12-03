@@ -27,7 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/color.h>
+#include <gcli/colour.h>
 #include <gcli/forges.h>
 #include <gcli/labels.h>
 #include <gcli/table.h>
@@ -71,7 +71,7 @@ gcli_print_labels(gcli_label const *const labels, size_t const labels_size)
 		errx(1, "error: could not init table");
 
 	for (size_t i = 0; i < labels_size; ++i) {
-		gcli_tbl_add_row(table, labels[i].id, labels[i].color, labels[i].name,
+		gcli_tbl_add_row(table, labels[i].id, labels[i].colour, labels[i].name,
 		                 labels[i].description);
 	}
 

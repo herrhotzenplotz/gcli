@@ -27,7 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/color.h>
+#include <gcli/colour.h>
 #include <gcli/editor.h>
 #include <gcli/forges.h>
 #include <gcli/github/issues.h>
@@ -120,7 +120,7 @@ gcli_print_issue_summary(gcli_issue const *const it)
 	       it->number,
 	       SV_ARGS(it->title), SV_ARGS(it->created_at),
 	       gcli_setbold(), SV_ARGS(it->author), gcli_resetbold(),
-	       gcli_state_color_sv(it->state), SV_ARGS(it->state), gcli_resetcolor(),
+	       gcli_state_colour_sv(it->state), SV_ARGS(it->state), gcli_resetcolour(),
 	       it->comments, sn_bool_yesno(it->locked));
 
 	if (it->labels_size) {

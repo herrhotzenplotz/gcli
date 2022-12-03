@@ -29,7 +29,7 @@
 
 #include <gcli/table.h>
 
-#include <gcli/color.h>
+#include <gcli/colour.h>
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -126,13 +126,13 @@ tablerow_add_cell(struct gcli_tbl *const table,
 	if (table->cols[col].flags & GCLI_TBLCOL_COLOUREXPL) {
 		int code = va_arg(vp, int);
 
-		/* don't free that! it's allocated and free'ed inside color.c */
-		row->cells[col].colour = gcli_setcolor(code);
+		/* don't free that! it's allocated and free'ed inside colour.c */
+		row->cells[col].colour = gcli_setcolour(code);
 	} else if (table->cols[col].flags & GCLI_TBLCOL_256COLOUR) {
 		uint64_t hexcode = va_arg(vp, uint64_t);
 
 		/* see comment above */
-		row->cells[col].colour = gcli_setcolor256(hexcode);
+		row->cells[col].colour = gcli_setcolour256(hexcode);
 	}
 
 
@@ -235,9 +235,9 @@ dump_row(struct gcli_tbl const *const table, size_t const i)
 		    (col + 1) < table->cols_size)
 			pad(table->col_widths[col] - strlen(row->cells[col].text));
 
-		/* State color */
+		/* State colour */
 		if (table->cols[col].flags & GCLI_TBLCOL_STATECOLOURED)
-			printf("%s", gcli_state_color_str(row->cells[col].text));
+			printf("%s", gcli_state_colour_str(row->cells[col].text));
 		else if (table->cols[col].flags &
 		         (GCLI_TBLCOL_COLOUREXPL|GCLI_TBLCOL_256COLOUR))
 			printf("%s", row->cells[col].colour);
@@ -250,12 +250,12 @@ dump_row(struct gcli_tbl const *const table, size_t const i)
 		 * printing <empty> */
 		printf("%s  ", row->cells[col].text ? row->cells[col].text : "<empty>");
 
-		/* End color */
+		/* End colour */
 		if (table->cols[col].flags &
 		    (GCLI_TBLCOL_STATECOLOURED
 		     |GCLI_TBLCOL_COLOUREXPL
 		     |GCLI_TBLCOL_256COLOUR))
-			printf("%s", gcli_resetcolor());
+			printf("%s", gcli_resetcolour());
 
 		/* Stop printing in bold */
 		if (table->cols[col].flags & GCLI_TBLCOL_BOLD)

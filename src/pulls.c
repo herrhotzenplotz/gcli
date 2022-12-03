@@ -27,7 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/color.h>
+#include <gcli/colour.h>
 #include <gcli/config.h>
 #include <gcli/editor.h>
 #include <gcli/forges.h>
@@ -133,10 +133,10 @@ gcli_print_pr_summary(gcli_pull_summary const *const it)
 	       SANITIZE(it->base_label),
 	       SANITIZE(it->created_at),
 	       gcli_setbold(), SANITIZE(it->author), gcli_resetbold(),
-	       gcli_state_color_str(it->state), SANITIZE(it->state), gcli_resetcolor(),
+	       gcli_state_colour_str(it->state), SANITIZE(it->state), gcli_resetcolour(),
 	       it->comments,
-	       gcli_setcolor(GCLI_COLOR_GREEN), it->additions, gcli_resetcolor(),
-	       gcli_setcolor(GCLI_COLOR_RED),   it->deletions, gcli_resetcolor(),
+	       gcli_setcolour(GCLI_COLOR_GREEN), it->additions, gcli_resetcolour(),
+	       gcli_setcolour(GCLI_COLOR_RED),   it->deletions, gcli_resetcolour(),
 	       it->commits, it->changed_files,
 	       sn_bool_yesno(it->merged),
 	       sn_bool_yesno(it->mergeable),

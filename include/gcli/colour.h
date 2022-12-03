@@ -53,11 +53,11 @@ enum {
 	GCLI_COLOR_DEFAULT,
 };
 
-char const *gcli_setcolor256(uint32_t const colorcode);
-char const *gcli_resetcolor(void);
-char const *gcli_setcolor(int const color);
-char const *gcli_state_color_sv(sn_sv const state);
-char const *gcli_state_color_str(char const *it);
+char const *gcli_setcolour256(uint32_t const colourcode);
+char const *gcli_resetcolour(void);
+char const *gcli_setcolour(int const colour);
+char const *gcli_state_colour_sv(sn_sv const state);
+char const *gcli_state_colour_str(char const *it);
 char const *gcli_setbold(void);
 char const *gcli_resetbold(void);
 

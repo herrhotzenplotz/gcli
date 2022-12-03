@@ -27,7 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/color.h>
+#include <gcli/colour.h>
 #include <gcli/config.h>
 
 #include <stdlib.h>
@@ -35,47 +35,47 @@
 static struct {
 	uint32_t code;
 	char *sequence;
-} color_table[1024];
-static size_t color_table_size;
+} colour_table[1024];
+static size_t colour_table_size;
 
 static void
-clean_color_table(void)
+clean_colour_table(void)
 {
-	for (size_t i = 0; i < color_table_size; ++i)
-		free(color_table[i].sequence);
+	for (size_t i = 0; i < colour_table_size; ++i)
+		free(colour_table[i].sequence);
 }
 
 static char const *
-color_cache_lookup(uint32_t const code)
+colour_cache_lookup(uint32_t const code)
 {
-	for (size_t i = 0; i < color_table_size; ++i) {
-		if (color_table[i].code == code)
-			return color_table[i].sequence;
+	for (size_t i = 0; i < colour_table_size; ++i) {
+		if (colour_table[i].code == code)
+			return colour_table[i].sequence;
 	}
 	return NULL;
 }
 
 static void
-color_cache_insert(uint32_t const code, char *sequence)
+colour_cache_insert(uint32_t const code, char *sequence)
 {
-	color_table[color_table_size].code     = code;
-	color_table[color_table_size].sequence = sequence;
-	color_table_size++;
+	colour_table[colour_table_size].code     = code;
+	colour_table[colour_table_size].sequence = sequence;
+	colour_table_size++;
 }
 
 char const *
-gcli_setcolor256(uint32_t const code)
+gcli_setcolour256(uint32_t const code)
 {
 	char       *result    = NULL;
 	char const *oldresult = NULL;
 
-	if (!gcli_config_have_colors())
+	if (!gcli_config_have_colours())
 		return "";
 
-	if (color_table_size == 0)
-		atexit(clean_color_table);
+	if (colour_table_size == 0)
+		atexit(clean_colour_table);
 
-	oldresult = color_cache_lookup(code);
+	oldresult = colour_cache_lookup(code);
 	if (oldresult)
 		return oldresult;
 
@@ -85,24 +85,24 @@ gcli_setcolor256(uint32_t const code)
 	                     (code & 0x00FF0000) >> 16,
 	                     (code & 0x0000FF00) >>  8);
 
-	color_cache_insert(code, result);
+	colour_cache_insert(code, result);
 
 	return result;
 }
 
 const char *
-gcli_resetcolor(void)
+gcli_resetcolour(void)
 {
-	if (!gcli_config_have_colors())
+	if (!gcli_config_have_colours())
 		return "";
 
 	return "\033[m";
 }
 
 const char *
-gcli_setcolor(int code)
+gcli_setcolour(int code)
 {
-	if (!gcli_config_have_colors())
+	if (!gcli_config_have_colours())
 		return "";
 
 	switch (code) {
@@ -124,7 +124,7 @@ gcli_setcolor(int code)
 char const *
 gcli_setbold(void)
 {
-	if (!gcli_config_have_colors())
+	if (!gcli_config_have_colours())
 		return "";
 	else
 		return "\033[1m";
@@ -133,24 +133,24 @@ gcli_setbold(void)
 char const *
 gcli_resetbold(void)
 {
-	if (!gcli_config_have_colors())
+	if (!gcli_config_have_colours())
 		return "";
 	else
 		return "\033[22m";
 }
 
 char const *
-gcli_state_color_str(char const *it)
+gcli_state_colour_str(char const *it)
 {
 	if (it)
-		return gcli_state_color_sv(SV((char *)it));
+		return gcli_state_colour_sv(SV((char *)it));
 	else
 		return "";
 }
 
 /* TODO: Probably a hash table would be more suitable */
 static const struct { char const *name; int code; }
-	state_color_table[] =
+	state_colour_table[] =
 {
 	{ .name = "open",      .code = GCLI_COLOR_GREEN   },
 	{ .name = "success",   .code = GCLI_COLOR_GREEN   },
@@ -165,14 +165,14 @@ static const struct { char const *name; int code; }
 };
 
 char const *
-gcli_state_color_sv(sn_sv const state)
+gcli_state_colour_sv(sn_sv const state)
 {
 	if (!sn_sv_null(state)) {
-		for (size_t i = 0; i < ARRAY_SIZE(state_color_table); ++i) {
-			if (sn_sv_has_prefix(state, state_color_table[i].name))
-				return gcli_setcolor(state_color_table[i].code);
+		for (size_t i = 0; i < ARRAY_SIZE(state_colour_table); ++i) {
+			if (sn_sv_has_prefix(state, state_colour_table[i].name))
+				return gcli_setcolour(state_colour_table[i].code);
 		}
 	}
 
-	return gcli_setcolor(GCLI_COLOR_DEFAULT);
+	return gcli_setcolour(GCLI_COLOR_DEFAULT);
 }

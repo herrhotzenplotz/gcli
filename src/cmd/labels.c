@@ -42,7 +42,7 @@
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: gcli labels create [-o owner -r repo] -n name -c color -d description\n");
+	fprintf(stderr, "usage: gcli labels create [-o owner -r repo] -n name -c colour -d description\n");
 	fprintf(stderr, "       gcli labels delete [-o owner -r repo] id\n");
 	fprintf(stderr, "       gcli labels [-o owner -r repo] [-n number]\n");
 	fprintf(stderr, "OPTIONS:\n");
@@ -50,7 +50,7 @@ usage(void)
 	fprintf(stderr, "  -r repo         The repository name\n");
 	fprintf(stderr, "  -n number       Number of labels to fetch (-1 = everything)\n");
 	fprintf(stderr, "  -l name         Name of the new label\n");
-	fprintf(stderr, "  -c color        Six digit hex code of the label's color\n");
+	fprintf(stderr, "  -c colour       Six digit hex code of the label's colour\n");
 	fprintf(stderr, "  -d description  A short description of the label\n");
 	fprintf(stderr, "\n");
 	version();
@@ -110,7 +110,7 @@ subcommand_labels_create(int argc, char *argv[])
 		{.name = "repo",        .has_arg = required_argument, .val = 'r'},
 		{.name = "owner",       .has_arg = required_argument, .val = 'o'},
 		{.name = "name",        .has_arg = required_argument, .val = 'n'},
-		{.name = "color",       .has_arg = required_argument, .val = 'c'},
+		{.name = "colour",      .has_arg = required_argument, .val = 'c'},
 		{.name = "description", .has_arg = required_argument, .val = 'd'},
 		{0}
 	};
@@ -125,9 +125,9 @@ subcommand_labels_create(int argc, char *argv[])
 			break;
 		case 'c': {
 			char *endptr = NULL;
-			label.color = strtol(optarg, &endptr, 16);
+			label.colour = strtol(optarg, &endptr, 16);
 			if (endptr != (optarg + strlen(optarg)))
-				err(1, "labels: cannot parse color");
+				err(1, "labels: cannot parse colour");
 		} break;
 		case 'd': {
 			label.description = optarg;

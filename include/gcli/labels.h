@@ -44,7 +44,7 @@ struct gcli_label {
 	long      id;
 	char     *name;
 	char     *description;
-	uint32_t  color;
+	uint32_t  colour;
 };
 
 size_t gcli_get_labels(char const *owner,

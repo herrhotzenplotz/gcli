@@ -64,7 +64,7 @@ static struct gcli_config {
 	char const *override_default_account;
 	char const *override_remote;
 	int         override_forgetype;
-	int         colors_disabled;
+	int         colours_disabled;
 
 	sn_sv  buffer;
 	void  *mmap_pointer;
@@ -433,9 +433,9 @@ gcli_config_init(int *argc, char ***argv)
 		  .has_arg = required_argument,
 		  .flag    = NULL,
 		  .val     = 'r' },
-		{ .name    = "no-colors",
+		{ .name    = "no-colours",
 		  .has_arg = no_argument,
-		  .flag    = &config.colors_disabled,
+		  .flag    = &config.colours_disabled,
 		  .val     = 1 },
 		{ .name    = "type",
 		  .has_arg = required_argument,
@@ -471,7 +471,7 @@ gcli_config_init(int *argc, char ***argv)
 			config.override_remote = optarg;
 		} break;
 		case 'c': {
-			config.colors_disabled = 1;
+			config.colours_disabled = 1;
 		} break;
 		case 'q': {
 			sn_setverbosity(VERBOSITY_QUIET);
@@ -719,22 +719,22 @@ gcli_config_get_repo(char const **const owner, char const **const repo)
 }
 
 int
-gcli_config_have_colors(void)
+gcli_config_have_colours(void)
 {
 	static int tested_tty = 0;
 
-	if (config.colors_disabled)
+	if (config.colours_disabled)
 		return 0;
 
 	if (tested_tty)
-		return !config.colors_disabled;
+		return !config.colours_disabled;
 
 	if (isatty(STDOUT_FILENO))
-		config.colors_disabled = false;
+		config.colours_disabled = false;
 	else
-		config.colors_disabled = true;
+		config.colours_disabled = true;
 
-	return !config.colors_disabled;
+	return !config.colours_disabled;
 }
 
 char const *

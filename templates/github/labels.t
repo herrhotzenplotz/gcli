@@ -7,6 +7,6 @@ object of gcli_label with
 	   ("id" => id as int,
 		"name" => name as string,
 		"description" => description as string,
-		"color" => color as github_style_color);
+		"colour" => colour as github_style_colour);
 
 parser github_labels is array of gcli_label use parse_github_label;

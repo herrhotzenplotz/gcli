@@ -57,7 +57,7 @@ sn_sv            gcli_config_get_base(void);
 gcli_forge_type  gcli_config_get_forge_type(void);
 sn_sv            gcli_config_get_override_default_account(void);
 void             gcli_config_get_repo(const char **const, const char **const);
-int              gcli_config_have_colors(void);
+int              gcli_config_have_colours(void);
 char const      *gcli_get_apibase(void);
 
 #endif /* CONFIG_H */

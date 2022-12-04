@@ -101,7 +101,7 @@ TEMPLATES = \
 	templates/gitlab/snippets.t
 
 libgcli_la_SOURCES = \
-	src/color.c include/gcli/color.h \
+	src/colour.c include/gcli/colour.h \
 	src/comments.c include/gcli/comments.h \
 	src/config.c include/gcli/config.h \
 	src/curl.c include/gcli/curl.h \

@@ -29,9 +29,10 @@
 
 #include <assert.h>
 
-#include <gcli/color.h>
+#include <gcli/colour.h>
 #include <gcli/config.h>
 #include <gcli/curl.h>
+#include <gcli/github/checks.h>
 #include <gcli/github/checks.h>
 #include <gcli/json_util.h>
 #include <gcli/table.h>

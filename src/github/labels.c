@@ -73,25 +73,25 @@ github_create_label(char const *owner,
                     char const *repo,
                     gcli_label *const label)
 {
-	char               *url         = NULL;
-	char               *data        = NULL;
-	char               *e_owner     = NULL;
-	char               *e_repo      = NULL;
-	char               *color       = NULL;
-	sn_sv               label_name  = SV_NULL;
-	sn_sv               label_descr = SV_NULL;
-	sn_sv               label_color = SV_NULL;
-	gcli_fetch_buffer   buffer      = {0};
-	struct json_stream  stream      = {0};
+	char               *url          = NULL;
+	char               *data         = NULL;
+	char               *e_owner      = NULL;
+	char               *e_repo       = NULL;
+	char               *colour       = NULL;
+	sn_sv               label_name   = SV_NULL;
+	sn_sv               label_descr  = SV_NULL;
+	sn_sv               label_colour = SV_NULL;
+	gcli_fetch_buffer   buffer       = {0};
+	struct json_stream  stream       = {0};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	color = sn_asprintf("%06X", label->color >> 8);
+	colour = sn_asprintf("%06X", label->colour >> 8);
 
-	label_name  = gcli_json_escape(SV(label->name));
-	label_descr = gcli_json_escape(SV(label->description));
-	label_color = gcli_json_escape(SV(color));
+	label_name   = gcli_json_escape(SV(label->name));
+	label_descr  = gcli_json_escape(SV(label->description));
+	label_colour = gcli_json_escape(SV(colour));
 
 	/* /repos/{owner}/{repo}/labels */
 	url = sn_asprintf("%s/repos/%s/%s/labels",
@@ -101,11 +101,11 @@ github_create_label(char const *owner,
 	data = sn_asprintf("{ "
 	                   "  \"name\": \""SV_FMT"\", "
 	                   "  \"description\": \""SV_FMT"\", "
-	                   "  \"color\": \""SV_FMT"\""
+	                   "  \"colour\": \""SV_FMT"\""
 	                   "}",
 	                   SV_ARGS(label_name),
 	                   SV_ARGS(label_descr),
-	                   SV_ARGS(label_color));
+	                   SV_ARGS(label_colour));
 
 	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
 	json_open_buffer(&stream, buffer.data, buffer.length);
@@ -116,10 +116,10 @@ github_create_label(char const *owner,
 	free(data);
 	free(e_owner);
 	free(e_repo);
-	free(color);
+	free(colour);
 	free(label_name.data);
 	free(label_descr.data);
-	free(label_color.data);
+	free(label_colour.data);
 	free(buffer.data);
 }
 

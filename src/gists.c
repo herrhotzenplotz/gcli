@@ -27,7 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/color.h>
+#include <gcli/colour.h>
 #include <gcli/config.h>
 #include <gcli/curl.h>
 #include <gcli/gists.h>
@@ -140,7 +140,7 @@ print_gist(enum gcli_output_flags const flags, gcli_gist const *const gist)
 	       " DATE : "SV_FMT"\n"
 	       "  URL : "SV_FMT"\n"
 	       " PULL : "SV_FMT"\n",
-	       gcli_setcolor(GCLI_COLOR_YELLOW), SV_ARGS(gist->id), gcli_resetcolor(),
+	       gcli_setcolour(GCLI_COLOR_YELLOW), SV_ARGS(gist->id), gcli_resetcolour(),
 	       gcli_setbold(), SV_ARGS(gist->owner), gcli_resetbold(),
 	       SV_ARGS(gist->description),
 	       SV_ARGS(gist->date),

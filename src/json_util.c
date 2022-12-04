@@ -317,33 +317,33 @@ get_parse_int_(json_stream *const input, char const *function)
 }
 
 uint32_t
-get_github_style_color(json_stream *const input)
+get_github_style_colour(json_stream *const input)
 {
-	char *color_str = get_string(input);
+	char *colour_str = get_string(input);
 	char *endptr    = NULL;
 
-	unsigned long color = strtoul(color_str, &endptr, 16);
-	if (endptr != color_str + strlen(color_str))
+	unsigned long colour = strtoul(colour_str, &endptr, 16);
+	if (endptr != colour_str + strlen(colour_str))
 		errx(1, "error: the api returned an"
-		     "invalid hexadecimal color code");
+		     "invalid hexadecimal colour code");
 
-	free(color_str);
+	free(colour_str);
 
-	return ((uint32_t)(color)) << 8;
+	return ((uint32_t)(colour)) << 8;
 }
 
 uint32_t
-get_gitlab_style_color(json_stream *const input)
+get_gitlab_style_colour(json_stream *const input)
 {
-	char *color  = get_string(input);
+	char *colour  = get_string(input);
 	char *endptr = NULL;
 	long  code   = 0;
 
-	code = strtol(color + 1, &endptr, 16);
-	if (endptr != (color + 1 + strlen(color + 1)))
-		err(1, "error: color code is invalid");
+	code = strtol(colour + 1, &endptr, 16);
+	if (endptr != (colour + 1 + strlen(colour + 1)))
+		err(1, "error: colour code is invalid");
 
-	free(color);
+	free(colour);
 
 	return ((uint32_t)(code) << 8);
 }

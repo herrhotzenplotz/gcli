@@ -41,7 +41,7 @@ typedef void *gcli_tbl;
 
 /** Flags for table column definitions */
 enum gcli_tblcol_flags {
-	/* column is as string and color is derived from its contents. */
+	/* column is as string and colour is derived from its contents. */
 	GCLI_TBLCOL_STATECOLOURED  = 1,
 	/* Right-justify the column */
 	GCLI_TBLCOL_JUSTIFYR       = 2,
@@ -50,7 +50,7 @@ enum gcli_tblcol_flags {
 	/* Explicit colour - provide the colour to gcli_tbl_add_row first
 	 * and second the content of the cell. */
 	GCLI_TBLCOL_COLOUREXPL     = 8,
-	/* 256 color handling. Just like the above */
+	/* 256 colour handling. Just like the above */
 	GCLI_TBLCOL_256COLOUR      = 16,
 };
 

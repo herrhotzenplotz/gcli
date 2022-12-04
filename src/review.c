@@ -27,7 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/color.h>
+#include <gcli/colour.h>
 #include <gcli/config.h>
 #include <gcli/curl.h>
 #include <gcli/forges.h>
@@ -48,9 +48,9 @@ gcli_review_print_review_table(gcli_pr_review const *const headers,
 			printf("   %s%s%s - %s - %s%s%s\n",
 			       gcli_setbold(), headers[i].author, gcli_resetbold(),
 			       headers[i].date,
-			       gcli_state_color_str(headers[i].state),
+			       gcli_state_colour_str(headers[i].state),
 			       headers[i].state,
-			       gcli_resetcolor());
+			       gcli_resetcolour());
 		} else {
 			printf("   %s%s%s - %s\n",
 			       gcli_setbold(), headers[i].author, gcli_resetbold(),

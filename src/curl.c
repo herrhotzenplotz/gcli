@@ -40,6 +40,25 @@
 #include <sn/sn.h>
 #include <pdjson/pdjson.h>
 
+/* Hack for NetBSD's broken isalnum implementation */
+#ifdef __NetBSD__
+#  ifdef isalnum
+#    undef isalnum
+#  endif
+#  define isalnum gcli_curl_isalnum
+
+/* TODO: this is fucked in case we are working on an EBCDIC machine
+ * (wtf are you doing anyways?) */
+static int
+gcli_curl_isalnum(char const c)
+{
+	return ('A' <= c && c <= 'Z')
+		|| ('a' <= c && c <= 'z')
+		|| ('0' <= c && c <= '9');
+}
+
+#endif /* __NetBSD */
+
 /* Cached curl handle */
 static CURL *gcli_curl_session = NULL;
 

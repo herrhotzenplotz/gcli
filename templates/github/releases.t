@@ -15,6 +15,7 @@ object of gcli_release with
         "draft"      => draft as bool,
         "prerelease" => prerelease as bool,
         "assets"     => assets as array of gcli_release_asset use parse_github_release_asset,
+        "upload_url" => upload_url as sv,
         "html_url"   => html_url as sv);
 
 parser github_releases is

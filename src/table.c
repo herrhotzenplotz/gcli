@@ -317,6 +317,7 @@ struct gcli_dict {
 		char *key;
 		char *value;
 		int flags;
+		int colour_args;
 	} *entries;
 	size_t entries_size;
 
@@ -334,6 +335,7 @@ static int
 gcli_dict_add_row(struct gcli_dict *list,
                   char const *const key,
                   int flags,
+                  int colour_args,
                   char *value)
 {
 	struct gcli_dict_entry *entry;
@@ -349,6 +351,7 @@ gcli_dict_add_row(struct gcli_dict *list,
 	entry->key = strdup(key);
 	entry->value = value;
 	entry->flags = flags;
+	entry->colour_args = colour_args;
 
 	if ((keylen = strlen(key)) > list->max_key_len)
 		list->max_key_len = keylen;
@@ -360,6 +363,7 @@ int
 gcli_dict_add(gcli_dict list,
               char const *const key,
               int flags,
+              int colour_args,
               char const *const fmt,
               ...)
 {
@@ -379,16 +383,18 @@ gcli_dict_add(gcli_dict list,
     vsnprintf(result, actual + 1, fmt, vp);
     va_end(vp);
 
-    return gcli_dict_add_row(list, key, flags, result);
+    return gcli_dict_add_row(list, key, flags, colour_args, result);
 }
 
 int
 gcli_dict_add_string(gcli_dict list,
                      char const *const key,
                      int flags,
+                     int colour_args,
                      char const *const str)
 {
-	return gcli_dict_add_row(list, key, flags, strdup(str ? str : "<empty>"));
+	return gcli_dict_add_row(list, key, flags, colour_args,
+	                         strdup(str ? str : "<empty>"));
 }
 
 static void
@@ -409,11 +415,28 @@ gcli_dict_end(gcli_dict _list)
 	struct gcli_dict *list = _list;
 
 	for (size_t i = 0; i < list->entries_size; ++i) {
+		int flags = list->entries[i].flags;
+
 		pad(list->max_key_len - strlen(list->entries[i].key));
 		printf("%s : ", list->entries[i].key);
 
-		/* TODO: formatting and flags handling */
+		if (flags & GCLI_TBLCOL_BOLD)
+			printf("%s", gcli_setbold());
+
+		if (flags & GCLI_TBLCOL_COLOUREXPL)
+			printf("%s", gcli_setcolour(list->entries[i].colour_args));
+
+		if (flags & GCLI_TBLCOL_STATECOLOURED)
+			printf("%s", gcli_state_colour_str(list->entries[i].value));
+
 		puts(list->entries[i].value);
+
+		if (flags & (GCLI_TBLCOL_COLOUREXPL
+		             |GCLI_TBLCOL_STATECOLOURED))
+			printf("%s", gcli_resetcolour());
+
+		if (flags & GCLI_TBLCOL_BOLD)
+			printf("%s", gcli_resetbold());
 	}
 
 	gcli_dict_free(list);

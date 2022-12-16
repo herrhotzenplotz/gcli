@@ -90,12 +90,14 @@ gcli_dict gcli_dict_begin(void);
 int gcli_dict_add(gcli_dict list,
                   char const *const key,
                   int flags,
+                  int colourargs,
                   char const *const fmt,
                   ...);
 
 int gcli_dict_add_string(gcli_dict list,
                          char const *const key,
                          int flags,
+                         int colourargs,
                          char const *const str);
 
 int gcli_dict_end(gcli_dict _list);

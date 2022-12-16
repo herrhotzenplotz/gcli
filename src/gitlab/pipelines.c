@@ -300,17 +300,17 @@ gitlab_print_job_status(gitlab_job const *const job)
 
 	printer = gcli_dict_begin();
 
-	gcli_dict_add(printer, "ID", 0, "%ld", job->id);
-	gcli_dict_add_string(printer, "STATUS", 0, job->status);
-	gcli_dict_add_string(printer, "STAGE", 0, job->stage);
-	gcli_dict_add_string(printer, "NAME", 0, job->name);
-	gcli_dict_add_string(printer, "REF", 0, job->ref);
-	gcli_dict_add_string(printer, "CREATED", 0, job->created_at);
-	gcli_dict_add_string(printer, "STARTED", 0, job->started_at);
-	gcli_dict_add_string(printer, "FINISHED", 0, job->finished_at);
-	gcli_dict_add(printer, "DURATION", 0, "%-.2lfs", job->duration);
-	gcli_dict_add_string(printer, "RUNNER NAME", 0, job->runner_name);
-	gcli_dict_add_string(printer, "RUNNER DESCR", 0, job->runner_description);
+	gcli_dict_add(printer,        "ID", 0, 0, "%ld", job->id);
+	gcli_dict_add_string(printer, "STATUS", GCLI_TBLCOL_STATECOLOURED, 0, job->status);
+	gcli_dict_add_string(printer, "STAGE", 0, 0, job->stage);
+	gcli_dict_add_string(printer, "NAME", GCLI_TBLCOL_BOLD, 0, job->name);
+	gcli_dict_add_string(printer, "REF", GCLI_TBLCOL_COLOUREXPL, GCLI_COLOR_YELLOW, job->ref);
+	gcli_dict_add_string(printer, "CREATED", 0, 0, job->created_at);
+	gcli_dict_add_string(printer, "STARTED", 0, 0, job->started_at);
+	gcli_dict_add_string(printer, "FINISHED", 0, 0, job->finished_at);
+	gcli_dict_add(printer,        "DURATION", 0, 0, "%-.2lfs", job->duration);
+	gcli_dict_add_string(printer, "RUNNER NAME", 0, 0, job->runner_name);
+	gcli_dict_add_string(printer, "RUNNER DESCR", 0, 0, job->runner_description);
 
 	gcli_dict_end(printer);
 }

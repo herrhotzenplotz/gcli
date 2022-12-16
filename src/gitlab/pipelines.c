@@ -296,23 +296,23 @@ gitlab_get_job(char const *owner,
 static void
 gitlab_print_job_status(gitlab_job const *const job)
 {
-	printf("          ID : %ld\n",     job->id);
-	printf("      STATUS : %s%s%s\n",
-	       gcli_state_colour_str(job->status),
-	       job->status,
-	       gcli_resetcolour());
-	printf("       STAGE : %s\n",      job->stage);
-	printf("        NAME : %s\n",      job->name);
-	printf("         REF : %s%s%s\n",
-	       gcli_setcolour(GCLI_COLOR_YELLOW),
-	       job->ref,
-	       gcli_resetcolour());
-	printf("     CREATED : %s\n",      job->created_at);
-	printf("     STARTED : %s\n",      job->started_at);
-	printf("    FINISHED : %s\n",      job->finished_at);
-	printf("    DURATION : %-.2lfs\n", job->duration);
-	printf(" RUNNER NAME : %s\n",      job->runner_name);
-	printf("RUNNER DESCR : %s\n",      job->runner_description);
+	gcli_dict printer;
+
+	printer = gcli_dict_begin();
+
+	gcli_dict_add(printer, "ID", 0, "%ld", job->id);
+	gcli_dict_add_string(printer, "STATUS", 0, job->status);
+	gcli_dict_add_string(printer, "STAGE", 0, job->stage);
+	gcli_dict_add_string(printer, "NAME", 0, job->name);
+	gcli_dict_add_string(printer, "REF", 0, job->ref);
+	gcli_dict_add_string(printer, "CREATED", 0, job->created_at);
+	gcli_dict_add_string(printer, "STARTED", 0, job->started_at);
+	gcli_dict_add_string(printer, "FINISHED", 0, job->finished_at);
+	gcli_dict_add(printer, "DURATION", 0, "%-.2lfs", job->duration);
+	gcli_dict_add_string(printer, "RUNNER NAME", 0, job->runner_name);
+	gcli_dict_add_string(printer, "RUNNER DESCR", 0, job->runner_description);
+
+	gcli_dict_end(printer);
 }
 
 void

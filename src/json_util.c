@@ -85,7 +85,11 @@ get_string_(json_stream *const input, char const *where)
 
 	size_t len;
 	char const *it = json_get_string(input, &len);
-	return sn_strndup(it, len);
+
+	if (!it)
+		return strdup("<empty>");
+	else
+		return sn_strndup(it, len);
 }
 
 bool

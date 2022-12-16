@@ -148,6 +148,8 @@ tablerow_add_cell(struct gcli_tbl *const table,
 	} break;
 	case GCLI_TBLCOLTYPE_STRING: {
 		char *it = va_arg(vp, char *);
+		if (!it)
+			it = "<empty>"; /* hack */
 		row->cells[col].text = strdup(it);
 		cell_size = strlen(it);
 	} break;

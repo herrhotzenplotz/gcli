@@ -36,8 +36,12 @@
 
 #include <stdlib.h>
 
+#include <sn/sn.h>
+
 typedef struct gcli_tblcoldef gcli_tblcoldef;
 typedef void *gcli_tbl;
+
+typedef void *gcli_dict;
 
 /** Flags for table column definitions */
 enum gcli_tblcol_flags {
@@ -80,5 +84,20 @@ void gcli_tbl_end(gcli_tbl table);
 
 /* Add a single to an initialized table */
 int gcli_tbl_add_row(gcli_tbl table, ...);
+
+gcli_dict gcli_dict_begin(void);
+
+int gcli_dict_add(gcli_dict list,
+                  char const *const key,
+                  int flags,
+                  char const *const fmt,
+                  ...);
+
+int gcli_dict_add_string(gcli_dict list,
+                         char const *const key,
+                         int flags,
+                         char const *const str);
+
+int gcli_dict_end(gcli_dict _list);
 
 #endif /* GCLI_TABLE_H */

@@ -317,7 +317,7 @@ struct gcli_dict {
 		char *key;
 		char *value;
 		int flags;
-		int colour_args;
+		uint32_t colour_args;
 	} *entries;
 	size_t entries_size;
 
@@ -363,7 +363,7 @@ int
 gcli_dict_add(gcli_dict list,
               char const *const key,
               int flags,
-              int colour_args,
+              uint32_t colour_args,
               char const *const fmt,
               ...)
 {
@@ -390,7 +390,7 @@ int
 gcli_dict_add_string(gcli_dict list,
                      char const *const key,
                      int flags,
-                     int colour_args,
+                     uint32_t colour_args,
                      char const *const str)
 {
 	return gcli_dict_add_row(list, key, flags, colour_args,
@@ -429,10 +429,14 @@ gcli_dict_end(gcli_dict _list)
 		if (flags & GCLI_TBLCOL_STATECOLOURED)
 			printf("%s", gcli_state_colour_str(list->entries[i].value));
 
+		if (flags & GCLI_TBLCOL_256COLOUR)
+			printf("%s", gcli_setcolour256(list->entries[i].colour_args));
+
 		puts(list->entries[i].value);
 
 		if (flags & (GCLI_TBLCOL_COLOUREXPL
-		             |GCLI_TBLCOL_STATECOLOURED))
+		             |GCLI_TBLCOL_STATECOLOURED
+		             |GCLI_TBLCOL_256COLOUR))
 			printf("%s", gcli_resetcolour());
 
 		if (flags & GCLI_TBLCOL_BOLD)

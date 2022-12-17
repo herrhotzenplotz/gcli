@@ -34,6 +34,7 @@
 #include <config.h>
 #endif
 
+#include <stdint.h>
 #include <stdlib.h>
 
 #include <sn/sn.h>
@@ -90,14 +91,14 @@ gcli_dict gcli_dict_begin(void);
 int gcli_dict_add(gcli_dict list,
                   char const *const key,
                   int flags,
-                  int colourargs,
+                  uint32_t colour_args,
                   char const *const fmt,
                   ...);
 
 int gcli_dict_add_string(gcli_dict list,
                          char const *const key,
                          int flags,
-                         int colourargs,
+                         uint32_t colour_args,
                          char const *const str);
 
 int gcli_dict_end(gcli_dict _list);

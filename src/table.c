@@ -310,3 +310,171 @@ gcli_tbl_end(gcli_tbl tbl)
 	gcli_tbl_dump(tbl);
 	gcli_tbl_free(tbl);
 }
+
+/* DICTIONARY *********************************************************/
+struct gcli_dict {
+	struct gcli_dict_entry {
+		char *key;
+		char *value;
+		int flags;
+		uint32_t colour_args;
+	} *entries;
+	size_t entries_size;
+
+	size_t max_key_len;
+};
+
+/* Create a new long list printer and return a handle to it */
+gcli_dict
+gcli_dict_begin(void)
+{
+	return calloc(sizeof(struct gcli_dict), 1);
+}
+
+static int
+gcli_dict_add_row(struct gcli_dict *list,
+                  char const *const key,
+                  int flags,
+                  int colour_args,
+                  char *value)
+{
+	struct gcli_dict_entry *entry;
+	size_t keylen;
+
+	list->entries = realloc(list->entries,
+	                        sizeof(*list->entries) * (list->entries_size + 1));
+	if (!list->entries)
+		return -1;
+
+	entry = &list->entries[list->entries_size++];
+
+	entry->key = strdup(key);
+	entry->value = value;
+	entry->flags = flags;
+	entry->colour_args = colour_args;
+
+	if ((keylen = strlen(key)) > list->max_key_len)
+		list->max_key_len = keylen;
+
+	return 0;
+}
+
+int
+gcli_dict_add(gcli_dict list,
+              char const *const key,
+              int flags,
+              uint32_t colour_args,
+              char const *const fmt,
+              ...)
+{
+    char tmp = 0, *result = NULL;
+    size_t actual = 0;
+    va_list vp;
+
+    va_start(vp, fmt);
+    actual = vsnprintf(&tmp, 1, fmt, vp);
+    va_end(vp);
+
+    result = calloc(1, actual + 1);
+    if (!result)
+        err(1, "calloc");
+
+    va_start(vp, fmt);
+    vsnprintf(result, actual + 1, fmt, vp);
+    va_end(vp);
+
+    return gcli_dict_add_row(list, key, flags, colour_args, result);
+}
+
+int
+gcli_dict_add_string(gcli_dict list,
+                     char const *const key,
+                     int flags,
+                     uint32_t colour_args,
+                     char const *const str)
+{
+	return gcli_dict_add_row(list, key, flags, colour_args,
+	                         strdup(str ? str : "<empty>"));
+}
+
+int
+gcli_dict_add_sv_list(gcli_dict dict,
+                      char const *const key,
+                      sn_sv const *const list,
+                      size_t const list_size)
+{
+	size_t totalsize = 0;
+	char *catted, *hd;
+
+	/* Sum of string lengths */
+	for (size_t i = 0; i < list_size; ++i)
+		totalsize += list[i].length;
+
+	/* Account for comma and space between each */
+	totalsize += (list_size - 1) * 2;
+
+	/* concatenate the strings */
+	hd = catted = calloc(totalsize + 1, 1);
+	for (size_t i = 0; i < list_size; ++i) {
+		memcpy(hd, list[i].data, list[i].length);
+		hd += list[i].length;
+
+		if (i + 1 < list_size) {
+			strcat(catted, ", ");
+			hd += 2;
+		}
+	}
+
+	/* Push the row into the state */
+	return gcli_dict_add_row(dict, key, 0, 0, catted);
+}
+
+static void
+gcli_dict_free(struct gcli_dict *list)
+{
+	for (size_t i = 0; i < list->entries_size; ++i) {
+		free(list->entries[i].key);
+		free(list->entries[i].value);
+	}
+
+	free(list->entries);
+	free(list);
+}
+
+int
+gcli_dict_end(gcli_dict _list)
+{
+	struct gcli_dict *list = _list;
+
+	for (size_t i = 0; i < list->entries_size; ++i) {
+		int flags = list->entries[i].flags;
+
+		pad(list->max_key_len - strlen(list->entries[i].key));
+		printf("%s : ", list->entries[i].key);
+
+		if (flags & GCLI_TBLCOL_BOLD)
+			printf("%s", gcli_setbold());
+
+		if (flags & GCLI_TBLCOL_COLOUREXPL)
+			printf("%s", gcli_setcolour(list->entries[i].colour_args));
+
+		if (flags & GCLI_TBLCOL_STATECOLOURED)
+			printf("%s", gcli_state_colour_str(list->entries[i].value));
+
+		if (flags & GCLI_TBLCOL_256COLOUR)
+			printf("%s", gcli_setcolour256(list->entries[i].colour_args));
+
+		puts(list->entries[i].value);
+
+		if (flags & (GCLI_TBLCOL_COLOUREXPL
+		             |GCLI_TBLCOL_STATECOLOURED
+		             |GCLI_TBLCOL_256COLOUR))
+			printf("%s", gcli_resetcolour());
+
+		if (flags & GCLI_TBLCOL_BOLD)
+			printf("%s", gcli_resetbold());
+	}
+
+	gcli_dict_free(list);
+	return 0;
+}

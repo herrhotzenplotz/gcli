@@ -111,50 +111,40 @@ gcli_print_pr_diff(FILE *stream,
 static void
 gcli_print_pr_summary(gcli_pull_summary const *const it)
 {
-#define SANITIZE(x) (x ? x : "N/A")
-	printf("   NUMBER : %d\n"
-	       "    TITLE : %s\n"
-	       "     HEAD : %s\n"
-	       "     BASE : %s\n"
-	       "  CREATED : %s\n"
-	       "   AUTHOR : %s%s%s\n"
-	       "    STATE : %s%s%s\n"
-	       " COMMENTS : %d\n"
-	       "  ADD:DEL : %s%d%s:%s%d%s\n"
-	       "  COMMITS : %d\n"
-	       "  CHANGED : %d\n"
-	       "   MERGED : %s\n"
-	       "MERGEABLE : %s\n"
-	       "    DRAFT : %s\n"
-	       "   LABELS : ",
-	       it->number,
-	       SANITIZE(it->title),
-	       SANITIZE(it->head_label),
-	       SANITIZE(it->base_label),
-	       SANITIZE(it->created_at),
-	       gcli_setbold(), SANITIZE(it->author), gcli_resetbold(),
-	       gcli_state_colour_str(it->state), SANITIZE(it->state), gcli_resetcolour(),
-	       it->comments,
-	       gcli_setcolour(GCLI_COLOR_GREEN), it->additions, gcli_resetcolour(),
-	       gcli_setcolour(GCLI_COLOR_RED),   it->deletions, gcli_resetcolour(),
-	       it->commits, it->changed_files,
-	       sn_bool_yesno(it->merged),
-	       sn_bool_yesno(it->mergeable),
-	       sn_bool_yesno(it->draft));
-#undef SANITIZE
+	gcli_dict dict;
+
+	dict = gcli_dict_begin();
+
+	gcli_dict_add(dict,        "NUMBER", 0, 0, "%d", it->number);
+	gcli_dict_add_string(dict, "TITLE", 0, 0, it->title);
+	gcli_dict_add_string(dict, "HEAD", 0, 0, it->head_label);
+	gcli_dict_add_string(dict, "BASE", 0, 0, it->base_label);
+	gcli_dict_add_string(dict, "CREATED", 0, 0, it->created_at);
+	gcli_dict_add_string(dict, "AUTHOR", GCLI_TBLCOL_BOLD, 0, it->author);
+	gcli_dict_add_string(dict, "STATE", GCLI_TBLCOL_STATECOLOURED, 0, it->state);
+	gcli_dict_add(dict,        "COMMENTS", 0, 0, "%d", it->comments);
+	/* FIXME: move printing colours into the dictionary printer? */
+	gcli_dict_add(dict,        "ADD:DEL", 0, 0, "%s%d%s:%s%d%s",
+	              gcli_setcolour(GCLI_COLOR_GREEN), it->additions, gcli_resetcolour(),
+	              gcli_setcolour(GCLI_COLOR_RED),   it->deletions, gcli_resetcolour());
+	gcli_dict_add(dict,        "COMMITS", 0, 0, "%d", it->commits);
+	gcli_dict_add(dict,        "CHANGED", 0, 0, "%d", it->changed_files);
+	gcli_dict_add_string(dict, "MERGED", 0, 0, sn_bool_yesno(it->merged));
+	gcli_dict_add_string(dict, "MERGEABLE", 0, 0, sn_bool_yesno(it->mergeable));
+	gcli_dict_add_string(dict, "DRAFT", 0, 0, sn_bool_yesno(it->draft));
 
 	if (it->labels_size) {
-		printf(SV_FMT, SV_ARGS(it->labels[0]));
-
-		for (size_t i = 1; i < it->labels_size; ++i)
-			printf(", "SV_FMT, SV_ARGS(it->labels[i]));
+		gcli_dict_add_sv_list(dict, "LABELS", it->labels, it->labels_size);
 	} else {
-		fputs("none", stdout);
+		gcli_dict_add_string(dict, "LABELS", 0, 0, "none");
 	}
-	fputs("\n\n", stdout);
 
-	if (it->body)
+	gcli_dict_end(dict);
+
+	if (it->body) {
+		putchar('\n');
 		pretty_print(it->body, 4, 80, stdout);
+	}
 }
 
 static int

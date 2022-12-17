@@ -109,44 +109,40 @@ gcli_print_issues_table(enum gcli_output_flags const flags,
 static void
 gcli_print_issue_summary(gcli_issue const *const it)
 {
-	printf("   NUMBER : %d\n"
-	       "    TITLE : "SV_FMT"\n"
-	       "  CREATED : "SV_FMT"\n"
-	       "   AUTHOR : %s"SV_FMT"%s\n"
-	       "    STATE : %s"SV_FMT"%s\n"
-	       " COMMENTS : %d\n"
-	       "   LOCKED : %s\n"
-	       "   LABELS : ",
-	       it->number,
-	       SV_ARGS(it->title), SV_ARGS(it->created_at),
-	       gcli_setbold(), SV_ARGS(it->author), gcli_resetbold(),
-	       gcli_state_colour_sv(it->state), SV_ARGS(it->state), gcli_resetcolour(),
-	       it->comments, sn_bool_yesno(it->locked));
+	gcli_dict dict;
+
+	dict = gcli_dict_begin();
+
+	gcli_dict_add(dict, "NAME", 0, 0, "%d", it->number);
+	gcli_dict_add(dict, "TITLE", 0, 0, SV_FMT, SV_ARGS(it->title));
+	gcli_dict_add(dict, "CREATED", 0, 0, SV_FMT, SV_ARGS(it->created_at));
+	gcli_dict_add(dict, "AUTHOR",  GCLI_TBLCOL_BOLD, 0,
+	              SV_FMT, SV_ARGS(it->author));
+	gcli_dict_add(dict, "STATE", GCLI_TBLCOL_STATECOLOURED, 0,
+	              SV_FMT, SV_ARGS(it->state));
+	gcli_dict_add(dict, "COMMENTS", 0, 0, "%d", it->comments);
+	gcli_dict_add(dict, "LOCKED", 0, 0, "%s", sn_bool_yesno(it->locked));
 
 	if (it->labels_size) {
-		printf(SV_FMT, SV_ARGS(it->labels[0]));
-
-		for (size_t i = 1; i < it->labels_size; ++i)
-			printf(", "SV_FMT, SV_ARGS(it->labels[i]));
+		gcli_dict_add_sv_list(dict, "LABELS", it->labels, it->labels_size);
 	} else {
-		printf("none");
+		gcli_dict_add(dict, "LABELS", 0, 0, "none");
 	}
-
-	putchar('\n');
 
 	if (it->assignees_size) {
-		printf("ASSIGNEES : "SV_FMT, SV_ARGS(it->assignees[0]));
-		for (size_t i = 1; i < it->assignees_size; ++i)
-			printf(", "SV_FMT, SV_ARGS(it->assignees[i]));
+		gcli_dict_add_sv_list(dict, "ASSIGNEES",
+		                      it->assignees, it->assignees_size);
 	} else {
-		printf("ASSIGNEES : none\n");
+		gcli_dict_add(dict, "ASSIGNEES", 0, 0, "none");
 	}
 
-	putchar('\n');
+	/* Dump the dictionary */
+	gcli_dict_end(dict);
 
 	/* The API may not return a body if the user didn't put in any
 	 * comment */
 	if (it->body.data) {
+		putchar('\n');
 		pretty_print(it->body.data, 4, 80, stdout);
 		putchar('\n');
 	}

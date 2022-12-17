@@ -48,32 +48,33 @@ static void
 gcli_print_release(enum gcli_output_flags const flags,
                    gcli_release const *const it)
 {
+	gcli_dict dict;
+
 	(void) flags;
 
-	/* General information */
-	printf("        ID : "SV_FMT"\n"
-	       "      NAME : "SV_FMT"\n"
-	       "    AUTHOR : "SV_FMT"\n"
-	       "      DATE : "SV_FMT"\n"
-	       "     DRAFT : %s\n"
-	       "PRERELEASE : %s\n"
-	       "    ASSETS :\n",
-	       SV_ARGS(it->id),
-	       SV_ARGS(it->name),
-	       SV_ARGS(it->author),
-	       SV_ARGS(it->date),
-	       sn_bool_yesno(it->draft),
-	       sn_bool_yesno(it->prerelease));
+	dict = gcli_dict_begin();
+
+	gcli_dict_add(dict,        "ID",         0, 0, SV_FMT, SV_ARGS(it->id));
+	gcli_dict_add(dict,        "NAME",       0, 0, SV_FMT, SV_ARGS(it->name));
+	gcli_dict_add(dict,        "AUTHOR",     0, 0, SV_FMT, SV_ARGS(it->author));
+	gcli_dict_add(dict,        "DATE",       0, 0, SV_FMT, SV_ARGS(it->date));
+	gcli_dict_add_string(dict, "DRAFT",      0, 0, sn_bool_yesno(it->draft));
+	gcli_dict_add_string(dict, "PRERELEASE", 0, 0, sn_bool_yesno(it->prerelease));
+	gcli_dict_add_string(dict, "ASSETS",     0, 0, "");
 
 	/* asset urls */
 	for (size_t i = 0; i < it->assets_size; ++i) {
-		printf("           : • %s\n", it->assets[i].name);
-		printf("           :   %s\n", it->assets[i].url);
+		gcli_dict_add(dict, "", 0, 0, "• %s", it->assets[i].name);
+		gcli_dict_add(dict, "", 0, 0, "  %s", it->assets[i].url);
 	}
 
+	gcli_dict_end(dict);
+
 	/* body */
-	printf("      BODY :\n");
-	pretty_print(it->body.data, 13, 80, stdout);
+	if (it->body.length) {
+		putchar('\n');
+		pretty_print(it->body.data, 13, 80, stdout);
+	}
 
 	putchar('\n');
 }

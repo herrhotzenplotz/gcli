@@ -101,6 +101,11 @@ int gcli_dict_add_string(gcli_dict list,
                          uint32_t colour_args,
                          char const *const str);
 
+int gcli_dict_add_sv_list(gcli_dict dict,
+                          char const *const key,
+                          sn_sv const *const list,
+                          size_t const list_size);
+
 int gcli_dict_end(gcli_dict _list);
 
 #endif /* GCLI_TABLE_H */

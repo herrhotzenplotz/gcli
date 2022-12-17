@@ -89,15 +89,21 @@ static void
 gcli_print_snippet(enum gcli_output_flags const flags,
                    gcli_snippet const *const it)
 {
+	gcli_dict dict;
+
 	(void) flags;
 
-	printf("    ID : %d\n", it->id);
-	printf(" TITLE : %s\n", it->title);
-	printf("AUTHOR : %s\n", it->author);
-	printf("  FILE : %s\n", it->filename);
-	printf("  DATE : %s\n", it->date);
-	printf("VSBLTY : %s\n", it->visibility);
-	printf("   URL : %s\n\n", it->raw_url);
+	dict = gcli_dict_begin();
+
+	gcli_dict_add(dict,        "ID",     0, 0, "%d", it->id);
+	gcli_dict_add_string(dict, "TITLE",  0, 0, it->title);
+	gcli_dict_add_string(dict, "AUTHOR", 0, 0, it->author);
+	gcli_dict_add_string(dict, "FILE",   0, 0, it->filename);
+	gcli_dict_add_string(dict, "DATE",   0, 0, it->date);
+	gcli_dict_add_string(dict, "VSBLTY", 0, 0, it->visibility);
+	gcli_dict_add_string(dict, "URL",    0, 0, it->raw_url);
+
+	gcli_dict_end(dict);
 }
 
 static void

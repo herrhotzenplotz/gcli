@@ -193,10 +193,11 @@ gitlab_get_pull_commits(char const *owner,
 
 		json_close(&stream);
 		free(url);
-		free(e_owner);
-		free(e_repo);
 		free(json_buffer.data);
 	} while ((url = next_url));
+
+	free(e_owner);
+	free(e_repo);
 
 	return (int)(count);
 }

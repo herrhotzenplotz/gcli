@@ -208,6 +208,13 @@ subcommand_gists(int argc, char *argv[])
 	int                     count      = 30;
 	enum gcli_output_flags  flags      = 0;
 
+	/* Make sure we are looking at a GitHub forge */
+	if (gcli_config_get_forge_type() != GCLI_FORGE_GITHUB) {
+		errx(1, "error: The gists subcommand only works for Github "
+		     "forges. Please use either -a or -t to force using a "
+		     "Github account.");
+	}
+
 	for (size_t i = 0; i < ARRAY_SIZE(gist_subcommands); ++i) {
 		if (argc > 1 && strcmp(argv[1], gist_subcommands[i].name) == 0) {
 			argc -= 1;

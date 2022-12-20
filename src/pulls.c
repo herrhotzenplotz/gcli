@@ -112,26 +112,40 @@ static void
 gcli_print_pr_summary(gcli_pull_summary const *const it)
 {
 	gcli_dict dict;
+	gcli_forge_descriptor const *const forge = gcli_forge();
 
 	dict = gcli_dict_begin();
 
-	gcli_dict_add(dict,        "NUMBER", 0, 0, "%d", it->number);
-	gcli_dict_add_string(dict, "TITLE", 0, 0, it->title);
-	gcli_dict_add_string(dict, "HEAD", 0, 0, it->head_label);
-	gcli_dict_add_string(dict, "BASE", 0, 0, it->base_label);
-	gcli_dict_add_string(dict, "CREATED", 0, 0, it->created_at);
-	gcli_dict_add_string(dict, "AUTHOR", GCLI_TBLCOL_BOLD, 0, it->author);
-	gcli_dict_add_string(dict, "STATE", GCLI_TBLCOL_STATECOLOURED, 0, it->state);
-	gcli_dict_add(dict,        "COMMENTS", 0, 0, "%d", it->comments);
-	/* FIXME: move printing colours into the dictionary printer? */
-	gcli_dict_add(dict,        "ADD:DEL", 0, 0, "%s%d%s:%s%d%s",
-	              gcli_setcolour(GCLI_COLOR_GREEN), it->additions, gcli_resetcolour(),
-	              gcli_setcolour(GCLI_COLOR_RED),   it->deletions, gcli_resetcolour());
-	gcli_dict_add(dict,        "COMMITS", 0, 0, "%d", it->commits);
-	gcli_dict_add(dict,        "CHANGED", 0, 0, "%d", it->changed_files);
-	gcli_dict_add_string(dict, "MERGED", 0, 0, sn_bool_yesno(it->merged));
-	gcli_dict_add_string(dict, "MERGEABLE", 0, 0, sn_bool_yesno(it->mergeable));
-	gcli_dict_add_string(dict, "DRAFT", 0, 0, sn_bool_yesno(it->draft));
+	gcli_dict_add(dict,            "NUMBER", 0, 0, "%d", it->number);
+	gcli_dict_add_string(dict,     "TITLE", 0, 0, it->title);
+	gcli_dict_add_string(dict,     "HEAD", 0, 0, it->head_label);
+	gcli_dict_add_string(dict,     "BASE", 0, 0, it->base_label);
+	gcli_dict_add_string(dict,     "CREATED", 0, 0, it->created_at);
+	gcli_dict_add_string(dict,     "AUTHOR", GCLI_TBLCOL_BOLD, 0, it->author);
+	gcli_dict_add_string(dict,     "STATE", GCLI_TBLCOL_STATECOLOURED, 0, it->state);
+	gcli_dict_add(dict,            "COMMENTS", 0, 0, "%d", it->comments);
+
+	if (!(forge->pull_summary_quirks & GCLI_PRS_QUIRK_ADDDEL))
+		/* FIXME: move printing colours into the dictionary printer? */
+		gcli_dict_add(dict,        "ADD:DEL", 0, 0, "%s%d%s:%s%d%s",
+		              gcli_setcolour(GCLI_COLOR_GREEN),
+		              it->additions,
+		              gcli_resetcolour(),
+		              gcli_setcolour(GCLI_COLOR_RED),
+		              it->deletions,
+		              gcli_resetcolour());
+
+	if (!(forge->pull_summary_quirks & GCLI_PRS_QUIRK_COMMITS))
+		gcli_dict_add(dict,        "COMMITS", 0, 0, "%d", it->commits);
+
+	if (!(forge->pull_summary_quirks & GCLI_PRS_QUIRK_CHANGES))
+		gcli_dict_add(dict,        "CHANGED", 0, 0, "%d", it->changed_files);
+
+	if (!(forge->pull_summary_quirks & GCLI_PRS_QUIRK_MERGED))
+		gcli_dict_add_string(dict, "MERGED", 0, 0, sn_bool_yesno(it->merged));
+
+	gcli_dict_add_string(dict,     "MERGEABLE", 0, 0, sn_bool_yesno(it->mergeable));
+	gcli_dict_add_string(dict,     "DRAFT", 0, 0, sn_bool_yesno(it->draft));
 
 	if (it->labels_size) {
 		gcli_dict_add_sv_list(dict, "LABELS", it->labels, it->labels_size);
@@ -230,7 +244,6 @@ gcli_pulls_summary_free(gcli_pull_summary *const it)
 	free(it->title);
 	free(it->body);
 	free(it->created_at);
-	free(it->commits_link);
 	free(it->head_label);
 	free(it->base_label);
 	free(it->head_sha);

@@ -3,13 +3,13 @@ include "gcli/gitlab/snippets.h";
 
 parser gitlab_snippet is
 object of gcli_snippet with
-       ("title" => title as string,
-        "id" => id as int,
-        "raw_url" => raw_url as string,
-        "created_at" => date as string,
-        "file_name" => filename as string,
-        "author" => author as user,
-        "visibility" => visibility as string);
+	("title"      => title as string,
+	 "id"         => id as int,
+	 "raw_url"    => raw_url as string,
+	 "created_at" => date as string,
+	 "file_name"  => filename as string,
+	 "author"     => author as user,
+	 "visibility" => visibility as string);
 
 parser gitlab_snippets is
 array of gcli_snippet use parse_gitlab_snippet;

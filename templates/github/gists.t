@@ -1,5 +1,5 @@
 include "gcli/json_util.h";
-include "gcli/gists.h";
+include "gcli/github/gists.h";
 
 parser github_gist_file is
 object of gcli_gist_file with

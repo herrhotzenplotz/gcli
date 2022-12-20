@@ -27,8 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GISTS_H
-#define GISTS_H
+#ifndef GCLI_GITHUB_GISTS_H
+#define GCLI_GITHUB_GISTS_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -96,4 +96,4 @@ void gcli_gists_free(gcli_gist_list *const list);
  */
 void parse_github_gist_files_idiot_hack(json_stream *stream, gcli_gist *gist);
 
-#endif /* GISTS_H */
+#endif /* GCLI_GITHUB_GISTS_H */

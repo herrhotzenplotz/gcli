@@ -30,7 +30,7 @@
 #include <gcli/colour.h>
 #include <gcli/config.h>
 #include <gcli/curl.h>
-#include <gcli/gists.h>
+#include <gcli/github/gists.h>
 #include <gcli/json_util.h>
 #include <gcli/table.h>
 

@@ -108,7 +108,6 @@ libgcli_la_SOURCES = \
 	src/editor.c include/gcli/editor.h \
 	src/forges.c include/gcli/forges.h \
 	src/forks.c include/gcli/forks.h \
-	src/gists.c include/gcli/gists.h \
 	src/gitconfig.c include/gcli/gitconfig.h \
 	src/issues.c include/gcli/issues.h \
 	src/json_util.c include/gcli/json_util.h \
@@ -144,6 +143,7 @@ libgcli_la_SOURCES = \
 	src/github/issues.c include/gcli/github/issues.h \
 	src/github/review.c include/gcli/github/review.h \
 	src/github/checks.c include/gcli/github/checks.h \
+	src/github/gists.c include/gcli/github/gists.h \
 	src/gitea/issues.c include/gcli/gitea/issues.h \
 	src/gitea/labels.c include/gcli/gitea/labels.h \
 	src/gitea/forks.c include/gcli/gitea/forks.h \

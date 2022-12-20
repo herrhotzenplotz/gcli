@@ -31,7 +31,7 @@
 
 #include <gcli/cmd.h>
 #include <gcli/curl.h>
-#include <gcli/gists.h>
+#include <gcli/github/gists.h>
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>

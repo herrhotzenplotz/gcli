@@ -214,7 +214,10 @@ gitea_forge_descriptor =
 	.get_api_error_string      = github_api_error_string,    /* hack! */
 	.user_object_key           = "username",
 	.html_url_key              = "web_url",
-	.pull_summary_quirks       = 0,
+	.pull_summary_quirks       = GCLI_PRS_QUIRK_COMMITS
+	                           | GCLI_PRS_QUIRK_ADDDEL
+	                           | GCLI_PRS_QUIRK_DRAFT
+	                           | GCLI_PRS_QUIRK_CHANGES,
 };
 
 gcli_forge_descriptor const *

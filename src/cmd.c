@@ -106,7 +106,11 @@ parse_labels_options(int *argc, char ***argv,
 	*_remove_labels_size = remove_labels_size;
 }
 
-/* delete the repo (and ask for confirmation) */
+/* delete the repo (and ask for confirmation)
+ *
+ * NOTE: this procedure is here because it is used by both the forks
+ * and repo subcommand. Ideally it should be moved into the 'repos'
+ * code but I don't wanna make it exported from there. */
 void
 delete_repo(bool always_yes, const char *owner, const char *repo)
 {

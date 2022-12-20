@@ -210,6 +210,16 @@ struct gcli_forge_descriptor {
 		int const            pr_number,
 		gcli_commit **const  out);
 
+	/** Bitmask of unsupported fields in the pull summary for this
+	 * forge */
+	enum gcli_pr_summary_quirks {
+		GCLI_PRS_QUIRK_ADDDEL     = 0x01,
+		GCLI_PRS_QUIRK_COMMITS    = 0x02,
+		GCLI_PRS_QUIRK_CHANGES    = 0x04,
+		GCLI_PRS_QUIRK_MERGED     = 0x08,
+		GCLI_PRS_QUIRK_DRAFT      = 0x10,
+	} pull_summary_quirks;
+
 	/**
 	 * Get a summary of the given PR/MR */
 	void (*get_pull_summary)(

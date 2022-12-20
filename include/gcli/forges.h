@@ -217,6 +217,7 @@ struct gcli_forge_descriptor {
 		GCLI_PRS_QUIRK_COMMITS    = 0x02,
 		GCLI_PRS_QUIRK_CHANGES    = 0x04,
 		GCLI_PRS_QUIRK_MERGED     = 0x08,
+		GCLI_PRS_QUIRK_DRAFT      = 0x10,
 	} pull_summary_quirks;
 
 	/**

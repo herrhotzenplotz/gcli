@@ -145,7 +145,8 @@ gcli_print_pr_summary(gcli_pull_summary const *const it)
 		gcli_dict_add_string(dict, "MERGED", 0, 0, sn_bool_yesno(it->merged));
 
 	gcli_dict_add_string(dict,     "MERGEABLE", 0, 0, sn_bool_yesno(it->mergeable));
-	gcli_dict_add_string(dict,     "DRAFT", 0, 0, sn_bool_yesno(it->draft));
+	if (!(forge->pull_summary_quirks & GCLI_PRS_QUIRK_DRAFT))
+		gcli_dict_add_string(dict, "DRAFT", 0, 0, sn_bool_yesno(it->draft));
 
 	if (it->labels_size) {
 		gcli_dict_add_sv_list(dict, "LABELS", it->labels, it->labels_size);

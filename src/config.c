@@ -734,6 +734,8 @@ gcli_config_have_colours(void)
 	else
 		config.colours_disabled = true;
 
+	tested_tty = 1;
+
 	return !config.colours_disabled;
 }
 

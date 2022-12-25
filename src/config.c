@@ -402,6 +402,26 @@ ensure_config(void)
 	return 0;
 }
 
+/** Check input for a value that indicates yes/true */
+static int
+checkyes(char const *const tmp)
+{
+	static char const *const yeses[] = { "1", "y", "Y" };
+
+	if (strlen(tmp) == 3) {
+		if (tolower(tmp[0]) == 'y' && tolower(tmp[1]) == 'e' &&
+		    tolower(tmp[2]) == 's')
+			return 1;
+	}
+
+	for (size_t i = 0; i < ARRAY_SIZE(yeses); ++i) {
+		if (strcmp(yeses[i], tmp) == 0)
+			return 1;
+	}
+
+	return 0;
+}
+
 /* readenv: Read values of environment variables and pre-populate the
  *          config structure. */
 static void
@@ -413,6 +433,18 @@ readenv(void)
 	 * specifying -a <account-name> */
 	if ((tmp = getenv("GCLI_ACCOUNT")))
 		config.override_default_account = tmp;
+
+	/* NO_COLOR: https://no-color.org/
+	 *
+	 * Note: the example implementation code on the website is
+	 * semantically buggy as it just checks for the variable being set
+	 * to ANYTHING. If you set it to 0 to indicate that you want
+	 * colours it will still disable colour output. This explicitly
+	 * checks the value of the variable if it is set. I purposefully
+	 * violate the definition to get expected and sane behaviour. */
+	tmp = getenv("NO_COLOR");
+	if (tmp && tmp[0] != '\0')
+		config.colours_disabled = checkyes(tmp);
 }
 
 int
@@ -433,10 +465,10 @@ gcli_config_init(int *argc, char ***argv)
 		  .has_arg = required_argument,
 		  .flag    = NULL,
 		  .val     = 'r' },
-		{ .name    = "no-colours",
+		{ .name    = "colours",
 		  .has_arg = no_argument,
 		  .flag    = &config.colours_disabled,
-		  .val     = 1 },
+		  .val     = 0 },
 		{ .name    = "type",
 		  .has_arg = required_argument,
 		  .flag    = NULL,
@@ -471,7 +503,7 @@ gcli_config_init(int *argc, char ***argv)
 			config.override_remote = optarg;
 		} break;
 		case 'c': {
-			config.colours_disabled = 1;
+			config.colours_disabled = 0;
 		} break;
 		case 'q': {
 			sn_setverbosity(VERBOSITY_QUIET);

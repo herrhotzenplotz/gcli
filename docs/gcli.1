@@ -77,10 +77,11 @@ must name a config section for an account in the global config file. See
 Use
 .Ar override-remote
 as the remote when trying to infer repository data.
-.It Fl c , -no-colours
-Do not output ANSI escape sequences for changing text
-formatting. Default is to output colours unless stdout is not a
-tty. See
+.It Fl c , -colours
+Ignore
+.Ev NO_COLOR
+and print ANSI escape sequences for changing text formatting. Default
+is to output colours unless stdout is not a tty. See
 .Xr isatty 3 .
 .It Fl q , -quiet
 Surpresses most output of
@@ -155,6 +156,15 @@ can be overridden again by using
 .Fl a Ar account-name .
 This is helpful in cases where you have multiple accounts of the same
 forge-type configured and you don't want to use the default.
+.It Ev NO_COLOR
+If set to
+.Sq 1 ,
+.Sq y or
+.Sq yes
+(capitalization ignored) this will suppress output of ANSI colour
+escape sequences. See
+.Sx OPTIONS
+(--colours).
 .El
 .Sh FILES
 .Bl -tag -width ${XDG_CONFIG_DIR}/gcli/config -compact

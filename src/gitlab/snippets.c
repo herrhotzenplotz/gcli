@@ -29,8 +29,8 @@
 
 #include <gcli/curl.h>
 #include <gcli/gitlab/config.h>
+#include <gcli/gitlab/snippets.h>
 #include <gcli/json_util.h>
-#include <gcli/snippets.h>
 #include <gcli/table.h>
 
 #include <pdjson/pdjson.h>

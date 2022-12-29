@@ -1,5 +1,5 @@
 include "gcli/json_util.h";
-include "gcli/snippets.h";
+include "gcli/gitlab/snippets.h";
 
 parser gitlab_snippet is
 object of gcli_snippet with

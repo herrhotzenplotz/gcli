@@ -27,8 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SNIPPETS_H
-#define SNIPPETS_H
+#ifndef GITLAB_SNIPPETS_H
+#define GITLAB_SNIPPETS_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -66,4 +66,4 @@ void gcli_snippet_delete(char const *snippet_id);
 
 void gcli_snippet_get(char const *snippet_id);
 
-#endif /* SNIPPETS_H */
+#endif /* GITLAB_SNIPPETS_H */

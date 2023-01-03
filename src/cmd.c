@@ -37,6 +37,8 @@
 
 #include <stdlib.h>
 
+#include <curl/curl.h>
+
 void
 copyright(void)
 {
@@ -51,7 +53,10 @@ version(void)
 {
 	fprintf(stderr,
 	        PACKAGE_STRING"\n"
-	        "Report bugs at "PACKAGE_URL".\n");
+	        "Using %s\n"
+	        "Using vendored pdjson library\n"
+	        "Report bugs at "PACKAGE_URL".\n",
+	        curl_version());
 }
 
 void

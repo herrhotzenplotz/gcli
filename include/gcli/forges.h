@@ -76,10 +76,10 @@ struct gcli_forge_descriptor {
 	/**
 	 * List forks of the given repo */
 	int (*get_forks)(
-		char const        *owner,
-		char const        *repo,
-		int const          max,
-		gcli_fork **const  out);
+		char const            *owner,
+		char const            *repo,
+		int const              max,
+		gcli_fork_list *const  out);
 
 	/**
 	 * Fork the given repo into the owner _in */

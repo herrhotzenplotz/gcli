@@ -128,9 +128,8 @@ subcommand_forks_create(int argc, char *argv[])
 int
 subcommand_forks(int argc, char *argv[])
 {
-	gcli_fork              *forks      = NULL;
+	gcli_fork_list          forks      = {0};
 	char const             *owner      = NULL, *repo = NULL;
-	int                     forks_size = 0;
 	int                     ch         = 0;
 	int                     count      = 30;
 	bool                    always_yes = false;
@@ -199,8 +198,11 @@ subcommand_forks(int argc, char *argv[])
 	check_owner_and_repo(&owner, &repo);
 
 	if (argc == 0) {
-		forks_size = gcli_get_forks(owner, repo, count, &forks);
-		gcli_print_forks(flags, forks, forks_size);
+		if (gcli_get_forks(owner, repo, count, &forks) < 0)
+			errx(1, "error: could not get forks");
+
+		gcli_print_forks(flags, &forks, count);
+
 		return EXIT_SUCCESS;
 	}
 

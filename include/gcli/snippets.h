@@ -37,6 +37,7 @@
 #include <gcli/gcli.h>
 
 typedef struct gcli_snippet gcli_snippet;
+typedef struct gcli_snippet_list gcli_snippet_list;
 
 struct gcli_snippet {
 	int   id;
@@ -48,13 +49,18 @@ struct gcli_snippet {
 	char *raw_url;
 };
 
-void gcli_snippets_free(gcli_snippet *list, int const list_size);
+struct gcli_snippet_list {
+	gcli_snippet *snippets;
+	size_t snippets_size;
+};
 
-int gcli_snippets_get(int const max, gcli_snippet **const out);
+void gcli_snippets_free(gcli_snippet_list *const list);
+
+int gcli_snippets_get(int const max, gcli_snippet_list *const out);
 
 void gcli_snippets_print(enum gcli_output_flags const flags,
-                         gcli_snippet const *const list,
-                         int const list_size);
+                         gcli_snippet_list const *const list,
+                         int const max);
 
 void gcli_snippet_delete(char const *snippet_id);
 

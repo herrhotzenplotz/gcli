@@ -178,9 +178,13 @@ subcommand_forks(int argc, char *argv[])
 			break;
 		case 'n': {
 			char *endptr = NULL;
-			count        = strtol(optarg, &endptr, 10);
+			count = strtol(optarg, &endptr, 10);
+
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "forks: unable to parse forks count argument");
+
+			if (count == 0)
+				errx(1, "error: forks count must not be zero");
 		} break;
 		case 's':
 			flags |= OUTPUT_SORTED;

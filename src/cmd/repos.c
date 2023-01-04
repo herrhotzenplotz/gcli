@@ -119,8 +119,8 @@ int
 subcommand_repos(int argc, char *argv[])
 {
 	int                     ch, repos_size, n = 30;
-	const char             *owner             = NULL;
-	const char             *repo              = NULL;
+	char const             *owner             = NULL;
+	char const             *repo              = NULL;
 	gcli_repo              *repos             = NULL;
 	bool                    always_yes        = false;
 	enum gcli_output_flags  flags             = 0;
@@ -131,7 +131,7 @@ subcommand_repos(int argc, char *argv[])
 		return subcommand_repos_create(argc, argv);
 	}
 
-	const struct option options[] = {
+	struct option const options[] = {
 		{ .name    = "count",
 		  .has_arg = required_argument,
 		  .flag    = NULL,
@@ -204,7 +204,7 @@ subcommand_repos(int argc, char *argv[])
 		check_owner_and_repo(&owner, &repo);
 
 		for (size_t i = 0; i < (size_t)argc; ++i) {
-			const char *action = argv[i];
+			char const *action = argv[i];
 
 			if (strcmp(action, "delete") == 0) {
 				delete_repo(always_yes, owner, repo);

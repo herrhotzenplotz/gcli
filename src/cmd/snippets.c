@@ -148,9 +148,13 @@ subcommand_snippets(int argc, char *argv[])
 		switch (ch) {
 		case 'n': {
 			char *endptr = NULL;
-			count        = strtol(optarg, &endptr, 10);
+			count = strtol(optarg, &endptr, 10);
+
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "snippets: cannot parse snippets count");
+
+			if (count == 0)
+				errx(1, "error: snippets count must not be zero");
 		} break;
 		case 's':
 			flags |= OUTPUT_SORTED;

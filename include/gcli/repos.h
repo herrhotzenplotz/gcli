@@ -38,6 +38,7 @@
 #include <gcli/gcli.h>
 
 typedef struct gcli_repo gcli_repo;
+typedef struct gcli_repo_list gcli_repo_list;
 typedef struct gcli_repo_create_options gcli_repo_create_options;
 
 struct gcli_repo {
@@ -50,6 +51,11 @@ struct gcli_repo {
 	bool  is_fork;
 };
 
+struct gcli_repo_list {
+	gcli_repo *repos;
+	size_t repos_size;
+};
+
 struct gcli_repo_create_options {
 	sn_sv name;
 	sn_sv description;
@@ -58,15 +64,15 @@ struct gcli_repo_create_options {
 
 int gcli_get_repos(char const *owner,
                    int const max,
-                   gcli_repo **const out);
+                   gcli_repo_list *const list);
 
-int gcli_get_own_repos(int const max, gcli_repo **const out);
+int gcli_get_own_repos(int const max, gcli_repo_list *const list);
 
-void gcli_repos_free(gcli_repo *, size_t const);
+void gcli_repos_free(gcli_repo_list *const list);
 
 void gcli_print_repos_table(enum gcli_output_flags const flags,
-                            gcli_repo const *const repos,
-                            size_t const repos_size);
+                            gcli_repo_list const *const repos,
+                            int const max);
 
 void gcli_repo_delete(char const *owner, char const *repo);
 

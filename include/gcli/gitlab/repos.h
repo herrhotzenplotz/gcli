@@ -42,9 +42,9 @@ void gitlab_get_repo(sn_sv const owner,
 
 int gitlab_get_repos(char const  *owner,
                      int const max,
-                     gcli_repo **const out);
+                     gcli_repo_list *const out);
 
-int gitlab_get_own_repos(int const max, gcli_repo **const out);
+int gitlab_get_own_repos(int const max, gcli_repo_list *const out);
 
 void gitlab_repo_delete(char const *owner,
                         char const *repo);

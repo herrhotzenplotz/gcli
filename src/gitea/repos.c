@@ -31,15 +31,15 @@
 #include <gcli/github/repos.h>
 
 int
-gitea_get_repos(char const *owner, int const max, gcli_repo **const out)
+gitea_get_repos(char const *owner, int const max, gcli_repo_list *const list)
 {
-	return github_get_repos(owner, max, out);
+	return github_get_repos(owner, max, list);
 }
 
 int
-gitea_get_own_repos(int const max, gcli_repo **const out)
+gitea_get_own_repos(int const max, gcli_repo_list *const list)
 {
-	return github_get_own_repos(max, out);
+	return github_get_own_repos(max, list);
 }
 
 gcli_repo *

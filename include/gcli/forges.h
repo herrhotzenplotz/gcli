@@ -293,15 +293,15 @@ struct gcli_forge_descriptor {
 	/**
 	 * Get a list of repos of the given owner */
 	int (*get_repos)(
-		char const        *owner,
-		int const          max,
-		gcli_repo **const  out);
+		char const *owner,
+		int const max,
+		gcli_repo_list *const out);
 
 	/**
 	 * Get a list of your own repos */
 	int (*get_own_repos)(
-		int         max,
-		gcli_repo **out);
+		int max,
+		gcli_repo_list *const out);
 
 	/**
 	 * Create the given repo */

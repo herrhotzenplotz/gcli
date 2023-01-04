@@ -271,6 +271,7 @@ subcommand_gists(int argc, char *argv[])
 
     gcli_get_gists(user, count, &gists);
 	gcli_print_gists(flags, &gists, count);
+	gcli_gists_free(&gists);
 
 	return EXIT_SUCCESS;
 }

@@ -348,3 +348,30 @@ gcli_delete_gist(char const *gist_id, bool const always_yes)
 	free(buffer.data);
 	free(url);
 }
+
+void
+gcli_gists_free(gcli_gist_list *const list)
+{
+	for (size_t i = 0; i < list->gists_size; ++i) {
+		free(list->gists[i].id.data);
+		free(list->gists[i].owner.data);
+		free(list->gists[i].url.data);
+		free(list->gists[i].date.data);
+		free(list->gists[i].git_pull_url.data);
+		free(list->gists[i].description.data);
+
+		for (int j = 0; j < list->gists[i].files_size; ++j) {
+			free(list->gists[i].files[j].filename.data);
+			free(list->gists[i].files[j].language.data);
+			free(list->gists[i].files[j].url.data);
+			free(list->gists[i].files[j].type.data);
+		}
+
+		free(list->gists[i].files);
+	}
+
+	free(list->gists);
+
+	list->gists = NULL;
+	list->gists_size = 0;
+}

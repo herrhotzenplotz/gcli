@@ -86,6 +86,8 @@ void gcli_create_gist(gcli_new_gist);
 
 void gcli_delete_gist(char const *gist_id, bool const always_yes);
 
+void gcli_gists_free(gcli_gist_list *const list);
+
 /**
  * NOTE(Nico): Because of idiots designing a web API, we get a list of
  * files in a gist NOT as an array but as an object whose keys are the

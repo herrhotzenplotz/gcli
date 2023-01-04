@@ -205,10 +205,9 @@ subcommand_pulls(int argc, char *argv[])
 	char                   *endptr     = NULL;
 	const char             *owner      = NULL;
 	const char             *repo       = NULL;
-	gcli_pull              *pulls      = NULL;
+	gcli_pull_list          pulls      = {0};
 	int                     ch         = 0;
 	int                     pr         = -1;
-	int                     pulls_size = 0;
 	int                     n          = 30; /* how many prs to fetch at least */
 	bool                    all        = false;
 	enum gcli_output_flags  flags      = 0;
@@ -293,11 +292,11 @@ subcommand_pulls(int argc, char *argv[])
 	/* In case no explicit PR number was specified, list all
 	 * open PRs and exit */
 	if (pr < 0) {
-		pulls_size = gcli_get_prs(owner, repo, all, n, &pulls);
-		gcli_print_pr_table(flags, pulls, pulls_size);
+		if (gcli_get_prs(owner, repo, all, n, &pulls) < 0)
+			errx(1, "error: could not fetch pull requests");
 
-		gcli_pulls_free(pulls, pulls_size);
-		free(pulls);
+		gcli_print_pr_table(flags, &pulls, n);
+		gcli_pulls_free(&pulls);
 
 		return EXIT_SUCCESS;
 	}

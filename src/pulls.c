@@ -40,13 +40,18 @@
 #include <sn/sn.h>
 
 void
-gcli_pulls_free(gcli_pull *const it, int const n)
+gcli_pulls_free(gcli_pull_list *const it)
 {
-	for (int i = 0; i < n; ++i) {
-		free((void *)it[i].title);
-		free((void *)it[i].state);
-		free((void *)it[i].creator);
+	for (size_t i = 0; i < it->pulls_size; ++i) {
+		free(it->pulls[i].title);
+		free(it->pulls[i].state);
+		free(it->pulls[i].creator);
 	}
+
+	free(it->pulls);
+
+	it->pulls = NULL;
+	it->pulls_size = 0;
 }
 
 int
@@ -54,16 +59,17 @@ gcli_get_prs(char const *owner,
              char const *repo,
              bool const all,
              int const max,
-             gcli_pull **const out)
+             gcli_pull_list *const out)
 {
 	return gcli_forge()->get_prs(owner, repo, all, max, out);
 }
 
 void
 gcli_print_pr_table(enum gcli_output_flags const flags,
-                    gcli_pull const *const pulls,
-                    int const pulls_size)
+                    gcli_pull_list const *const list,
+                    int const max)
 {
+	int n;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
 		{ .name = "NUMBER",  .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
@@ -73,26 +79,39 @@ gcli_print_pr_table(enum gcli_output_flags const flags,
 		{ .name = "TITLE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
-	if (pulls_size == 0) {
+	if (list->pulls_size == 0) {
 		puts("No Pull Requests");
 		return;
 	}
 
+	/* Determine number of items to print */
+	if (max < 0 || max > list->pulls_size)
+		n = list->pulls_size;
+	else
+		n = max;
 
+	/* Fill the table */
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: cannot init table");
 
 	if (flags & OUTPUT_SORTED) {
-		for (int i = pulls_size; i > 0; --i) {
-			gcli_tbl_add_row(table, pulls[i-1].number, pulls[i-1].state,
-			                 pulls[i-1].merged, pulls[i-1].creator,
-			                 pulls[i-1].title);
+		for (int i = 0; i < n; ++i) {
+			gcli_tbl_add_row(table,
+			                 list->pulls[n-i-1].number,
+			                 list->pulls[n-i-1].state,
+			                 list->pulls[n-i-1].merged,
+			                 list->pulls[n-i-1].creator,
+			                 list->pulls[n-i-1].title);
 		}
 	} else {
-		for (int i = 0; i < pulls_size; ++i) {
-			gcli_tbl_add_row(table, pulls[i].number, pulls[i].state,
-			                 pulls[i].merged, pulls[i].creator, pulls[i].title);
+		for (int i = 0; i < n; ++i) {
+			gcli_tbl_add_row(table,
+			                 list->pulls[i].number,
+			                 list->pulls[i].state,
+			                 list->pulls[i].merged,
+			                 list->pulls[i].creator,
+			                 list->pulls[i].title);
 		}
 	}
 

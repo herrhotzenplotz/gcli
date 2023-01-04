@@ -41,7 +41,7 @@ int github_get_prs(char const *owner,
                    char const *reponame,
                    bool const all,
                    int const max,
-                   gcli_pull **const out);
+                   gcli_pull_list *const out);
 
 void github_print_pr_diff(FILE *stream,
                           char const *owner,

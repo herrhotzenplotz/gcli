@@ -36,7 +36,7 @@ gitea_get_pulls(char const *owner,
                 char const *repo,
                 bool const all,
                 int const max,
-                gcli_pull **const out)
+                gcli_pull_list *const out)
 {
 	return github_get_prs(owner, repo, all, max, out);
 }

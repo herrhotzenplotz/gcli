@@ -44,11 +44,17 @@ typedef struct gcli_pull                gcli_pull;
 typedef struct gcli_submit_pull_options gcli_submit_pull_options;
 typedef struct gcli_commit              gcli_commit;
 typedef struct gcli_pull_summary        gcli_pull_summary;
+typedef struct gcli_pull_list           gcli_pull_list;
 
 struct gcli_pull {
-	char const *title, *state, *creator;
+	char *title, *state, *creator;
 	int number, id;
 	bool merged;
+};
+
+struct gcli_pull_list {
+	gcli_pull *pulls;
+	size_t pulls_size;
 };
 
 struct gcli_pull_summary {
@@ -98,15 +104,15 @@ int gcli_get_prs(char const *owner,
                  char const *reponame,
                  bool const all,
                  int const max,
-                 gcli_pull **const out);
+                 gcli_pull_list *const out);
 
-void gcli_pulls_free(gcli_pull *const it, int const n);
+void gcli_pulls_free(gcli_pull_list *const list);
 
 void gcli_pulls_summary_free(gcli_pull_summary *const it);
 
 void gcli_print_pr_table(enum gcli_output_flags const flags,
-                         gcli_pull const *const pulls,
-                         int const pulls_size);
+                         gcli_pull_list const *const list,
+                         int const max);
 
 void gcli_print_pr_diff(FILE *stream,
                         char const *owner,

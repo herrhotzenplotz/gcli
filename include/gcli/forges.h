@@ -154,11 +154,11 @@ struct gcli_forge_descriptor {
 	/**
 	 * Get a list of PRs/MRs on the given repo */
 	int (*get_prs)(
-		char const        *owner,
-		char const        *reponame,
-		bool const         all,
-		int const          max,
-		gcli_pull **const  out);
+		char const *owner,
+		char const *reponame,
+		bool const all,
+		int const max,
+		gcli_pull_list *const out);
 
 	/**
 	 * Print a diff of the changes of a PR/MR to the stream */

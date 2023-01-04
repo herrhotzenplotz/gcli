@@ -41,7 +41,7 @@ int gitea_get_pulls(char const *owner,
                     char const *reponame,
                     bool const all,
                     int const max,
-                    gcli_pull **const out);
+                    gcli_pull_list *const out);
 
 void gitea_get_pull_summary(char const *owner,
                             char const *repo,

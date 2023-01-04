@@ -211,9 +211,14 @@ subcommand_labels(int argc, char *argv[])
 			break;
 		case 'n': {
 			char *endptr = NULL;
-			count        = strtol(optarg, &endptr, 10);
+
+			count = strtol(optarg, &endptr, 10);
+
 			if (endptr != (optarg + strlen(optarg)))
-				err(1, "labels: cannot parse label count");
+				errx(1, "labels: cannot parse label count");
+
+			if (count == 0)
+				errx(1, "error: number of labels must not be zero");
 		} break;
 		case '?':
 		default:

@@ -63,7 +63,7 @@ parse_github_gist_files_idiot_hack(json_stream *stream, gcli_gist *const gist)
 }
 
 int
-gcli_get_gists(char const *user, int const max, gcli_gist **const out)
+gcli_get_gists(char const *user, int const max, gcli_gist_list *const list)
 {
 	char               *url      = NULL;
 	char               *next_url = NULL;
@@ -81,10 +81,8 @@ gcli_get_gists(char const *user, int const max, gcli_gist **const out)
 
 	do {
 		gcli_fetch(url, &next_url, &buffer);
-
 		json_open_buffer(&stream, buffer.data, buffer.length);
-
-		parse_github_gists(&stream, out, &size);
+		parse_github_gists(&stream, &list->gists, &list->gists_size);
 
 		json_close(&stream);
 		free(buffer.data);
@@ -157,23 +155,31 @@ print_gist(enum gcli_output_flags const flags, gcli_gist const *const gist)
 
 static void
 gcli_print_gists_long(enum gcli_output_flags const flags,
-                      gcli_gist const *const gists,
-                      int const gists_size)
+                      gcli_gist_list const *const list,
+                      int const max)
 {
+	int n;
+
+	if (max < 0 || max > list->gists_size)
+		n = list->gists_size;
+	else
+		n = max;
+
 	if (flags & OUTPUT_SORTED) {
-		for (int i = gists_size; i > 0; --i)
-			print_gist(flags, &gists[i - 1]);
+		for (int i = 0; i < n; ++i)
+			print_gist(flags, &list->gists[n-i-1]);
 	} else {
-		for (int i = 0; i < gists_size; ++i)
-			print_gist(flags, &gists[i]);
+		for (int i = 0; i < n; ++i)
+			print_gist(flags, &list->gists[i]);
 	}
 }
 
 static void
 gcli_print_gists_short(enum gcli_output_flags const flags,
-                       gcli_gist const *const gists,
-                       int const gists_size)
+                       gcli_gist_list const *const list,
+                       int const max)
 {
+	int n;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
 		{ .name = "ID",          .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_COLOUREXPL },
@@ -183,23 +189,32 @@ gcli_print_gists_short(enum gcli_output_flags const flags,
 		{ .name = "DESCRIPTION", .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
 	};
 
+	if (max < 0 || max > list->gists_size)
+		n = list->gists_size;
+	else
+		n = max;
 
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not init table");
 
 	if (flags & OUTPUT_SORTED) {
-		for (int i = gists_size; i > 0; --i) {
-			gcli_tbl_add_row(table, GCLI_COLOR_YELLOW, gists[i-1].id,
-			                 gists[i-1].owner, gists[i-1].date,
-			                 (int)gists[i-1].files_size, /* For safety pass it as int */
-			                 gists[i-1].description);
+		for (int i = 0; i < n; ++i) {
+			gcli_tbl_add_row(table,
+			                 GCLI_COLOR_YELLOW, list->gists[n-i-1].id,
+			                 list->gists[n-i-1].owner,
+			                 list->gists[n-i-1].date,
+			                 (int)list->gists[n-i-1].files_size, /* For safety pass it as int */
+			                 list->gists[n-i-1].description);
 		}
 	} else {
-		for (int i = 0; i < gists_size; ++i) {
-			gcli_tbl_add_row(table, GCLI_COLOR_YELLOW, gists[i].id,
-			                 gists[i].owner, gists[i].date,
-			                 (int)gists[i].files_size, gists[i].description);
+		for (int i = 0; i < n; ++i) {
+			gcli_tbl_add_row(table,
+			                 GCLI_COLOR_YELLOW, list->gists[i].id,
+			                 list->gists[i].owner,
+			                 list->gists[i].date,
+			                 (int)list->gists[i].files_size,
+			                 list->gists[i].description);
 		}
 	}
 
@@ -208,18 +223,18 @@ gcli_print_gists_short(enum gcli_output_flags const flags,
 
 void
 gcli_print_gists(enum gcli_output_flags const flags,
-                 gcli_gist const *const gists,
-                 int const gists_size)
+                 gcli_gist_list const *const list,
+                 int const max)
 {
-	if (gists_size == 0) {
+	if (list->gists_size == 0) {
 		puts("No Gists");
 		return;
 	}
 
 	if (flags & OUTPUT_LONG)	/* if we are in long mode (no pun intended) */
-		gcli_print_gists_long(flags, gists, gists_size);
+		gcli_print_gists_long(flags, list, max);
 	else                        /* real mode (bad joke, I know) */
-		gcli_print_gists_short(flags, gists, gists_size);
+		gcli_print_gists_short(flags, list, max);
 }
 
 gcli_gist *

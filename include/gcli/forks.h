@@ -67,4 +67,6 @@ void gcli_print_forks(enum gcli_output_flags const flags,
 
 void gcli_fork_delete(char const *owner, char const *repo);
 
+void gcli_forks_free(gcli_fork_list *const list);
+
 #endif /* FORK_H */

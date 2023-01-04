@@ -206,6 +206,7 @@ subcommand_forks(int argc, char *argv[])
 			errx(1, "error: could not get forks");
 
 		gcli_print_forks(flags, &forks, count);
+		gcli_forks_free(&forks);
 
 		return EXIT_SUCCESS;
 	}

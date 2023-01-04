@@ -97,3 +97,18 @@ gcli_fork_create(char const *owner, char const *repo, char const *_in)
 {
 	gcli_forge()->fork_create(owner, repo, _in);
 }
+
+void
+gcli_forks_free(gcli_fork_list *const list)
+{
+	for (size_t i = 0; i < list->forks_size; ++i) {
+		free(list->forks[i].full_name.data);
+		free(list->forks[i].owner.data);
+		free(list->forks[i].date.data);
+	}
+
+	free(list->forks);
+
+	list->forks = NULL;
+	list->forks_size = 0;
+}

@@ -36,10 +36,10 @@
 
 #include <gcli/labels.h>
 
-size_t github_get_labels(char const *owner,
-                         char const *reponame,
-                         int const max,
-                         gcli_label **const out);
+int github_get_labels(char const *owner,
+                      char const *reponame,
+                      int const max,
+                      gcli_label_list *const out);
 
 void github_create_label(char const *owner,
                          char const *repo,

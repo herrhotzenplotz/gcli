@@ -268,11 +268,11 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Get a list of labels that are valid in the given repository */
-	size_t (*get_labels)(
-		char const         *owner,
-		char const         *repo,
-		int const           max,
-		gcli_label **const  out);
+    int (*get_labels)(
+		char const             *owner,
+		char const             *repo,
+		int const               max,
+		gcli_label_list *const  out);
 
 	/**
 	 * Create the given label

@@ -32,11 +32,11 @@
 #include <gcli/labels.h>
 #include <gcli/table.h>
 
-size_t
+int
 gcli_get_labels(char const *owner,
                 char const *reponame,
                 int const max,
-                gcli_label **const out)
+                gcli_label_list *const out)
 {
 	return gcli_forge()->get_labels(owner, reponame, max, out);
 }
@@ -49,16 +49,20 @@ gcli_free_label(gcli_label *const label)
 }
 
 void
-gcli_free_labels(gcli_label *labels, size_t const labels_size)
+gcli_free_labels(gcli_label_list *const list)
 {
-	for (size_t i = 0; i < labels_size; ++i)
-		gcli_free_label(&labels[i]);
-	free(labels);
+	for (size_t i = 0; i < list->labels_size; ++i)
+		gcli_free_label(&list->labels[i]);
+	free(list->labels);
+
+	list->labels = NULL;
+	list->labels_size = 0;
 }
 
 void
-gcli_print_labels(gcli_label const *const labels, size_t const labels_size)
+gcli_print_labels(gcli_label_list const *const list, int const max)
 {
+	int n;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
 		{ .name = "ID",          .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
@@ -66,13 +70,23 @@ gcli_print_labels(gcli_label const *const labels, size_t const labels_size)
 		{ .name = "DESCRIPTION", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
+	/* Determine number of items to print */
+	if (max < 0 || max > list->labels_size)
+		n = list->labels_size;
+	else
+		n = max;
+
+	/* Fill table */
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not init table");
 
-	for (size_t i = 0; i < labels_size; ++i) {
-		gcli_tbl_add_row(table, labels[i].id, labels[i].colour, labels[i].name,
-		                 labels[i].description);
+	for (size_t i = 0; i < n; ++i) {
+		gcli_tbl_add_row(table,
+		                 list->labels[i].id,
+		                 list->labels[i].colour,
+		                 list->labels[i].name,
+		                 list->labels[i].description);
 	}
 
 	gcli_tbl_end(table);

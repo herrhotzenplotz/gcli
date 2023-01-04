@@ -102,7 +102,8 @@ subcommand_labels_delete(int argc, char *argv[])
 static int
 subcommand_labels_create(int argc, char *argv[])
 {
-	gcli_label  label = {0};
+	gcli_label label = {0};
+	gcli_label_list labels = { .labels = &label, .labels_size = 1 };
 	char const *owner = NULL, *repo = NULL;
 	int         ch;
 
@@ -163,7 +164,7 @@ subcommand_labels_create(int argc, char *argv[])
 
 	/* only if we are not quieted */
 	if (!sn_quiet())
-		gcli_print_labels(&label, 1);
+		gcli_print_labels(&labels, 1);
 
 	gcli_free_label(&label);
 
@@ -181,11 +182,10 @@ static struct {
 int
 subcommand_labels(int argc, char *argv[])
 {
-	int         count = 30;
-	int         ch;
+	int count = 30;
+	int ch;
 	char const *owner = NULL, *repo = NULL;
-	size_t      labels_count;
-	gcli_label *labels;
+	gcli_label_list labels = {0};
 
 	const struct option options[] = {
 		{.name = "repo",  .has_arg = required_argument, .flag = NULL, .val = 'r'},
@@ -234,10 +234,11 @@ subcommand_labels(int argc, char *argv[])
 
 	check_owner_and_repo(&owner, &repo);
 
-	labels_count = gcli_get_labels(owner, repo, count, &labels);
+	if (gcli_get_labels(owner, repo, count, &labels) < 0)
+		errx(1, "error: could not fetch list of labels");
 
-	gcli_print_labels(labels, labels_count);
-	gcli_free_labels(labels, labels_count);
+	gcli_print_labels(&labels, count);
+	gcli_free_labels(&labels);
 
 	return EXIT_SUCCESS;
 }

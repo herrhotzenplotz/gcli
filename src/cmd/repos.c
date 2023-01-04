@@ -175,6 +175,9 @@ subcommand_repos(int argc, char *argv[])
 			n = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "repos: cannot parse repo count");
+
+			if (n == 0)
+				errx(1, "error: number of repos must not be zero");
 		} break;
 		case '?':
 		default:

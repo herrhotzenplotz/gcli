@@ -91,11 +91,11 @@ struct gcli_forge_descriptor {
 	/**
 	 * Get a list of issues on the given repo */
 	int (*get_issues)(
-		char const         *owner,
-		char const         *repo,
-		bool const          all,
-		int const           max,
-		gcli_issue **const  out);
+		char const *owner,
+		char const *repo,
+		bool const all,
+		int const max,
+		gcli_issue_list *const out);
 
 	/**
 	 * Get a summary of an issue */

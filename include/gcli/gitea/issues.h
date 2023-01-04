@@ -40,7 +40,7 @@ int gitea_get_issues(char const *owner,
                      char const *reponame,
                      bool const all,
                      int const max,
-                     gcli_issue **const out);
+                     gcli_issue_list *const out);
 
 void gitea_get_issue_summary(char const *owner,
                              char const *repo,

@@ -136,16 +136,13 @@ subcommand_issue_create(int argc, char *argv[])
 int
 subcommand_issues(int argc, char *argv[])
 {
-	gcli_issue             *issues      = NULL;
-	int                     issues_size = 0;
-	char const             *owner       = NULL;
-	char const             *repo        = NULL;
-	char                   *endptr      = NULL;
-	int                     ch          = 0;
-	int                     issue       = -1;
-	int                     n           = 30;
-	bool                    all         = false;
-	enum gcli_output_flags  flags       = 0;
+	gcli_issue_list list = {0};
+	char const *owner = NULL;
+	char const *repo = NULL;
+	char *endptr = NULL;
+	int ch = 0, issue = -1, n = 30;
+	bool all = false;
+	enum gcli_output_flags flags = 0;
 
 	/* detect whether we wanna create an issue */
 	if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
@@ -228,10 +225,12 @@ subcommand_issues(int argc, char *argv[])
 
 	/* No issue number was given, so list all open issues */
 	if (issue < 0) {
-		issues_size = gcli_get_issues(owner, repo, all, n, &issues);
-		gcli_print_issues_table(flags, issues, issues_size);
+		if (gcli_get_issues(owner, repo, all, n, &list) < 0)
+			errx(1, "error: could not get issues");
 
-		gcli_issues_free(issues, issues_size);
+		gcli_print_issues_table(flags, &list, n);
+
+		gcli_issues_free(&list);
 		return EXIT_SUCCESS;
 	}
 

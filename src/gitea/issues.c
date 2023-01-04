@@ -42,7 +42,7 @@ gitea_get_issues(char const *owner,
                  char const *repo,
                  bool const all,
                  int const max,
-                 gcli_issue **const out)
+                 gcli_issue_list *const out)
 {
 	return github_get_issues(owner, repo, all, max, out);
 }

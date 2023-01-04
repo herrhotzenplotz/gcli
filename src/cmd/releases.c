@@ -271,11 +271,10 @@ int
 subcommand_releases(int argc, char *argv[])
 {
 	int                     ch;
-	int                     releases_size;
 	int                     count    = 30;
 	char const             *owner    = NULL;
 	char const             *repo     = NULL;
-	gcli_release           *releases = NULL;
+	gcli_release_list       releases = {0};
 	enum gcli_output_flags  flags    = 0;
 
 	if (argc > 1) {
@@ -350,9 +349,11 @@ subcommand_releases(int argc, char *argv[])
 
 	check_owner_and_repo(&owner, &repo);
 
-	releases_size = gcli_get_releases(owner, repo, count, &releases);
-	gcli_print_releases(flags, releases, releases_size);
-	gcli_free_releases(releases, releases_size);
+	if (gcli_get_releases(owner, repo, count, &releases) < 0)
+		errx(1, "error: could not get releases");
+
+	gcli_print_releases(flags, &releases, count);
+	gcli_free_releases(&releases);
 
 	return EXIT_SUCCESS;
 }

@@ -39,7 +39,7 @@
 int gitlab_get_releases(char const *owner,
                         char const *repo,
                         int const max,
-                        gcli_release **const out);
+                        gcli_release_list *const list);
 
 void gitlab_create_release(gcli_new_release const *const release);
 

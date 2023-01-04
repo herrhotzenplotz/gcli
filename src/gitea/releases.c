@@ -37,9 +37,9 @@
 
 int
 gitea_get_releases(char const *owner, char const *repo,
-                   int const max, gcli_release **const out)
+                   int const max, gcli_release_list *const list)
 {
-	return github_get_releases(owner, repo, max, out);
+	return github_get_releases(owner, repo, max, list);
 }
 
 static void
@@ -56,9 +56,9 @@ static void
 gitea_upload_release_asset(char *const url,
                            gcli_release_asset_upload const asset)
 {
-	char              *e_assetname  = NULL;
-	char              *request      = NULL;
-	gcli_fetch_buffer  buffer       = {0};
+	char              *e_assetname = NULL;
+	char              *request     = NULL;
+	gcli_fetch_buffer  buffer      = {0};
 
 	e_assetname = gcli_urlencode(asset.name);
 	request = sn_asprintf("%s?name=%s", url, e_assetname);

@@ -39,9 +39,9 @@ int
 gcli_get_releases(char const *owner,
                   char const *repo,
                   int const max,
-                  gcli_release **const out)
+                  gcli_release_list *const list)
 {
-	return gcli_forge()->get_releases(owner, repo, max, out);
+	return gcli_forge()->get_releases(owner, repo, max, list);
 }
 
 static void
@@ -81,23 +81,32 @@ gcli_print_release(enum gcli_output_flags const flags,
 
 static void
 gcli_print_releases_long(enum gcli_output_flags const flags,
-                         gcli_release const *const releases,
-                         int const releases_size)
+                         gcli_release_list const *const list,
+                         int const max)
 {
+	int n;
+
+	/* Determine how many items to print */
+	if (max < 0 || max > list->releases_size)
+		n = list->releases_size;
+	else
+		n = max;
+
 	if (flags & OUTPUT_SORTED) {
-		for (int i = releases_size; i > 0; --i)
-			gcli_print_release(flags, &releases[i - 1]);
+		for (int i = 0; i < n; ++i)
+			gcli_print_release(flags, &list->releases[n-i-1]);
 	} else {
-		for (int i = 0; i < releases_size; ++i)
-			gcli_print_release(flags, &releases[i]);
+		for (int i = 0; i < n; ++i)
+			gcli_print_release(flags, &list->releases[i]);
 	}
 }
 
 static void
 gcli_print_releases_short(enum gcli_output_flags const flags,
-                          gcli_release const *const releases,
-                          int const releases_size)
+                          gcli_release_list const *const list,
+                          int const max)
 {
+	int n;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
 		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
@@ -107,21 +116,32 @@ gcli_print_releases_short(enum gcli_output_flags const flags,
 		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
 	};
 
+	if (max < 0 || max > list->releases_size)
+		n = max;
+	else
+		n = list->releases_size;
+
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not init table");
 
 	if (flags & OUTPUT_SORTED) {
-		for (int i = releases_size; i > 0; --i) {
-			gcli_tbl_add_row(table, releases[i-1].id, releases[i-1].date,
-			                 releases[i-1].draft, releases[i-1].prerelease,
-			                 releases[i-1].name);
+		for (int i = 0; i < n; ++i) {
+			gcli_tbl_add_row(table,
+			                 list->releases[n-i-1].id,
+			                 list->releases[n-i-1].date,
+			                 list->releases[n-i-1].draft,
+			                 list->releases[n-i-1].prerelease,
+			                 list->releases[n-i-1].name);
 		}
 	} else {
-		for (int i = 0; i < releases_size; ++i) {
-			gcli_tbl_add_row(table, releases[i].id, releases[i].date,
-			                 releases[i].draft, releases[i].prerelease,
-			                 releases[i].name);
+		for (int i = 0; i < n; ++i) {
+			gcli_tbl_add_row(table,
+			                 list->releases[i].id,
+			                 list->releases[i].date,
+			                 list->releases[i].draft,
+			                 list->releases[i].prerelease,
+			                 list->releases[i].name);
 		}
 	}
 
@@ -130,41 +150,41 @@ gcli_print_releases_short(enum gcli_output_flags const flags,
 
 void
 gcli_print_releases(enum gcli_output_flags const flags,
-                    gcli_release const *const releases,
-                    int const releases_size)
+                    gcli_release_list const *const list,
+                    int const max)
 {
-	if (releases_size == 0) {
+	if (max == 0) {
 		puts("No releases");
 		return;
 	}
 
 	if (flags & OUTPUT_LONG)
-		gcli_print_releases_long(flags, releases, releases_size);
+		gcli_print_releases_long(flags, list, max);
 	else
-		gcli_print_releases_short(flags, releases, releases_size);
+		gcli_print_releases_short(flags, list, max);
 }
 
 void
-gcli_free_releases(gcli_release *releases, int const releases_size)
+gcli_free_releases(gcli_release_list *const list)
 {
-	if (!releases)
-		return;
+	for (int i = 0; i < list->releases_size; ++i) {
+		free(list->releases[i].name.data);
+		free(list->releases[i].body.data);
+		free(list->releases[i].author.data);
+		free(list->releases[i].date.data);
 
-	for (int i = 0; i < releases_size; ++i) {
-		free(releases[i].name.data);
-		free(releases[i].body.data);
-		free(releases[i].author.data);
-		free(releases[i].date.data);
-
-		for (size_t j = 0; j < releases[i].assets_size; ++j) {
-			free(releases[i].assets[j].name);
-			free(releases[i].assets[j].url);
+		for (size_t j = 0; j < list->releases[i].assets_size; ++j) {
+			free(list->releases[i].assets[j].name);
+			free(list->releases[i].assets[j].url);
 		}
 
-		free(releases[i].assets);
+		free(list->releases[i].assets);
 	}
 
-	free(releases);
+	free(list->releases);
+
+	list->releases = NULL;
+	list->releases_size = 0;
 }
 
 void

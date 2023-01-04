@@ -249,10 +249,10 @@ struct gcli_forge_descriptor {
 	/**
 	 * Get a list of releases in the given repo */
 	int (*get_releases)(
-		char const           *owner,
-		char const           *repo,
-		int const             max,
-		gcli_release **const  out);
+		char const *owner,
+		char const *repo,
+		int const max,
+		gcli_release_list *const out);
 
 	/**
 	 * Create a new release */

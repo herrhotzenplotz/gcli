@@ -270,6 +270,9 @@ subcommand_pulls(int argc, char *argv[])
 
 			if (n < -1)
 				errx(1, "error: pr count is out of range");
+
+			if (n == 0)
+				errx(1, "error: pr count must not be zero");
 		} break;
 		case 'a': {
 			all = true;

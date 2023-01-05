@@ -65,7 +65,7 @@ gcli_print_labels(gcli_label_list const *const list, int const max)
 	int n;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
-		{ .name = "ID",          .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "ID",          .type = GCLI_TBLCOLTYPE_LONG,   .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "NAME",        .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_256COLOUR|GCLI_TBLCOL_BOLD },
 		{ .name = "DESCRIPTION", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
@@ -83,7 +83,7 @@ gcli_print_labels(gcli_label_list const *const list, int const max)
 
 	for (size_t i = 0; i < n; ++i) {
 		gcli_tbl_add_row(table,
-		                 list->labels[i].id,
+		                 (long)list->labels[i].id, /* Cast is important here (#165) */
 		                 list->labels[i].colour,
 		                 list->labels[i].name,
 		                 list->labels[i].description);

@@ -41,6 +41,7 @@
 
 typedef struct gcli_issue gcli_issue;
 typedef struct gcli_submit_issue_options gcli_submit_issue_options;
+typedef struct gcli_issue_list gcli_issue_list;
 
 struct gcli_issue {
 	int     number;
@@ -65,18 +66,22 @@ struct gcli_submit_issue_options {
 	bool  always_yes;
 };
 
+struct gcli_issue_list {
+	gcli_issue *issues;
+	size_t issues_size;
+};
+
 int gcli_get_issues(char const *owner,
                     char const *reponame,
                     bool const all,
                     int const max,
-                    gcli_issue **const out);
+                    gcli_issue_list *const out);
 
-void gcli_issues_free(gcli_issue *it,
-                      int const size);
+void gcli_issues_free(gcli_issue_list *const);
 
 void gcli_print_issues_table(enum gcli_output_flags const flags,
-                             gcli_issue const *const issues,
-                             int const issues_size);
+                             gcli_issue_list const *const list,
+                             int const max);
 
 void gcli_issue_summary(char const *owner,
                         char const *reponame,

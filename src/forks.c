@@ -37,16 +37,17 @@ int
 gcli_get_forks(char const *owner,
                char const *repo,
                int const max,
-               gcli_fork **const out)
+               gcli_fork_list *const out)
 {
 	return gcli_forge()->get_forks(owner, repo, max, out);
 }
 
 void
 gcli_print_forks(enum gcli_output_flags const flags,
-                 gcli_fork const *const forks,
-                 size_t const forks_size)
+                 gcli_fork_list const *const list,
+                 int const max)
 {
+	int n;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
 		{ .name = "OWNER",    .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_BOLD },
@@ -55,25 +56,36 @@ gcli_print_forks(enum gcli_output_flags const flags,
 		{ .name = "FULLNAME", .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
 	};
 
-	if (forks_size == 0) {
+	if (list->forks_size == 0) {
 		puts("No forks");
 		return;
 	}
 
+	/* Determine number of items to print */
+	if (max < 0 || max > list->forks_size)
+		n = list->forks_size;
+	else
+		n = max;
 
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not initialize table");
 
 	if (flags & OUTPUT_SORTED) {
-		for (size_t i = forks_size; i > 0; --i) {
-			gcli_tbl_add_row(table, forks[i-1].owner, forks[i-1].date,
-			                 forks[i-1].forks, forks[i-1].full_name);
+		for (int i = 0; i < n; ++i) {
+			gcli_tbl_add_row(table,
+			                 list->forks[n-i-1].owner,
+			                 list->forks[n-i-1].date,
+			                 list->forks[n-i-1].forks,
+			                 list->forks[n-i-1].full_name);
 		}
 	} else {
-		for (size_t i = 0; i < forks_size; ++i) {
-			gcli_tbl_add_row(table, forks[i].owner, forks[i].date,
-			                 forks[i].forks, forks[i].full_name);
+		for (size_t i = 0; i < n; ++i) {
+			gcli_tbl_add_row(table,
+			                 list->forks[i].owner,
+			                 list->forks[i].date,
+			                 list->forks[i].forks,
+			                 list->forks[i].full_name);
 		}
 	}
 
@@ -84,4 +96,19 @@ void
 gcli_fork_create(char const *owner, char const *repo, char const *_in)
 {
 	gcli_forge()->fork_create(owner, repo, _in);
+}
+
+void
+gcli_forks_free(gcli_fork_list *const list)
+{
+	for (size_t i = 0; i < list->forks_size; ++i) {
+		free(list->forks[i].full_name.data);
+		free(list->forks[i].owner.data);
+		free(list->forks[i].date.data);
+	}
+
+	free(list->forks);
+
+	list->forks = NULL;
+	list->forks_size = 0;
 }

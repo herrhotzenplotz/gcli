@@ -120,7 +120,7 @@ github_free_checks(gcli_github_checks *const list)
 	list->checks_size = 0;
 }
 
-void
+int
 github_checks(char const *owner,
               char const *repo,
               char const *ref,
@@ -131,4 +131,6 @@ github_checks(char const *owner,
 	github_get_checks(owner, repo, ref, max, &checks);
 	github_print_checks(&checks);
 	github_free_checks(&checks);
+
+	return 0;
 }

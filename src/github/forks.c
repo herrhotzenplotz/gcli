@@ -41,7 +41,7 @@ int
 github_get_forks(char const *owner,
                  char const *repo,
                  int const max,
-                 gcli_fork **const out)
+                 gcli_fork_list *const list)
 {
 	gcli_fetch_buffer   buffer   = {0};
 	char               *url      = NULL;
@@ -49,9 +49,8 @@ github_get_forks(char const *owner,
 	char               *e_repo   = NULL;
 	char               *next_url = NULL;
 	struct json_stream  stream   = {0};
-	size_t              size     = 0;
 
-	*out = NULL;
+	*list = (gcli_fork_list) {0};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -63,21 +62,19 @@ github_get_forks(char const *owner,
 
 	do {
 		gcli_fetch(url, &next_url, &buffer);
-
 		json_open_buffer(&stream, buffer.data, buffer.length);
-
-		parse_github_forks(&stream, out, &size);
+		parse_github_forks(&stream, &list->forks, &list->forks_size);
 
 		json_close(&stream);
 		free(buffer.data);
 		free(url);
-	} while ((url = next_url) && (max == -1 || (int)size < max));
+	} while ((url = next_url) && (max == -1 || (int)list->forks_size < max));
 
 	free(next_url);
 	free(e_owner);
 	free(e_repo);
 
-	return (int)size;
+	return 0;
 }
 
 void

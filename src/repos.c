@@ -35,7 +35,7 @@
 #include <stdlib.h>
 
 int
-gcli_get_repos(char const *owner, int const max, gcli_repo **const out)
+gcli_get_repos(char const *owner, int const max, gcli_repo_list *const out)
 {
 	return gcli_forge()->get_repos(owner, max, out);
 }
@@ -43,9 +43,10 @@ gcli_get_repos(char const *owner, int const max, gcli_repo **const out)
 
 void
 gcli_print_repos_table(enum gcli_output_flags const flags,
-                       gcli_repo const *const repos,
-                       size_t const repos_size)
+                       gcli_repo_list const *const list,
+                       int const max)
 {
+	int n;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
 		{ .name = "FORK",     .type = GCLI_TBLCOLTYPE_BOOL, .flags = 0 },
@@ -54,11 +55,16 @@ gcli_print_repos_table(enum gcli_output_flags const flags,
 		{ .name = "FULLNAME", .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
 	};
 
-	if (repos_size == 0) {
+	if (list->repos_size == 0) {
 		puts("No repos");
 		return;
 	}
 
+	/* Determine number of repos to print */
+	if (max < 0 || max > list->repos_size)
+		n = list->repos_size;
+	else
+		n = max;
 
 	/* init table */
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
@@ -67,13 +73,19 @@ gcli_print_repos_table(enum gcli_output_flags const flags,
 
 	/* put data into table */
 	if (flags & OUTPUT_SORTED) {
-		for (size_t i = repos_size; i > 0; --i)
-			gcli_tbl_add_row(table, repos[i-1].is_fork, repos[i-1].visibility,
-			                 repos[i-1].date, repos[i-1].full_name);
+		for (size_t i = 0; i < n; ++i)
+			gcli_tbl_add_row(table,
+			                 list->repos[n-i-1].is_fork,
+			                 list->repos[n-i-1].visibility,
+			                 list->repos[n-i-1].date,
+			                 list->repos[n-i-1].full_name);
 	} else {
-		for (size_t i = 0; i < repos_size; ++i)
-			gcli_tbl_add_row(table, repos[i].is_fork, repos[i].visibility,
-			                 repos[i].date, repos[i].full_name);
+		for (size_t i = 0; i < n; ++i)
+			gcli_tbl_add_row(table,
+			                 list->repos[i].is_fork,
+			                 list->repos[i].visibility,
+			                 list->repos[i].date,
+			                 list->repos[i].full_name);
 	}
 
 	/* print it */
@@ -81,21 +93,24 @@ gcli_print_repos_table(enum gcli_output_flags const flags,
 }
 
 void
-gcli_repos_free(gcli_repo *repos, size_t const repos_size)
+gcli_repos_free(gcli_repo_list *const list)
 {
-	for (size_t i = 0; i < repos_size; ++i) {
-		free(repos[i].full_name.data);
-		free(repos[i].name.data);
-		free(repos[i].owner.data);
-		free(repos[i].date.data);
-		free(repos[i].visibility.data);
+	for (size_t i = 0; i < list->repos_size; ++i) {
+		free(list->repos[i].full_name.data);
+		free(list->repos[i].name.data);
+		free(list->repos[i].owner.data);
+		free(list->repos[i].date.data);
+		free(list->repos[i].visibility.data);
 	}
 
-	free(repos);
+	free(list->repos);
+
+	list->repos = NULL;
+	list->repos_size = 0;
 }
 
 int
-gcli_get_own_repos(int const max, gcli_repo **const out)
+gcli_get_own_repos(int const max, gcli_repo_list *const out)
 {
 	return gcli_forge()->get_own_repos(max, out);
 }

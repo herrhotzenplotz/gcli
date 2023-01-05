@@ -36,7 +36,7 @@ gitea_get_pulls(char const *owner,
                 char const *repo,
                 bool const all,
                 int const max,
-                gcli_pull **const out)
+                gcli_pull_list *const out)
 {
 	return github_get_prs(owner, repo, all, max, out);
 }
@@ -165,7 +165,7 @@ gitea_print_pr_diff(FILE *const stream,
 	free(url);
 }
 
-void
+int
 gitea_pull_checks(char const *owner,
                   char const *repo,
                   int const pr_number)
@@ -175,4 +175,6 @@ gitea_pull_checks(char const *owner,
 	(void) pr_number;
 
 	warnx("PR checks are not available on Gitea");
+
+	return 0;
 }

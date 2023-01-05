@@ -63,9 +63,9 @@ void github_print_checks(gcli_github_checks const *const checks);
 
 void github_free_checks(gcli_github_checks *const checks);
 
-void github_checks(char const *owner,
-                   char const *repo,
-                   char const *ref,
-                   int const max);
+int github_checks(char const *owner,
+                  char const *repo,
+                  char const *ref,
+                  int const max);
 
 #endif /* GITHUB_CHECKS_H */

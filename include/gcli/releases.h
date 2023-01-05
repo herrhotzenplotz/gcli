@@ -34,10 +34,11 @@
 #include "config.h"
 #endif
 
-#include <sn/sn.h>
 #include <gcli/gcli.h>
+#include <sn/sn.h>
 
 typedef struct gcli_release              gcli_release;
+typedef struct gcli_release_list         gcli_release_list;
 typedef struct gcli_new_release          gcli_new_release;
 typedef struct gcli_release_asset        gcli_release_asset;
 typedef struct gcli_release_asset_upload gcli_release_asset_upload;
@@ -59,6 +60,11 @@ struct gcli_release {
 	sn_sv               html_url;
 	bool                draft;
 	bool                prerelease;
+};
+
+struct gcli_release_list {
+	gcli_release *releases;
+	size_t releases_size;
 };
 
 struct gcli_release_asset_upload {
@@ -84,13 +90,13 @@ struct gcli_new_release {
 int gcli_get_releases(char const *owner,
                       char const *repo,
                       int const max,
-                      gcli_release **const out);
+                      gcli_release_list *const list);
 
 void gcli_print_releases(enum gcli_output_flags const flags,
-                         gcli_release const *const releases,
-                         int const releases_size);
+                         gcli_release_list const *const list,
+                         int const max);
 
-void gcli_free_releases(gcli_release *, int const);
+void gcli_free_releases(gcli_release_list *const);
 
 void gcli_create_release(gcli_new_release const *);
 

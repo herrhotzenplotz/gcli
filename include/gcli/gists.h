@@ -40,6 +40,7 @@
 #include <sn/sn.h>
 
 typedef struct gcli_gist      gcli_gist;
+typedef struct gcli_gist_list gcli_gist_list;
 typedef struct gcli_gist_file gcli_gist_file;
 typedef struct gcli_new_gist  gcli_new_gist;
 
@@ -49,6 +50,11 @@ struct gcli_gist_file {
 	sn_sv  url;
 	sn_sv  type;
 	size_t size;
+};
+
+struct gcli_gist_list {
+	gcli_gist *gists;
+	size_t gists_size;
 };
 
 struct gcli_gist {
@@ -68,17 +74,19 @@ struct gcli_new_gist {
 	char const *gist_description;
 };
 
-int gcli_get_gists(char const *user, int const max, gcli_gist **const out);
+int gcli_get_gists(char const *user, int const max, gcli_gist_list *const list);
 
 gcli_gist *gcli_get_gist(char const *gist_id);
 
 void gcli_print_gists(enum gcli_output_flags const flags,
-                      gcli_gist const *const gists,
-                      int const gists_size);
+                      gcli_gist_list const *const list,
+                      int const max);
 
 void gcli_create_gist(gcli_new_gist);
 
 void gcli_delete_gist(char const *gist_id, bool const always_yes);
+
+void gcli_gists_free(gcli_gist_list *const list);
 
 /**
  * NOTE(Nico): Because of idiots designing a web API, we get a list of

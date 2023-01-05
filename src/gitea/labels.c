@@ -35,13 +35,13 @@
 #include <pdjson/pdjson.h>
 #include <sn/sn.h>
 
-size_t
+int
 gitea_get_labels(char const *owner,
                  char const *reponame,
                  int max,
-                 gcli_label **const out)
+                 gcli_label_list *const list)
 {
-	return github_get_labels(owner, reponame, max, out);
+	return github_get_labels(owner, reponame, max, list);
 }
 
 void
@@ -57,20 +57,20 @@ gitea_delete_label(char const *owner,
                    char const *repo,
                    char const *label)
 {
-	char              *url         = NULL;
-	gcli_fetch_buffer  buffer      = {0};
-	gcli_label        *labels      = NULL;
-	size_t             labels_size = 0;
-	int                id          = -1;
+	char              *url    = NULL;
+	gcli_fetch_buffer  buffer = {0};
+	gcli_label_list    list   = {0};
+	int                id     = -1;
 
 	/* Gitea wants the id of the label, not its name. thus fetch all
 	 * the labels first to then find out what the id is we need. */
-	labels_size = gitea_get_labels(owner, repo, -1, &labels);
+	if (gitea_get_labels(owner, repo, -1, &list) < 0)
+		errx(1, "error: could not get list of labels");
 
 	/* Search for the id */
-	for (size_t i = 0; i < labels_size; ++i) {
-		if (strcmp(labels[i].name, label) == 0) {
-			id = labels[i].id;
+	for (size_t i = 0; i < list.labels_size; ++i) {
+		if (strcmp(list.labels[i].name, label) == 0) {
+			id = list.labels[i].id;
 			break;
 		}
 	}
@@ -86,7 +86,7 @@ gitea_delete_label(char const *owner,
 
 	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
 
-	gcli_free_labels(labels, labels_size);
+	gcli_free_labels(&list);
 	free(url);
 	free(buffer.data);
 }

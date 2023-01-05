@@ -58,9 +58,9 @@ usage(void)
 static int
 subcommand_repos_create(int argc, char *argv[])
 {
-	int                       ch;
-	gcli_repo_create_options  create_options = {0};
-	gcli_repo                *created_repo   = NULL;
+	int ch;
+	gcli_repo_create_options create_options = {0};
+	gcli_repo_list list = {0};
 
 	const struct option options[] = {
 		{ .name    = "repo",
@@ -107,10 +107,11 @@ subcommand_repos_create(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	created_repo = gcli_repo_create(&create_options);
+	list.repos = gcli_repo_create(&create_options);
+	list.repos_size = 1;
 
-	gcli_print_repos_table(0, created_repo, 1);
-	gcli_repos_free(created_repo, 1);
+	gcli_print_repos_table(0, &list, 1);
+	gcli_repos_free(&list);
 
 	return EXIT_SUCCESS;
 }
@@ -118,12 +119,12 @@ subcommand_repos_create(int argc, char *argv[])
 int
 subcommand_repos(int argc, char *argv[])
 {
-	int                     ch, repos_size, n = 30;
-	const char             *owner             = NULL;
-	const char             *repo              = NULL;
-	gcli_repo              *repos             = NULL;
-	bool                    always_yes        = false;
-	enum gcli_output_flags  flags             = 0;
+	int                     ch, n = 30;
+	char const             *owner      = NULL;
+	char const             *repo       = NULL;
+	gcli_repo_list          repos      = {0};
+	bool                    always_yes = false;
+	enum gcli_output_flags  flags      = 0;
 
 	/* detect whether we wanna create a repo */
 	if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
@@ -131,7 +132,7 @@ subcommand_repos(int argc, char *argv[])
 		return subcommand_repos_create(argc, argv);
 	}
 
-	const struct option options[] = {
+	struct option const options[] = {
 		{ .name    = "count",
 		  .has_arg = required_argument,
 		  .flag    = NULL,
@@ -174,6 +175,9 @@ subcommand_repos(int argc, char *argv[])
 			n = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "repos: cannot parse repo count");
+
+			if (n == 0)
+				errx(1, "error: number of repos must not be zero");
 		} break;
 		case '?':
 		default:
@@ -194,17 +198,17 @@ subcommand_repos(int argc, char *argv[])
 		}
 
 		if (!owner)
-			repos_size = gcli_get_own_repos(n, &repos);
+		    gcli_get_own_repos(n, &repos);
 		else
-			repos_size = gcli_get_repos(owner, n, &repos);
+			gcli_get_repos(owner, n, &repos);
 
-		gcli_print_repos_table(flags, repos, (size_t)repos_size);
-		gcli_repos_free(repos, repos_size);
+		gcli_print_repos_table(flags, &repos, n);
+		gcli_repos_free(&repos);
 	} else {
 		check_owner_and_repo(&owner, &repo);
 
 		for (size_t i = 0; i < (size_t)argc; ++i) {
-			const char *action = argv[i];
+			char const *action = argv[i];
 
 			if (strcmp(action, "delete") == 0) {
 				delete_repo(always_yes, owner, repo);

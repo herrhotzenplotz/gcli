@@ -43,9 +43,8 @@ github_get_issues(char const *owner,
                   char const *repo,
                   bool const all,
                   int const max,
-                  gcli_issue **const out)
+                  gcli_issue_list *const out)
 {
-	size_t             count       = 0;
 	json_stream        stream      = {0};
 	gcli_fetch_buffer  json_buffer = {0};
 	char              *url         = NULL;
@@ -67,13 +66,13 @@ github_get_issues(char const *owner,
 
 		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 
-		parse_github_issues(&stream, out, &count);
+		parse_github_issues(&stream, &out->issues, &out->issues_size);
 
 		free(json_buffer.data);
 		free(url);
 		json_close(&stream);
 
-	} while ((url = next_url) && (max == -1 || (int)count < max));
+	} while ((url = next_url) && (max == -1 || (int)out->issues_size < max));
 	/* continue iterating if we have both a next_url and we are
 	 * supposed to fetch more issues (either max is -1 thus all issues
 	 * or we haven't fetched enough yet). */
@@ -82,7 +81,7 @@ github_get_issues(char const *owner,
 	free(e_owner);
 	free(e_repo);
 
-	return (int)count;
+	return 0;
 }
 
 void

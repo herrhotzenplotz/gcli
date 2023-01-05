@@ -76,10 +76,10 @@ struct gcli_forge_descriptor {
 	/**
 	 * List forks of the given repo */
 	int (*get_forks)(
-		char const        *owner,
-		char const        *repo,
-		int const          max,
-		gcli_fork **const  out);
+		char const            *owner,
+		char const            *repo,
+		int const              max,
+		gcli_fork_list *const  out);
 
 	/**
 	 * Fork the given repo into the owner _in */
@@ -91,11 +91,11 @@ struct gcli_forge_descriptor {
 	/**
 	 * Get a list of issues on the given repo */
 	int (*get_issues)(
-		char const         *owner,
-		char const         *repo,
-		bool const          all,
-		int const           max,
-		gcli_issue **const  out);
+		char const *owner,
+		char const *repo,
+		bool const all,
+		int const max,
+		gcli_issue_list *const out);
 
 	/**
 	 * Get a summary of an issue */
@@ -154,11 +154,11 @@ struct gcli_forge_descriptor {
 	/**
 	 * Get a list of PRs/MRs on the given repo */
 	int (*get_prs)(
-		char const        *owner,
-		char const        *reponame,
-		bool const         all,
-		int const          max,
-		gcli_pull **const  out);
+		char const *owner,
+		char const *reponame,
+		bool const all,
+		int const max,
+		gcli_pull_list *const out);
 
 	/**
 	 * Print a diff of the changes of a PR/MR to the stream */
@@ -170,7 +170,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Print a list of checks associated with the given pull. */
-	void (*print_pr_checks)(
+	int (*print_pr_checks)(
 		char const *owner,
 		char const *reponame,
 		int const pr_number);
@@ -249,10 +249,10 @@ struct gcli_forge_descriptor {
 	/**
 	 * Get a list of releases in the given repo */
 	int (*get_releases)(
-		char const           *owner,
-		char const           *repo,
-		int const             max,
-		gcli_release **const  out);
+		char const *owner,
+		char const *repo,
+		int const max,
+		gcli_release_list *const out);
 
 	/**
 	 * Create a new release */
@@ -268,11 +268,11 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Get a list of labels that are valid in the given repository */
-	size_t (*get_labels)(
-		char const         *owner,
-		char const         *repo,
-		int const           max,
-		gcli_label **const  out);
+    int (*get_labels)(
+		char const             *owner,
+		char const             *repo,
+		int const               max,
+		gcli_label_list *const  out);
 
 	/**
 	 * Create the given label
@@ -293,15 +293,15 @@ struct gcli_forge_descriptor {
 	/**
 	 * Get a list of repos of the given owner */
 	int (*get_repos)(
-		char const        *owner,
-		int const          max,
-		gcli_repo **const  out);
+		char const *owner,
+		int const max,
+		gcli_repo_list *const out);
 
 	/**
 	 * Get a list of your own repos */
 	int (*get_own_repos)(
-		int         max,
-		gcli_repo **out);
+		int max,
+		gcli_repo_list *const out);
 
 	/**
 	 * Create the given repo */

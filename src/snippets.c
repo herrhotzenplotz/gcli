@@ -41,48 +41,48 @@
 #include <templates/gitlab/snippets.h>
 
 void
-gcli_snippets_free(gcli_snippet *list, int const list_size)
+gcli_snippets_free(gcli_snippet_list *const list)
 {
-	for (int i = 0; i < list_size; ++i) {
-		free(list[i].title);
-		free(list[i].filename);
-		free(list[i].date);
-		free(list[i].author);
-		free(list[i].visibility);
-		free(list[i].raw_url);
+	for (int i = 0; i < list->snippets_size; ++i) {
+		free(list->snippets[i].title);
+		free(list->snippets[i].filename);
+		free(list->snippets[i].date);
+		free(list->snippets[i].author);
+		free(list->snippets[i].visibility);
+		free(list->snippets[i].raw_url);
 	}
 
-	free(list);
+	free(list->snippets);
+
+	list->snippets = NULL;
+	list->snippets_size = 0;
 }
 
 int
-gcli_snippets_get(int const max, gcli_snippet **const out)
+gcli_snippets_get(int const max, gcli_snippet_list *const out)
 {
 	char               *url      = NULL;
 	char               *next_url = NULL;
 	gcli_fetch_buffer   buffer   = {0};
 	struct json_stream  stream   = {0};
-	size_t              size     = 0;
 
-	*out = NULL;
+	*out = (gcli_snippet_list) {0};
 
 	url = sn_asprintf("%s/snippets", gitlab_get_apibase());
 
 	do {
 		gcli_fetch(url, &next_url, &buffer);
-
 		json_open_buffer(&stream, buffer.data, buffer.length);
-
-		parse_gitlab_snippets(&stream, out, &size);
+		parse_gitlab_snippets(&stream, &out->snippets, &out->snippets_size);
 
 		json_close(&stream);
 		free(url);
 		free(buffer.data);
-	} while ((url = next_url) && (max == -1 || (int)size < max));
+	} while ((url = next_url) && (max == -1 || (int)out->snippets_size < max));
 
 	free(next_url);
 
-	return (int)size;
+	return 0;
 }
 
 static void
@@ -108,23 +108,32 @@ gcli_print_snippet(enum gcli_output_flags const flags,
 
 static void
 gcli_print_snippets_long(enum gcli_output_flags const flags,
-                         gcli_snippet const *const list,
-                         int const list_size)
+                         gcli_snippet_list const *const list,
+                         int const max)
 {
+	int n;
+
+	/* Determine number of items to print */
+	if (max < 0 || max > list->snippets_size)
+		n = list->snippets_size;
+	else
+		n = max;
+
 	if (flags & OUTPUT_SORTED) {
-		for (int i = list_size; i > 0; --i)
-			gcli_print_snippet(flags, &list[i - 1]);
+		for (int i = 0; i < n; ++i)
+			gcli_print_snippet(flags, &list->snippets[n-i-1]);
 	} else {
-		for (int i = 0; i < list_size; ++i)
-			gcli_print_snippet(flags, &list[i]);
+		for (int i = 0; i < n; ++i)
+			gcli_print_snippet(flags, &list->snippets[i]);
 	}
 }
 
 static void
 gcli_print_snippets_short(enum gcli_output_flags const flags,
-                          gcli_snippet const *const list,
-                          int const list_size)
+                          gcli_snippet_list const *const list,
+                          int const max)
 {
+	int n;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
 		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
@@ -134,20 +143,33 @@ gcli_print_snippets_short(enum gcli_output_flags const flags,
 		{ .name = "TITLE",      .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
+	/* Determine number of items to print */
+	if (max < 0 || max > list->snippets_size)
+		n = list->snippets_size;
+	else
+		n = max;
+
+	/* Fill table */
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not init table");
 
-
 	if (flags & OUTPUT_SORTED) {
-		for (int i = list_size; i > 0; --i)
-			gcli_tbl_add_row(table, list[i-1].id, list[i-1].date,
-			                 list[i-1].visibility, list[i-1].author,
-			                 list[i-1].title);
+		for (int i = 0; i < n; ++i)
+			gcli_tbl_add_row(table,
+			                 list->snippets[n-i-1].id,
+			                 list->snippets[n-i-1].date,
+			                 list->snippets[n-i-1].visibility,
+			                 list->snippets[n-i-1].author,
+			                 list->snippets[n-i-1].title);
 	} else {
-		for (int i = 0; i < list_size; ++i)
-			gcli_tbl_add_row(table, list[i].id, list[i].date,
-			                 list[i].visibility, list[i].author, list[i].title);
+		for (int i = 0; i < n; ++i)
+			gcli_tbl_add_row(table,
+			                 list->snippets[i].id,
+			                 list->snippets[i].date,
+			                 list->snippets[i].visibility,
+			                 list->snippets[i].author,
+			                 list->snippets[i].title);
 	}
 
 	gcli_tbl_end(table);
@@ -155,18 +177,18 @@ gcli_print_snippets_short(enum gcli_output_flags const flags,
 
 void
 gcli_snippets_print(enum gcli_output_flags const flags,
-                    gcli_snippet const *const list,
-                    int const list_size)
+                    gcli_snippet_list const *const list,
+                    int const max)
 {
-	if (list_size == 0) {
+	if (list->snippets_size == 0) {
 		puts("No Snippets");
 		return;
 	}
 
 	if (flags & OUTPUT_LONG)
-		gcli_print_snippets_long(flags, list, list_size);
+		gcli_print_snippets_long(flags, list, max);
 	else
-		gcli_print_snippets_short(flags, list, list_size);
+		gcli_print_snippets_short(flags, list, max);
 }
 
 void

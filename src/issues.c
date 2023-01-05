@@ -52,12 +52,15 @@ gcli_issue_free(gcli_issue *const it)
 }
 
 void
-gcli_issues_free(gcli_issue *issues, int const issues_size)
+gcli_issues_free(gcli_issue_list *const list)
 {
-	for (int i = 0; i < issues_size; ++i)
-		gcli_issue_free(&issues[i]);
+	for (int i = 0; i < list->issues_size; ++i)
+		gcli_issue_free(&list->issues[i]);
 
-	free(issues);
+	free(list->issues);
+
+	list->issues = NULL;
+	list->issues_size = 0;
 }
 
 int
@@ -65,16 +68,17 @@ gcli_get_issues(char const *owner,
                 char const *repo,
                 bool const all,
                 int const max,
-                gcli_issue **const out)
+                gcli_issue_list *const out)
 {
 	return gcli_forge()->get_issues(owner, repo, all, max, out);
 }
 
 void
 gcli_print_issues_table(enum gcli_output_flags const flags,
-                        gcli_issue const *const issues,
-                        int const issues_size)
+                        gcli_issue_list const *const list,
+                        int const max)
 {
+	int n;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
 		{ .name = "NUMBER", .type = GCLI_TBLCOLTYPE_INT, .flags = GCLI_TBLCOL_JUSTIFYR },
@@ -82,7 +86,7 @@ gcli_print_issues_table(enum gcli_output_flags const flags,
 		{ .name = "TITLE",  .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
 	};
 
-	if (issues_size == 0) {
+	if (list->issues_size == 0) {
 		puts("No issues");
 		return;
 	}
@@ -91,18 +95,30 @@ gcli_print_issues_table(enum gcli_output_flags const flags,
 	if (!table)
 		errx(1, "could not init table printer");
 
+	/* Determine the correct number of items to print */
+	if (max < 0 || max > list->issues_size)
+		n = list->issues_size;
+	else
+		n = max;
+
+	/* Iterate depending on the output order */
 	if (flags & OUTPUT_SORTED) {
-		for (int i = issues_size; i > 0; --i) {
-			gcli_tbl_add_row(table, issues[i - 1].number, issues[i - 1].state,
-			                 issues[i - 1].title);
+		for (int i = 0; i < n; ++i) {
+			gcli_tbl_add_row(table,
+			                 list->issues[n - i - 1].number,
+			                 list->issues[n - i - 1].state,
+			                 list->issues[n - i - 1].title);
 		}
 	} else {
-		for (int i = 0; i < issues_size; ++i) {
-			gcli_tbl_add_row(table, issues[i].number, issues[i].state,
-			                 issues[i].title);
+		for (int i = 0; i < n; ++i) {
+			gcli_tbl_add_row(table,
+			                 list->issues[i].number,
+			                 list->issues[i].state,
+			                 list->issues[i].title);
 		}
 	}
 
+	/* Dump the table */
 	gcli_tbl_end(table);
 }
 

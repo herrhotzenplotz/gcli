@@ -40,47 +40,46 @@
 #include <templates/gitlab/pipelines.h>
 
 static int
-fetch_pipelines(char *url, int const max, gitlab_pipeline **const out)
+fetch_pipelines(char *url, int const max, gitlab_pipeline_list *const list)
 {
 	char               *next_url = NULL;
 	gcli_fetch_buffer   buffer   = {0};
 	struct json_stream  stream   = {0};
-	size_t              out_size = 0;
 
-	*out = NULL;
+	*list = (gitlab_pipeline_list) {0};
 
 	do {
 		gcli_fetch(url, &next_url, &buffer);
 
 		json_open_buffer(&stream, buffer.data, buffer.length);
 
-		parse_gitlab_pipelines(&stream, out, &out_size);
+		parse_gitlab_pipelines(&stream, &list->pipelines, &list->pipelines_size);
 
 		json_close(&stream);
 		free(buffer.data);
 		free(url);
-	} while ((url = next_url) && (max == -1 || (int)out_size < max));
+	} while ((url = next_url) && (max == -1 || (int)list->pipelines_size < max));
 
-	return (int)out_size;
+	return 0;
 }
 
 int
 gitlab_get_pipelines(char const *owner,
                      char const *repo,
                      int const max,
-                     gitlab_pipeline **const out)
+                     gitlab_pipeline_list *const list)
 {
 	char *url = NULL;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/pipelines",
 	                  gitlab_get_apibase(), owner, repo);
 
-	return fetch_pipelines(url, max, out);
+	return fetch_pipelines(url, max, list);
 }
 
 static int
 gitlab_get_mr_pipelines(char const *owner, char const *repo, int const mr_id,
-                        gitlab_pipeline **const out)
+                        gitlab_pipeline_list *const list)
 {
 	char *url = NULL;
 
@@ -88,12 +87,11 @@ gitlab_get_mr_pipelines(char const *owner, char const *repo, int const mr_id,
 	                  gitlab_get_apibase(), owner, repo, mr_id);
 
 	/* fetch everything */
-	return fetch_pipelines(url, -1, out);
+	return fetch_pipelines(url, -1, list);
 }
 
 void
-gitlab_print_pipelines(gitlab_pipeline const *const pipelines,
-                       int const pipelines_size)
+gitlab_print_pipelines(gitlab_pipeline_list const *const list)
 {
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
@@ -104,7 +102,7 @@ gitlab_print_pipelines(gitlab_pipeline const *const pipelines,
 		{ .name = "REF",     .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
-	if (!pipelines_size) {
+	if (!list->pipelines_size) {
 		printf("No pipelines\n");
 		return;
 	}
@@ -113,42 +111,44 @@ gitlab_print_pipelines(gitlab_pipeline const *const pipelines,
 	if (!table)
 		errx(1, "error: could not init table");
 
-	for (int i = 0; i < pipelines_size; ++i) {
+	for (int i = 0; i < list->pipelines_size; ++i) {
 		gcli_tbl_add_row(table,
-		                 (int)(pipelines[i].id),
-		                 pipelines[i].status,
-		                 pipelines[i].created_at,
-		                 pipelines[i].updated_at,
-		                 pipelines[i].ref);
+		                 (int)(list->pipelines[i].id),
+		                 list->pipelines[i].status,
+		                 list->pipelines[i].created_at,
+		                 list->pipelines[i].updated_at,
+		                 list->pipelines[i].ref);
 	}
 
 	gcli_tbl_end(table);
 }
 
 void
-gitlab_free_pipelines(gitlab_pipeline *pipelines,
-                      int const pipelines_size)
+gitlab_free_pipelines(gitlab_pipeline_list *const list)
 {
-	for (int i = 0; i < pipelines_size; ++i) {
-		free(pipelines[i].status);
-		free(pipelines[i].created_at);
-		free(pipelines[i].updated_at);
-		free(pipelines[i].ref);
-		free(pipelines[i].sha);
-		free(pipelines[i].source);
+	for (int i = 0; i < list->pipelines_size; ++i) {
+		free(list->pipelines[i].status);
+		free(list->pipelines[i].created_at);
+		free(list->pipelines[i].updated_at);
+		free(list->pipelines[i].ref);
+		free(list->pipelines[i].sha);
+		free(list->pipelines[i].source);
 	}
-	free(pipelines);
+	free(list->pipelines);
+
+	list->pipelines = NULL;
+	list->pipelines_size = 0;
 }
 
 void
 gitlab_pipelines(char const *owner, char const *repo, int const count)
 {
-	gitlab_pipeline *pipelines = NULL;
+	gitlab_pipeline_list pipelines = {0};
 	int const pipelines_size = gitlab_get_pipelines(
 		owner, repo, count, &pipelines);
 
-	gitlab_print_pipelines(pipelines, pipelines_size);
-	gitlab_free_pipelines(pipelines, pipelines_size);
+	gitlab_print_pipelines(&pipelines);
+	gitlab_free_pipelines(&pipelines);
 }
 
 void
@@ -354,13 +354,16 @@ gitlab_job_retry(char const *owner, char const *repo, long const jid)
 	free(buffer.data);
 }
 
-void
+int
 gitlab_mr_pipelines(char const *owner, char const *repo, int const mr_id)
 {
-	gitlab_pipeline *pipelines;
-	int pipelines_size;
+	gitlab_pipeline_list list = {0};
 
-	pipelines_size = gitlab_get_mr_pipelines(owner, repo, mr_id, &pipelines);
-	gitlab_print_pipelines(pipelines, pipelines_size);
-	gitlab_free_pipelines(pipelines, pipelines_size);
+	if (gitlab_get_mr_pipelines(owner, repo, mr_id, &list) < 0)
+		return -1;
+
+	gitlab_print_pipelines(&list);
+	gitlab_free_pipelines(&list);
+
+	return 0;
 }

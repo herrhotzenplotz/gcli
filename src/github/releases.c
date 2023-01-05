@@ -42,7 +42,7 @@ int
 github_get_releases(char const *owner,
                     char const *repo,
                     int const max,
-                    gcli_release **const out)
+                    gcli_release_list *const list)
 {
 	char               *url      = NULL;
 	char               *e_owner  = NULL;
@@ -50,9 +50,9 @@ github_get_releases(char const *owner,
 	char               *next_url = NULL;
 	gcli_fetch_buffer   buffer   = {0};
 	struct json_stream  stream   = {0};
-	size_t              size     = 0;
 
-	*out = NULL;
+
+	*list = (gcli_release_list) {0};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -64,21 +64,19 @@ github_get_releases(char const *owner,
 
 	do {
 		gcli_fetch(url, &next_url, &buffer);
-
 		json_open_buffer(&stream, buffer.data, buffer.length);
-
-		parse_github_releases(&stream, out, &size);
+		parse_github_releases(&stream, &list->releases, &list->releases_size);
 
 		json_close(&stream);
 		free(url);
 		free(buffer.data);
-	} while ((url = next_url) && (max == -1 || (int)size < max));
+	} while ((url = next_url) && (max == -1 || (int)list->releases_size < max));
 
 	free(next_url);
 	free(e_owner);
 	free(e_repo);
 
-	return (int)(size);
+	return 0;
 }
 
 static void

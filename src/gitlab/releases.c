@@ -47,14 +47,13 @@ fixup_asset_name(gcli_release_asset *const asset)
 }
 
 static void
-fixup_release_asset_names(gcli_release *const releases,
-                          size_t const releases_size)
+fixup_release_asset_names(gcli_release_list *list)
 {
 	/* Iterate over releases */
-	for (size_t j = 0; j < releases_size; ++j) {
+	for (size_t j = 0; j < list->releases_size; ++j) {
 		/* iterate over releases */
-		for (size_t i = 0; i < releases[j].assets_size; ++i) {
-			fixup_asset_name(&releases[j].assets[i]);
+		for (size_t i = 0; i < list->releases[j].assets_size; ++i) {
+			fixup_asset_name(&list->releases[j].assets[i]);
 		}
 	}
 }
@@ -63,7 +62,7 @@ int
 gitlab_get_releases(char const *owner,
                     char const *repo,
                     int const max,
-                    gcli_release **const out)
+                    gcli_release_list *const list)
 {
 	char              *url      = NULL;
 	char              *next_url = NULL;
@@ -71,9 +70,9 @@ gitlab_get_releases(char const *owner,
 	char              *e_repo   = NULL;
 	gcli_fetch_buffer  buffer   = {0};
 	json_stream        stream   = {0};
-	size_t             size     = 0;
 
-	*out = NULL;
+
+	*list = (gcli_release_list) {0};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -87,19 +86,19 @@ gitlab_get_releases(char const *owner,
 		gcli_fetch(url, &next_url, &buffer);
 		json_open_buffer(&stream, buffer.data, buffer.length);
 
-		parse_gitlab_releases(&stream, out, &size);
+		parse_gitlab_releases(&stream, &list->releases, &list->releases_size);
 
 		free(url);
 		free(buffer.data);
-	} while ((url = next_url) && (max == -1 || (int)size < max));
+	} while ((url = next_url) && (max == -1 || (int)list->releases_size < max));
 
 	free(e_owner);
 	free(e_repo);
 	free(next_url);
 
-	fixup_release_asset_names(*out, size);
+	fixup_release_asset_names(list);
 
-	return (int)(size);
+	return 0;
 }
 
 void

@@ -38,14 +38,13 @@
 #include <templates/github/repos.h>
 
 int
-github_get_repos(char const *owner, int const max, gcli_repo **const out)
+github_get_repos(char const *owner, int const max, gcli_repo_list *const list)
 {
 	char               *url      = NULL;
 	char               *next_url = NULL;
 	char               *e_owner  = NULL;
 	gcli_fetch_buffer   buffer   = {0};
 	struct json_stream  stream   = {0};
-	size_t              size     = 0;
 
 	e_owner = gcli_urlencode(owner);
 
@@ -69,49 +68,44 @@ github_get_repos(char const *owner, int const max, gcli_repo **const out)
 
 	do {
 		gcli_fetch(url, &next_url, &buffer);
-
 		json_open_buffer(&stream, buffer.data, buffer.length);
-
-		parse_github_repos(&stream, out, &size);
+		parse_github_repos(&stream, &list->repos, &list->repos_size);
 
 		free(url);
 		free(buffer.data);
 		json_close(&stream);
-	} while ((url = next_url) && (max == -1 || (int)size < max));
+	} while ((url = next_url) && (max == -1 || (int)list->repos_size < max));
 
 	free(url);
 	free(e_owner);
 
-	return (int)size;
+	return 0;
 }
 
 int
-github_get_own_repos(int const max, gcli_repo **const out)
+github_get_own_repos(int const max, gcli_repo_list *const list)
 {
 	char               *url      = NULL;
 	char               *next_url = NULL;
 	gcli_fetch_buffer   buffer   = {0};
 	struct json_stream  stream   = {0};
-	size_t              size     = 0;
 
 	url = sn_asprintf("%s/user/repos", gcli_get_apibase());
 
 	do {
 		buffer.length = 0;
 		gcli_fetch(url, &next_url, &buffer);
-
 		json_open_buffer(&stream, buffer.data, buffer.length);
-
-		parse_github_repos(&stream, out, &size);
+		parse_github_repos(&stream, &list->repos, &list->repos_size);
 
 		free(buffer.data);
 		json_close(&stream);
 		free(url);
-	} while ((url = next_url) && (max == -1 || (int)size < max));
+	} while ((url = next_url) && (max == -1 || (int)list->repos_size < max));
 
 	free(next_url);
 
-	return (int)size;
+	return 0;
 }
 
 void

@@ -39,6 +39,7 @@
 #include <stdlib.h>
 
 typedef struct gcli_label gcli_label;
+typedef struct gcli_label_list gcli_label_list;
 
 struct gcli_label {
 	long      id;
@@ -47,17 +48,22 @@ struct gcli_label {
 	uint32_t  colour;
 };
 
-size_t gcli_get_labels(char const *owner,
-                       char const *reponame,
-                       int const max,
-                       gcli_label **const out);
+struct gcli_label_list {
+	gcli_label *labels;
+	size_t labels_size;
+};
+
+int gcli_get_labels(char const *owner,
+                    char const *reponame,
+                    int const max,
+                    gcli_label_list *const out);
 
 void gcli_free_label(gcli_label *const label);
 
-void gcli_free_labels(gcli_label *labels, size_t const labels_size);
+void gcli_free_labels(gcli_label_list *const labels);
 
-void gcli_print_labels(gcli_label const *const labels,
-                       size_t const labels_size);
+void gcli_print_labels(gcli_label_list const *const list,
+                       int const max);
 
 void gcli_create_label(char const *owner,
                        char const *repo,

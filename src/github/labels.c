@@ -35,18 +35,17 @@
 
 #include <templates/github/labels.h>
 
-size_t
+int
 github_get_labels(char const *owner,
                   char const *reponame,
                   int const max,
-                  gcli_label **const out)
+                  gcli_label_list *const out)
 {
-	size_t             out_size = 0;
-	char              *url      = NULL;
-	char              *next_url = NULL;
-	gcli_fetch_buffer  buffer   = {0};
+	char *url = NULL;
+	char *next_url = NULL;
+	gcli_fetch_buffer buffer = {0};
 
-	*out = NULL;
+	*out = (gcli_label_list) {0};
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/labels",
@@ -57,15 +56,14 @@ github_get_labels(char const *owner,
 
 		gcli_fetch(url, &next_url, &buffer);
 		json_open_buffer(&stream, buffer.data, buffer.length);
-
-		parse_github_labels(&stream, out, &out_size);
+		parse_github_labels(&stream, &out->labels, &out->labels_size);
 
 		json_close(&stream);
 		free(url);
 		free(buffer.data);
-	} while ((url = next_url) && ((int)(out_size) < max || max < 0));
+	} while ((url = next_url) && ((int)(out->labels_size) < max || max < 0));
 
-	return out_size;
+	return 0;
 }
 
 void

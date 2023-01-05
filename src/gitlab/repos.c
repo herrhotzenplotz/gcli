@@ -71,14 +71,13 @@ gitlab_get_repo(sn_sv owner,
 int
 gitlab_get_repos(char const *owner,
                  int const max,
-                 gcli_repo **const out)
+                 gcli_repo_list *const list)
 {
 	char              *url      = NULL;
 	char              *next_url = NULL;
 	char              *e_owner  = NULL;
 	gcli_fetch_buffer  buffer   = {0};
 	json_stream        stream   = {0};
-	size_t             size     = 0;
 
 	e_owner = gcli_urlencode(owner);
 
@@ -89,21 +88,21 @@ gitlab_get_repos(char const *owner,
 
 		json_open_buffer(&stream, buffer.data, buffer.length);
 
-		parse_gitlab_repos(&stream, out, &size);
+		parse_gitlab_repos(&stream, &list->repos, &list->repos_size);
 
 		free(url);
 		free(buffer.data);
 		json_close(&stream);
-	} while ((url = next_url) && (max == -1 || (int)size < max));
+	} while ((url = next_url) && (max == -1 || (int)list->repos_size < max));
 
 	free(url);
 	free(e_owner);
 
-	return size;
+	return 0;
 }
 
 int
-gitlab_get_own_repos(int const max, gcli_repo **const out)
+gitlab_get_own_repos(int const max, gcli_repo_list *const out)
 {
 	char  *_account = NULL;
 	sn_sv  account  = {0};

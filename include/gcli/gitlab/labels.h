@@ -36,10 +36,10 @@
 
 #include <gcli/labels.h>
 
-size_t gitlab_get_labels(char const *owner,
-                         char const *reponame,
-                         int const max,
-                         gcli_label **out);
+int gitlab_get_labels(char const *owner,
+                      char const *reponame,
+                      int const max,
+                      gcli_label_list *out);
 
 void gitlab_create_label(char const *owner,
                          char const *repo,

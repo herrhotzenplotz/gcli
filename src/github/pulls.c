@@ -45,9 +45,8 @@ github_get_prs(char const *owner,
                char const *repo,
                bool const all,
                int const max,
-               gcli_pull **const out)
+               gcli_pull_list *const list)
 {
-	size_t             count       = 0;
 	json_stream        stream      = {0};
 	gcli_fetch_buffer  json_buffer = {0};
 	char              *url         = NULL;
@@ -65,21 +64,19 @@ github_get_prs(char const *owner,
 
 	do {
 		gcli_fetch(url, &next_url, &json_buffer);
-
 		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-
-		parse_github_pulls(&stream, out, &count);
+		parse_github_pulls(&stream, &list->pulls, &list->pulls_size);
 
 		free(json_buffer.data);
 		free(url);
 		json_close(&stream);
-	} while ((url = next_url) && (max == -1 || (int)count < max));
+	} while ((url = next_url) && (max == -1 || (int)(list->pulls_size) < max));
 
 	free(url);
 	free(e_owner);
 	free(e_repo);
 
-	return (int)count;
+	return 0;
 }
 
 void
@@ -325,12 +322,13 @@ github_get_pull_summary(char const *owner,
 	free(json_buffer.data);
 }
 
-void
+int
 github_pr_checks(char const *owner, char const *repo, int const pr_number)
 {
 	char refname[64] = {0};
 
 	/* This is kind of a hack, but it works! */
 	snprintf(refname, sizeof refname, "refs%%2Fpull%%2F%d%%2Fhead", pr_number);
-	github_checks(owner, repo, refname, -1);
+
+	return github_checks(owner, repo, refname, -1);
 }

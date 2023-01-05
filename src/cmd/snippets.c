@@ -115,11 +115,10 @@ static struct snippet_subcommand {
 int
 subcommand_snippets(int argc, char *argv[])
 {
-	int                     ch;
-	gcli_snippet           *snippets      = NULL;
-	int                     snippets_size = 0;
-	int                     count         = 30;
-	enum gcli_output_flags  flags         = 0;
+	int ch;
+	gcli_snippet_list list = {0};
+	int count = 30;
+	enum gcli_output_flags flags = 0;
 
 	for (size_t i = 0; i < ARRAY_SIZE(snippet_subcommands); ++i) {
 		if (argc > 1 && strcmp(argv[1], snippet_subcommands[i].name) == 0) {
@@ -149,9 +148,13 @@ subcommand_snippets(int argc, char *argv[])
 		switch (ch) {
 		case 'n': {
 			char *endptr = NULL;
-			count        = strtol(optarg, &endptr, 10);
+			count = strtol(optarg, &endptr, 10);
+
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "snippets: cannot parse snippets count");
+
+			if (count == 0)
+				errx(1, "error: snippets count must not be zero");
 		} break;
 		case 's':
 			flags |= OUTPUT_SORTED;
@@ -169,8 +172,9 @@ subcommand_snippets(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	snippets_size = gcli_snippets_get(count, &snippets);
-	gcli_snippets_print(flags, snippets, snippets_size);
+	gcli_snippets_get(count, &list);
+	gcli_snippets_print(flags, &list, count);
+	gcli_snippets_free(&list);
 
 	return EXIT_SUCCESS;
 }

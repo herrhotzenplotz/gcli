@@ -202,11 +202,10 @@ int
 subcommand_gists(int argc, char *argv[])
 {
 	int                     ch;
-	char const             *user       = NULL;
-	gcli_gist              *gists      = NULL;
-	int                     gists_size = 0;
-	int                     count      = 30;
-	enum gcli_output_flags  flags      = 0;
+	char const             *user  = NULL;
+	gcli_gist_list          gists = {0};
+	int                     count = 30;
+	enum gcli_output_flags  flags = 0;
 
 	/* Make sure we are looking at a GitHub forge */
 	if (gcli_config_get_forge_type() != GCLI_FORGE_GITHUB) {
@@ -270,8 +269,9 @@ subcommand_gists(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	gists_size = gcli_get_gists(user, count, &gists);
-	gcli_print_gists(flags, gists, gists_size);
+    gcli_get_gists(user, count, &gists);
+	gcli_print_gists(flags, &gists, count);
+	gcli_gists_free(&gists);
 
 	return EXIT_SUCCESS;
 }

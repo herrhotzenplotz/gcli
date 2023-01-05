@@ -42,9 +42,8 @@ gitlab_get_mrs(char const *owner,
                char const *repo,
                bool const all,
                int const max,
-               gcli_pull **const out)
+               gcli_pull_list *const list)
 {
-	size_t             count       = 0;
 	json_stream        stream      = {0};
 	gcli_fetch_buffer  json_buffer = {0};
 	char              *url         = NULL;
@@ -63,21 +62,19 @@ gitlab_get_mrs(char const *owner,
 
 	do {
 		gcli_fetch(url, &next_url, &json_buffer);
-
 		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-
-		parse_gitlab_mrs(&stream, out, &count);
+		parse_gitlab_mrs(&stream, &list->pulls, &list->pulls_size);
 
 		free(json_buffer.data);
 		free(url);
 		json_close(&stream);
-	} while ((url = next_url) && (max == -1 || (int)count < max));
+	} while ((url = next_url) && (max == -1 || (int)list->pulls_size < max));
 
 	free(url);
 	free(e_owner);
 	free(e_repo);
 
-	return (int)(count);
+	return 0;
 }
 
 void

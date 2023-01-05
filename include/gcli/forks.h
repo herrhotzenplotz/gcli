@@ -38,6 +38,7 @@
 #include <gcli/gcli.h>
 
 typedef struct gcli_fork gcli_fork;
+typedef struct gcli_fork_list gcli_fork_list;
 
 struct gcli_fork {
 	sn_sv full_name;
@@ -46,19 +47,26 @@ struct gcli_fork {
 	int   forks;
 };
 
+struct gcli_fork_list {
+	gcli_fork *forks;
+	size_t forks_size;
+};
+
 int gcli_get_forks(char const *owner,
                    char const *reponame,
                    int const max,
-                   gcli_fork **const out);
+                   gcli_fork_list *const out);
 
 void gcli_fork_create(char const *owner,
                       char const *repo,
                       char const *in);
 
 void gcli_print_forks(enum gcli_output_flags const flags,
-                      const gcli_fork *const forks,
-                      size_t const forks_size);
+                      gcli_fork_list const *const list,
+                      int const max);
 
 void gcli_fork_delete(char const *owner, char const *repo);
+
+void gcli_forks_free(gcli_fork_list *const list);
 
 #endif /* FORK_H */

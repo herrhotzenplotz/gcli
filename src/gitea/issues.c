@@ -42,7 +42,7 @@ gitea_get_issues(char const *owner,
                  char const *repo,
                  bool const all,
                  int const max,
-                 gcli_issue **const out)
+                 gcli_issue_list *const out)
 {
 	return github_get_issues(owner, repo, all, max, out);
 }
@@ -148,12 +148,11 @@ gitea_issue_assign(char const *owner,
 /* Return the stringified id of the given label */
 static char *
 get_id_of_label(char const *label_name,
-                gcli_label const *const labels,
-                size_t const labels_size)
+                gcli_label_list const *const list)
 {
-	for (size_t i = 0; i < labels_size; ++i)
-		if (strcmp(labels[i].name, label_name) == 0)
-			return sn_asprintf("%ld", labels[i].id);
+	for (size_t i = 0; i < list->labels_size; ++i)
+		if (strcmp(list->labels[i].name, label_name) == 0)
+			return sn_asprintf("%ld", list->labels[i].id);
 	return NULL;
 }
 
@@ -163,16 +162,14 @@ label_names_to_ids(char const *owner,
                    char const *const names[],
                    size_t const names_size)
 {
-	gcli_label  *labels      = NULL;
-	size_t       labels_size = 0;
-	char       **ids         = NULL;
-	size_t       ids_size    = 0;
+	gcli_label_list list = {0};
+	char **ids = NULL;
+	size_t ids_size = 0;
 
-	labels_size = gitea_get_labels(owner, repo, -1, &labels);
+    gitea_get_labels(owner, repo, -1, &list);
 
 	for (size_t i = 0; i < names_size; ++i) {
-		char *const label_id = get_id_of_label(
-			names[i], labels, labels_size);
+		char *const label_id = get_id_of_label(names[i], &list);
 
 		if (!label_id)
 			errx(1, "error: no such label '%s'", names[i]);
@@ -181,7 +178,7 @@ label_names_to_ids(char const *owner,
 		ids[ids_size++] = label_id;
 	}
 
-	gcli_free_labels(labels, labels_size);
+	gcli_free_labels(&list);
 
 	return ids;
 }

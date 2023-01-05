@@ -73,8 +73,8 @@ void gitea_print_pr_diff(FILE *stream,
                          char const *repo,
                          int const pr_number);
 
-void gitea_pull_checks(char const *owner,
-                       char const *repo,
-                       int const pr_number);
+int gitea_pull_checks(char const *owner,
+                      char const *repo,
+                      int const pr_number);
 
 #endif /* GITEA_PULLS_H */

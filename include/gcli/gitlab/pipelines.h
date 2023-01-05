@@ -34,8 +34,9 @@
 #include "config.h"
 #endif
 
-typedef struct gitlab_pipeline gitlab_pipeline;
-typedef struct gitlab_job      gitlab_job;
+typedef struct gitlab_pipeline      gitlab_pipeline;
+typedef struct gitlab_pipeline_list gitlab_pipeline_list;
+typedef struct gitlab_job           gitlab_job;
 
 struct gitlab_pipeline {
 	long  id;
@@ -45,6 +46,11 @@ struct gitlab_pipeline {
 	char *ref;
 	char *sha;
 	char *source;
+};
+
+struct gitlab_pipeline_list {
+	gitlab_pipeline *pipelines;
+	size_t pipelines_size;
 };
 
 struct gitlab_job {
@@ -64,13 +70,11 @@ struct gitlab_job {
 int gitlab_get_pipelines(char const *owner,
                          char const *repo,
                          int const max,
-                         gitlab_pipeline **const out);
+                         gitlab_pipeline_list *const out);
 
-void gitlab_print_pipelines(gitlab_pipeline const *const pipelines,
-                            int const pipelines_size);
+void gitlab_print_pipelines(gitlab_pipeline_list const *const list);
 
-void gitlab_free_pipelines(gitlab_pipeline *pipelines,
-                           int const pipelines_size);
+void gitlab_free_pipelines(gitlab_pipeline_list *const list);
 
 void gitlab_pipelines(char const *owner,
                       char const *repo,
@@ -109,8 +113,8 @@ void gitlab_job_retry(char const *owner,
                       char const *repo,
                       long const job_id);
 
-void gitlab_mr_pipelines(char const *owner,
-                         char const *repo,
-                         int const mr_id);
+int gitlab_mr_pipelines(char const *owner,
+                        char const *repo,
+                        int const mr_id);
 
 #endif /* GITLAB_PIPELINES_H */

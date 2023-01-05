@@ -48,9 +48,9 @@ void github_print_pr_diff(FILE *stream,
                           char const *reponame,
                           int const pr_number);
 
-void github_pr_checks(char const *owner,
-                      char const *repo,
-                      int const pr_number);
+int github_pr_checks(char const *owner,
+                     char const *repo,
+                     int const pr_number);
 
 void github_pr_merge(char const *owner,
                      char const *reponame,

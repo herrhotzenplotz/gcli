@@ -323,6 +323,10 @@ subcommand_releases(int argc, char *argv[])
 			count        = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "releases: cannot parse release count");
+
+			if (count == 0)
+				errx(1, "error: number of releases must not be zero");
+
 		} break;
 		case 's':
 			flags |= OUTPUT_SORTED;

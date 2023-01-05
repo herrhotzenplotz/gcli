@@ -322,12 +322,13 @@ github_get_pull_summary(char const *owner,
 	free(json_buffer.data);
 }
 
-void
+int
 github_pr_checks(char const *owner, char const *repo, int const pr_number)
 {
 	char refname[64] = {0};
 
 	/* This is kind of a hack, but it works! */
 	snprintf(refname, sizeof refname, "refs%%2Fpull%%2F%d%%2Fhead", pr_number);
-	github_checks(owner, repo, refname, -1);
+
+	return github_checks(owner, repo, refname, -1);
 }

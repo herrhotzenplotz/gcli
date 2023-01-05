@@ -165,7 +165,7 @@ gitea_print_pr_diff(FILE *const stream,
 	free(url);
 }
 
-void
+int
 gitea_pull_checks(char const *owner,
                   char const *repo,
                   int const pr_number)
@@ -175,4 +175,6 @@ gitea_pull_checks(char const *owner,
 	(void) pr_number;
 
 	warnx("PR checks are not available on Gitea");
+
+	return 0;
 }

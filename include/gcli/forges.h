@@ -170,7 +170,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Print a list of checks associated with the given pull. */
-	void (*print_pr_checks)(
+	int (*print_pr_checks)(
 		char const *owner,
 		char const *reponame,
 		int const pr_number);

@@ -40,8 +40,8 @@
 #include <sn/sn.h>
 #include <pdjson/pdjson.h>
 
-/* Hack for NetBSD's broken isalnum implementation */
-#ifdef __NetBSD__
+/* Hack for NetBSD's and Oracle Solaris broken isalnum implementation */
+#if defined(__NetBSD__) || (defined(__SVR4) && defined(__sun))
 #  ifdef isalnum
 #    undef isalnum
 #  endif
@@ -57,7 +57,7 @@ gcli_curl_isalnum(char const c)
 		|| ('0' <= c && c <= '9');
 }
 
-#endif /* __NetBSD */
+#endif /* __NetBSD and Oracle Solaris */
 
 /* Cached curl handle */
 static CURL *gcli_curl_session = NULL;

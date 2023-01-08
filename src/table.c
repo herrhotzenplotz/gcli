@@ -118,18 +118,18 @@ table_freerow(struct gcli_tblrow *row, size_t const cols)
 static int
 tablerow_add_cell(struct gcli_tbl *const table,
                   struct gcli_tblrow *const row,
-                  size_t const col, va_list vp)
+                  size_t const col, va_list *vp)
 {
 	int cell_size = 0;
 
 	/* Extract the explicit colour code */
 	if (table->cols[col].flags & GCLI_TBLCOL_COLOUREXPL) {
-		int code = va_arg(vp, int);
+		int code = va_arg(*vp, int);
 
 		/* don't free that! it's allocated and free'ed inside colour.c */
 		row->cells[col].colour = gcli_setcolour(code);
 	} else if (table->cols[col].flags & GCLI_TBLCOL_256COLOUR) {
-		uint64_t hexcode = va_arg(vp, uint64_t);
+		uint64_t hexcode = va_arg(*vp, uint64_t);
 
 		/* see comment above */
 		row->cells[col].colour = gcli_setcolour256(hexcode);
@@ -139,33 +139,33 @@ tablerow_add_cell(struct gcli_tbl *const table,
 	/* Process the content */
 	switch (table->cols[col].type) {
 	case GCLI_TBLCOLTYPE_INT: {
-		row->cells[col].text = sn_asprintf("%d", va_arg(vp, int));
+		row->cells[col].text = sn_asprintf("%d", va_arg(*vp, int));
 		cell_size = strlen(row->cells[col].text);
 	} break;
 	case GCLI_TBLCOLTYPE_LONG: {
-		row->cells[col].text = sn_asprintf("%ld", va_arg(vp, long));
+		row->cells[col].text = sn_asprintf("%ld", va_arg(*vp, long));
 		cell_size = strlen(row->cells[col].text);
 	} break;
 	case GCLI_TBLCOLTYPE_STRING: {
-		char *it = va_arg(vp, char *);
+		char *it = va_arg(*vp, char *);
 		if (!it)
 			it = "<empty>"; /* hack */
 		row->cells[col].text = strdup(it);
 		cell_size = strlen(it);
 	} break;
 	case GCLI_TBLCOLTYPE_SV: {
-		sn_sv src = va_arg(vp, sn_sv);
+		sn_sv src = va_arg(*vp, sn_sv);
 		row->cells[col].text = sn_sv_to_cstr(src);
 		cell_size = src.length;
 	} break;
 	case GCLI_TBLCOLTYPE_DOUBLE: {
-		row->cells[col].text = sn_asprintf("%lf", va_arg(vp, double));
+		row->cells[col].text = sn_asprintf("%lf", va_arg(*vp, double));
 		cell_size = strlen(row->cells[col].text);
 	} break;
 	case GCLI_TBLCOLTYPE_BOOL: {
 		/* Do not use real _Bool type as it triggers a compiler bug in
 		 * LLVM clang 13 */
-		int val = va_arg(vp, int);
+		int val = va_arg(*vp, int);
 		if (val) {
 			row->cells[col].text = strdup("yes");
 			cell_size = 3;
@@ -201,7 +201,7 @@ gcli_tbl_add_row(gcli_tbl _table, ...)
 
 	/* Step through all the columns and print the cells */
 	for (size_t i = 0; i < table->cols_size; ++i) {
-		if (tablerow_add_cell(table, &row, i, vp) < 0) {
+		if (tablerow_add_cell(table, &row, i, &vp) < 0) {
 			table_freerow(&row, table->cols_size);
 			va_end(vp);
 			return -1;

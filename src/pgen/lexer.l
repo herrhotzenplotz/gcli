@@ -34,7 +34,7 @@
 #include <stdlib.h>
 
 #include <gcli/pgen.h>
-#include "parser.h"
+#include "src/pgen/parser.h"
 
 int yycol = 1, yyrow = 1;
 char *yyfile = NULL;

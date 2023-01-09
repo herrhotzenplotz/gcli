@@ -56,6 +56,8 @@ struct gcli_issue {
 	size_t  labels_size;
 	sn_sv  *assignees;
 	size_t  assignees_size;
+	/* workaround for GitHub where PRs are also issues */
+	int     is_pr;
 };
 
 struct gcli_submit_issue_options {

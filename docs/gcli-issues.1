@@ -57,13 +57,13 @@ execute the given
 for the specified
 .Ar issue .
 .El
-
+.
 .Sh SUBCOMMANDS
 .Bl -tag -width indent
 .It Cm create
 Create a new issues in the given or autodetected repository. The
 editor will come up and ask you to enter an issue message.
-
+.Pp
 The following flags can be specified:
 .Bl -tag -width indent
 .It Fl i , -in Ar owner/repo
@@ -105,17 +105,17 @@ Print a list of issues in the current project:
 .Bd -literal -offset indent
 $ gcli issues
 .Ed
-
+.Pp
 Report a new issue in the current project:
 .Bd -literal -offset indent
 $ gcli create issues "summary here"
 .Ed
-
+.Pp
 Print both a summary and comments of issue 1 in herrhotzenplotz/gcli:
 .Bd -literal -offset indent
 $ gcli issues -o herrhotzenplotz -r gcli -i 1 summary comments
 .Ed
-
+.Pp
 Add the labels
 .Sq foo
 and
@@ -129,13 +129,22 @@ $ gcli issues -i420 labels --add foo --add bar
 .Xr gcli 1
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+.Sh CAVEATS
+GitHub and Gitea treat Pull Requests as Issues. Due to the semantics
+of
+.Nm
+those issues that are actually PRs are dropped from the output. In
+this case a note will be printed indicating how many issues were
+dropped. You can suppress this warning using the
+.Fl q
+program option.
 .Sh BUGS
 GitHub only supports removing labels from issues one by one. If you
 still wanna remove multiple issues with one gcli call, you may do
 something like:
-
+.
 .Bd -literal -offset indent
 $ gcli issues -i42 labels --remove bug labels --remove foo
 .Ed
-
+.Pp
 Please report issues preferably via e-mail, on GitLab or on GitHub.

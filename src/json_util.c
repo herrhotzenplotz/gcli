@@ -368,3 +368,16 @@ get_gitlab_can_be_merged(json_stream *const input)
 {
 	return sn_sv_eq_to(get_sv(input), "can_be_merged");
 }
+
+int
+get_github_is_pr(json_stream *input)
+{
+	enum json_type next = json_peek(input);
+
+	if (next == JSON_NULL)
+		json_next(input);
+	else
+		SKIP_OBJECT_VALUE(input);
+
+	return next == JSON_OBJECT;
+}

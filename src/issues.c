@@ -78,7 +78,7 @@ gcli_print_issues_table(enum gcli_output_flags const flags,
                         gcli_issue_list const *const list,
                         int const max)
 {
-	int n;
+	int n, pruned = 0;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
 		{ .name = "NUMBER", .type = GCLI_TBLCOLTYPE_INT, .flags = GCLI_TBLCOL_JUSTIFYR },
@@ -104,22 +104,34 @@ gcli_print_issues_table(enum gcli_output_flags const flags,
 	/* Iterate depending on the output order */
 	if (flags & OUTPUT_SORTED) {
 		for (int i = 0; i < n; ++i) {
-			gcli_tbl_add_row(table,
-			                 list->issues[n - i - 1].number,
-			                 list->issues[n - i - 1].state,
-			                 list->issues[n - i - 1].title);
+			if (!list->issues[n - 1 - 1].is_pr) {
+				gcli_tbl_add_row(table,
+				                 list->issues[n - i - 1].number,
+				                 list->issues[n - i - 1].state,
+				                 list->issues[n - i - 1].title);
+			} else {
+				pruned++;
+			}
 		}
 	} else {
 		for (int i = 0; i < n; ++i) {
-			gcli_tbl_add_row(table,
-			                 list->issues[i].number,
-			                 list->issues[i].state,
-			                 list->issues[i].title);
+			if (!list->issues[i].is_pr) {
+				gcli_tbl_add_row(table,
+				                 list->issues[i].number,
+				                 list->issues[i].state,
+				                 list->issues[i].title);
+			} else {
+				pruned++;
+			}
 		}
 	}
 
 	/* Dump the table */
 	gcli_tbl_end(table);
+
+	/* Inform the user that we pruned pull requests from the output */
+	if (pruned && sn_getverbosity() != VERBOSITY_QUIET)
+		fprintf(stderr, "info: %d pull requests pruned\n", pruned);
 }
 
 static void

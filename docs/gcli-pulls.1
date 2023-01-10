@@ -11,7 +11,7 @@
 .Op Fl n Ar n
 .Op Fl o Ar owner Fl r Ar repo
 .Nm
-.Fl p Ar pr
+.Fl i Ar pr
 .Op Fl o Ar owner Fl r Ar repo
 .Ar actions...
 .Nm
@@ -55,7 +55,7 @@ pull requests. Default: 30. If
 is set to -1 this will fetch all pull requests. Note that on large
 repositories fetching all pull requests can take a considerable amount
 of time and may result in rate limiting by the respective API.
-.It Fl p , -pull Ar PR
+.It Fl i , -id Ar PR
 execute the given
 .Ar actions
 on the specified
@@ -143,12 +143,12 @@ $ gcli pulls create "summary here"
 
 Print both a summary and comments of PR 11 in herrhotzenplotz/gcli:
 .Bd -literal -offset indent
-$ gcli pulls -o herrhotzenplotz -r gcli -p 11 summary comments
+$ gcli pulls -o herrhotzenplotz -r gcli -i 11 summary comments
 .Ed
 
 Merge PR 42 in the upstream repository:
 .Bd -literal -offset indent
-$ gcli pulls -p 42 merge
+$ gcli pulls -i 42 merge
 .Ed
 
 Note that you could also pull the PR head and merge it manually into

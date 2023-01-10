@@ -48,7 +48,7 @@ usage(void)
 	fprintf(stderr, "usage: gcli pulls create [-o owner -r repo] [-f from]\n");
 	fprintf(stderr, "                         [-t to] [-d] [-l label]\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] [-a] [-n number] [-s]\n");
-	fprintf(stderr, "       gcli pulls [-o owner -r repo] -p pull actions...\n");
+	fprintf(stderr, "       gcli pulls [-o owner -r repo] -i pull-id actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
 	fprintf(stderr, "  -o owner        The repository owner\n");
 	fprintf(stderr, "  -r repo         The repository name\n");
@@ -57,7 +57,7 @@ usage(void)
 	fprintf(stderr, "  -f owner:branch Specify the owner and branch of the fork that is the head of a PR.\n");
 	fprintf(stderr, "  -l label        Add the given label when creating the PR\n");
 	fprintf(stderr, "  -n number       Number of PRs to fetch (-1 = everything)\n");
-	fprintf(stderr, "  -p id           ID of PR to perform actions on\n");
+	fprintf(stderr, "  -i id           ID of PR to perform actions on\n");
 	fprintf(stderr, "  -s              Print (sort) in reverse order\n");
 	fprintf(stderr, "  -t branch       Specify target branch of the PR\n");
 	fprintf(stderr, "  -y              Do not ask for confirmation.\n");
@@ -239,15 +239,15 @@ subcommand_pulls(int argc, char *argv[])
 		  .has_arg = required_argument,
 		  .flag    = NULL,
 		  .val     = 'o' },
-		{ .name    = "pull",
+		{ .name    = "id",
 		  .has_arg = required_argument,
 		  .flag    = NULL,
-		  .val     = 'p' },
+		  .val     = 'i' },
 		{0},
 	};
 
 	/* Parse commandline options */
-	while ((ch = getopt_long(argc, argv, "+n:o:r:p:as", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "+n:o:r:i:as", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
 			owner = optarg;
@@ -255,7 +255,7 @@ subcommand_pulls(int argc, char *argv[])
 		case 'r':
 			repo = optarg;
 			break;
-		case 'p': {
+		case 'i': {
 			pr = strtoul(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "error: cannot parse pr number »%s«", optarg);

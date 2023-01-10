@@ -167,7 +167,7 @@ subcommand_issues(int argc, char *argv[])
 		  .has_arg = required_argument,
 		  .flag    = NULL,
 		  .val     = 'o' },
-		{ .name    = "issue",
+		{ .name    = "id",
 		  .has_arg = required_argument,
 		  .flag    = NULL,
 		  .val     = 'i' },

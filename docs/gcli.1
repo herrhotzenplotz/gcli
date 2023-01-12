@@ -80,9 +80,14 @@ as the remote when trying to infer repository data.
 .It Fl c , -colours
 Ignore
 .Ev NO_COLOR
-and print ANSI escape sequences for changing text formatting. Default
-is to output colours unless stdout is not a tty. See
+as well as whether the output is not tty and print ANSI escape
+sequences for changing text formatting. Default is to output colours
+unless stdout is not a tty. See
 .Xr isatty 3 .
+This is useful in combination with pagers such as
+.Xr more 1
+and
+.Xr less 1 .
 .It Fl q , -quiet
 Surpresses most output of
 .Nm .

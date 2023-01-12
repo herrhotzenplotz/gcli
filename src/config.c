@@ -64,7 +64,8 @@ static struct gcli_config {
 	char const *override_default_account;
 	char const *override_remote;
 	int         override_forgetype;
-	int         colours_disabled;
+	int         colours_disabled;     /* NO_COLOR set or output is not a TTY */
+	int         force_colours;        /* -c option was given */
 
 	sn_sv  buffer;
 	void  *mmap_pointer;
@@ -503,7 +504,7 @@ gcli_config_init(int *argc, char ***argv)
 			config.override_remote = optarg;
 		} break;
 		case 'c': {
-			config.colours_disabled = 0;
+			config.force_colours = 1;
 		} break;
 		case 'q': {
 			sn_setverbosity(VERBOSITY_QUIET);
@@ -754,6 +755,9 @@ int
 gcli_config_have_colours(void)
 {
 	static int tested_tty = 0;
+
+	if (config.force_colours)
+		return 1;
 
 	if (config.colours_disabled)
 		return 0;

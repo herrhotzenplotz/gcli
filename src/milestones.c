@@ -29,6 +29,7 @@
 
 #include <gcli/forges.h>
 #include <gcli/milestones.h>
+#include <gcli/table.h>
 
 int
 gcli_get_milestones(char const *const owner,
@@ -41,12 +42,36 @@ gcli_get_milestones(char const *const owner,
 
 #include <stdio.h>
 void
-gcli_print_milestones(gcli_milestone_list const *const it,
+gcli_print_milestones(gcli_milestone_list const *const list,
                       int max)
 {
-	(void) it;
-	(void) max;
-	printf("gcli_print_milestones is not yet ipmlemented\n");
+	size_t n;
+	gcli_tbl tbl;
+	gcli_tblcoldef cols[] = {
+		{ .name = "ID",      .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "STATE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
+		{ .name = "CREATED", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "TITLE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+	};
+
+	tbl = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!tbl)
+		errx(1, "error: could not init table printer");
+
+	if (max < 0 || (size_t)(max) > list->milestones_size)
+		n = list->milestones_size;
+	else
+		n = max;
+
+	for (size_t i = 0; i < n; ++i) {
+		gcli_tbl_add_row(tbl,
+		                 list->milestones[i].id,
+		                 list->milestones[i].state,
+		                 list->milestones[i].created_at,
+		                 list->milestones[i].title);
+	}
+
+	gcli_tbl_end(tbl);
 }
 
 static void

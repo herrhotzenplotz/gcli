@@ -27,7 +27,13 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <gcli/curl.h>
+#include <gcli/gitlab/config.h>
 #include <gcli/gitlab/milestones.h>
+
+#include <templates/gitlab/milestones.h>
+
+#include <pdjson/pdjson.h>
 
 int
 gitlab_get_milestones(char const *owner,
@@ -35,10 +41,31 @@ gitlab_get_milestones(char const *owner,
                       int max,
                       gcli_milestone_list *const out)
 {
-	(void) owner;
-	(void) repo;
-	(void) max;
-	(void) out;
+	char *url, *next_url = NULL;
+	char *e_owner, *e_repo;
+	gcli_fetch_buffer buffer = {0};
+	json_stream stream = {0};
 
-	return -1;
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/milestones",
+	                  gitlab_get_apibase(), e_owner, e_repo);
+
+	do {
+		gcli_fetch(url, &next_url, &buffer);
+		json_open_buffer(&stream, buffer.data, buffer.length);
+
+		parse_gitlab_milestones(&stream, &out->milestones, &out->milestones_size);
+
+		free(buffer.data);
+		free(url);
+		json_close(&stream);
+	} while ((url = next_url) && (max == -1 || (int)out->milestones_size < max));
+
+	free(next_url);
+	free(e_owner);
+	free(e_repo);
+
+	return 0;
 }

@@ -94,6 +94,7 @@ TEMPLATES = \
 	templates/gitlab/issues.t \
 	templates/gitlab/labels.t \
 	templates/gitlab/merge_requests.t \
+	templates/gitlab/milestones.t \
 	templates/gitlab/pipelines.t \
 	templates/gitlab/releases.t \
 	templates/gitlab/repos.t \

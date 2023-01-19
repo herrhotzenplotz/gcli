@@ -128,6 +128,7 @@ libgcli_la_SOURCES = \
 	src/gitlab/issues.c include/gcli/gitlab/issues.h \
 	src/gitlab/labels.c include/gcli/gitlab/labels.h \
 	src/gitlab/merge_requests.c include/gcli/gitlab/merge_requests.h \
+	src/gitlab/milestones.c include/gcli/gitlab/milestones.h \
 	src/gitlab/pipelines.c include/gcli/gitlab/pipelines.h \
 	src/gitlab/releases.c include/gcli/gitlab/releases.h \
 	src/gitlab/repos.c include/gcli/gitlab/repos.h \

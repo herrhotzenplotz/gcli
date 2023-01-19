@@ -51,6 +51,7 @@
 #include <gcli/gitlab/issues.h>
 #include <gcli/gitlab/labels.h>
 #include <gcli/gitlab/merge_requests.h>
+#include <gcli/gitlab/milestones.h>
 #include <gcli/gitlab/pipelines.h>
 #include <gcli/gitlab/releases.h>
 #include <gcli/gitlab/repos.h>
@@ -135,6 +136,7 @@ gitlab_forge_descriptor =
 	.issue_add_labels          = gitlab_issue_add_labels,
 	.issue_remove_labels       = gitlab_issue_remove_labels,
 	.perform_submit_issue      = gitlab_perform_submit_issue,
+	.get_milestones            = gitlab_get_milestones,
 	.get_prs                   = gitlab_get_mrs,
 	.print_pr_diff             = gitlab_print_pr_diff,
 	.print_pr_checks           = gitlab_mr_pipelines,

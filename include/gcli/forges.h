@@ -39,6 +39,7 @@
 #include <gcli/forks.h>
 #include <gcli/issues.h>
 #include <gcli/labels.h>
+#include <gcli/milestones.h>
 #include <gcli/pulls.h>
 #include <gcli/releases.h>
 #include <gcli/repos.h>
@@ -150,6 +151,14 @@ struct gcli_forge_descriptor {
 	void (*perform_submit_issue)(
 		gcli_submit_issue_options  opts,
 		gcli_fetch_buffer         *out);
+
+	/**
+	 * Get list of milestones */
+	int (*get_milestones)(
+		char const *owner,
+		char const *repo,
+		int const max,
+		gcli_milestone_list *const out);
 
 	/**
 	 * Get a list of PRs/MRs on the given repo */

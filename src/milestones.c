@@ -1,0 +1,74 @@
+/*
+ * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided
+ * with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include <gcli/forges.h>
+#include <gcli/milestones.h>
+
+int
+gcli_get_milestones(char const *const owner,
+                    char const *const repo,
+                    int const max,
+                    gcli_milestone_list *const out)
+{
+	return gcli_forge()->get_milestones(owner, repo, max, out);
+}
+
+#include <stdio.h>
+void
+gcli_print_milestones(gcli_milestone_list const *const it,
+                      int max)
+{
+	(void) it;
+	(void) max;
+	printf("gcli_print_milestones is not yet ipmlemented\n");
+}
+
+static void
+gcli_free_milestone(gcli_milestone *it)
+{
+	free(it->title);
+	it->title = NULL;
+	free(it->state);
+	it->state = NULL;
+	free(it->created_at);
+	it->created_at = NULL;
+	free(it->due_date);
+	it->due_date = NULL;
+}
+
+void
+gcli_free_milestones(gcli_milestone_list *const it)
+{
+	for (size_t i = 0; i < it->milestones_size; ++i)
+		gcli_free_milestone(&it->milestones[i]);
+
+	free(it->milestones);
+	it->milestones = NULL;
+	it->milestones_size = 0;
+}

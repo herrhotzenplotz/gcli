@@ -12,6 +12,8 @@ issues(struct json_stream *stream)
 	struct json_stream str   = {0};
 	gcli_issue         issue = {0};
 
+	(void) stream;
+
 	json_open_stream(&str, stdin);
 	parse_github_issue(&str, &issue);
 
@@ -55,7 +57,9 @@ labels(struct json_stream *stream)
 int
 main(int argc, char *argv[])
 {
-	struct json_stream str   = {0};
+	struct json_stream str = {0};
+
+	(void) argc;
 
 	json_open_stream(&str, stdin);
 

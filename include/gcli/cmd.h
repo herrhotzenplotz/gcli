@@ -65,6 +65,7 @@ int subcommand_forks(int argc, char *argv[]);
 int subcommand_gists(int argc, char *argv[]);
 int subcommand_issues(int argc, char *argv[]);
 int subcommand_labels(int argc, char *argv[]);
+int subcommand_milestones(int argc, char *argv[]);
 int subcommand_pipelines(int argc, char *argv[]);
 int subcommand_pulls(int argc, char *argv[]);
 int subcommand_releases(int argc, char *argv[]);

@@ -27,7 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include <config.h>
 
 #include <gcli/config.h>
 #include <gcli/github/config.h>

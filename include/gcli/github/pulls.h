@@ -31,7 +31,7 @@
 #define GITHUB_PULLS_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <gcli/curl.h>

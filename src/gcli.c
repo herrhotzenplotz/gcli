@@ -27,7 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include <config.h>
 
 #ifdef HAVE_GETOPT_h
 #include <getopt.h>

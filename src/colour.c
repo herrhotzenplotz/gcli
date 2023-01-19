@@ -153,6 +153,7 @@ static const struct { char const *name; int code; }
 	state_colour_table[] =
 {
 	{ .name = "open",      .code = GCLI_COLOR_GREEN   },
+	{ .name = "active",    .code = GCLI_COLOR_GREEN   },
 	{ .name = "success",   .code = GCLI_COLOR_GREEN   },
 	{ .name = "APPROVED",  .code = GCLI_COLOR_GREEN   },
 	{ .name = "merged",    .code = GCLI_COLOR_MAGENTA },

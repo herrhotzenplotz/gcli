@@ -64,6 +64,7 @@
 #include <gcli/gitea/forks.h>
 #include <gcli/gitea/issues.h>
 #include <gcli/gitea/labels.h>
+#include <gcli/gitea/milestones.h>
 #include <gcli/gitea/pulls.h>
 #include <gcli/gitea/releases.h>
 #include <gcli/gitea/repos.h>
@@ -186,6 +187,7 @@ gitea_forge_descriptor =
 	.issue_reopen              = gitea_issue_reopen,
 	.issue_assign              = gitea_issue_assign,
 	.get_issue_comments        = gitea_get_comments,
+	.get_milestones            = gitea_get_milestones,
 	.perform_submit_comment    = gitea_perform_submit_comment,
 	.issue_add_labels          = gitea_issue_add_labels,
 	.issue_remove_labels       = gitea_issue_remove_labels,

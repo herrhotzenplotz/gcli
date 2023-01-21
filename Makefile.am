@@ -101,7 +101,8 @@ TEMPLATES = \
 	templates/gitlab/repos.t \
 	templates/gitlab/review.t \
 	templates/gitlab/status.t \
-	templates/gitlab/snippets.t
+	templates/gitlab/snippets.t \
+	templates/gitea/milestones.t
 
 libgcli_la_SOURCES = \
 	src/colour.c include/gcli/colour.h \
@@ -158,6 +159,7 @@ libgcli_la_SOURCES = \
 	src/gitea/pulls.c include/gcli/gitea/pulls.h \
 	src/gitea/releases.c include/gcli/gitea/releases.h \
 	src/gitea/repos.c include/gcli/gitea/repos.h \
+	src/gitea/milestones.c include/gcli/gitea/milestones.h \
 	$(TEMPLATES)
 
 BUILT_SOURCES = \

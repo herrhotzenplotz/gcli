@@ -122,6 +122,9 @@ github_forge_descriptor =
 	.user_object_key           = "login",
 	.html_url_key              = "html_url",
 	.pull_summary_quirks       = 0,
+	.milestone_quirks          = GCLI_MILESTONE_QUIRKS_EXPIRED
+	                           | GCLI_MILESTONE_QUIRKS_DUEDATE
+	                           | GCLI_MILESTONE_QUIRKS_PULLS,
 };
 
 static gcli_forge_descriptor const
@@ -175,6 +178,7 @@ gitlab_forge_descriptor =
 	                           | GCLI_PRS_QUIRK_COMMITS
 	                           | GCLI_PRS_QUIRK_CHANGES
 	                           | GCLI_PRS_QUIRK_MERGED,
+	.milestone_quirks          = 0,
 };
 
 static gcli_forge_descriptor const
@@ -227,6 +231,9 @@ gitea_forge_descriptor =
 	                           | GCLI_PRS_QUIRK_ADDDEL
 	                           | GCLI_PRS_QUIRK_DRAFT
 	                           | GCLI_PRS_QUIRK_CHANGES,
+	.milestone_quirks          = GCLI_MILESTONE_QUIRKS_EXPIRED
+	                           | GCLI_MILESTONE_QUIRKS_DUEDATE
+	                           | GCLI_MILESTONE_QUIRKS_PULLS,
 };
 
 gcli_forge_descriptor const *

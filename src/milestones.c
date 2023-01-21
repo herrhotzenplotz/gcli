@@ -86,6 +86,7 @@ void
 gcli_print_milestone(gcli_milestone const *const milestone)
 {
 	gcli_dict dict;
+	uint32_t const quirks = gcli_forge()->milestone_quirks;
 
 	dict = gcli_dict_begin();
 	gcli_dict_add(dict,        "ID", 0, 0, "%d", milestone->id);
@@ -93,8 +94,13 @@ gcli_print_milestone(gcli_milestone const *const milestone)
 	gcli_dict_add_string(dict, "STATE", GCLI_TBLCOL_STATECOLOURED, 0, milestone->state);
 	gcli_dict_add_string(dict, "CREATED", 0, 0, milestone->created_at);
 	gcli_dict_add_string(dict, "UPDATED", 0, 0, milestone->created_at);
-	gcli_dict_add_string(dict, "DUE", 0, 0, milestone->due_date);
-	gcli_dict_add_string(dict, "EXPIRED", 0, 0, sn_bool_yesno(milestone->expired));
+
+	if ((quirks & GCLI_MILESTONE_QUIRKS_DUEDATE) == 0)
+		gcli_dict_add_string(dict, "DUE", 0, 0, milestone->due_date);
+
+	if ((quirks & GCLI_MILESTONE_QUIRKS_EXPIRED) == 0)
+		gcli_dict_add_string(dict, "EXPIRED", 0, 0, sn_bool_yesno(milestone->expired));
+
 	gcli_dict_end(dict);
 
 	if (milestone->description && strlen(milestone->description)) {
@@ -107,7 +113,9 @@ gcli_print_milestone(gcli_milestone const *const milestone)
 		gcli_print_issues_table(0, &milestone->issue_list, -1);
 	}
 
-	if (milestone->pull_list.pulls_size) {
+	if ((quirks & GCLI_MILESTONE_QUIRKS_PULLS) &&
+	    milestone->pull_list.pulls_size)
+	{
 		printf("\nPULLS:\n");
 		gcli_print_pulls_table(0, &milestone->pull_list, -1);
 	}

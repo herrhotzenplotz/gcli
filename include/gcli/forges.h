@@ -153,6 +153,14 @@ struct gcli_forge_descriptor {
 		gcli_fetch_buffer         *out);
 
 	/**
+	 * Bitmask of exceptions/fields that the forge doesn't support */
+	enum {
+		GCLI_MILESTONE_QUIRKS_EXPIRED = 0x1,
+		GCLI_MILESTONE_QUIRKS_DUEDATE = 0x2,
+		GCLI_MILESTONE_QUIRKS_PULLS   = 0x4,
+	} const milestone_quirks;
+
+	/**
 	 * Get list of milestones */
 	int (*get_milestones)(
 		char const *owner,

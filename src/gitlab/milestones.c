@@ -30,6 +30,7 @@
 #include <gcli/curl.h>
 #include <gcli/gitlab/config.h>
 #include <gcli/gitlab/issues.h>
+#include <gcli/gitlab/merge_requests.h>
 #include <gcli/gitlab/milestones.h>
 
 #include <templates/gitlab/milestones.h>
@@ -103,7 +104,16 @@ gitlab_get_milestone(char const *owner,
 	                  gitlab_get_apibase(), e_owner, e_repo, milestone);
 
 	rc = gitlab_fetch_issues(url, -1, &out->issue_list);
+	if (rc < 0)
+		goto out;
 
+	/* Fetch assigned merge requests */
+	url = sn_asprintf("%s/projects/%s%%2F%s/milestones/%d/merge_requests",
+	                  gitlab_get_apibase(), e_owner, e_repo, milestone);
+
+	rc = gitlab_fetch_mrs(url, -1, &out->pull_list);
+
+out:
 	free(e_owner);
 	free(e_repo);
 

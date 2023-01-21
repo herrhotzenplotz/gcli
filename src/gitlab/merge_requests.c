@@ -38,27 +38,11 @@
 #include <pdjson/pdjson.h>
 
 int
-gitlab_get_mrs(char const *owner,
-               char const *repo,
-               bool const all,
-               int const max,
-               gcli_pull_list *const list)
+gitlab_fetch_mrs(char *url, int const max, gcli_pull_list *const list)
 {
 	json_stream        stream      = {0};
 	gcli_fetch_buffer  json_buffer = {0};
-	char              *url         = NULL;
-	char              *e_owner     = NULL;
-	char              *e_repo      = NULL;
 	char              *next_url    = NULL;
-
-	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
-
-	url = sn_asprintf(
-		"%s/projects/%s%%2F%s/merge_requests%s",
-		gitlab_get_apibase(),
-		e_owner, e_repo,
-		all ? "" : "?state=opened");
 
 	do {
 		gcli_fetch(url, &next_url, &json_buffer);
@@ -71,10 +55,34 @@ gitlab_get_mrs(char const *owner,
 	} while ((url = next_url) && (max == -1 || (int)list->pulls_size < max));
 
 	free(url);
+
+	return 0;
+}
+
+int
+gitlab_get_mrs(char const *owner,
+               char const *repo,
+               bool const all,
+               int const max,
+               gcli_pull_list *const list)
+{
+	char *url     = NULL;
+	char *e_owner = NULL;
+	char *e_repo  = NULL;
+
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
+
+	url = sn_asprintf(
+		"%s/projects/%s%%2F%s/merge_requests%s",
+		gitlab_get_apibase(),
+		e_owner, e_repo,
+		all ? "" : "?state=opened");
+
 	free(e_owner);
 	free(e_repo);
 
-	return 0;
+	return gitlab_fetch_mrs(url, max, list);
 }
 
 void

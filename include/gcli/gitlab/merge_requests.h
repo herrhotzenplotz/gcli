@@ -36,6 +36,10 @@
 
 #include <gcli/pulls.h>
 
+int gitlab_fetch_mrs(char *url,
+                     int const max,
+                     gcli_pull_list *const list);
+
 int gitlab_get_mrs(char const *owner,
                    char const *reponame,
                    bool const all,

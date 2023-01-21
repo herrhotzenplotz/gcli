@@ -38,6 +38,7 @@
 #include <gcli/github/forks.h>
 #include <gcli/github/issues.h>
 #include <gcli/github/labels.h>
+#include <gcli/github/milestones.h>
 #include <gcli/github/pulls.h>
 #include <gcli/github/releases.h>
 #include <gcli/github/repos.h>
@@ -83,6 +84,7 @@ github_forge_descriptor =
 	.issue_add_labels          = github_issue_add_labels,
 	.issue_remove_labels       = github_issue_remove_labels,
 	.perform_submit_issue      = github_perform_submit_issue,
+	.get_milestones            = github_get_milestones,
 	.get_prs                   = github_get_prs,
 	.print_pr_diff             = github_print_pr_diff,
 	.print_pr_checks           = github_pr_checks,

@@ -144,6 +144,7 @@ libgcli_la_SOURCES = \
 	src/github/comments.c include/gcli/github/comments.h \
 	src/github/status.c include/gcli/github/status.h \
 	src/github/labels.c include/gcli/github/labels.h \
+	src/github/milestones.c include/gcli/github/milestones.h \
 	src/github/issues.c include/gcli/github/issues.h \
 	src/github/review.c include/gcli/github/review.h \
 	src/github/checks.c include/gcli/github/checks.h \

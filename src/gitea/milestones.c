@@ -32,6 +32,8 @@
 #include <gcli/curl.h>
 #include <gcli/config.h>
 
+#include <gcli/github/issues.h>
+
 #include <templates/gitea/milestones.h>
 
 #include <pdjson/pdjson.h>
@@ -96,6 +98,10 @@ gitea_get_milestone(char const *const owner,
 
 	free(buffer.data);
 	free(url);
+
+	url = sn_asprintf("%s/repos/%s/%s/issues?state=all&milestones=%d",
+	                  gcli_get_apibase(), e_owner, e_repo, milestone);
+	github_fetch_issues(url, -1, &out->issue_list);
 
 	free(e_owner);
 	free(e_repo);

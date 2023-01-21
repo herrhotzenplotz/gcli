@@ -94,6 +94,11 @@ gcli_print_milestone(gcli_milestone const *const milestone)
 	gcli_dict_add_string(dict, "CREATED", 0, 0, milestone->created_at);
 	gcli_dict_add_string(dict, "DUE", 0, 0, milestone->due_date);
 	gcli_dict_end(dict);
+
+	if (milestone->description) {
+		printf("\nDESCRIPTION:\n");
+		pretty_print(milestone->description, 4, 80, stdout);
+	}
 }
 
 void
@@ -105,6 +110,11 @@ gcli_free_milestone(gcli_milestone *const it)
 	it->state = NULL;
 	free(it->created_at);
 	it->created_at = NULL;
+
+	free(it->description);
+	it->description = NULL;
+	free(it->updated_at);
+	it->updated_at = NULL;
 	free(it->due_date);
 	it->due_date = NULL;
 }

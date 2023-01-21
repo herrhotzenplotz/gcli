@@ -44,7 +44,12 @@ struct gcli_milestone {
 	char *title;
 	char *state;
 	char *created_at;
+
+	/* Extended info */
+	char *description;
+	char *updated_at;
 	char *due_date;
+	int expired;
 };
 
 struct gcli_milestone_list {

@@ -106,6 +106,11 @@ gcli_print_milestone(gcli_milestone const *const milestone)
 		printf("\nISSUES:\n");
 		gcli_print_issues_table(0, &milestone->issue_list, -1);
 	}
+
+	if (milestone->pull_list.pulls_size) {
+		printf("\nPULLS:\n");
+		gcli_print_pulls_table(0, &milestone->pull_list, -1);
+	}
 }
 
 void
@@ -126,6 +131,7 @@ gcli_free_milestone(gcli_milestone *const it)
 	it->due_date = NULL;
 
 	gcli_issues_free(&it->issue_list);
+	gcli_pulls_free(&it->pull_list);
 }
 
 void

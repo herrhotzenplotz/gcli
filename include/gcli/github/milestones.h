@@ -37,4 +37,9 @@ int github_get_milestones(char const *const owner,
                           int const max,
                           gcli_milestone_list *const out);
 
+int github_get_milestone(char const *const owner,
+                         char const *const repo,
+                         int const milestone,
+                         gcli_milestone *const out);
+
 #endif /* GCLI_GITHUB_MILESTONES_H */

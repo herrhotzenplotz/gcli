@@ -85,6 +85,7 @@ github_forge_descriptor =
 	.issue_remove_labels       = github_issue_remove_labels,
 	.perform_submit_issue      = github_perform_submit_issue,
 	.get_milestones            = github_get_milestones,
+	.get_milestone             = github_get_milestone,
 	.get_prs                   = github_get_prs,
 	.print_pr_diff             = github_print_pr_diff,
 	.print_pr_checks           = github_pr_checks,

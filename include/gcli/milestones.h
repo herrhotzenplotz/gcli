@@ -37,6 +37,7 @@
 #include <stdlib.h>
 
 #include <gcli/issues.h>
+#include <gcli/pulls.h>
 
 typedef struct gcli_milestone gcli_milestone;
 typedef struct gcli_milestone_list gcli_milestone_list;
@@ -54,6 +55,7 @@ struct gcli_milestone {
 	int expired;
 
 	gcli_issue_list issue_list;
+	gcli_pull_list pull_list;
 };
 
 struct gcli_milestone_list {

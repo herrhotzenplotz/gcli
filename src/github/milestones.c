@@ -31,6 +31,7 @@
 
 #include <gcli/curl.h>
 #include <gcli/config.h>
+#include <gcli/github/issues.h>
 
 #include <templates/github/milestones.h>
 
@@ -79,6 +80,7 @@ github_get_milestone(char const *const owner,
 	char *url, *e_owner, *e_repo;
 	gcli_fetch_buffer buffer = {0};
 	json_stream stream = {0};
+	int rc;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -94,6 +96,16 @@ github_get_milestone(char const *const owner,
 	json_close(&stream);
 	free(url);
 	free(buffer.data);
+
+	url = sn_asprintf("%s/repos/%s/%s/issues?milestone=%d&state=all",
+	                  gcli_get_apibase(), e_owner, e_repo, milestone);
+	rc = github_fetch_issues(url, -1, &out->issue_list);
+	if (rc < 0)
+		goto out;
+
+	;
+
+out:
 	free(e_repo);
 	free(e_owner);
 

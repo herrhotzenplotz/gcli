@@ -37,6 +37,10 @@
 #include <gcli/curl.h>
 #include <gcli/issues.h>
 
+int github_fetch_issues(char *url,
+                        int const max,
+                        gcli_issue_list *const out);
+
 int github_get_issues(char const *owner,
                       char const *repo,
                       bool const all,

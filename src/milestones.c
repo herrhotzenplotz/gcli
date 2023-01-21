@@ -97,7 +97,7 @@ gcli_print_milestone(gcli_milestone const *const milestone)
 	gcli_dict_add_string(dict, "EXPIRED", 0, 0, sn_bool_yesno(milestone->expired));
 	gcli_dict_end(dict);
 
-	if (milestone->description) {
+	if (milestone->description && strlen(milestone->description)) {
 		printf("\nDESCRIPTION:\n");
 		pretty_print(milestone->description, 4, 80, stdout);
 	}

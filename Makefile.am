@@ -89,6 +89,7 @@ TEMPLATES = \
 	templates/github/releases.t \
 	templates/github/repos.t \
 	templates/github/status.t \
+	templates/github/milestones.t \
 	templates/gitlab/comments.t \
 	templates/gitlab/forks.t \
 	templates/gitlab/issues.t \

@@ -29,16 +29,43 @@
 
 #include <gcli/github/milestones.h>
 
+#include <gcli/curl.h>
+#include <gcli/config.h>
+
+#include <templates/github/milestones.h>
+
+#include <pdjson/pdjson.h>
+
 int
 github_get_milestones(char const *const owner,
                       char const *const repo,
                       int const max,
                       gcli_milestone_list *const out)
 {
-	(void) owner;
-	(void) repo;
-	(void) max;
-	(void) out;
+	char *url, *next_url = NULL, *e_owner, *e_repo;
 
-	return -1;
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/repos/%s/%s/milestones",
+	                  gcli_get_apibase(),
+	                  e_owner, e_repo);
+
+	do {
+		gcli_fetch_buffer buffer = {0};
+		json_stream stream = {0};
+
+		gcli_fetch(url, &next_url, &buffer);
+		json_open_buffer(&stream, buffer.data, buffer.length);
+
+		parse_github_milestones(&stream, &out->milestones, &out->milestones_size);
+
+		json_close(&stream);
+		free(url);
+		free(buffer.data);
+	} while ((url = next_url) && ((max < 0) || (out->milestones_size < (size_t)max)));
+
+	free(url);
+
+	return 0;
 }

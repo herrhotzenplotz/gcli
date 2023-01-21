@@ -188,6 +188,7 @@ gitea_forge_descriptor =
 	.issue_assign              = gitea_issue_assign,
 	.get_issue_comments        = gitea_get_comments,
 	.get_milestones            = gitea_get_milestones,
+	.get_milestone             = gitea_get_milestone,
 	.perform_submit_comment    = gitea_perform_submit_comment,
 	.issue_add_labels          = gitea_issue_add_labels,
 	.issue_remove_labels       = gitea_issue_remove_labels,

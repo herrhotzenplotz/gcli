@@ -37,4 +37,9 @@ int gitea_get_milestones(char const *const owner,
                          int const max,
                          gcli_milestone_list *const out);
 
+int gitea_get_milestone(char const *const owner,
+                        char const *const repo,
+                        int const milestone,
+                        gcli_milestone *const out);
+
 #endif /* GCLI_GITEA_MILESTONES_H */

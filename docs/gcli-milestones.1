@@ -1,0 +1,37 @@
+.Dd $Mdocdate$
+.Dt GCLI-MILESTONES 1
+.Os
+.Sh NAME
+.Nm gcli milestones
+.Nd List and manage milestones in various Git Forges
+.Sh SYNOPSIS
+.Nm
+.Nm
+.Op Fl i Ar milestone-id
+.Sh DESCRIPTION
+The
+.Nm
+can be used to print a list of milestones or details about particular
+milestones.
+.Sh OPTIONS
+.Bl -tag -width indent
+.It Fl i , -id Ar id
+Print detailed information about the milestone with the given ID.
+.El
+.Sh EXAMPLES
+Print a list of milestones for the current autodetected forge:
+.Bd -literal -offset indent
+$ gcli milestones
+.Ed
+.Pp
+Print details about the milestone with the ID 42:
+.Bd -literal -offset indent
+$ gcli milestones -i 42
+.Ed
+.Sh SEE ALSO
+.Xr git 1 ,
+.Xr gcli 1
+.Sh AUTHORS
+.An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+.Sh BUGS
+Please report issues preferably via e-mail, on GitLab or on GitHub.

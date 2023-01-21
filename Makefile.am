@@ -42,6 +42,7 @@ dist_man_MANS = \
 	docs/gcli-gists.1 \
 	docs/gcli-issues.1 \
 	docs/gcli-labels.1 \
+	docs/gcli-milestones.1 \
 	docs/gcli-pipelines.1 \
 	docs/gcli-pulls.1 \
 	docs/gcli-releases.1 \

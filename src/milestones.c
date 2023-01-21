@@ -101,6 +101,11 @@ gcli_print_milestone(gcli_milestone const *const milestone)
 	if ((quirks & GCLI_MILESTONE_QUIRKS_EXPIRED) == 0)
 		gcli_dict_add_string(dict, "EXPIRED", 0, 0, sn_bool_yesno(milestone->expired));
 
+	if ((quirks & GCLI_MILESTONE_QUIRKS_NISSUES) == 0) {
+		gcli_dict_add(dict, "OPEN ISSUES", 0, 0, "%d", milestone->open_issues);
+		gcli_dict_add(dict, "CLOSED ISSUES", 0, 0, "%d", milestone->closed_issues);
+	}
+
 	gcli_dict_end(dict);
 
 	if (milestone->description && strlen(milestone->description)) {

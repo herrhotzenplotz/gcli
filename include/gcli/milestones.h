@@ -54,6 +54,10 @@ struct gcli_milestone {
 	char *due_date;
 	int expired;
 
+	/* Github and Gitea Specific */
+	int open_issues;
+	int closed_issues;
+
 	gcli_issue_list issue_list;
 	gcli_pull_list pull_list;
 };

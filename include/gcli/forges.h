@@ -158,6 +158,7 @@ struct gcli_forge_descriptor {
 		GCLI_MILESTONE_QUIRKS_EXPIRED = 0x1,
 		GCLI_MILESTONE_QUIRKS_DUEDATE = 0x2,
 		GCLI_MILESTONE_QUIRKS_PULLS   = 0x4,
+		GCLI_MILESTONE_QUIRKS_NISSUES = 0x8,
 	} const milestone_quirks;
 
 	/**

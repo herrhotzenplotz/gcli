@@ -178,7 +178,7 @@ gitlab_forge_descriptor =
 	                           | GCLI_PRS_QUIRK_COMMITS
 	                           | GCLI_PRS_QUIRK_CHANGES
 	                           | GCLI_PRS_QUIRK_MERGED,
-	.milestone_quirks          = 0,
+	.milestone_quirks          = GCLI_MILESTONE_QUIRKS_NISSUES,
 };
 
 static gcli_forge_descriptor const

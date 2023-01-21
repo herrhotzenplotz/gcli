@@ -41,4 +41,9 @@ int gitlab_get_milestones(char const *owner,
                           int max,
                           gcli_milestone_list *const out);
 
+int gitlab_get_milestone(char const *owner,
+                         char const *repo,
+                         int const milestone,
+                         gcli_milestone *const out);
+
 #endif /* GCLI_GITLAB_MILESTONES_H */

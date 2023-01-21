@@ -69,3 +69,33 @@ gitlab_get_milestones(char const *owner,
 
 	return 0;
 }
+
+int
+gitlab_get_milestone(char const *owner,
+                     char const *repo,
+                     int const milestone,
+                     gcli_milestone *const out)
+{
+	char *url, *e_owner, *e_repo;
+	gcli_fetch_buffer buffer = {0};
+	json_stream stream = {0};
+
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/milestones/%d",
+	                  gitlab_get_apibase(), e_owner, e_repo, milestone);
+
+	gcli_fetch(url, NULL, &buffer);
+	json_open_buffer(&stream, buffer.data, buffer.length);
+
+	parse_gitlab_milestone(&stream, out);
+
+	json_close(&stream);
+	free(buffer.data);
+	free(url);
+	free(e_owner);
+	free(e_repo);
+
+	return 0;
+}

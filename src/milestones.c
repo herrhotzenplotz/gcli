@@ -40,7 +40,15 @@ gcli_get_milestones(char const *const owner,
 	return gcli_forge()->get_milestones(owner, repo, max, out);
 }
 
-#include <stdio.h>
+int
+gcli_get_milestone(char const *owner,
+                   char const *repo,
+                   int const milestone,
+                   gcli_milestone *const out)
+{
+	return gcli_forge()->get_milestone(owner, repo, milestone, out);
+}
+
 void
 gcli_print_milestones(gcli_milestone_list const *const list,
                       int max)
@@ -74,8 +82,22 @@ gcli_print_milestones(gcli_milestone_list const *const list,
 	gcli_tbl_end(tbl);
 }
 
-static void
-gcli_free_milestone(gcli_milestone *it)
+void
+gcli_print_milestone(gcli_milestone const *const milestone)
+{
+	gcli_dict dict;
+
+	dict = gcli_dict_begin();
+	gcli_dict_add(dict,        "ID", 0, 0, "%d", milestone->id);
+	gcli_dict_add_string(dict, "TITLE", 0, 0, milestone->title);
+	gcli_dict_add_string(dict, "STATE", GCLI_TBLCOL_STATECOLOURED, 0, milestone->state);
+	gcli_dict_add_string(dict, "CREATED", 0, 0, milestone->created_at);
+	gcli_dict_add_string(dict, "DUE", 0, 0, milestone->due_date);
+	gcli_dict_end(dict);
+}
+
+void
+gcli_free_milestone(gcli_milestone *const it)
 {
 	free(it->title);
 	it->title = NULL;

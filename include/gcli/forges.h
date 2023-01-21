@@ -161,6 +161,14 @@ struct gcli_forge_descriptor {
 		gcli_milestone_list *const out);
 
 	/**
+	 * Get a single milestone */
+	int (*get_milestone)(
+		char const *owner,
+		char const *repo,
+		int const milestone,
+		gcli_milestone *const out);
+
+	/**
 	 * Get a list of PRs/MRs on the given repo */
 	int (*get_prs)(
 		char const *owner,

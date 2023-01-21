@@ -57,9 +57,17 @@ int gcli_get_milestones(char const *const owner,
                         int const max,
                         gcli_milestone_list *const out);
 
+int gcli_get_milestone(char const *const owner,
+                       char const *const repo,
+                       int const max,
+                       gcli_milestone *const out);
+
 void gcli_print_milestones(gcli_milestone_list const *const it,
                            int max);
 
+void gcli_print_milestone(gcli_milestone const *const it);
+
+void gcli_free_milestone(gcli_milestone *const it);
 void gcli_free_milestones(gcli_milestone_list *const it);
 
 #endif /* GCLI_MILESTONES_H */

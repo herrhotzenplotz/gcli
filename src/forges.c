@@ -137,6 +137,7 @@ gitlab_forge_descriptor =
 	.issue_remove_labels       = gitlab_issue_remove_labels,
 	.perform_submit_issue      = gitlab_perform_submit_issue,
 	.get_milestones            = gitlab_get_milestones,
+	.get_milestone             = gitlab_get_milestone,
 	.get_prs                   = gitlab_get_mrs,
 	.print_pr_diff             = gitlab_print_pr_diff,
 	.print_pr_checks           = gitlab_mr_pipelines,

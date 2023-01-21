@@ -29,6 +29,7 @@
 
 #include <gcli/curl.h>
 #include <gcli/gitlab/config.h>
+#include <gcli/gitlab/issues.h>
 #include <gcli/gitlab/milestones.h>
 
 #include <templates/gitlab/milestones.h>
@@ -64,6 +65,7 @@ gitlab_get_milestones(char const *owner,
 	} while ((url = next_url) && (max == -1 || (int)out->milestones_size < max));
 
 	free(next_url);
+
 	free(e_owner);
 	free(e_repo);
 
@@ -79,6 +81,7 @@ gitlab_get_milestone(char const *owner,
 	char *url, *e_owner, *e_repo;
 	gcli_fetch_buffer buffer = {0};
 	json_stream stream = {0};
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -94,8 +97,15 @@ gitlab_get_milestone(char const *owner,
 	json_close(&stream);
 	free(buffer.data);
 	free(url);
+
+	/* Fetch assigned issues */
+	url = sn_asprintf("%s/projects/%s%%2F%s/milestones/%d/issues",
+	                  gitlab_get_apibase(), e_owner, e_repo, milestone);
+
+	rc = gitlab_fetch_issues(url, -1, &out->issue_list);
+
 	free(e_owner);
 	free(e_repo);
 
-	return 0;
+	return rc;
 }

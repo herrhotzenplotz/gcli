@@ -92,12 +92,19 @@ gcli_print_milestone(gcli_milestone const *const milestone)
 	gcli_dict_add_string(dict, "TITLE", 0, 0, milestone->title);
 	gcli_dict_add_string(dict, "STATE", GCLI_TBLCOL_STATECOLOURED, 0, milestone->state);
 	gcli_dict_add_string(dict, "CREATED", 0, 0, milestone->created_at);
+	gcli_dict_add_string(dict, "UPDATED", 0, 0, milestone->created_at);
 	gcli_dict_add_string(dict, "DUE", 0, 0, milestone->due_date);
+	gcli_dict_add_string(dict, "EXPIRED", 0, 0, sn_bool_yesno(milestone->expired));
 	gcli_dict_end(dict);
 
 	if (milestone->description) {
 		printf("\nDESCRIPTION:\n");
 		pretty_print(milestone->description, 4, 80, stdout);
+	}
+
+	if (milestone->issue_list.issues_size) {
+		printf("\nISSUES:\n");
+		gcli_print_issues_table(0, &milestone->issue_list, -1);
 	}
 }
 
@@ -117,6 +124,8 @@ gcli_free_milestone(gcli_milestone *const it)
 	it->updated_at = NULL;
 	free(it->due_date);
 	it->due_date = NULL;
+
+	gcli_issues_free(&it->issue_list);
 }
 
 void

@@ -151,6 +151,9 @@ gcli_print_issue_summary(gcli_issue const *const it)
 	gcli_dict_add(dict, "COMMENTS", 0, 0, "%d", it->comments);
 	gcli_dict_add(dict, "LOCKED", 0, 0, "%s", sn_bool_yesno(it->locked));
 
+	if (it->milestone.length)
+		gcli_dict_add(dict, "MILESTONE", 0, 0, SV_FMT, SV_ARGS(it->milestone));
+
 	if (it->labels_size) {
 		gcli_dict_add_sv_list(dict, "LABELS", it->labels, it->labels_size);
 	} else {

@@ -84,6 +84,7 @@ Tested Operating Systems so far:
 - Minix 3.4.0 (GENERIC) i386
 - OpenBSD 7.0 GENERIC amd64
 - Alpine Linux 3.16 x86_64
+- Darwin 22.2.0 arm64
 
 ## Support
 

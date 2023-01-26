@@ -161,7 +161,9 @@ static const struct { char const *name; int code; }
 	{ .name = "canceled",  .code = GCLI_COLOR_RED     }, /* orthography has left the channel */
 	{ .name = "failure",   .code = GCLI_COLOR_RED     },
 	{ .name = "running",   .code = GCLI_COLOR_BLUE    },
+	{ .name = "created",   .code = GCLI_COLOR_BLUE    },
 	{ .name = "COMMENTED", .code = GCLI_COLOR_BLUE    },
+	{ .name = "pending",   .code = GCLI_COLOR_CYAN    },
 };
 
 char const *

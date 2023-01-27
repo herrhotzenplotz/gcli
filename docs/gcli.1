@@ -7,7 +7,7 @@
 .Sh SYNOPSIS
 
 .Nm
-.Op common options
+.Op overrides
 .Cm subcommand
 .Op options
 .Sh DESCRIPTION
@@ -25,6 +25,11 @@ various tasks. Some commands may also take an item to operate on and
 accept multiple actions that will be performed on the item (e.g. PRs
 may be summarized, comments fetched and a diff printed all in one
 command).
+
+The default behaviour of 
+.Nm
+can be overriden to accomodate more nuanced use cases. Manual
+overrides must be passed before subcommands and their options.
 .Sh SUBCOMMANDS
 Most of these subcommands are documented in dedicated man pages.
 .Bl -tag -width pipelines
@@ -53,20 +58,25 @@ Manage your own or other repositories. See
 .It Cm comment
 Submit comments under issues and PRs. See
 .Xr gcli-comment 1 .
-.It Cm version
-Print version and exit.
 .It Cm status
 Print a list of TODOs and/or notifications. See
 .Xr gcli-status 1 .
 .It Cm pipelines
-Inspect and manage Gitlab Pipelines.
+Inspect and manage Gitlab Pipelines. See
+.Xr gcli-pipelines 1 .
+.It Cm releases
+Create and manage releases. See
+.Xr gcli-releases 1 .
 .It Cm api
 Perform direct queries to the API and dump the JSON response to
-stdout. This is primarily inteded to assist debugging gcli. See
+stdout. This is primarily intended to assist debugging gcli. See
 .Xr gcli-api 1 .
+.It Cm version
+Print version and exit.
 .El
 .Sh OPTIONS
-Common options are:
+.Nm
+overrides are:
 .Bl -tag -width indent
 .It Fl a , -account Ar override-account
 Manually override the default account.
@@ -84,19 +94,16 @@ as well as whether the output is not tty and print ANSI escape
 sequences for changing text formatting. Default is to output colours
 unless stdout is not a tty. See
 .Xr isatty 3 .
-This is useful in combination with pagers such as
-.Xr more 1
-and
+This is useful in combination with modern pagers such as
 .Xr less 1 .
 .It Fl q , -quiet
-Surpresses most output of
+Supresses most output of
 .Nm .
 .It Fl v , -verbose
 Be very verbose. This means that warnings about missing config files
 and request steps are printed to stderr.
 .It Fl t , -type Ar forge-type
-Forcefully override the forge type if it can't be inferred
-correctly. Set
+Forcefully override the forge type. Set
 .Ar forge-type
 to
 .Sq github ,
@@ -132,9 +139,7 @@ in combination with
 Operate on the given repository.  Can only be used in combination with
 .Fl o .
 .It Fl i Ar id
-Operate on the given issue number.
-.It Fl p Ar pr
-Operate on the given pull request.
+Operate on the given numeric identifier.
 .El
 
 Other options specific to the context are documented in the respective
@@ -238,7 +243,7 @@ to manually specify all the options like
 
 .El
 .Sh EXAMPLES
-List all open issues in the current upstream repository:
+List recently opened issues in the current upstream repository:
 .Bd -literal -width indent
 $ gcli issues
 .Ed
@@ -253,12 +258,14 @@ Get a summary and comments of upstream PR #22:
 $ gcli pulls -p 22 summary comments
 .Ed
 
-List the last 10 issues in contour-terminal/contour ignoring all
-warnings and forcing a connection to GitHub.
+ 
+Establish a connection to github and print the last 10 pull requests
+in contour-terminal/contour regardless of their state.
 .Bd -literal -width indent
-gcli -t github -q issues -o contour-terminal -r contour -a -n10
+$ gcli -t github pulls -o contour-terminal -r contour -a -n10
 .Ed
-This works when you don't have a config file in place.
+This can be useful if neither your config file nor the directory you're
+working from contain the relevant forge and repository information.
 .Sh SEE ALSO
 .Xr git 1 ,
 .Xr gcli-issues 1 ,
@@ -271,6 +278,7 @@ This works when you don't have a config file in place.
 .Xr gcli-gists 1 ,
 .Xr gcli-releases 1 ,
 .Xr gcli-comment 1
+.Xr gcli-pipelines 1
 .\" .Sh STANDARDS
 .Sh HISTORY
 The idea for

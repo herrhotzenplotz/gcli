@@ -130,6 +130,8 @@ void gcli_get_pull_summary(char const *owner,
 
 void gcli_pr_submit(gcli_submit_pull_options);
 
+void gcli_pull_summary_print_op(gcli_pull_summary *const summary);
+
 void gcli_pr_merge(char const *owner,
                    char const *reponame,
                    int const pr_number,

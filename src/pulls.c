@@ -174,11 +174,6 @@ gcli_print_pr_summary(gcli_pull_summary const *const it)
 	}
 
 	gcli_dict_end(dict);
-
-	if (it->body) {
-		putchar('\n');
-		pretty_print(it->body, 4, 80, stdout);
-	}
 }
 
 static int
@@ -333,6 +328,13 @@ gcli_pr_summary(char const *owner,
                 int const pr_number)
 {
 	gcli_pr_info(owner, repo, pr_number, false);
+}
+
+void
+gcli_pull_summary_print_op(gcli_pull_summary *const summary)
+{
+	if (summary->body)
+		pretty_print(summary->body, 4, 80, stdout);
 }
 
 void

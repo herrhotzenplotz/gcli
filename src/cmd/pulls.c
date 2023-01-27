@@ -377,6 +377,11 @@ handle_pull_actions(int argc, char *argv[],
 			/* Print meta information */
 			gcli_pull_summary_print_status(&summary);
 
+		} else if (strcmp(action, "commits") == 0) {
+
+			/* Does not require the summary */
+			gcli_pull_commits(owner, repo, pr);
+
 		} else if (strcmp(action, "diff") == 0) {
 			gcli_print_pr_diff(stdout, owner, repo, pr);
 

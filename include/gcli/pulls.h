@@ -123,6 +123,10 @@ void gcli_pr_checks(char const *owner,
                     char const *repo,
                     int const pr_number);
 
+void gcli_pull_commits(char const *owner,
+                       char const *repo,
+                       int const pr_number);
+
 void gcli_get_pull_summary(char const *owner,
                            char const *repo,
                            int const pr_number,

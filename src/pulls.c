@@ -176,6 +176,94 @@ gcli_pull_summary_print_status(gcli_pull_summary const *const it)
 	gcli_dict_end(dict);
 }
 
+static int
+gcli_get_pull_commits(char const *owner,
+                      char const *repo,
+                      int const pr_number,
+                      gcli_commit **const out)
+{
+	return gcli_forge()->get_pull_commits(owner, repo, pr_number, out);
+}
+
+/**
+ * Get a copy of the first line of the passed string.
+ */
+static char *
+cut_newline(char const *const _it)
+{
+	char *it = strdup(_it);
+	char *foo = it;
+	while (*foo) {
+		if (*foo == '\n') {
+			*foo = 0;
+			break;
+		}
+		foo += 1;
+	}
+
+	return it;
+}
+
+static void
+gcli_print_commits_table(gcli_commit const *const commits,
+                         int const commits_size)
+{
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "SHA",     .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_COLOUREXPL },
+		{ .name = "AUTHOR",  .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_BOLD },
+		{ .name = "EMAIL",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "DATE",    .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "MESSAGE", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+	};
+
+	if (commits_size == 0) {
+		puts("No commits");
+		return;
+	}
+
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
+		errx(1, "error: could not initialize table");
+
+	for (int i = 0; i < commits_size; ++i) {
+		char *message = cut_newline(commits[i].message);
+		gcli_tbl_add_row(table, GCLI_COLOR_YELLOW, commits[i].sha,
+		                 commits[i].author, commits[i].email, commits[i].date,
+		                 message);
+		free(message);          /* message is copied by the function above */
+	}
+
+	gcli_tbl_end(table);
+}
+
+static void
+gcli_commits_free(gcli_commit *it, int const size)
+{
+	for (int i = 0; i < size; ++i) {
+		free((void *)it[i].sha);
+		free((void *)it[i].message);
+		free((void *)it[i].date);
+		free((void *)it[i].author);
+		free((void *)it[i].email);
+	}
+
+	free(it);
+}
+
+void
+gcli_pull_commits(char const *owner,
+                  char const *repo,
+                  int const pr_number)
+{
+	gcli_commit *commits      = NULL;
+	int          commits_size = 0;
+
+	commits_size = gcli_get_pull_commits(owner, repo, pr_number, &commits);
+	gcli_print_commits_table(commits, commits_size);
+	gcli_commits_free(commits, commits_size);
+}
+
 void
 gcli_pulls_summary_free(gcli_pull_summary *const it)
 {

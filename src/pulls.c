@@ -272,7 +272,7 @@ gcli_pulls_summary_free(gcli_pull_summary *const it)
 		free(it->labels[i].data);
 }
 
-static void
+void
 gcli_get_pull_summary(char const *owner,
                       char const *repo,
                       int const pr_number,

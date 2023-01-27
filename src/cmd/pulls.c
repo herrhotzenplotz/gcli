@@ -202,6 +202,12 @@ subcommand_pull_create(int argc, char *argv[])
 	return EXIT_SUCCESS;
 }
 
+/* Forward declaration */
+static int handle_pull_actions(int argc, char *argv[],
+                               char const *owner,
+                               char const *repo,
+                               int pr);
+
 int
 subcommand_pulls(int argc, char *argv[])
 {
@@ -314,17 +320,43 @@ subcommand_pulls(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	/* we have an explicit PR number, so execute all operations the
-	 * user has given */
+	/* Hand off to actions handling */
+	return handle_pull_actions(argc, argv, owner, repo, pr);
+}
+
+/** Helper routine for fetching a PR summary if required */
+static void
+ensure_summary(char const *owner, char const *repo, int pr,
+               int *const fetched_summary, gcli_pull_summary *const summary)
+{
+	if (*fetched_summary)
+		return;
+
+	gcli_get_pull_summary(owner, repo, pr, summary);
+	*fetched_summary = 1;
+}
+
+/** Handling routine for Pull Request related actions specified on the
+ * command line. Make sure that the usage at the top is consistent
+ * with the actions implemented here. */
+static int
+handle_pull_actions(int argc, char *argv[],
+                    char const *owner, char const *repo,
+                    int pr)
+{
+	/* For ease of handling and not making redundant calls to the API
+	 * we'll fetch the summary only if a command requires it. Then
+	 * we'll proceed to actually handling it. */
+	int fetched_summary = 0;
+	gcli_pull_summary summary = {0};
+
+
 	while (argc > 0) {
 		const char *operation = shift(&argc, &argv);
 
 		if (strcmp(operation, "diff") == 0) {
 			gcli_print_pr_diff(stdout, owner, repo, pr);
-		} else if (strcmp(operation, "summary") == 0) {
-			gcli_pr_summary(owner, repo, pr);
-		} else if (strcmp(operation, "status") == 0) {
-			gcli_pr_status(owner, repo, pr);
+
 		} else if (strcmp(operation, "comments") == 0) {
 			gcli_pull_comments(owner, repo, pr);
 		} else if (strcmp(operation, "checks") == 0) {

@@ -169,7 +169,12 @@ struct gcli_forge_descriptor {
 		int const   pr_number);
 
 	/**
-	 * Print a list of checks associated with the given pull. */
+	 * Print a list of checks associated with the given pull.
+	 *
+	 * NOTE(Nico): This is a print routine here because the CI systems
+	 * underlying the forge are so different that we cannot properly
+	 * unify them. For Gitlab this will call into the pipelines code,
+	 * for Github into the actions code. */
 	int (*print_pr_checks)(
 		char const *owner,
 		char const *reponame,

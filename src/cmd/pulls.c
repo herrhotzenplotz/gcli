@@ -358,7 +358,7 @@ handle_pull_actions(int argc, char *argv[],
 
 		/* Check if it is a valid one. When we find any of
 		 *
-		 *      all, op or meta
+		 *      all, op or status
 		 *
 		 * we must ensure that the summary has been fetched. */
 		if (strcmp(action, "op") == 0) {
@@ -368,6 +368,14 @@ handle_pull_actions(int argc, char *argv[],
 
 			/* Print it */
 			gcli_pull_summary_print_op(&summary);
+
+		} else if (strcmp(action, "status") == 0) {
+
+			/* Ensure we have the summary ready */
+			ensure_summary(owner, repo, pr, &fetched_summary, &summary);
+
+			/* Print meta information */
+			gcli_pull_summary_print_status(&summary);
 
 		} else if (strcmp(action, "diff") == 0) {
 			gcli_print_pr_diff(stdout, owner, repo, pr);

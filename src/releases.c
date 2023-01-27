@@ -117,9 +117,9 @@ gcli_print_releases_short(enum gcli_output_flags const flags,
 	};
 
 	if (max < 0 || max > list->releases_size)
-		n = max;
-	else
 		n = list->releases_size;
+	else
+		n = max;
 
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
@@ -153,7 +153,7 @@ gcli_print_releases(enum gcli_output_flags const flags,
                     gcli_release_list const *const list,
                     int const max)
 {
-	if (max == 0) {
+	if (list->releases_size == 0) {
 		puts("No releases");
 		return;
 	}

@@ -5,7 +5,7 @@
 .Nm gcli
 .Nd interact with git forges without using a web-browser
 .Sh SYNOPSIS
-
+.Pp
 .Nm
 .Op overrides
 .Cm subcommand
@@ -16,7 +16,7 @@ can be used to interact with
 .Xr git 1
 forges like GitHub, GitLab and Gitea from the command line in order to
 make many tasks like managing issues and pull requests easier.
-
+.Pp
 Calls to
 .Nm
 usually consist of either only the subcommand to list requested data
@@ -25,8 +25,8 @@ various tasks. Some commands may also take an item to operate on and
 accept multiple actions that will be performed on the item (e.g. PRs
 may be summarized, comments fetched and a diff printed all in one
 command).
-
-The default behaviour of 
+.Pp
+The default behaviour of
 .Nm
 can be overriden to accomodate more nuanced use cases. Manual
 overrides must be passed before subcommands and their options.
@@ -112,7 +112,7 @@ or
 .Sq gitea
 to connect to the corresponding services.
 .El
-
+.Pp
 Common options across almost all of the subcommands are:
 .Bl -tag -width indent
 .It Fl s , -sorted
@@ -141,7 +141,7 @@ Operate on the given repository.  Can only be used in combination with
 .It Fl i Ar id
 Operate on the given numeric identifier.
 .El
-
+.Pp
 Other options specific to the context are documented in the respective
 man pages.
 .\" .Sh IMPLEMENTATION NOTES
@@ -178,12 +178,11 @@ escape sequences. See
 .El
 .Sh FILES
 .Bl -tag -width ${XDG_CONFIG_DIR}/gcli/config -compact
-
 .It Pa ${XDG_CONFIG_DIR}/gcli/config
 The config file for
 .Nm .
 It shall contain the following data:
-
+.Pp
 .Bd -literal
 defaults {
 	editor=/path/to/ganoooo/emacs
@@ -205,7 +204,7 @@ herrhotzenplotz-gl {
 	forge-type=gitlab
 }
 .Ed
-
+.Pp
 In case
 .Sq apibase
 is not set, it defaults to the above values.
@@ -215,55 +214,55 @@ recommend setting the following on GitHub:
 On GitLab you only need the
 .Sq api
 scope.
-
+.Pp
 If editor is not set in the config file,
 .Nm
 will use
 .Ev EDITOR
 from the environment.
-
+.Pp
 Both
 .Sq gitlab-default-account
 and
 .Sq github-default-account
 must point at a config section with that exact name.
-
+.Pp
 .It Pa .gcli
 A repo-specific config file that may contain the following data:
 .Bd -literal
 pr.upstream=herrhotzenplotz/gcli
 pr.base=trunk
 .Ed
-
+.Pp
 It is intended to be committed into the repo so that users don't have
 to manually specify all the options like
 .Fl -in ,
 .Fl -from ,
 .Fl -base etc.
-
+.Pp
 .El
 .Sh EXAMPLES
 List recently opened issues in the current upstream repository:
 .Bd -literal -width indent
 $ gcli issues
 .Ed
-
+.Pp
 Merge upstream PR #22:
 .Bd -literal -width indent
 $ gcli pulls -p 22 merge
 .Ed
-
+.Pp
 Get a summary and comments of upstream PR #22:
 .Bd -literal -width indent
 $ gcli pulls -p 22 summary comments
 .Ed
-
- 
+.Pp
 Establish a connection to github and print the last 10 pull requests
 in contour-terminal/contour regardless of their state.
 .Bd -literal -width indent
 $ gcli -t github pulls -o contour-terminal -r contour -a -n10
 .Ed
+.Pp
 This can be useful if neither your config file nor the directory you're
 working from contain the relevant forge and repository information.
 .Sh SEE ALSO
@@ -288,12 +287,12 @@ tool written by GitHub became clear to be the manual dialing and DNS
 resolving by the Go runtime, circumventing almost the entirety of the
 IP and DNS services of the operating system and leaking sensitive
 information when using Tor.
-
+.Pp
 Implementation started in October 2021 with the goal of having a
 decent, sufficiently portable and secure version of a cli utility to
 interact with the GitHub world without using the inconvenient web
 interface.
-
+.Pp
 Later, support for GitLab and Gitea (Codeberg) were added.
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
@@ -304,7 +303,7 @@ However, it is a non-goal of the project to provide all this
 functionality.
 .Sh BUGS
 Yes. It is software.
-
+.Pp
 Please report issues preferably via e-mail, on GitLab or on
 GitHub. You may also report an issue like so:
 .Bd -literal -width indent

@@ -350,18 +350,20 @@ handle_pull_actions(int argc, char *argv[],
 	int fetched_summary = 0;
 	gcli_pull_summary summary = {0};
 
-
+	/* Iterate over the argument list until the end */
 	while (argc > 0) {
-		const char *operation = shift(&argc, &argv);
+		const char *action = shift(&argc, &argv);
 
-		if (strcmp(operation, "diff") == 0) {
+		if (strcmp(action, "diff") == 0) {
 			gcli_print_pr_diff(stdout, owner, repo, pr);
 
-		} else if (strcmp(operation, "comments") == 0) {
+		} else if (strcmp(action, "comments") == 0) {
 			gcli_pull_comments(owner, repo, pr);
-		} else if (strcmp(operation, "checks") == 0) {
+
+		} else if (strcmp(action, "checks") == 0) {
 			gcli_pr_checks(owner, repo, pr);
-		} else if (strcmp(operation, "merge") == 0) {
+
+		} else if (strcmp(action, "merge") == 0) {
 			/* Check whether the user intends a squash-merge */
 			if (argc > 0 && (strcmp(argv[0], "-s") == 0 || strcmp(argv[0], "--squash") == 0)) {
 				--argc; ++argv;
@@ -369,25 +371,29 @@ handle_pull_actions(int argc, char *argv[],
 			} else {
 				gcli_pr_merge(owner, repo, pr, false);
 			}
-		} else if (strcmp(operation, "close") == 0) {
+
+		} else if (strcmp(action, "close") == 0) {
 			gcli_pr_close(owner, repo, pr);
-		} else if (strcmp(operation, "reopen") == 0) {
+
+		} else if (strcmp(action, "reopen") == 0) {
 			gcli_pr_reopen(owner, repo, pr);
-		} else if (strcmp(operation, "reviews") == 0) {
+
+		} else if (strcmp(action, "reviews") == 0) {
 			/* list reviews */
 			gcli_pr_review *reviews      = NULL;
 			size_t          reviews_size = gcli_review_get_reviews(
 				owner, repo, pr, &reviews);
 			gcli_review_print_review_table(reviews, reviews_size);
 			gcli_review_reviews_free(reviews, reviews_size);
-		} else if (strcmp("labels", operation) == 0) {
+
+		} else if (strcmp("labels", action) == 0) {
 			const char **add_labels         = NULL;
 			size_t       add_labels_size    = 0;
 			const char **remove_labels      = NULL;
 			size_t       remove_labels_size = 0;
 
 			if (argc == 0) {
-				fprintf(stderr, "error: expected label operations\n");
+				fprintf(stderr, "error: expected label action\n");
 				usage();
 				return EXIT_FAILURE;
 			}
@@ -406,10 +412,12 @@ handle_pull_actions(int argc, char *argv[],
 
 			free(add_labels);
 			free(remove_labels);
+
 		} else {
-			fprintf(stderr, "error: unknown operation %s\n", operation);
+			fprintf(stderr, "error: unknown action %s\n", action);
 			usage();
 			return EXIT_FAILURE;
+
 		}
 	}
 

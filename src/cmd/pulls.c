@@ -195,7 +195,7 @@ subcommand_pull_create(int argc, char *argv[])
 
 	opts.title = SV(argv[0]);
 
-	gcli_pr_submit(opts);
+	gcli_pull_submit(opts);
 
 	free(opts.labels);
 
@@ -304,10 +304,10 @@ subcommand_pulls(int argc, char *argv[])
 	/* In case no explicit PR number was specified, list all
 	 * open PRs and exit */
 	if (pr < 0) {
-		if (gcli_get_prs(owner, repo, all, n, &pulls) < 0)
+		if (gcli_get_pulls(owner, repo, all, n, &pulls) < 0)
 			errx(1, "error: could not fetch pull requests");
 
-		gcli_print_pr_table(flags, &pulls, n);
+		gcli_print_pulls_table(flags, &pulls, n);
 		gcli_pulls_free(&pulls);
 
 		return EXIT_SUCCESS;
@@ -383,28 +383,28 @@ handle_pull_actions(int argc, char *argv[],
 			gcli_pull_commits(owner, repo, pr);
 
 		} else if (strcmp(action, "diff") == 0) {
-			gcli_print_pr_diff(stdout, owner, repo, pr);
+			gcli_print_pull_diff(stdout, owner, repo, pr);
 
 		} else if (strcmp(action, "comments") == 0) {
 			gcli_pull_comments(owner, repo, pr);
 
 		} else if (strcmp(action, "ci") == 0) {
-			gcli_pr_checks(owner, repo, pr);
+			gcli_pull_checks(owner, repo, pr);
 
 		} else if (strcmp(action, "merge") == 0) {
 			/* Check whether the user intends a squash-merge */
 			if (argc > 0 && (strcmp(argv[0], "-s") == 0 || strcmp(argv[0], "--squash") == 0)) {
 				--argc; ++argv;
-				gcli_pr_merge(owner, repo, pr, true);
+				gcli_pull_merge(owner, repo, pr, true);
 			} else {
-				gcli_pr_merge(owner, repo, pr, false);
+				gcli_pull_merge(owner, repo, pr, false);
 			}
 
 		} else if (strcmp(action, "close") == 0) {
-			gcli_pr_close(owner, repo, pr);
+			gcli_pull_close(owner, repo, pr);
 
 		} else if (strcmp(action, "reopen") == 0) {
-			gcli_pr_reopen(owner, repo, pr);
+			gcli_pull_reopen(owner, repo, pr);
 
 		} else if (strcmp(action, "reviews") == 0) {
 			/* list reviews */
@@ -432,10 +432,10 @@ handle_pull_actions(int argc, char *argv[],
 
 			/* actually go about deleting and adding the labels */
 			if (add_labels_size)
-				gcli_pr_add_labels(
+				gcli_pull_add_labels(
 					owner, repo, pr, add_labels, add_labels_size);
 			if (remove_labels_size)
-				gcli_pr_remove_labels(
+				gcli_pull_remove_labels(
 					owner, repo, pr, remove_labels, remove_labels_size);
 
 			free(add_labels);

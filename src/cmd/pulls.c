@@ -352,9 +352,24 @@ handle_pull_actions(int argc, char *argv[],
 
 	/* Iterate over the argument list until the end */
 	while (argc > 0) {
+
+		/* Grab the next action from the argument list */
 		const char *action = shift(&argc, &argv);
 
-		if (strcmp(action, "diff") == 0) {
+		/* Check if it is a valid one. When we find any of
+		 *
+		 *      all, op or meta
+		 *
+		 * we must ensure that the summary has been fetched. */
+		if (strcmp(action, "op") == 0) {
+
+			/* Ensure we have fetched the summary */
+			ensure_summary(owner, repo, pr, &fetched_summary, &summary);
+
+			/* Print it */
+			gcli_pull_summary_print_op(&summary);
+
+		} else if (strcmp(action, "diff") == 0) {
 			gcli_print_pr_diff(stdout, owner, repo, pr);
 
 		} else if (strcmp(action, "comments") == 0) {

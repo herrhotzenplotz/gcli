@@ -62,11 +62,11 @@ usage(void)
 	fprintf(stderr, "  -t branch       Specify target branch of the PR\n");
 	fprintf(stderr, "  -y              Do not ask for confirmation.\n");
 	fprintf(stderr, "ACTIONS:\n");
-	fprintf(stderr, "  all             TODO: Display status, commits, op and checks of the PR\n");
-	fprintf(stderr, "  op              TODO: Display original post\n");
-	fprintf(stderr, "  status          TODO: Display PR metadata\n");
-	fprintf(stderr, "  comments        TODO: Display comments\n");
-	fprintf(stderr, "  commits         TODO: Display commits of the PR\n");
+	fprintf(stderr, "  all             Display status, commits, op and checks of the PR\n");
+	fprintf(stderr, "  op              Display original post\n");
+	fprintf(stderr, "  status          Display PR metadata\n");
+	fprintf(stderr, "  comments        Display comments\n");
+	fprintf(stderr, "  commits         Display commits of the PR\n");
 	fprintf(stderr, "  ci              Display CI/Pipeline status information about the PR\n");
 	fprintf(stderr, "  merge [-s]      Merge the PR (-s = squash commits)\n");
 	fprintf(stderr, "  close           Close the PR\n");

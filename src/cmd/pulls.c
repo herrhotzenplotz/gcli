@@ -388,7 +388,7 @@ handle_pull_actions(int argc, char *argv[],
 		} else if (strcmp(action, "comments") == 0) {
 			gcli_pull_comments(owner, repo, pr);
 
-		} else if (strcmp(action, "checks") == 0) {
+		} else if (strcmp(action, "ci") == 0) {
 			gcli_pr_checks(owner, repo, pr);
 
 		} else if (strcmp(action, "merge") == 0) {

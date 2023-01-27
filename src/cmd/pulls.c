@@ -361,7 +361,27 @@ handle_pull_actions(int argc, char *argv[],
 		 *      all, op or status
 		 *
 		 * we must ensure that the summary has been fetched. */
-		if (strcmp(action, "op") == 0) {
+		if (strcmp(action, "all") == 0) {
+
+			/* First make sure we have the summary ready */
+			ensure_summary(owner, repo, pr, &fetched_summary, &summary);
+
+			/* Print meta */
+			gcli_pull_summary_print_status(&summary);
+
+			/* OP */
+			puts("\nORIGINAL POST");
+			gcli_pull_summary_print_op(&summary);
+
+			/* Commits */
+			puts("\nCOMMITS");
+			gcli_pull_commits(owner, repo, pr);
+
+			/* Checks */
+			puts("\nCHECKS");
+			gcli_pull_checks(owner, repo, pr);
+
+		} else if (strcmp(action, "op") == 0) {
 
 			/* Ensure we have fetched the summary */
 			ensure_summary(owner, repo, pr, &fetched_summary, &summary);

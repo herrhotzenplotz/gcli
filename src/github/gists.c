@@ -158,18 +158,18 @@ gcli_print_gists_long(enum gcli_output_flags const flags,
                       gcli_gist_list const *const list,
                       int const max)
 {
-	int n;
+	size_t n;
 
-	if (max < 0 || max > list->gists_size)
+	if (max < 0 || (size_t)(max) > list->gists_size)
 		n = list->gists_size;
 	else
 		n = max;
 
 	if (flags & OUTPUT_SORTED) {
-		for (int i = 0; i < n; ++i)
+		for (size_t i = 0; i < n; ++i)
 			print_gist(flags, &list->gists[n-i-1]);
 	} else {
-		for (int i = 0; i < n; ++i)
+		for (size_t i = 0; i < n; ++i)
 			print_gist(flags, &list->gists[i]);
 	}
 }
@@ -179,7 +179,7 @@ gcli_print_gists_short(enum gcli_output_flags const flags,
                        gcli_gist_list const *const list,
                        int const max)
 {
-	int n;
+	size_t n;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
 		{ .name = "ID",          .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_COLOUREXPL },
@@ -189,7 +189,7 @@ gcli_print_gists_short(enum gcli_output_flags const flags,
 		{ .name = "DESCRIPTION", .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
 	};
 
-	if (max < 0 || max > list->gists_size)
+	if (max < 0 || (size_t)(max) > list->gists_size)
 		n = list->gists_size;
 	else
 		n = max;
@@ -199,7 +199,7 @@ gcli_print_gists_short(enum gcli_output_flags const flags,
 		errx(1, "error: could not init table");
 
 	if (flags & OUTPUT_SORTED) {
-		for (int i = 0; i < n; ++i) {
+		for (size_t i = 0; i < n; ++i) {
 			gcli_tbl_add_row(table,
 			                 GCLI_COLOR_YELLOW, list->gists[n-i-1].id,
 			                 list->gists[n-i-1].owner,
@@ -208,7 +208,7 @@ gcli_print_gists_short(enum gcli_output_flags const flags,
 			                 list->gists[n-i-1].description);
 		}
 	} else {
-		for (int i = 0; i < n; ++i) {
+		for (size_t i = 0; i < n; ++i) {
 			gcli_tbl_add_row(table,
 			                 GCLI_COLOR_YELLOW, list->gists[i].id,
 			                 list->gists[i].owner,
@@ -360,7 +360,7 @@ gcli_gists_free(gcli_gist_list *const list)
 		free(list->gists[i].git_pull_url.data);
 		free(list->gists[i].description.data);
 
-		for (int j = 0; j < list->gists[i].files_size; ++j) {
+		for (size_t j = 0; j < list->gists[i].files_size; ++j) {
 			free(list->gists[i].files[j].filename.data);
 			free(list->gists[i].files[j].language.data);
 			free(list->gists[i].files[j].url.data);

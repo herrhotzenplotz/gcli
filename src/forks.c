@@ -47,7 +47,7 @@ gcli_print_forks(enum gcli_output_flags const flags,
                  gcli_fork_list const *const list,
                  int const max)
 {
-	int n;
+	size_t n;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
 		{ .name = "OWNER",    .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_BOLD },
@@ -62,7 +62,7 @@ gcli_print_forks(enum gcli_output_flags const flags,
 	}
 
 	/* Determine number of items to print */
-	if (max < 0 || max > list->forks_size)
+	if (max < 0 || (size_t)(max) > list->forks_size)
 		n = list->forks_size;
 	else
 		n = max;
@@ -72,7 +72,7 @@ gcli_print_forks(enum gcli_output_flags const flags,
 		errx(1, "error: could not initialize table");
 
 	if (flags & OUTPUT_SORTED) {
-		for (int i = 0; i < n; ++i) {
+		for (size_t i = 0; i < n; ++i) {
 			gcli_tbl_add_row(table,
 			                 list->forks[n-i-1].owner,
 			                 list->forks[n-i-1].date,

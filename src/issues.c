@@ -54,7 +54,7 @@ gcli_issue_free(gcli_issue *const it)
 void
 gcli_issues_free(gcli_issue_list *const list)
 {
-	for (int i = 0; i < list->issues_size; ++i)
+	for (size_t i = 0; i < list->issues_size; ++i)
 		gcli_issue_free(&list->issues[i]);
 
 	free(list->issues);
@@ -96,7 +96,7 @@ gcli_print_issues_table(enum gcli_output_flags const flags,
 		errx(1, "could not init table printer");
 
 	/* Determine the correct number of items to print */
-	if (max < 0 || max > list->issues_size)
+	if (max < 0 || (size_t)(max) > list->issues_size)
 		n = list->issues_size;
 	else
 		n = max;

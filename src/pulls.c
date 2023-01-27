@@ -85,7 +85,7 @@ gcli_print_pr_table(enum gcli_output_flags const flags,
 	}
 
 	/* Determine number of items to print */
-	if (max < 0 || max > list->pulls_size)
+	if (max < 0 || (size_t)(max) > list->pulls_size)
 		n = list->pulls_size;
 	else
 		n = max;

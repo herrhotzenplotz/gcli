@@ -414,12 +414,20 @@ handle_pull_actions(int argc, char *argv[],
 			free(remove_labels);
 
 		} else {
+			/* At this point we found an unknown action / stray
+			 * options on the command line. Error out in this case. */
+
 			fprintf(stderr, "error: unknown action %s\n", action);
 			usage();
 			return EXIT_FAILURE;
 
 		}
-	}
+
+	} /* Next action */
+
+	/* Free the summary only when we actually fetched it */
+	if (fetched_summary)
+		gcli_pulls_summary_free(&summary);
 
 	return EXIT_SUCCESS;
 }

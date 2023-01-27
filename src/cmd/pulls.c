@@ -471,6 +471,9 @@ handle_pull_actions(int argc, char *argv[],
 
 		}
 
+		if (argc)
+			putchar('\n');
+
 	} /* Next action */
 
 	/* Free the summary only when we actually fetched it */

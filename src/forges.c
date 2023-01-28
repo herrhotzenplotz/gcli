@@ -87,12 +87,12 @@ github_forge_descriptor =
 	.perform_submit_issue      = github_perform_submit_issue,
 	.get_milestones            = github_get_milestones,
 	.get_milestone             = github_get_milestone,
-	.get_prs                   = github_get_prs,
-	.print_pr_diff             = github_print_pr_diff,
-	.print_pr_checks           = github_pr_checks,
-	.pr_merge                  = github_pr_merge,
-	.pr_reopen                 = github_pr_reopen,
-	.pr_close                  = github_pr_close,
+	.get_prs                   = github_get_pulls,
+	.print_pr_diff             = github_print_pull_diff,
+	.print_pr_checks           = github_pull_checks,
+	.pr_merge                  = github_pull_merge,
+	.pr_reopen                 = github_pull_reopen,
+	.pr_close                  = github_pull_close,
 
 	/* HACK: Here we can use the same functions as with issues because
 	 * PRs are the same as issues on Github and the functions have the
@@ -100,7 +100,7 @@ github_forge_descriptor =
 	.pr_add_labels             = github_issue_add_labels,
 	.pr_remove_labels          = github_issue_remove_labels,
 
-	.perform_submit_pr         = github_perform_submit_pr,
+	.perform_submit_pr         = github_perform_submit_pull,
 	.get_pull_commits          = github_get_pull_commits,
 	.get_pull_summary          = github_get_pull_summary,
 	.get_releases              = github_get_releases,

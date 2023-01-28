@@ -38,7 +38,7 @@ gitea_get_pulls(char const *owner,
                 int const max,
                 gcli_pull_list *const out)
 {
-	return github_get_prs(owner, repo, all, max, out);
+	return github_get_pulls(owner, repo, all, max, out);
 }
 
 void
@@ -64,7 +64,7 @@ gitea_pull_submit(gcli_submit_pull_options opts)
 {
 	warnx("In case the following process errors out, see: "
 	      "https://github.com/go-gitea/gitea/issues/20175");
-	github_perform_submit_pr(opts);
+	github_perform_submit_pull(opts);
 }
 
 void

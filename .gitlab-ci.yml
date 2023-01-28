@@ -1,0 +1,57 @@
+stages:
+  - testing
+  - dist
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+
+alpine-amd64:
+  stage: testing
+  tags:
+    - linux
+  image: alpine:3.17
+  script:
+    - apk add libcurl gcc autoconf automake libtool make pkgconf musl-dev curl-dev flex bison xz gzip bzip2
+    - ./autogen.sh
+    - ./configure CFLAGS='-std=c99 -pedantic -Wall -Wextra -Werror' CPPFLAGS='-D_XOPEN_SOURCE=600' || (cat config.log && exit 42)
+    - make
+    - make distcheck
+
+freebsd-arm64:
+  stage: testing
+  tags:
+    - freebsd
+    - arm64
+  script:
+    - ./autogen.sh
+    - ./configure LEX=flex YACC=byacc CFLAGS='-std=c99 -pedantic -Wall -Wextra -Wno-misleading-indentation -Werror' CPPFLAGS='-D_XOPEN_SOURCE=600' || (cat config.log && exit 42)
+    - make
+    - make distcheck
+
+dist:
+  stage: dist
+  tags:
+    - freebsd
+    - arm64
+  script:
+    - ./autogen.sh
+    - ./configure
+    - make dist
+  artifacts:
+    name: "Dist Tarballs"
+    paths:
+      - gcli-*.tar.*
+
+debian-amd64:
+  stage: testing
+  tags:
+    - linux
+  image: debian:bullseye
+  script:
+    - apt-get update
+    - apt-get install -y --no-install-recommends build-essential libcurl4-openssl-dev pkgconf autotools-dev bison flex make autoconf automake libtool
+    - ./autogen.sh
+    - ./configure CFLAGS='-std=c99 -pedantic -Wall -Wextra -Werror -Wno-misleading-indentation' CPPFLAGS='-D_XOPEN_SOURCE=600' || (cat config.log && exit 42)
+    - make
+    - make distcheck

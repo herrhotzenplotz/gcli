@@ -46,7 +46,7 @@ gcli_print_repos_table(enum gcli_output_flags const flags,
                        gcli_repo_list const *const list,
                        int const max)
 {
-	int n;
+	size_t n;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
 		{ .name = "FORK",     .type = GCLI_TBLCOLTYPE_BOOL, .flags = 0 },
@@ -61,7 +61,7 @@ gcli_print_repos_table(enum gcli_output_flags const flags,
 	}
 
 	/* Determine number of repos to print */
-	if (max < 0 || max > list->repos_size)
+	if (max < 0 || (size_t)(max) > list->repos_size)
 		n = list->repos_size;
 	else
 		n = max;

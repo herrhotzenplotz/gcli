@@ -62,7 +62,7 @@ gcli_free_labels(gcli_label_list *const list)
 void
 gcli_print_labels(gcli_label_list const *const list, int const max)
 {
-	int n;
+	size_t n;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
 		{ .name = "ID",          .type = GCLI_TBLCOLTYPE_LONG,   .flags = GCLI_TBLCOL_JUSTIFYR },
@@ -71,7 +71,7 @@ gcli_print_labels(gcli_label_list const *const list, int const max)
 	};
 
 	/* Determine number of items to print */
-	if (max < 0 || max > list->labels_size)
+	if (max < 0 || (size_t)(max) > list->labels_size)
 		n = list->labels_size;
 	else
 		n = max;

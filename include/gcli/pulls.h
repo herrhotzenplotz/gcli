@@ -100,62 +100,67 @@ struct gcli_submit_pull_options {
 	bool         always_yes;
 };
 
-int gcli_get_prs(char const *owner,
-                 char const *reponame,
-                 bool const all,
-                 int const max,
-                 gcli_pull_list *const out);
+int gcli_get_pulls(char const *owner,
+                   char const *reponame,
+                   bool const all,
+                   int const max,
+                   gcli_pull_list *const out);
 
 void gcli_pulls_free(gcli_pull_list *const list);
 
 void gcli_pulls_summary_free(gcli_pull_summary *const it);
 
-void gcli_print_pr_table(enum gcli_output_flags const flags,
-                         gcli_pull_list const *const list,
-                         int const max);
+void gcli_print_pulls_table(enum gcli_output_flags const flags,
+                            gcli_pull_list const *const list,
+                            int const max);
 
-void gcli_print_pr_diff(FILE *stream,
-                        char const *owner,
-                        char const *reponame,
-                        int const   pr_number);
+void gcli_print_pull_diff(FILE *stream,
+                          char const *owner,
+                          char const *reponame,
+                          int const   pr_number);
 
-void gcli_pr_summary(char const *owner,
+void gcli_pull_checks(char const *owner,
+                      char const *repo,
+                      int const pr_number);
+
+void gcli_pull_commits(char const *owner,
+                       char const *repo,
+                       int const pr_number);
+
+void gcli_get_pull_summary(char const *owner,
+                           char const *repo,
+                           int const pr_number,
+                           gcli_pull_summary *const out);
+
+void gcli_pull_submit(gcli_submit_pull_options);
+
+void gcli_pull_summary_print_status(gcli_pull_summary const *const it);
+
+void gcli_pull_summary_print_op(gcli_pull_summary *const summary);
+
+void gcli_pull_merge(char const *owner,
+                     char const *reponame,
+                     int const pr_number,
+                     bool const squash);
+
+void gcli_pull_close(char const *owner,
                      char const *reponame,
                      int const pr_number);
 
-void gcli_pr_status(char const *owner,
-                    char const *reponame,
-                    int const pr_number);
+void gcli_pull_reopen(char const *owner,
+                      char const *reponame,
+                      int const pr_number);
 
-void gcli_pr_checks(char const *owner,
-                    char const *repo,
-                    int const pr_number);
+void gcli_pull_add_labels(char const *owner,
+                          char const *repo,
+                          int const pr_number,
+                          char const *const labels[],
+                          size_t const labels_size);
 
-void gcli_pr_submit(gcli_submit_pull_options);
-
-void gcli_pr_merge(char const *owner,
-                   char const *reponame,
-                   int const pr_number,
-                   bool const squash);
-
-void gcli_pr_close(char const *owner,
-                   char const *reponame,
-                   int const pr_number);
-
-void gcli_pr_reopen(char const *owner,
-                    char const *reponame,
-                    int const pr_number);
-
-void gcli_pr_add_labels(char const *owner,
-                        char const *repo,
-                        int const pr_number,
-                        char const *const labels[],
-                        size_t const labels_size);
-
-void gcli_pr_remove_labels(char const *owner,
-                           char const *repo,
-                           int pr_number,
-                           char const *const labels[],
-                           size_t const labels_size);
+void gcli_pull_remove_labels(char const *owner,
+                             char const *repo,
+                             int pr_number,
+                             char const *const labels[],
+                             size_t const labels_size);
 
 #endif /* PULLS_H */

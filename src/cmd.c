@@ -85,14 +85,14 @@ parse_labels_options(int *argc, char ***argv,
 
 	/* Collect add/delete labels */
 	while (*argc > 0) {
-		if (strcmp(**argv, "--add") == 0) {
+		if (strcmp(**argv, "add") == 0) {
 			shift(argc, argv);
 
 			add_labels = realloc(
 				add_labels,
 				(add_labels_size + 1) * sizeof(*add_labels));
 			add_labels[add_labels_size++] = shift(argc, argv);
-		} else if (strcmp(**argv, "--remove") == 0) {
+		} else if (strcmp(**argv, "remove") == 0) {
 			shift(argc, argv);
 
 			remove_labels = realloc(

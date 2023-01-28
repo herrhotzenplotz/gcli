@@ -75,14 +75,11 @@ Do not ask for confirmation before creating the issue. Assume yes.
 .Sh ACTIONS
 .Ar actions...
 may be one or more of the following:
-.Bl -tag -width indent
+.Bl -tag -width "labels [options]"
 .It Cm comments
 Print a list of comments under the issue.
 .It Cm status
 Print a short summary of the issue.
-.It Cm summary
-Alias for
-.Cm status .
 .It Cm close
 Close the issue.
 .It Cm reopen
@@ -94,9 +91,9 @@ Assign the issue to the given
 .It Cm labels Op Ar options
 The following options can be specified more than once:
 .Bl -tag -width indent
-.It Fl -add Ar label
+.It add Ar label
 Add the given label to the issue.
-.It Fl -remove Ar label
+.It remove Ar label
 Remove the given label from the issue.
 .El
 .El
@@ -122,7 +119,7 @@ and
 .Sq bar
 to the issue with id 420:
 .Bd -literal -offset indent
-$ gcli issues -i420 labels --add foo --add bar
+$ gcli issues -i420 labels add foo add bar
 .Ed
 .Sh SEE ALSO
 .Xr git 1 ,
@@ -144,7 +141,9 @@ still wanna remove multiple issues with one gcli call, you may do
 something like:
 .
 .Bd -literal -offset indent
-$ gcli issues -i42 labels --remove bug labels --remove foo
+$ gcli issues -i42 \\
+        labels remove bug \\
+        labels remove foo
 .Ed
 .Pp
 Please report issues preferably via e-mail, on GitLab or on GitHub.

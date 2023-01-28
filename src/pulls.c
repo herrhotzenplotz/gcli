@@ -55,19 +55,19 @@ gcli_pulls_free(gcli_pull_list *const it)
 }
 
 int
-gcli_get_prs(char const *owner,
-             char const *repo,
-             bool const all,
-             int const max,
-             gcli_pull_list *const out)
+gcli_get_pulls(char const *owner,
+               char const *repo,
+               bool const all,
+               int const max,
+               gcli_pull_list *const out)
 {
 	return gcli_forge()->get_prs(owner, repo, all, max, out);
 }
 
 void
-gcli_print_pr_table(enum gcli_output_flags const flags,
-                    gcli_pull_list const *const list,
-                    int const max)
+gcli_print_pulls_table(enum gcli_output_flags const flags,
+                       gcli_pull_list const *const list,
+                       int const max)
 {
 	int n;
 	gcli_tbl table;
@@ -85,7 +85,7 @@ gcli_print_pr_table(enum gcli_output_flags const flags,
 	}
 
 	/* Determine number of items to print */
-	if (max < 0 || max > list->pulls_size)
+	if (max < 0 || (size_t)(max) > list->pulls_size)
 		n = list->pulls_size;
 	else
 		n = max;
@@ -119,16 +119,16 @@ gcli_print_pr_table(enum gcli_output_flags const flags,
 }
 
 void
-gcli_print_pr_diff(FILE *stream,
-                   char const *owner,
-                   char const *reponame,
-                   int const pr_number)
+gcli_print_pull_diff(FILE *stream,
+                     char const *owner,
+                     char const *reponame,
+                     int const pr_number)
 {
 	gcli_forge()->print_pr_diff(stream, owner, reponame, pr_number);
 }
 
-static void
-gcli_print_pr_summary(gcli_pull_summary const *const it)
+void
+gcli_pull_summary_print_status(gcli_pull_summary const *const it)
 {
 	gcli_dict dict;
 	gcli_forge_descriptor const *const forge = gcli_forge();
@@ -174,11 +174,6 @@ gcli_print_pr_summary(gcli_pull_summary const *const it)
 	}
 
 	gcli_dict_end(dict);
-
-	if (it->body) {
-		putchar('\n');
-		pretty_print(it->body, 4, 80, stdout);
-	}
 }
 
 static int
@@ -257,6 +252,19 @@ gcli_commits_free(gcli_commit *it, int const size)
 }
 
 void
+gcli_pull_commits(char const *owner,
+                  char const *repo,
+                  int const pr_number)
+{
+	gcli_commit *commits      = NULL;
+	int          commits_size = 0;
+
+	commits_size = gcli_get_pull_commits(owner, repo, pr_number, &commits);
+	gcli_print_commits_table(commits, commits_size);
+	gcli_commits_free(commits, commits_size);
+}
+
+void
 gcli_pulls_summary_free(gcli_pull_summary *const it)
 {
 	free(it->author);
@@ -272,7 +280,7 @@ gcli_pulls_summary_free(gcli_pull_summary *const it)
 		free(it->labels[i].data);
 }
 
-static void
+void
 gcli_get_pull_summary(char const *owner,
                       char const *repo,
                       int const pr_number,
@@ -281,68 +289,21 @@ gcli_get_pull_summary(char const *owner,
 	gcli_forge()->get_pull_summary(owner, repo, pr_number, out);
 }
 
-static void
-gcli_pr_info(char const *owner,
-             char const *repo,
-             int const pr_number,
-             bool const is_status)
+void
+gcli_pull_summary_print_op(gcli_pull_summary *const summary)
 {
-	gcli_pull_summary  summary      = {0};
-	gcli_commit       *commits      = NULL;
-	int                commits_size = 0;
-
-	/* Summary header */
-	gcli_get_pull_summary(owner, repo, pr_number, &summary);
-	gcli_print_pr_summary(&summary);
-
-	/* Commits */
-	commits_size = gcli_get_pull_commits(owner, repo, pr_number, &commits);
-
-	puts("\nCOMMITS");
-	gcli_print_commits_table(commits, commits_size);
-
-	gcli_commits_free(commits, commits_size);
-
-	/* Only print checks if the user issued the 'status' action */
-	if (is_status) {
-		switch (gcli_config_get_forge_type()) {
-		case GCLI_FORGE_GITHUB:
-		case GCLI_FORGE_GITLAB:
-			puts("\nCHECKS");
-			gcli_pr_checks(owner, repo, pr_number);
-			break;
-		default:
-			break;
-		}
-	}
-
-	gcli_pulls_summary_free(&summary);
+	if (summary->body)
+		pretty_print(summary->body, 4, 80, stdout);
 }
 
 void
-gcli_pr_status(char const *owner,
-               char const *repo,
-               int const pr_number)
-{
-	gcli_pr_info(owner, repo, pr_number, true);
-}
-
-void
-gcli_pr_summary(char const *owner,
-                char const *repo,
-                int const pr_number)
-{
-	gcli_pr_info(owner, repo, pr_number, false);
-}
-
-void
-gcli_pr_checks(char const *owner, char const *repo, int const pr_number)
+gcli_pull_checks(char const *owner, char const *repo, int const pr_number)
 {
 	gcli_forge()->print_pr_checks(owner, repo, pr_number);
 }
 
 static void
-pr_init_user_file(FILE *stream, void *_opts)
+pull_init_user_file(FILE *stream, void *_opts)
 {
 	gcli_submit_pull_options *opts = _opts;
 	fprintf(
@@ -354,15 +315,15 @@ pr_init_user_file(FILE *stream, void *_opts)
 }
 
 static sn_sv
-gcli_pr_get_user_message(gcli_submit_pull_options *opts)
+gcli_pull_get_user_message(gcli_submit_pull_options *opts)
 {
-	return gcli_editor_get_user_message(pr_init_user_file, opts);
+	return gcli_editor_get_user_message(pull_init_user_file, opts);
 }
 
 void
-gcli_pr_submit(gcli_submit_pull_options opts)
+gcli_pull_submit(gcli_submit_pull_options opts)
 {
-	opts.body = gcli_pr_get_user_message(&opts);
+	opts.body = gcli_pull_get_user_message(&opts);
 
 	fprintf(stdout,
 	        "The following PR will be created:\n"
@@ -387,43 +348,43 @@ gcli_pr_submit(gcli_submit_pull_options opts)
 }
 
 void
-gcli_pr_merge(char const *owner,
-              char const *reponame,
-              int const pr_number,
-              bool const squash)
+gcli_pull_merge(char const *owner,
+                char const *reponame,
+                int const pr_number,
+                bool const squash)
 {
 	gcli_forge()->pr_merge(owner, reponame, pr_number, squash);
 }
 
 void
-gcli_pr_close(char const *owner, char const *reponame, int const pr_number)
+gcli_pull_close(char const *owner, char const *reponame, int const pr_number)
 {
 	gcli_forge()->pr_close(owner, reponame, pr_number);
 }
 
 void
-gcli_pr_reopen(char const *owner, char const *reponame, int const pr_number)
+gcli_pull_reopen(char const *owner, char const *reponame, int const pr_number)
 {
 	gcli_forge()->pr_reopen(owner, reponame, pr_number);
 }
 
 void
-gcli_pr_add_labels(char const *owner,
-                   char const *repo,
-                   int const pr_number,
-                   char const *const labels[],
-                   size_t const labels_size)
+gcli_pull_add_labels(char const *owner,
+                     char const *repo,
+                     int const pr_number,
+                     char const *const labels[],
+                     size_t const labels_size)
 {
 	gcli_forge()->pr_add_labels(
 		owner, repo, pr_number, labels, labels_size);
 }
 
 void
-gcli_pr_remove_labels(char const *owner,
-                      char const *repo,
-                      int const pr_number,
-                      char const *const labels[],
-                      size_t const labels_size)
+gcli_pull_remove_labels(char const *owner,
+                        char const *repo,
+                        int const pr_number,
+                        char const *const labels[],
+                        size_t const labels_size)
 {
 	gcli_forge()->pr_remove_labels(
 		owner, repo, pr_number, labels, labels_size);

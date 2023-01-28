@@ -55,7 +55,7 @@ usage(void)
 	fprintf(stderr, "  -n number       Number of issues to fetch (-1 = everything)\n");
 	fprintf(stderr, "  -i issue        ID of issue to perform actions on\n");
 	fprintf(stderr, "ACTIONS:\n");
-	fprintf(stderr, "  summary|status  Display status information\n");
+	fprintf(stderr, "  status          Display status information\n");
 	fprintf(stderr, "  comments        Display comments\n");
 	fprintf(stderr, "  close           Close the issue\n");
 	fprintf(stderr, "  reopen          Reopen a closed issue\n");
@@ -250,8 +250,7 @@ subcommand_issues(int argc, char *argv[])
 
 		if (strcmp("comments", operation) == 0) {
 			gcli_issue_comments(owner, repo, issue);
-		} else if (strcmp("summary", operation) == 0
-		           || strcmp("status", operation) == 0) {
+		} else if (strcmp("status", operation) == 0) {
 			gcli_issue_summary(owner, repo, issue);
 		} else if (strcmp("close", operation) == 0) {
 			gcli_issue_close(owner, repo, issue);

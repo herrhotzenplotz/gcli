@@ -61,8 +61,8 @@ usage(void)
 	fprintf(stderr, "  reopen          Reopen a closed issue\n");
 	fprintf(stderr, "  assign <user>   Assign the issue to the given user\n");
 	fprintf(stderr, "  labels ...      Add or remove labels:\n");
-	fprintf(stderr, "                     --add <name>\n");
-	fprintf(stderr, "                     --remove <name>\n");
+	fprintf(stderr, "                     add <name>\n");
+	fprintf(stderr, "                     remove <name>\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();

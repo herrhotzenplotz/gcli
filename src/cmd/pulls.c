@@ -72,8 +72,8 @@ usage(void)
 	fprintf(stderr, "  close           Close the PR\n");
 	fprintf(stderr, "  reopen          Reopen a closed PR\n");
 	fprintf(stderr, "  labels ...      Add or remove labels:\n");
-	fprintf(stderr, "                     --add <name>\n");
-	fprintf(stderr, "                     --remove <name>\n");
+	fprintf(stderr, "                     add <name>\n");
+	fprintf(stderr, "                     remove <name>\n");
 	fprintf(stderr, "  diff            Display changes as diff\n");
 	fprintf(stderr, "  reviews         Display reviews\n");
 	fprintf(stderr, "\n");

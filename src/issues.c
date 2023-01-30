@@ -44,6 +44,7 @@ gcli_issue_free(gcli_issue *const it)
 	free(it->author.data);
 	free(it->state.data);
 	free(it->body.data);
+	free(it->milestone.data);
 
 	for (size_t i = 0; i < it->labels_size; ++i)
 		free(it->labels[i].data);

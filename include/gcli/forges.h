@@ -178,6 +178,14 @@ struct gcli_forge_descriptor {
 		gcli_milestone *const out);
 
 	/**
+	 * Get list of issues attached to this milestone */
+	int (*get_milestone_issues)(
+		char const *const owner,
+		char const *const repo,
+		int const milestone,
+		gcli_issue_list *const out);
+
+	/**
 	 * Get a list of PRs/MRs on the given repo */
 	int (*get_prs)(
 		char const *owner,

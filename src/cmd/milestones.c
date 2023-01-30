@@ -40,15 +40,24 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: gcli milestones [-o owner -r repo]\n");
-	fprintf(stderr, "       gcli milestones [-o owner -r repo] -i milestone\n");
+	fprintf(stderr, "       gcli milestones [-o owner -r repo] -i milestone action...\n");
 	fprintf(stderr, "OPTIONS:\n");
 	fprintf(stderr, "  -o owner        The repository owner\n");
 	fprintf(stderr, "  -r repo         The repository name\n");
-	fprintf(stderr, "  -i milestone    Fetch details about the given milestone ID\n");
+	fprintf(stderr, "  -i milestone    Run actions for the given milestone id\n");
+	fprintf(stderr, "ACTIONS:\n");
+	fprintf(stderr, "  status          Display general status information about the milestone\n");
+	fprintf(stderr, "  issues          List issues associated with the milestone\n");
+	fprintf(stderr, "  pulls           List pull requests associated with the milestone\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
 }
+
+static int handle_milestone_actions(int argc, char *argv[],
+                                    char const *const owner,
+                                    char const *const repo,
+                                    int const milestone_id);
 
 int
 subcommand_milestones(int argc, char *argv[])
@@ -121,16 +130,86 @@ subcommand_milestones(int argc, char *argv[])
 
 		gcli_print_milestones(&list, max);
 		gcli_free_milestones(&list);
-	} else {
-		gcli_milestone milestone = {0};
 
-		rc = gcli_get_milestone(owner, repo, milestone_id, &milestone);
-		if (rc < 0)
-			errx(1, "error: could not get milestone %d", milestone_id);
-
-		gcli_print_milestone(&milestone);
-		gcli_free_milestone(&milestone);
+		return 0;
 	}
 
-	return 0;
+	return handle_milestone_actions(argc, argv, owner, repo, milestone_id);
+}
+
+static void
+ensure_milestone(char const *const owner,
+                 char const *const repo,
+                 int const milestone_id,
+                 int *const fetched_milestone,
+                 gcli_milestone *const milestone)
+{
+	int rc;
+
+	if (*fetched_milestone)
+		return;
+
+	rc = gcli_get_milestone(owner, repo, milestone_id, milestone);
+	if (rc < 0)
+		errx(1, "error: could not get milestone %d", milestone_id);
+
+	*fetched_milestone = 1;
+}
+
+static int
+handle_milestone_actions(int argc, char *argv[],
+                         char const *const owner,
+                         char const *const repo,
+                         int const milestone_id)
+{
+	gcli_milestone milestone = {0};
+	int fetched_milestone = 0;
+
+	/* Iterate over all the actions */
+	while (argc) {
+		/* Read in action */
+		char const *action = shift(&argc, &argv);
+
+		/* Dispatch */
+		if (strcmp(action, "status") == 0) {
+
+			/* Make sure we have the milestone data */
+			ensure_milestone(owner, repo, milestone_id,
+			                 &fetched_milestone, &milestone);
+
+			/* Print meta */
+			gcli_print_milestone(&milestone);
+		} else if (strcmp(action, "issues") == 0) {
+
+			gcli_issue_list issues = {0};
+
+			/* Fetch list of issues associated with milestone */
+			gcli_milestone_get_issues(owner, repo, milestone_id, &issues);
+
+			/* Print them as a table */
+			gcli_print_issues_table(0, &issues, -1);
+
+			/* Cleanup */
+			gcli_issues_free(&issues);
+
+		} else {
+
+			/* We don't know of the action - maybe a syntax error or
+			 * trailing garbage. Error out in this case. */
+			fprintf(stderr, "error: unknown action %s\n", action);
+			usage();
+			return EXIT_FAILURE;
+		}
+
+
+		/* Print a blank line if we are not at the end */
+		if (argc)
+			putchar('\n');
+	}
+
+	/* Cleanup the milestone if we ever fetched it */
+	if (fetched_milestone)
+		gcli_free_milestone(&milestone);
+
+	return EXIT_SUCCESS;
 }

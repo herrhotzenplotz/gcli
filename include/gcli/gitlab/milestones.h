@@ -46,4 +46,9 @@ int gitlab_get_milestone(char const *owner,
                          int const milestone,
                          gcli_milestone *const out);
 
+int gitlab_milestone_get_issues(char const *const owner,
+                                char const *const repo,
+                                int const milestone,
+                                gcli_issue_list *const out);
+
 #endif /* GCLI_GITLAB_MILESTONES_H */

@@ -99,12 +99,28 @@ gitea_get_milestone(char const *const owner,
 	free(buffer.data);
 	free(url);
 
-	url = sn_asprintf("%s/repos/%s/%s/issues?state=all&milestones=%d",
-	                  gcli_get_apibase(), e_owner, e_repo, milestone);
-	github_fetch_issues(url, -1, &out->issue_list);
-
 	free(e_owner);
 	free(e_repo);
 
 	return 0;
+}
+
+int
+gitea_milestone_get_issues(char const *const owner,
+                           char const *const repo,
+                           int const milestone,
+                           gcli_issue_list *const out)
+{
+	char *url, *e_owner, *e_repo;
+
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/repos/%s/%s/issues?state=all&milestones=%d",
+	                  gcli_get_apibase(), e_owner, e_repo, milestone);
+
+	free(e_repo);
+	free(e_owner);
+
+	return github_fetch_issues(url, -1, out);
 }

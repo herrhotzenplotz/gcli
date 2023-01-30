@@ -57,9 +57,6 @@ struct gcli_milestone {
 	/* Github and Gitea Specific */
 	int open_issues;
 	int closed_issues;
-
-	gcli_issue_list issue_list;
-	gcli_pull_list pull_list;
 };
 
 struct gcli_milestone_list {
@@ -84,5 +81,10 @@ void gcli_print_milestone(gcli_milestone const *const it);
 
 void gcli_free_milestone(gcli_milestone *const it);
 void gcli_free_milestones(gcli_milestone_list *const it);
+
+int gcli_milestone_get_issues(char const *const owner,
+                              char const *const repo,
+                              int const milestone,
+                              gcli_issue_list *const out);
 
 #endif /* GCLI_MILESTONES_H */

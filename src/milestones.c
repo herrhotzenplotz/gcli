@@ -112,18 +112,6 @@ gcli_print_milestone(gcli_milestone const *const milestone)
 		printf("\nDESCRIPTION:\n");
 		pretty_print(milestone->description, 4, 80, stdout);
 	}
-
-	if (milestone->issue_list.issues_size) {
-		printf("\nISSUES:\n");
-		gcli_print_issues_table(0, &milestone->issue_list, -1);
-	}
-
-	if ((quirks & GCLI_MILESTONE_QUIRKS_PULLS) &&
-	    milestone->pull_list.pulls_size)
-	{
-		printf("\nPULLS:\n");
-		gcli_print_pulls_table(0, &milestone->pull_list, -1);
-	}
 }
 
 void
@@ -142,9 +130,6 @@ gcli_free_milestone(gcli_milestone *const it)
 	it->updated_at = NULL;
 	free(it->due_date);
 	it->due_date = NULL;
-
-	gcli_issues_free(&it->issue_list);
-	gcli_pulls_free(&it->pull_list);
 }
 
 void
@@ -156,4 +141,13 @@ gcli_free_milestones(gcli_milestone_list *const it)
 	free(it->milestones);
 	it->milestones = NULL;
 	it->milestones_size = 0;
+}
+
+int
+gcli_milestone_get_issues(char const *const owner,
+                          char const *const repo,
+                          int const milestone,
+                          gcli_issue_list *const out)
+{
+	return gcli_forge()->get_milestone_issues(owner, repo, milestone, out);
 }

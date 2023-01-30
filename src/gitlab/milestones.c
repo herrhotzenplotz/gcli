@@ -98,24 +98,32 @@ gitlab_get_milestone(char const *owner,
 	json_close(&stream);
 	free(buffer.data);
 	free(url);
+	free(e_owner);
+	free(e_repo);
 
-	/* Fetch assigned issues */
+	return rc;
+}
+
+int
+gitlab_milestone_get_issues(char const *const owner,
+                            char const *const repo,
+                            int const milestone,
+                            gcli_issue_list *const out)
+{
+	char *url, *e_owner, *e_repo;
+	int rc;
+
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
 	url = sn_asprintf("%s/projects/%s%%2F%s/milestones/%d/issues",
 	                  gitlab_get_apibase(), e_owner, e_repo, milestone);
 
-	rc = gitlab_fetch_issues(url, -1, &out->issue_list);
-	if (rc < 0)
-		goto out;
+	rc = gitlab_fetch_issues(url, -1, out);
 
-	/* Fetch assigned merge requests */
-	url = sn_asprintf("%s/projects/%s%%2F%s/milestones/%d/merge_requests",
-	                  gitlab_get_apibase(), e_owner, e_repo, milestone);
-
-	rc = gitlab_fetch_mrs(url, -1, &out->pull_list);
-
-out:
-	free(e_owner);
+	free(url);
 	free(e_repo);
+	free(e_owner);
 
 	return rc;
 }

@@ -108,18 +108,16 @@ github_milestone_get_issues(char const *const owner,
                             gcli_issue_list *const out)
 {
 	char *url, *e_owner, *e_repo;
-	int rc;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/repos/%s/%s/issues?milestone=%d&state=all",
 	                  gcli_get_apibase(), e_owner, e_repo, milestone);
-	rc = github_fetch_issues(url, -1, out);
 
-	free(url);
 	free(e_repo);
 	free(e_owner);
+	/* URL is freed by github_fetch_issues */
 
-	return rc;
+	return github_fetch_issues(url, -1, out);
 }

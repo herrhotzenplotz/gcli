@@ -111,7 +111,6 @@ gitlab_milestone_get_issues(char const *const owner,
                             gcli_issue_list *const out)
 {
 	char *url, *e_owner, *e_repo;
-	int rc;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -119,11 +118,9 @@ gitlab_milestone_get_issues(char const *const owner,
 	url = sn_asprintf("%s/projects/%s%%2F%s/milestones/%d/issues",
 	                  gitlab_get_apibase(), e_owner, e_repo, milestone);
 
-	rc = gitlab_fetch_issues(url, -1, out);
-
-	free(url);
 	free(e_repo);
 	free(e_owner);
+	/* URL is freed by the fetch_issues call */
 
-	return rc;
+	return gitlab_fetch_issues(url, -1, out);;
 }

@@ -48,7 +48,6 @@ usage(void)
 	fprintf(stderr, "ACTIONS:\n");
 	fprintf(stderr, "  status          Display general status information about the milestone\n");
 	fprintf(stderr, "  issues          List issues associated with the milestone\n");
-	fprintf(stderr, "  pulls           List pull requests associated with the milestone\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
@@ -58,6 +57,17 @@ static int handle_milestone_actions(int argc, char *argv[],
                                     char const *const owner,
                                     char const *const repo,
                                     int const milestone_id);
+
+
+static int
+subcommand_milestone_create(int argc, char *argv[])
+{
+	(void) argc;
+	(void) argv;
+
+	fprintf(stderr, "error: create subcommand is not yet implemented\n");
+	return 1;
+}
 
 int
 subcommand_milestones(int argc, char *argv[])
@@ -83,6 +93,13 @@ subcommand_milestones(int argc, char *argv[])
 		  .val = 'i' },
 	};
 
+	/* detect whether we wanna create a milestone */
+	if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
+		shift(&argc, &argv);
+		return subcommand_milestone_create(argc, argv);
+	}
+
+	/* Proceed with fetching information */
 	repo = NULL;
 	owner = NULL;
 

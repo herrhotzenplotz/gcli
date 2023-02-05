@@ -63,6 +63,7 @@ usage(void)
 	fprintf(stderr, "  labels ...      Add or remove labels:\n");
 	fprintf(stderr, "                     add <name>\n");
 	fprintf(stderr, "                     remove <name>\n");
+	fprintf(stderr, "  milestone <id>  Assign this issue to the given milestone\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
@@ -285,6 +286,37 @@ subcommand_issues(int argc, char *argv[])
 
 			free(add_labels);
 			free(remove_labels);
+		} else if (strcmp("milestone", operation) == 0) {
+			char const *milestone_str;
+			char *endptr;
+			int milestone;
+
+			/* Set the milestone for the issue
+			 *
+			 * Check that the user provided a milestone id */
+			if (!argc) {
+				fprintf(stderr, "error: missing milestone id\n");
+				usage();
+				return EXIT_FAILURE;
+			}
+
+			/* Fetch the milestone from the argument vector */
+			milestone_str = shift(&argc, &argv);
+
+			/* Parse the milestone id */
+			milestone = strtoul(milestone_str, &endptr, 10);
+
+			/* Check successful for parse */
+			if (endptr != milestone_str + strlen(milestone_str)) {
+				fprintf(stderr, "error: could not parse milestone id\n");
+				usage();
+				return EXIT_FAILURE;
+			}
+
+			/* Pass it to the dispatch */
+			if (gcli_issue_set_milestone(owner, repo, issue, milestone) < 0)
+				errx(1, "error: could not assign milestone");
+
 		} else {
 			fprintf(stderr, "error: unknown operation %s\n", operation);
 			usage();

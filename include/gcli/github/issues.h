@@ -80,4 +80,9 @@ void github_issue_remove_labels(char const *owner,
                                 char const *const labels[],
                                 size_t const labels_size);
 
+int github_issue_set_milestone(char const *const owner,
+                               char const *const repo,
+                               int const issue,
+                               int const milestone);
+
 #endif /* GCLI_ISSUES_H */

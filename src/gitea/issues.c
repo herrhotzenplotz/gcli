@@ -250,3 +250,12 @@ gitea_issue_remove_labels(char const *owner,
 
 	free_id_list(ids, labels_size);
 }
+
+int
+gitea_issue_set_milestone(char const *const owner,
+                          char const *const repo,
+                          int const issue,
+                          int const milestone)
+{
+	return github_issue_set_milestone(owner, repo, issue, milestone);
+}

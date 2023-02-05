@@ -41,6 +41,8 @@ int gitlab_get_milestones(char const *owner,
                           int max,
                           gcli_milestone_list *const out);
 
+int gitlab_create_milestone(struct gcli_milestone_create_args const *args);
+
 int gitlab_get_milestone(char const *owner,
                          char const *repo,
                          int const milestone,

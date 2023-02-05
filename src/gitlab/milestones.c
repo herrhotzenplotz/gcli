@@ -124,3 +124,37 @@ gitlab_milestone_get_issues(char const *const owner,
 
 	return gitlab_fetch_issues(url, -1, out);;
 }
+
+int
+gitlab_create_milestone(struct gcli_milestone_create_args const *args)
+{
+	char *url, *e_owner, *e_repo, *json_body, *description = NULL;
+
+	e_owner = gcli_urlencode(args->owner);
+	e_repo = gcli_urlencode(args->repo);
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/milestones",
+	                  gitlab_get_apibase(), e_owner, e_repo);
+
+	/* TODO: JSON escaping */
+	if (args->description)
+		description = sn_asprintf(", \"description\": \"%s\"",
+		                          args->description);
+
+	json_body = sn_asprintf("{"
+	                        "    \"title\": \"%s\""
+	                        "    %s"
+	                        "}",
+	                        args->title,
+	                        description ? description : "");
+
+	gcli_fetch_with_method("POST", url, json_body, NULL, NULL);
+
+	free(json_body);
+	free(description);
+	free(url);
+	free(e_repo);
+	free(e_owner);
+
+	return 0;
+}

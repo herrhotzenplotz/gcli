@@ -44,4 +44,8 @@ int gitea_get_milestone(char const *const owner,
 
 int gitea_create_milestone(struct gcli_milestone_create_args const *args);
 
+int gitea_delete_milestone(char const *const owner,
+                           char const *const repo,
+                           int const milestone);
+
 #endif /* GCLI_GITEA_MILESTONES_H */

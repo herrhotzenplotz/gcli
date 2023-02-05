@@ -131,3 +131,11 @@ gitea_milestone_get_issues(char const *const owner,
 
 	return github_fetch_issues(url, -1, out);
 }
+
+int
+gitea_delete_milestone(char const *const owner,
+                       char const *const repo,
+                       int const milestone)
+{
+	return github_delete_milestone(owner, repo, milestone);
+}

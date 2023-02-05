@@ -63,6 +63,7 @@ usage(void)
 	fprintf(stderr, "  labels ...      Add or remove labels:\n");
 	fprintf(stderr, "                     add <name>\n");
 	fprintf(stderr, "                     remove <name>\n");
+	fprintf(stderr, "  milestone <id>  Assign this issue to the given milestone\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();

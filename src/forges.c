@@ -198,6 +198,7 @@ gitea_forge_descriptor =
 	.issue_close               = gitea_issue_close,
 	.issue_reopen              = gitea_issue_reopen,
 	.issue_assign              = gitea_issue_assign,
+	.issue_set_milestone       = gitea_issue_set_milestone,
 	.get_issue_comments        = gitea_get_comments,
 	.get_milestones            = gitea_get_milestones,
 	.get_milestone             = gitea_get_milestone,

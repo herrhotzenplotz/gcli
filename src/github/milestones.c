@@ -127,7 +127,6 @@ github_create_milestone(struct gcli_milestone_create_args const *args)
 {
 	char *url, *e_owner, *e_repo;
 	char *json_body, *description;
-	gcli_fetch_buffer buffer = {0};
 
 	e_owner = gcli_urlencode(args->owner);
 	e_repo = gcli_urlencode(args->repo);
@@ -147,9 +146,8 @@ github_create_milestone(struct gcli_milestone_create_args const *args)
 	url = sn_asprintf("%s/repos/%s/%s/milestones",
 	                  gcli_get_apibase(), e_owner, e_repo);
 
-	gcli_fetch_with_method("POST", url, json_body, NULL, &buffer);
+	gcli_fetch_with_method("POST", url, json_body, NULL, NULL);
 
-	free(buffer.data);
 	free(json_body);
 	free(description);
 	free(url);
@@ -165,7 +163,6 @@ github_delete_milestone(char const *const owner,
                         int const milestone)
 {
 	char *url, *e_owner, *e_repo;
-	gcli_fetch_buffer buffer = {0};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -175,9 +172,8 @@ github_delete_milestone(char const *const owner,
 	                  e_owner, e_repo,
 	                  milestone);
 
-	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
 
-	free(buffer.data);
 	free(url);
 	free(e_repo);
 	free(e_owner);

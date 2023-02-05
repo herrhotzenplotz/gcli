@@ -76,6 +76,11 @@ gcli_print_milestones(gcli_milestone_list const *const list,
 		{ .name = "TITLE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
+	if (!list->milestones_size) {
+		puts("No milestones");
+		return;
+	}
+
 	tbl = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!tbl)
 		errx(1, "error: could not init table printer");

@@ -31,7 +31,7 @@
 #define GITLAB_PIPELINES_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 typedef struct gitlab_pipeline      gitlab_pipeline;

@@ -1,0 +1,83 @@
+.Dd $Mdocdate$
+.Dt GCLI-MILESTONES 1
+.Os
+.Sh NAME
+.Nm gcli milestones
+.Nd List and manage milestones in various Git Forges
+.Sh SYNOPSIS
+.Nm
+.Op Fl o Ar owner Fl r Ar repo
+.Nm
+.Op Fl o Ar owner Fl r Ar repo
+.Op Fl i Ar id
+.Nm
+.Cm create
+.Op Fl o Ar owner Fl r Ar repo
+.Fl t Ar title
+.Op Fl d Ar description
+.Sh DESCRIPTION
+The
+.Nm
+command can be used to work with milestones on various
+.Xr git 1
+forges. You can list, create, modify or delete milestons.
+.Sh OPTIONS
+.Bl -tag -width indent
+.It Fl i , -id Ar id
+Operate on a milestone with the given
+.Ar id .
+.It Fl o , -owner Ar owner
+Work with milestones on a repository of the given
+.Ar owner .
+.It Fl r , -repo Ar repo
+Work with milestones on the given
+.Ar repository .
+.It Fl t , -title Ar title
+Create a milestone with the given
+.Ar title .
+This option is mandatory when creating a milestone.
+.It Fl d , -description Ar description
+Create the milestone with the given
+.Ar description .
+.El
+.Sh ACTIONS
+When operating on a single milestone you may use one or more of the
+following actions:
+.Bl -tag -width indent
+.It Cm status
+Print general metadata and information about the milestone.
+.It Cm issues
+Print a list of issues attached to the milestone.
+.It Cm delete
+Delete this milestone.
+.El
+.Sh EXAMPLES
+Print a list of milestones for the current autodetected forge:
+.Bd -literal -offset indent
+$ gcli milestones
+.Ed
+.Pp
+Print details about the milestone with the ID 42:
+.Bd -literal -offset indent
+$ gcli milestones -i 42 status
+.Ed
+.Pp
+Create a new milestone with the title foobar:
+.Bd -literal -offset indent
+$ gcli milestones create -t foobar
+.Ed
+.Pp
+Delete milestone number 420 in vim/vim on Github:
+.Bd -literal -offset indent
+$ gcli -t github milestones -i 420 delete
+.Ed
+.Sh SEE ALSO
+.Xr git 1 ,
+.Xr gcli 1
+.Sh AUTHORS
+.An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+.Sh BUGS
+The delete subcommand deletes the milestone without asking for
+confirmation.
+.Pp
+Please report issues preferably via e-mail, on GitLab or on GitHub.

@@ -31,7 +31,7 @@
 #define FORGES_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <gcli/comments.h>
@@ -39,6 +39,7 @@
 #include <gcli/forks.h>
 #include <gcli/issues.h>
 #include <gcli/labels.h>
+#include <gcli/milestones.h>
 #include <gcli/pulls.h>
 #include <gcli/releases.h>
 #include <gcli/repos.h>
@@ -150,6 +151,51 @@ struct gcli_forge_descriptor {
 	void (*perform_submit_issue)(
 		gcli_submit_issue_options  opts,
 		gcli_fetch_buffer         *out);
+
+	/**
+	 * Bitmask of exceptions/fields that the forge doesn't support */
+	enum {
+		GCLI_MILESTONE_QUIRKS_EXPIRED = 0x1,
+		GCLI_MILESTONE_QUIRKS_DUEDATE = 0x2,
+		GCLI_MILESTONE_QUIRKS_PULLS   = 0x4,
+		GCLI_MILESTONE_QUIRKS_NISSUES = 0x8,
+	} const milestone_quirks;
+
+	/**
+	 * Get list of milestones */
+	int (*get_milestones)(
+		char const *owner,
+		char const *repo,
+		int const max,
+		gcli_milestone_list *const out);
+
+	/**
+	 * Get a single milestone */
+	int (*get_milestone)(
+		char const *owner,
+		char const *repo,
+		int const milestone,
+		gcli_milestone *const out);
+
+	/**
+	 * create a milestone */
+	int (*create_milestone)(
+		struct gcli_milestone_create_args const *args);
+
+	/**
+	 * delete a milestone */
+	int (*delete_milestone)(
+		char const *const owner,
+		char const *const repo,
+		int const milestone);
+
+	/**
+	 * Get list of issues attached to this milestone */
+	int (*get_milestone_issues)(
+		char const *const owner,
+		char const *const repo,
+		int const milestone,
+		gcli_issue_list *const out);
 
 	/**
 	 * Get a list of PRs/MRs on the given repo */

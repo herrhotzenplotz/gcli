@@ -31,7 +31,7 @@
 #define GCLI_GITHUB_GISTS_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <gcli/gcli.h>

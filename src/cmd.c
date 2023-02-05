@@ -28,7 +28,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <gcli/cmd.h>
@@ -44,7 +44,7 @@ copyright(void)
 {
 	fprintf(
 		stderr,
-		"Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>"
+		"Copyright 2021, 2022, 2023 Nico Sonack <nsonack@herrhotzenplotz.de>"
 		" and contributors.\n");
 }
 

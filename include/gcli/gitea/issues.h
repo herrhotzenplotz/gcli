@@ -31,7 +31,7 @@
 #define GITEA_ISSUES_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <gcli/issues.h>

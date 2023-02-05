@@ -31,11 +31,15 @@
 #define GITLAB_ISSUES_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <gcli/curl.h>
 #include <gcli/issues.h>
+
+int gitlab_fetch_issues(char *url,
+                        int const max,
+                        gcli_issue_list *const out);
 
 int gitlab_get_issues(char const *owner,
                       char const *repo,

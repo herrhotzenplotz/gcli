@@ -31,7 +31,7 @@
 #define GCLI_CMD_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <sn/sn.h>
@@ -65,6 +65,7 @@ int subcommand_forks(int argc, char *argv[]);
 int subcommand_gists(int argc, char *argv[]);
 int subcommand_issues(int argc, char *argv[]);
 int subcommand_labels(int argc, char *argv[]);
+int subcommand_milestones(int argc, char *argv[]);
 int subcommand_pipelines(int argc, char *argv[]);
 int subcommand_pulls(int argc, char *argv[]);
 int subcommand_releases(int argc, char *argv[]);

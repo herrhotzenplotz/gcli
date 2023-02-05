@@ -31,7 +31,7 @@
 #define ISSUES_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <sn/sn.h>
@@ -58,6 +58,7 @@ struct gcli_issue {
 	size_t  assignees_size;
 	/* workaround for GitHub where PRs are also issues */
 	int     is_pr;
+	sn_sv   milestone;
 };
 
 struct gcli_submit_issue_options {

@@ -31,10 +31,14 @@
 #define GITLAB_MERGE_REQUESTS_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <gcli/pulls.h>
+
+int gitlab_fetch_mrs(char *url,
+                     int const max,
+                     gcli_pull_list *const list);
 
 int gitlab_get_mrs(char const *owner,
                    char const *reponame,

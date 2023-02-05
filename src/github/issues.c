@@ -39,27 +39,13 @@
 #include <templates/github/issues.h>
 
 int
-github_get_issues(char const *owner,
-                  char const *repo,
-                  bool const all,
-                  int const max,
-                  gcli_issue_list *const out)
+github_fetch_issues(char *url,
+                    int const max,
+                    gcli_issue_list *const out)
 {
 	json_stream        stream      = {0};
 	gcli_fetch_buffer  json_buffer = {0};
-	char              *url         = NULL;
-	char              *e_owner     = NULL;
-	char              *e_repo      = NULL;
 	char              *next_url    = NULL;
-
-	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
-
-	url = sn_asprintf(
-		"%s/repos/%s/%s/issues?state=%s",
-		gcli_get_apibase(),
-		e_owner, e_repo,
-		all ? "all" : "open");
 
 	do {
 		gcli_fetch(url, &next_url, &json_buffer);
@@ -73,15 +59,36 @@ github_get_issues(char const *owner,
 		json_close(&stream);
 
 	} while ((url = next_url) && (max == -1 || (int)out->issues_size < max));
-	/* continue iterating if we have both a next_url and we are
-	 * supposed to fetch more issues (either max is -1 thus all issues
-	 * or we haven't fetched enough yet). */
 
-	free(next_url);
+	free(url);
+
+	return 0;
+}
+
+int
+github_get_issues(char const *owner,
+                  char const *repo,
+                  bool const all,
+                  int const max,
+                  gcli_issue_list *const out)
+{
+	char *url     = NULL;
+	char *e_owner = NULL;
+	char *e_repo  = NULL;
+
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
+
+	url = sn_asprintf(
+		"%s/repos/%s/%s/issues?state=%s",
+		gcli_get_apibase(),
+		e_owner, e_repo,
+		all ? "all" : "open");
+
 	free(e_owner);
 	free(e_repo);
 
-	return 0;
+	return github_fetch_issues(url, max, out);
 }
 
 void

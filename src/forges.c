@@ -38,6 +38,7 @@
 #include <gcli/github/forks.h>
 #include <gcli/github/issues.h>
 #include <gcli/github/labels.h>
+#include <gcli/github/milestones.h>
 #include <gcli/github/pulls.h>
 #include <gcli/github/releases.h>
 #include <gcli/github/repos.h>
@@ -51,6 +52,7 @@
 #include <gcli/gitlab/issues.h>
 #include <gcli/gitlab/labels.h>
 #include <gcli/gitlab/merge_requests.h>
+#include <gcli/gitlab/milestones.h>
 #include <gcli/gitlab/pipelines.h>
 #include <gcli/gitlab/releases.h>
 #include <gcli/gitlab/repos.h>
@@ -62,6 +64,7 @@
 #include <gcli/gitea/forks.h>
 #include <gcli/gitea/issues.h>
 #include <gcli/gitea/labels.h>
+#include <gcli/gitea/milestones.h>
 #include <gcli/gitea/pulls.h>
 #include <gcli/gitea/releases.h>
 #include <gcli/gitea/repos.h>
@@ -82,12 +85,17 @@ github_forge_descriptor =
 	.issue_add_labels          = github_issue_add_labels,
 	.issue_remove_labels       = github_issue_remove_labels,
 	.perform_submit_issue      = github_perform_submit_issue,
-	.get_prs                   = github_get_prs,
-	.print_pr_diff             = github_print_pr_diff,
-	.print_pr_checks           = github_pr_checks,
-	.pr_merge                  = github_pr_merge,
-	.pr_reopen                 = github_pr_reopen,
-	.pr_close                  = github_pr_close,
+	.get_milestones            = github_get_milestones,
+	.get_milestone             = github_get_milestone,
+	.create_milestone          = github_create_milestone,
+	.delete_milestone          = github_delete_milestone,
+	.get_milestone_issues      = github_milestone_get_issues,
+	.get_prs                   = github_get_pulls,
+	.print_pr_diff             = github_print_pull_diff,
+	.print_pr_checks           = github_pull_checks,
+	.pr_merge                  = github_pull_merge,
+	.pr_reopen                 = github_pull_reopen,
+	.pr_close                  = github_pull_close,
 
 	/* HACK: Here we can use the same functions as with issues because
 	 * PRs are the same as issues on Github and the functions have the
@@ -95,7 +103,7 @@ github_forge_descriptor =
 	.pr_add_labels             = github_issue_add_labels,
 	.pr_remove_labels          = github_issue_remove_labels,
 
-	.perform_submit_pr         = github_perform_submit_pr,
+	.perform_submit_pr         = github_perform_submit_pull,
 	.get_pull_commits          = github_get_pull_commits,
 	.get_pull_summary          = github_get_pull_summary,
 	.get_releases              = github_get_releases,
@@ -117,6 +125,9 @@ github_forge_descriptor =
 	.user_object_key           = "login",
 	.html_url_key              = "html_url",
 	.pull_summary_quirks       = 0,
+	.milestone_quirks          = GCLI_MILESTONE_QUIRKS_EXPIRED
+	                           | GCLI_MILESTONE_QUIRKS_DUEDATE
+	                           | GCLI_MILESTONE_QUIRKS_PULLS,
 };
 
 static gcli_forge_descriptor const
@@ -135,6 +146,11 @@ gitlab_forge_descriptor =
 	.issue_add_labels          = gitlab_issue_add_labels,
 	.issue_remove_labels       = gitlab_issue_remove_labels,
 	.perform_submit_issue      = gitlab_perform_submit_issue,
+	.get_milestones            = gitlab_get_milestones,
+	.get_milestone             = gitlab_get_milestone,
+	.create_milestone          = gitlab_create_milestone,
+	.delete_milestone          = gitlab_delete_milestone,
+	.get_milestone_issues      = gitlab_milestone_get_issues,
 	.get_prs                   = gitlab_get_mrs,
 	.print_pr_diff             = gitlab_print_pr_diff,
 	.print_pr_checks           = gitlab_mr_pipelines,
@@ -168,6 +184,7 @@ gitlab_forge_descriptor =
 	                           | GCLI_PRS_QUIRK_COMMITS
 	                           | GCLI_PRS_QUIRK_CHANGES
 	                           | GCLI_PRS_QUIRK_MERGED,
+	.milestone_quirks          = GCLI_MILESTONE_QUIRKS_NISSUES,
 };
 
 static gcli_forge_descriptor const
@@ -180,6 +197,10 @@ gitea_forge_descriptor =
 	.issue_reopen              = gitea_issue_reopen,
 	.issue_assign              = gitea_issue_assign,
 	.get_issue_comments        = gitea_get_comments,
+	.get_milestones            = gitea_get_milestones,
+	.get_milestone             = gitea_get_milestone,
+	.create_milestone          = gitea_create_milestone,
+	.delete_milestone          = gitea_delete_milestone,
 	.perform_submit_comment    = gitea_perform_submit_comment,
 	.issue_add_labels          = gitea_issue_add_labels,
 	.issue_remove_labels       = gitea_issue_remove_labels,
@@ -218,6 +239,9 @@ gitea_forge_descriptor =
 	                           | GCLI_PRS_QUIRK_ADDDEL
 	                           | GCLI_PRS_QUIRK_DRAFT
 	                           | GCLI_PRS_QUIRK_CHANGES,
+	.milestone_quirks          = GCLI_MILESTONE_QUIRKS_EXPIRED
+	                           | GCLI_MILESTONE_QUIRKS_DUEDATE
+	                           | GCLI_MILESTONE_QUIRKS_PULLS,
 };
 
 gcli_forge_descriptor const *

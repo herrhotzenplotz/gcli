@@ -27,9 +27,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include <config.h>
 
 #include <gcli/cmd.h>
+#include <gcli/config.h>
 #include <gcli/curl.h>
 #include <gcli/github/gists.h>
 

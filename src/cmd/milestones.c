@@ -40,11 +40,14 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: gcli milestones [-o owner -r repo]\n");
+	fprintf(stderr, "       gcli milestones create [-o owner -r repo] -t title [-d description]\n");
 	fprintf(stderr, "       gcli milestones [-o owner -r repo] -i milestone action...\n");
 	fprintf(stderr, "OPTIONS:\n");
 	fprintf(stderr, "  -o owner        The repository owner\n");
 	fprintf(stderr, "  -r repo         The repository name\n");
 	fprintf(stderr, "  -i milestone    Run actions for the given milestone id\n");
+	fprintf(stderr, "  -t title        Title of the milestone to create\n");
+	fprintf(stderr, "  -d description  Description the milestone to create\n");
 	fprintf(stderr, "ACTIONS:\n");
 	fprintf(stderr, "  status          Display general status information about the milestone\n");
 	fprintf(stderr, "  issues          List issues associated with the milestone\n");

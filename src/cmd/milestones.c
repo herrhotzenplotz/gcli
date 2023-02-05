@@ -118,8 +118,11 @@ subcommand_milestone_create(int argc, char *argv[])
 	if (!args.title)
 		errx(1, "error: missing milestone title");
 
-	fprintf(stderr, "error: create subcommand is not yet implemented\n");
-	return 1;
+	/* actually create the milestone */
+	if (gcli_create_milestone(&args) < 0)
+		errx(1, "error: could not create milestone");
+
+	return 0;
 }
 
 int

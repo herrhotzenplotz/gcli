@@ -49,6 +49,12 @@ gcli_get_milestone(char const *owner,
 	return gcli_forge()->get_milestone(owner, repo, milestone, out);
 }
 
+int
+gcli_create_milestone(struct gcli_milestone_create_args const *args)
+{
+	return gcli_forge()->create_milestone(args);
+}
+
 void
 gcli_print_milestones(gcli_milestone_list const *const list,
                       int max)

@@ -84,6 +84,8 @@ int gcli_get_milestone(char const *const owner,
                        int const max,
                        gcli_milestone *const out);
 
+int gcli_create_milestone(struct gcli_milestone_create_args const *args);
+
 void gcli_print_milestones(gcli_milestone_list const *const it,
                            int max);
 

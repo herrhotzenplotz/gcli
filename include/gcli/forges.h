@@ -178,6 +178,11 @@ struct gcli_forge_descriptor {
 		gcli_milestone *const out);
 
 	/**
+	 * create a milestone */
+	int (*create_milestone)(
+		struct gcli_milestone_create_args const *args);
+
+	/**
 	 * Get list of issues attached to this milestone */
 	int (*get_milestone_issues)(
 		char const *const owner,

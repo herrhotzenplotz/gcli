@@ -164,9 +164,19 @@ gitlab_delete_milestone(char const *const owner,
                         char const *const repo,
                         int const milestone)
 {
-	(void) owner;
-	(void) repo;
-	(void) milestone;
+	char *url, *e_owner, *e_repo;
 
-	return -1;
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/milestones/%d",
+	                  gitlab_get_apibase(), e_owner, e_repo, milestone);
+
+	gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
+
+	free(url);
+	free(e_repo);
+	free(e_owner);
+
+	return 0;
 }

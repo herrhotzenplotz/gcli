@@ -86,6 +86,10 @@ int gcli_get_milestone(char const *const owner,
 
 int gcli_create_milestone(struct gcli_milestone_create_args const *args);
 
+int gcli_delete_milestone(char const *const owner,
+                          char const *const repo,
+                          int const milestone);
+
 void gcli_print_milestones(gcli_milestone_list const *const it,
                            int max);
 

@@ -48,6 +48,7 @@ usage(void)
 	fprintf(stderr, "ACTIONS:\n");
 	fprintf(stderr, "  status          Display general status information about the milestone\n");
 	fprintf(stderr, "  issues          List issues associated with the milestone\n");
+	fprintf(stderr, "  delete          Delete this milestone\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
@@ -264,6 +265,11 @@ handle_milestone_actions(int argc, char *argv[],
 
 			/* Cleanup */
 			gcli_issues_free(&issues);
+
+		} else if (strcmp(action, "delete") == 0) {
+
+			/* Delete the milestone */
+			gcli_delete_milestone(owner, repo, milestone_id);
 
 		} else {
 

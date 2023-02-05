@@ -183,6 +183,13 @@ struct gcli_forge_descriptor {
 		struct gcli_milestone_create_args const *args);
 
 	/**
+	 * delete a milestone */
+	int (*delete_milestone)(
+		char const *const owner,
+		char const *const repo,
+		int const milestone);
+
+	/**
 	 * Get list of issues attached to this milestone */
 	int (*get_milestone_issues)(
 		char const *const owner,

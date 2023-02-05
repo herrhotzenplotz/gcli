@@ -158,3 +158,29 @@ github_create_milestone(struct gcli_milestone_create_args const *args)
 
 	return 0;
 }
+
+int
+github_delete_milestone(char const *const owner,
+                        char const *const repo,
+                        int const milestone)
+{
+	char *url, *e_owner, *e_repo;
+	gcli_fetch_buffer buffer = {0};
+
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/repos/%s/%s/milestones/%d",
+	                  gcli_get_apibase(),
+	                  e_owner, e_repo,
+	                  milestone);
+
+	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+
+	free(buffer.data);
+	free(url);
+	free(e_repo);
+	free(e_owner);
+
+	return 0;
+}

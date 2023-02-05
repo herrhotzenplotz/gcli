@@ -55,6 +55,14 @@ gcli_create_milestone(struct gcli_milestone_create_args const *args)
 	return gcli_forge()->create_milestone(args);
 }
 
+int
+gcli_delete_milestone(char const *const owner,
+                      char const *const repo,
+                      int const milestone)
+{
+	return gcli_forge()->delete_milestone(owner, repo, milestone);
+}
+
 void
 gcli_print_milestones(gcli_milestone_list const *const list,
                       int max)

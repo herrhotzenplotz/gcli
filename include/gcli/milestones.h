@@ -64,6 +64,16 @@ struct gcli_milestone_list {
 	size_t milestones_size;
 };
 
+struct gcli_milestone_create_args {
+	/* These are const because they are coming from either an mmapped
+	 * buffer or from command line arguments. They should never ever
+	 * get free()-ed */
+	char const *title;
+	char const *description;
+	char const *owner;
+	char const *repo;
+};
+
 int gcli_get_milestones(char const *const owner,
                         char const *const repo,
                         int const max,

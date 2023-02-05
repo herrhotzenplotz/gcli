@@ -62,8 +62,61 @@ static int handle_milestone_actions(int argc, char *argv[],
 static int
 subcommand_milestone_create(int argc, char *argv[])
 {
-	(void) argc;
-	(void) argv;
+	int ch;
+	struct gcli_milestone_create_args args = {0};
+	struct option const options[] = {
+		{ .name = "owner",
+		  .has_arg = required_argument,
+		  .flag = NULL,
+		  .val = 'o' },
+		{ .name = "repo",
+		  .has_arg = required_argument,
+		  .flag = NULL,
+		  .val = 'r' },
+		{ .name = "title",
+		  .has_arg = required_argument,
+		  .flag = NULL,
+		  .val = 't' },
+		{ .name  = "description",
+		  .has_arg = required_argument,
+		  .flag = NULL,
+		  .val = 'd' },
+	};
+
+	/* Read in options */
+	while ((ch = getopt_long(argc, argv, "+o:r:t:d:", options, NULL)) != -1) {
+		switch (ch) {
+		case 'o':
+			args.owner = optarg;
+			break;
+		case 'r':
+			args.repo = optarg;
+			break;
+		case 't':
+			args.title = optarg;
+			break;
+		case 'd':
+			args.description = optarg;
+			break;
+		default:
+			usage();
+			return 1;
+		}
+	}
+
+	argc -= optind;
+	argv += optind;
+
+	/* sanity check argumets */
+	if (argc)
+		errx(1, "error: stray arguments");
+
+	/* make sure both are set or deduce them */
+	check_owner_and_repo(&args.owner, &args.repo);
+
+	/* enforce the user to at least provide a title */
+	if (!args.title)
+		errx(1, "error: missing milestone title");
 
 	fprintf(stderr, "error: create subcommand is not yet implemented\n");
 	return 1;

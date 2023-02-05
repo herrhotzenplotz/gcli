@@ -269,7 +269,8 @@ handle_milestone_actions(int argc, char *argv[],
 		} else if (strcmp(action, "delete") == 0) {
 
 			/* Delete the milestone */
-			gcli_delete_milestone(owner, repo, milestone_id);
+			if (gcli_delete_milestone(owner, repo, milestone_id) < 0)
+				errx(1, "error: could not delete milestone");
 
 		} else {
 

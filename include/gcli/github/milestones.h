@@ -42,6 +42,8 @@ int github_get_milestone(char const *const owner,
                          int const milestone,
                          gcli_milestone *const out);
 
+int github_create_milestone(struct gcli_milestone_create_args const *args);
+
 int github_milestone_get_issues(char const *const owner,
                                 char const *const repo,
                                 int const milestone,

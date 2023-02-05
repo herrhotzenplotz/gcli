@@ -87,6 +87,7 @@ github_forge_descriptor =
 	.perform_submit_issue      = github_perform_submit_issue,
 	.get_milestones            = github_get_milestones,
 	.get_milestone             = github_get_milestone,
+	.create_milestone          = github_create_milestone,
 	.get_milestone_issues      = github_milestone_get_issues,
 	.get_prs                   = github_get_pulls,
 	.print_pr_diff             = github_print_pull_diff,

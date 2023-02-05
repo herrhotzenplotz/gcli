@@ -121,3 +121,40 @@ github_milestone_get_issues(char const *const owner,
 
 	return github_fetch_issues(url, -1, out);
 }
+
+int
+github_create_milestone(struct gcli_milestone_create_args const *args)
+{
+	char *url, *e_owner, *e_repo;
+	char *json_body, *description;
+	gcli_fetch_buffer buffer = {0};
+
+	e_owner = gcli_urlencode(args->owner);
+	e_repo = gcli_urlencode(args->repo);
+
+	/* TODO: handle escaping */
+	if (args->description)
+		description = sn_asprintf(",\"description\": \"%s\"", args->description);
+	else
+		description = strdup("");
+
+	json_body = sn_asprintf(
+		"{"
+		"    \"title\"      : \"%s\""
+		"    %s"
+		"}", args->title, description);
+
+	url = sn_asprintf("%s/repos/%s/%s/milestones",
+	                  gcli_get_apibase(), e_owner, e_repo);
+
+	gcli_fetch_with_method("POST", url, json_body, NULL, &buffer);
+
+	free(buffer.data);
+	free(json_body);
+	free(description);
+	free(url);
+	free(e_repo);
+	free(e_owner);
+
+	return 0;
+}

@@ -158,3 +158,15 @@ gitlab_create_milestone(struct gcli_milestone_create_args const *args)
 
 	return 0;
 }
+
+int
+gitlab_delete_milestone(char const *const owner,
+                        char const *const repo,
+                        int const milestone)
+{
+	(void) owner;
+	(void) repo;
+	(void) milestone;
+
+	return -1;
+}

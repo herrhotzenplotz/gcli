@@ -149,6 +149,7 @@ gitlab_forge_descriptor =
 	.get_milestones            = gitlab_get_milestones,
 	.get_milestone             = gitlab_get_milestone,
 	.create_milestone          = gitlab_create_milestone,
+	.delete_milestone          = gitlab_delete_milestone,
 	.get_milestone_issues      = gitlab_milestone_get_issues,
 	.get_prs                   = gitlab_get_mrs,
 	.print_pr_diff             = gitlab_print_pr_diff,

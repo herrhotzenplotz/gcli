@@ -43,6 +43,10 @@ int gitlab_get_milestones(char const *owner,
 
 int gitlab_create_milestone(struct gcli_milestone_create_args const *args);
 
+int gitlab_delete_milestone(char const *const owner,
+                            char const *const repo,
+                            int const milestone);
+
 int gitlab_get_milestone(char const *owner,
                          char const *repo,
                          int const milestone,

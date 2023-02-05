@@ -33,6 +33,7 @@
 #include <gcli/config.h>
 
 #include <gcli/github/issues.h>
+#include <gcli/github/milestones.h>
 
 #include <templates/gitea/milestones.h>
 
@@ -103,6 +104,12 @@ gitea_get_milestone(char const *const owner,
 	free(e_repo);
 
 	return 0;
+}
+
+int
+gitea_create_milestone(struct gcli_milestone_create_args const *args)
+{
+	return github_create_milestone(args);
 }
 
 int

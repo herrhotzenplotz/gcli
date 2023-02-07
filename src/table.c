@@ -250,7 +250,7 @@ dump_row(struct gcli_tbl const *const table, size_t const i)
 
 		/* Print cell if it is not NULL, otherwise indicate it by
 		 * printing <empty> */
-		printf("%s  ", row->cells[col].text ? row->cells[col].text : "<empty>");
+		printf("%s", row->cells[col].text ? row->cells[col].text : "<empty>");
 
 		/* End colour */
 		if (table->cols[col].flags &
@@ -263,10 +263,17 @@ dump_row(struct gcli_tbl const *const table, size_t const i)
 		if (table->cols[col].flags & GCLI_TBLCOL_BOLD)
 			printf("%s", gcli_resetbold());
 
-		/* If left-justified and not last column, print padding */
-		if (!(table->cols[col].flags & GCLI_TBLCOL_JUSTIFYR) &&
-		    (col + 1) < table->cols_size)
-			pad(table->col_widths[col] - strlen(row->cells[col].text));
+		/* If not last column, print padding of 2 spaces */
+		if ((col + 1) < table->cols_size) {
+			size_t padding = 2;
+
+			/* If left-justified, print justify-padding */
+			if (!(table->cols[col].flags & GCLI_TBLCOL_JUSTIFYR) &&
+			    (col + 1) < table->cols_size)
+				padding += table->col_widths[col] - strlen(row->cells[col].text);
+
+			pad(padding);
+		}
 	}
 	putchar('\n');
 }

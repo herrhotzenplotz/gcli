@@ -232,6 +232,12 @@ dump_row(struct gcli_tbl const *const table, size_t const i)
 	struct gcli_tblrow const *const row = &table->rows[i];
 
 	for (size_t col = 0; col < table->cols_size; ++col) {
+
+		/* Skip empty columns (as with colour indicators in no-colour
+		 * mode) */
+		if (table->col_widths[col] == 0)
+			continue;
+
 		/* If right justified and not last column, print padding */
 		if ((table->cols[col].flags & GCLI_TBLCOL_JUSTIFYR) &&
 		    (col + 1) < table->cols_size)
@@ -265,7 +271,9 @@ dump_row(struct gcli_tbl const *const table, size_t const i)
 
 		/* If not last column, print padding of 2 spaces */
 		if ((col + 1) < table->cols_size) {
-			size_t padding = 2;
+			size_t padding =
+				(table->cols[col].flags & GCLI_TBLCOL_TIGHT)
+				? 1 : 2;
 
 			/* If left-justified, print justify-padding */
 			if (!(table->cols[col].flags & GCLI_TBLCOL_JUSTIFYR) &&
@@ -284,10 +292,21 @@ gcli_tbl_dump(gcli_tbl const _table)
 	struct gcli_tbl const *const table = (struct gcli_tbl const *const)_table;
 
 	for (size_t i = 0; i < table->cols_size; ++i) {
-		printf("%s  ", table->cols[i].name);
+		size_t padding = 0;
+		/* Skip empty columns e.g. in no-colour mode */
+		if (table->col_widths[i] == 0)
+			continue;
+
+		/* Check if we have tight column spacing */
+		if (table->cols[i].flags & GCLI_TBLCOL_TIGHT)
+			padding = 1;
+		else
+			padding = 2;
+
+		printf("%s", table->cols[i].name);
 
 		if ((i + 1) < table->cols_size)
-			pad(table->col_widths[i] - strlen(table->cols[i].name));
+			pad(padding + table->col_widths[i] - strlen(table->cols[i].name));
 	}
 	printf("\n");
 

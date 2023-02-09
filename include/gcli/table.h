@@ -57,6 +57,8 @@ enum gcli_tblcol_flags {
 	GCLI_TBLCOL_COLOUREXPL     = 8,
 	/* 256 colour handling. Just like the above */
 	GCLI_TBLCOL_256COLOUR      = 16,
+	/* Have a column spacing to the right of one instead of two spaces */
+	GCLI_TBLCOL_TIGHT          = 32,
 };
 
 enum gcli_tblcoltype {

@@ -266,6 +266,38 @@ ensure_issue(char const *const owner, char const *const repo,
 	*have_fetched_issue = 1;
 }
 
+static inline void
+handle_issue_labels_action(int *argc, char ***argv,
+                           char const *const owner,
+                           char const *const repo,
+                           int const issue_id)
+{
+	char const **add_labels = NULL;
+	size_t add_labels_size = 0;
+	char const **remove_labels = NULL;
+	size_t remove_labels_size = 0;
+
+	if (argc == 0) {
+		fprintf(stderr, "error: expected label operations\n");
+		usage();
+		exit(EXIT_FAILURE);
+	}
+
+	parse_labels_options(argc, argv, &add_labels, &add_labels_size,
+	                     &remove_labels, &remove_labels_size);
+
+	/* actually go about deleting and adding the labels */
+	if (add_labels_size)
+		gcli_issue_add_labels(owner, repo, issue_id,
+		                      add_labels, add_labels_size);
+	if (remove_labels_size)
+		gcli_issue_remove_labels(owner, repo, issue_id,
+		                         remove_labels, remove_labels_size);
+
+	free(add_labels);
+	free(remove_labels);
+}
+
 static inline int
 handle_issues_actions(int argc, char *argv[],
                       char const *const owner,
@@ -303,31 +335,10 @@ handle_issues_actions(int argc, char *argv[],
 			gcli_issue_assign(owner, repo, issue_id, assignee);
 
 		} else if (strcmp("labels", operation) == 0) {
-			char const **add_labels         = NULL;
-			size_t       add_labels_size    = 0;
-			char const **remove_labels      = NULL;
-			size_t       remove_labels_size = 0;
 
-			if (argc == 0) {
-				fprintf(stderr, "error: expected label operations\n");
-				usage();
-				return EXIT_FAILURE;
-			}
+			handle_issue_labels_action(
+				&argc, &argv, owner, repo, issue_id);
 
-			parse_labels_options(&argc, &argv,
-			                     &add_labels, &add_labels_size,
-			                     &remove_labels, &remove_labels_size);
-
-			/* actually go about deleting and adding the labels */
-			if (add_labels_size)
-				gcli_issue_add_labels(owner, repo, issue_id,
-				                      add_labels, add_labels_size);
-			if (remove_labels_size)
-				gcli_issue_remove_labels(owner, repo, issue_id,
-				                         remove_labels, remove_labels_size);
-
-			free(add_labels);
-			free(remove_labels);
 		} else if (strcmp("milestone", operation) == 0) {
 			char const *milestone_str;
 			char *endptr;

@@ -134,6 +134,11 @@ subcommand_issue_create(int argc, char *argv[])
 	return EXIT_SUCCESS;
 }
 
+static inline int handle_issues_actions(int argc, char *argv[],
+                                        char const *const owner,
+                                        char const *const repo,
+                                        int const issue);
+
 int
 subcommand_issues(int argc, char *argv[])
 {
@@ -245,14 +250,24 @@ subcommand_issues(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
+	/* Handle all the actions */
+	return handle_issues_actions(argc, argv, owner, repo, issue_id);
+}
+
+static inline int
+handle_issues_actions(int argc, char *argv[],
+                      char const *const owner,
+                      char const *const repo,
+                      int const issue_id)
+{
 	/* execute all operations on the given issue */
 	while (argc > 0) {
 		char const *operation = shift(&argc, &argv);
 
 		if (strcmp("comments", operation) == 0) {
+
 			gcli_issue_comments(owner, repo, issue_id);
-		} else if (strcmp("status", operation) == 0) {
-			gcli_issue_summary(owner, repo, issue_id);
+
 		} else if (strcmp("close", operation) == 0) {
 
 			gcli_issue_close(owner, repo, issue_id);

@@ -141,7 +141,7 @@ subcommand_issues(int argc, char *argv[])
 	char const *owner = NULL;
 	char const *repo = NULL;
 	char *endptr = NULL;
-	int ch = 0, issue = -1, n = 30;
+	int ch = 0, issue_id = -1, n = 30;
 	bool all = false;
 	enum gcli_output_flags flags = 0;
 
@@ -190,11 +190,11 @@ subcommand_issues(int argc, char *argv[])
 			repo = optarg;
 			break;
 		case 'i': {
-			issue = strtol(optarg, &endptr, 10);
+			issue_id = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "error: cannot parse issue number");
 
-			if (issue < 0)
+			if (issue_id < 0)
 				errx(1, "error: issue number is out of range");
 		} break;
 		case 'n': {
@@ -228,7 +228,7 @@ subcommand_issues(int argc, char *argv[])
 	check_owner_and_repo(&owner, &repo);
 
 	/* No issue number was given, so list all open issues */
-	if (issue < 0) {
+	if (issue_id < 0) {
 		if (gcli_get_issues(owner, repo, all, n, &list) < 0)
 			errx(1, "error: could not get issues");
 
@@ -250,16 +250,22 @@ subcommand_issues(int argc, char *argv[])
 		char const *operation = shift(&argc, &argv);
 
 		if (strcmp("comments", operation) == 0) {
-			gcli_issue_comments(owner, repo, issue);
+			gcli_issue_comments(owner, repo, issue_id);
 		} else if (strcmp("status", operation) == 0) {
-			gcli_issue_summary(owner, repo, issue);
+			gcli_issue_summary(owner, repo, issue_id);
 		} else if (strcmp("close", operation) == 0) {
-			gcli_issue_close(owner, repo, issue);
+
+			gcli_issue_close(owner, repo, issue_id);
+
 		} else if (strcmp("reopen", operation) == 0) {
-			gcli_issue_reopen(owner, repo, issue);
+
+			gcli_issue_reopen(owner, repo, issue_id);
+
 		} else if (strcmp("assign", operation) == 0) {
+
 			char const *assignee = shift(&argc, &argv);
-			gcli_issue_assign(owner, repo, issue, assignee);
+			gcli_issue_assign(owner, repo, issue_id, assignee);
+
 		} else if (strcmp("labels", operation) == 0) {
 			char const **add_labels         = NULL;
 			size_t       add_labels_size    = 0;
@@ -278,10 +284,10 @@ subcommand_issues(int argc, char *argv[])
 
 			/* actually go about deleting and adding the labels */
 			if (add_labels_size)
-				gcli_issue_add_labels(owner, repo, issue,
+				gcli_issue_add_labels(owner, repo, issue_id,
 				                      add_labels, add_labels_size);
 			if (remove_labels_size)
-				gcli_issue_remove_labels(owner, repo, issue,
+				gcli_issue_remove_labels(owner, repo, issue_id,
 				                         remove_labels, remove_labels_size);
 
 			free(add_labels);
@@ -314,7 +320,7 @@ subcommand_issues(int argc, char *argv[])
 			}
 
 			/* Pass it to the dispatch */
-			if (gcli_issue_set_milestone(owner, repo, issue, milestone) < 0)
+			if (gcli_issue_set_milestone(owner, repo, issue_id, milestone) < 0)
 				errx(1, "error: could not assign milestone");
 
 		} else {

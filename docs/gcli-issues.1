@@ -76,10 +76,14 @@ Do not ask for confirmation before creating the issue. Assume yes.
 .Ar actions...
 may be one or more of the following:
 .Bl -tag -width "labels [options]"
+.It Cm all
+Display both a summary and the original post of the issue.
 .It Cm comments
 Print a list of comments under the issue.
 .It Cm status
 Print a short summary of the issue.
+.It Cm op
+Print the original post of the issue.
 .It Cm close
 Close the issue.
 .It Cm reopen
@@ -113,7 +117,7 @@ $ gcli create issues "summary here"
 .Pp
 Print both a summary and comments of issue 1 in herrhotzenplotz/gcli:
 .Bd -literal -offset indent
-$ gcli issues -o herrhotzenplotz -r gcli -i 1 summary comments
+$ gcli issues -o herrhotzenplotz -r gcli -i 1 status comments
 .Ed
 .Pp
 Add the labels

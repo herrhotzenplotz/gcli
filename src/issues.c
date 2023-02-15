@@ -36,7 +36,7 @@
 #include <gcli/table.h>
 #include <sn/sn.h>
 
-static void
+void
 gcli_issue_free(gcli_issue *const it)
 {
 	free(it->title.data);
@@ -135,8 +135,8 @@ gcli_print_issues_table(enum gcli_output_flags const flags,
 		fprintf(stderr, "info: %d pull requests pruned\n", pruned);
 }
 
-static void
-gcli_print_issue_summary(gcli_issue const *const it)
+void
+gcli_issue_print_summary(gcli_issue const *const it)
 {
 	gcli_dict dict;
 
@@ -171,25 +171,22 @@ gcli_print_issue_summary(gcli_issue const *const it)
 	/* Dump the dictionary */
 	gcli_dict_end(dict);
 
-	/* The API may not return a body if the user didn't put in any
-	 * comment */
-	if (it->body.data) {
-		putchar('\n');
-		pretty_print(it->body.data, 4, 80, stdout);
-		putchar('\n');
-	}
 }
 
 void
-gcli_issue_summary(char const *owner,
-                   char const *repo,
-                   int const issue_number)
+gcli_issue_print_op(gcli_issue const *const it)
 {
-	gcli_issue details = {0};
+	if (it->body.length && it->body.data)
+		pretty_print(it->body.data, 4, 80, stdout);
+}
 
-	gcli_forge()->get_issue_summary(owner, repo, issue_number, &details);
-	gcli_print_issue_summary(&details);
-	gcli_issue_free(&details);
+void
+gcli_get_issue(char const *owner,
+               char const *repo,
+               int const issue_number,
+               gcli_issue *const out)
+{
+	gcli_forge()->get_issue_summary(owner, repo, issue_number, out);
 }
 
 void

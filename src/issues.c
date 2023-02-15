@@ -36,7 +36,7 @@
 #include <gcli/table.h>
 #include <sn/sn.h>
 
-static void
+void
 gcli_issue_free(gcli_issue *const it)
 {
 	free(it->title.data);

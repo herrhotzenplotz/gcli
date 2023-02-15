@@ -405,7 +405,8 @@ handle_issues_actions(int argc, char *argv[],
 		}
 	}
 
-	// TODO: Free fetched issue if needed
+	if (have_fetched_issue)
+		gcli_issue_free(&issue);
 
 	return EXIT_SUCCESS;
 }

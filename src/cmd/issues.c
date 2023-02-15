@@ -298,6 +298,43 @@ handle_issue_labels_action(int *argc, char ***argv,
 	free(remove_labels);
 }
 
+static inline void
+handle_issue_milestone_action(int *argc, char ***argv,
+                              char const *const owner,
+                              char const *const repo,
+                              int const issue_id)
+{
+	char const *milestone_str;
+	char *endptr;
+	int milestone;
+
+	/* Set the milestone for the issue
+	 *
+	 * Check that the user provided a milestone id */
+	if (!argc) {
+		fprintf(stderr, "error: missing milestone id\n");
+		usage();
+		exit(EXIT_FAILURE);
+	}
+
+	/* Fetch the milestone from the argument vector */
+	milestone_str = shift(argc, argv);
+
+	/* Parse the milestone id */
+	milestone = strtoul(milestone_str, &endptr, 10);
+
+	/* Check successful for parse */
+	if (endptr != milestone_str + strlen(milestone_str)) {
+		fprintf(stderr, "error: could not parse milestone id\n");
+		usage();
+		exit(EXIT_FAILURE);
+	}
+
+	/* Pass it to the dispatch */
+	if (gcli_issue_set_milestone(owner, repo, issue_id, milestone) < 0)
+		errx(1, "error: could not assign milestone");
+}
+
 static inline int
 handle_issues_actions(int argc, char *argv[],
                       char const *const owner,
@@ -340,35 +377,9 @@ handle_issues_actions(int argc, char *argv[],
 				&argc, &argv, owner, repo, issue_id);
 
 		} else if (strcmp("milestone", operation) == 0) {
-			char const *milestone_str;
-			char *endptr;
-			int milestone;
 
-			/* Set the milestone for the issue
-			 *
-			 * Check that the user provided a milestone id */
-			if (!argc) {
-				fprintf(stderr, "error: missing milestone id\n");
-				usage();
-				return EXIT_FAILURE;
-			}
-
-			/* Fetch the milestone from the argument vector */
-			milestone_str = shift(&argc, &argv);
-
-			/* Parse the milestone id */
-			milestone = strtoul(milestone_str, &endptr, 10);
-
-			/* Check successful for parse */
-			if (endptr != milestone_str + strlen(milestone_str)) {
-				fprintf(stderr, "error: could not parse milestone id\n");
-				usage();
-				return EXIT_FAILURE;
-			}
-
-			/* Pass it to the dispatch */
-			if (gcli_issue_set_milestone(owner, repo, issue_id, milestone) < 0)
-				errx(1, "error: could not assign milestone");
+			handle_issue_milestone_action(
+				&argc, &argv, owner, repo, issue_id);
 
 		} else {
 			fprintf(stderr, "error: unknown operation %s\n", operation);

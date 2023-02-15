@@ -56,6 +56,7 @@ usage(void)
 	fprintf(stderr, "  -i issue        ID of issue to perform actions on\n");
 	fprintf(stderr, "ACTIONS:\n");
 	fprintf(stderr, "  status          Display status information\n");
+	fprintf(stderr, "  op              Display original post\n");
 	fprintf(stderr, "  comments        Display comments\n");
 	fprintf(stderr, "  close           Close the issue\n");
 	fprintf(stderr, "  reopen          Reopen a closed issue\n");
@@ -351,6 +352,12 @@ handle_issues_actions(int argc, char *argv[],
 		if (strcmp("comments", operation) == 0) {
 			/* Doesn't require fetching the issue data */
 			gcli_issue_comments(owner, repo, issue_id);
+
+		} else if (strcmp("op", operation) == 0) {
+			/* Make sure we have fetched the issue data */
+			ensure_issue(owner, repo, issue_id, &have_fetched_issue, &issue);
+
+			gcli_issue_print_op(&issue);
 
 		} else if (strcmp("status", operation) == 0) {
 			/* Make sure we have fetched the issue data */

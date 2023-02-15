@@ -174,6 +174,13 @@ gcli_issue_print_summary(gcli_issue const *const it)
 }
 
 void
+gcli_issue_print_op(gcli_issue const *const it)
+{
+	if (it->body.length && it->body.data)
+		pretty_print(it->body.data, 4, 80, stdout);
+}
+
+void
 gcli_get_issue(char const *owner,
                char const *repo,
                int const issue_number,

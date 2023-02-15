@@ -55,6 +55,7 @@ usage(void)
 	fprintf(stderr, "  -n number       Number of issues to fetch (-1 = everything)\n");
 	fprintf(stderr, "  -i issue        ID of issue to perform actions on\n");
 	fprintf(stderr, "ACTIONS:\n");
+	fprintf(stderr, "  all             Display both status and and op\n");
 	fprintf(stderr, "  status          Display status information\n");
 	fprintf(stderr, "  op              Display original post\n");
 	fprintf(stderr, "  comments        Display comments\n");
@@ -349,7 +350,16 @@ handle_issues_actions(int argc, char *argv[],
 	while (argc > 0) {
 		char const *operation = shift(&argc, &argv);
 
-		if (strcmp("comments", operation) == 0) {
+		if (strcmp("all", operation) == 0) {
+			/* Make sure we have fetched the issue data */
+			ensure_issue(owner, repo, issue_id, &have_fetched_issue, &issue);
+
+			gcli_issue_print_summary(&issue);
+
+			puts("\nORIGINAL POST\n");
+			gcli_issue_print_op(&issue);
+
+		} else if (strcmp("comments", operation) == 0) {
 			/* Doesn't require fetching the issue data */
 			gcli_issue_comments(owner, repo, issue_id);
 
@@ -394,6 +404,8 @@ handle_issues_actions(int argc, char *argv[],
 			return EXIT_FAILURE;
 		}
 	}
+
+	// TODO: Free fetched issue if needed
 
 	return EXIT_SUCCESS;
 }

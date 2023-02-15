@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([gcli],[1.0.0-RC1],[nsonack@herrhotzenplotz.de],[gcli],[https://gitlab.com/herrhotzenplotz/gcli/])
+AC_INIT([gcli],[1.0.0-RC2],[nsonack@herrhotzenplotz.de],[gcli],[https://gitlab.com/herrhotzenplotz/gcli/])
 AM_INIT_AUTOMAKE([1.0 foreign subdir-objects dist-bzip2 dist-xz -Wall])
 
 dnl Silent by default.

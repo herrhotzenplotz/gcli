@@ -136,6 +136,44 @@ gcli_print_issues_table(enum gcli_output_flags const flags,
 }
 
 void
+gcli_issue_print_summary(gcli_issue const *const it)
+{
+	gcli_dict dict;
+
+	dict = gcli_dict_begin();
+
+	gcli_dict_add(dict, "NAME", 0, 0, "%d", it->number);
+	gcli_dict_add(dict, "TITLE", 0, 0, SV_FMT, SV_ARGS(it->title));
+	gcli_dict_add(dict, "CREATED", 0, 0, SV_FMT, SV_ARGS(it->created_at));
+	gcli_dict_add(dict, "AUTHOR",  GCLI_TBLCOL_BOLD, 0,
+	              SV_FMT, SV_ARGS(it->author));
+	gcli_dict_add(dict, "STATE", GCLI_TBLCOL_STATECOLOURED, 0,
+	              SV_FMT, SV_ARGS(it->state));
+	gcli_dict_add(dict, "COMMENTS", 0, 0, "%d", it->comments);
+	gcli_dict_add(dict, "LOCKED", 0, 0, "%s", sn_bool_yesno(it->locked));
+
+	if (it->milestone.length)
+		gcli_dict_add(dict, "MILESTONE", 0, 0, SV_FMT, SV_ARGS(it->milestone));
+
+	if (it->labels_size) {
+		gcli_dict_add_sv_list(dict, "LABELS", it->labels, it->labels_size);
+	} else {
+		gcli_dict_add(dict, "LABELS", 0, 0, "none");
+	}
+
+	if (it->assignees_size) {
+		gcli_dict_add_sv_list(dict, "ASSIGNEES",
+		                      it->assignees, it->assignees_size);
+	} else {
+		gcli_dict_add(dict, "ASSIGNEES", 0, 0, "none");
+	}
+
+	/* Dump the dictionary */
+	gcli_dict_end(dict);
+
+}
+
+void
 gcli_get_issue(char const *owner,
                char const *repo,
                int const issue_number,

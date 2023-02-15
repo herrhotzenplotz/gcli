@@ -254,19 +254,40 @@ subcommand_issues(int argc, char *argv[])
 	return handle_issues_actions(argc, argv, owner, repo, issue_id);
 }
 
+static inline void
+ensure_issue(char const *const owner, char const *const repo,
+             int const issue_id,
+             int *const have_fetched_issue, gcli_issue *const issue)
+{
+	if (*have_fetched_issue)
+		return;
+
+	gcli_get_issue(owner, repo, issue_id, issue);
+	*have_fetched_issue = 1;
+}
+
 static inline int
 handle_issues_actions(int argc, char *argv[],
                       char const *const owner,
                       char const *const repo,
                       int const issue_id)
 {
+	int have_fetched_issue = 0;
+	gcli_issue issue = {0};
+
 	/* execute all operations on the given issue */
 	while (argc > 0) {
 		char const *operation = shift(&argc, &argv);
 
 		if (strcmp("comments", operation) == 0) {
-
+			/* Doesn't require fetching the issue data */
 			gcli_issue_comments(owner, repo, issue_id);
+
+		} else if (strcmp("status", operation) == 0) {
+			/* Make sure we have fetched the issue data */
+			ensure_issue(owner, repo, issue_id, &have_fetched_issue, &issue);
+
+			gcli_issue_print_summary(&issue);
 
 		} else if (strcmp("close", operation) == 0) {
 

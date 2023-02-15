@@ -91,6 +91,8 @@ void gcli_get_issue(char const *owner,
                     int const issue_number,
                     gcli_issue *const out);
 
+void gcli_issue_print_summary(gcli_issue const *const it);
+
 void gcli_issue_close(char const *owner,
                       char const *repo,
                       int const issue_number);

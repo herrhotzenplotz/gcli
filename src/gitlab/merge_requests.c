@@ -317,14 +317,15 @@ gitlab_perform_submit_mr(gcli_submit_pull_options opts)
 		target.id,
 		labels ? labels : "");
 
-	/* construct url */
-	sn_sv e_owner = gcli_urlencode_sv(source_owner);
-	sn_sv e_repo  = gcli_urlencode_sv(opts.repo);
+	/* construct url. The thing below works as the string view is
+	 * malloced and also NUL-terminated */
+	char *e_owner = gcli_urlencode_sv(source_owner).data;
+	char *e_repo = gcli_urlencode(opts.repo);
 
 	char *url = sn_asprintf(
-		"%s/projects/"SV_FMT"%%2F"SV_FMT"/merge_requests",
+		"%s/projects/%s%%2F%s/merge_requests",
 		gitlab_get_apibase(),
-		SV_ARGS(e_owner), SV_ARGS(e_repo));
+	    e_owner, e_repo);
 
 	/* perform request */
 	gcli_fetch_with_method("POST", url, post_fields, NULL, &buffer);
@@ -335,8 +336,8 @@ gitlab_perform_submit_mr(gcli_submit_pull_options opts)
 	free(e_target_branch.data);
 	free(e_title.data);
 	free(e_body.data);
-	free(e_owner.data);
-	free(e_repo.data);
+	free(e_owner);
+	free(e_repo);
 	free(labels);
 	free(post_fields);
 	free(url);

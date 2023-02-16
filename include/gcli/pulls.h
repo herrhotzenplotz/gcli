@@ -81,8 +81,8 @@ struct gcli_commit {
 
 /* Options to submit to the gh api for creating a PR */
 struct gcli_submit_pull_options {
-	sn_sv        owner;
-	sn_sv        repo;
+	char const  *owner;
+	char const  *repo;
 	sn_sv        from;
 	sn_sv        to;
 	sn_sv        title;

@@ -148,10 +148,10 @@ subcommand_pull_create(int argc, char *argv[])
 			opts.draft = 1;
 			break;
 		case 'o':
-			opts.owner = SV(optarg);
+			opts.owner = optarg;
 			break;
 		case 'r':
-			opts.repo = SV(optarg);
+			opts.repo = optarg;
 			break;
 		case 'l': /* add a label */
 			opts.labels = realloc(
@@ -180,12 +180,7 @@ subcommand_pull_create(int argc, char *argv[])
 			     "--to branch-name or set pr.base in .gcli.");
 	}
 
-	if (!opts.owner.length || !opts.repo.length) {
-		gcli_config_get_upstream_parts(&opts.owner, &opts.repo);
-		if (!opts.owner.length || !opts.repo.length)
-			errx(1, "error: PR target repo is missing. Please either "
-			     "specify -o owner and -r repo or set pr.upstream in .gcli.");
-	}
+	check_owner_and_repo(&opts.owner, &opts.repo);
 
 	if (argc != 1) {
 		fprintf(stderr, "error: Missing title to PR\n");

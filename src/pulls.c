@@ -331,11 +331,11 @@ gcli_pull_submit(gcli_submit_pull_options opts)
 	        "TITLE   : "SV_FMT"\n"
 	        "BASE    : "SV_FMT"\n"
 	        "HEAD    : "SV_FMT"\n"
-	        "IN      : "SV_FMT"/"SV_FMT"\n"
+	        "IN      : %s/%s\n"
 	        "MESSAGE :\n"SV_FMT"\n",
 	        SV_ARGS(opts.title),SV_ARGS(opts.to),
 	        SV_ARGS(opts.from),
-	        SV_ARGS(opts.owner), SV_ARGS(opts.repo),
+	        opts.owner, opts.repo,
 	        SV_ARGS(opts.body));
 
 	fputc('\n', stdout);

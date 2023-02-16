@@ -37,24 +37,24 @@
 #include <templates/gitlab/repos.h>
 
 void
-gitlab_get_repo(sn_sv owner,
-                sn_sv repo,
+gitlab_get_repo(char const *owner,
+                char const *repo,
                 gcli_repo *const out)
 {
 	/* GET /projects/:id */
 	char              *url     = NULL;
 	gcli_fetch_buffer  buffer  = {0};
 	json_stream        stream  = {0};
-	sn_sv              e_owner = {0};
-	sn_sv              e_repo  = {0};
+	char              *e_owner = {0};
+	char              *e_repo  = {0};
 
-	e_owner = gcli_urlencode_sv(owner);
-	e_repo  = gcli_urlencode_sv(repo);
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
-		"%s/projects/"SV_FMT"%%2F"SV_FMT,
+		"%s/projects/%s%%2F%s",
 		gitlab_get_apibase(),
-		SV_ARGS(e_owner), SV_ARGS(e_repo));
+	    e_owner, e_repo);
 
 	gcli_fetch(url, NULL, &buffer);
 	json_open_buffer(&stream, buffer.data, buffer.length);
@@ -63,8 +63,8 @@ gitlab_get_repo(sn_sv owner,
 
 	json_close(&stream);
 	free(buffer.data);
-	free(e_owner.data);
-	free(e_repo.data);
+	free(e_owner);
+	free(e_repo);
 	free(url);
 }
 

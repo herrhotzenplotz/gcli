@@ -626,7 +626,11 @@ gcli_config_get_upstream_parts(sn_sv *const owner, sn_sv *const repo)
 
 	sn_sv upstream   = gcli_config_get_upstream();
 	*owner           = sn_sv_chop_until(&upstream, '/');
-	/* TODO: Sanity check */
+
+	/* Sanity check: did we actually reach the '/'? */
+	if (*upstream.data != '/')
+		errx(1, ".gcli has invalid upstream format. expected owner/repo");
+
 	upstream.data   += 1;
 	upstream.length -= 1;
 	*repo            = upstream;

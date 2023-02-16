@@ -185,24 +185,22 @@ void
 github_perform_submit_issue(gcli_submit_issue_options opts,
                             gcli_fetch_buffer *out)
 {
-	sn_sv e_owner = gcli_urlencode_sv(opts.owner);
-	sn_sv e_repo  = gcli_urlencode_sv(opts.repo);
-	sn_sv e_title = gcli_json_escape(opts.title);
-	sn_sv e_body  = gcli_json_escape(opts.body);
+	char  *e_owner = gcli_urlencode(opts.owner);
+	char  *e_repo  = gcli_urlencode(opts.repo);
+	sn_sv  e_title = gcli_json_escape(opts.title);
+	sn_sv  e_body  = gcli_json_escape(opts.body);
 
 	char *post_fields = sn_asprintf(
 		"{ \"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
 		SV_ARGS(e_title), SV_ARGS(e_body));
-	char *url         = sn_asprintf(
-		"%s/repos/"SV_FMT"/"SV_FMT"/issues",
-		gcli_get_apibase(),
-		SV_ARGS(e_owner),
-		SV_ARGS(e_repo));
+
+	char *url = sn_asprintf("%s/repos/%s/%s/issues",
+	                        gcli_get_apibase(), e_owner, e_repo);
 
 	gcli_fetch_with_method("POST", url, post_fields, NULL, out);
 
-	free(e_owner.data);
-	free(e_repo.data);
+	free(e_owner);
+	free(e_repo);
 	free(e_title.data);
 	free(e_body.data);
 	free(post_fields);

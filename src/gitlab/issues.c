@@ -191,8 +191,8 @@ void
 gitlab_perform_submit_issue(gcli_submit_issue_options opts,
                             gcli_fetch_buffer *const out)
 {
-	sn_sv e_owner = gcli_urlencode_sv(opts.owner);
-	sn_sv e_repo  = gcli_urlencode_sv(opts.repo);
+	char *e_owner = gcli_urlencode(opts.owner);
+	char *e_repo  = gcli_urlencode(opts.repo);
 	sn_sv e_title = gcli_json_escape(opts.title);
 	sn_sv e_body  = gcli_json_escape(opts.body);
 
@@ -200,15 +200,13 @@ gitlab_perform_submit_issue(gcli_submit_issue_options opts,
 		"{ \"title\": \""SV_FMT"\", \"description\": \""SV_FMT"\" }",
 		SV_ARGS(e_title), SV_ARGS(e_body));
 	char *url         = sn_asprintf(
-		"%s/projects/"SV_FMT"%%2F"SV_FMT"/issues",
-		gitlab_get_apibase(),
-		SV_ARGS(e_owner),
-		SV_ARGS(e_repo));
+		"%s/projects/%s%%2F%s/issues",
+		gitlab_get_apibase(), e_owner, e_repo);
 
 	gcli_fetch_with_method("POST", url, post_fields, NULL, out);
 
-	free(e_owner.data);
-	free(e_repo.data);
+	free(e_owner);
+	free(e_repo);
 	free(e_title.data);
 	free(e_body.data);
 	free(post_fields);

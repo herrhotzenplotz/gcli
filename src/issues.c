@@ -229,11 +229,12 @@ gcli_issue_submit(gcli_submit_issue_options opts)
 	printf("The following issue will be created:\n"
 	       "\n"
 	       "TITLE   : "SV_FMT"\n"
-	       "OWNER   : "SV_FMT"\n"
-	       "REPO    : "SV_FMT"\n"
+	       "OWNER   : %s\n"
+	       "REPO    : %s\n"
 	       "MESSAGE :\n"SV_FMT"\n",
-	       SV_ARGS(opts.title), SV_ARGS(opts.owner),
-	       SV_ARGS(opts.repo), SV_ARGS(opts.body));
+	       SV_ARGS(opts.title),
+	       opts.owner, opts.repo,
+	       SV_ARGS(opts.body));
 
 	putchar('\n');
 

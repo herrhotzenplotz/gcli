@@ -97,10 +97,10 @@ subcommand_issue_create(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "o:r:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
-			opts.owner = SV(optarg);
+			opts.owner = optarg;
 			break;
 		case 'r':
-			opts.repo = SV(optarg);
+			opts.repo = optarg;
 			break;
 		case 'y':
 			opts.always_yes = true;
@@ -114,14 +114,7 @@ subcommand_issue_create(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	if (!opts.owner.length || !opts.repo.length) {
-		gcli_config_get_upstream_parts(&opts.owner, &opts.repo);
-		if (!opts.owner.length || !opts.repo.length)
-			errx(1,
-			     "error: Target repo for the issue to be created "
-			     "in is missing. Please either specify '-o owner' "
-			     "and '-r repo' or set pr.upstream in .gcli.");
-	}
+	check_owner_and_repo(&opts.owner, &opts.repo);
 
 	if (argc != 1) {
 		fprintf(stderr, "error: Expected one argument for issue title\n");

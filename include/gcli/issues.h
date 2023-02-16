@@ -62,11 +62,11 @@ struct gcli_issue {
 };
 
 struct gcli_submit_issue_options {
-	sn_sv owner;
-	sn_sv repo;
-	sn_sv title;
-	sn_sv body;
-	bool  always_yes;
+	char const *owner;
+	char const *repo;
+	sn_sv       title;
+	sn_sv       body;
+	bool        always_yes;
 };
 
 struct gcli_issue_list {

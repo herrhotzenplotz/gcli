@@ -88,9 +88,9 @@ Tested Operating Systems so far:
 
 ## Support
 
-You can ask your local frenchman aka. neutaaaaan for emotional support
-when using this piece of software. Otherwise you can read the man page
-at »man gcli«.
+Please refer to the manual pages that come with gcli. You may want to
+start at `gcli(1)`. For further questions refer to the issues on
+Github and Gitlab or ask on IRC.
 
 ## Bugs and contributions
 

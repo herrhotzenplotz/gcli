@@ -43,17 +43,10 @@
 typedef struct gcli_pull                gcli_pull;
 typedef struct gcli_submit_pull_options gcli_submit_pull_options;
 typedef struct gcli_commit              gcli_commit;
-typedef struct gcli_pull_header         gcli_pull_header;
 typedef struct gcli_pull_list           gcli_pull_list;
 
-struct gcli_pull_header {
-	char *title, *state, *creator;
-	int number, id;
-	bool merged;
-};
-
 struct gcli_pull_list {
-	gcli_pull_header *pulls;
+	gcli_pull *pulls;
 	size_t pulls_size;
 };
 

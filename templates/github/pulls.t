@@ -1,18 +1,6 @@
 include "gcli/pulls.h";
 include "templates/github/labels.h";
 
-parser github_pull_header is
-object of gcli_pull_header with
-	("title"     => title as string,
-	 "state"     => state as string,
-	 "number"    => number as int,
-	 "id"        => id as int,
-	 "merged_at" => merged as is_string,
-	 "user"      => creator as user);
-
-parser github_pulls is array of gcli_pull_header
-	use parse_github_pull_header;
-
 parser github_commit_author_field is
 object of gcli_commit with
 	("name"  => author as string,
@@ -64,3 +52,6 @@ object of gcli_pull with
 	 "base"          => use parse_github_branch_label);
 
 parser github_pr_merge_message is object of char* select "message" as string;
+
+parser github_pulls is array of gcli_pull
+	use parse_github_pull;

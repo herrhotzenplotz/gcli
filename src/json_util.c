@@ -366,7 +366,10 @@ get_gitea_visibility(json_stream *const input)
 bool
 get_gitlab_can_be_merged(json_stream *const input)
 {
-	return sn_sv_eq_to(get_sv(input), "can_be_merged");
+	sn_sv tmp = get_sv(input);
+	bool result = sn_sv_eq_to(tmp, "can_be_merged");
+	free(tmp.data);
+	return result;
 }
 
 int

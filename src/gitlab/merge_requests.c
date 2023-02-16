@@ -47,7 +47,7 @@ gitlab_fetch_mrs(char *url, int const max, gcli_pull_list *const list)
 	do {
 		gcli_fetch(url, &next_url, &json_buffer);
 		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-		parse_gitlab_mr_headers(&stream, &list->pulls, &list->pulls_size);
+		parse_gitlab_mrs(&stream, &list->pulls, &list->pulls_size);
 
 		free(json_buffer.data);
 		free(url);

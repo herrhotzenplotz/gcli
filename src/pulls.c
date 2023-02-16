@@ -42,11 +42,8 @@
 void
 gcli_pulls_free(gcli_pull_list *const it)
 {
-	for (size_t i = 0; i < it->pulls_size; ++i) {
-		free(it->pulls[i].title);
-		free(it->pulls[i].state);
-		free(it->pulls[i].creator);
-	}
+	for (size_t i = 0; i < it->pulls_size; ++i)
+		gcli_pull_free(&it->pulls[i]);
 
 	free(it->pulls);
 
@@ -101,7 +98,7 @@ gcli_print_pulls_table(enum gcli_output_flags const flags,
 			                 list->pulls[n-i-1].number,
 			                 list->pulls[n-i-1].state,
 			                 list->pulls[n-i-1].merged,
-			                 list->pulls[n-i-1].creator,
+			                 list->pulls[n-i-1].author,
 			                 list->pulls[n-i-1].title);
 		}
 	} else {
@@ -110,7 +107,7 @@ gcli_print_pulls_table(enum gcli_output_flags const flags,
 			                 list->pulls[i].number,
 			                 list->pulls[i].state,
 			                 list->pulls[i].merged,
-			                 list->pulls[i].creator,
+			                 list->pulls[i].author,
 			                 list->pulls[i].title);
 		}
 	}
@@ -278,7 +275,10 @@ gcli_pull_free(gcli_pull *const it)
 
 	for (size_t i = 0; i < it->labels_size; ++i)
 		free(it->labels[i].data);
+
+	free(it->labels);
 }
+
 
 void
 gcli_get_pull(char const *owner,

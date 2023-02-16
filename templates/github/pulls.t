@@ -1,8 +1,8 @@
 include "gcli/pulls.h";
 include "templates/github/labels.h";
 
-parser github_pull is
-object of gcli_pull with
+parser github_pull_header is
+object of gcli_pull_header with
 	("title"     => title as string,
 	 "state"     => state as string,
 	 "number"    => number as int,
@@ -10,8 +10,8 @@ object of gcli_pull with
 	 "merged_at" => merged as is_string,
 	 "user"      => creator as user);
 
-parser github_pulls is array of gcli_pull
-	use parse_github_pull;
+parser github_pulls is array of gcli_pull_header
+	use parse_github_pull_header;
 
 parser github_commit_author_field is
 object of gcli_commit with
@@ -33,16 +33,16 @@ parser github_commits is array of gcli_commit
 	use parse_github_commit;
 
 parser github_pull_head is
-object of gcli_pull_summary with
+object of gcli_pull with
 	("sha"   => head_sha as string,
 	 "label" => head_label as string);
 
 parser github_branch_label is
-object of gcli_pull_summary with
+object of gcli_pull with
 	("label" => base_label as string);
 
-parser github_pull_summary is
-object of gcli_pull_summary with
+parser github_pull is
+object of gcli_pull with
 	("title"         => title as string,
 	 "state"         => state as string,
 	 "body"          => body as string,
@@ -56,7 +56,7 @@ object of gcli_pull_summary with
 	 "additions"     => additions as int,
 	 "deletions"     => deletions as int,
 	 "changed_files" => changed_files as int,
-	 "merged"        => merged as bool,
+	 "merged_at"     => merged as is_string,
 	 "mergeable"     => mergeable as bool,
 	 "draft"         => draft as bool,
 	 "user"          => author as user,

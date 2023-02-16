@@ -324,16 +324,16 @@ subcommand_pulls(int argc, char *argv[])
 	return handle_pull_actions(argc, argv, owner, repo, pr);
 }
 
-/** Helper routine for fetching a PR summary if required */
+/** Helper routine for fetching a PR if required */
 static void
-ensure_summary(char const *owner, char const *repo, int pr,
-               int *const fetched_summary, gcli_pull_summary *const summary)
+ensure_pull(char const *owner, char const *repo, int pr,
+            int *const fetched_pull, gcli_pull *const pull)
 {
-	if (*fetched_summary)
+	if (*fetched_pull)
 		return;
 
-	gcli_get_pull_summary(owner, repo, pr, summary);
-	*fetched_summary = 1;
+	gcli_get_pull(owner, repo, pr, pull);
+	*fetched_pull = 1;
 }
 
 /** Handling routine for Pull Request related actions specified on the
@@ -347,8 +347,8 @@ handle_pull_actions(int argc, char *argv[],
 	/* For ease of handling and not making redundant calls to the API
 	 * we'll fetch the summary only if a command requires it. Then
 	 * we'll proceed to actually handling it. */
-	int fetched_summary = 0;
-	gcli_pull_summary summary = {0};
+	int fetched_pull = 0;
+	gcli_pull pull = {0};
 
 	/* Iterate over the argument list until the end */
 	while (argc > 0) {
@@ -363,15 +363,15 @@ handle_pull_actions(int argc, char *argv[],
 		 * we must ensure that the summary has been fetched. */
 		if (strcmp(action, "all") == 0) {
 
-			/* First make sure we have the summary ready */
-			ensure_summary(owner, repo, pr, &fetched_summary, &summary);
+			/* First make sure we have the data ready */
+			ensure_pull(owner, repo, pr, &fetched_pull, &pull);
 
 			/* Print meta */
-			gcli_pull_summary_print_status(&summary);
+			gcli_pull_print_status(&pull);
 
 			/* OP */
 			puts("\nORIGINAL POST");
-			gcli_pull_summary_print_op(&summary);
+			gcli_pull_print_op(&pull);
 
 			/* Commits */
 			puts("\nCOMMITS");
@@ -383,19 +383,19 @@ handle_pull_actions(int argc, char *argv[],
 
 		} else if (strcmp(action, "op") == 0) {
 
-			/* Ensure we have fetched the summary */
-			ensure_summary(owner, repo, pr, &fetched_summary, &summary);
+			/* Ensure we have fetched the data */
+			ensure_pull(owner, repo, pr, &fetched_pull, &pull);
 
 			/* Print it */
-			gcli_pull_summary_print_op(&summary);
+			gcli_pull_print_op(&pull);
 
 		} else if (strcmp(action, "status") == 0) {
 
-			/* Ensure we have the summary ready */
-			ensure_summary(owner, repo, pr, &fetched_summary, &summary);
+			/* Ensure we have the data */
+			ensure_pull(owner, repo, pr, &fetched_pull, &pull);
 
 			/* Print meta information */
-			gcli_pull_summary_print_status(&summary);
+			gcli_pull_print_status(&pull);
 
 		} else if (strcmp(action, "commits") == 0) {
 
@@ -476,9 +476,9 @@ handle_pull_actions(int argc, char *argv[],
 
 	} /* Next action */
 
-	/* Free the summary only when we actually fetched it */
-	if (fetched_summary)
-		gcli_pulls_summary_free(&summary);
+	/* Free the pull request data only when we actually fetched it */
+	if (fetched_pull)
+		gcli_pull_free(&pull);
 
 	return EXIT_SUCCESS;
 }

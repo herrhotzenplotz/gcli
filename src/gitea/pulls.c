@@ -42,12 +42,12 @@ gitea_get_pulls(char const *owner,
 }
 
 void
-gitea_get_pull_summary(char const *owner,
-                       char const *repo,
-                       int const pr_number,
-                       gcli_pull_summary *const out)
+gitea_get_pull(char const *owner,
+               char const *repo,
+               int const pr_number,
+               gcli_pull *const out)
 {
-	github_get_pull_summary(owner, repo, pr_number, out);
+	github_get_pull(owner, repo, pr_number, out);
 }
 
 int

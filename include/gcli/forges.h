@@ -280,11 +280,11 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Get a summary of the given PR/MR */
-	void (*get_pull_summary)(
-		char const               *owner,
-		char const               *repo,
-		int const                 pr_number,
-		gcli_pull_summary *const  out);
+	void (*get_pull)(
+		char const *owner,
+		char const *repo,
+		int const pr_number,
+		gcli_pull *const out);
 
 	/**
 	 * Add labels to Pull Requests */

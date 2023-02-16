@@ -211,7 +211,7 @@ github_perform_submit_pull(gcli_submit_pull_options opts)
 	sn_sv              e_head, e_base, e_title, e_body;
 	gcli_fetch_buffer  fetch_buffer = {0};
 	struct json_stream json         = {0};
-	gcli_pull_summary  pull         = {0};
+	gcli_pull          pull         = {0};
 
 	e_head  = gcli_json_escape(opts.from);
 	e_base  = gcli_json_escape(opts.to);
@@ -236,7 +236,7 @@ github_perform_submit_pull(gcli_submit_pull_options opts)
 	 * with one request. */
 	if (opts.labels_size) {
 		json_open_buffer(&json, fetch_buffer.data, fetch_buffer.length);
-		parse_github_pull_summary(&json, &pull);
+		parse_github_pull(&json, &pull);
 
 		/* HACK: the string in the string view is passed from the
 		 *       command line and is thus null-terminated. We don't
@@ -246,7 +246,7 @@ github_perform_submit_pull(gcli_submit_pull_options opts)
 		github_issue_add_labels(opts.owner.data, opts.repo.data,
 		                        pull.id, opts.labels, opts.labels_size);
 
-		gcli_pulls_summary_free(&pull);
+		gcli_pull_free(&pull);
 		json_close(&json);
 	}
 
@@ -299,10 +299,10 @@ github_get_pull_commits(char const *owner,
 }
 
 void
-github_get_pull_summary(char const *owner,
-                        char const *repo,
-                        int const pr_number,
-                        gcli_pull_summary *const out)
+github_get_pull(char const *owner,
+                char const *repo,
+                int const pr_number,
+                gcli_pull *const out)
 {
 	json_stream        stream      = {0};
 	gcli_fetch_buffer  json_buffer = {0};
@@ -321,7 +321,7 @@ github_get_pull_summary(char const *owner,
 
 	json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 
-	parse_github_pull_summary(&stream, out);
+	parse_github_pull(&stream, out);
 
 	json_close(&stream);
 	free(url);

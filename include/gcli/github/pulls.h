@@ -76,10 +76,10 @@ int github_get_pull_commits(char const *owner,
                             int const pr_number,
                             gcli_commit **const out);
 
-void github_get_pull_summary(char const *owner,
-                             char const *repo,
-                             int const pr_number,
-                             gcli_pull_summary *const out);
+void github_get_pull(char const *owner,
+                     char const *repo,
+                     int const pr_number,
+                     gcli_pull *const out);
 
 sn_sv github_pull_try_derive_head(void);
 

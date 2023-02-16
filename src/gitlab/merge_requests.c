@@ -47,7 +47,7 @@ gitlab_fetch_mrs(char *url, int const max, gcli_pull_list *const list)
 	do {
 		gcli_fetch(url, &next_url, &json_buffer);
 		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-		parse_gitlab_mrs(&stream, &list->pulls, &list->pulls_size);
+		parse_gitlab_mr_headers(&stream, &list->pulls, &list->pulls_size);
 
 		free(json_buffer.data);
 		free(url);
@@ -135,10 +135,10 @@ gitlab_mr_merge(char const *owner,
 }
 
 void
-gitlab_get_pull_summary(char const *owner,
-                        char const *repo,
-                        int const pr_number,
-                        gcli_pull_summary *const out)
+gitlab_get_pull(char const *owner,
+                char const *repo,
+                int const pr_number,
+                gcli_pull *const out)
 {
 	json_stream        stream      = {0};
 	gcli_fetch_buffer  json_buffer = {0};
@@ -158,7 +158,7 @@ gitlab_get_pull_summary(char const *owner,
 
 	json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 
-	parse_gitlab_mr_summary(&stream, out);
+	parse_gitlab_mr(&stream, out);
 
 	json_close(&stream);
 	free(url);

@@ -35,7 +35,7 @@ pulls(struct json_stream *stream)
 
 	printf("title\t%s\n", pull.title);
 	printf("state\t%s\n", pull.state);
-	printf("author\t%s\n", pull.creator);
+	printf("author\t%s\n", pull.author);
 	printf("number\t%d\n", pull.number);
 	printf("id\t%d\n", pull.id);
 	printf("merged\t%d\n", pull.merged);

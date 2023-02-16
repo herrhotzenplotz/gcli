@@ -43,21 +43,21 @@
 typedef struct gcli_pull                gcli_pull;
 typedef struct gcli_submit_pull_options gcli_submit_pull_options;
 typedef struct gcli_commit              gcli_commit;
-typedef struct gcli_pull_summary        gcli_pull_summary;
+typedef struct gcli_pull_header         gcli_pull_header;
 typedef struct gcli_pull_list           gcli_pull_list;
 
-struct gcli_pull {
+struct gcli_pull_header {
 	char *title, *state, *creator;
 	int number, id;
 	bool merged;
 };
 
 struct gcli_pull_list {
-	gcli_pull *pulls;
+	gcli_pull_header *pulls;
 	size_t pulls_size;
 };
 
-struct gcli_pull_summary {
+struct gcli_pull {
 	char   *author;
 	char   *state;
 	char   *title;
@@ -106,9 +106,9 @@ int gcli_get_pulls(char const *owner,
                    int const max,
                    gcli_pull_list *const out);
 
-void gcli_pulls_free(gcli_pull_list *const list);
+void gcli_pull_free(gcli_pull *const it);
 
-void gcli_pulls_summary_free(gcli_pull_summary *const it);
+void gcli_pulls_free(gcli_pull_list *const list);
 
 void gcli_print_pulls_table(enum gcli_output_flags const flags,
                             gcli_pull_list const *const list,
@@ -127,16 +127,16 @@ void gcli_pull_commits(char const *owner,
                        char const *repo,
                        int const pr_number);
 
-void gcli_get_pull_summary(char const *owner,
-                           char const *repo,
-                           int const pr_number,
-                           gcli_pull_summary *const out);
+void gcli_get_pull(char const *owner,
+                   char const *repo,
+                   int const pr_number,
+                   gcli_pull *const out);
 
 void gcli_pull_submit(gcli_submit_pull_options);
 
-void gcli_pull_summary_print_status(gcli_pull_summary const *const it);
+void gcli_pull_print_status(gcli_pull const *const it);
 
-void gcli_pull_summary_print_op(gcli_pull_summary *const summary);
+void gcli_pull_print_op(gcli_pull *const summary);
 
 void gcli_pull_merge(char const *owner,
                      char const *reponame,

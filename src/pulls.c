@@ -128,7 +128,7 @@ gcli_print_pull_diff(FILE *stream,
 }
 
 void
-gcli_pull_summary_print_status(gcli_pull_summary const *const it)
+gcli_pull_print_status(gcli_pull const *const it)
 {
 	gcli_dict dict;
 	gcli_forge_descriptor const *const forge = gcli_forge();
@@ -265,7 +265,7 @@ gcli_pull_commits(char const *owner,
 }
 
 void
-gcli_pulls_summary_free(gcli_pull_summary *const it)
+gcli_pull_free(gcli_pull *const it)
 {
 	free(it->author);
 	free(it->state);
@@ -281,19 +281,19 @@ gcli_pulls_summary_free(gcli_pull_summary *const it)
 }
 
 void
-gcli_get_pull_summary(char const *owner,
-                      char const *repo,
-                      int const pr_number,
-                      gcli_pull_summary *const out)
+gcli_get_pull(char const *owner,
+              char const *repo,
+              int const pr_number,
+              gcli_pull *const out)
 {
-	gcli_forge()->get_pull_summary(owner, repo, pr_number, out);
+	gcli_forge()->get_pull(owner, repo, pr_number, out);
 }
 
 void
-gcli_pull_summary_print_op(gcli_pull_summary *const summary)
+gcli_pull_print_op(gcli_pull *const pull)
 {
-	if (summary->body)
-		pretty_print(summary->body, 4, 80, stdout);
+	if (pull->body)
+		pretty_print(pull->body, 4, 80, stdout);
 }
 
 void

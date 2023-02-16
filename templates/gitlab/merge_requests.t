@@ -1,7 +1,7 @@
 include "gcli/gitlab/merge_requests.h";
 
-parser gitlab_mr is
-object of gcli_pull with
+parser gitlab_mr_header is
+object of gcli_pull_header with
 	("title"     => title as string,
 	 "state"     => state as string,
 	 "iid"       => number as int,
@@ -9,10 +9,10 @@ object of gcli_pull with
 	 "merged_at" => merged as is_string,
 	 "author"    => creator as user);
 
-parser gitlab_mrs is array of gcli_pull use parse_gitlab_mr;
+parser gitlab_mr_headers is array of gcli_pull_header use parse_gitlab_mr_header;
 
-parser gitlab_mr_summary is
-object of gcli_pull_summary with
+parser gitlab_mr is
+object of gcli_pull with
 	("title"            => title as string,
 	 "state"            => state as string,
 	 "description"      => body as string,

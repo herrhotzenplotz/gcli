@@ -342,7 +342,7 @@ gcli_gitconfig_read_gitconfig(void)
 		if (buffer.length == 0)
 			break;
 
-		// TODO: Git Config files support comments
+		/* TODO: Git Config files support comments */
 		if (*buffer.data != '[')
 			errx(1, "error: invalid git config");
 

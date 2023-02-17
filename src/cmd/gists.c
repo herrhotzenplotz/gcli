@@ -84,8 +84,6 @@ subcommand_gist_get(int argc, char *argv[])
 	     file_name, gist_id);
 
 file_found:
-	/* TODO: check if tty when file is large */
-	/* TODO: HACK */
 
 	if (isatty(STDOUT_FILENO) && (file->size >= 4 * 1024 * 1024))
 		errx(1, "File is bigger than 4 MiB, refusing to print to stdout.");

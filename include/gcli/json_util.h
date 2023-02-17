@@ -54,7 +54,6 @@
 #define get_int_to_sv(input)     (sn_sv_fmt("%ld", get_int(input)))
 #define get_int_to_string(input) (sn_asprintf("%ld", get_int(input)))
 
-
 long        get_int_(json_stream *input, char const *function);
 double      get_double_(json_stream *input, char const *function);
 long        get_parse_int_(json_stream *input, char const *function);
@@ -64,6 +63,7 @@ sn_sv       get_sv_(json_stream *input, char const *function);
 char       *get_user_(json_stream *input, char const *function);
 char const *get_label_(json_stream *input, char const *function);
 sn_sv       gcli_json_escape(sn_sv);
+#define     gcli_json_escape_cstr(x) (gcli_json_escape(SV((x))).data)
 void        gcli_print_html_url(gcli_fetch_buffer);
 void        gcli_json_advance(json_stream *input, char const *fmt, ...);
 uint32_t    get_github_style_colour(json_stream *input);

@@ -32,6 +32,7 @@
 #include <gcli/config.h>
 #include <gcli/curl.h>
 #include <gcli/github/issues.h>
+#include <gcli/json_util.h>
 
 #include <templates/github/milestones.h>
 
@@ -131,11 +132,14 @@ github_create_milestone(struct gcli_milestone_create_args const *args)
 	e_owner = gcli_urlencode(args->owner);
 	e_repo = gcli_urlencode(args->repo);
 
-	/* TODO: handle escaping */
-	if (args->description)
-		description = sn_asprintf(",\"description\": \"%s\"", args->description);
-	else
+	if (args->description) {
+		/* This is fine :-) */
+		char *e_description = gcli_json_escape_cstr((char *)args->description);
+		description = sn_asprintf(",\"description\": \"%s\"", e_description);
+		free(e_description);
+	} else {
 		description = strdup("");
+	}
 
 	json_body = sn_asprintf(
 		"{"

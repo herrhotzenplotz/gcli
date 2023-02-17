@@ -134,7 +134,7 @@ github_create_milestone(struct gcli_milestone_create_args const *args)
 
 	if (args->description) {
 		/* This is fine :-) */
-		char *e_description = gcli_json_escape_cstr((char *)args->description);
+		char *e_description = gcli_json_escape_cstr(args->description);
 		description = sn_asprintf(",\"description\": \"%s\"", e_description);
 		free(e_description);
 	} else {

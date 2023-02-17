@@ -63,7 +63,7 @@ sn_sv       get_sv_(json_stream *input, char const *function);
 char       *get_user_(json_stream *input, char const *function);
 char const *get_label_(json_stream *input, char const *function);
 sn_sv       gcli_json_escape(sn_sv);
-#define     gcli_json_escape_cstr(x) (gcli_json_escape(SV((x))).data)
+#define     gcli_json_escape_cstr(x) (gcli_json_escape(SV((char *)(x))).data)
 void        gcli_print_html_url(gcli_fetch_buffer);
 void        gcli_json_advance(json_stream *input, char const *fmt, ...);
 uint32_t    get_github_style_colour(json_stream *input);

@@ -32,6 +32,7 @@
 #include <gcli/gitlab/issues.h>
 #include <gcli/gitlab/merge_requests.h>
 #include <gcli/gitlab/milestones.h>
+#include <gcli/json_util.h>
 
 #include <templates/gitlab/milestones.h>
 
@@ -128,7 +129,7 @@ gitlab_milestone_get_issues(char const *const owner,
 int
 gitlab_create_milestone(struct gcli_milestone_create_args const *args)
 {
-	char *url, *e_owner, *e_repo, *json_body, *description = NULL;
+	char *url, *e_owner, *e_repo, *e_title, *json_body, *description = NULL;
 
 	e_owner = gcli_urlencode(args->owner);
 	e_repo = gcli_urlencode(args->repo);
@@ -136,23 +137,27 @@ gitlab_create_milestone(struct gcli_milestone_create_args const *args)
 	url = sn_asprintf("%s/projects/%s%%2F%s/milestones",
 	                  gitlab_get_apibase(), e_owner, e_repo);
 
-	/* TODO: JSON escaping */
-	if (args->description)
-		description = sn_asprintf(", \"description\": \"%s\"",
-		                          args->description);
+	/* Escape and prepare the description if needed */
+	if (args->description) {
+		char *e_description = gcli_json_escape_cstr(args->description);
+		description = sn_asprintf(", \"description\": \"%s\"", e_description);
+		free(e_description);
+	}
+
+	e_title = gcli_json_escape_cstr(args->title);
 
 	json_body = sn_asprintf("{"
 	                        "    \"title\": \"%s\""
 	                        "    %s"
 	                        "}",
-	                        args->title,
-	                        description ? description : "");
+	                        e_title, description ? description : "");
 
 	gcli_fetch_with_method("POST", url, json_body, NULL, NULL);
 
 	free(json_body);
 	free(description);
 	free(url);
+	free(e_title);
 	free(e_repo);
 	free(e_owner);
 

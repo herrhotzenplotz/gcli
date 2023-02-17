@@ -324,7 +324,6 @@ gitlab_job_status(char const *owner, char const *repo, long const jid)
 	gitlab_free_job_data(&job);
 }
 
-/* TODO: Maybe devise a macro for these things ? */
 void
 gitlab_job_cancel(char const *owner, char const *repo, long const jid)
 {

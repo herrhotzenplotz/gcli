@@ -1,6 +1,6 @@
-.Dd $Mdocdate$
+.Dd @PACKAGE_DATE@
 .Dt GCLI-REPOS 1
-.Os
+.Os @PACKAGE_STRING@
 .Sh NAME
 .Nm gcli repos
 .Nd Manage remote repositories on various git forges
@@ -67,7 +67,7 @@ may be one or more of the following:
 .It Cm delete
 Delete the repository. You will be asked for confirmation unless you set
 .Fl y .
-
+.Pp
 The following flags can be specified:
 .Bl -tag -width indent
 .It Fl r , -repo
@@ -86,17 +86,17 @@ List your own repos:
 .Bd -literal -offset indent
 $ gcli repos
 .Ed
-
+.Pp
 List neutaaaaan's repositories:
 .Bd -literal -offset indent
 $ gcli repos -o neutaaaaan
 .Ed
-
+.Pp
 Delete vim/vim without confirmation:
 .Bd -literal -offset indent
 $ gcli repos -o vim -r vim -y delete
 .Ed
-
+.Pp
 Create a repository called emacs with a description and make it
 public:
 .Bd -literal -offset indent
@@ -112,5 +112,7 @@ $ gcli repos create -r emacs -d "welcome to the holy church of emacs."
 Currently it is only possible to create repositories for authenticated
 users thus it is impossible to create a repository in another
 organization.
+.Pp
+Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
+or on Github.
 
-Please report issues preferably via e-mail, on GitLab or on GitHub.

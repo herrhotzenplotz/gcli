@@ -1,6 +1,6 @@
-.Dd $Mdocdate$
+.Dd @PACKAGE_DATE@
 .Dt GCLI-LABELS 1
-.Os
+.Os @PACKAGE_STRING@
 .Sh NAME
 .Nm gcli labels
 .Nd Manage ticket labels in git forges
@@ -36,12 +36,12 @@ Work in the given repository. This option can only be used in
 combination with
 .Fl o .
 .El
-
+.Pp
 .Sh SUBCOMMANDS
 .Bl -tag -width indent
 .It Cm create
 Create a new label in the given or autodetected repository.
-
+.Pp
 The following flags must be specified:
 .Bl -tag -width indent
 .It Fl n , -name Ar name
@@ -60,7 +60,7 @@ is expected to be a 6 digit hexadecimal RGB colour code.
 .El
 .It Cm delete
 Delete the specified label in the given or autodetected repository.
-
+.Pp
 There are no flags for this subcommand.
 .El
 .Sh EXAMPLES
@@ -68,7 +68,7 @@ Print a list of all labels in the current project:
 .Bd -literal -offset indent
 $ gcli labels
 .Ed
-
+.Pp
 Create a new label called
 .Sq bug
 with a description
@@ -80,7 +80,7 @@ $ gcli labels create \\
 		--description "Something is not working as expected" \\
 		--colour FF0000
 .Ed
-
+.Pp
 Delete the label
 .Sq foobar
 in herrhotzenplotz/gcli and use the configured account
@@ -96,5 +96,6 @@ $ gcli -a gitlab labels delete -o herrhotzenplotz -r gcli foobar
 .Sh BUGS
 The delete subcommand should ask for confirmation and have a flag to
 override this behaviour.
-
-Please report issues preferably via e-mail, on GitLab or on GitHub.
+.Pp
+Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
+or on Github.

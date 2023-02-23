@@ -1,6 +1,6 @@
-.Dd $Mdocdate$
+.Dd @PACKAGE_DATE@
 .Dt GCLI-MILESTONES 1
-.Os
+.Os @PACKAGE_STRING@
 .Sh NAME
 .Nm gcli milestones
 .Nd List and manage milestones in various Git Forges
@@ -80,4 +80,6 @@ $ gcli -t github milestones -i 420 delete
 The delete subcommand deletes the milestone without asking for
 confirmation.
 .Pp
-Please report issues preferably via e-mail, on GitLab or on GitHub.
+Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
+or on Github.
+

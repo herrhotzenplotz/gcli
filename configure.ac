@@ -5,6 +5,10 @@ AC_PREREQ([2.69])
 AC_INIT([gcli],[1.0.0-RC2],[nsonack@herrhotzenplotz.de],[gcli],[https://gitlab.com/herrhotzenplotz/gcli/])
 AM_INIT_AUTOMAKE([1.0 foreign subdir-objects dist-bzip2 dist-xz -Wall])
 
+dnl Release Date.
+PACKAGE_DATE="20 February, 2023"
+AC_SUBST([PACKAGE_DATE])
+
 dnl Silent by default.
 AM_SILENT_RULES([yes])
 
@@ -53,5 +57,20 @@ AC_CHECK_HEADERS([string.h signal.h sys/wait.h unistd.h sys/mman.h sys/types.h],
 dnl Check that the function is defined somewhere.
 AC_CHECK_FUNC([getopt_long])
 
-AC_CONFIG_FILES([Makefile])
+dnl Generate and substitute various files
+AC_CONFIG_FILES([Makefile
+                 docs/gcli-api.1
+                 docs/gcli-comment.1
+                 docs/gcli-forks.1
+                 docs/gcli-gists.1
+                 docs/gcli-issues.1
+                 docs/gcli-labels.1
+                 docs/gcli-milestones.1
+                 docs/gcli-pipelines.1
+                 docs/gcli-pulls.1
+                 docs/gcli-releases.1
+                 docs/gcli-repos.1
+                 docs/gcli-snippets.1
+                 docs/gcli-status.1
+                 docs/gcli.1])
 AC_OUTPUT

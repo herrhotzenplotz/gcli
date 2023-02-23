@@ -1,6 +1,7 @@
-.Dd $Mdocdate$
+.Dd @PACKAGE_DATE@
 .Dt GCLI-COMMENT 1
-.Os
+.Os @PACKAGE_STRING@
+.Dd $Mdocdate$
 .Sh NAME
 .Nm gcli comment
 .Nd Comment on tickets in git forges
@@ -50,7 +51,7 @@ Comment under PR #11 in the upstream repository:
 .Bd -literal -offset indent
 $ gcli comment -p 11
 .Ed
-
+.Pp
 Comment under issue 1 in herrhotzenplotz/gcli:
 .Bd -literal -offset indent
 $ gcli comment -o herrhotzenplotz -r gcli -i 1
@@ -65,5 +66,6 @@ $ gcli comment -o herrhotzenplotz -r gcli -i 1
 .Sh BUGS
 There is no way to preview the markdown markup, however you can input
 markdown which will be rendered on the remote site.
-
-Please report issues preferably via e-mail, on GitLab or on GitHub.
+.Pp
+Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
+or on Github.

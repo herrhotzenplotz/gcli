@@ -1,6 +1,6 @@
-.Dd $Mdocdate$
+.Dd @PACKAGE_DATE@
 .Dt GCLI-PULLS 1
-.Os
+.Os @PACKAGE_STRING@
 .Sh NAME
 .Nm gcli pulls
 .Nd Manage Pull Requests on Git Forges
@@ -61,13 +61,13 @@ execute the given
 on the specified
 .Ar PR .
 .El
-
+.Pp
 .Sh SUBCOMMANDS
 .Bl -tag -width create
 .It Cm create
 Create a new PR in the given or autodetected repository. The editor
 will come up and ask you to enter the PR message.
-
+.Pp
 The following flags can be specified:
 .Bl -tag -width indent
 .It Fl o , -owner Ar owner
@@ -140,7 +140,7 @@ Print a list of open PRs in the current project:
 .Bd -literal -offset indent
 $ gcli pulls
 .Ed
-
+.Pp
 Create a new PR in the current Project, the head is the currently
 checked out branch of git. See
 .Xr git-status 1
@@ -148,17 +148,17 @@ The base will be what pr.base in .gcli is set to.
 .Bd -literal -offset indent
 $ gcli pulls create "summary here"
 .Ed
-
+.Pp
 Print both a summary and comments of PR 11 in herrhotzenplotz/gcli:
 .Bd -literal -offset indent
 $ gcli pulls -o herrhotzenplotz -r gcli -i 11 all comments
 .Ed
-
+.Pp
 Merge PR 42 in the upstream repository:
 .Bd -literal -offset indent
 $ gcli pulls -i 42 merge
 .Ed
-
+.Pp
 Note that you could also pull the PR head and merge it manually into
 the base branch. Assuming trunk is the base branch:
 .Bd -literal -offset indent
@@ -168,7 +168,7 @@ $ <make etc>
 $ git checkout trunk
 $ git merge --no-ff 42-review
 .Ed
-
+.Pp
 .Sh SEE ALSO
 .Xr git 1 ,
 .Xr git-merge 1 ,
@@ -178,4 +178,5 @@ $ git merge --no-ff 42-review
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
 .Sh BUGS
-Please report issues preferably via e-mail, on GitLab or on GitHub.
+Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
+or on Github.

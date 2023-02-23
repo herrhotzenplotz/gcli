@@ -1,6 +1,6 @@
-.Dd $Mdocdate$
+.Dd @PACKAGE_DATE@
 .Dt GCLI-ISSUES 1
-.Os
+.Os @PACKAGE_STRING@
 .Sh NAME
 .Nm gcli issues
 .Nd Manage issues in various git forges
@@ -153,4 +153,5 @@ $ gcli issues -i42 \\
         labels remove foo
 .Ed
 .Pp
-Please report issues preferably via e-mail, on GitLab or on GitHub.
+Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
+or on Github.

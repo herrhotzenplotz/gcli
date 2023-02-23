@@ -1,6 +1,6 @@
-.Dd $Mdocdate$
+.Dd @PACKAGE_DATE@
 .Dt GCLI-GISTS 1
-.Os
+.Os @PACKAGE_STRING@
 .Sh NAME
 .Nm gcli gists
 .Nd manage Github Gists
@@ -70,32 +70,31 @@ List neutaaaaan's Gists:
 .Bd -literal -offset indent
 $ gcli gists -u neutaaaaan
 .Ed
-
+.Pp
 Paste a new gist named foobar and read from foobar.txt:
 .Bd -literal -offset indent
 $ gcli gists create foobar < foobar.txt
 .Ed
-
+.Pp
 Delete gist with id 3b546069d2856e6051bbe3c1080f1b5d:
 .Bd -literal -offset indent
 $ gcli gists delete 3b546069d2856e6051bbe3c1080f1b5d
 .Ed
-
+.Pp
 Print foobar.txt from Gist with id 3b546069d2856e6051bbe3c1080f1b5d
 into your pager:
 .Bd -literal -offset indent
 $ gcli gists get 3b546069d2856e6051bbe3c1080f1b5d foobar.txt | $PAGER
 .Ed
-
+.Pp
 .Sh SEE ALSO
 .Xr git 1 ,
 .Xr gcli 1
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
 .Sh BUGS
-Yes. It is software.
-
 This subcommand only works on GitHub. It is not implemented for
 GitLab, as GitLab snippets work differently.
-
-Please report issues preferably via e-mail, on GitLab or on GitHub.
+.Pp
+Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
+or on Github.

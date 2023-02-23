@@ -1,6 +1,6 @@
-.Dd $Mdocdate$
+.Dd @PACKAGE_DATE@
 .Dt GCLI-SNIPPETS 1
-.Os
+.Os @PACKAGE_STRING@
 .Sh NAME
 .Nm gcli snippets
 .Nd manage Gitlab snippets
@@ -48,30 +48,33 @@ List all of your snippets:
 .Bd -literal -offset indent
 $ gcli -t gitlab snippets
 .Ed
-
+.Pp
 Delete snippet with id 69420:
 .Bd -literal -offset indent
 $ gcli -t gitlab snippets delete 69420
 .Ed
-
+.Pp
 Print snippet with id 69420 into your pager:
 .Bd -literal -offset indent
 $ gcli -t gitlab snippets get 69420 | $PAGER
 .Ed
-
 .Sh SEE ALSO
 .Xr git 1 ,
 .Xr gcli 1
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
 .Sh BUGS
+.Bl -dash
+.It
 This subcommand only works on Gitlab. It is not implemented for
 GitHub, as GitHub Gists work differently.
-
+.It
 Creating snippets is currently unimplemented.
-
+.It
 There is no
 .Fl y
 flag to ask the user whether he is sure about deleting a snippet.
-
-Please report issues preferably via e-mail, on GitLab or on GitHub.
+.El
+.Pp
+Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
+or on Github.

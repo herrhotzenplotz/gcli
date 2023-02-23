@@ -1,6 +1,6 @@
-.Dd $Mdocdate$
+.Dd @PACKAGE_DATE@
 .Dt GCLI 1
-.Os
+.Os @PACKAGE_STRING@
 .Sh NAME
 .Nm gcli
 .Nd interact with git forges without using a web-browser
@@ -147,8 +147,6 @@ Operate on the given numeric identifier.
 .Pp
 Other options specific to the context are documented in the respective
 man pages.
-.\" .Sh IMPLEMENTATION NOTES
-.\" Not used in OpenBSD.
 .Sh ENVIRONMENT
 .Bl -tag -width XDG_CONFIG_DIR
 .It Ev EDITOR
@@ -281,7 +279,6 @@ working from contain the relevant forge and repository information.
 .Xr gcli-releases 1 ,
 .Xr gcli-comment 1
 .Xr gcli-pipelines 1
-.\" .Sh STANDARDS
 .Sh HISTORY
 The idea for
 .Nm
@@ -305,13 +302,18 @@ Not all features that are available from the web version are available in
 However, it is a non-goal of the project to provide all this
 functionality.
 .Sh BUGS
-Yes. It is software.
+There is an undocumented
+.Cm ci
+subcommand available for GitHub CI services. The subcommand is
+undocumented as it is not well tested and likely subject to changes.
 .Pp
-Please report issues preferably via e-mail, on GitLab or on
-GitHub. You may also report an issue like so:
+Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
+or on Github.
+.Pp
+You may also report an issue like so:
 .Bd -literal -width indent
-$ gcli -a some-gitlab-account issues create -o herrhotzenplotz -r gcli "BUG : ..."
+$ gcli -a some-gitlab-account \\
+        issues create \\
+        -o herrhotzenplotz -r gcli \\
+        "BUG : ..."
 .Ed
-.Sh SECURITY CONSIDERATIONS
-It is written in C. If it were written in Rust, it would have been
-much safer.

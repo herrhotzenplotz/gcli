@@ -94,6 +94,7 @@ $ gcli forks -y delete
 .Xr gcli 1
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+and contributors.
 .Sh BUGS
 Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
 or on Github.

@@ -108,6 +108,7 @@ $ gcli repos create -r emacs -d "welcome to the holy church of emacs."
 .Xr emacs 1
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+and contributors.
 .Sh BUGS
 Currently it is only possible to create repositories for authenticated
 users thus it is impossible to create a repository in another
@@ -115,4 +116,3 @@ organization.
 .Pp
 Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
 or on Github.
-

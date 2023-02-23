@@ -93,6 +93,7 @@ $ gcli -a gitlab labels delete -o herrhotzenplotz -r gcli foobar
 .Xr gcli 1
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+and contributors.
 .Sh BUGS
 The delete subcommand should ask for confirmation and have a flag to
 override this behaviour.

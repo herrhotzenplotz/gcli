@@ -63,6 +63,7 @@ $ gcli comment -o herrhotzenplotz -r gcli -i 1
 .Xr gcli-pulls 1
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+and contributors.
 .Sh BUGS
 There is no way to preview the markdown markup, however you can input
 markdown which will be rendered on the remote site.

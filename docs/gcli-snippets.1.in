@@ -63,6 +63,7 @@ $ gcli -t gitlab snippets get 69420 | $PAGER
 .Xr gcli 1
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+and contributors.
 .Sh BUGS
 .Bl -dash
 .It

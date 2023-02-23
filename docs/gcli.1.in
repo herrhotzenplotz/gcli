@@ -296,6 +296,7 @@ interface.
 Later, support for GitLab and Gitea (Codeberg) were added.
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+and contributors.
 .Sh CAVEATS
 Not all features that are available from the web version are available in
 .Nm .

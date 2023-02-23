@@ -92,6 +92,7 @@ $ gcli gists get 3b546069d2856e6051bbe3c1080f1b5d foobar.txt | $PAGER
 .Xr gcli 1
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+and contributors.
 .Sh BUGS
 This subcommand only works on GitHub. It is not implemented for
 GitLab, as GitLab snippets work differently.

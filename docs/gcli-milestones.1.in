@@ -76,6 +76,7 @@ $ gcli -t github milestones -i 420 delete
 .Xr gcli 1
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+and contributors.
 .Sh BUGS
 The delete subcommand deletes the milestone without asking for
 confirmation.

@@ -133,6 +133,7 @@ $ gcli issues -i420 labels add foo add bar
 .Xr gcli 1
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+and contributors.
 .Sh CAVEATS
 GitHub and Gitea treat Pull Requests as Issues. Due to the semantics
 of

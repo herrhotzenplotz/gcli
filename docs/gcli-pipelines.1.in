@@ -82,6 +82,7 @@ $ gcli pipelines -o herrhotzenplotz -r gcli -j 423141 log
 .Xr gcli 1
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+and contributors.
 .Sh BUGS
 We are missing a
 .Fl a

@@ -67,15 +67,15 @@ select                             { yycol += yyleng; return SELECT;    }
 ";"                                { yycol += yyleng; return SEMICOLON; }
 ","                                { yycol += yyleng; return COMMA;     }
 [A-Za-z][A-Za-z0-9_*]*             {
-									   yycol += yyleng;
-									   yylval.ident.text = strdup(yytext);
-									   return IDENT;
-								   }
+                                       yycol += yyleng;
+                                       yylval.ident.text = strdup(yytext);
+                                       return IDENT;
+                                   }
 \"[^\"]*\"                         {
-									   yycol += yyleng;
-									   yylval.strlit.text = strdup(yytext + 1);
-									   yylval.strlit.text[strlen(yytext + 1) - 1] = '\0';
-									   return STRLIT;
-								   }
+                                       yycol += yyleng;
+                                       yylval.strlit.text = strdup(yytext + 1);
+                                       yylval.strlit.text[strlen(yytext + 1) - 1] = '\0';
+                                       return STRLIT;
+                                   }
 .                                  { yyerror("unrecognized character"); }
 %%

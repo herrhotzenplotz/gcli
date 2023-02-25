@@ -8,7 +8,7 @@ AM_CPPFLAGS += -I$(srcdir)
 AM_CPPFLAGS += -DYY_NO_INPUT
 AM_CPPFLAGS += -DYY_NO_UNPUT
 
-noinst_PROGRAMS = pgen
+noinst_PROGRAMS = pgen$(EXEEXT)
 pgen_SOURCES = \
 	include/gcli/pgen.h \
 	src/pgen/dump_c.c \
@@ -19,11 +19,11 @@ pgen_SOURCES = \
 
 noinst_LTLIBRARIES = libgcli.la libsn.la libpdjson.la
 
-.NOTPARALLEL: pgen $(builddir)/src/pgen/parser.c $(builddir)/src/pgen/parser.h $(builddir)/src/pgen/lexer.c
+.NOTPARALLEL: pgen$(EXEEXT) $(builddir)/src/pgen/parser.c $(builddir)/src/pgen/parser.h $(builddir)/src/pgen/lexer.c
 
-libgcli_la_DEPENDENCIES = pgen
+libgcli_la_DEPENDENCIES = pgen$(EXEEXT)
 
-$(BUILT_SOURCES): pgen
+$(BUILT_SOURCES): pgen$(EXEEXT)
 
 SUFFIXES = .t
 .t.h:
@@ -32,7 +32,7 @@ SUFFIXES = .t
 .t.c:
 	$(AM_V_GEN)./pgen -tc -o $@ $<
 
-bin_PROGRAMS = gcli
+bin_PROGRAMS = gcli$(EXEEXT)
 gcli_LDADD = libgcli.la libpdjson.la libsn.la
 
 dist_man_MANS = \
@@ -178,9 +178,9 @@ EXTRA_DIST = \
 ###########################################
 # Tests
 check_PROGRAMS = \
-	tests/json-escape \
-	tests/pgen-tests \
-	tests/url-encode
+	tests/json-escape$(EXEEXT) \
+	tests/pgen-tests$(EXEEXT) \
+	tests/url-encode$(EXEEXT)
 
 SHELL_TESTS = \
 	tests/01_pgen_simple_object.sh \

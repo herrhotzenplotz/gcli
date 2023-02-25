@@ -102,10 +102,68 @@ If you change the build system also make sure that it passes a distcheck:
 
 # Code Style
 
-Please use the BSD Style conventions for formatting your code. Indent
-with tabs, align with spaces. There is a `.editorconfig` included in
-the source code that should automatically provide you with all needed
-options.
+Please use the BSD Style conventions for formatting your code. This means:
+
+- Functions return type and name go on separate lines, no mixed code
+  and declarations (except in for loops):
+
+        void
+        foo(int bar)
+        {
+            int x, y, z;
+
+            x = bar;
+
+            for (int i = 0; i < 10; ++i)
+                z += i;
+
+            return x;
+        }
+
+  This allows to search for the implementation of a function through a
+  simple `grep -rn '^foo' .`.
+
+- typedef structs separately from their definitions
+
+        typedef struct foo foo;
+
+        struct foo {
+            int bar;
+            char const *baz;
+        };
+
+- Indent with tabs, align with spaces
+
+  `»` denotes a TAB character, `.` indicates a whitespace:
+
+        void
+        foo(struct foo const *thefoo)
+        {
+        »   if (thefoo)
+        »   »   printf("%s: %d\n"
+        »   »   .......thefoo->wat,
+        »   »   .......thefoo->count);
+        }
+
+- Try to have a max of 80 characters per line
+
+  I know we're not using punchcards anymore, however it makes the code
+  way more readable.
+
+- Use C99
+
+  Please don't use C11 or even more modern features. Reason being that
+  I want gcli to be portable to older platforms where either no modern
+  compilers are available or where we have to rely on old gcc versions
+  and/or buggy vendor compilers. Notable forbidden features are
+  `_Static_assert` and anonymous unions. If you use the compiler flags
+  I mentioned above you should get notified by the compiler.
+
+There is a `.editorconfig` included in the source code that should
+automatically provide you with all needed
+options. [Editorconfig](https://editorconfig.org/#pre-installed) is a
+plugin that is available for almost all notable editors out there. I
+highly recommend you use it.
 
 # Adding support for new forges
 

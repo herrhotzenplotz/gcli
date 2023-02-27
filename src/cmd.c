@@ -52,7 +52,7 @@ void
 version(void)
 {
 	fprintf(stderr,
-	        PACKAGE_STRING"\n"
+	        PACKAGE_STRING" ("HOSTOS")\n"
 	        "Using %s\n"
 	        "Using vendored pdjson library\n"
 	        "Report bugs at "PACKAGE_URL".\n",

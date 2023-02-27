@@ -57,6 +57,9 @@ AC_CHECK_HEADERS([string.h signal.h sys/wait.h unistd.h sys/mman.h sys/types.h],
 dnl Check that the function is defined somewhere.
 AC_CHECK_FUNC([getopt_long])
 
+dnl Host OS name in various files
+AC_DEFINE_UNQUOTED([HOSTOS], ["$host"], [Define to the triplet of the host operating system])
+
 dnl Generate and substitute various files
 AC_CONFIG_FILES([Makefile
                  docs/gcli-api.1
@@ -73,4 +76,6 @@ AC_CONFIG_FILES([Makefile
                  docs/gcli-snippets.1
                  docs/gcli-status.1
                  docs/gcli.1])
+
+
 AC_OUTPUT

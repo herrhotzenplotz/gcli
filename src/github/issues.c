@@ -38,6 +38,31 @@
 
 #include <templates/github/issues.h>
 
+/* TODO: Remove this function once we use linked lists for storing
+ *       issues.
+ *
+ * This is an ugly hack caused by the sillyness of the Github API that
+ * treats Pull Requests as issues and reports them to us when we
+ * request issues. This function nukes them from the list, readjusts
+ * the allocation size and fixes the reported list size. */
+static void
+github_hack_fixup_issues_that_are_actually_pulls(gcli_issue_list *const it)
+{
+	for (size_t i = it->issues_size; i > 0; --i) {
+		if (it->issues[i-1].is_pr) {
+			/*  len = 7, i = 5, to move = 7 - 5 = 2
+			 *   0   1   2   3   4   5   6
+			 * | x | x | x | x | X | x | x | */
+			gcli_issue_free(&it->issues[i-1]);
+			memmove(&it->issues[i-1], &it->issues[i],
+			        sizeof(*it->issues) * (it->issues_size - i));
+			it->issues = realloc(
+				it->issues,
+				(--it->issues_size) * sizeof(*it->issues));
+		}
+	}
+}
+
 int
 github_fetch_issues(char *url,
                     int const max,
@@ -53,6 +78,8 @@ github_fetch_issues(char *url,
 		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 
 		parse_github_issues(&stream, &out->issues, &out->issues_size);
+		/* Hack: Remove PRs from the issue list because github. */
+		github_hack_fixup_issues_that_are_actually_pulls(out);
 
 		free(json_buffer.data);
 		free(url);

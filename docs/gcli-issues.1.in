@@ -39,8 +39,8 @@ List issues in the given repository. This option can only be used in
 combination with
 .Fl o .
 .It Fl a
-List all issues, including closed ones. Cannot be combined with
-actions. This does not affect the
+List issues disregarding their state. This will list closed issues as
+well. Cannot be combined with actions. This does not affect the
 .Fl n
 option.
 .It Fl n , -count Ar n
@@ -50,7 +50,8 @@ issues. Setting
 .Ar n
 to -1 will fetch all issues. Default: 30. Note that on large
 repositories fetching all issues can take a considerable amount of
-time and may result in rate limiting by the respective API.
+time and may result in rate limiting by the respective API. See
+.Sx CAVEATS .
 .It Fl i , -id Ar issue
 execute the given
 .Ar actions

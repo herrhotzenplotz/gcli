@@ -121,7 +121,7 @@ Common options across almost all of the subcommands are:
 .It Fl s , -sorted
 Reverse the output such that most recent items appear at the bottom.
 .It Fl n , -count Ar n
-Fetch multiple pages of data. The default is usually 30 items, but
+Fetch multiple items of data. The default is usually 30 items, but
 this parameter allows to fetch more than that. Setting
 .Ar n
 to -1 will result in all pages being queried and all items being read.

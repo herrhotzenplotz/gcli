@@ -57,18 +57,24 @@ If you are building from Git you will also need:
 ### Compile
 In order to perform a build, do:
 ```console
-$ ./configure
+$ ./configure [--prefix=/usr/local]
 $ make
-# make DESTDIR=/ install
+# make [DESTDIR=/] install
 ```
 
-You may leave out `DESTDIR`. The above is the default value.
+You may leave out `DESTDIR` and `--prefix=`. The above is the default
+value. The final installation destination is `$DESTDIR/$PREFIX/...`.
 
-If you are building from Git you need to generate the configure script
+If you are unsure, consult the builtin configure help by running
+`./configure --help`.
+
+Also, if you are building from Git you need to generate the configure script
 first:
 ```console
 $ ./autogen.sh
 ```
+
+For more details also see [HACKING.md](HACKING.md).
 
 In case any of this does not work, please either report a bug, or
 submit a patch in case you managed to fix it.
@@ -95,9 +101,9 @@ Github and Gitlab or ask on IRC.
 
 ## Bugs and contributions
 
-Please report bugs to nsonack@herrhotzenplotz.de or on
-[GitLab](https://gitlab.com/herrhotzenplotz/gcli). You can also submit
-patches this way using git-send-email.
+Please report bugs, issues and questions to nsonack@herrhotzenplotz.de
+or on [GitLab](https://gitlab.com/herrhotzenplotz/gcli). You can also
+submit patches this way using git-send-email.
 
 ## License
 

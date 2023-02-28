@@ -172,6 +172,7 @@ CLEANFILES = $(BUILT_SOURCES)
 EXTRA_DIST = \
 	LICENSE \
 	README.md \
+	HACKING.md \
 	autogen.sh \
 	m4/.gitkeep
 

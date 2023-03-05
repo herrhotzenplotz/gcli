@@ -32,6 +32,7 @@
 #endif
 
 #include <gcli/cmd.h>
+#include <gcli/config.h>
 #include <gcli/curl.h>
 
 #include <stdio.h>

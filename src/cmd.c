@@ -28,7 +28,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <gcli/cmd.h>
@@ -37,12 +37,14 @@
 
 #include <stdlib.h>
 
+#include <curl/curl.h>
+
 void
 copyright(void)
 {
 	fprintf(
 		stderr,
-		"Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>"
+		"Copyright 2021, 2022, 2023 Nico Sonack <nsonack@herrhotzenplotz.de>"
 		" and contributors.\n");
 }
 
@@ -50,8 +52,11 @@ void
 version(void)
 {
 	fprintf(stderr,
-	        PACKAGE_STRING"\n"
-	        "Report bugs at "PACKAGE_URL".\n");
+	        PACKAGE_STRING" ("HOSTOS")\n"
+	        "Using %s\n"
+	        "Using vendored pdjson library\n"
+	        "Report bugs at "PACKAGE_URL".\n",
+	        curl_version());
 }
 
 void
@@ -80,14 +85,14 @@ parse_labels_options(int *argc, char ***argv,
 
 	/* Collect add/delete labels */
 	while (*argc > 0) {
-		if (strcmp(**argv, "--add") == 0) {
+		if (strcmp(**argv, "add") == 0) {
 			shift(argc, argv);
 
 			add_labels = realloc(
 				add_labels,
 				(add_labels_size + 1) * sizeof(*add_labels));
 			add_labels[add_labels_size++] = shift(argc, argv);
-		} else if (strcmp(**argv, "--remove") == 0) {
+		} else if (strcmp(**argv, "remove") == 0) {
 			shift(argc, argv);
 
 			remove_labels = realloc(
@@ -106,7 +111,11 @@ parse_labels_options(int *argc, char ***argv,
 	*_remove_labels_size = remove_labels_size;
 }
 
-/* delete the repo (and ask for confirmation) */
+/* delete the repo (and ask for confirmation)
+ *
+ * NOTE: this procedure is here because it is used by both the forks
+ * and repo subcommand. Ideally it should be moved into the 'repos'
+ * code but I don't wanna make it exported from there. */
 void
 delete_repo(bool always_yes, const char *owner, const char *repo)
 {

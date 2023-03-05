@@ -29,8 +29,8 @@
 
 #include <gcli/curl.h>
 #include <gcli/gitlab/config.h>
+#include <gcli/gitlab/snippets.h>
 #include <gcli/json_util.h>
-#include <gcli/snippets.h>
 #include <gcli/table.h>
 
 #include <pdjson/pdjson.h>
@@ -43,7 +43,7 @@
 void
 gcli_snippets_free(gcli_snippet_list *const list)
 {
-	for (int i = 0; i < list->snippets_size; ++i) {
+	for (size_t i = 0; i < list->snippets_size; ++i) {
 		free(list->snippets[i].title);
 		free(list->snippets[i].filename);
 		free(list->snippets[i].date);
@@ -114,7 +114,7 @@ gcli_print_snippets_long(enum gcli_output_flags const flags,
 	int n;
 
 	/* Determine number of items to print */
-	if (max < 0 || max > list->snippets_size)
+	if (max < 0 || (size_t)(max) > list->snippets_size)
 		n = list->snippets_size;
 	else
 		n = max;
@@ -144,7 +144,7 @@ gcli_print_snippets_short(enum gcli_output_flags const flags,
 	};
 
 	/* Determine number of items to print */
-	if (max < 0 || max > list->snippets_size)
+	if (max < 0 || (size_t)(max) > list->snippets_size)
 		n = list->snippets_size;
 	else
 		n = max;

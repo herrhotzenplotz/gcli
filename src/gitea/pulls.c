@@ -38,16 +38,16 @@ gitea_get_pulls(char const *owner,
                 int const max,
                 gcli_pull_list *const out)
 {
-	return github_get_prs(owner, repo, all, max, out);
+	return github_get_pulls(owner, repo, all, max, out);
 }
 
 void
-gitea_get_pull_summary(char const *owner,
-                       char const *repo,
-                       int const pr_number,
-                       gcli_pull_summary *const out)
+gitea_get_pull(char const *owner,
+               char const *repo,
+               int const pr_number,
+               gcli_pull *const out)
 {
-	github_get_pull_summary(owner, repo, pr_number, out);
+	github_get_pull(owner, repo, pr_number, out);
 }
 
 int
@@ -64,7 +64,7 @@ gitea_pull_submit(gcli_submit_pull_options opts)
 {
 	warnx("In case the following process errors out, see: "
 	      "https://github.com/go-gitea/gitea/issues/20175");
-	github_perform_submit_pr(opts);
+	github_perform_submit_pull(opts);
 }
 
 void

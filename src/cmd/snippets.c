@@ -27,10 +27,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include <config.h>
 
 #include <gcli/cmd.h>
-#include <gcli/snippets.h>
+#include <gcli/gitlab/snippets.h>
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>

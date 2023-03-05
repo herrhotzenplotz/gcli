@@ -111,7 +111,7 @@ gitlab_print_pipelines(gitlab_pipeline_list const *const list)
 	if (!table)
 		errx(1, "error: could not init table");
 
-	for (int i = 0; i < list->pipelines_size; ++i) {
+	for (size_t i = 0; i < list->pipelines_size; ++i) {
 		gcli_tbl_add_row(table,
 		                 (int)(list->pipelines[i].id),
 		                 list->pipelines[i].status,
@@ -126,7 +126,7 @@ gitlab_print_pipelines(gitlab_pipeline_list const *const list)
 void
 gitlab_free_pipelines(gitlab_pipeline_list *const list)
 {
-	for (int i = 0; i < list->pipelines_size; ++i) {
+	for (size_t i = 0; i < list->pipelines_size; ++i) {
 		free(list->pipelines[i].status);
 		free(list->pipelines[i].created_at);
 		free(list->pipelines[i].updated_at);
@@ -144,9 +144,8 @@ void
 gitlab_pipelines(char const *owner, char const *repo, int const count)
 {
 	gitlab_pipeline_list pipelines = {0};
-	int const pipelines_size = gitlab_get_pipelines(
-		owner, repo, count, &pipelines);
 
+	gitlab_get_pipelines(owner, repo, count, &pipelines);
 	gitlab_print_pipelines(&pipelines);
 	gitlab_free_pipelines(&pipelines);
 }
@@ -325,7 +324,6 @@ gitlab_job_status(char const *owner, char const *repo, long const jid)
 	gitlab_free_job_data(&job);
 }
 
-/* TODO: Maybe devise a macro for these things ? */
 void
 gitlab_job_cancel(char const *owner, char const *repo, long const jid)
 {

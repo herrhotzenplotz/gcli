@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,43 +27,30 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SNIPPETS_H
-#define SNIPPETS_H
+#ifndef GCLI_GITHUB_MILESTONES_H
+#define GCLI_GITHUB_MILESTONES_H
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <gcli/milestones.h>
 
-#include <gcli/gcli.h>
+int github_get_milestones(char const *const owner,
+                          char const *const repo,
+                          int const max,
+                          gcli_milestone_list *const out);
 
-typedef struct gcli_snippet gcli_snippet;
-typedef struct gcli_snippet_list gcli_snippet_list;
+int github_get_milestone(char const *const owner,
+                         char const *const repo,
+                         int const milestone,
+                         gcli_milestone *const out);
 
-struct gcli_snippet {
-	int   id;
-	char *title;
-	char *filename;
-	char *date;
-	char *author;
-	char *visibility;
-	char *raw_url;
-};
+int github_create_milestone(struct gcli_milestone_create_args const *args);
 
-struct gcli_snippet_list {
-	gcli_snippet *snippets;
-	size_t snippets_size;
-};
+int github_delete_milestone(char const *const owner,
+                            char const *const repo,
+                            int const milestone);
 
-void gcli_snippets_free(gcli_snippet_list *const list);
+int github_milestone_get_issues(char const *const owner,
+                                char const *const repo,
+                                int const milestone,
+                                gcli_issue_list *const out);
 
-int gcli_snippets_get(int const max, gcli_snippet_list *const out);
-
-void gcli_snippets_print(enum gcli_output_flags const flags,
-                         gcli_snippet_list const *const list,
-                         int const max);
-
-void gcli_snippet_delete(char const *snippet_id);
-
-void gcli_snippet_get(char const *snippet_id);
-
-#endif /* SNIPPETS_H */
+#endif /* GCLI_GITHUB_MILESTONES_H */

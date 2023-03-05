@@ -138,18 +138,23 @@ github_repo_create(gcli_repo_create_options const *options) /* Options descripto
 	char               *url, *data;
 	gcli_fetch_buffer   buffer = {0};
 	struct json_stream  stream = {0};
+	sn_sv               e_name, e_description;
 
 	/* Will be freed by the caller with gcli_repos_free */
 	repo = calloc(1, sizeof(gcli_repo));
 
 	/* Request preparation */
 	url = sn_asprintf("%s/user/repos", gcli_get_apibase());
-	/* TODO: escape the repo name and the description */
+
+	/* JSON-escape repo name and description */
+	e_name = gcli_json_escape(options->name);
+	e_description = gcli_json_escape(options->description);
+
+	/* Construct payload */
 	data = sn_asprintf("{\"name\": \""SV_FMT"\","
 	                   " \"description\": \""SV_FMT"\","
 	                   " \"private\": %s }",
-	                   SV_ARGS(options->name),
-	                   SV_ARGS(options->description),
+	                   SV_ARGS(e_name), SV_ARGS(e_description),
 	                   gcli_json_bool(options->private));
 
 	/* Fetch and parse result */
@@ -160,6 +165,8 @@ github_repo_create(gcli_repo_create_options const *options) /* Options descripto
 	/* Cleanup */
 	json_close(&stream);
 	free(buffer.data);
+	free(e_name.data);
+	free(e_description.data);
 	free(data);
 	free(url);
 

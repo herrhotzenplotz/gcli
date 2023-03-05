@@ -85,6 +85,20 @@ void warn(const char *fmt, ...) PRINTF_FORMAT(1, 2);
 #define sn_unimplemented errx(42, "%s: unimplemented", __func__)
 #define sn_notreached    errx(42, "%s: unreachable", __func__)
 
+/* Weird minimum function */
+static inline int
+sn_min(int x, int y)
+{
+	if (x < 0)
+		return y;
+	else if (y < 0)
+		return x;
+	else if (x < y)
+		return x;
+	else
+		return y;
+}
+
 /* string functions */
 char *sn_strndup (const char *it, size_t len);
 char *sn_asprintf(const char *fmt, ...) PRINTF_FORMAT(1, 2);

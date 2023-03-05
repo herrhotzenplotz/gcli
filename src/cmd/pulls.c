@@ -27,7 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include <config.h>
 
 #include <gcli/cmd.h>
 #include <gcli/comments.h>
@@ -48,7 +48,7 @@ usage(void)
 	fprintf(stderr, "usage: gcli pulls create [-o owner -r repo] [-f from]\n");
 	fprintf(stderr, "                         [-t to] [-d] [-l label]\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] [-a] [-n number] [-s]\n");
-	fprintf(stderr, "       gcli pulls [-o owner -r repo] -p pull actions...\n");
+	fprintf(stderr, "       gcli pulls [-o owner -r repo] -i pull-id actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
 	fprintf(stderr, "  -o owner        The repository owner\n");
 	fprintf(stderr, "  -r repo         The repository name\n");
@@ -57,20 +57,23 @@ usage(void)
 	fprintf(stderr, "  -f owner:branch Specify the owner and branch of the fork that is the head of a PR.\n");
 	fprintf(stderr, "  -l label        Add the given label when creating the PR\n");
 	fprintf(stderr, "  -n number       Number of PRs to fetch (-1 = everything)\n");
-	fprintf(stderr, "  -p id           ID of PR to perform actions on\n");
+	fprintf(stderr, "  -i id           ID of PR to perform actions on\n");
 	fprintf(stderr, "  -s              Print (sort) in reverse order\n");
 	fprintf(stderr, "  -t branch       Specify target branch of the PR\n");
 	fprintf(stderr, "  -y              Do not ask for confirmation.\n");
 	fprintf(stderr, "ACTIONS:\n");
-	fprintf(stderr, "  summary|status  Display status information\n");
+	fprintf(stderr, "  all             Display status, commits, op and checks of the PR\n");
+	fprintf(stderr, "  op              Display original post\n");
+	fprintf(stderr, "  status          Display PR metadata\n");
 	fprintf(stderr, "  comments        Display comments\n");
-	fprintf(stderr, "  checks          Display CI/Pipeline status information about the PR\n");
+	fprintf(stderr, "  commits         Display commits of the PR\n");
+	fprintf(stderr, "  ci              Display CI/Pipeline status information about the PR\n");
 	fprintf(stderr, "  merge [-s]      Merge the PR (-s = squash commits)\n");
 	fprintf(stderr, "  close           Close the PR\n");
 	fprintf(stderr, "  reopen          Reopen a closed PR\n");
 	fprintf(stderr, "  labels ...      Add or remove labels:\n");
-	fprintf(stderr, "                     --add <name>\n");
-	fprintf(stderr, "                     --remove <name>\n");
+	fprintf(stderr, "                     add <name>\n");
+	fprintf(stderr, "                     remove <name>\n");
 	fprintf(stderr, "  diff            Display changes as diff\n");
 	fprintf(stderr, "  reviews         Display reviews\n");
 	fprintf(stderr, "\n");
@@ -145,10 +148,10 @@ subcommand_pull_create(int argc, char *argv[])
 			opts.draft = 1;
 			break;
 		case 'o':
-			opts.owner = SV(optarg);
+			opts.owner = optarg;
 			break;
 		case 'r':
-			opts.repo = SV(optarg);
+			opts.repo = optarg;
 			break;
 		case 'l': /* add a label */
 			opts.labels = realloc(
@@ -177,12 +180,7 @@ subcommand_pull_create(int argc, char *argv[])
 			     "--to branch-name or set pr.base in .gcli.");
 	}
 
-	if (!opts.owner.length || !opts.repo.length) {
-		gcli_config_get_upstream_parts(&opts.owner, &opts.repo);
-		if (!opts.owner.length || !opts.repo.length)
-			errx(1, "error: PR target repo is missing. Please either "
-			     "specify -o owner and -r repo or set pr.upstream in .gcli.");
-	}
+	check_owner_and_repo(&opts.owner, &opts.repo);
 
 	if (argc != 1) {
 		fprintf(stderr, "error: Missing title to PR\n");
@@ -192,12 +190,18 @@ subcommand_pull_create(int argc, char *argv[])
 
 	opts.title = SV(argv[0]);
 
-	gcli_pr_submit(opts);
+	gcli_pull_submit(opts);
 
 	free(opts.labels);
 
 	return EXIT_SUCCESS;
 }
+
+/* Forward declaration */
+static int handle_pull_actions(int argc, char *argv[],
+                               char const *owner,
+                               char const *repo,
+                               int pr);
 
 int
 subcommand_pulls(int argc, char *argv[])
@@ -239,15 +243,15 @@ subcommand_pulls(int argc, char *argv[])
 		  .has_arg = required_argument,
 		  .flag    = NULL,
 		  .val     = 'o' },
-		{ .name    = "pull",
+		{ .name    = "id",
 		  .has_arg = required_argument,
 		  .flag    = NULL,
-		  .val     = 'p' },
+		  .val     = 'i' },
 		{0},
 	};
 
 	/* Parse commandline options */
-	while ((ch = getopt_long(argc, argv, "+n:o:r:p:as", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "+n:o:r:i:as", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
 			owner = optarg;
@@ -255,7 +259,7 @@ subcommand_pulls(int argc, char *argv[])
 		case 'r':
 			repo = optarg;
 			break;
-		case 'p': {
+		case 'i': {
 			pr = strtoul(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "error: cannot parse pr number »%s«", optarg);
@@ -295,10 +299,10 @@ subcommand_pulls(int argc, char *argv[])
 	/* In case no explicit PR number was specified, list all
 	 * open PRs and exit */
 	if (pr < 0) {
-		if (gcli_get_prs(owner, repo, all, n, &pulls) < 0)
+		if (gcli_get_pulls(owner, repo, all, n, &pulls) < 0)
 			errx(1, "error: could not fetch pull requests");
 
-		gcli_print_pr_table(flags, &pulls, n);
+		gcli_print_pulls_table(flags, &pulls, n);
 		gcli_pulls_free(&pulls);
 
 		return EXIT_SUCCESS;
@@ -311,48 +315,128 @@ subcommand_pulls(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	/* we have an explicit PR number, so execute all operations the
-	 * user has given */
-	while (argc > 0) {
-		const char *operation = shift(&argc, &argv);
+	/* Hand off to actions handling */
+	return handle_pull_actions(argc, argv, owner, repo, pr);
+}
 
-		if (strcmp(operation, "diff") == 0) {
-			gcli_print_pr_diff(stdout, owner, repo, pr);
-		} else if (strcmp(operation, "summary") == 0) {
-			gcli_pr_summary(owner, repo, pr);
-		} else if (strcmp(operation, "status") == 0) {
-			gcli_pr_status(owner, repo, pr);
-		} else if (strcmp(operation, "comments") == 0) {
+/** Helper routine for fetching a PR if required */
+static void
+ensure_pull(char const *owner, char const *repo, int pr,
+            int *const fetched_pull, gcli_pull *const pull)
+{
+	if (*fetched_pull)
+		return;
+
+	gcli_get_pull(owner, repo, pr, pull);
+	*fetched_pull = 1;
+}
+
+/** Handling routine for Pull Request related actions specified on the
+ * command line. Make sure that the usage at the top is consistent
+ * with the actions implemented here. */
+static int
+handle_pull_actions(int argc, char *argv[],
+                    char const *owner, char const *repo,
+                    int pr)
+{
+	/* For ease of handling and not making redundant calls to the API
+	 * we'll fetch the summary only if a command requires it. Then
+	 * we'll proceed to actually handling it. */
+	int fetched_pull = 0;
+	gcli_pull pull = {0};
+
+	/* Iterate over the argument list until the end */
+	while (argc > 0) {
+
+		/* Grab the next action from the argument list */
+		const char *action = shift(&argc, &argv);
+
+		/* Check if it is a valid one. When we find any of
+		 *
+		 *      all, op or status
+		 *
+		 * we must ensure that the summary has been fetched. */
+		if (strcmp(action, "all") == 0) {
+
+			/* First make sure we have the data ready */
+			ensure_pull(owner, repo, pr, &fetched_pull, &pull);
+
+			/* Print meta */
+			gcli_pull_print_status(&pull);
+
+			/* OP */
+			puts("\nORIGINAL POST");
+			gcli_pull_print_op(&pull);
+
+			/* Commits */
+			puts("\nCOMMITS");
+			gcli_pull_commits(owner, repo, pr);
+
+			/* Checks */
+			puts("\nCHECKS");
+			gcli_pull_checks(owner, repo, pr);
+
+		} else if (strcmp(action, "op") == 0) {
+
+			/* Ensure we have fetched the data */
+			ensure_pull(owner, repo, pr, &fetched_pull, &pull);
+
+			/* Print it */
+			gcli_pull_print_op(&pull);
+
+		} else if (strcmp(action, "status") == 0) {
+
+			/* Ensure we have the data */
+			ensure_pull(owner, repo, pr, &fetched_pull, &pull);
+
+			/* Print meta information */
+			gcli_pull_print_status(&pull);
+
+		} else if (strcmp(action, "commits") == 0) {
+
+			/* Does not require the summary */
+			gcli_pull_commits(owner, repo, pr);
+
+		} else if (strcmp(action, "diff") == 0) {
+			gcli_print_pull_diff(stdout, owner, repo, pr);
+
+		} else if (strcmp(action, "comments") == 0) {
 			gcli_pull_comments(owner, repo, pr);
-		} else if (strcmp(operation, "checks") == 0) {
-			gcli_pr_checks(owner, repo, pr);
-		} else if (strcmp(operation, "merge") == 0) {
+
+		} else if (strcmp(action, "ci") == 0) {
+			gcli_pull_checks(owner, repo, pr);
+
+		} else if (strcmp(action, "merge") == 0) {
 			/* Check whether the user intends a squash-merge */
 			if (argc > 0 && (strcmp(argv[0], "-s") == 0 || strcmp(argv[0], "--squash") == 0)) {
 				--argc; ++argv;
-				gcli_pr_merge(owner, repo, pr, true);
+				gcli_pull_merge(owner, repo, pr, true);
 			} else {
-				gcli_pr_merge(owner, repo, pr, false);
+				gcli_pull_merge(owner, repo, pr, false);
 			}
-		} else if (strcmp(operation, "close") == 0) {
-			gcli_pr_close(owner, repo, pr);
-		} else if (strcmp(operation, "reopen") == 0) {
-			gcli_pr_reopen(owner, repo, pr);
-		} else if (strcmp(operation, "reviews") == 0) {
+
+		} else if (strcmp(action, "close") == 0) {
+			gcli_pull_close(owner, repo, pr);
+
+		} else if (strcmp(action, "reopen") == 0) {
+			gcli_pull_reopen(owner, repo, pr);
+
+		} else if (strcmp(action, "reviews") == 0) {
 			/* list reviews */
 			gcli_pr_review *reviews      = NULL;
 			size_t          reviews_size = gcli_review_get_reviews(
 				owner, repo, pr, &reviews);
 			gcli_review_print_review_table(reviews, reviews_size);
 			gcli_review_reviews_free(reviews, reviews_size);
-		} else if (strcmp("labels", operation) == 0) {
+
+		} else if (strcmp("labels", action) == 0) {
 			const char **add_labels         = NULL;
 			size_t       add_labels_size    = 0;
 			const char **remove_labels      = NULL;
 			size_t       remove_labels_size = 0;
 
 			if (argc == 0) {
-				fprintf(stderr, "error: expected label operations\n");
+				fprintf(stderr, "error: expected label action\n");
 				usage();
 				return EXIT_FAILURE;
 			}
@@ -363,20 +447,33 @@ subcommand_pulls(int argc, char *argv[])
 
 			/* actually go about deleting and adding the labels */
 			if (add_labels_size)
-				gcli_pr_add_labels(
+				gcli_pull_add_labels(
 					owner, repo, pr, add_labels, add_labels_size);
 			if (remove_labels_size)
-				gcli_pr_remove_labels(
+				gcli_pull_remove_labels(
 					owner, repo, pr, remove_labels, remove_labels_size);
 
 			free(add_labels);
 			free(remove_labels);
+
 		} else {
-			fprintf(stderr, "error: unknown operation %s\n", operation);
+			/* At this point we found an unknown action / stray
+			 * options on the command line. Error out in this case. */
+
+			fprintf(stderr, "error: unknown action %s\n", action);
 			usage();
 			return EXIT_FAILURE;
+
 		}
-	}
+
+		if (argc)
+			putchar('\n');
+
+	} /* Next action */
+
+	/* Free the pull request data only when we actually fetched it */
+	if (fetched_pull)
+		gcli_pull_free(&pull);
 
 	return EXIT_SUCCESS;
 }

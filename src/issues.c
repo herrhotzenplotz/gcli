@@ -36,7 +36,7 @@
 #include <gcli/table.h>
 #include <sn/sn.h>
 
-static void
+void
 gcli_issue_free(gcli_issue *const it)
 {
 	free(it->title.data);
@@ -44,6 +44,7 @@ gcli_issue_free(gcli_issue *const it)
 	free(it->author.data);
 	free(it->state.data);
 	free(it->body.data);
+	free(it->milestone.data);
 
 	for (size_t i = 0; i < it->labels_size; ++i)
 		free(it->labels[i].data);
@@ -54,7 +55,7 @@ gcli_issue_free(gcli_issue *const it)
 void
 gcli_issues_free(gcli_issue_list *const list)
 {
-	for (int i = 0; i < list->issues_size; ++i)
+	for (size_t i = 0; i < list->issues_size; ++i)
 		gcli_issue_free(&list->issues[i]);
 
 	free(list->issues);
@@ -78,7 +79,7 @@ gcli_print_issues_table(enum gcli_output_flags const flags,
                         gcli_issue_list const *const list,
                         int const max)
 {
-	int n;
+	int n, pruned = 0;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
 		{ .name = "NUMBER", .type = GCLI_TBLCOLTYPE_INT, .flags = GCLI_TBLCOL_JUSTIFYR },
@@ -96,7 +97,7 @@ gcli_print_issues_table(enum gcli_output_flags const flags,
 		errx(1, "could not init table printer");
 
 	/* Determine the correct number of items to print */
-	if (max < 0 || max > list->issues_size)
+	if (max < 0 || (size_t)(max) > list->issues_size)
 		n = list->issues_size;
 	else
 		n = max;
@@ -104,26 +105,38 @@ gcli_print_issues_table(enum gcli_output_flags const flags,
 	/* Iterate depending on the output order */
 	if (flags & OUTPUT_SORTED) {
 		for (int i = 0; i < n; ++i) {
-			gcli_tbl_add_row(table,
-			                 list->issues[n - i - 1].number,
-			                 list->issues[n - i - 1].state,
-			                 list->issues[n - i - 1].title);
+			if (!list->issues[n - 1 - 1].is_pr) {
+				gcli_tbl_add_row(table,
+				                 list->issues[n - i - 1].number,
+				                 list->issues[n - i - 1].state,
+				                 list->issues[n - i - 1].title);
+			} else {
+				pruned++;
+			}
 		}
 	} else {
 		for (int i = 0; i < n; ++i) {
-			gcli_tbl_add_row(table,
-			                 list->issues[i].number,
-			                 list->issues[i].state,
-			                 list->issues[i].title);
+			if (!list->issues[i].is_pr) {
+				gcli_tbl_add_row(table,
+				                 list->issues[i].number,
+				                 list->issues[i].state,
+				                 list->issues[i].title);
+			} else {
+				pruned++;
+			}
 		}
 	}
 
 	/* Dump the table */
 	gcli_tbl_end(table);
+
+	/* Inform the user that we pruned pull requests from the output */
+	if (pruned && sn_getverbosity() != VERBOSITY_QUIET)
+		fprintf(stderr, "info: %d pull requests pruned\n", pruned);
 }
 
-static void
-gcli_print_issue_summary(gcli_issue const *const it)
+void
+gcli_issue_print_summary(gcli_issue const *const it)
 {
 	gcli_dict dict;
 
@@ -138,6 +151,9 @@ gcli_print_issue_summary(gcli_issue const *const it)
 	              SV_FMT, SV_ARGS(it->state));
 	gcli_dict_add(dict, "COMMENTS", 0, 0, "%d", it->comments);
 	gcli_dict_add(dict, "LOCKED", 0, 0, "%s", sn_bool_yesno(it->locked));
+
+	if (it->milestone.length)
+		gcli_dict_add(dict, "MILESTONE", 0, 0, SV_FMT, SV_ARGS(it->milestone));
 
 	if (it->labels_size) {
 		gcli_dict_add_sv_list(dict, "LABELS", it->labels, it->labels_size);
@@ -155,25 +171,22 @@ gcli_print_issue_summary(gcli_issue const *const it)
 	/* Dump the dictionary */
 	gcli_dict_end(dict);
 
-	/* The API may not return a body if the user didn't put in any
-	 * comment */
-	if (it->body.data) {
-		putchar('\n');
-		pretty_print(it->body.data, 4, 80, stdout);
-		putchar('\n');
-	}
 }
 
 void
-gcli_issue_summary(char const *owner,
-                   char const *repo,
-                   int const issue_number)
+gcli_issue_print_op(gcli_issue const *const it)
 {
-	gcli_issue details = {0};
+	if (it->body.length && it->body.data)
+		pretty_print(it->body.data, 4, 80, stdout);
+}
 
-	gcli_forge()->get_issue_summary(owner, repo, issue_number, &details);
-	gcli_print_issue_summary(&details);
-	gcli_issue_free(&details);
+void
+gcli_get_issue(char const *owner,
+               char const *repo,
+               int const issue_number,
+               gcli_issue *const out)
+{
+	gcli_forge()->get_issue_summary(owner, repo, issue_number, out);
 }
 
 void
@@ -216,11 +229,12 @@ gcli_issue_submit(gcli_submit_issue_options opts)
 	printf("The following issue will be created:\n"
 	       "\n"
 	       "TITLE   : "SV_FMT"\n"
-	       "OWNER   : "SV_FMT"\n"
-	       "REPO    : "SV_FMT"\n"
+	       "OWNER   : %s\n"
+	       "REPO    : %s\n"
 	       "MESSAGE :\n"SV_FMT"\n",
-	       SV_ARGS(opts.title), SV_ARGS(opts.owner),
-	       SV_ARGS(opts.repo), SV_ARGS(opts.body));
+	       SV_ARGS(opts.title),
+	       opts.owner, opts.repo,
+	       SV_ARGS(opts.body));
 
 	putchar('\n');
 
@@ -264,4 +278,13 @@ gcli_issue_remove_labels(char const *owner,
                          size_t const labels_size)
 {
 	gcli_forge()->issue_remove_labels(owner, repo, issue, labels, labels_size);
+}
+
+int
+gcli_issue_set_milestone(char const *const owner,
+                         char const *const repo,
+                         int const issue,
+                         int const milestone)
+{
+	return gcli_forge()->issue_set_milestone(owner, repo, issue, milestone);
 }

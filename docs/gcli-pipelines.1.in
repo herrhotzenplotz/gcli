@@ -1,6 +1,6 @@
-.Dd $Mdocdate$
+.Dd @PACKAGE_DATE@
 .Dt GCLI-PIPELINES 1
-.Os
+.Os @PACKAGE_STRING@
 .Sh NAME
 .Nm gcli pipelines
 .Nd Inspect and manage GitLab Pipelines
@@ -25,7 +25,7 @@ fetching their logs.
 .Sh OPTIONS
 .Bl -tag -width indent
 .It Fl o , -owner Ar owner
-Operato on the repository of the given owner. This option can only be
+Operate on the repository of the given owner. This option can only be
 used in combination with
 .Fl r .
 .It Fl r , -repo Ar repo
@@ -66,12 +66,12 @@ Print a list of the last 30 pipelines in the current project:
 .Bd -literal -offset indent
 $ gcli pipelines
 .Ed
-
+.Pp
 List all jobs of pipeline #3316:
 .Bd -literal -offset indent
 $ gcli pipelines -p3316
 .Ed
-
+.Pp
 Dump the log of Job #423141 in herrhotzenplotz/gcli:
 .Bd -literal -offset indent
 $ gcli pipelines -o herrhotzenplotz -r gcli -j 423141 log
@@ -82,9 +82,11 @@ $ gcli pipelines -o herrhotzenplotz -r gcli -j 423141 log
 .Xr gcli 1
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+and contributors.
 .Sh BUGS
 We are missing a
 .Fl a
 flag. This is the current implied behaviour.
-
-Please report issues preferably via e-mail, on GitLab or on GitHub.
+.Pp
+Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
+or on Github.

@@ -1,6 +1,6 @@
-.Dd $Mdocdate$
+.Dd @PACKAGE_DATE@
 .Dt GCLI-PULLS 1
-.Os
+.Os @PACKAGE_STRING@
 .Sh NAME
 .Nm gcli pulls
 .Nd Manage Pull Requests on Git Forges
@@ -11,7 +11,7 @@
 .Op Fl n Ar n
 .Op Fl o Ar owner Fl r Ar repo
 .Nm
-.Fl p Ar pr
+.Fl i Ar pr
 .Op Fl o Ar owner Fl r Ar repo
 .Ar actions...
 .Nm
@@ -55,19 +55,19 @@ pull requests. Default: 30. If
 is set to -1 this will fetch all pull requests. Note that on large
 repositories fetching all pull requests can take a considerable amount
 of time and may result in rate limiting by the respective API.
-.It Fl p , -pull Ar PR
+.It Fl i , -id Ar PR
 execute the given
 .Ar actions
 on the specified
 .Ar PR .
 .El
-
+.Pp
 .Sh SUBCOMMANDS
 .Bl -tag -width create
 .It Cm create
 Create a new PR in the given or autodetected repository. The editor
 will come up and ask you to enter the PR message.
-
+.Pp
 The following flags can be specified:
 .Bl -tag -width indent
 .It Fl o , -owner Ar owner
@@ -92,14 +92,22 @@ The title of the Pull Request or Merge Request.
 .Ar actions...
 may be one or more of the following:
 .Bl -tag -width comments
+.It Cm all
+Get all the relevant information about a PR. The following actions are
+implied:
+.Cm status ,
+.Cm op ,
+.Cm commits and
+.Cm ci .
+.It Cm commits
+Print the list of commits associated with the Pull Requests.
 .It Cm comments
 Print a list of comments under the PR.
 .It Cm status
-Print a short summary of the PR including all CI check runs on the
-head commit.
-.It Cm summary
-Print a short summary of the PR (without CI checks).
-.It Cm checks
+Print metadata of the commit such as the ID, head and base branch etc.
+.It Cm op
+Print the original post of the Pull Request.
+.It Cm ci
 Print a list of checks that ran on the PR (GitLab Pipelines and GitHub CI).
 .It Cm diff
 Print a diff of the changes attached to the PR. This can be piped into
@@ -121,9 +129,9 @@ Print reviews including comments under them.
 .It Cm labels Op Ar options
 The following options can be specified more than once:
 .Bl -tag -width indent
-.It Fl -add Ar label
+.It add Ar label
 Add the given label to the pull request.
-.It Fl -remove Ar label
+.It remove Ar label
 Remove the given label from the pull request.
 .El
 .El
@@ -132,7 +140,7 @@ Print a list of open PRs in the current project:
 .Bd -literal -offset indent
 $ gcli pulls
 .Ed
-
+.Pp
 Create a new PR in the current Project, the head is the currently
 checked out branch of git. See
 .Xr git-status 1
@@ -140,17 +148,17 @@ The base will be what pr.base in .gcli is set to.
 .Bd -literal -offset indent
 $ gcli pulls create "summary here"
 .Ed
-
+.Pp
 Print both a summary and comments of PR 11 in herrhotzenplotz/gcli:
 .Bd -literal -offset indent
-$ gcli pulls -o herrhotzenplotz -r gcli -p 11 summary comments
+$ gcli pulls -o herrhotzenplotz -r gcli -i 11 all comments
 .Ed
-
+.Pp
 Merge PR 42 in the upstream repository:
 .Bd -literal -offset indent
-$ gcli pulls -p 42 merge
+$ gcli pulls -i 42 merge
 .Ed
-
+.Pp
 Note that you could also pull the PR head and merge it manually into
 the base branch. Assuming trunk is the base branch:
 .Bd -literal -offset indent
@@ -160,7 +168,7 @@ $ <make etc>
 $ git checkout trunk
 $ git merge --no-ff 42-review
 .Ed
-
+.Pp
 .Sh SEE ALSO
 .Xr git 1 ,
 .Xr git-merge 1 ,
@@ -169,5 +177,7 @@ $ git merge --no-ff 42-review
 .Xr patch 1
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+and contributors.
 .Sh BUGS
-Please report issues preferably via e-mail, on GitLab or on GitHub.
+Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
+or on Github.

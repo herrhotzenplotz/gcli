@@ -34,7 +34,7 @@
 #include <stdlib.h>
 
 #include <gcli/pgen.h>
-#include "parser.h"
+#include "src/pgen/parser.h"
 
 int yycol = 1, yyrow = 1;
 char *yyfile = NULL;
@@ -67,15 +67,15 @@ select                             { yycol += yyleng; return SELECT;    }
 ";"                                { yycol += yyleng; return SEMICOLON; }
 ","                                { yycol += yyleng; return COMMA;     }
 [A-Za-z][A-Za-z0-9_*]*             {
-									   yycol += yyleng;
-									   yylval.ident.text = strdup(yytext);
-									   return IDENT;
-								   }
+                                       yycol += yyleng;
+                                       yylval.ident.text = strdup(yytext);
+                                       return IDENT;
+                                   }
 \"[^\"]*\"                         {
-									   yycol += yyleng;
-									   yylval.strlit.text = strdup(yytext + 1);
-									   yylval.strlit.text[strlen(yytext + 1) - 1] = '\0';
-									   return STRLIT;
-								   }
+                                       yycol += yyleng;
+                                       yylval.strlit.text = strdup(yytext + 1);
+                                       yylval.strlit.text[strlen(yytext + 1) - 1] = '\0';
+                                       return STRLIT;
+                                   }
 .                                  { yyerror("unrecognized character"); }
 %%

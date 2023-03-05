@@ -32,9 +32,9 @@
 
 #include <gcli/pgen.h>
 
-FILE	*outfile	 = NULL;
-char	*outfilename = NULL;
-int		 dumptype	 = 0;
+FILE *outfile = NULL;
+char *outfilename = NULL;
+int dumptype = 0;
 
 /* Forward declaration. Is in generated lexer.c */
 extern int yylex (void);
@@ -51,112 +51,112 @@ static void footer_dump(void);
 %token OPAREN CPAREN SEMICOLON ARRAY OF COMMA SELECT
 
 %union {
-	struct strlit		strlit;
-	struct ident		ident;
-	struct objentry		objentry;
-	struct objentry     *objentries;
+	struct strlit       strlit;
+	struct ident        ident;
+	struct objentry     objentry;
+	struct objentry    *objentries;
 	struct objparser    objparser;
 	struct arrayparser  arrayparser;
 }
 
-%token	<strlit>		STRLIT
-%token	<ident>			IDENT
+%token <strlit>      STRLIT
+%token <ident>       IDENT
 
-%type	<objentry>		obj_entry
-%type	<objentries>	obj_entries
-%type	<objparser>		objparser
+%type  <objentry>    obj_entry
+%type  <objentries>  obj_entries
+%type  <objparser>   objparser
 
-%type	<arrayparser>	arrayparser;
+%type  <arrayparser> arrayparser;
 
 %%
-input:			instruction input
-		|
-		;
+input: instruction input
+     |
+     ;
 
-instruction:	objparser SEMICOLON
-				{
-					objparser_dump(&($1));
-				}
-		|		arrayparser SEMICOLON
-				{
-					arrayparser_dump(&($1));
-				}
-		|		INCLUDE STRLIT SEMICOLON
-				{
-					include_dump($2.text);
-				}
-		;
+instruction:    objparser SEMICOLON
+                {
+                    objparser_dump(&($1));
+                }
+           |    arrayparser SEMICOLON
+                {
+                    arrayparser_dump(&($1));
+                }
+           |    INCLUDE STRLIT SEMICOLON
+                {
+                    include_dump($2.text);
+                }
+           ;
 
-objparser:		PARSER IDENT IS OBJECT OF IDENT WITH OPAREN obj_entries CPAREN
-				{
-					$$.kind = OBJPARSER_ENTRIES;
-					$$.name		  = $2.text;
-					$$.returntype = $6.text;
-					$$.entries	  = $9;
-				}
-		|		PARSER IDENT IS OBJECT OF IDENT SELECT STRLIT AS IDENT
-				{
-					$$.kind = OBJPARSER_SELECT;
-					$$.name = $2.text;
-					$$.returntype = $6.text;
-					$$.select.fieldname = $8.text;
-					$$.select.fieldtype = $10.text;
-				}
-		;
+objparser:    PARSER IDENT IS OBJECT OF IDENT WITH OPAREN obj_entries CPAREN
+              {
+                  $$.kind = OBJPARSER_ENTRIES;
+                  $$.name = $2.text;
+                  $$.returntype = $6.text;
+                  $$.entries = $9;
+              }
+         |    PARSER IDENT IS OBJECT OF IDENT SELECT STRLIT AS IDENT
+              {
+                  $$.kind = OBJPARSER_SELECT;
+                  $$.name = $2.text;
+                  $$.returntype = $6.text;
+                  $$.select.fieldname = $8.text;
+                  $$.select.fieldtype = $10.text;
+                }
+         ;
 
-arrayparser:	PARSER IDENT IS ARRAY OF IDENT USE IDENT
-				{
-					$$.name = $2.text;
-					$$.returntype = $6.text;
-					$$.parser = $8.text;
-				}
-		;
+arrayparser:    PARSER IDENT IS ARRAY OF IDENT USE IDENT
+                {
+                    $$.name = $2.text;
+                    $$.returntype = $6.text;
+                    $$.parser = $8.text;
+                }
+           ;
 
-obj_entries:	obj_entries COMMA obj_entry
-				{
-					$$ = malloc(sizeof(*($$)));
-					*($$) = $3;
-					$$->next = $1;
-				}
-		|		obj_entry
-				{
-					$$ = malloc(sizeof(*($$)));
-					*($$) = $1;
-					$$->next = NULL;
-				}
-		;
+obj_entries:    obj_entries COMMA obj_entry
+                {
+                    $$ = malloc(sizeof(*($$)));
+                    *($$) = $3;
+                    $$->next = $1;
+                }
+           |    obj_entry
+                {
+                    $$ = malloc(sizeof(*($$)));
+                    *($$) = $1;
+                    $$->next = NULL;
+                }
+           ;
 
-obj_entry:		STRLIT FATARROW IDENT AS IDENT
-				{
-					$$.jsonname = $1.text;
-					$$.kind		= OBJENTRY_SIMPLE;
-					$$.name		= $3.text;
-					$$.type		= $5.text;
-					$$.parser	= NULL;
-				}
-		|		STRLIT FATARROW IDENT AS IDENT USE IDENT
-				{
-					$$.jsonname = $1.text;
-					$$.kind		= OBJENTRY_SIMPLE;
-					$$.name		= $3.text;
-					$$.type		= $5.text;
-					$$.parser	= $7.text;
-				}
-		|		STRLIT FATARROW IDENT AS ARRAY OF IDENT USE IDENT
-				{
-					$$.jsonname = $1.text;
-					$$.kind		= OBJENTRY_ARRAY;
-					$$.name		= $3.text;
-					$$.type		= $7.text;
-					$$.parser	= $9.text;
-				}
-		|		STRLIT FATARROW USE IDENT
-				{
-					$$.jsonname = $1.text;
-					$$.kind		= OBJENTRY_CONTINUATION;
-					$$.parser	= $4.text;
-				}
-		;
+obj_entry:    STRLIT FATARROW IDENT AS IDENT
+              {
+                  $$.jsonname = $1.text;
+                  $$.kind = OBJENTRY_SIMPLE;
+                  $$.name = $3.text;
+                  $$.type = $5.text;
+                  $$.parser = NULL;
+              }
+         |    STRLIT FATARROW IDENT AS IDENT USE IDENT
+              {
+                  $$.jsonname = $1.text;
+                  $$.kind = OBJENTRY_SIMPLE;
+                  $$.name = $3.text;
+                  $$.type = $5.text;
+                  $$.parser = $7.text;
+              }
+         |    STRLIT FATARROW IDENT AS ARRAY OF IDENT USE IDENT
+              {
+                  $$.jsonname = $1.text;
+                  $$.kind = OBJENTRY_ARRAY;
+                  $$.name = $3.text;
+                  $$.type = $7.text;
+                  $$.parser = $9.text;
+              }
+         |    STRLIT FATARROW USE IDENT
+              {
+                  $$.jsonname = $1.text;
+                  $$.kind = OBJENTRY_CONTINUATION;
+                  $$.parser = $4.text;
+              }
+         ;
 %%
 
 #include <assert.h>
@@ -183,16 +183,16 @@ struct {
 		.dump_objparser = objparser_dump_plain
 	},
 	[DUMP_C] = {
-		.dump_header	  = header_dump_c,
-		.dump_objparser	  = objparser_dump_c,
-		.dump_include	  = include_dump_c,
+		.dump_header      = header_dump_c,
+		.dump_objparser   = objparser_dump_c,
+		.dump_include     = include_dump_c,
 		.dump_arrayparser = arrayparser_dump_c,
 	},
 	[DUMP_H] = {
-		.dump_header	  = header_dump_h,
-		.dump_objparser	  = objparser_dump_h,
-		.dump_include	  = include_dump_h,
-		.dump_footer	  = footer_dump_h,
+		.dump_header      = header_dump_h,
+		.dump_objparser   = objparser_dump_h,
+		.dump_include     = include_dump_h,
+		.dump_footer      = footer_dump_h,
 		.dump_arrayparser = arrayparser_dump_h,
 	}
 };
@@ -241,11 +241,11 @@ footer_dump(void)
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: pgen [-v] [-o outputfile] [-t c|plain] [...]\n");
+	fprintf(stderr, "usage: pgen [-v] [-o outputfile] [-t c|h|plain] [...]\n");
 	fprintf(stderr, "OPTIONS:\n");
 	fprintf(stderr, "   -v       Print version and exit\n");
 	fprintf(stderr, "   -o file  Dump output into the given file\n");
-	fprintf(stderr, "   -t type  Type of the output. Can be either C or plain.\n");
+	fprintf(stderr, "   -t type  Type of the output. Can be either c, h or plain.\n");
 }
 
 int

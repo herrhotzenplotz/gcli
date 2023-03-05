@@ -31,7 +31,7 @@
 #define PULLS_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <stdio.h>
@@ -43,21 +43,14 @@
 typedef struct gcli_pull                gcli_pull;
 typedef struct gcli_submit_pull_options gcli_submit_pull_options;
 typedef struct gcli_commit              gcli_commit;
-typedef struct gcli_pull_summary        gcli_pull_summary;
 typedef struct gcli_pull_list           gcli_pull_list;
-
-struct gcli_pull {
-	char *title, *state, *creator;
-	int number, id;
-	bool merged;
-};
 
 struct gcli_pull_list {
 	gcli_pull *pulls;
 	size_t pulls_size;
 };
 
-struct gcli_pull_summary {
+struct gcli_pull {
 	char   *author;
 	char   *state;
 	char   *title;
@@ -88,8 +81,8 @@ struct gcli_commit {
 
 /* Options to submit to the gh api for creating a PR */
 struct gcli_submit_pull_options {
-	sn_sv        owner;
-	sn_sv        repo;
+	char const  *owner;
+	char const  *repo;
 	sn_sv        from;
 	sn_sv        to;
 	sn_sv        title;
@@ -100,62 +93,67 @@ struct gcli_submit_pull_options {
 	bool         always_yes;
 };
 
-int gcli_get_prs(char const *owner,
-                 char const *reponame,
-                 bool const all,
-                 int const max,
-                 gcli_pull_list *const out);
+int gcli_get_pulls(char const *owner,
+                   char const *reponame,
+                   bool const all,
+                   int const max,
+                   gcli_pull_list *const out);
+
+void gcli_pull_free(gcli_pull *const it);
 
 void gcli_pulls_free(gcli_pull_list *const list);
 
-void gcli_pulls_summary_free(gcli_pull_summary *const it);
+void gcli_print_pulls_table(enum gcli_output_flags const flags,
+                            gcli_pull_list const *const list,
+                            int const max);
 
-void gcli_print_pr_table(enum gcli_output_flags const flags,
-                         gcli_pull_list const *const list,
-                         int const max);
+void gcli_print_pull_diff(FILE *stream,
+                          char const *owner,
+                          char const *reponame,
+                          int const   pr_number);
 
-void gcli_print_pr_diff(FILE *stream,
-                        char const *owner,
-                        char const *reponame,
-                        int const   pr_number);
+void gcli_pull_checks(char const *owner,
+                      char const *repo,
+                      int const pr_number);
 
-void gcli_pr_summary(char const *owner,
+void gcli_pull_commits(char const *owner,
+                       char const *repo,
+                       int const pr_number);
+
+void gcli_get_pull(char const *owner,
+                   char const *repo,
+                   int const pr_number,
+                   gcli_pull *const out);
+
+void gcli_pull_submit(gcli_submit_pull_options);
+
+void gcli_pull_print_status(gcli_pull const *const it);
+
+void gcli_pull_print_op(gcli_pull *const summary);
+
+void gcli_pull_merge(char const *owner,
+                     char const *reponame,
+                     int const pr_number,
+                     bool const squash);
+
+void gcli_pull_close(char const *owner,
                      char const *reponame,
                      int const pr_number);
 
-void gcli_pr_status(char const *owner,
-                    char const *reponame,
-                    int const pr_number);
+void gcli_pull_reopen(char const *owner,
+                      char const *reponame,
+                      int const pr_number);
 
-void gcli_pr_checks(char const *owner,
-                    char const *repo,
-                    int const pr_number);
+void gcli_pull_add_labels(char const *owner,
+                          char const *repo,
+                          int const pr_number,
+                          char const *const labels[],
+                          size_t const labels_size);
 
-void gcli_pr_submit(gcli_submit_pull_options);
-
-void gcli_pr_merge(char const *owner,
-                   char const *reponame,
-                   int const pr_number,
-                   bool const squash);
-
-void gcli_pr_close(char const *owner,
-                   char const *reponame,
-                   int const pr_number);
-
-void gcli_pr_reopen(char const *owner,
-                    char const *reponame,
-                    int const pr_number);
-
-void gcli_pr_add_labels(char const *owner,
-                        char const *repo,
-                        int const pr_number,
-                        char const *const labels[],
-                        size_t const labels_size);
-
-void gcli_pr_remove_labels(char const *owner,
-                           char const *repo,
-                           int pr_number,
-                           char const *const labels[],
-                           size_t const labels_size);
+void gcli_pull_remove_labels(char const *owner,
+                             char const *repo,
+                             int pr_number,
+                             char const *const labels[],
+                             size_t const labels_size);
 
 #endif /* PULLS_H */

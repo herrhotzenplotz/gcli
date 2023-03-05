@@ -1,6 +1,6 @@
-.Dd $Mdocdate$
+.Dd @PACKAGE_DATE@
 .Dt GCLI-FORKS 1
-.Os
+.Os @PACKAGE_STRING@
 .Sh NAME
 .Nm gcli forks
 .Nd Manage repository forks in git forges
@@ -55,7 +55,7 @@ may be one or more of the following:
 .It Cm delete
 Delete the fork. You will be asked for confirmation unless you set
 .Fl y .
-
+.Pp
 The following flags can be specified:
 .Bl -tag -width indent
 .It Fl r , -repo
@@ -76,7 +76,7 @@ $ git clone git@github.com:vim/vim
 $ cd vim
 $ gcli forks create --into <myaccount>
 .Ed
-
+.Pp
 This will ask you if you want to add a remote to your fork. In case
 you accept the offer, the origin remote will be renamed to upstream
 and a new origin will be pointed at your newly created fork. You may
@@ -84,7 +84,7 @@ also want to setup a .gcli file at the same time:
 .Bd -literal -offset indent
 $ printf -- "pr.upstream=vim/vim\\npr.base=trunk\\n" >> .gcli
 .Ed
-
+.Pp
 Delete your fork of the current repository without confirmation:
 .Bd -literal -offset indent
 $ gcli forks -y delete
@@ -94,5 +94,7 @@ $ gcli forks -y delete
 .Xr gcli 1
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+and contributors.
 .Sh BUGS
-Please report issues preferably via e-mail, on GitLab or on GitHub.
+Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
+or on Github.

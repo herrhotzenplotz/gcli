@@ -31,7 +31,7 @@
 #define ISSUES_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <sn/sn.h>
@@ -56,14 +56,17 @@ struct gcli_issue {
 	size_t  labels_size;
 	sn_sv  *assignees;
 	size_t  assignees_size;
+	/* workaround for GitHub where PRs are also issues */
+	int     is_pr;
+	sn_sv   milestone;
 };
 
 struct gcli_submit_issue_options {
-	sn_sv owner;
-	sn_sv repo;
-	sn_sv title;
-	sn_sv body;
-	bool  always_yes;
+	char const *owner;
+	char const *repo;
+	sn_sv       title;
+	sn_sv       body;
+	bool        always_yes;
 };
 
 struct gcli_issue_list {
@@ -83,9 +86,15 @@ void gcli_print_issues_table(enum gcli_output_flags const flags,
                              gcli_issue_list const *const list,
                              int const max);
 
-void gcli_issue_summary(char const *owner,
-                        char const *reponame,
-                        int const issue_number);
+void gcli_get_issue(char const *owner,
+                    char const *reponame,
+                    int const issue_number,
+                    gcli_issue *const out);
+
+void gcli_issue_free(gcli_issue *const it);
+
+void gcli_issue_print_summary(gcli_issue const *const it);
+void gcli_issue_print_op(gcli_issue const *const it);
 
 void gcli_issue_close(char const *owner,
                       char const *repo,
@@ -113,5 +122,10 @@ void gcli_issue_remove_labels(char const *owner,
                               int const issue_number,
                               char const *const labels[],
                               size_t const labels_size);
+
+int gcli_issue_set_milestone(char const *const owner,
+                             char const *const repo,
+                             int const issue,
+                             int const milestone);
 
 #endif /* ISSUES_H */

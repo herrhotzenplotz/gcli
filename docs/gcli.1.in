@@ -1,13 +1,13 @@
-.Dd $Mdocdate$
+.Dd @PACKAGE_DATE@
 .Dt GCLI 1
-.Os
+.Os @PACKAGE_STRING@
 .Sh NAME
 .Nm gcli
 .Nd interact with git forges without using a web-browser
 .Sh SYNOPSIS
-
+.Pp
 .Nm
-.Op common options
+.Op overrides
 .Cm subcommand
 .Op options
 .Sh DESCRIPTION
@@ -16,7 +16,7 @@ can be used to interact with
 .Xr git 1
 forges like GitHub, GitLab and Gitea from the command line in order to
 make many tasks like managing issues and pull requests easier.
-
+.Pp
 Calls to
 .Nm
 usually consist of either only the subcommand to list requested data
@@ -25,9 +25,14 @@ various tasks. Some commands may also take an item to operate on and
 accept multiple actions that will be performed on the item (e.g. PRs
 may be summarized, comments fetched and a diff printed all in one
 command).
+.Pp
+The default behaviour of
+.Nm
+can be overriden to accomodate more nuanced use cases. Manual
+overrides must be passed before subcommands and their options.
 .Sh SUBCOMMANDS
 Most of these subcommands are documented in dedicated man pages.
-.Bl -tag -width pipelines
+.Bl -tag -width milestones
 .It Cm issues
 Issues in repositories. See
 .Xr gcli-issues 1 .
@@ -53,20 +58,28 @@ Manage your own or other repositories. See
 .It Cm comment
 Submit comments under issues and PRs. See
 .Xr gcli-comment 1 .
-.It Cm version
-Print version and exit.
 .It Cm status
 Print a list of TODOs and/or notifications. See
 .Xr gcli-status 1 .
 .It Cm pipelines
-Inspect and manage Gitlab Pipelines.
+Inspect and manage Gitlab Pipelines. See
+.Xr gcli-pipelines 1 .
+.It Cm releases
+Create and manage releases. See
+.Xr gcli-releases 1 .
+.It Cm milestones
+List and manage milestones. See
+.Xr gcli-milestones 1 .
 .It Cm api
 Perform direct queries to the API and dump the JSON response to
-stdout. This is primarily inteded to assist debugging gcli. See
+stdout. This is primarily intended to assist debugging gcli. See
 .Xr gcli-api 1 .
+.It Cm version
+Print version and exit.
 .El
 .Sh OPTIONS
-Common options are:
+.Nm
+overrides are:
 .Bl -tag -width indent
 .It Fl a , -account Ar override-account
 Manually override the default account.
@@ -80,18 +93,20 @@ as the remote when trying to infer repository data.
 .It Fl c , -colours
 Ignore
 .Ev NO_COLOR
-and print ANSI escape sequences for changing text formatting. Default
-is to output colours unless stdout is not a tty. See
+as well as whether the output is not tty and print ANSI escape
+sequences for changing text formatting. Default is to output colours
+unless stdout is not a tty. See
 .Xr isatty 3 .
+This is useful in combination with modern pagers such as
+.Xr less 1 .
 .It Fl q , -quiet
-Surpresses most output of
+Supresses most output of
 .Nm .
 .It Fl v , -verbose
 Be very verbose. This means that warnings about missing config files
 and request steps are printed to stderr.
 .It Fl t , -type Ar forge-type
-Forcefully override the forge type if it can't be inferred
-correctly. Set
+Forcefully override the forge type. Set
 .Ar forge-type
 to
 .Sq github ,
@@ -100,13 +115,13 @@ or
 .Sq gitea
 to connect to the corresponding services.
 .El
-
+.Pp
 Common options across almost all of the subcommands are:
 .Bl -tag -width indent
 .It Fl s , -sorted
 Reverse the output such that most recent items appear at the bottom.
 .It Fl n , -count Ar n
-Fetch multiple pages of data. The default is usually 30 items, but
+Fetch multiple items of data. The default is usually 30 items, but
 this parameter allows to fetch more than that. Setting
 .Ar n
 to -1 will result in all pages being queried and all items being read.
@@ -127,15 +142,11 @@ in combination with
 Operate on the given repository.  Can only be used in combination with
 .Fl o .
 .It Fl i Ar id
-Operate on the given issue number.
-.It Fl p Ar pr
-Operate on the given pull request.
+Operate on the given numeric identifier.
 .El
-
+.Pp
 Other options specific to the context are documented in the respective
 man pages.
-.\" .Sh IMPLEMENTATION NOTES
-.\" Not used in OpenBSD.
 .Sh ENVIRONMENT
 .Bl -tag -width XDG_CONFIG_DIR
 .It Ev EDITOR
@@ -168,12 +179,11 @@ escape sequences. See
 .El
 .Sh FILES
 .Bl -tag -width ${XDG_CONFIG_DIR}/gcli/config -compact
-
 .It Pa ${XDG_CONFIG_DIR}/gcli/config
 The config file for
 .Nm .
 It shall contain the following data:
-
+.Pp
 .Bd -literal
 defaults {
 	editor=/path/to/ganoooo/emacs
@@ -195,7 +205,7 @@ herrhotzenplotz-gl {
 	forge-type=gitlab
 }
 .Ed
-
+.Pp
 In case
 .Sq apibase
 is not set, it defaults to the above values.
@@ -205,55 +215,57 @@ recommend setting the following on GitHub:
 On GitLab you only need the
 .Sq api
 scope.
-
+.Pp
 If editor is not set in the config file,
 .Nm
 will use
 .Ev EDITOR
 from the environment.
-
+.Pp
 Both
 .Sq gitlab-default-account
 and
 .Sq github-default-account
 must point at a config section with that exact name.
-
+.Pp
 .It Pa .gcli
 A repo-specific config file that may contain the following data:
 .Bd -literal
 pr.upstream=herrhotzenplotz/gcli
 pr.base=trunk
 .Ed
-
+.Pp
 It is intended to be committed into the repo so that users don't have
 to manually specify all the options like
 .Fl -in ,
 .Fl -from ,
 .Fl -base etc.
-
+.Pp
 .El
 .Sh EXAMPLES
-List all open issues in the current upstream repository:
+List recently opened issues in the current upstream repository:
 .Bd -literal -width indent
 $ gcli issues
 .Ed
-
+.Pp
 Merge upstream PR #22:
 .Bd -literal -width indent
 $ gcli pulls -p 22 merge
 .Ed
-
+.Pp
 Get a summary and comments of upstream PR #22:
 .Bd -literal -width indent
 $ gcli pulls -p 22 summary comments
 .Ed
-
-List the last 10 issues in contour-terminal/contour ignoring all
-warnings and forcing a connection to GitHub.
+.Pp
+Establish a connection to github and print the last 10 pull requests
+in contour-terminal/contour regardless of their state.
 .Bd -literal -width indent
-gcli -t github -q issues -o contour-terminal -r contour -a -n10
+$ gcli -t github pulls -o contour-terminal -r contour -a -n10
 .Ed
-This works when you don't have a config file in place.
+.Pp
+This can be useful if neither your config file nor the directory you're
+working from contain the relevant forge and repository information.
 .Sh SEE ALSO
 .Xr git 1 ,
 .Xr gcli-issues 1 ,
@@ -266,7 +278,7 @@ This works when you don't have a config file in place.
 .Xr gcli-gists 1 ,
 .Xr gcli-releases 1 ,
 .Xr gcli-comment 1
-.\" .Sh STANDARDS
+.Xr gcli-pipelines 1
 .Sh HISTORY
 The idea for
 .Nm
@@ -275,28 +287,34 @@ tool written by GitHub became clear to be the manual dialing and DNS
 resolving by the Go runtime, circumventing almost the entirety of the
 IP and DNS services of the operating system and leaking sensitive
 information when using Tor.
-
+.Pp
 Implementation started in October 2021 with the goal of having a
 decent, sufficiently portable and secure version of a cli utility to
 interact with the GitHub world without using the inconvenient web
 interface.
-
+.Pp
 Later, support for GitLab and Gitea (Codeberg) were added.
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+and contributors.
 .Sh CAVEATS
 Not all features that are available from the web version are available in
 .Nm .
 However, it is a non-goal of the project to provide all this
 functionality.
 .Sh BUGS
-Yes. It is software.
-
-Please report issues preferably via e-mail, on GitLab or on
-GitHub. You may also report an issue like so:
+There is an undocumented
+.Cm ci
+subcommand available for GitHub CI services. The subcommand is
+undocumented as it is not well tested and likely subject to changes.
+.Pp
+Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
+or on Github.
+.Pp
+You may also report an issue like so:
 .Bd -literal -width indent
-$ gcli -a some-gitlab-account issues create -o herrhotzenplotz -r gcli "BUG : ..."
+$ gcli -a some-gitlab-account \\
+        issues create \\
+        -o herrhotzenplotz -r gcli \\
+        "BUG : ..."
 .Ed
-.Sh SECURITY CONSIDERATIONS
-It is written in C. If it were written in Rust, it would have been
-much safer.

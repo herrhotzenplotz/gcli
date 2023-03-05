@@ -31,7 +31,7 @@
 #define GITEA_ISSUES_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <gcli/issues.h>
@@ -74,5 +74,10 @@ void gitea_issue_remove_labels(char const *owner,
                                int const issue,
                                char const *const labels[],
                                size_t const labels_size);
+
+int gitea_issue_set_milestone(char const *const owner,
+                              char const *const repo,
+                              int const issue,
+                              int const milestone);
 
 #endif /* GITEA_ISSUES_H */

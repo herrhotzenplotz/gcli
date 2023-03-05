@@ -31,7 +31,7 @@
 #define GITEA_PULLS_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <gcli/curl.h>
@@ -43,10 +43,10 @@ int gitea_get_pulls(char const *owner,
                     int const max,
                     gcli_pull_list *const out);
 
-void gitea_get_pull_summary(char const *owner,
-                            char const *repo,
-                            int	const pr_number,
-                            gcli_pull_summary *const out);
+void gitea_get_pull(char const *owner,
+                    char const *repo,
+                    int	const pr_number,
+                    gcli_pull *const out);
 
 int gitea_get_pull_commits(char const *owner,
                            char const *repo,

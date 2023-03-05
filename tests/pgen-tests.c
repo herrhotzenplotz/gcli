@@ -12,6 +12,8 @@ issues(struct json_stream *stream)
 	struct json_stream str   = {0};
 	gcli_issue         issue = {0};
 
+	(void) stream;
+
 	json_open_stream(&str, stdin);
 	parse_github_issue(&str, &issue);
 
@@ -33,7 +35,7 @@ pulls(struct json_stream *stream)
 
 	printf("title\t%s\n", pull.title);
 	printf("state\t%s\n", pull.state);
-	printf("author\t%s\n", pull.creator);
+	printf("author\t%s\n", pull.author);
 	printf("number\t%d\n", pull.number);
 	printf("id\t%d\n", pull.id);
 	printf("merged\t%d\n", pull.merged);
@@ -55,7 +57,9 @@ labels(struct json_stream *stream)
 int
 main(int argc, char *argv[])
 {
-	struct json_stream str   = {0};
+	struct json_stream str = {0};
+
+	(void) argc;
 
 	json_open_stream(&str, stdin);
 

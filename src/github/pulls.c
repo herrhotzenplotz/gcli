@@ -41,26 +41,11 @@
 #include <templates/github/pulls.h>
 
 int
-github_get_prs(char const *owner,
-               char const *repo,
-               bool const all,
-               int const max,
-               gcli_pull_list *const list)
+github_fetch_pulls(char *url, int max, gcli_pull_list *const list)
 {
 	json_stream        stream      = {0};
 	gcli_fetch_buffer  json_buffer = {0};
-	char              *url         = NULL;
 	char              *next_url    = NULL;
-	char              *e_owner     = NULL;
-	char              *e_repo      = NULL;
-
-	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
-
-	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls?state=%s",
-		gcli_get_apibase(),
-		e_owner, e_repo, all ? "all" : "open");
 
 	do {
 		gcli_fetch(url, &next_url, &json_buffer);
@@ -73,17 +58,40 @@ github_get_prs(char const *owner,
 	} while ((url = next_url) && (max == -1 || (int)(list->pulls_size) < max));
 
 	free(url);
-	free(e_owner);
-	free(e_repo);
 
 	return 0;
 }
 
+int
+github_get_pulls(char const *owner,
+                 char const *repo,
+                 bool const all,
+                 int const max,
+                 gcli_pull_list *const list)
+{
+	char *url     = NULL;
+	char *e_owner = NULL;
+	char *e_repo  = NULL;
+
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
+
+	url = sn_asprintf(
+		"%s/repos/%s/%s/pulls?state=%s",
+		gcli_get_apibase(),
+		e_owner, e_repo, all ? "all" : "open");
+
+	free(e_owner);
+	free(e_repo);
+
+	return github_fetch_pulls(url, max, list);
+}
+
 void
-github_print_pr_diff(FILE *stream,
-                     char const *owner,
-                     char const *repo,
-                     int const pr_number)
+github_print_pull_diff(FILE *stream,
+                       char const *owner,
+                       char const *repo,
+                       int const pr_number)
 {
 	char *url     = NULL;
 	char *e_owner = NULL;
@@ -104,10 +112,10 @@ github_print_pr_diff(FILE *stream,
 }
 
 void
-github_pr_merge(char const *owner,
-                char const *repo,
-                int const pr_number,
-                bool const squash)
+github_pull_merge(char const *owner,
+                  char const *repo,
+                  int const pr_number,
+                  bool const squash)
 {
 	json_stream        stream      = {0};
 	gcli_fetch_buffer  json_buffer = {0};
@@ -144,7 +152,7 @@ github_pr_merge(char const *owner,
 }
 
 void
-github_pr_close(char const *owner, char const *repo, int const pr_number)
+github_pull_close(char const *owner, char const *repo, int const pr_number)
 {
 	gcli_fetch_buffer  json_buffer = {0};
 	char              *url         = NULL;
@@ -171,7 +179,7 @@ github_pr_close(char const *owner, char const *repo, int const pr_number)
 }
 
 void
-github_pr_reopen(char const *owner, char const *repo, int const pr_number)
+github_pull_reopen(char const *owner, char const *repo, int const pr_number)
 {
 	gcli_fetch_buffer  json_buffer = {0};
 	char              *url         = NULL;
@@ -198,12 +206,12 @@ github_pr_reopen(char const *owner, char const *repo, int const pr_number)
 }
 
 void
-github_perform_submit_pr(gcli_submit_pull_options opts)
+github_perform_submit_pull(gcli_submit_pull_options opts)
 {
 	sn_sv              e_head, e_base, e_title, e_body;
 	gcli_fetch_buffer  fetch_buffer = {0};
 	struct json_stream json         = {0};
-	gcli_pull_summary  pull         = {0};
+	gcli_pull          pull         = {0};
 
 	e_head  = gcli_json_escape(opts.from);
 	e_base  = gcli_json_escape(opts.to);
@@ -218,9 +226,9 @@ github_perform_submit_pr(gcli_submit_pull_options opts)
 		SV_ARGS(e_title),
 		SV_ARGS(e_body));
 	char *url         = sn_asprintf(
-		"%s/repos/"SV_FMT"/"SV_FMT"/pulls",
+		"%s/repos/%s/%s/pulls",
 		gcli_get_apibase(),
-		SV_ARGS(opts.owner), SV_ARGS(opts.repo));
+		opts.owner, opts.repo);
 
 	gcli_fetch_with_method("POST", url, post_fields, NULL, &fetch_buffer);
 
@@ -228,17 +236,12 @@ github_perform_submit_pr(gcli_submit_pull_options opts)
 	 * with one request. */
 	if (opts.labels_size) {
 		json_open_buffer(&json, fetch_buffer.data, fetch_buffer.length);
-		parse_github_pull_summary(&json, &pull);
+		parse_github_pull(&json, &pull);
 
-		/* HACK: the string in the string view is passed from the
-		 *       command line and is thus null-terminated. We don't
-		 *       need to convert it into a C-string. Ideally,
-		 *       gcli_pulls_create_options.(repo|owner) should be a
-		 *       C-string to begin with. */
-		github_issue_add_labels(opts.owner.data, opts.repo.data,
-		                        pull.id, opts.labels, opts.labels_size);
+		github_issue_add_labels(opts.owner, opts.repo, pull.id,
+		                        opts.labels, opts.labels_size);
 
-		gcli_pulls_summary_free(&pull);
+		gcli_pull_free(&pull);
 		json_close(&json);
 	}
 
@@ -291,10 +294,10 @@ github_get_pull_commits(char const *owner,
 }
 
 void
-github_get_pull_summary(char const *owner,
-                        char const *repo,
-                        int const pr_number,
-                        gcli_pull_summary *const out)
+github_get_pull(char const *owner,
+                char const *repo,
+                int const pr_number,
+                gcli_pull *const out)
 {
 	json_stream        stream      = {0};
 	gcli_fetch_buffer  json_buffer = {0};
@@ -313,7 +316,7 @@ github_get_pull_summary(char const *owner,
 
 	json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 
-	parse_github_pull_summary(&stream, out);
+	parse_github_pull(&stream, out);
 
 	json_close(&stream);
 	free(url);
@@ -323,7 +326,7 @@ github_get_pull_summary(char const *owner,
 }
 
 int
-github_pr_checks(char const *owner, char const *repo, int const pr_number)
+github_pull_checks(char const *owner, char const *repo, int const pr_number)
 {
 	char refname[64] = {0};
 

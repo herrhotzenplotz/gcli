@@ -38,27 +38,11 @@
 #include <pdjson/pdjson.h>
 
 int
-gitlab_get_mrs(char const *owner,
-               char const *repo,
-               bool const all,
-               int const max,
-               gcli_pull_list *const list)
+gitlab_fetch_mrs(char *url, int const max, gcli_pull_list *const list)
 {
 	json_stream        stream      = {0};
 	gcli_fetch_buffer  json_buffer = {0};
-	char              *url         = NULL;
-	char              *e_owner     = NULL;
-	char              *e_repo      = NULL;
 	char              *next_url    = NULL;
-
-	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
-
-	url = sn_asprintf(
-		"%s/projects/%s%%2F%s/merge_requests%s",
-		gitlab_get_apibase(),
-		e_owner, e_repo,
-		all ? "" : "?state=opened");
 
 	do {
 		gcli_fetch(url, &next_url, &json_buffer);
@@ -71,10 +55,34 @@ gitlab_get_mrs(char const *owner,
 	} while ((url = next_url) && (max == -1 || (int)list->pulls_size < max));
 
 	free(url);
+
+	return 0;
+}
+
+int
+gitlab_get_mrs(char const *owner,
+               char const *repo,
+               bool const all,
+               int const max,
+               gcli_pull_list *const list)
+{
+	char *url     = NULL;
+	char *e_owner = NULL;
+	char *e_repo  = NULL;
+
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
+
+	url = sn_asprintf(
+		"%s/projects/%s%%2F%s/merge_requests%s",
+		gitlab_get_apibase(),
+		e_owner, e_repo,
+		all ? "" : "?state=opened");
+
 	free(e_owner);
 	free(e_repo);
 
-	return 0;
+	return gitlab_fetch_mrs(url, max, list);
 }
 
 void
@@ -127,10 +135,10 @@ gitlab_mr_merge(char const *owner,
 }
 
 void
-gitlab_get_pull_summary(char const *owner,
-                        char const *repo,
-                        int const pr_number,
-                        gcli_pull_summary *const out)
+gitlab_get_pull(char const *owner,
+                char const *repo,
+                int const pr_number,
+                gcli_pull *const out)
 {
 	json_stream        stream      = {0};
 	gcli_fetch_buffer  json_buffer = {0};
@@ -150,7 +158,7 @@ gitlab_get_pull_summary(char const *owner,
 
 	json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 
-	parse_gitlab_mr_summary(&stream, out);
+	parse_gitlab_mr(&stream, out);
 
 	json_close(&stream);
 	free(url);
@@ -309,14 +317,15 @@ gitlab_perform_submit_mr(gcli_submit_pull_options opts)
 		target.id,
 		labels ? labels : "");
 
-	/* construct url */
-	sn_sv e_owner = gcli_urlencode_sv(source_owner);
-	sn_sv e_repo  = gcli_urlencode_sv(opts.repo);
+	/* construct url. The thing below works as the string view is
+	 * malloced and also NUL-terminated */
+	char *e_owner = gcli_urlencode_sv(source_owner).data;
+	char *e_repo = gcli_urlencode(opts.repo);
 
 	char *url = sn_asprintf(
-		"%s/projects/"SV_FMT"%%2F"SV_FMT"/merge_requests",
+		"%s/projects/%s%%2F%s/merge_requests",
 		gitlab_get_apibase(),
-		SV_ARGS(e_owner), SV_ARGS(e_repo));
+	    e_owner, e_repo);
 
 	/* perform request */
 	gcli_fetch_with_method("POST", url, post_fields, NULL, &buffer);
@@ -327,8 +336,8 @@ gitlab_perform_submit_mr(gcli_submit_pull_options opts)
 	free(e_target_branch.data);
 	free(e_title.data);
 	free(e_body.data);
-	free(e_owner.data);
-	free(e_repo.data);
+	free(e_owner);
+	free(e_repo);
 	free(labels);
 	free(post_fields);
 	free(url);

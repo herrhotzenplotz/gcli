@@ -46,6 +46,10 @@
 static gcli_gitremote remotes[MAX_REMOTES];
 static size_t         remotes_size;
 
+/* Search for a file named fname in the .gcli directory.
+ *
+ * This is ugly code. However, I don't see an easier way to do
+ * this. */
 static char const *
 find_file_in_dotgit(char const *fname)
 {
@@ -67,10 +71,13 @@ find_file_in_dotgit(char const *fname)
 		if (!curr_dir)
 			err(1, "opendir");
 
+		/* Read entries of the directory */
 		while ((ent = readdir(curr_dir))) {
 			if (strcmp(".", ent->d_name) == 0 || strcmp("..", ent->d_name) == 0)
 				continue;
 
+			/* Is this the .git directory? If so, allocate some memory
+			 * to store the path into dotgit and append '/\0' */
 			if (strcmp(".git", ent->d_name) == 0) {
 				size_t len = strlen(curr_dir_path);
 				dotgit = malloc(len + strlen(ent->d_name) + 2);
@@ -84,6 +91,9 @@ find_file_in_dotgit(char const *fname)
 			}
 		}
 
+		/* If we reach this point and dotgit is NULL we couldn't find
+		 * the .git directory in the current directory. In this case
+		 * we append '..' to the path and resolve it. */
 		if (!dotgit) {
 			size_t len = strlen(curr_dir_path);
 			char *tmp = malloc(len + sizeof("/.."));
@@ -99,6 +109,7 @@ find_file_in_dotgit(char const *fname)
 
 			free(tmp);
 
+			/* Check if we reached the filesystem root */
 			if (strcmp("/", curr_dir_path) == 0) {
 				free(curr_dir_path);
 				closedir(curr_dir);
@@ -113,15 +124,18 @@ find_file_in_dotgit(char const *fname)
 
 	free(curr_dir_path);
 
+	/* Now search for the file in the found .git directory */
 	curr_dir = opendir(dotgit);
 	if (!curr_dir)
 		err(1, "opendir");
 
 	while ((ent = readdir(curr_dir))) {
+		/* skip over . and .. directory entries */
 		if (strcmp(".", ent->d_name) == 0 || strcmp("..", ent->d_name) == 0)
 			continue;
 
-		// We found the config file, put together it's path and return that
+		/* We found the config file, put together it's path and return
+		 * that */
 		if (strcmp(fname, ent->d_name) == 0) {
 			int len = strlen(dotgit);
 
@@ -328,7 +342,7 @@ gcli_gitconfig_read_gitconfig(void)
 		if (buffer.length == 0)
 			break;
 
-		// TODO: Git Config files support comments
+		/* TODO: Git Config files support comments */
 		if (*buffer.data != '[')
 			errx(1, "error: invalid git config");
 

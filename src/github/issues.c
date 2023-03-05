@@ -38,6 +38,60 @@
 
 #include <templates/github/issues.h>
 
+/* TODO: Remove this function once we use linked lists for storing
+ *       issues.
+ *
+ * This is an ugly hack caused by the sillyness of the Github API that
+ * treats Pull Requests as issues and reports them to us when we
+ * request issues. This function nukes them from the list, readjusts
+ * the allocation size and fixes the reported list size. */
+static void
+github_hack_fixup_issues_that_are_actually_pulls(gcli_issue_list *const it)
+{
+	for (size_t i = it->issues_size; i > 0; --i) {
+		if (it->issues[i-1].is_pr) {
+			/*  len = 7, i = 5, to move = 7 - 5 = 2
+			 *   0   1   2   3   4   5   6
+			 * | x | x | x | x | X | x | x | */
+			gcli_issue_free(&it->issues[i-1]);
+			memmove(&it->issues[i-1], &it->issues[i],
+			        sizeof(*it->issues) * (it->issues_size - i));
+			it->issues = realloc(
+				it->issues,
+				(--it->issues_size) * sizeof(*it->issues));
+		}
+	}
+}
+
+int
+github_fetch_issues(char *url,
+                    int const max,
+                    gcli_issue_list *const out)
+{
+	json_stream        stream      = {0};
+	gcli_fetch_buffer  json_buffer = {0};
+	char              *next_url    = NULL;
+
+	do {
+		gcli_fetch(url, &next_url, &json_buffer);
+
+		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+
+		parse_github_issues(&stream, &out->issues, &out->issues_size);
+		/* Hack: Remove PRs from the issue list because github. */
+		github_hack_fixup_issues_that_are_actually_pulls(out);
+
+		free(json_buffer.data);
+		free(url);
+		json_close(&stream);
+
+	} while ((url = next_url) && (max == -1 || (int)out->issues_size < max));
+
+	free(url);
+
+	return 0;
+}
+
 int
 github_get_issues(char const *owner,
                   char const *repo,
@@ -45,12 +99,9 @@ github_get_issues(char const *owner,
                   int const max,
                   gcli_issue_list *const out)
 {
-	json_stream        stream      = {0};
-	gcli_fetch_buffer  json_buffer = {0};
-	char              *url         = NULL;
-	char              *e_owner     = NULL;
-	char              *e_repo      = NULL;
-	char              *next_url    = NULL;
+	char *url     = NULL;
+	char *e_owner = NULL;
+	char *e_repo  = NULL;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -61,27 +112,10 @@ github_get_issues(char const *owner,
 		e_owner, e_repo,
 		all ? "all" : "open");
 
-	do {
-		gcli_fetch(url, &next_url, &json_buffer);
-
-		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-
-		parse_github_issues(&stream, &out->issues, &out->issues_size);
-
-		free(json_buffer.data);
-		free(url);
-		json_close(&stream);
-
-	} while ((url = next_url) && (max == -1 || (int)out->issues_size < max));
-	/* continue iterating if we have both a next_url and we are
-	 * supposed to fetch more issues (either max is -1 thus all issues
-	 * or we haven't fetched enough yet). */
-
-	free(next_url);
 	free(e_owner);
 	free(e_repo);
 
-	return 0;
+	return github_fetch_issues(url, max, out);
 }
 
 void
@@ -178,24 +212,22 @@ void
 github_perform_submit_issue(gcli_submit_issue_options opts,
                             gcli_fetch_buffer *out)
 {
-	sn_sv e_owner = gcli_urlencode_sv(opts.owner);
-	sn_sv e_repo  = gcli_urlencode_sv(opts.repo);
-	sn_sv e_title = gcli_json_escape(opts.title);
-	sn_sv e_body  = gcli_json_escape(opts.body);
+	char  *e_owner = gcli_urlencode(opts.owner);
+	char  *e_repo  = gcli_urlencode(opts.repo);
+	sn_sv  e_title = gcli_json_escape(opts.title);
+	sn_sv  e_body  = gcli_json_escape(opts.body);
 
 	char *post_fields = sn_asprintf(
 		"{ \"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
 		SV_ARGS(e_title), SV_ARGS(e_body));
-	char *url         = sn_asprintf(
-		"%s/repos/"SV_FMT"/"SV_FMT"/issues",
-		gcli_get_apibase(),
-		SV_ARGS(e_owner),
-		SV_ARGS(e_repo));
+
+	char *url = sn_asprintf("%s/repos/%s/%s/issues",
+	                        gcli_get_apibase(), e_owner, e_repo);
 
 	gcli_fetch_with_method("POST", url, post_fields, NULL, out);
 
-	free(e_owner.data);
-	free(e_repo.data);
+	free(e_owner);
+	free(e_repo);
 	free(e_title.data);
 	free(e_body.data);
 	free(post_fields);
@@ -289,4 +321,31 @@ github_issue_remove_labels(char const *owner,
 	free(url);
 	free(e_label);
 	free(buffer.data);
+}
+
+int
+github_issue_set_milestone(char const *const owner,
+                           char const *const repo,
+                           int const issue,
+                           int const milestone)
+{
+	char *url, *e_owner, *e_repo, *body;
+
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/repos/%s/%s/issues/%d",
+	                  gcli_get_apibase(),
+	                  e_owner, e_repo, issue);
+
+	body = sn_asprintf("{ \"milestone\": %d }", milestone);
+
+	gcli_fetch_with_method("PATCH", url, body, NULL, NULL);
+
+	free(body);
+	free(url);
+	free(e_repo);
+	free(e_owner);
+
+	return 0;
 }

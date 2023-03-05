@@ -8,7 +8,7 @@ AM_CPPFLAGS += -I$(srcdir)
 AM_CPPFLAGS += -DYY_NO_INPUT
 AM_CPPFLAGS += -DYY_NO_UNPUT
 
-noinst_PROGRAMS = pgen
+noinst_PROGRAMS = pgen$(EXEEXT)
 pgen_SOURCES = \
 	include/gcli/pgen.h \
 	src/pgen/dump_c.c \
@@ -19,11 +19,11 @@ pgen_SOURCES = \
 
 noinst_LTLIBRARIES = libgcli.la libsn.la libpdjson.la
 
-.NOTPARALLEL: pgen $(builddir)/src/pgen/parser.c $(builddir)/src/pgen/parser.h $(builddir)/src/pgen/lexer.c
+.NOTPARALLEL: pgen$(EXEEXT) $(builddir)/src/pgen/parser.c $(builddir)/src/pgen/parser.h $(builddir)/src/pgen/lexer.c
 
-libgcli_la_DEPENDENCIES = pgen
+libgcli_la_DEPENDENCIES = pgen$(EXEEXT)
 
-$(BUILT_SOURCES): pgen
+$(BUILT_SOURCES): pgen$(EXEEXT)
 
 SUFFIXES = .t
 .t.h:
@@ -32,7 +32,7 @@ SUFFIXES = .t
 .t.c:
 	$(AM_V_GEN)./pgen -tc -o $@ $<
 
-bin_PROGRAMS = gcli
+bin_PROGRAMS = gcli$(EXEEXT)
 gcli_LDADD = libgcli.la libpdjson.la libsn.la
 
 dist_man_MANS = \
@@ -42,6 +42,7 @@ dist_man_MANS = \
 	docs/gcli-gists.1 \
 	docs/gcli-issues.1 \
 	docs/gcli-labels.1 \
+	docs/gcli-milestones.1 \
 	docs/gcli-pipelines.1 \
 	docs/gcli-pulls.1 \
 	docs/gcli-releases.1 \
@@ -60,6 +61,7 @@ gcli_SOURCES = \
 	src/cmd/gists.c \
 	src/cmd/issues.c \
 	src/cmd/labels.c \
+	src/cmd/milestones.c \
 	src/cmd/pipelines.c \
 	src/cmd/pulls.c \
 	src/cmd/releases.c \
@@ -88,17 +90,20 @@ TEMPLATES = \
 	templates/github/releases.t \
 	templates/github/repos.t \
 	templates/github/status.t \
+	templates/github/milestones.t \
 	templates/gitlab/comments.t \
 	templates/gitlab/forks.t \
 	templates/gitlab/issues.t \
 	templates/gitlab/labels.t \
 	templates/gitlab/merge_requests.t \
+	templates/gitlab/milestones.t \
 	templates/gitlab/pipelines.t \
 	templates/gitlab/releases.t \
 	templates/gitlab/repos.t \
 	templates/gitlab/review.t \
 	templates/gitlab/status.t \
-	templates/gitlab/snippets.t
+	templates/gitlab/snippets.t \
+	templates/gitea/milestones.t
 
 libgcli_la_SOURCES = \
 	src/colour.c include/gcli/colour.h \
@@ -108,16 +113,16 @@ libgcli_la_SOURCES = \
 	src/editor.c include/gcli/editor.h \
 	src/forges.c include/gcli/forges.h \
 	src/forks.c include/gcli/forks.h \
-	src/gists.c include/gcli/gists.h \
 	src/gitconfig.c include/gcli/gitconfig.h \
 	src/issues.c include/gcli/issues.h \
 	src/json_util.c include/gcli/json_util.h \
 	src/labels.c include/gcli/labels.h \
+	src/milestones.c include/gcli/milestones.h \
 	src/pulls.c include/gcli/pulls.h \
 	src/releases.c include/gcli/releases.h \
 	src/repos.c include/gcli/repos.h \
 	src/review.c include/gcli/review.h \
-	src/snippets.c include/gcli/snippets.h \
+	src/gitlab/snippets.c include/gcli/gitlab/snippets.h \
 	src/status.c include/gcli/status.h \
 	src/table.c include/gcli/table.h \
 	src/gitlab/api.c include/gcli/gitlab/api.h \
@@ -127,6 +132,7 @@ libgcli_la_SOURCES = \
 	src/gitlab/issues.c include/gcli/gitlab/issues.h \
 	src/gitlab/labels.c include/gcli/gitlab/labels.h \
 	src/gitlab/merge_requests.c include/gcli/gitlab/merge_requests.h \
+	src/gitlab/milestones.c include/gcli/gitlab/milestones.h \
 	src/gitlab/pipelines.c include/gcli/gitlab/pipelines.h \
 	src/gitlab/releases.c include/gcli/gitlab/releases.h \
 	src/gitlab/repos.c include/gcli/gitlab/repos.h \
@@ -141,9 +147,11 @@ libgcli_la_SOURCES = \
 	src/github/comments.c include/gcli/github/comments.h \
 	src/github/status.c include/gcli/github/status.h \
 	src/github/labels.c include/gcli/github/labels.h \
+	src/github/milestones.c include/gcli/github/milestones.h \
 	src/github/issues.c include/gcli/github/issues.h \
 	src/github/review.c include/gcli/github/review.h \
 	src/github/checks.c include/gcli/github/checks.h \
+	src/github/gists.c include/gcli/github/gists.h \
 	src/gitea/issues.c include/gcli/gitea/issues.h \
 	src/gitea/labels.c include/gcli/gitea/labels.h \
 	src/gitea/forks.c include/gcli/gitea/forks.h \
@@ -152,6 +160,7 @@ libgcli_la_SOURCES = \
 	src/gitea/pulls.c include/gcli/gitea/pulls.h \
 	src/gitea/releases.c include/gcli/gitea/releases.h \
 	src/gitea/repos.c include/gcli/gitea/repos.h \
+	src/gitea/milestones.c include/gcli/gitea/milestones.h \
 	$(TEMPLATES)
 
 BUILT_SOURCES = \
@@ -163,14 +172,16 @@ CLEANFILES = $(BUILT_SOURCES)
 EXTRA_DIST = \
 	LICENSE \
 	README.md \
-	autogen.sh
+	HACKING.md \
+	autogen.sh \
+	m4/.gitkeep
 
 ###########################################
 # Tests
 check_PROGRAMS = \
-	tests/json-escape \
-	tests/pgen-tests \
-	tests/url-encode
+	tests/json-escape$(EXEEXT) \
+	tests/pgen-tests$(EXEEXT) \
+	tests/url-encode$(EXEEXT)
 
 SHELL_TESTS = \
 	tests/01_pgen_simple_object.sh \

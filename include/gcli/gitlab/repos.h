@@ -31,13 +31,13 @@
 #define GITLAB_REPOS_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <gcli/repos.h>
 
-void gitlab_get_repo(sn_sv const owner,
-                     sn_sv const repo,
+void gitlab_get_repo(char const *owner,
+                     char const *repo,
                      gcli_repo *const out);
 
 int gitlab_get_repos(char const  *owner,

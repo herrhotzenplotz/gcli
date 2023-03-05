@@ -37,6 +37,39 @@
 
 #include <pdjson/pdjson.h>
 
+/** Given the url fetch issues */
+int
+gitlab_fetch_issues(char *url,
+                    int const max,
+                    gcli_issue_list *const out)
+{
+	json_stream        stream      = {0};
+	gcli_fetch_buffer  json_buffer = {0};
+	char              *next_url    = NULL;
+
+	do {
+		gcli_fetch(url, &next_url, &json_buffer);
+
+		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+
+		parse_gitlab_issues(&stream, &out->issues, &out->issues_size);
+
+		free(json_buffer.data);
+		json_buffer.data = NULL;
+		json_buffer.length = 0;
+
+		free(url);
+		json_close(&stream);
+	} while ((url = next_url) && (max == -1 || (int)out->issues_size < max));
+	/* continue iterating if we have both a next_url and we are
+	 * supposed to fetch more issues (either max is -1 thus all issues
+	 * or we haven't fetched enough yet). */
+
+	free(next_url);
+
+	return 0;
+}
+
 int
 gitlab_get_issues(char const *owner,
                   char const *repo,
@@ -44,12 +77,9 @@ gitlab_get_issues(char const *owner,
                   int const max,
                   gcli_issue_list *const out)
 {
-	json_stream        stream      = {0};
-	gcli_fetch_buffer  json_buffer = {0};
-	char              *url         = NULL;
-	char              *e_owner     = NULL;
-	char              *e_repo      = NULL;
-	char              *next_url    = NULL;
+	char *url     = NULL;
+	char *e_owner = NULL;
+	char *e_repo  = NULL;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -60,27 +90,10 @@ gitlab_get_issues(char const *owner,
 		e_owner, e_repo,
 		all ? "" : "?state=opened");
 
-	do {
-		gcli_fetch(url, &next_url, &json_buffer);
-
-		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-
-		parse_gitlab_issues(&stream, &out->issues, &out->issues_size);
-
-		free(json_buffer.data);
-		free(url);
-		json_close(&stream);
-
-	} while ((url = next_url) && (max == -1 || (int)out->issues_size < max));
-	/* continue iterating if we have both a next_url and we are
-	 * supposed to fetch more issues (either max is -1 thus all issues
-	 * or we haven't fetched enough yet). */
-
-	free(next_url);
 	free(e_owner);
 	free(e_repo);
 
-	return 0;
+	return gitlab_fetch_issues(url, max, out);
 }
 
 void
@@ -178,8 +191,8 @@ void
 gitlab_perform_submit_issue(gcli_submit_issue_options opts,
                             gcli_fetch_buffer *const out)
 {
-	sn_sv e_owner = gcli_urlencode_sv(opts.owner);
-	sn_sv e_repo  = gcli_urlencode_sv(opts.repo);
+	char *e_owner = gcli_urlencode(opts.owner);
+	char *e_repo  = gcli_urlencode(opts.repo);
 	sn_sv e_title = gcli_json_escape(opts.title);
 	sn_sv e_body  = gcli_json_escape(opts.body);
 
@@ -187,15 +200,13 @@ gitlab_perform_submit_issue(gcli_submit_issue_options opts,
 		"{ \"title\": \""SV_FMT"\", \"description\": \""SV_FMT"\" }",
 		SV_ARGS(e_title), SV_ARGS(e_body));
 	char *url         = sn_asprintf(
-		"%s/projects/"SV_FMT"%%2F"SV_FMT"/issues",
-		gitlab_get_apibase(),
-		SV_ARGS(e_owner),
-		SV_ARGS(e_repo));
+		"%s/projects/%s%%2F%s/issues",
+		gitlab_get_apibase(), e_owner, e_repo);
 
 	gcli_fetch_with_method("POST", url, post_fields, NULL, out);
 
-	free(e_owner.data);
-	free(e_repo.data);
+	free(e_owner);
+	free(e_repo);
 	free(e_title.data);
 	free(e_body.data);
 	free(post_fields);
@@ -312,4 +323,26 @@ gitlab_issue_remove_labels(char const *owner,
 	free(data);
 	free(list);
 	free(buffer.data);
+}
+
+int
+gitlab_issue_set_milestone(char const *const owner,
+                           char const *const repo,
+                           int const issue,
+                           int const milestone)
+{
+	char *url, *e_owner, *e_repo;
+
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%d?milestone_id=%d",
+	                  gitlab_get_apibase(), e_owner, e_repo, issue, milestone);
+
+	gcli_fetch_with_method("PUT", url, NULL, NULL, NULL);
+
+	free(url);
+	free(e_repo);
+	free(e_owner);
+
+	return 0;
 }

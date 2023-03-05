@@ -31,11 +31,15 @@
 #define GITLAB_ISSUES_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <gcli/curl.h>
 #include <gcli/issues.h>
+
+int gitlab_fetch_issues(char *url,
+                        int const max,
+                        gcli_issue_list *const out);
 
 int gitlab_get_issues(char const *owner,
                       char const *repo,
@@ -75,5 +79,10 @@ void gitlab_issue_remove_labels(char const *owner,
                                 int const issue,
                                 char const *const labels[],
                                 size_t const labels_size);
+
+int gitlab_issue_set_milestone(char const *const owner,
+                               char const *const repo,
+                               int const issue,
+                               int const milestone);
 
 #endif /* GITLAB_ISSUES_H */

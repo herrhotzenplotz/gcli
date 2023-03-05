@@ -79,8 +79,7 @@ gcli_setcolour256(uint32_t const code)
 	if (oldresult)
 		return oldresult;
 
-	/* TODO: This is inherently screwed */
-	result = sn_asprintf("\033[38;2;%02d;%02d;%02dm",
+	result = sn_asprintf("\033[48;2;%02d;%02d;%02dm",
 	                     (code & 0xFF000000) >> 24,
 	                     (code & 0x00FF0000) >> 16,
 	                     (code & 0x0000FF00) >>  8);
@@ -148,11 +147,11 @@ gcli_state_colour_str(char const *it)
 		return "";
 }
 
-/* TODO: Probably a hash table would be more suitable */
 static const struct { char const *name; int code; }
 	state_colour_table[] =
 {
 	{ .name = "open",      .code = GCLI_COLOR_GREEN   },
+	{ .name = "active",    .code = GCLI_COLOR_GREEN   },
 	{ .name = "success",   .code = GCLI_COLOR_GREEN   },
 	{ .name = "APPROVED",  .code = GCLI_COLOR_GREEN   },
 	{ .name = "merged",    .code = GCLI_COLOR_MAGENTA },

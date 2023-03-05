@@ -27,7 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include <config.h>
 
 #include <gcli/cmd.h>
 #include <gcli/comments.h>
@@ -55,14 +55,17 @@ usage(void)
 	fprintf(stderr, "  -n number       Number of issues to fetch (-1 = everything)\n");
 	fprintf(stderr, "  -i issue        ID of issue to perform actions on\n");
 	fprintf(stderr, "ACTIONS:\n");
-	fprintf(stderr, "  summary|status  Display status information\n");
+	fprintf(stderr, "  all             Display both status and and op\n");
+	fprintf(stderr, "  status          Display status information\n");
+	fprintf(stderr, "  op              Display original post\n");
 	fprintf(stderr, "  comments        Display comments\n");
 	fprintf(stderr, "  close           Close the issue\n");
 	fprintf(stderr, "  reopen          Reopen a closed issue\n");
 	fprintf(stderr, "  assign <user>   Assign the issue to the given user\n");
 	fprintf(stderr, "  labels ...      Add or remove labels:\n");
-	fprintf(stderr, "                     --add <name>\n");
-	fprintf(stderr, "                     --remove <name>\n");
+	fprintf(stderr, "                     add <name>\n");
+	fprintf(stderr, "                     remove <name>\n");
+	fprintf(stderr, "  milestone <id>  Assign this issue to the given milestone\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
@@ -94,10 +97,10 @@ subcommand_issue_create(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "o:r:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
-			opts.owner = SV(optarg);
+			opts.owner = optarg;
 			break;
 		case 'r':
-			opts.repo = SV(optarg);
+			opts.repo = optarg;
 			break;
 		case 'y':
 			opts.always_yes = true;
@@ -111,14 +114,7 @@ subcommand_issue_create(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	if (!opts.owner.length || !opts.repo.length) {
-		gcli_config_get_upstream_parts(&opts.owner, &opts.repo);
-		if (!opts.owner.length || !opts.repo.length)
-			errx(1,
-			     "error: Target repo for the issue to be created "
-			     "in is missing. Please either specify '-o owner' "
-			     "and '-r repo' or set pr.upstream in .gcli.");
-	}
+	check_owner_and_repo(&opts.owner, &opts.repo);
 
 	if (argc != 1) {
 		fprintf(stderr, "error: Expected one argument for issue title\n");
@@ -133,6 +129,11 @@ subcommand_issue_create(int argc, char *argv[])
 	return EXIT_SUCCESS;
 }
 
+static inline int handle_issues_actions(int argc, char *argv[],
+                                        char const *const owner,
+                                        char const *const repo,
+                                        int const issue);
+
 int
 subcommand_issues(int argc, char *argv[])
 {
@@ -140,7 +141,7 @@ subcommand_issues(int argc, char *argv[])
 	char const *owner = NULL;
 	char const *repo = NULL;
 	char *endptr = NULL;
-	int ch = 0, issue = -1, n = 30;
+	int ch = 0, issue_id = -1, n = 30;
 	bool all = false;
 	enum gcli_output_flags flags = 0;
 
@@ -167,7 +168,7 @@ subcommand_issues(int argc, char *argv[])
 		  .has_arg = required_argument,
 		  .flag    = NULL,
 		  .val     = 'o' },
-		{ .name    = "issue",
+		{ .name    = "id",
 		  .has_arg = required_argument,
 		  .flag    = NULL,
 		  .val     = 'i' },
@@ -189,11 +190,11 @@ subcommand_issues(int argc, char *argv[])
 			repo = optarg;
 			break;
 		case 'i': {
-			issue = strtol(optarg, &endptr, 10);
+			issue_id = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "error: cannot parse issue number");
 
-			if (issue < 0)
+			if (issue_id < 0)
 				errx(1, "error: issue number is out of range");
 		} break;
 		case 'n': {
@@ -227,7 +228,7 @@ subcommand_issues(int argc, char *argv[])
 	check_owner_and_repo(&owner, &repo);
 
 	/* No issue number was given, so list all open issues */
-	if (issue < 0) {
+	if (issue_id < 0) {
 		if (gcli_get_issues(owner, repo, all, n, &list) < 0)
 			errx(1, "error: could not get issues");
 
@@ -244,54 +245,161 @@ subcommand_issues(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
+	/* Handle all the actions */
+	return handle_issues_actions(argc, argv, owner, repo, issue_id);
+}
+
+static inline void
+ensure_issue(char const *const owner, char const *const repo,
+             int const issue_id,
+             int *const have_fetched_issue, gcli_issue *const issue)
+{
+	if (*have_fetched_issue)
+		return;
+
+	gcli_get_issue(owner, repo, issue_id, issue);
+	*have_fetched_issue = 1;
+}
+
+static inline void
+handle_issue_labels_action(int *argc, char ***argv,
+                           char const *const owner,
+                           char const *const repo,
+                           int const issue_id)
+{
+	char const **add_labels = NULL;
+	size_t add_labels_size = 0;
+	char const **remove_labels = NULL;
+	size_t remove_labels_size = 0;
+
+	if (argc == 0) {
+		fprintf(stderr, "error: expected label operations\n");
+		usage();
+		exit(EXIT_FAILURE);
+	}
+
+	parse_labels_options(argc, argv, &add_labels, &add_labels_size,
+	                     &remove_labels, &remove_labels_size);
+
+	/* actually go about deleting and adding the labels */
+	if (add_labels_size)
+		gcli_issue_add_labels(owner, repo, issue_id,
+		                      add_labels, add_labels_size);
+	if (remove_labels_size)
+		gcli_issue_remove_labels(owner, repo, issue_id,
+		                         remove_labels, remove_labels_size);
+
+	free(add_labels);
+	free(remove_labels);
+}
+
+static inline void
+handle_issue_milestone_action(int *argc, char ***argv,
+                              char const *const owner,
+                              char const *const repo,
+                              int const issue_id)
+{
+	char const *milestone_str;
+	char *endptr;
+	int milestone;
+
+	/* Set the milestone for the issue
+	 *
+	 * Check that the user provided a milestone id */
+	if (!argc) {
+		fprintf(stderr, "error: missing milestone id\n");
+		usage();
+		exit(EXIT_FAILURE);
+	}
+
+	/* Fetch the milestone from the argument vector */
+	milestone_str = shift(argc, argv);
+
+	/* Parse the milestone id */
+	milestone = strtoul(milestone_str, &endptr, 10);
+
+	/* Check successful for parse */
+	if (endptr != milestone_str + strlen(milestone_str)) {
+		fprintf(stderr, "error: could not parse milestone id\n");
+		usage();
+		exit(EXIT_FAILURE);
+	}
+
+	/* Pass it to the dispatch */
+	if (gcli_issue_set_milestone(owner, repo, issue_id, milestone) < 0)
+		errx(1, "error: could not assign milestone");
+}
+
+static inline int
+handle_issues_actions(int argc, char *argv[],
+                      char const *const owner,
+                      char const *const repo,
+                      int const issue_id)
+{
+	int have_fetched_issue = 0;
+	gcli_issue issue = {0};
+
 	/* execute all operations on the given issue */
 	while (argc > 0) {
 		char const *operation = shift(&argc, &argv);
 
-		if (strcmp("comments", operation) == 0) {
-			gcli_issue_comments(owner, repo, issue);
-		} else if (strcmp("summary", operation) == 0
-		           || strcmp("status", operation) == 0) {
-			gcli_issue_summary(owner, repo, issue);
+		if (strcmp("all", operation) == 0) {
+			/* Make sure we have fetched the issue data */
+			ensure_issue(owner, repo, issue_id, &have_fetched_issue, &issue);
+
+			gcli_issue_print_summary(&issue);
+
+			puts("\nORIGINAL POST\n");
+			gcli_issue_print_op(&issue);
+
+		} else if (strcmp("comments", operation) == 0) {
+			/* Doesn't require fetching the issue data */
+			gcli_issue_comments(owner, repo, issue_id);
+
+		} else if (strcmp("op", operation) == 0) {
+			/* Make sure we have fetched the issue data */
+			ensure_issue(owner, repo, issue_id, &have_fetched_issue, &issue);
+
+			gcli_issue_print_op(&issue);
+
+		} else if (strcmp("status", operation) == 0) {
+			/* Make sure we have fetched the issue data */
+			ensure_issue(owner, repo, issue_id, &have_fetched_issue, &issue);
+
+			gcli_issue_print_summary(&issue);
+
 		} else if (strcmp("close", operation) == 0) {
-			gcli_issue_close(owner, repo, issue);
+
+			gcli_issue_close(owner, repo, issue_id);
+
 		} else if (strcmp("reopen", operation) == 0) {
-			gcli_issue_reopen(owner, repo, issue);
+
+			gcli_issue_reopen(owner, repo, issue_id);
+
 		} else if (strcmp("assign", operation) == 0) {
+
 			char const *assignee = shift(&argc, &argv);
-			gcli_issue_assign(owner, repo, issue, assignee);
+			gcli_issue_assign(owner, repo, issue_id, assignee);
+
 		} else if (strcmp("labels", operation) == 0) {
-			char const **add_labels         = NULL;
-			size_t       add_labels_size    = 0;
-			char const **remove_labels      = NULL;
-			size_t       remove_labels_size = 0;
 
-			if (argc == 0) {
-				fprintf(stderr, "error: expected label operations\n");
-				usage();
-				return EXIT_FAILURE;
-			}
+			handle_issue_labels_action(
+				&argc, &argv, owner, repo, issue_id);
 
-			parse_labels_options(&argc, &argv,
-			                     &add_labels, &add_labels_size,
-			                     &remove_labels, &remove_labels_size);
+		} else if (strcmp("milestone", operation) == 0) {
 
-			/* actually go about deleting and adding the labels */
-			if (add_labels_size)
-				gcli_issue_add_labels(owner, repo, issue,
-				                      add_labels, add_labels_size);
-			if (remove_labels_size)
-				gcli_issue_remove_labels(owner, repo, issue,
-				                         remove_labels, remove_labels_size);
+			handle_issue_milestone_action(
+				&argc, &argv, owner, repo, issue_id);
 
-			free(add_labels);
-			free(remove_labels);
 		} else {
 			fprintf(stderr, "error: unknown operation %s\n", operation);
 			usage();
 			return EXIT_FAILURE;
 		}
 	}
+
+	if (have_fetched_issue)
+		gcli_issue_free(&issue);
 
 	return EXIT_SUCCESS;
 }

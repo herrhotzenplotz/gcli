@@ -1,6 +1,6 @@
-.Dd $Mdocdate$
+.Dd @PACKAGE_DATE@
 .Dt GCLI-API 1
-.Os
+.Os @PACKAGE_STRING@
 .Sh NAME
 .Nm gcli api
 .Nd Perform API Calls to Git Forges and retrieve results
@@ -32,5 +32,7 @@ $ gcli -v api -a /projects/herrhotzenplotz%2Fgcli/issues >/tmp/foo
 .Xr gcli 1
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+and contributors.
 .Sh BUGS
-Please report issues preferably via e-mail, on GitLab or on GitHub.
+Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
+or on Github.

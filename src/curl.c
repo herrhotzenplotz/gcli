@@ -40,8 +40,8 @@
 #include <sn/sn.h>
 #include <pdjson/pdjson.h>
 
-/* Hack for NetBSD's broken isalnum implementation */
-#ifdef __NetBSD__
+/* Hack for NetBSD's and Oracle Solaris broken isalnum implementation */
+#if defined(__NetBSD__) || (defined(__SVR4) && defined(__sun))
 #  ifdef isalnum
 #    undef isalnum
 #  endif
@@ -57,7 +57,7 @@ gcli_curl_isalnum(char const c)
 		|| ('0' <= c && c <= '9');
 }
 
-#endif /* __NetBSD */
+#endif /* __NetBSD and Oracle Solaris */
 
 /* Cached curl handle */
 static CURL *gcli_curl_session = NULL;
@@ -119,11 +119,15 @@ gcli_curl_check_api_error(CURLcode code,
 static size_t
 fetch_write_callback(char *in, size_t size, size_t nmemb, void *data)
 {
-	gcli_fetch_buffer *out = data;
+	/* the user may have passed null indicating that we do not care
+	 * about the result body of the request. */
+	if (data) {
+		gcli_fetch_buffer *out = data;
 
-	out->data = realloc(out->data, out->length + size * nmemb);
-	memcpy(&(out->data[out->length]), in, size * nmemb);
-	out->length += size * nmemb;
+		out->data = realloc(out->data, out->length + size * nmemb);
+		memcpy(&(out->data[out->length]), in, size * nmemb);
+		out->length += size * nmemb;
+	}
 
 	return size * nmemb;
 }
@@ -316,6 +320,8 @@ gcli_fetch_with_method(
 {
 	CURLcode           ret;
 	struct curl_slist *headers;
+	gcli_fetch_buffer tmp = {0}; /* used for error codes when out is NULL */
+	gcli_fetch_buffer *buf = NULL;
 	char              *link_header = NULL;
 
 	char *auth_header = gcli_config_get_authheader();
@@ -333,7 +339,15 @@ gcli_fetch_with_method(
 	if (auth_header)
 		headers = curl_slist_append(headers, auth_header);
 
-	*out = (gcli_fetch_buffer) {0};
+	/* Only clear the output buffer if we have a pointer to it. If the
+	 * user is not interested in the result we use a temporary buffer
+	 * for proper error reporting. */
+	if (out) {
+		*out = (gcli_fetch_buffer) {0};
+		buf = out;
+	} else {
+		buf = &tmp;
+	}
 
 	gcli_curl_ensure();
 
@@ -346,14 +360,14 @@ gcli_fetch_with_method(
 	curl_easy_setopt(gcli_curl_session, CURLOPT_USERAGENT, "curl/7.79.1");
 	curl_easy_setopt(gcli_curl_session, CURLOPT_CUSTOMREQUEST, method);
 	curl_easy_setopt(gcli_curl_session, CURLOPT_TCP_KEEPALIVE, 1L);
-	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEDATA, out);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEDATA, buf);
 	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
 	curl_easy_setopt(gcli_curl_session, CURLOPT_FAILONERROR, 0L);
 	curl_easy_setopt(gcli_curl_session, CURLOPT_HEADERFUNCTION, fetch_header_callback);
 	curl_easy_setopt(gcli_curl_session, CURLOPT_HEADERDATA, &link_header);
 
 	ret = curl_easy_perform(gcli_curl_session);
-	gcli_curl_check_api_error(ret, url, out);
+	gcli_curl_check_api_error(ret, url, buf);
 
 	if (link_header && pagination_next)
 		*pagination_next = parse_link_header(link_header);
@@ -362,6 +376,11 @@ gcli_fetch_with_method(
 
 	curl_slist_free_all(headers);
 	headers = NULL;
+
+	/* if the user is not interested in the result, free the temporary
+	 * buffer */
+	if (!out)
+		free(tmp.data);
 
 	free(auth_header);
 }

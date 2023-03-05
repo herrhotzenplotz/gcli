@@ -27,11 +27,12 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
+#include <config.h>
 
 #include <gcli/cmd.h>
+#include <gcli/config.h>
 #include <gcli/curl.h>
-#include <gcli/gists.h>
+#include <gcli/github/gists.h>
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -83,8 +84,6 @@ subcommand_gist_get(int argc, char *argv[])
 	     file_name, gist_id);
 
 file_found:
-	/* TODO: check if tty when file is large */
-	/* TODO: HACK */
 
 	if (isatty(STDOUT_FILENO) && (file->size >= 4 * 1024 * 1024))
 		errx(1, "File is bigger than 4 MiB, refusing to print to stdout.");

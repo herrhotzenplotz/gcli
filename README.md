@@ -3,7 +3,7 @@
 Simple and portable CLI tool for interacting with GitHub, GitLab and
 Gitea from the command line.
 
-![](docs/screenshot-02.png)
+![](docs/screenshot-03.png)
 
 ## Why?
 
@@ -57,18 +57,24 @@ If you are building from Git you will also need:
 ### Compile
 In order to perform a build, do:
 ```console
-$ ./configure
+$ ./configure [--prefix=/usr/local]
 $ make
-# make DESTDIR=/ install
+# make [DESTDIR=/] install
 ```
 
-You may leave out `DESTDIR`. The above is the default value.
+You may leave out `DESTDIR` and `--prefix=`. The above is the default
+value. The final installation destination is `$DESTDIR/$PREFIX/...`.
 
-If you are building from Git you need to generate the configure script
+If you are unsure, consult the builtin configure help by running
+`./configure --help`.
+
+Also, if you are building from Git you need to generate the configure script
 first:
 ```console
 $ ./autogen.sh
 ```
+
+For more details also see [HACKING.md](HACKING.md).
 
 In case any of this does not work, please either report a bug, or
 submit a patch in case you managed to fix it.
@@ -85,18 +91,19 @@ Tested Operating Systems so far:
 - OpenBSD 7.0 GENERIC amd64
 - Alpine Linux 3.16 x86_64
 - Darwin 22.2.0 arm64
+- Windows 10 (mingw32-w64)
 
 ## Support
 
-You can ask your local frenchman aka. neutaaaaan for emotional support
-when using this piece of software. Otherwise you can read the man page
-at »man gcli«.
+Please refer to the manual pages that come with gcli. You may want to
+start at `gcli(1)`. For further questions refer to the issues on
+Github and Gitlab or ask on IRC.
 
 ## Bugs and contributions
 
-Please report bugs to nsonack@herrhotzenplotz.de or on
-[GitLab](https://gitlab.com/herrhotzenplotz/gcli). You can also submit
-patches this way using git-send-email.
+Please report bugs, issues and questions to nsonack@herrhotzenplotz.de
+or on [GitLab](https://gitlab.com/herrhotzenplotz/gcli). You can also
+submit patches this way using git-send-email.
 
 ## License
 

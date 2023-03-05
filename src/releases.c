@@ -87,7 +87,7 @@ gcli_print_releases_long(enum gcli_output_flags const flags,
 	int n;
 
 	/* Determine how many items to print */
-	if (max < 0 || max > list->releases_size)
+	if (max < 0 || (size_t)(max) > list->releases_size)
 		n = list->releases_size;
 	else
 		n = max;
@@ -106,7 +106,7 @@ gcli_print_releases_short(enum gcli_output_flags const flags,
                           gcli_release_list const *const list,
                           int const max)
 {
-	int n;
+	size_t n;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
 		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
@@ -116,17 +116,17 @@ gcli_print_releases_short(enum gcli_output_flags const flags,
 		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
 	};
 
-	if (max < 0 || max > list->releases_size)
-		n = max;
-	else
+	if (max < 0 || (size_t)(max) > list->releases_size)
 		n = list->releases_size;
+	else
+		n = max;
 
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not init table");
 
 	if (flags & OUTPUT_SORTED) {
-		for (int i = 0; i < n; ++i) {
+		for (size_t i = 0; i < n; ++i) {
 			gcli_tbl_add_row(table,
 			                 list->releases[n-i-1].id,
 			                 list->releases[n-i-1].date,
@@ -135,7 +135,7 @@ gcli_print_releases_short(enum gcli_output_flags const flags,
 			                 list->releases[n-i-1].name);
 		}
 	} else {
-		for (int i = 0; i < n; ++i) {
+		for (size_t i = 0; i < n; ++i) {
 			gcli_tbl_add_row(table,
 			                 list->releases[i].id,
 			                 list->releases[i].date,
@@ -153,7 +153,7 @@ gcli_print_releases(enum gcli_output_flags const flags,
                     gcli_release_list const *const list,
                     int const max)
 {
-	if (max == 0) {
+	if (list->releases_size == 0) {
 		puts("No releases");
 		return;
 	}
@@ -167,7 +167,7 @@ gcli_print_releases(enum gcli_output_flags const flags,
 void
 gcli_free_releases(gcli_release_list *const list)
 {
-	for (int i = 0; i < list->releases_size; ++i) {
+	for (size_t i = 0; i < list->releases_size; ++i) {
 		free(list->releases[i].name.data);
 		free(list->releases[i].body.data);
 		free(list->releases[i].author.data);

@@ -99,7 +99,7 @@ github_create_label(char const *owner,
 	data = sn_asprintf("{ "
 	                   "  \"name\": \""SV_FMT"\", "
 	                   "  \"description\": \""SV_FMT"\", "
-	                   "  \"colour\": \""SV_FMT"\""
+	                   "  \"color\": \""SV_FMT"\""
 	                   "}",
 	                   SV_ARGS(label_name),
 	                   SV_ARGS(label_descr),

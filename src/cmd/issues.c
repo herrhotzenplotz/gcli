@@ -141,8 +141,8 @@ subcommand_issues(int argc, char *argv[])
 	char const *owner = NULL;
 	char const *repo = NULL;
 	char *endptr = NULL;
-	int ch = 0, issue_id = -1, n = 30;
-	bool all = false;
+	int ch = 0, issue_id = -1, n = 30, longopt = 0;
+	gcli_issue_fetch_details details = {0};
 	enum gcli_output_flags flags = 0;
 
 	/* detect whether we wanna create an issue */
@@ -177,11 +177,16 @@ subcommand_issues(int argc, char *argv[])
 		  .flag    = NULL,
 		  .val     = 'n'
 		},
+		{ .name    = "author",
+		  .has_arg = required_argument,
+		  .flag    = NULL,
+		  .val     = 0,
+		},
 		{0},
 	};
 
 	/* parse options */
-	while ((ch = getopt_long(argc, argv, "+sn:o:r:i:a", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "+sn:o:r:i:a", options, &longopt)) != -1) {
 		switch (ch) {
 		case 'o':
 			owner = optarg;
@@ -209,11 +214,15 @@ subcommand_issues(int argc, char *argv[])
 				errx(1, "error: issue count must not be zero");
 		} break;
 		case 'a':
-			all = true;
+			details.all = true;
 			break;
 		case 's':
 			flags |= OUTPUT_SORTED;
 			break;
+		case 0: {
+			if (strcmp(options[longopt].name, "author") == 0)
+				details.author = optarg;
+		} break;
 		case '?':
 		default:
 			usage();
@@ -229,7 +238,7 @@ subcommand_issues(int argc, char *argv[])
 
 	/* No issue number was given, so list all open issues */
 	if (issue_id < 0) {
-		if (gcli_get_issues(owner, repo, all, n, &list) < 0)
+		if (gcli_get_issues(owner, repo, &details, n, &list) < 0)
 			errx(1, "error: could not get issues");
 
 		gcli_print_issues_table(flags, &list, n);
@@ -239,7 +248,7 @@ subcommand_issues(int argc, char *argv[])
 	}
 
 	/* require -a to not be set */
-	if (all) {
+	if (details.all) {
 		fprintf(stderr, "error: -a cannot be combined with operations on an issue\n");
 		usage();
 		return EXIT_FAILURE;

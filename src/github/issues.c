@@ -95,7 +95,7 @@ github_fetch_issues(char *url,
 int
 github_get_issues(char const *owner,
                   char const *repo,
-                  bool const all,
+                  gcli_issue_fetch_details const *details,
                   int const max,
                   gcli_issue_list *const out)
 {
@@ -110,7 +110,7 @@ github_get_issues(char const *owner,
 		"%s/repos/%s/%s/issues?state=%s",
 		gcli_get_apibase(),
 		e_owner, e_repo,
-		all ? "all" : "open");
+		details->all ? "all" : "open");
 
 	free(e_owner);
 	free(e_repo);

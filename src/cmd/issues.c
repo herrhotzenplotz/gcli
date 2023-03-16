@@ -44,12 +44,13 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: gcli issues create [-o owner -r repo] [-y] title...\n");
-	fprintf(stderr, "       gcli issues [-o owner -r repo] [-a] [-n number] [-s]\n");
+	fprintf(stderr, "       gcli issues [-o owner -r repo] [-a] [-n number] [-A author] [-s]\n");
 	fprintf(stderr, "       gcli issues [-o owner -r repo] -i issue actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
 	fprintf(stderr, "  -o owner        The repository owner\n");
 	fprintf(stderr, "  -r repo         The repository name\n");
 	fprintf(stderr, "  -y              Do not ask for confirmation.\n");
+	fprintf(stderr, "  -A author       Only print issues by the given author\n");
 	fprintf(stderr, "  -a              Fetch everything including closed issues \n");
 	fprintf(stderr, "  -s              Print (sort) in reverse order\n");
 	fprintf(stderr, "  -n number       Number of issues to fetch (-1 = everything)\n");
@@ -141,7 +142,7 @@ subcommand_issues(int argc, char *argv[])
 	char const *owner = NULL;
 	char const *repo = NULL;
 	char *endptr = NULL;
-	int ch = 0, issue_id = -1, n = 30, longopt = 0;
+	int ch = 0, issue_id = -1, n = 30;
 	gcli_issue_fetch_details details = {0};
 	enum gcli_output_flags flags = 0;
 
@@ -180,13 +181,13 @@ subcommand_issues(int argc, char *argv[])
 		{ .name    = "author",
 		  .has_arg = required_argument,
 		  .flag    = NULL,
-		  .val     = 0,
+		  .val     = 'A',
 		},
 		{0},
 	};
 
 	/* parse options */
-	while ((ch = getopt_long(argc, argv, "+sn:o:r:i:a", options, &longopt)) != -1) {
+	while ((ch = getopt_long(argc, argv, "+sn:o:r:i:aA:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
 			owner = optarg;
@@ -219,9 +220,8 @@ subcommand_issues(int argc, char *argv[])
 		case 's':
 			flags |= OUTPUT_SORTED;
 			break;
-		case 0: {
-			if (strcmp(options[longopt].name, "author") == 0)
-				details.author = optarg;
+		case 'A': {
+			details.author = optarg;
 		} break;
 		case '?':
 		default:

@@ -94,7 +94,7 @@ struct gcli_forge_descriptor {
 	int (*get_issues)(
 		char const *owner,
 		char const *repo,
-		bool const all,
+		gcli_issue_fetch_details const *details,
 		int const max,
 		gcli_issue_list *const out);
 

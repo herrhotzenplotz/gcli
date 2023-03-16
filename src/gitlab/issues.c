@@ -73,23 +73,34 @@ gitlab_fetch_issues(char *url,
 int
 gitlab_get_issues(char const *owner,
                   char const *repo,
-                  bool const all,
+                  gcli_issue_fetch_details const *details,
                   int const max,
                   gcli_issue_list *const out)
 {
-	char *url     = NULL;
+	char *url = NULL;
 	char *e_owner = NULL;
-	char *e_repo  = NULL;
+	char *e_repo = NULL;
+	char *e_author = NULL;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
+	if (details->author) {
+		char *tmp = gcli_urlencode(details->author);
+		e_author = sn_asprintf("%cauthor_username=%s",
+		                       details->all ? '?' : '&',
+		                       tmp);
+		free(tmp);
+	}
+
 	url = sn_asprintf(
-		"%s/projects/%s%%2F%s/issues%s",
+		"%s/projects/%s%%2F%s/issues%s%s",
 		gitlab_get_apibase(),
 		e_owner, e_repo,
-		all ? "" : "?state=opened");
+		details->all ? "" : "?state=opened",
+		e_author ? e_author : "");
 
+	free(e_author);
 	free(e_owner);
 	free(e_repo);
 

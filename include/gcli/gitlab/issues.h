@@ -41,11 +41,9 @@ int gitlab_fetch_issues(char *url,
                         int const max,
                         gcli_issue_list *const out);
 
-int gitlab_get_issues(char const *owner,
-                      char const *repo,
-                      bool const all,
-                      int const max,
-                      gcli_issue_list *const out);
+int gitlab_get_issues(char const *owner, char const *repo,
+                      gcli_issue_fetch_details const *details,
+                      int const max, gcli_issue_list *const out);
 
 void gitlab_get_issue_summary(char const *owner,
                               char const *repo,

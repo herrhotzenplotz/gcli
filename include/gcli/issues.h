@@ -42,6 +42,7 @@
 typedef struct gcli_issue gcli_issue;
 typedef struct gcli_submit_issue_options gcli_submit_issue_options;
 typedef struct gcli_issue_list gcli_issue_list;
+typedef struct gcli_issue_fetch_details gcli_issue_fetch_details;
 
 struct gcli_issue {
 	int     number;
@@ -74,11 +75,14 @@ struct gcli_issue_list {
 	size_t issues_size;
 };
 
-int gcli_get_issues(char const *owner,
-                    char const *reponame,
-                    bool const all,
-                    int const max,
-                    gcli_issue_list *const out);
+struct gcli_issue_fetch_details {
+	bool all;                   /* disregard the issue state */
+	char const *author;         /* A username who issued */
+};
+
+int gcli_get_issues(char const *owner, char const *reponame,
+                    gcli_issue_fetch_details const *details,
+                    int const max, gcli_issue_list *const out);
 
 void gcli_issues_free(gcli_issue_list *const);
 

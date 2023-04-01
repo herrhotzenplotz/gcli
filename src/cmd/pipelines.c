@@ -47,16 +47,18 @@ usage(void)
 	fprintf(stderr, "       gcli pipelines [-o owner -r repo] -p pipeline [-n number]\n");
 	fprintf(stderr, "       gcli pipelines [-o owner -r repo] -j job [-n number] actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
-	fprintf(stderr, "  -o owner        The repository owner\n");
-	fprintf(stderr, "  -r repo         The repository name\n");
-	fprintf(stderr, "  -p pipeline     Fetch jobs of the given pipeline\n");
-	fprintf(stderr, "  -j job          Run actions for the given job\n");
-	fprintf(stderr, "  -n number       Number of issues to fetch (-1 = everything)\n");
+	fprintf(stderr, "  -o owner                 The repository owner\n");
+	fprintf(stderr, "  -r repo                  The repository name\n");
+	fprintf(stderr, "  -p pipeline              Fetch jobs of the given pipeline\n");
+	fprintf(stderr, "  -j job                   Run actions for the given job\n");
+	fprintf(stderr, "  -n number                Number of issues to fetch (-1 = everything)\n");
 	fprintf(stderr, "ACTIONS:\n");
-	fprintf(stderr, "  status          Display status information\n");
-	fprintf(stderr, "  log             Display job log\n");
-	fprintf(stderr, "  cancel          Cancel the job\n");
-	fprintf(stderr, "  retry           Retry the given job\n");
+	fprintf(stderr, "  status                   Display status information\n");
+	fprintf(stderr, "  artifacts [-o filename]  Download a zip archive of the artifacts of the given job\n");
+	fprintf(stderr, "                           (default output filename: artifacts.zip)\n");
+	fprintf(stderr, "  log                      Display job log\n");
+	fprintf(stderr, "  cancel                   Cancel the job\n");
+	fprintf(stderr, "  retry                    Retry the given job\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
@@ -172,15 +174,30 @@ subcommand_pipelines(int argc, char *argv[])
 		char const *name;                               /* Name on the cli */
 		void (*fn)(char const *, char const *, long);   /* Function to be invoked for this action */
 	} job_actions[] = {
-		{ .name = "log",    .fn = gitlab_job_get_log },
-		{ .name = "status", .fn = gitlab_job_status  },
-		{ .name = "cancel", .fn = gitlab_job_cancel  },
-		{ .name = "retry",  .fn = gitlab_job_retry   },
+		{ .name = "log",       .fn = gitlab_job_get_log            },
+		{ .name = "status",    .fn = gitlab_job_status             },
+		{ .name = "cancel",    .fn = gitlab_job_cancel             },
+		{ .name = "retry",     .fn = gitlab_job_retry              },
 	};
 
 next_action:
 	while (argc) {
 		char const *action = shift(&argc, &argv);
+
+		/* Handle the artifacts action separately because it allows a
+		 * -o flag. No other action supports flags. */
+		if (strcmp(action, "artifacts") == 0) {
+			char const *outfile = "artifacts.zip";
+			if (argc && strcmp(argv[0], "-o") == 0) {
+				if (argc < 2)
+					errx(1, "error: -o is missing the output filename");
+				outfile = argv[1];
+				argc -= 2;
+				argv += 2;
+			}
+			gitlab_job_download_artifacts(owner, repo, jid, outfile);
+			goto next_action;
+		}
 
 		/* Find the action and invoke it */
 		for (size_t i = 0; i < ARRAY_SIZE(job_actions); ++i) {

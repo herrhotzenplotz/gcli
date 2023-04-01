@@ -365,3 +365,30 @@ gitlab_mr_pipelines(char const *owner, char const *repo, int const mr_id)
 
 	return 0;
 }
+
+void
+gitlab_job_download_artifacts(char const *owner, char const *repo,
+                              long const jid, char const *const outfile)
+{
+	char *url;
+	char *e_owner, *e_repo;
+	FILE *f;
+
+	f = fopen(outfile, "wb");
+	if (f == NULL)
+		err(1, "could not open %s", outfile);
+
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld/artifacts",
+	                  gitlab_get_apibase(),
+	                  e_owner, e_repo, jid);
+
+	gcli_curl(f, url, "application/zip");
+
+	fclose(f);
+	free(url);
+	free(e_owner);
+	free(e_repo);
+}

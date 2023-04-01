@@ -170,6 +170,7 @@ gcli_curl_test_success(char const *url)
 	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEDATA, &buffer);
 	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
 	curl_easy_setopt(gcli_curl_session, CURLOPT_FAILONERROR, 0L);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_FOLLOWLOCATION, 1L);
 
 	ret = curl_easy_perform(gcli_curl_session);
 
@@ -224,6 +225,7 @@ gcli_curl(FILE *stream, char const *url, char const *content_type)
 	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEDATA, &buffer);
 	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
 	curl_easy_setopt(gcli_curl_session, CURLOPT_FAILONERROR, 0L);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_FOLLOWLOCATION, 1L);
 
 	ret = curl_easy_perform(gcli_curl_session);
 	gcli_curl_check_api_error(ret, url, &buffer);
@@ -365,6 +367,7 @@ gcli_fetch_with_method(
 	curl_easy_setopt(gcli_curl_session, CURLOPT_FAILONERROR, 0L);
 	curl_easy_setopt(gcli_curl_session, CURLOPT_HEADERFUNCTION, fetch_header_callback);
 	curl_easy_setopt(gcli_curl_session, CURLOPT_HEADERDATA, &link_header);
+	curl_easy_setopt(gcli_curl_session, CURLOPT_FOLLOWLOCATION, 1L);
 
 	ret = curl_easy_perform(gcli_curl_session);
 	gcli_curl_check_api_error(ret, url, buf);

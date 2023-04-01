@@ -117,4 +117,8 @@ int gitlab_mr_pipelines(char const *owner,
                         char const *repo,
                         int const mr_id);
 
+void gitlab_job_download_artifacts(char const *owner,
+                                   char const *repo,
+                                   long const jid);
+
 #endif /* GITLAB_PIPELINES_H */

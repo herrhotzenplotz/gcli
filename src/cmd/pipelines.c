@@ -54,6 +54,7 @@ usage(void)
 	fprintf(stderr, "  -n number       Number of issues to fetch (-1 = everything)\n");
 	fprintf(stderr, "ACTIONS:\n");
 	fprintf(stderr, "  status          Display status information\n");
+	fprintf(stderr, "  artifacts       Download a zip archive of the artifacts of the given job\n");
 	fprintf(stderr, "  log             Display job log\n");
 	fprintf(stderr, "  cancel          Cancel the job\n");
 	fprintf(stderr, "  retry           Retry the given job\n");
@@ -172,10 +173,11 @@ subcommand_pipelines(int argc, char *argv[])
 		char const *name;                               /* Name on the cli */
 		void (*fn)(char const *, char const *, long);   /* Function to be invoked for this action */
 	} job_actions[] = {
-		{ .name = "log",    .fn = gitlab_job_get_log },
-		{ .name = "status", .fn = gitlab_job_status  },
-		{ .name = "cancel", .fn = gitlab_job_cancel  },
-		{ .name = "retry",  .fn = gitlab_job_retry   },
+		{ .name = "log",       .fn = gitlab_job_get_log            },
+		{ .name = "status",    .fn = gitlab_job_status             },
+		{ .name = "cancel",    .fn = gitlab_job_cancel             },
+		{ .name = "retry",     .fn = gitlab_job_retry              },
+		{ .name = "artifacts", .fn = gitlab_job_download_artifacts },
 	};
 
 next_action:

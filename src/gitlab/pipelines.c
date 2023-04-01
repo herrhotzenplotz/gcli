@@ -368,15 +368,15 @@ gitlab_mr_pipelines(char const *owner, char const *repo, int const mr_id)
 
 void
 gitlab_job_download_artifacts(char const *owner, char const *repo,
-                              long const jid)
+                              long const jid, char const *const outfile)
 {
 	char *url;
 	char *e_owner, *e_repo;
 	FILE *f;
 
-	f = fopen("artifacts.zip", "wb");
+	f = fopen(outfile, "wb");
 	if (f == NULL)
-		err(1, "could not open artifacts.zip");
+		err(1, "could not open %s", outfile);
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);

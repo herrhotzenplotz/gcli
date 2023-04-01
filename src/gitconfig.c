@@ -32,21 +32,77 @@
 #include <gcli/gitconfig.h>
 #include <sn/sn.h>
 
-#include <stdio.h>
-#include <sys/wait.h>
 #include <dirent.h>
+#include <signal.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <signal.h>
-
 #include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #define MAX_REMOTES 64
 static gcli_gitremote remotes[MAX_REMOTES];
 static size_t         remotes_size;
 
-/* Search for a file named fname in the .gcli directory.
+/* Resolve a worktree .git if needed */
+static char *
+resolve_worktree_gitdir_if_needed(char *dotgit)
+{
+	struct stat sb = {0};
+	FILE *f;
+	char *newdir = NULL;
+
+	if (stat(dotgit, &sb) < 0)
+		err(1, "stat");
+
+	/* Real .git directory */
+	if (S_ISDIR(sb.st_mode))
+		return dotgit;
+
+	f = fopen(dotgit, "r");
+	if (!f)
+		err(1, "fopen");
+
+	while (!ferror(f) && !feof(f)) {
+		char *key, *value;
+		char buf[256] = {0};
+
+		fgets(buf, sizeof buf, f);
+
+		key = buf;
+		value = strchr(buf, ':');
+		if (!value)
+			continue;
+
+		*value++ = '\0';
+		while (*value == ' ')
+			++value;
+
+		if (strcmp(key, "gitdir") == 0) {
+			size_t const len = strlen(value);
+
+			newdir = strdup(value);
+
+			/* trim off any potential newline character */
+			if (newdir[len - 1] == '\n')
+				newdir[len - 1] = '\0';
+
+			break;
+		}
+	}
+
+	if (newdir == NULL)
+		errx(1, "error: .git is a file but does not contain a gitdir pointer");
+
+	fclose(f);
+
+	free(dotgit);
+	return newdir;
+}
+
+/* Search for a file named fname in the .git directory.
  *
  * This is ugly code. However, I don't see an easier way to do
  * this. */
@@ -123,6 +179,11 @@ find_file_in_dotgit(char const *fname)
 	} while (dotgit == NULL);
 
 	free(curr_dir_path);
+
+	/* In case we are working with git worktrees, the .git might be a
+	 * file that contains a pointer to the actual .git directory. Here
+	 * we call into a function that resolves this link if needed. */
+	dotgit = resolve_worktree_gitdir_if_needed(dotgit);
 
 	/* Now search for the file in the found .git directory */
 	curr_dir = opendir(dotgit);

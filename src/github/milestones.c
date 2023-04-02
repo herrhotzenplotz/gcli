@@ -193,17 +193,27 @@ normalize_date_to_iso8601(char const *const input,
                           char *output, size_t const output_size)
 {
 	struct tm tm_buf = {0};
+	struct tm *utm_buf;
 	char *endptr;
+	time_t utctime;
 
 	assert(output_size == 21);
 
-	/* TODO: Timezone handling */
-
+	/* Parse input time */
 	endptr = strptime(input, "%Y-%m-%d", &tm_buf);
 	if (endptr == NULL || *endptr != '\0')
 		errx(1, "error: date »%s« is invalid: want YYYY-MM-DD", input);
 
-	strftime(output, output_size, "%Y-%m-%dT%H:%M:%SZ", &tm_buf);
+	/* Convert to UTC: Really, we should be using the _r versions of
+	 * these functions for thread-safety but since gcli doesn't do
+	 * multithreading (except for inside libcurl) we do not need to be
+	 * worried about the storage behind the pointer returned by gmtime
+	 * to be altered by another thread. */
+	utctime = mktime(&tm_buf);
+	utm_buf = gmtime(&utctime);
+
+	/* Format the output string - now in UTC */
+	strftime(output, output_size, "%Y-%m-%dT%H:%M:%SZ", utm_buf);
 }
 
 int

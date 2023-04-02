@@ -184,3 +184,18 @@ github_delete_milestone(char const *const owner,
 
 	return 0;
 }
+
+int
+github_milestone_set_duedate(char const *const owner,
+                             char const *const repo,
+                             int const milestone,
+                             char const *const date)
+{
+	(void) owner;
+	(void) repo;
+	(void) milestone;
+	(void) date;
+
+	errx(1, "error: github_milestone_set_duedate is not yet implemented");
+	return -1;
+}

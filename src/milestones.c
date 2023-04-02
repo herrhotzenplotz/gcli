@@ -170,3 +170,12 @@ gcli_milestone_get_issues(char const *const owner,
 {
 	return gcli_forge()->get_milestone_issues(owner, repo, milestone, out);
 }
+
+int
+gcli_milestone_set_duedate(char const *const owner,
+                           char const *const repo,
+                           int const milestone,
+                           char const *const date)
+{
+	return gcli_forge()->milestone_set_duedate(owner, repo, milestone, date);
+}

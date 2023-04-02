@@ -191,11 +191,22 @@ github_milestone_set_duedate(char const *const owner,
                              int const milestone,
                              char const *const date)
 {
-	(void) owner;
-	(void) repo;
-	(void) milestone;
-	(void) date;
+	char *url, *e_owner, *e_repo, *payload;
 
-	errx(1, "error: github_milestone_set_duedate is not yet implemented");
-	return -1;
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/repos/%s/%s/milestones/%d",
+	                  gcli_get_apibase(),
+	                  e_owner, e_repo, milestone);
+
+	payload = sn_asprintf("{ \"due_on\": \"%s\"}", date);
+	gcli_fetch_with_method("PATCH", url, payload, NULL, NULL);
+
+	free(payload);
+	free(url);
+	free(e_repo);
+	free(e_owner);
+
+	return 0;
 }

@@ -44,6 +44,9 @@ Create the milestone with the given
 When operating on a single milestone you may use one or more of the
 following actions:
 .Bl -tag -width indent
+.It Cm all
+Print both general status info and a list of issues related to the
+given milestone.
 .It Cm status
 Print general metadata and information about the milestone.
 .It Cm issues

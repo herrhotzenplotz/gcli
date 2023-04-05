@@ -43,15 +43,16 @@ usage(void)
 	fprintf(stderr, "       gcli milestones create [-o owner -r repo] -t title [-d description]\n");
 	fprintf(stderr, "       gcli milestones [-o owner -r repo] -i milestone action...\n");
 	fprintf(stderr, "OPTIONS:\n");
-	fprintf(stderr, "  -o owner        The repository owner\n");
-	fprintf(stderr, "  -r repo         The repository name\n");
-	fprintf(stderr, "  -i milestone    Run actions for the given milestone id\n");
-	fprintf(stderr, "  -t title        Title of the milestone to create\n");
-	fprintf(stderr, "  -d description  Description the milestone to create\n");
+	fprintf(stderr, "  -o owner             The repository owner\n");
+	fprintf(stderr, "  -r repo              The repository name\n");
+	fprintf(stderr, "  -i milestone         Run actions for the given milestone id\n");
+	fprintf(stderr, "  -t title             Title of the milestone to create\n");
+	fprintf(stderr, "  -d description       Description the milestone to create\n");
 	fprintf(stderr, "ACTIONS:\n");
-	fprintf(stderr, "  status          Display general status information about the milestone\n");
-	fprintf(stderr, "  issues          List issues associated with the milestone\n");
-	fprintf(stderr, "  delete          Delete this milestone\n");
+	fprintf(stderr, "  status               Display general status information about the milestone\n");
+	fprintf(stderr, "  issues               List issues associated with the milestone\n");
+	fprintf(stderr, "  set-duedate <date>   Set due date \n");
+	fprintf(stderr, "  delete               Delete this milestone\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
@@ -274,6 +275,20 @@ handle_milestone_actions(int argc, char *argv[],
 			/* Delete the milestone */
 			if (gcli_delete_milestone(owner, repo, milestone_id) < 0)
 				errx(1, "error: could not delete milestone");
+
+		} else if (strcmp(action, "set-duedate") == 0) {
+
+			char *new_date = NULL;
+
+			/* grab the the date that the user provided */
+			if (!argc)
+				errx(1, "error: missing date for set-duedate");
+
+			new_date = shift(&argc, &argv);
+
+			/* Do it! */
+			if (gcli_milestone_set_duedate(owner, repo, milestone_id, new_date) < 0)
+				errx(1, "error: could not update milestone due date");
 
 		} else {
 

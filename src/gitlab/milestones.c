@@ -38,6 +38,9 @@
 
 #include <pdjson/pdjson.h>
 
+#include <assert.h>
+#include <time.h>
+
 int
 gitlab_get_milestones(char const *owner,
                       char const *repo,
@@ -178,6 +181,61 @@ gitlab_delete_milestone(char const *const owner,
 	                  gitlab_get_apibase(), e_owner, e_repo, milestone);
 
 	gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
+
+	free(url);
+	free(e_repo);
+	free(e_owner);
+
+	return 0;
+}
+
+/* TODO: merge this with the github code */
+static void
+normalize_date_to_gitlab_format(char const *const input, char *output,
+                                size_t const output_size)
+{
+	struct tm tm_buf = {0};
+	struct tm *utm_buf;
+	char *endptr;
+	time_t utctime;
+
+	assert(output_size == 9);
+
+	/* Parse input time */
+	endptr = strptime(input, "%Y-%m-%d", &tm_buf);
+	if (endptr == NULL || *endptr != '\0')
+		errx(1, "error: date »%s« is invalid: want YYYY-MM-DD", input);
+
+	/* Convert to UTC: Really, we should be using the _r versions of
+	 * these functions for thread-safety but since gcli doesn't do
+	 * multithreading (except for inside libcurl) we do not need to be
+	 * worried about the storage behind the pointer returned by gmtime
+	 * to be altered by another thread. */
+	utctime = mktime(&tm_buf);
+	utm_buf = gmtime(&utctime);
+
+	/* Format the output string - now in UTC */
+	strftime(output, output_size, "%Y%m%d", utm_buf);
+}
+
+int
+gitlab_milestone_set_duedate(char const *const owner,
+                             char const *const repo,
+                             int const milestone,
+                             char const *const date)
+{
+	char *url, *e_owner, *e_repo, norm_date[9] = {0};
+
+	normalize_date_to_gitlab_format(date, norm_date, sizeof norm_date);
+
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/milestones/%d?due_date=%s",
+	                  gitlab_get_apibase(), e_owner, e_repo, milestone,
+	                  norm_date);
+
+	gcli_fetch_with_method("PUT", url, "", NULL, NULL);
 
 	free(url);
 	free(e_repo);

@@ -190,6 +190,14 @@ struct gcli_forge_descriptor {
 		int const milestone);
 
 	/**
+	 * delete a milestone */
+	int (*milestone_set_duedate)(
+		char const *owner,
+		char const *repo,
+		int milestone,
+		char const *date);
+
+	/**
 	 * Get list of issues attached to this milestone */
 	int (*get_milestone_issues)(
 		char const *const owner,

@@ -38,6 +38,9 @@
 
 #include <pdjson/pdjson.h>
 
+#include <assert.h>
+#include <time.h>
+
 int
 github_get_milestones(char const *const owner,
                       char const *const repo,
@@ -178,6 +181,62 @@ github_delete_milestone(char const *const owner,
 
 	gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
 
+	free(url);
+	free(e_repo);
+	free(e_owner);
+
+	return 0;
+}
+
+static void
+normalize_date_to_iso8601(char const *const input,
+                          char *output, size_t const output_size)
+{
+	struct tm tm_buf = {0};
+	struct tm *utm_buf;
+	char *endptr;
+	time_t utctime;
+
+	assert(output_size == 21);
+
+	/* Parse input time */
+	endptr = strptime(input, "%Y-%m-%d", &tm_buf);
+	if (endptr == NULL || *endptr != '\0')
+		errx(1, "error: date »%s« is invalid: want YYYY-MM-DD", input);
+
+	/* Convert to UTC: Really, we should be using the _r versions of
+	 * these functions for thread-safety but since gcli doesn't do
+	 * multithreading (except for inside libcurl) we do not need to be
+	 * worried about the storage behind the pointer returned by gmtime
+	 * to be altered by another thread. */
+	utctime = mktime(&tm_buf);
+	utm_buf = gmtime(&utctime);
+
+	/* Format the output string - now in UTC */
+	strftime(output, output_size, "%Y-%m-%dT%H:%M:%SZ", utm_buf);
+}
+
+int
+github_milestone_set_duedate(char const *const owner,
+                             char const *const repo,
+                             int const milestone,
+                             char const *const date)
+{
+	char *url, *e_owner, *e_repo, *payload, norm_date[21] = {0};
+
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/repos/%s/%s/milestones/%d",
+	                  gcli_get_apibase(),
+	                  e_owner, e_repo, milestone);
+
+	normalize_date_to_iso8601(date, norm_date, sizeof norm_date);
+
+	payload = sn_asprintf("{ \"due_on\": \"%s\"}", norm_date);
+	gcli_fetch_with_method("PATCH", url, payload, NULL, NULL);
+
+	free(payload);
 	free(url);
 	free(e_repo);
 	free(e_owner);

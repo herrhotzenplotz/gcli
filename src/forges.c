@@ -90,6 +90,7 @@ github_forge_descriptor =
 	.get_milestone             = github_get_milestone,
 	.create_milestone          = github_create_milestone,
 	.delete_milestone          = github_delete_milestone,
+	.milestone_set_duedate     = github_milestone_set_duedate,
 	.get_milestone_issues      = github_milestone_get_issues,
 	.get_prs                   = github_get_pulls,
 	.print_pr_diff             = github_print_pull_diff,
@@ -151,6 +152,7 @@ gitlab_forge_descriptor =
 	.get_milestone             = gitlab_get_milestone,
 	.create_milestone          = gitlab_create_milestone,
 	.delete_milestone          = gitlab_delete_milestone,
+	.milestone_set_duedate     = gitlab_milestone_set_duedate,
 	.get_milestone_issues      = gitlab_milestone_get_issues,
 	.issue_set_milestone       = gitlab_issue_set_milestone,
 	.get_prs                   = gitlab_get_mrs,
@@ -204,6 +206,7 @@ gitea_forge_descriptor =
 	.get_milestone             = gitea_get_milestone,
 	.create_milestone          = gitea_create_milestone,
 	.delete_milestone          = gitea_delete_milestone,
+	.milestone_set_duedate     = gitea_milestone_set_duedate,
 	.perform_submit_comment    = gitea_perform_submit_comment,
 	.issue_add_labels          = gitea_issue_add_labels,
 	.issue_remove_labels       = gitea_issue_remove_labels,
@@ -243,7 +246,6 @@ gitea_forge_descriptor =
 	                           | GCLI_PRS_QUIRK_DRAFT
 	                           | GCLI_PRS_QUIRK_CHANGES,
 	.milestone_quirks          = GCLI_MILESTONE_QUIRKS_EXPIRED
-	                           | GCLI_MILESTONE_QUIRKS_DUEDATE
 	                           | GCLI_MILESTONE_QUIRKS_PULLS,
 };
 

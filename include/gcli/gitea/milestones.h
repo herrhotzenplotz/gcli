@@ -48,4 +48,9 @@ int gitea_delete_milestone(char const *const owner,
                            char const *const repo,
                            int const milestone);
 
+int gitea_milestone_set_duedate(char const *const owner,
+                                char const *const repo,
+                                int const milestone,
+                                char const *const date);
+
 #endif /* GCLI_GITEA_MILESTONES_H */

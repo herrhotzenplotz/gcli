@@ -245,7 +245,6 @@ gitea_forge_descriptor =
 	                           | GCLI_PRS_QUIRK_DRAFT
 	                           | GCLI_PRS_QUIRK_CHANGES,
 	.milestone_quirks          = GCLI_MILESTONE_QUIRKS_EXPIRED
-	                           | GCLI_MILESTONE_QUIRKS_DUEDATE
 	                           | GCLI_MILESTONE_QUIRKS_PULLS,
 };
 

@@ -49,6 +49,7 @@ usage(void)
 	fprintf(stderr, "  -t title             Title of the milestone to create\n");
 	fprintf(stderr, "  -d description       Description the milestone to create\n");
 	fprintf(stderr, "ACTIONS:\n");
+	fprintf(stderr, "  all                  Display both status information and issues for the milestone\n");
 	fprintf(stderr, "  status               Display general status information about the milestone\n");
 	fprintf(stderr, "  issues               List issues associated with the milestone\n");
 	fprintf(stderr, "  set-duedate <date>   Set due date \n");
@@ -249,14 +250,19 @@ handle_milestone_actions(int argc, char *argv[],
 		char const *action = shift(&argc, &argv);
 
 		/* Dispatch */
-		if (strcmp(action, "status") == 0) {
+		if (strcmp(action, "all") == 0) {
 
-			/* Make sure we have the milestone data */
+			gcli_issue_list issues = {0};
+
 			ensure_milestone(owner, repo, milestone_id,
 			                 &fetched_milestone, &milestone);
 
-			/* Print meta */
 			gcli_print_milestone(&milestone);
+			printf("\nISSUES:\n");
+			gcli_milestone_get_issues(owner, repo, milestone_id, &issues);
+			gcli_print_issues_table(0, &issues, -1);
+			gcli_issues_free(&issues);
+
 		} else if (strcmp(action, "issues") == 0) {
 
 			gcli_issue_list issues = {0};
@@ -270,6 +276,14 @@ handle_milestone_actions(int argc, char *argv[],
 			/* Cleanup */
 			gcli_issues_free(&issues);
 
+		} else if (strcmp(action, "status") == 0) {
+
+			/* Make sure we have the milestone data */
+			ensure_milestone(owner, repo, milestone_id,
+			                 &fetched_milestone, &milestone);
+
+			/* Print meta */
+			gcli_print_milestone(&milestone);
 		} else if (strcmp(action, "delete") == 0) {
 
 			/* Delete the milestone */

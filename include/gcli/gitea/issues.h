@@ -36,11 +36,9 @@
 
 #include <gcli/issues.h>
 
-int gitea_get_issues(char const *owner,
-                     char const *reponame,
-                     bool const all,
-                     int const max,
-                     gcli_issue_list *const out);
+int gitea_get_issues(char const *owner, char const *reponame,
+                     gcli_issue_fetch_details const *details,
+                     int const max, gcli_issue_list *const out);
 
 void gitea_get_issue_summary(char const *owner,
                              char const *repo,

@@ -9,6 +9,7 @@ object of gcli_milestone with
 	"state" => state as string,
 	"updated_at" => updated_at as string,
 	"open_issues" => open_issues as int,
+	"due_on" => due_date as string,
 	"closed_issues" => closed_issues as int);
 
 parser gitea_milestones is

@@ -94,7 +94,7 @@ struct gcli_forge_descriptor {
 	int (*get_issues)(
 		char const *owner,
 		char const *repo,
-		bool const all,
+		gcli_issue_fetch_details const *details,
 		int const max,
 		gcli_issue_list *const out);
 
@@ -188,6 +188,14 @@ struct gcli_forge_descriptor {
 		char const *const owner,
 		char const *const repo,
 		int const milestone);
+
+	/**
+	 * delete a milestone */
+	int (*milestone_set_duedate)(
+		char const *owner,
+		char const *repo,
+		int milestone,
+		char const *date);
 
 	/**
 	 * Get list of issues attached to this milestone */

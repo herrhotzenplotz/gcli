@@ -103,4 +103,9 @@ int gcli_milestone_get_issues(char const *const owner,
                               int const milestone,
                               gcli_issue_list *const out);
 
+int gcli_milestone_set_duedate(char const *owner,
+                               char const *repo,
+                               int milestone,
+                               char const *date);
+
 #endif /* GCLI_MILESTONES_H */

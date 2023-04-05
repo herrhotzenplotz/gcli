@@ -53,4 +53,9 @@ int github_milestone_get_issues(char const *const owner,
                                 int const milestone,
                                 gcli_issue_list *const out);
 
+int github_milestone_set_duedate(char const *const owner,
+                                 char const *const repo,
+                                 int const milestone,
+                                 char const *const date);
+
 #endif /* GCLI_GITHUB_MILESTONES_H */

@@ -51,7 +51,7 @@ for the specified
 .Sh ACTIONS
 .Ar actions...
 may be one or more of the following:
-.Bl -tag -width indent
+.Bl -tag -width artifacts
 .It Cm log
 Dump the log of the job.
 .It Cm status
@@ -60,6 +60,12 @@ Print a short summary of the job.
 Cancel the job.
 .It Cm retry
 Retry the job.
+.It Cm artifacts Op Fl o Ar outfile
+Download the artifacts archive as a zip to disk. The default output file is
+.Pa artifacts.zip
+but it can be overriden by using the
+.Fl o
+flag.
 .El
 .Sh EXAMPLES
 Print a list of the last 30 pipelines in the current project:

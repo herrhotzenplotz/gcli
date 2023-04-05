@@ -92,6 +92,7 @@ Tested Operating Systems so far:
 - Alpine Linux 3.16 x86_64
 - Darwin 22.2.0 arm64
 - Windows 10 (mingw32-w64)
+- NetBSD 9.3 amd64, sparc64 and VAX
 
 ## Support
 

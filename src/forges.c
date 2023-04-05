@@ -206,6 +206,7 @@ gitea_forge_descriptor =
 	.get_milestone             = gitea_get_milestone,
 	.create_milestone          = gitea_create_milestone,
 	.delete_milestone          = gitea_delete_milestone,
+	.milestone_set_duedate     = gitea_milestone_set_duedate,
 	.perform_submit_comment    = gitea_perform_submit_comment,
 	.issue_add_labels          = gitea_issue_add_labels,
 	.issue_remove_labels       = gitea_issue_remove_labels,

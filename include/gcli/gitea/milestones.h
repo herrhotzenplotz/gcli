@@ -53,4 +53,9 @@ int gitea_milestone_set_duedate(char const *const owner,
                                 int const milestone,
                                 char const *const date);
 
+int gitea_milestone_get_issues(char const *const owner,
+                               char const *const repo,
+                               int const milestone,
+                               gcli_issue_list *const out);
+
 #endif /* GCLI_GITEA_MILESTONES_H */

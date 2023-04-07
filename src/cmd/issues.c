@@ -47,26 +47,27 @@ usage(void)
 	fprintf(stderr, "       gcli issues [-o owner -r repo] [-a] [-n number] [-A author] [-s]\n");
 	fprintf(stderr, "       gcli issues [-o owner -r repo] -i issue actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
-	fprintf(stderr, "  -o owner        The repository owner\n");
-	fprintf(stderr, "  -r repo         The repository name\n");
-	fprintf(stderr, "  -y              Do not ask for confirmation.\n");
-	fprintf(stderr, "  -A author       Only print issues by the given author\n");
-	fprintf(stderr, "  -a              Fetch everything including closed issues \n");
-	fprintf(stderr, "  -s              Print (sort) in reverse order\n");
-	fprintf(stderr, "  -n number       Number of issues to fetch (-1 = everything)\n");
-	fprintf(stderr, "  -i issue        ID of issue to perform actions on\n");
+	fprintf(stderr, "  -o owner           The repository owner\n");
+	fprintf(stderr, "  -r repo            The repository name\n");
+	fprintf(stderr, "  -y                 Do not ask for confirmation.\n");
+	fprintf(stderr, "  -A author          Only print issues by the given author\n");
+	fprintf(stderr, "  -a                 Fetch everything including closed issues \n");
+	fprintf(stderr, "  -s                 Print (sort) in reverse order\n");
+	fprintf(stderr, "  -n number          Number of issues to fetch (-1 = everything)\n");
+	fprintf(stderr, "  -i issue           ID of issue to perform actions on\n");
 	fprintf(stderr, "ACTIONS:\n");
-	fprintf(stderr, "  all             Display both status and and op\n");
-	fprintf(stderr, "  status          Display status information\n");
-	fprintf(stderr, "  op              Display original post\n");
-	fprintf(stderr, "  comments        Display comments\n");
-	fprintf(stderr, "  close           Close the issue\n");
-	fprintf(stderr, "  reopen          Reopen a closed issue\n");
-	fprintf(stderr, "  assign <user>   Assign the issue to the given user\n");
-	fprintf(stderr, "  labels ...      Add or remove labels:\n");
-	fprintf(stderr, "                     add <name>\n");
-	fprintf(stderr, "                     remove <name>\n");
-	fprintf(stderr, "  milestone <id>  Assign this issue to the given milestone\n");
+	fprintf(stderr, "  all                Display both status and and op\n");
+	fprintf(stderr, "  status             Display status information\n");
+	fprintf(stderr, "  op                 Display original post\n");
+	fprintf(stderr, "  comments           Display comments\n");
+	fprintf(stderr, "  close              Close the issue\n");
+	fprintf(stderr, "  reopen             Reopen a closed issue\n");
+	fprintf(stderr, "  assign <user>      Assign the issue to the given user\n");
+	fprintf(stderr, "  labels ...         Add or remove labels:\n");
+	fprintf(stderr, "                        add <name>\n");
+	fprintf(stderr, "                        remove <name>\n");
+	fprintf(stderr, "  milestone <id>     Assign this issue to the given milestone\n");
+	fprintf(stderr, "  milestone -d       Clear the assigned milestone of the given issue\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
@@ -310,7 +311,7 @@ handle_issue_milestone_action(int *argc, char ***argv,
 {
 	char const *milestone_str;
 	char *endptr;
-	int milestone;
+	int milestone, rc;
 
 	/* Set the milestone for the issue
 	 *
@@ -324,7 +325,16 @@ handle_issue_milestone_action(int *argc, char ***argv,
 	/* Fetch the milestone from the argument vector */
 	milestone_str = shift(argc, argv);
 
-	/* Parse the milestone id */
+	/* Check if the milestone_str is -d indicating that we should
+	 * clear the milestone */
+	if (strcmp(milestone_str, "-d") == 0) {
+		rc = gcli_issue_clear_milestone(owner, repo, issue_id);
+		if (rc < 0)
+			errx(1, "error: could not clear milestone of issue #%d", issue_id);
+		return;
+	}
+
+	/* It is a milestone ID. Parse it. */
 	milestone = strtoul(milestone_str, &endptr, 10);
 
 	/* Check successful for parse */

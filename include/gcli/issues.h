@@ -132,4 +132,8 @@ int gcli_issue_set_milestone(char const *const owner,
                              int const issue,
                              int const milestone);
 
+int gcli_issue_clear_milestone(char const *const owner,
+                               char const *const repo,
+                               int const issue);
+
 #endif /* ISSUES_H */

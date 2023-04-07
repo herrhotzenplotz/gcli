@@ -213,6 +213,13 @@ struct gcli_forge_descriptor {
 		int const milestone);
 
 	/**
+	 * Clear the milestones of an issue */
+	int (*issue_clear_milestone)(
+		char const *const owner,
+		char const *const repo,
+		int const issue);
+
+	/**
 	 * Get a list of PRs/MRs on the given repo */
 	int (*get_prs)(
 		char const *owner,

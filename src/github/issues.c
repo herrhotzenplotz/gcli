@@ -118,7 +118,7 @@ github_get_issues(char const *owner,
 		gcli_get_apibase(),
 		e_owner, e_repo,
 		details->all ? "all" : "open",
-		e_author);
+		e_author ? e_author : "");
 
 	free(e_author);
 	free(e_owner);

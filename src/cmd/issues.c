@@ -348,6 +348,13 @@ handle_issues_actions(int argc, char *argv[],
 	int have_fetched_issue = 0;
 	gcli_issue issue = {0};
 
+	/* Check if the user missed out on supplying actions */
+	if (argc == 0) {
+		fprintf(stderr, "error: no actions supplied\n");
+		usage();
+		exit(EXIT_FAILURE);
+	}
+
 	/* execute all operations on the given issue */
 	while (argc > 0) {
 		char const *operation = shift(&argc, &argv);

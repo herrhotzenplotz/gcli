@@ -174,11 +174,18 @@ subcommand_pipelines(int argc, char *argv[])
 		char const *name;                               /* Name on the cli */
 		void (*fn)(char const *, char const *, long);   /* Function to be invoked for this action */
 	} job_actions[] = {
-		{ .name = "log",       .fn = gitlab_job_get_log            },
-		{ .name = "status",    .fn = gitlab_job_status             },
-		{ .name = "cancel",    .fn = gitlab_job_cancel             },
-		{ .name = "retry",     .fn = gitlab_job_retry              },
+		{ .name = "log",    .fn = gitlab_job_get_log },
+		{ .name = "status", .fn = gitlab_job_status  },
+		{ .name = "cancel", .fn = gitlab_job_cancel  },
+		{ .name = "retry",  .fn = gitlab_job_retry   },
 	};
+
+	/* Check if the user missed out on supplying actions */
+	if (argc == 0) {
+		fprintf(stderr, "error: no actions supplied\n");
+		usage();
+		exit(EXIT_FAILURE);
+	}
 
 next_action:
 	while (argc) {

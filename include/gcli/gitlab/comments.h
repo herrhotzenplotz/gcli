@@ -38,16 +38,16 @@
 #include <gcli/curl.h>
 
 void gitlab_perform_submit_comment(gcli_submit_comment_opts opts,
-                                   gcli_fetch_buffer *const out);
+                                   gcli_fetch_buffer *out);
 
 int gitlab_get_issue_comments(char const *owner,
                               char const *repo,
-                              int const issue,
-                              gcli_comment **const out);
+                              int issue,
+                              gcli_comment **out);
 
 int gitlab_get_mr_comments(char const *owner,
                            char const *repo,
-                           int const issue,
-                           gcli_comment **const out);
+                           int issue,
+                           gcli_comment **out);
 
 #endif /* GITLAB_COMMENTS_H */

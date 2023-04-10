@@ -37,11 +37,11 @@
 #include <gcli/repos.h>
 
 int github_get_repos(char const *owner,
-                     int const max,
-                     gcli_repo_list *const out);
+                     int max,
+                     gcli_repo_list *out);
 
-int github_get_own_repos(int const max,
-                         gcli_repo_list *const out);
+int github_get_own_repos(int max,
+                         gcli_repo_list *out);
 
 void github_repo_delete(char const *owner,
                         char const *repo);

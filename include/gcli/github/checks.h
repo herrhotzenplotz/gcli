@@ -56,16 +56,16 @@ struct gcli_github_checks {
 void github_get_checks(char const *owner,
                        char const *repo,
                        char const *ref,
-                       int const max,
-                       gcli_github_checks *const checks);
+                       int max,
+                       gcli_github_checks *checks);
 
-void github_print_checks(gcli_github_checks const *const checks);
+void github_print_checks(gcli_github_checks const *checks);
 
-void github_free_checks(gcli_github_checks *const checks);
+void github_free_checks(gcli_github_checks *checks);
 
 int github_checks(char const *owner,
                   char const *repo,
                   char const *ref,
-                  int const max);
+                  int max);
 
 #endif /* GITHUB_CHECKS_H */

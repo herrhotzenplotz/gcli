@@ -34,28 +34,28 @@
 
 int gitea_get_milestones(char const *const owner,
                          char const *const repo,
-                         int const max,
-                         gcli_milestone_list *const out);
+                         int max,
+                         gcli_milestone_list *out);
 
 int gitea_get_milestone(char const *const owner,
                         char const *const repo,
-                        int const milestone,
-                        gcli_milestone *const out);
+                        int milestone,
+                        gcli_milestone *out);
 
 int gitea_create_milestone(struct gcli_milestone_create_args const *args);
 
-int gitea_delete_milestone(char const *const owner,
-                           char const *const repo,
-                           int const milestone);
+int gitea_delete_milestone(char const *owner,
+                           char const *repo,
+                           int milestone);
 
-int gitea_milestone_set_duedate(char const *const owner,
-                                char const *const repo,
-                                int const milestone,
-                                char const *const date);
+int gitea_milestone_set_duedate(char const *owner,
+                                char const *repo,
+                                int milestone,
+                                char const *date);
 
-int gitea_milestone_get_issues(char const *const owner,
-                               char const *const repo,
-                               int const milestone,
-                               gcli_issue_list *const out);
+int gitea_milestone_get_issues(char const *owner,
+                               char const *repo,
+                               int milestone,
+                               gcli_issue_list *out);
 
 #endif /* GCLI_GITEA_MILESTONES_H */

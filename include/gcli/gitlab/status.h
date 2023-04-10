@@ -36,8 +36,8 @@
 
 #include <gcli/status.h>
 
-size_t gitlab_get_notifications(gcli_notification **const notifications,
-                                int const count);
+size_t gitlab_get_notifications(gcli_notification **notifications,
+                                int count);
 
 void gitlab_notification_mark_as_read(char const *id);
 

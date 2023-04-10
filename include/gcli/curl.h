@@ -48,7 +48,7 @@ struct gcli_fetch_buffer {
 };
 
 void gcli_fetch(char const *url,
-                char **const pagination_next,
+                char **pagination_next,
                 gcli_fetch_buffer *out);
 
 void gcli_curl(FILE *stream,
@@ -58,8 +58,8 @@ void gcli_curl(FILE *stream,
 void gcli_fetch_with_method(char const *method,
                             char const *url,
                             char const *data,
-                            char **const pagination_next,
-                            gcli_fetch_buffer *const out);
+                            char **pagination_next,
+                            gcli_fetch_buffer *out);
 
 void gcli_post_upload(char const *url,
                       char const *content_type,
@@ -69,7 +69,7 @@ void gcli_post_upload(char const *url,
 
 void gcli_curl_gitea_upload_attachment(char const *url,
                                        char const *filename,
-                                       gcli_fetch_buffer *const out);
+                                       gcli_fetch_buffer *out);
 
 bool gcli_curl_test_success(char const *url);
 char *gcli_urlencode(char const *);

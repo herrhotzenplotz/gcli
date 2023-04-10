@@ -59,19 +59,19 @@ struct gcli_pr_review {
 	size_t                  comments_size;
 };
 
-void gcli_review_reviews_free(gcli_pr_review *it, size_t const size);
+void gcli_review_reviews_free(gcli_pr_review *it, size_t size);
 
-void gcli_review_comments_free(gcli_pr_review_comment *it, size_t const size);
+void gcli_review_comments_free(gcli_pr_review_comment *it, size_t size);
 
 size_t gcli_review_get_reviews(char const *owner,
                                char const *repo,
-                               int const pr,
-                               gcli_pr_review **const out);
+                               int pr,
+                               gcli_pr_review **out);
 
-void gcli_review_print_review_table(gcli_pr_review const *const headers,
-                                    size_t const headers_size);
+void gcli_review_print_review_table(gcli_pr_review const *headers,
+                                    size_t headers_size);
 
-void gcli_review_print_comments(gcli_pr_review_comment const *const comments,
-                                size_t const comments_size);
+void gcli_review_print_comments(gcli_pr_review_comment const *comments,
+                                size_t comments_size);
 
 #endif /* REVIEW_H */

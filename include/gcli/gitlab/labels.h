@@ -38,12 +38,12 @@
 
 int gitlab_get_labels(char const *owner,
                       char const *reponame,
-                      int const max,
+                      int max,
                       gcli_label_list *out);
 
 void gitlab_create_label(char const *owner,
                          char const *repo,
-                         gcli_label *const label);
+                         gcli_label *label);
 
 void gitlab_delete_label(char const *owner,
                          char const *repo,

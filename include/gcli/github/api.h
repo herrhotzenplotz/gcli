@@ -36,6 +36,6 @@
 
 #include <gcli/curl.h>
 
-char const *github_api_error_string(gcli_fetch_buffer *const it);
+char const *github_api_error_string(gcli_fetch_buffer *it);
 
 #endif /* GITHUB_API_H */

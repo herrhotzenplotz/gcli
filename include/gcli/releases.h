@@ -89,22 +89,22 @@ struct gcli_new_release {
 
 int gcli_get_releases(char const *owner,
                       char const *repo,
-                      int const max,
-                      gcli_release_list *const list);
+                      int max,
+                      gcli_release_list *list);
 
-void gcli_print_releases(enum gcli_output_flags const flags,
-                         gcli_release_list const *const list,
-                         int const max);
+void gcli_print_releases(enum gcli_output_flags flags,
+                         gcli_release_list const *list,
+                         int max);
 
-void gcli_free_releases(gcli_release_list *const);
+void gcli_free_releases(gcli_release_list *);
 
 void gcli_create_release(gcli_new_release const *);
 
-void gcli_release_push_asset(gcli_new_release *const,
+void gcli_release_push_asset(gcli_new_release *,
                              gcli_release_asset_upload);
 
-void gcli_delete_release(char const *const owner,
-                         char const *const repo,
-                         char const *const id);
+void gcli_delete_release(char const *owner,
+                         char const *repo,
+                         char const *id);
 
 #endif /* RELEASES_H */

@@ -38,8 +38,8 @@
 
 int github_get_releases(char const *owner,
                         char const *repo,
-                        int const max,
-                        gcli_release_list *const list);
+                        int max,
+                        gcli_release_list *list);
 
 void github_create_release(gcli_new_release const *release);
 

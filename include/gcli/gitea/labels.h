@@ -38,15 +38,15 @@
 
 int gitea_get_labels(char const *owner,
                      char const *reponame,
-                     int const max,
-                     gcli_label_list *const out);
+                     int max,
+                     gcli_label_list *out);
 
 void gitea_create_label(char const *owner,
                         char const *repo,
-                        gcli_label *const label);
+                        gcli_label *label);
 
 void gitea_delete_label(char const *owner,
                         char const *repo,
-                        char const *const label);
+                        char const *label);
 
 #endif /* GITEA_LABELS_H */

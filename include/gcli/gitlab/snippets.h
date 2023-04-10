@@ -54,13 +54,13 @@ struct gcli_snippet_list {
 	size_t snippets_size;
 };
 
-void gcli_snippets_free(gcli_snippet_list *const list);
+void gcli_snippets_free(gcli_snippet_list *list);
 
-int gcli_snippets_get(int const max, gcli_snippet_list *const out);
+int gcli_snippets_get(int max, gcli_snippet_list *out);
 
-void gcli_snippets_print(enum gcli_output_flags const flags,
-                         gcli_snippet_list const *const list,
-                         int const max);
+void gcli_snippets_print(enum gcli_output_flags flags,
+                         gcli_snippet_list const *list,
+                         int max);
 
 void gcli_snippet_delete(char const *snippet_id);
 

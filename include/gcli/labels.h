@@ -55,22 +55,22 @@ struct gcli_label_list {
 
 int gcli_get_labels(char const *owner,
                     char const *reponame,
-                    int const max,
-                    gcli_label_list *const out);
+                    int max,
+                    gcli_label_list *out);
 
-void gcli_free_label(gcli_label *const label);
+void gcli_free_label(gcli_label *label);
 
-void gcli_free_labels(gcli_label_list *const labels);
+void gcli_free_labels(gcli_label_list *labels);
 
-void gcli_print_labels(gcli_label_list const *const list,
-                       int const max);
+void gcli_print_labels(gcli_label_list const *list,
+                       int max);
 
 void gcli_create_label(char const *owner,
                        char const *repo,
-                       gcli_label *const label);
+                       gcli_label *label);
 
 void gcli_delete_label(char const *owner,
                        char const *repo,
-                       char const *const label);
+                       char const *label);
 
 #endif /* LABELS_H */

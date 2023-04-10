@@ -58,10 +58,10 @@ struct gcli_submit_comment_opts {
 };
 
 void gcli_print_comment_list(gcli_comment const *comments,
-                             size_t const comments_size);
+                             size_t comments_size);
 
-void gcli_issue_comments(char const *owner, char const *repo, int const issue);
-void gcli_pull_comments(char const *owner, char const *repo, int const issue);
+void gcli_issue_comments(char const *owner, char const *repo, int issue);
+void gcli_pull_comments(char const *owner, char const *repo, int issue);
 void gcli_comment_submit(gcli_submit_comment_opts opts);
 
 #endif /* COMMENTS_H */

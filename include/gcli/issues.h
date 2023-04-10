@@ -80,60 +80,62 @@ struct gcli_issue_fetch_details {
 	char const *author;         /* A username who issued */
 };
 
-int gcli_get_issues(char const *owner, char const *reponame,
+int gcli_get_issues(char const *owner,
+                    char const *reponame,
                     gcli_issue_fetch_details const *details,
-                    int const max, gcli_issue_list *const out);
+                    int max,
+                    gcli_issue_list *out);
 
-void gcli_issues_free(gcli_issue_list *const);
+void gcli_issues_free(gcli_issue_list *);
 
-void gcli_print_issues_table(enum gcli_output_flags const flags,
-                             gcli_issue_list const *const list,
-                             int const max);
+void gcli_print_issues_table(enum gcli_output_flags flags,
+                             gcli_issue_list const *list,
+                             int max);
 
 void gcli_get_issue(char const *owner,
                     char const *reponame,
-                    int const issue_number,
-                    gcli_issue *const out);
+                    int issue_number,
+                    gcli_issue *out);
 
-void gcli_issue_free(gcli_issue *const it);
+void gcli_issue_free(gcli_issue *it);
 
-void gcli_issue_print_summary(gcli_issue const *const it);
-void gcli_issue_print_op(gcli_issue const *const it);
+void gcli_issue_print_summary(gcli_issue const *it);
+void gcli_issue_print_op(gcli_issue const *it);
 
 void gcli_issue_close(char const *owner,
                       char const *repo,
-                      int const issue_number);
+                      int issue_number);
 
 void gcli_issue_reopen(char const *owner,
                        char const *repo,
-                       int const issue_number);
+                       int issue_number);
 
 void gcli_issue_submit(gcli_submit_issue_options);
 
 void gcli_issue_assign(char const *owner,
                        char const *repo,
-                       int const issue_number,
+                       int issue_number,
                        char const *assignee);
 
 void gcli_issue_add_labels(char const *owner,
                            char const *repo,
-                           int const issue_number,
+                           int issue_number,
                            char const *const labels[],
-                           size_t const labels_size);
+                           size_t labels_size);
 
 void gcli_issue_remove_labels(char const *owner,
                               char const *repo,
-                              int const issue_number,
+                              int issue_number,
                               char const *const labels[],
-                              size_t const labels_size);
+                              size_t labels_size);
 
-int gcli_issue_set_milestone(char const *const owner,
-                             char const *const repo,
-                             int const issue,
-                             int const milestone);
+int gcli_issue_set_milestone(char const *owner,
+                             char const *repo,
+                             int issue,
+                             int milestone);
 
-int gcli_issue_clear_milestone(char const *const owner,
-                               char const *const repo,
-                               int const issue);
+int gcli_issue_clear_milestone(char const *owner,
+                               char const *repo,
+                               int issue);
 
 #endif /* ISSUES_H */

@@ -345,6 +345,13 @@ handle_pull_actions(int argc, char *argv[],
 	int fetched_pull = 0;
 	gcli_pull pull = {0};
 
+	/* Check if the user missed out on supplying actions */
+	if (argc == 0) {
+		fprintf(stderr, "error: no actions supplied\n");
+		usage();
+		exit(EXIT_FAILURE);
+	}
+
 	/* Iterate over the argument list until the end */
 	while (argc > 0) {
 

@@ -41,7 +41,7 @@ usage(void)
 {
 	fprintf(stderr, "usage: gcli milestones [-o owner -r repo]\n");
 	fprintf(stderr, "       gcli milestones create [-o owner -r repo] -t title [-d description]\n");
-	fprintf(stderr, "       gcli milestones [-o owner -r repo] -i milestone action...\n");
+	fprintf(stderr, "       gcli milestones [-o owner -r repo] -i milestone actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
 	fprintf(stderr, "  -o owner             The repository owner\n");
 	fprintf(stderr, "  -r repo              The repository name\n");
@@ -243,6 +243,14 @@ handle_milestone_actions(int argc, char *argv[],
 {
 	gcli_milestone milestone = {0};
 	int fetched_milestone = 0;
+
+	/* Check if the user missed out on supplying actions */
+	if (argc == 0) {
+		fprintf(stderr, "error: no actions supplied\n");
+		usage();
+		exit(EXIT_FAILURE);
+	}
+
 
 	/* Iterate over all the actions */
 	while (argc) {

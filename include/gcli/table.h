@@ -78,8 +78,8 @@ struct gcli_tblcoldef {
 };
 
 /* Init a table printer */
-gcli_tbl gcli_tbl_begin(gcli_tblcoldef const *const cols,
-                        size_t const cols_size);
+gcli_tbl gcli_tbl_begin(gcli_tblcoldef const *cols,
+                        size_t cols_size);
 
 /* Print the table contents and free all the resources allocated in
  * the table */
@@ -91,22 +91,22 @@ int gcli_tbl_add_row(gcli_tbl table, ...);
 gcli_dict gcli_dict_begin(void);
 
 int gcli_dict_add(gcli_dict list,
-                  char const *const key,
+                  char const *key,
                   int flags,
                   uint32_t colour_args,
-                  char const *const fmt,
+                  char const *fmt,
                   ...);
 
 int gcli_dict_add_string(gcli_dict list,
-                         char const *const key,
+                         char const *key,
                          int flags,
                          uint32_t colour_args,
-                         char const *const str);
+                         char const *str);
 
 int gcli_dict_add_sv_list(gcli_dict dict,
-                          char const *const key,
-                          sn_sv const *const list,
-                          size_t const list_size);
+                          char const *key,
+                          sn_sv const *list,
+                          size_t list_size);
 
 int gcli_dict_end(gcli_dict _list);
 

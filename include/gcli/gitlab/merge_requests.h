@@ -37,55 +37,55 @@
 #include <gcli/pulls.h>
 
 int gitlab_fetch_mrs(char *url,
-                     int const max,
-                     gcli_pull_list *const list);
+                     int max,
+                     gcli_pull_list *list);
 
 int gitlab_get_mrs(char const *owner,
                    char const *reponame,
-                   bool const all,
-                   int const max,
-                   gcli_pull_list *const out);
+                   bool all,
+                   int max,
+                   gcli_pull_list *out);
 
 void gitlab_print_pr_diff(FILE *stream,
                           char const *owner,
                           char const *reponame,
-                          int const pr_number);
+                          int pr_number);
 
 void gitlab_mr_merge(char const *owner,
                      char const *reponame,
-                     int const mr_number,
-                     bool const squash);
+                     int mr_number,
+                     bool squash);
 
 void gitlab_mr_close(char const *owner,
                      char const *reponame,
-                     int const pr_number);
+                     int pr_number);
 
 void gitlab_mr_reopen(char const *owner,
                       char const *reponame,
-                      int const pr_number);
+                      int pr_number);
 
 void gitlab_get_pull(char const *owner,
                      char const *repo,
-                     int const pr_number,
-                     gcli_pull *const out);
+                     int pr_number,
+                     gcli_pull *out);
 
 int gitlab_get_pull_commits(char const *owner,
                             char const *repo,
-                            int const pr_number,
-                            gcli_commit **const out);
+                            int pr_number,
+                            gcli_commit **out);
 
 void gitlab_perform_submit_mr(gcli_submit_pull_options opts);
 
 void gitlab_mr_add_labels(char const *owner,
                           char const *repo,
-                          int const mr,
+                          int mr,
                           char const *const labels[],
-                          size_t const labels_size);
+                          size_t labels_size);
 
 void gitlab_mr_remove_labels(char const *owner,
                              char const *repo,
-                             int const mr,
+                             int mr,
                              char const *const labels[],
-                             size_t const labels_size);
+                             size_t labels_size);
 
 #endif /* GITLAB_MERGE_REQUESTS_H */

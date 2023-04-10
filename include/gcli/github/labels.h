@@ -38,12 +38,12 @@
 
 int github_get_labels(char const *owner,
                       char const *reponame,
-                      int const max,
-                      gcli_label_list *const out);
+                      int max,
+                      gcli_label_list *out);
 
 void github_create_label(char const *owner,
                          char const *repo,
-                         gcli_label *const label);
+                         gcli_label *label);
 
 void github_delete_label(char const *owner,
                          char const *repo,

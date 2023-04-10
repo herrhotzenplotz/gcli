@@ -47,14 +47,14 @@ struct gcli_notification {
 
 typedef struct gcli_notification gcli_notification;
 
-void gcli_status(int const count);
+void gcli_status(int count);
 
-size_t gcli_get_notifications(gcli_notification **const out, int const count);
+size_t gcli_get_notifications(gcli_notification **out, int count);
 
-void gcli_notification_mark_as_read(const char *id);
+void gcli_notification_mark_as_read(char const *id);
 
 void gcli_free_notifications(gcli_notification *, size_t);
 
-void gcli_print_notifications(gcli_notification const *const, size_t const);
+void gcli_print_notifications(gcli_notification const *, size_t);
 
 #endif /* STATUS_H */

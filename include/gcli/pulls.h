@@ -95,65 +95,65 @@ struct gcli_submit_pull_options {
 
 int gcli_get_pulls(char const *owner,
                    char const *reponame,
-                   bool const all,
-                   int const max,
-                   gcli_pull_list *const out);
+                   bool all,
+                   int max,
+                   gcli_pull_list *out);
 
-void gcli_pull_free(gcli_pull *const it);
+void gcli_pull_free(gcli_pull *it);
 
-void gcli_pulls_free(gcli_pull_list *const list);
+void gcli_pulls_free(gcli_pull_list *list);
 
-void gcli_print_pulls_table(enum gcli_output_flags const flags,
-                            gcli_pull_list const *const list,
-                            int const max);
+void gcli_print_pulls_table(enum gcli_output_flags flags,
+                            gcli_pull_list const *list,
+                            int max);
 
 void gcli_print_pull_diff(FILE *stream,
                           char const *owner,
                           char const *reponame,
-                          int const   pr_number);
+                          int pr_number);
 
 void gcli_pull_checks(char const *owner,
                       char const *repo,
-                      int const pr_number);
+                      int pr_number);
 
 void gcli_pull_commits(char const *owner,
                        char const *repo,
-                       int const pr_number);
+                       int pr_number);
 
 void gcli_get_pull(char const *owner,
                    char const *repo,
-                   int const pr_number,
-                   gcli_pull *const out);
+                   int pr_number,
+                   gcli_pull *out);
 
 void gcli_pull_submit(gcli_submit_pull_options);
 
-void gcli_pull_print_status(gcli_pull const *const it);
+void gcli_pull_print_status(gcli_pull const *it);
 
-void gcli_pull_print_op(gcli_pull *const summary);
+void gcli_pull_print_op(gcli_pull *summary);
 
 void gcli_pull_merge(char const *owner,
                      char const *reponame,
-                     int const pr_number,
-                     bool const squash);
+                     int pr_number,
+                     bool squash);
 
 void gcli_pull_close(char const *owner,
                      char const *reponame,
-                     int const pr_number);
+                     int pr_number);
 
 void gcli_pull_reopen(char const *owner,
                       char const *reponame,
-                      int const pr_number);
+                      int pr_number);
 
 void gcli_pull_add_labels(char const *owner,
                           char const *repo,
-                          int const pr_number,
+                          int pr_number,
                           char const *const labels[],
-                          size_t const labels_size);
+                          size_t labels_size);
 
 void gcli_pull_remove_labels(char const *owner,
                              char const *repo,
                              int pr_number,
                              char const *const labels[],
-                             size_t const labels_size);
+                             size_t labels_size);
 
 #endif /* PULLS_H */

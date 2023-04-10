@@ -36,8 +36,8 @@
 
 #include <sn/sn.h>
 
-char  *gitlab_get_apibase(void);
-char  *gitlab_get_authheader(void);
-sn_sv  gitlab_get_account(void);
+char *gitlab_get_apibase(void);
+char *gitlab_get_authheader(void);
+sn_sv gitlab_get_account(void);
 
 #endif /* GITLAB_CONFIG_H */

@@ -50,10 +50,10 @@ sn_sv gcli_gitconfig_get_current_branch(void);
 
 void gcli_gitconfig_add_fork_remote(char const *org, char const *repo);
 
-int gcli_gitconfig_get_forgetype(char const *const remote_name);
+int gcli_gitconfig_get_forgetype(char const *remote_name);
 
-int gcli_gitconfig_repo_by_remote(char const *const remote_name,
-                                  char const **const owner,
-                                  char const **const repo);
+int gcli_gitconfig_repo_by_remote(char const *remote_name,
+                                  char const **owner,
+                                  char const **repo);
 
 #endif /* GITCONFIG_H */

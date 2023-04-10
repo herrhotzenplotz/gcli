@@ -43,7 +43,7 @@ void github_perform_submit_comment(
 
 int github_get_comments(char const *owner,
                         char const *repo,
-                        int const issue,
-                        gcli_comment **const out);
+                        int issue,
+                        gcli_comment **out);
 
 #endif /* GITHUB_COMMENTS_H */

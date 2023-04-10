@@ -39,47 +39,47 @@
 
 int github_fetch_pulls(char *url,
                        int max,
-                       gcli_pull_list *const list);
+                       gcli_pull_list *list);
 
 int github_get_pulls(char const *owner,
                      char const *reponame,
-                     bool const all,
-                     int const max,
-                     gcli_pull_list *const out);
+                     bool all,
+                     int max,
+                     gcli_pull_list *out);
 
 void github_print_pull_diff(FILE *stream,
                             char const *owner,
                             char const *reponame,
-                            int const pr_number);
+                            int pr_number);
 
 int github_pull_checks(char const *owner,
                        char const *repo,
-                       int const pr_number);
+                       int pr_number);
 
 void github_pull_merge(char const *owner,
                        char const *reponame,
-                       int const pr_number,
-                       bool const squash);
+                       int pr_number,
+                       bool squash);
 
 void github_pull_reopen(char const *owner,
                         char const *reponame,
-                        int const pr_number);
+                        int pr_number);
 
 void github_pull_close(char const *owner,
                        char const *reponame,
-                       int const pr_number);
+                       int pr_number);
 
 void github_perform_submit_pull(gcli_submit_pull_options opts);
 
 int github_get_pull_commits(char const *owner,
                             char const *repo,
-                            int const pr_number,
-                            gcli_commit **const out);
+                            int pr_number,
+                            gcli_commit **out);
 
 void github_get_pull(char const *owner,
                      char const *repo,
-                     int const pr_number,
-                     gcli_pull *const out);
+                     int pr_number,
+                     gcli_pull *out);
 
 sn_sv github_pull_try_derive_head(void);
 

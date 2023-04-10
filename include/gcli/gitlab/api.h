@@ -36,6 +36,6 @@
 
 #include <gcli/curl.h>
 
-char const *gitlab_api_error_string(gcli_fetch_buffer *const it);
+char const *gitlab_api_error_string(gcli_fetch_buffer *buf);
 
 #endif /* GITLAB_API_H */

@@ -357,3 +357,38 @@ gitlab_issue_set_milestone(char const *const owner,
 
 	return 0;
 }
+
+int
+gitlab_issue_clear_milestone(char const *const owner,
+                             char const *const repo,
+                             int const issue)
+{
+	char *url, *e_owner, *e_repo, *payload;
+
+	/* The Gitlab API says:
+	 *
+	 *    milestone_id: The global ID of a milestone to assign the
+	 *    issue to. Set to 0 or provide an empty value to unassign a
+	 *    milestone.
+	 *
+	 * However, the documentation is plain wrong and trying to set it
+	 * to zero does absolutely nothing. What do you expect from an
+	 * enterprise quality product?! Certainly not this kind of spanish
+	 * inquisition. Fear and surprise. That's the Gitlab API in a
+	 * nutshell.*/
+
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%d",
+	                  gitlab_get_apibase(), e_owner, e_repo, issue);
+	payload = sn_asprintf("{ \"milestone_id\": null }");
+
+	gcli_fetch_with_method("PUT", url, payload, NULL, NULL);
+
+	free(payload);
+	free(url);
+	free(e_repo);
+	free(e_owner);
+
+	return 0;
+}

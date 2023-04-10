@@ -358,3 +358,29 @@ github_issue_set_milestone(char const *const owner,
 
 	return 0;
 }
+
+int
+github_issue_clear_milestone(char const *const owner,
+                             char const *const repo,
+                             int const issue)
+{
+	char *url, *e_owner, *e_repo, *body;
+
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/repos/%s/%s/issues/%d",
+	                  gcli_get_apibase(),
+	                  e_owner, e_repo, issue);
+
+	body = sn_asprintf("{ \"milestone\": null }");
+
+	gcli_fetch_with_method("PATCH", url, body, NULL, NULL);
+
+	free(body);
+	free(url);
+	free(e_repo);
+	free(e_owner);
+
+	return 0;
+}

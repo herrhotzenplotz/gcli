@@ -83,4 +83,7 @@ int github_issue_set_milestone(char const *const owner,
                                int const issue,
                                int const milestone);
 
+int github_issue_clear_milestone(char const *const owner,
+                                 char const *const repo,
+                                 int const issue);
 #endif /* GCLI_ISSUES_H */

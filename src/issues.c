@@ -288,3 +288,11 @@ gcli_issue_set_milestone(char const *const owner,
 {
 	return gcli_forge()->issue_set_milestone(owner, repo, issue, milestone);
 }
+
+int
+gcli_issue_clear_milestone(char const *const owner,
+                           char const *const repo,
+                           int const issue)
+{
+	return gcli_forge()->issue_clear_milestone(owner, repo, issue);
+}

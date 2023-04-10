@@ -83,4 +83,8 @@ int gitlab_issue_set_milestone(char const *const owner,
                                int const issue,
                                int const milestone);
 
+int gitlab_issue_clear_milestone(char const *const owner,
+                                 char const *const repo,
+                                 int const issue);
+
 #endif /* GITLAB_ISSUES_H */

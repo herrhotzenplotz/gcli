@@ -111,20 +111,49 @@ github_print_pull_diff(FILE *stream,
 	free(url);
 }
 
+/* TODO: figure out a way to get rid of the 3 consecutive urlencode
+ * calls */
+static void
+github_pull_delete_head_branch(char const *owner,
+                               char const *repo,
+                               int const pr_number)
+{
+	gcli_pull pull = {0};
+	char *url, *e_owner, *e_repo;
+	char const *head_branch;
+
+	github_get_pull(owner, repo, pr_number, &pull);
+
+	head_branch = strchr(pull.head_label, ':');
+	head_branch++;
+
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/repos/%s/%s/git/refs/heads/%s",
+	                  github_get_apibase(), e_owner, e_repo,
+	                  head_branch);
+
+	gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
+
+	free(url);
+	free(e_owner);
+	free(e_repo);
+	gcli_pull_free(&pull);
+}
+
 void
 github_pull_merge(char const *owner,
                   char const *repo,
                   int const pr_number,
                   enum gcli_merge_flags const flags)
 {
-	json_stream stream = {0};
-	gcli_fetch_buffer json_buffer = {0};
 	char *url = NULL;
 	char *e_owner = NULL;
 	char *e_repo = NULL;
 	char const *data = "{}";
-	char *message;
 	bool const squash = flags & GCLI_PULL_MERGE_SQUASH;
+	bool const delete_source = flags & GCLI_PULL_MERGE_DELETEHEAD;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -135,18 +164,11 @@ github_pull_merge(char const *owner,
 		e_owner, e_repo, pr_number,
 		squash ? "squash" : "merge");
 
-	gcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
-	json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+	gcli_fetch_with_method("PUT", url, data, NULL, NULL);
 
-	/* only print the merge message if we haven't been quieted */
-	if (!sn_quiet()) {
-		parse_github_pr_merge_message(&stream, &message);
-		puts(message);
-		free(message);
-	}
+	if (delete_source)
+		github_pull_delete_head_branch(owner, repo, pr_number);
 
-	json_close(&stream);
-	free(json_buffer.data);
 	free(url);
 	free(e_owner);
 	free(e_repo);

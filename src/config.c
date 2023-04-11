@@ -619,6 +619,17 @@ gcli_config_get_upstream(void)
 	return gcli_local_config_find_by_key("pr.upstream");
 }
 
+bool
+gcli_config_pr_inhibit_delete_source_branch(void)
+{
+	sn_sv val;
+
+	init_local_config();
+
+	val = gcli_local_config_find_by_key("pr.inhibit-delete-source-branch");
+	return sn_sv_eq_to(val,	"yes");
+}
+
 void
 gcli_config_get_upstream_parts(sn_sv *const owner, sn_sv *const repo)
 {

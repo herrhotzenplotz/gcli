@@ -416,6 +416,10 @@ handle_pull_actions(int argc, char *argv[],
 		} else if (strcmp(action, "merge") == 0) {
 			enum gcli_merge_flags flags = GCLI_PULL_MERGE_DELETEHEAD;
 
+			/* Default behaviour */
+			if (gcli_config_pr_inhibit_delete_source_branch())
+			    flags = 0;
+
 			if (argc > 0) {
 				/* Check whether the user intends a squash-merge
 				 * and/or wants to delete the source branch of the

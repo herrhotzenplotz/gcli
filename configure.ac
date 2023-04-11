@@ -6,7 +6,7 @@ AC_INIT([gcli],[1.0.4-devel],[nsonack@herrhotzenplotz.de],[gcli],[https://gitlab
 AM_INIT_AUTOMAKE([1.0 foreign subdir-objects dist-bzip2 dist-xz -Wall])
 
 dnl Release Date.
-PACKAGE_DATE="05 March, 2023"
+PACKAGE_DATE="UNRELEASED"
 AC_SUBST([PACKAGE_DATE])
 
 dnl Silent by default.

@@ -104,23 +104,28 @@ void
 gitlab_mr_merge(char const *owner,
                 char const *repo,
                 int const mr_number,
-                bool const squash)
+                enum gcli_merge_flags const flags)
 {
 	gcli_fetch_buffer  buffer  = {0};
-	char              *url     = NULL;
-	char              *e_owner = NULL;
-	char              *e_repo  = NULL;
-	char const        *data    = "{}";
+	char *url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	char const *data = "{}";
+	bool const squash = flags & GCLI_PULL_MERGE_SQUASH;
+	bool const delete_source = flags & GCLI_PULL_MERGE_DELETEHEAD;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
 	/* PUT /projects/:id/merge_requests/:merge_request_iid/merge */
 	url = sn_asprintf(
-		"%s/projects/%s%%2F%s/merge_requests/%d/merge?squash=%s",
+		"%s/projects/%s%%2F%s/merge_requests/%d/merge"
+		"?squash=%s"
+		"&should_remove_source_branch=%s",
 		gitlab_get_apibase(),
 		e_owner, e_repo, mr_number,
-		squash ? "true" : "false");
+		squash ? "true" : "false",
+		delete_source ? "true" : "false");
 
 	gcli_fetch_with_method("PUT", url, data, NULL, &buffer);
 

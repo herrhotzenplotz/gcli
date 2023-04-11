@@ -233,6 +233,7 @@ A repo-specific config file that may contain the following data:
 .Bd -literal
 pr.upstream=herrhotzenplotz/gcli
 pr.base=trunk
+pr.inhibit-delete-source-branch=yes
 .Ed
 .Pp
 It is intended to be committed into the repo so that users don't have

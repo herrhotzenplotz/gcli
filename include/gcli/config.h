@@ -53,6 +53,7 @@ sn_sv gcli_config_get_upstream(void);
 sn_sv gcli_config_get_base(void);
 gcli_forge_type gcli_config_get_forge_type(void);
 sn_sv gcli_config_get_override_default_account(void);
+bool gcli_config_pr_inhibit_delete_source_branch(void);
 void gcli_config_get_repo(char const **, char const **);
 int gcli_config_have_colours(void);
 char const *gcli_get_apibase(void);

@@ -59,7 +59,7 @@ int github_pull_checks(char const *owner,
 void github_pull_merge(char const *owner,
                        char const *reponame,
                        int pr_number,
-                       bool squash);
+                       enum gcli_merge_flags flags);
 
 void github_pull_reopen(char const *owner,
                         char const *reponame,

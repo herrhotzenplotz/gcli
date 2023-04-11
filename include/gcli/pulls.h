@@ -131,10 +131,15 @@ void gcli_pull_print_status(gcli_pull const *it);
 
 void gcli_pull_print_op(gcli_pull *summary);
 
+enum gcli_merge_flags {
+	GCLI_PULL_MERGE_SQUASH = 0x1, /* squash commits when merging */
+	GCLI_PULL_MERGE_DELETEHEAD = 0x2, /* delete the source branch after merging */
+};
+
 void gcli_pull_merge(char const *owner,
                      char const *reponame,
                      int pr_number,
-                     bool squash);
+                     enum gcli_merge_flags flags);
 
 void gcli_pull_close(char const *owner,
                      char const *reponame,

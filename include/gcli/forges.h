@@ -254,7 +254,7 @@ struct gcli_forge_descriptor {
 		char const *owner,
 		char const *reponame,
 		int pr_number,
-		bool squash);
+		enum gcli_merge_flags flags);
 
 	/**
 	 * Reopen the given PR/MR */

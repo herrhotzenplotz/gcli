@@ -123,6 +123,8 @@ Merge the PR. You may supply the following options:
 .Bl -tag -width indent
 .It Fl -squash , s
 Squash the commits before merging.
+.It Fl -delete , d
+Delete the source branch after merging.
 .El
 .It Cm reviews
 Print reviews including comments under them.

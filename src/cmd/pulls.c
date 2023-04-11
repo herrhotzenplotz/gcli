@@ -68,7 +68,7 @@ usage(void)
 	fprintf(stderr, "  comments        Display comments\n");
 	fprintf(stderr, "  commits         Display commits of the PR\n");
 	fprintf(stderr, "  ci              Display CI/Pipeline status information about the PR\n");
-	fprintf(stderr, "  merge [-s] [-d] Merge the PR (-s = squash commits, -d = delete source branch)\n");
+	fprintf(stderr, "  merge [-s] [-D] Merge the PR (-s = squash commits, -d = inhibit deleting source branch)\n");
 	fprintf(stderr, "  close           Close the PR\n");
 	fprintf(stderr, "  reopen          Reopen a closed PR\n");
 	fprintf(stderr, "  labels ...      Add or remove labels:\n");
@@ -414,7 +414,7 @@ handle_pull_actions(int argc, char *argv[],
 			gcli_pull_checks(owner, repo, pr);
 
 		} else if (strcmp(action, "merge") == 0) {
-			enum gcli_merge_flags flags = 0;
+			enum gcli_merge_flags flags = GCLI_PULL_MERGE_DELETEHEAD;
 
 			if (argc > 0) {
 				/* Check whether the user intends a squash-merge
@@ -424,10 +424,10 @@ handle_pull_actions(int argc, char *argv[],
 				    strcmp(argv[0], "--squash") == 0) {
 					--argc; ++argv;
 					flags |= GCLI_PULL_MERGE_SQUASH;
-				} else if (strcmp(argv[0], "-d") == 0 ||
-				           strcmp(argv[0], "--delete") == 0) {
+				} else if (strcmp(argv[0], "-D") == 0 ||
+				           strcmp(argv[0], "--inhibit-delete") == 0) {
 					--argc; ++argv;
-					flags |= GCLI_PULL_MERGE_DELETEHEAD;
+					flags &= ~GCLI_PULL_MERGE_DELETEHEAD;
 				}
 			}
 

@@ -187,6 +187,8 @@ pretty_print(const char *input, int indent, int maxlinelen, FILE *out)
                 fprintf(out, "%.*s", w - 1, it);
                 it += w;
                 break;
+            } else if (it[w - 1] == '\0') {
+	            w -= 1;
             }
 
             fprintf(out, "%.*s", w, it);

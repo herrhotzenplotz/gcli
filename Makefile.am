@@ -181,7 +181,8 @@ EXTRA_DIST = \
 check_PROGRAMS = \
 	tests/json-escape$(EXEEXT) \
 	tests/pgen-tests$(EXEEXT) \
-	tests/url-encode$(EXEEXT)
+	tests/url-encode$(EXEEXT) \
+	tests/pretty_print_test$(EXEEXT)
 
 SHELL_TESTS = \
 	tests/01_pgen_simple_object.sh \
@@ -189,7 +190,8 @@ SHELL_TESTS = \
 	tests/03_pgen_error_trailing_comma.sh \
 	tests/04_pgen_simple_issue.sh \
 	tests/05_pgen_simple_pull.sh \
-	tests/06_pgen_simple_label.sh
+	tests/06_pgen_simple_label.sh \
+	tests/07_pretty_print.sh
 
 EXTRA_DIST += \
 	${SHELL_TESTS} \
@@ -197,7 +199,8 @@ EXTRA_DIST += \
 	tests/samples/pgen_simple_object.dump \
 	tests/samples/github_simple_issue.json tests/samples/parse_simple_issue.dump \
 	tests/samples/github_simple_pull.json tests/samples/parse_simple_pull.dump \
-	tests/samples/github_simple_label.json tests/samples/parse_simple_label.dump
+	tests/samples/github_simple_label.json tests/samples/parse_simple_label.dump \
+	tests/samples/pretty.dump
 
 TESTS = \
 	tests/json-escape \
@@ -210,3 +213,5 @@ tests_pgen_tests_LDADD = \
 	libgcli.la libpdjson.la libsn.la
 tests_url_encode_LDADD = \
 	libgcli.la libpdjson.la libsn.la
+tests_pretty_print_test_LDADD = \
+	libsn.la

@@ -414,13 +414,15 @@ handle_pull_actions(int argc, char *argv[],
 			gcli_pull_checks(owner, repo, pr);
 
 		} else if (strcmp(action, "merge") == 0) {
+			enum gcli_merge_flags flags = 0;
+
 			/* Check whether the user intends a squash-merge */
 			if (argc > 0 && (strcmp(argv[0], "-s") == 0 || strcmp(argv[0], "--squash") == 0)) {
 				--argc; ++argv;
-				gcli_pull_merge(owner, repo, pr, true);
-			} else {
-				gcli_pull_merge(owner, repo, pr, false);
+				flags |= GCLI_PULL_MERGE_SQUASH;
 			}
+
+			gcli_pull_merge(owner, repo, pr, flags);
 
 		} else if (strcmp(action, "close") == 0) {
 			gcli_pull_close(owner, repo, pr);

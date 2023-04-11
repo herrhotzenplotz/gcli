@@ -104,13 +104,14 @@ void
 gitlab_mr_merge(char const *owner,
                 char const *repo,
                 int const mr_number,
-                bool const squash)
+                enum gcli_merge_flags const flags)
 {
 	gcli_fetch_buffer  buffer  = {0};
-	char              *url     = NULL;
-	char              *e_owner = NULL;
-	char              *e_repo  = NULL;
-	char const        *data    = "{}";
+	char *url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	char const *data = "{}";
+	bool const squash = flags & GCLI_PULL_MERGE_SQUASH;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);

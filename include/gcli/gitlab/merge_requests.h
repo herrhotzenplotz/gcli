@@ -54,7 +54,7 @@ void gitlab_print_pr_diff(FILE *stream,
 void gitlab_mr_merge(char const *owner,
                      char const *reponame,
                      int mr_number,
-                     bool squash);
+                     enum gcli_merge_flags flags);
 
 void gitlab_mr_close(char const *owner,
                      char const *reponame,

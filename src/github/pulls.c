@@ -115,15 +115,16 @@ void
 github_pull_merge(char const *owner,
                   char const *repo,
                   int const pr_number,
-                  bool const squash)
+                  enum gcli_merge_flags const flags)
 {
-	json_stream        stream      = {0};
-	gcli_fetch_buffer  json_buffer = {0};
-	char              *url         = NULL;
-	char              *e_owner     = NULL;
-	char              *e_repo      = NULL;
-	char const        *data        = "{}";
-	char              *message;
+	json_stream stream = {0};
+	gcli_fetch_buffer json_buffer = {0};
+	char *url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	char const *data = "{}";
+	char *message;
+	bool const squash = flags & GCLI_PULL_MERGE_SQUASH;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);

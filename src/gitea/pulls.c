@@ -71,19 +71,20 @@ void
 gitea_pull_merge(char const *owner,
                  char const *repo,
                  int const pr_number,
-                 bool const squash)
+                 enum gcli_merge_flags const flags)
 {
-	char              *url     = NULL;
-	char              *e_owner = NULL;
-	char              *e_repo  = NULL;
-	char              *data    = NULL;
-	gcli_fetch_buffer  buffer  = {0};
+	char *url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	char *data = NULL;
+	gcli_fetch_buffer buffer = {0};
+	bool const squash = flags & GCLI_PULL_MERGE_SQUASH;
 
 	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
-	url     = sn_asprintf("%s/repos/%s/%s/pulls/%d/merge",
-	                      gcli_get_apibase(), e_owner, e_repo, pr_number);
-	data    = sn_asprintf("{ \"Do\": \"%s\" }", squash ? "squash" : "merge");
+	e_repo = gcli_urlencode(repo);
+	url = sn_asprintf("%s/repos/%s/%s/pulls/%d/merge",
+	                  gcli_get_apibase(), e_owner, e_repo, pr_number);
+	data = sn_asprintf("{ \"Do\": \"%s\" }", squash ? "squash" : "merge");
 
 	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
 

@@ -351,9 +351,9 @@ void
 gcli_pull_merge(char const *owner,
                 char const *reponame,
                 int const pr_number,
-                bool const squash)
+                enum gcli_merge_flags flags)
 {
-	gcli_forge()->pr_merge(owner, reponame, pr_number, squash);
+	gcli_forge()->pr_merge(owner, reponame, pr_number, flags);
 }
 
 void

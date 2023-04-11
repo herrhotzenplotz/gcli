@@ -119,11 +119,15 @@ Close the PR.
 .It Cm reopen
 Reopen a closed PR.
 .It Cm merge Op Ar options
-Merge the PR. You may supply the following options:
+Merge the PR. The source branch is deleted by default unless you set the
+.Dq pr.inhibit-delete-source-branch
+option to yes in your
+.Pa .gcli
+file. You may supply the following options:
 .Bl -tag -width indent
 .It Fl -squash , s
 Squash the commits before merging.
-.It Fl -delete , d
+.It Fl -inhibit-delete , D
 Delete the source branch after merging.
 .El
 .It Cm reviews

@@ -68,6 +68,24 @@ gitlab_get_repo(char const *owner,
 	free(url);
 }
 
+static void
+gitlab_repos_fixup_missing_visibility(gcli_repo_list *const list)
+{
+	static char const public[] = "public";
+	static size_t const public_len = sizeof(public) - 1;
+
+	/* Gitlab does not return a visibility field in the repo object on
+	 * unauthenticated API requests. We fix up the missing field here
+	 * assuming that the repository must be public. */
+	for (size_t i = 0; i < list->repos_size; ++i) {
+		if (sn_sv_null(list->repos[i].visibility))
+			list->repos[i].visibility = (sn_sv) {
+				.data = strdup(public),
+				.length = public_len,
+			};
+	}
+}
+
 int
 gitlab_get_repos(char const *owner,
                  int const max,
@@ -97,6 +115,8 @@ gitlab_get_repos(char const *owner,
 
 	free(url);
 	free(e_owner);
+
+	gitlab_repos_fixup_missing_visibility(list);
 
 	return 0;
 }

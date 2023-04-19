@@ -39,6 +39,7 @@
 #include <pdjson/pdjson.h>
 
 #include <assert.h>
+#include <string.h>
 #include <time.h>
 
 int

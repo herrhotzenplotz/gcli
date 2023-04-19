@@ -7,6 +7,7 @@ AM_CPPFLAGS += -I$(srcdir)/thirdparty
 AM_CPPFLAGS += -I$(srcdir)
 AM_CPPFLAGS += -DYY_NO_INPUT
 AM_CPPFLAGS += -DYY_NO_UNPUT
+AM_CPPFLAGS += -D_XOPEN_SOURCE=600
 
 noinst_PROGRAMS = pgen$(EXEEXT)
 pgen_SOURCES = \

@@ -69,19 +69,35 @@ gitlab_get_mrs(char const *owner,
 	char *url = NULL;
 	char *e_owner = NULL;
 	char *e_repo = NULL;
+	char *e_author = NULL;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	if (details->author)
-		warnx("author is ignored by GitLab code");
+	if (details->author) {
+		char *tmp = gcli_urlencode(details->author);
+		e_author = sn_asprintf("?author_username=%s", tmp);
+		free(tmp);
+	}
 
+	/* Note that Gitlab gives you all merge requests inclduing merged
+	 * and closed ones by default. If we want only open merge
+	 * requests, we have to be very explicit about it and give it the
+	 * state=open flag for this purpose.
+	 *
+	 * The below ternary stuff may look like magic, however it is just
+	 * to make sure we insert the right character into the param
+	 * list. Again, note that this behaviour differs quite
+	 * substantially from Github's. */
 	url = sn_asprintf(
-		"%s/projects/%s%%2F%s/merge_requests%s",
+		"%s/projects/%s%%2F%s/merge_requests%s%s%s",
 		gitlab_get_apibase(),
 		e_owner, e_repo,
-		details->all ? "" : "?state=opened");
+		e_author ? e_author : "",
+		e_author ? (details->all ? "" : "&") : (details->all ? "" : "?"),
+		details->all ? "" : "state=opened");
 
+	free(e_author);
 	free(e_owner);
 	free(e_repo);
 

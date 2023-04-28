@@ -53,7 +53,7 @@ usage(void)
 	fprintf(stderr, "  -o owner        The repository owner\n");
 	fprintf(stderr, "  -r repo         The repository name\n");
 	fprintf(stderr, "  -a              Fetch everything including closed and merged PRs\n");
-	fprintf(stderr, "  -A author       Filter pull requests by the given author (only on Gitlab)\n");
+	fprintf(stderr, "  -A author       Filter pull requests by the given author\n");
 	fprintf(stderr, "  -d              Mark newly created PR as a draft\n");
 	fprintf(stderr, "  -f owner:branch Specify the owner and branch of the fork that is the head of a PR.\n");
 	fprintf(stderr, "  -l label        Add the given label when creating the PR\n");

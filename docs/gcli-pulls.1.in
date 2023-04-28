@@ -7,6 +7,7 @@
 .Sh SYNOPSIS
 .Nm
 .Op Fl a
+.Op Fl A Ar author
 .Op Fl s
 .Op Fl n Ar n
 .Op Fl o Ar owner Fl r Ar repo
@@ -42,6 +43,9 @@ be used in combination with
 List PRs in the given repository. This option can only be used in
 combination with
 .Fl o .
+.It Fl A , -author Ar author
+Filter pull requests by the given author. This is currently only
+implemented on GitLab.
 .It Fl a
 List all PRs, including closed and merged ones. Cannot be combined
 with actions. This does not affect the

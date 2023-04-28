@@ -47,12 +47,13 @@ usage(void)
 {
 	fprintf(stderr, "usage: gcli pulls create [-o owner -r repo] [-f from]\n");
 	fprintf(stderr, "                         [-t to] [-d] [-l label]\n");
-	fprintf(stderr, "       gcli pulls [-o owner -r repo] [-a] [-n number] [-s]\n");
+	fprintf(stderr, "       gcli pulls [-o owner -r repo] [-a] [-A author ][-n number] [-s]\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] -i pull-id actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
 	fprintf(stderr, "  -o owner        The repository owner\n");
 	fprintf(stderr, "  -r repo         The repository name\n");
 	fprintf(stderr, "  -a              Fetch everything including closed and merged PRs\n");
+	fprintf(stderr, "  -A author       Filter pull requests by the given author (only on Gitlab)\n");
 	fprintf(stderr, "  -d              Mark newly created PR as a draft\n");
 	fprintf(stderr, "  -f owner:branch Specify the owner and branch of the fork that is the head of a PR.\n");
 	fprintf(stderr, "  -l label        Add the given label when creating the PR\n");

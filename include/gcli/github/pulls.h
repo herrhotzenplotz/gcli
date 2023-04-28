@@ -38,6 +38,7 @@
 #include <gcli/pulls.h>
 
 int github_fetch_pulls(char *url,
+                       char const *filter_author,
                        int max,
                        gcli_pull_list *list);
 

@@ -44,8 +44,15 @@ List PRs in the given repository. This option can only be used in
 combination with
 .Fl o .
 .It Fl A , -author Ar author
-Filter pull requests by the given author. This is currently only
-implemented on GitLab.
+Filter pull requests by the given author.
+.Pp
+Note that the implementation is somewhat limited on GitHub and Gitea
+since the respective API does not allow off-loading the filtering to
+its side. Due to this fact using this option may take an increased
+amount of time because
+.Nm
+needs to iterate all the fetched data and filter out the requested
+information.
 .It Fl a
 List all PRs, including closed and merged ones. Cannot be combined
 with actions. This does not affect the

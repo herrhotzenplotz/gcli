@@ -34,11 +34,11 @@
 int
 gitea_get_pulls(char const *owner,
                 char const *repo,
-                bool const all,
+                gcli_pull_fetch_details const *const details,
                 int const max,
                 gcli_pull_list *const out)
 {
-	return github_get_pulls(owner, repo, all, max, out);
+	return github_get_pulls(owner, repo, details, max, out);
 }
 
 void

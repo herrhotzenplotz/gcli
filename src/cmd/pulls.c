@@ -206,15 +206,15 @@ static int handle_pull_actions(int argc, char *argv[],
 int
 subcommand_pulls(int argc, char *argv[])
 {
-	char                   *endptr     = NULL;
-	const char             *owner      = NULL;
-	const char             *repo       = NULL;
-	gcli_pull_list          pulls      = {0};
-	int                     ch         = 0;
-	int                     pr         = -1;
-	int                     n          = 30; /* how many prs to fetch at least */
-	bool                    all        = false;
-	enum gcli_output_flags  flags      = 0;
+	char *endptr = NULL;
+	char const *owner = NULL;
+	char const *repo = NULL;
+	gcli_pull_list pulls = {0};
+	int ch = 0;
+	int pr = -1;
+	int n = 30;                 /* how many prs to fetch at least */
+	gcli_pull_fetch_details details = {0};
+	enum gcli_output_flags flags = 0;
 
 	/* detect whether we wanna create a PR */
 	if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
@@ -227,6 +227,10 @@ subcommand_pulls(int argc, char *argv[])
 		  .has_arg = no_argument,
 		  .flag    = NULL,
 		  .val     = 'a' },
+		{ .name    = "author",
+		  .has_arg = no_argument,
+		  .flag    = NULL,
+		  .val     = 'A' },
 		{ .name    = "sorted",
 		  .has_arg = no_argument,
 		  .flag    = NULL,
@@ -251,7 +255,7 @@ subcommand_pulls(int argc, char *argv[])
 	};
 
 	/* Parse commandline options */
-	while ((ch = getopt_long(argc, argv, "+n:o:r:i:as", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "+n:o:r:i:asA:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
 			owner = optarg;
@@ -279,7 +283,10 @@ subcommand_pulls(int argc, char *argv[])
 				errx(1, "error: pr count must not be zero");
 		} break;
 		case 'a': {
-			all = true;
+			details.all = true;
+		} break;
+		case 'A': {
+			details.author = optarg;
 		} break;
 		case 's': {
 			flags |= OUTPUT_SORTED;
@@ -299,7 +306,7 @@ subcommand_pulls(int argc, char *argv[])
 	/* In case no explicit PR number was specified, list all
 	 * open PRs and exit */
 	if (pr < 0) {
-		if (gcli_get_pulls(owner, repo, all, n, &pulls) < 0)
+		if (gcli_get_pulls(owner, repo, &details, n, &pulls) < 0)
 			errx(1, "error: could not fetch pull requests");
 
 		gcli_print_pulls_table(flags, &pulls, n);
@@ -309,8 +316,8 @@ subcommand_pulls(int argc, char *argv[])
 	}
 
 	/* If a PR number was given, require -a to be unset */
-	if (all) {
-		fprintf(stderr, "error: -a cannot be combined with operations on a PR\n");
+	if (details.all || details.author) {
+		fprintf(stderr, "error: -a and -A cannot be combined with operations on a PR\n");
 		usage();
 		return EXIT_FAILURE;
 	}

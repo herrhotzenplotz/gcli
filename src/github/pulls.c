@@ -65,21 +65,24 @@ github_fetch_pulls(char *url, int max, gcli_pull_list *const list)
 int
 github_get_pulls(char const *owner,
                  char const *repo,
-                 bool const all,
+                 gcli_pull_fetch_details const *const details,
                  int const max,
                  gcli_pull_list *const list)
 {
-	char *url     = NULL;
+	char *url = NULL;
 	char *e_owner = NULL;
-	char *e_repo  = NULL;
+	char *e_repo = NULL;
 
 	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
+	e_repo = gcli_urlencode(repo);
+
+	if (details->author)
+		warnx("author is ignored by the GitHub routines");
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/pulls?state=%s",
 		gcli_get_apibase(),
-		e_owner, e_repo, all ? "all" : "open");
+		e_owner, e_repo, details->all ? "all" : "open");
 
 	free(e_owner);
 	free(e_repo);

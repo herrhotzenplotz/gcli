@@ -224,7 +224,7 @@ struct gcli_forge_descriptor {
 	int (*get_prs)(
 		char const *owner,
 		char const *reponame,
-		bool all,
+		gcli_pull_fetch_details const *details,
 		int max,
 		gcli_pull_list *out);
 

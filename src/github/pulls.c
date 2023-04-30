@@ -40,17 +40,53 @@
 
 #include <templates/github/pulls.h>
 
-int
-github_fetch_pulls(char *url, int max, gcli_pull_list *const list)
+/* The following function is a hack around the stupidity of the Github
+ * REST API. With Github's REST API it is impossible to explicitly
+ * request a list of pull requests filtered by a given author. I guess
+ * what you're supposed to be doing is to do the filtering
+ * yourself.
+ *
+ * What this function does is to go through the list of pull requests
+ * and removes the ones that are not authored by the given
+ * username. It then shrinks the allocation size of the list such that
+ * we don't confuse the malloc allocator. Really, it shouldn't change
+ * the actual storage and instead just record the new size of the
+ * allocation. */
+static void
+github_pulls_filter_author(char const *const author, gcli_pull_list *const list)
 {
-	json_stream        stream      = {0};
-	gcli_fetch_buffer  json_buffer = {0};
-	char              *next_url    = NULL;
+	for (size_t i = list->pulls_size; i > 0; --i) {
+		if (strcmp(author, list->pulls[i-1].author) == 0)
+			continue;
+
+		gcli_pull_free(&list->pulls[i - 1]);
+
+		memmove(&list->pulls[i - 1], &list->pulls[i],
+		        sizeof(*list->pulls) * (list->pulls_size - i));
+		list->pulls = realloc(
+			list->pulls,
+			sizeof(*list->pulls) * (--list->pulls_size));
+	}
+}
+
+int
+github_fetch_pulls(char *url,
+                   char const *const filter_author,
+                   int max,
+                   gcli_pull_list *const list)
+{
+	json_stream stream = {0};
+	gcli_fetch_buffer json_buffer = {0};
+	char *next_url = NULL;
 
 	do {
 		gcli_fetch(url, &next_url, &json_buffer);
 		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 		parse_github_pulls(&stream, &list->pulls, &list->pulls_size);
+
+		/* Filter out PRs manually - but only when requested */
+		if (filter_author)
+			github_pulls_filter_author(filter_author, list);
 
 		free(json_buffer.data);
 		free(url);
@@ -65,26 +101,29 @@ github_fetch_pulls(char *url, int max, gcli_pull_list *const list)
 int
 github_get_pulls(char const *owner,
                  char const *repo,
-                 bool const all,
+                 gcli_pull_fetch_details const *const details,
                  int const max,
                  gcli_pull_list *const list)
 {
-	char *url     = NULL;
+	char *url = NULL;
 	char *e_owner = NULL;
-	char *e_repo  = NULL;
+	char *e_repo = NULL;
 
 	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
+	e_repo = gcli_urlencode(repo);
+
+	if (details->author)
+		warnx("author is ignored by the GitHub routines");
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/pulls?state=%s",
 		gcli_get_apibase(),
-		e_owner, e_repo, all ? "all" : "open");
+		e_owner, e_repo, details->all ? "all" : "open");
 
 	free(e_owner);
 	free(e_repo);
 
-	return github_fetch_pulls(url, max, list);
+	return github_fetch_pulls(url, details->author, max, list);
 }
 
 void

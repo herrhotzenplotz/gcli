@@ -41,6 +41,7 @@
 #include <gcli/gcli.h>
 
 typedef struct gcli_pull                gcli_pull;
+typedef struct gcli_pull_fetch_details  gcli_pull_fetch_details;
 typedef struct gcli_submit_pull_options gcli_submit_pull_options;
 typedef struct gcli_commit              gcli_commit;
 typedef struct gcli_pull_list           gcli_pull_list;
@@ -93,9 +94,14 @@ struct gcli_submit_pull_options {
 	bool         always_yes;
 };
 
+struct gcli_pull_fetch_details {
+	bool all;
+	char const *author;
+};
+
 int gcli_get_pulls(char const *owner,
                    char const *reponame,
-                   bool all,
+                   gcli_pull_fetch_details const *details,
                    int max,
                    gcli_pull_list *out);
 

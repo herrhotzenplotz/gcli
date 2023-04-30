@@ -38,12 +38,13 @@
 #include <gcli/pulls.h>
 
 int github_fetch_pulls(char *url,
+                       char const *filter_author,
                        int max,
                        gcli_pull_list *list);
 
 int github_get_pulls(char const *owner,
                      char const *reponame,
-                     bool all,
+                     gcli_pull_fetch_details const *details,
                      int max,
                      gcli_pull_list *out);
 

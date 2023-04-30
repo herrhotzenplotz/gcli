@@ -54,11 +54,11 @@ gcli_pulls_free(gcli_pull_list *const it)
 int
 gcli_get_pulls(char const *owner,
                char const *repo,
-               bool const all,
+               gcli_pull_fetch_details const *const details,
                int const max,
                gcli_pull_list *const out)
 {
-	return gcli_forge()->get_prs(owner, repo, all, max, out);
+	return gcli_forge()->get_prs(owner, repo, details, max, out);
 }
 
 void

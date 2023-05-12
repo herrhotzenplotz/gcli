@@ -2,11 +2,11 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([gcli],[1.0.4-devel],[nsonack@herrhotzenplotz.de],[gcli],[https://gitlab.com/herrhotzenplotz/gcli/])
+AC_INIT([gcli],[1.1.0],[nsonack@herrhotzenplotz.de],[gcli],[https://gitlab.com/herrhotzenplotz/gcli/])
 AM_INIT_AUTOMAKE([1.0 foreign subdir-objects dist-bzip2 dist-xz -Wall])
 
 dnl Release Date.
-PACKAGE_DATE="UNRELEASED"
+PACKAGE_DATE="23-May-2023"
 AC_SUBST([PACKAGE_DATE])
 
 dnl Silent by default.

@@ -38,7 +38,7 @@ OPT_LIBCURL=$withval
 
 AS_IF([test "x$OPT_LIBCURL" = "xno"],
       [AC_MSG_ERROR([--with-libcurl must not be disabled])])
-AS_IF([test "x$OPT_LIBCURL" = "xcheck"],
+AS_IF([test "x$OPT_LIBCURL" = "xcheck" || test "x$OPT_LIBCURL" = "xyes"],
       [PKG_CHECK_MODULES([LIBCURL], [libcurl],,[AC_MSG_ERROR([Could not find libcurl])])
        CFLAGS="$LIBCURL_CFLAGS $CFLAGS"
        LDFLAGS="$LIBCURL_LIBS $LDFLAGS"],

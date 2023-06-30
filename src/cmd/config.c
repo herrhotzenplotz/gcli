@@ -46,25 +46,16 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: gcli config ssh\n");
+	fprintf(stderr, "       gcli config ssh add --title some-title --key path/to/key.pub\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
 }
 
 static int
-subcommand_ssh(int argc, char *argv[])
+list_sshkeys(void)
 {
 	gcli_sshkey_list list = {0};
-
-	(void) argv;
-
-	--argc; /* TODO: Proper option parsing */
-
-	if (argc) {
-		fprintf(stderr, "error: stray arguments\n");
-		usage();
-		return EXIT_FAILURE;
-	}
 
 	if (gcli_sshkeys_get_keys(&list) < 0) {
 		fprintf(stderr, "error: could not get list of SSH keys\n");
@@ -75,6 +66,35 @@ subcommand_ssh(int argc, char *argv[])
 	gcli_sshkeys_free_keys(&list);
 
 	return 0;
+}
+
+static int
+add_sshkey(int argc, char *argv[])
+{
+	(void) argc;
+	(void) argv;
+
+	sn_unimplemented;
+
+	return EXIT_FAILURE;
+}
+
+static int
+subcommand_ssh(int argc, char *argv[])
+{
+	char *cmdname;
+
+	if (--argc == 0)
+		return list_sshkeys();
+
+	cmdname = *(++argv);
+
+	if (strcmp(cmdname, "add") == 0)
+		return add_sshkey(argc, argv);
+
+	fprintf(stderr, "error: unrecognised subcommand »%s«.\n", cmdname);
+	usage();
+	return EXIT_FAILURE;
 }
 
 struct subcommand {

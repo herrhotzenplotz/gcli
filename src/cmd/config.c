@@ -35,8 +35,10 @@
 #include <gcli/config.h>
 #include <gcli/sshkeys.h>
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -71,12 +73,53 @@ list_sshkeys(void)
 static int
 add_sshkey(int argc, char *argv[])
 {
-	(void) argc;
-	(void) argv;
+	char *title = NULL, *keypath = NULL;
+	gcli_sshkey key = {0};
+	int ch;
 
-	sn_unimplemented;
+	struct option options[] = {
+		{ .name = "title", .has_arg = required_argument, .flag = NULL, .val = 't' },
+		{ .name = "key",   .has_arg = required_argument, .flag = NULL, .val = 'k' },
+		{ 0 },
+	};
 
-	return EXIT_FAILURE;
+	while ((ch = getopt_long(argc, argv, "+t:k:", options, NULL)) != -1) {
+		switch (ch) {
+		case 't': {
+			title = optarg;
+		} break;
+		case 'k': {
+			keypath = optarg;
+
+			if (access(keypath, R_OK) < 0) {
+				fprintf(stderr, "error: cannot access %s: %s\n",
+				        keypath, strerror(errno));
+				return EXIT_FAILURE;
+			}
+		} break;
+		default: {
+			usage();
+			return EXIT_FAILURE;
+		} break;
+		}
+	}
+
+	if (title == NULL) {
+		fprintf(stderr, "error: missing title\n");
+		usage();
+		return EXIT_FAILURE;
+	}
+
+	if (keypath == NULL) {
+		fprintf(stderr, "error: missing public key path\n");
+		usage();
+		return EXIT_FAILURE;
+	}
+
+	if (gcli_sshkeys_add_key(title, keypath, &key) < 0)
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
 }
 
 static int

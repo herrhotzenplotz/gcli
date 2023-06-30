@@ -422,6 +422,12 @@ struct gcli_forge_descriptor {
 	int (*get_sshkeys)(gcli_sshkey_list *);
 
 	/**
+	 * Add an SSH public key */
+	int (*add_sshkey)(char const *title,
+	                  char const *public_key_path,
+	                  gcli_sshkey *out);
+
+	/**
 	 * Get the error string from the API */
 	char const *(*get_api_error_string)(
 		gcli_fetch_buffer *);

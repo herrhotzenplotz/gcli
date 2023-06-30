@@ -57,6 +57,7 @@ gitlab_get_sshkeys(gcli_sshkey_list *list)
 
 	json_close(&str);
 	free(buf.data);
+	free(url);
 
 	return 0;
 }

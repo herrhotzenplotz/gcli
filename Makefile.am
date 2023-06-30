@@ -58,6 +58,7 @@ gcli_SOURCES = \
 	src/cmd/api.c \
 	src/cmd/ci.c \
 	src/cmd/comment.c \
+	src/cmd/config.c \
 	src/cmd/forks.c \
 	src/cmd/gists.c \
 	src/cmd/issues.c \

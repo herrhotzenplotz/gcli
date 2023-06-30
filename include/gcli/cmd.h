@@ -61,6 +61,7 @@ void delete_repo(bool always_yes, const char *owner, const char *repo);
 int subcommand_api(int argc, char *argv[]);
 int subcommand_ci(int argc, char *argv[]);
 int subcommand_comment(int argc, char *argv[]);
+int subcommand_config(int argc, char *argv[]);
 int subcommand_forks(int argc, char *argv[]);
 int subcommand_gists(int argc, char *argv[]);
 int subcommand_issues(int argc, char *argv[]);

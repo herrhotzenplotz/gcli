@@ -64,6 +64,7 @@ dnl Generate and substitute various files
 AC_CONFIG_FILES([Makefile
                  docs/gcli-api.1
                  docs/gcli-comment.1
+                 docs/gcli-config.1
                  docs/gcli-forks.1
                  docs/gcli-gists.1
                  docs/gcli-issues.1

@@ -39,6 +39,7 @@ gcli_LDADD = libgcli.la libpdjson.la libsn.la
 dist_man_MANS = \
 	docs/gcli-api.1 \
 	docs/gcli-comment.1 \
+	docs/gcli-config.1 \
 	docs/gcli-forks.1 \
 	docs/gcli-gists.1 \
 	docs/gcli-issues.1 \

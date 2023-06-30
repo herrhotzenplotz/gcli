@@ -51,6 +51,22 @@ usage(void)
 	copyright();
 }
 
+static int
+subcommand_ssh(int argc, char *argv[])
+{
+	(void) argc;
+	(void) argv;
+
+	return 0;
+}
+
+struct subcommand {
+	char const *const name;
+	int (*fn)(int argc, char *argv[]);
+} subcommands[] = {
+	{ .name = "ssh", .fn = subcommand_ssh },
+};
+
 int
 subcommand_config(int argc, char *argv[])
 {
@@ -71,5 +87,22 @@ subcommand_config(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	return EXIT_SUCCESS;
+	/* Check if the user gave us at least one option for this
+	 * subcommand */
+	if (argc == 0) {
+		fprintf(stderr, "error: missing subcommand for config\n");
+		usage();
+		return EXIT_FAILURE;
+	}
+
+	for (size_t i = 0; i < ARRAY_SIZE(subcommands); ++i) {
+		if (strcmp(argv[0], subcommands[i].name) == 0)
+			return subcommands[i].fn(argc, argv);
+	}
+
+	fprintf(stderr, "error: unrecognised config subcommand »%s«\n",
+	        argv[0]);
+	usage();
+
+	return EXIT_FAILURE;
 }

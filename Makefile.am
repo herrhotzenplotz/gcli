@@ -58,6 +58,7 @@ gcli_SOURCES = \
 	src/cmd/api.c \
 	src/cmd/ci.c \
 	src/cmd/comment.c \
+	src/cmd/config.c \
 	src/cmd/forks.c \
 	src/cmd/gists.c \
 	src/cmd/issues.c \
@@ -102,6 +103,7 @@ TEMPLATES = \
 	templates/gitlab/releases.t \
 	templates/gitlab/repos.t \
 	templates/gitlab/review.t \
+	templates/gitlab/sshkeys.t \
 	templates/gitlab/status.t \
 	templates/gitlab/snippets.t \
 	templates/gitea/milestones.t
@@ -125,6 +127,7 @@ libgcli_la_SOURCES = \
 	src/review.c include/gcli/review.h \
 	src/gitlab/snippets.c include/gcli/gitlab/snippets.h \
 	src/status.c include/gcli/status.h \
+	src/sshkeys.c include/gcli/sshkeys.h \
 	src/table.c include/gcli/table.h \
 	src/gitlab/api.c include/gcli/gitlab/api.h \
 	src/gitlab/comments.c include/gcli/gitlab/comments.h \
@@ -139,6 +142,7 @@ libgcli_la_SOURCES = \
 	src/gitlab/repos.c include/gcli/gitlab/repos.h \
 	src/gitlab/review.c include/gcli/gitlab/review.h \
 	src/gitlab/status.c include/gcli/gitlab/status.h \
+	src/gitlab/sshkeys.c include/gcli/gitlab/sshkeys.h \
 	src/github/releases.c include/gcli/github/releases.h \
 	src/github/config.c include/gcli/github/config.h \
 	src/github/api.c include/gcli/github/api.h \

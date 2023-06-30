@@ -428,6 +428,10 @@ struct gcli_forge_descriptor {
 	                  gcli_sshkey *out);
 
 	/**
+	 * Delete an SSH public key by its ID */
+	int (*delete_sshkey)(int id);
+
+	/**
 	 * Get the error string from the API */
 	char const *(*get_api_error_string)(
 		gcli_fetch_buffer *);

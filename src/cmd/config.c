@@ -49,6 +49,7 @@ usage(void)
 {
 	fprintf(stderr, "usage: gcli config ssh\n");
 	fprintf(stderr, "       gcli config ssh add --title some-title --key path/to/key.pub\n");
+	fprintf(stderr, "       gcli config ssh delete id\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
@@ -122,6 +123,35 @@ add_sshkey(int argc, char *argv[])
 }
 
 static int
+delete_sshkey(int argc, char *argv[])
+{
+	int id;
+	char *endptr;
+
+	/* skip 'delete' keyword */
+	--argc; ++argv;
+
+	if (argc != 1) {
+		fprintf(stderr, "error: incorrect number of arguments\n");
+		usage();
+		return EXIT_FAILURE;
+	}
+
+	/* parse the id */
+	id = strtol(argv[0], &endptr, 10);
+
+	if (endptr != argv[0] + strlen(argv[0])) {
+		fprintf(stderr, "error: could not parse ID of SSH key to delete\n");
+		return EXIT_FAILURE;
+	}
+
+	if (gcli_sshkeys_delete_key(id) < 0)
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+
+static int
 subcommand_ssh(int argc, char *argv[])
 {
 	char *cmdname;
@@ -133,6 +163,8 @@ subcommand_ssh(int argc, char *argv[])
 
 	if (strcmp(cmdname, "add") == 0)
 		return add_sshkey(argc, argv);
+	else if (strcmp(cmdname, "delete") == 0)
+		return delete_sshkey(argc, argv);
 
 	fprintf(stderr, "error: unrecognised subcommand »%s«.\n", cmdname);
 	usage();

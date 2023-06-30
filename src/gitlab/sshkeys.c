@@ -96,3 +96,16 @@ gitlab_add_sshkey(char const *const title,
 
 	return 0;
 }
+
+int
+gitlab_delete_sshkey(int id)
+{
+	char *url;
+
+	url = sn_asprintf("%s/user/keys/%d", gcli_get_apibase(), id);
+	gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
+
+	free(url);
+
+	return 0;
+}

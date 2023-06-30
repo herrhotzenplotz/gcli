@@ -33,7 +33,7 @@
 
 #include <gcli/cmd.h>
 #include <gcli/config.h>
-#include <gcli/curl.h>
+#include <gcli/sshkeys.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -54,8 +54,24 @@ usage(void)
 static int
 subcommand_ssh(int argc, char *argv[])
 {
-	(void) argc;
+	gcli_sshkey_list list = {0};
+
 	(void) argv;
+
+	--argc; /* TODO: Proper option parsing */
+
+	if (argc) {
+		fprintf(stderr, "error: stray arguments\n");
+		usage();
+		return EXIT_FAILURE;
+	}
+
+	if (gcli_sshkeys_get_keys(&list) < 0) {
+		fprintf(stderr, "error: could not get list of SSH keys\n");
+		return EXIT_FAILURE;
+	}
+
+	gcli_sshkeys_free_keys(&list);
 
 	return 0;
 }

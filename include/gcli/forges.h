@@ -44,6 +44,7 @@
 #include <gcli/releases.h>
 #include <gcli/repos.h>
 #include <gcli/review.h>
+#include <gcli/sshkeys.h>
 #include <gcli/status.h>
 
 typedef struct gcli_forge_descriptor gcli_forge_descriptor;
@@ -415,6 +416,10 @@ struct gcli_forge_descriptor {
 	/**
 	 * Get the user account name */
 	sn_sv (*get_account)(void);
+
+	/**
+	 * Get list of SSH keys */
+	int (*get_sshkeys)(gcli_sshkey_list *);
 
 	/**
 	 * Get the error string from the API */

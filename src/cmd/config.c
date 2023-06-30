@@ -35,8 +35,10 @@
 #include <gcli/config.h>
 #include <gcli/sshkeys.h>
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -46,25 +48,16 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: gcli config ssh\n");
+	fprintf(stderr, "       gcli config ssh add --title some-title --key path/to/key.pub\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
 }
 
 static int
-subcommand_ssh(int argc, char *argv[])
+list_sshkeys(void)
 {
 	gcli_sshkey_list list = {0};
-
-	(void) argv;
-
-	--argc; /* TODO: Proper option parsing */
-
-	if (argc) {
-		fprintf(stderr, "error: stray arguments\n");
-		usage();
-		return EXIT_FAILURE;
-	}
 
 	if (gcli_sshkeys_get_keys(&list) < 0) {
 		fprintf(stderr, "error: could not get list of SSH keys\n");
@@ -75,6 +68,75 @@ subcommand_ssh(int argc, char *argv[])
 	gcli_sshkeys_free_keys(&list);
 
 	return 0;
+}
+
+static int
+add_sshkey(int argc, char *argv[])
+{
+	char *title = NULL, *keypath = NULL;
+	int ch;
+
+	struct option options[] = {
+		{ .name = "title", .has_arg = required_argument, .flag = NULL, .val = 't' },
+		{ .name = "key",   .has_arg = required_argument, .flag = NULL, .val = 'k' },
+		{ 0 },
+	};
+
+	while ((ch = getopt_long(argc, argv, "+t:k:", options, NULL)) != -1) {
+		switch (ch) {
+		case 't': {
+			title = optarg;
+		} break;
+		case 'k': {
+			keypath = optarg;
+
+			if (access(keypath, R_OK) < 0) {
+				fprintf(stderr, "error: cannot access %s: %s\n",
+				        keypath, strerror(errno));
+				return EXIT_FAILURE;
+			}
+		} break;
+		default: {
+			usage();
+			return EXIT_FAILURE;
+		} break;
+		}
+	}
+
+	if (title == NULL) {
+		fprintf(stderr, "error: missing title\n");
+		usage();
+		return EXIT_FAILURE;
+	}
+
+	if (keypath == NULL) {
+		fprintf(stderr, "error: missing public key path\n");
+		usage();
+		return EXIT_FAILURE;
+	}
+
+	if (gcli_sshkeys_add_key(title, keypath, NULL) < 0)
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+
+static int
+subcommand_ssh(int argc, char *argv[])
+{
+	char *cmdname;
+
+	if (--argc == 0)
+		return list_sshkeys();
+
+	cmdname = *(++argv);
+
+	if (strcmp(cmdname, "add") == 0)
+		return add_sshkey(argc, argv);
+
+	fprintf(stderr, "error: unrecognised subcommand »%s«.\n", cmdname);
+	usage();
+	return EXIT_FAILURE;
 }
 
 struct subcommand {

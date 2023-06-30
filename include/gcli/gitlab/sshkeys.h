@@ -37,5 +37,8 @@
 #include <gcli/sshkeys.h>
 
 int gitlab_get_sshkeys(gcli_sshkey_list *list);
+int gitlab_add_sshkey(char const *const title,
+                      char const *const pubkey,
+                      gcli_sshkey *const out);
 
 #endif /* GCLI_GITLAB_SSHKEYS_H */

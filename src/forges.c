@@ -185,6 +185,7 @@ gitlab_forge_descriptor =
 	.get_authheader            = gitlab_get_authheader,
 	.get_account               = gitlab_get_account,
 	.get_sshkeys               = gitlab_get_sshkeys,
+	.add_sshkey                = gitlab_add_sshkey,
 	.get_api_error_string      = gitlab_api_error_string,
 	.user_object_key           = "username",
 	.html_url_key              = "web_url",

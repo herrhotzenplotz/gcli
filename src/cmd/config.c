@@ -71,6 +71,7 @@ subcommand_ssh(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
+	gcli_sshkeys_print_keys(&list);
 	gcli_sshkeys_free_keys(&list);
 
 	return 0;

@@ -34,11 +34,36 @@
 #include <gcli/config.h>
 #include <gcli/forges.h>
 #include <gcli/sshkeys.h>
+#include <gcli/table.h>
 
 int
 gcli_sshkeys_get_keys(gcli_sshkey_list *out)
 {
 	return gcli_forge()->get_sshkeys(out);
+}
+
+void
+gcli_sshkeys_print_keys(gcli_sshkey_list const *list)
+{
+	gcli_tbl *tbl;
+	gcli_tblcoldef cols[] = {
+		{ .name = "ID",      .type = GCLI_TBLCOLTYPE_INT,    .flags = 0 },
+		{ .name = "CREATED", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "TITLE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+	};
+
+	if (list->keys_size == 0) {
+		printf("No SSH keys\n");
+		return;
+	}
+
+	tbl = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+
+	for (size_t i = 0; i < list->keys_size; ++i) {
+		gcli_tbl_add_row(tbl, list->keys[i].id, list->keys[i].created_at, list->keys[i].title);
+	}
+
+	gcli_tbl_end(tbl);
 }
 
 void

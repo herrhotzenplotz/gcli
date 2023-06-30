@@ -52,6 +52,7 @@ typedef struct gcli_sshkey gcli_sshkey;
 typedef struct gcli_sshkey_list gcli_sshkey_list;
 
 int gcli_sshkeys_get_keys(gcli_sshkey_list *out);
+void gcli_sshkeys_print_keys(gcli_sshkey_list const *list);
 void gcli_sshkeys_free_keys(gcli_sshkey_list *list);
 
 #endif /* GCLI_SSHKEYS_H */

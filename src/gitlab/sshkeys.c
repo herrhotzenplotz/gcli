@@ -32,10 +32,26 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <gcli/gitlab/sshkeys.h>
+#include <gcli/config.h>
+#include <gcli/curl.h>
+
+#include <sn/sn.h>
+#include <pdjson/pdjson.h>
 
 int
 gitlab_get_sshkeys(gcli_sshkey_list *list)
 {
+	char *url;
+	gcli_fetch_buffer buf = {0};
+	json_stream str;
+
 	*list = (gcli_sshkey_list) {0};
+	url = sn_asprintf("%s/user/keys", gcli_get_apibase());
+
+	gcli_fetch(url, NULL, &buf);
+	json_open_buffer(&str, buf.data, buf.length);
+
+	free(buf.data);
+
 	return 0;
 }

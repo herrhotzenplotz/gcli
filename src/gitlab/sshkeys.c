@@ -38,6 +38,8 @@
 #include <sn/sn.h>
 #include <pdjson/pdjson.h>
 
+#include <templates/gitlab/sshkeys.h>
+
 int
 gitlab_get_sshkeys(gcli_sshkey_list *list)
 {
@@ -51,6 +53,9 @@ gitlab_get_sshkeys(gcli_sshkey_list *list)
 	gcli_fetch(url, NULL, &buf);
 	json_open_buffer(&str, buf.data, buf.length);
 
+	parse_gitlab_sshkeys(&str, &list->keys, &list->keys_size);
+
+	json_close(&str);
 	free(buf.data);
 
 	return 0;

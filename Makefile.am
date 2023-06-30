@@ -103,6 +103,7 @@ TEMPLATES = \
 	templates/gitlab/releases.t \
 	templates/gitlab/repos.t \
 	templates/gitlab/review.t \
+	templates/gitlab/sshkeys.t \
 	templates/gitlab/status.t \
 	templates/gitlab/snippets.t \
 	templates/gitea/milestones.t

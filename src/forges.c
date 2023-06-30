@@ -58,6 +58,7 @@
 #include <gcli/gitlab/repos.h>
 #include <gcli/gitlab/review.h>
 #include <gcli/gitlab/status.h>
+#include <gcli/gitlab/sshkeys.h>
 
 #include <gcli/gitea/comments.h>
 #include <gcli/gitea/config.h>
@@ -183,6 +184,7 @@ gitlab_forge_descriptor =
 	.notification_mark_as_read = gitlab_notification_mark_as_read,
 	.get_authheader            = gitlab_get_authheader,
 	.get_account               = gitlab_get_account,
+	.get_sshkeys               = gitlab_get_sshkeys,
 	.get_api_error_string      = gitlab_api_error_string,
 	.user_object_key           = "username",
 	.html_url_key              = "web_url",

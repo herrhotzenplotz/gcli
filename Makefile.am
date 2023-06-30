@@ -141,6 +141,7 @@ libgcli_la_SOURCES = \
 	src/gitlab/repos.c include/gcli/gitlab/repos.h \
 	src/gitlab/review.c include/gcli/gitlab/review.h \
 	src/gitlab/status.c include/gcli/gitlab/status.h \
+	src/gitlab/sshkeys.c include/gcli/gitlab/sshkeys.h \
 	src/github/releases.c include/gcli/github/releases.h \
 	src/github/config.c include/gcli/github/config.h \
 	src/github/api.c include/gcli/github/api.h \

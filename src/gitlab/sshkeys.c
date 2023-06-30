@@ -27,31 +27,15 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GCLI_SSHKEYS_H
-#define GCLI_SSHKEYS_H
-
-#ifdef HAVE_CONFIG_H
+#ifndef HAVE_CONFIG_H
 #include <config.h>
-#endif
+#endif /* HAVE_CONFIG_H */
 
-#include <stddef.h>
+#include <gcli/gitlab/sshkeys.h>
 
-struct gcli_sshkey {
-	int id;
-	char *title;
-	char *key;
-	char *created_at;
-};
-
-struct gcli_sshkey_list {
-	struct gcli_sshkey *keys;
-	size_t keys_size;
-};
-
-typedef struct gcli_sshkey gcli_sshkey;
-typedef struct gcli_sshkey_list gcli_sshkey_list;
-
-int gcli_sshkeys_get_keys(gcli_sshkey_list *out);
-void gcli_sshkeys_free_keys(gcli_sshkey_list *list);
-
-#endif /* GCLI_SSHKEYS_H */
+int
+gitlab_get_sshkeys(gcli_sshkey_list *list)
+{
+	*list = (gcli_sshkey_list) {0};
+	return 0;
+}

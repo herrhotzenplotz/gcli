@@ -37,6 +37,16 @@
 
 #include <pdjson/pdjson.h>
 
+/* Workaround because gitlab doesn't give us an explicit field for
+ * this. */
+static void
+gitlab_mrs_fixup(gcli_pull_list *const list)
+{
+	for (size_t i = 0; i < list->pulls_size; ++i) {
+		list->pulls[i].merged = !strcmp(list->pulls[i].state, "merged");
+	}
+}
+
 int
 gitlab_fetch_mrs(char *url, int const max, gcli_pull_list *const list)
 {
@@ -55,6 +65,8 @@ gitlab_fetch_mrs(char *url, int const max, gcli_pull_list *const list)
 	} while ((url = next_url) && (max == -1 || (int)list->pulls_size < max));
 
 	free(url);
+
+	gitlab_mrs_fixup(list);
 
 	return 0;
 }

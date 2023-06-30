@@ -86,29 +86,16 @@ gcli_sshkeys_add_key(char const *title,
                      char const *public_key_path,
                      gcli_sshkey *out)
 {
-	FILE *f;
-	size_t len;
 	int rc;
 	char *buffer;
 
-	/* open file and determine length */
-	f = fopen(public_key_path, "r");
-	if (!f)
-		return -1;
-
-	fseek(f, 0, SEEK_END);
-	len = ftell(f);
-	rewind(f);
-
-	/* TODO proper error handling */
-	buffer = malloc(len + 1);
-	if (fread(buffer, 1, len, f) != len)
-		return -1;
+	rc = sn_read_file(public_key_path, &buffer);
+	if (rc < 0)
+		return rc;
 
 	rc = gcli_forge()->add_sshkey(title, buffer, out);
-
 	free(buffer);
-	fclose(f);
+
 	return rc;
 }
 

@@ -34,6 +34,7 @@
 #include <gcli/gitlab/sshkeys.h>
 #include <gcli/config.h>
 #include <gcli/curl.h>
+#include <gcli/json_util.h>
 
 #include <sn/sn.h>
 #include <pdjson/pdjson.h>
@@ -60,6 +61,38 @@ gitlab_get_sshkeys(gcli_sshkey_list *list)
 		free(buf.data);
 		free(url);
 	} while ((url = next_url));
+
+	return 0;
+}
+
+int
+gitlab_add_sshkey(char const *const title,
+                  char const *const pubkey,
+                  gcli_sshkey *const out)
+{
+	char *url, *payload;
+	char *e_title, *e_key;
+	gcli_fetch_buffer buf = {0};
+
+	url = sn_asprintf("%s/user/keys", gcli_get_apibase());
+
+	/* Prepare payload */
+	e_title = gcli_json_escape_cstr(title);
+	e_key = gcli_json_escape_cstr(pubkey);
+	payload = sn_asprintf(
+		"{ \"title\": \"%s\", \"key\": \"%s\" }",
+		e_title, e_key);
+
+	gcli_fetch_with_method("POST", url, payload, NULL, &buf);
+	if (out) {
+		json_stream str;
+
+		json_open_buffer(&str, buf.data, buf.length);
+		parse_gitlab_sshkey(&str, out);
+		json_close(&str);
+	}
+
+	free(buf.data);
 
 	return 0;
 }

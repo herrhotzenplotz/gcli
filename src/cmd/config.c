@@ -74,7 +74,6 @@ static int
 add_sshkey(int argc, char *argv[])
 {
 	char *title = NULL, *keypath = NULL;
-	gcli_sshkey key = {0};
 	int ch;
 
 	struct option options[] = {
@@ -116,7 +115,7 @@ add_sshkey(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	if (gcli_sshkeys_add_key(title, keypath, &key) < 0)
+	if (gcli_sshkeys_add_key(title, keypath, NULL) < 0)
 		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;

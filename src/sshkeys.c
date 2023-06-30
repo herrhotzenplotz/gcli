@@ -111,3 +111,9 @@ gcli_sshkeys_add_key(char const *title,
 	fclose(f);
 	return rc;
 }
+
+int
+gcli_sshkeys_delete_key(int id)
+{
+	return gcli_forge()->delete_sshkey(id);
+}

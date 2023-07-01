@@ -254,12 +254,13 @@ sn_read_file(char const *path, char **buffer)
 	len = ftell(f);
 	rewind(f);
 
-	/* TODO proper error handling */
 	*buffer = malloc(len + 1);
 	if (fread(*buffer, 1, len, f) != len) {
 		rc = -1;
 		goto err_read;
 	}
+
+	(*buffer)[len] = '\0';
 
 	rc = (int)(len);
 

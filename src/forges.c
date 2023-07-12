@@ -246,6 +246,7 @@ gitea_forge_descriptor =
 
 	.get_sshkeys               = gitea_get_sshkeys,
 	.add_sshkey                = gitea_add_sshkey,
+	.delete_sshkey             = gitea_delete_sshkey,
 
 	.get_authheader            = gitea_get_authheader,
 	.get_account               = gitea_get_account,

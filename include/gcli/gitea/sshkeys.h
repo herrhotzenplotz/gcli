@@ -36,5 +36,6 @@ int gitea_get_sshkeys(gcli_sshkey_list *out);
 int gitea_add_sshkey(char const *title,
                      char const *public_key_data,
                      gcli_sshkey *out);
+int gitea_delete_sshkey(int id);
 
 #endif /* GCLI_GITEA_SSHKEYS_H */

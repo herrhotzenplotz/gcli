@@ -49,3 +49,9 @@ gitea_add_sshkey(char const *const title,
 {
 	return gitlab_add_sshkey(title, pubkey, out);
 }
+
+int
+gitea_delete_sshkey(int id)
+{
+	return gitlab_delete_sshkey(id);
+}

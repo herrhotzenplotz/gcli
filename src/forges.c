@@ -126,6 +126,7 @@ github_forge_descriptor =
 
 	.get_sshkeys               = github_get_sshkeys,
 	.add_sshkey                = github_add_sshkey,
+	.delete_sshkey             = github_delete_sshkey,
 
 	.get_notifications         = github_get_notifications,
 	.notification_mark_as_read = github_notification_mark_as_read,

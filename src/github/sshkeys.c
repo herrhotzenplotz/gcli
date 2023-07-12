@@ -46,3 +46,9 @@ github_add_sshkey(char const *const title,
 {
 	return gitlab_add_sshkey(title, pubkey, out);
 }
+
+int
+github_delete_sshkey(int id)
+{
+	return gitlab_delete_sshkey(id);
+}

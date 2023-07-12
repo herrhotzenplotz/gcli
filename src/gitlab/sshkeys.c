@@ -82,6 +82,8 @@ gitlab_add_sshkey(char const *const title,
 	payload = sn_asprintf(
 		"{ \"title\": \"%s\", \"key\": \"%s\" }",
 		e_title, e_key);
+	free(e_title);
+	free(e_key);
 
 	gcli_fetch_with_method("POST", url, payload, NULL, &buf);
 	if (out) {

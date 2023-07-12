@@ -69,6 +69,7 @@
 #include <gcli/gitea/pulls.h>
 #include <gcli/gitea/releases.h>
 #include <gcli/gitea/repos.h>
+#include <gcli/gitea/sshkeys.h>
 
 static gcli_forge_descriptor const
 github_forge_descriptor =
@@ -242,6 +243,10 @@ gitea_forge_descriptor =
 	.get_own_repos             = gitea_get_own_repos,
 	.repo_create               = gitea_repo_create,
 	.repo_delete               = gitea_repo_delete,
+
+	.get_sshkeys               = gitea_get_sshkeys,
+	.add_sshkey                = gitea_add_sshkey,
+	.delete_sshkey             = gitea_delete_sshkey,
 
 	.get_authheader            = gitea_get_authheader,
 	.get_account               = gitea_get_account,

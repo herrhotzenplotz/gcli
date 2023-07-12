@@ -158,6 +158,7 @@ libgcli_la_SOURCES = \
 	src/github/review.c include/gcli/github/review.h \
 	src/github/checks.c include/gcli/github/checks.h \
 	src/github/gists.c include/gcli/github/gists.h \
+	src/github/sshkeys.c include/gcli/github/sshkeys.h \
 	src/gitea/issues.c include/gcli/gitea/issues.h \
 	src/gitea/labels.c include/gcli/gitea/labels.h \
 	src/gitea/forks.c include/gcli/gitea/forks.h \

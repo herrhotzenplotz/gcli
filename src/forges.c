@@ -43,6 +43,7 @@
 #include <gcli/github/releases.h>
 #include <gcli/github/repos.h>
 #include <gcli/github/review.h>
+#include <gcli/github/sshkeys.h>
 #include <gcli/github/status.h>
 
 #include <gcli/gitlab/api.h>
@@ -122,6 +123,9 @@ github_forge_descriptor =
 	.get_reviews               = github_review_get_reviews,
 	.repo_create               = github_repo_create,
 	.repo_delete               = github_repo_delete,
+
+	.get_sshkeys               = github_get_sshkeys,
+
 	.get_notifications         = github_get_notifications,
 	.notification_mark_as_read = github_notification_mark_as_read,
 	.get_authheader            = github_get_authheader,

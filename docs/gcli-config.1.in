@@ -58,8 +58,10 @@ $ gcli config ssh add \\
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
 and contributors.
 .Sh BUGS
-These features are currently only implemented for Gitlab and will
-segfault on both Github and Gitea.
+When using this feature to manage SSH keys on Github be aware that you need the
+.Dq read:public_key
+scope enabled on your access token. You will receive HTTP 404 errors
+otherwise.
 .Pp
 Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
 or on Github.

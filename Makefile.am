@@ -166,6 +166,7 @@ libgcli_la_SOURCES = \
 	src/gitea/pulls.c include/gcli/gitea/pulls.h \
 	src/gitea/releases.c include/gcli/gitea/releases.h \
 	src/gitea/repos.c include/gcli/gitea/repos.h \
+	src/gitea/sshkeys.c include/gcli/gitea/sshkeys.h \
 	src/gitea/milestones.c include/gcli/gitea/milestones.h \
 	$(TEMPLATES)
 

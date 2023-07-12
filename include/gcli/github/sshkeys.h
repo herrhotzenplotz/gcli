@@ -33,5 +33,8 @@
 #include <gcli/sshkeys.h>
 
 int github_get_sshkeys(gcli_sshkey_list *out);
+int github_add_sshkey(char const *const title,
+                      char const *const pubkey,
+                      gcli_sshkey *out);
 
 #endif /* GCLI_GITHUB_SSHKEYS_H */

@@ -38,3 +38,11 @@ github_get_sshkeys(gcli_sshkey_list *out)
 {
 	return gitlab_get_sshkeys(out);
 }
+
+int
+github_add_sshkey(char const *const title,
+                  char const *const pubkey,
+                  gcli_sshkey *out)
+{
+	return gitlab_add_sshkey(title, pubkey, out);
+}

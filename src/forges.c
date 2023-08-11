@@ -177,6 +177,7 @@ gitlab_forge_descriptor =
 	.pr_add_labels             = gitlab_mr_add_labels,
 	.pr_remove_labels          = gitlab_mr_remove_labels,
 	.pr_set_milestone          = gitlab_mr_set_milestone,
+	.pr_clear_milestone        = gitlab_mr_clear_milestone,
 	.get_releases              = gitlab_get_releases,
 	.create_release            = gitlab_create_release,
 	.delete_release            = gitlab_delete_release,

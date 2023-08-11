@@ -450,3 +450,16 @@ gitlab_mr_set_milestone(char const *owner,
 	free(url);
 	free(data);
 }
+
+void
+gitlab_mr_clear_milestone(char const *owner,
+                          char const *repo,
+                          int mr)
+{
+	/* GitLab's REST API docs state:
+	 *
+	 * The global ID of a milestone to assign the merge request
+	 * to. Set to 0 or provide an empty value to unassign a
+	 * milestone. */
+	gitlab_mr_set_milestone(owner, repo, mr, 0);
+}

@@ -93,4 +93,8 @@ void gitlab_mr_set_milestone(char const *owner,
                              int mr,
                              int milestone_id);
 
+void gitlab_mr_clear_milestone(char const *owner,
+                               char const *repo,
+                               int mr);
+
 #endif /* GITLAB_MERGE_REQUESTS_H */

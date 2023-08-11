@@ -1,5 +1,9 @@
 include "gcli/gitlab/merge_requests.h";
 
+parser gitlab_mr_milestone is
+object of gcli_pull with
+	("title" => milestone as string);
+
 parser gitlab_mr is
 object of gcli_pull with
 	("title"            => title as string,
@@ -15,7 +19,8 @@ object of gcli_pull with
 	 "author"           => author as user,
 	 "source_branch"    => head_label as string,
 	 "sha"              => head_sha as string,
-	 "target_branch"    => base_label as string);
+	 "target_branch"    => base_label as string,
+	 "milestone"        => use parse_gitlab_mr_milestone);
 
 parser gitlab_mrs is array of gcli_pull use parse_gitlab_mr;
 

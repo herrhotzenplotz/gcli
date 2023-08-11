@@ -77,4 +77,13 @@ int gitea_pull_checks(char const *owner,
                       char const *repo,
                       int pr_number);
 
+int gitea_pull_set_milestone(char const *owner,
+                             char const *repo,
+                             int pr_number,
+                             int milestone_id);
+
+int gitea_pull_clear_milestone(char const *owner,
+                               char const *repo,
+                               int pr_number);
+
 #endif /* GITEA_PULLS_H */

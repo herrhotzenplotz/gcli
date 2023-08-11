@@ -112,6 +112,12 @@ github_forge_descriptor =
 	.perform_submit_pr         = github_perform_submit_pull,
 	.get_pull_commits          = github_get_pull_commits,
 	.get_pull                  = github_get_pull,
+
+	/* This works because the function signatures are the same and
+	 * GitHub treats pull requests as issues */
+	.pr_set_milestone          = github_issue_set_milestone,
+	.pr_clear_milestone        = github_issue_clear_milestone,
+
 	.get_releases              = github_get_releases,
 	.create_release            = github_create_release,
 	.delete_release            = github_delete_release,
@@ -176,6 +182,8 @@ gitlab_forge_descriptor =
 	.get_pull                  = gitlab_get_pull,
 	.pr_add_labels             = gitlab_mr_add_labels,
 	.pr_remove_labels          = gitlab_mr_remove_labels,
+	.pr_set_milestone          = gitlab_mr_set_milestone,
+	.pr_clear_milestone        = gitlab_mr_clear_milestone,
 	.get_releases              = gitlab_get_releases,
 	.create_release            = gitlab_create_release,
 	.delete_release            = gitlab_delete_release,
@@ -235,6 +243,8 @@ gitea_forge_descriptor =
 	.get_pull_comments         = gitea_get_comments,
 	.get_pull                  = gitea_get_pull,
 	.get_pull_commits          = gitea_get_pull_commits,
+	.pr_set_milestone          = gitea_pull_set_milestone,
+	.pr_clear_milestone        = gitea_pull_clear_milestone,
 	.get_releases              = gitea_get_releases,
 	.create_release            = gitea_create_release,
 	.delete_release            = gitea_delete_release,

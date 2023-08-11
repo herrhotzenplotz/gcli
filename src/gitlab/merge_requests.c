@@ -430,3 +430,40 @@ gitlab_mr_remove_labels(char const *owner,
 	free(list);
 	free(buffer.data);
 }
+
+int
+gitlab_mr_set_milestone(char const *owner,
+                        char const *repo,
+                        int mr,
+                        int milestone_id)
+{
+	char *url  = NULL;
+	char *data = NULL;
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%d",
+	                  gitlab_get_apibase(), owner, repo, mr);
+
+	data = sn_asprintf("{ \"milestone_id\": \"%d\"}", milestone_id);
+
+	gcli_fetch_with_method("PUT", url, data, NULL, NULL);
+
+	free(url);
+	free(data);
+
+	return 0;
+}
+
+int
+gitlab_mr_clear_milestone(char const *owner,
+                          char const *repo,
+                          int mr)
+{
+	/* GitLab's REST API docs state:
+	 *
+	 * The global ID of a milestone to assign the merge request
+	 * to. Set to 0 or provide an empty value to unassign a
+	 * milestone. */
+	gitlab_mr_set_milestone(owner, repo, mr, 0);
+
+	return 0;
+}

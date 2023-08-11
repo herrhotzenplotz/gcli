@@ -144,6 +144,9 @@ gcli_pull_print_status(gcli_pull const *const it)
 	gcli_dict_add_string(dict,     "STATE", GCLI_TBLCOL_STATECOLOURED, 0, it->state);
 	gcli_dict_add(dict,            "COMMENTS", 0, 0, "%d", it->comments);
 
+	if (it->milestone)
+		gcli_dict_add_string(dict, "MILESTONE", 0, 0, it->milestone);
+
 	if (!(forge->pull_summary_quirks & GCLI_PRS_QUIRK_ADDDEL))
 		/* FIXME: move printing colours into the dictionary printer? */
 		gcli_dict_add(dict,        "ADD:DEL", 0, 0, "%s%d%s:%s%d%s",
@@ -282,7 +285,6 @@ gcli_pull_free(gcli_pull *const it)
 	free(it->labels);
 }
 
-
 void
 gcli_get_pull(char const *owner,
               char const *repo,
@@ -391,4 +393,21 @@ gcli_pull_remove_labels(char const *owner,
 {
 	gcli_forge()->pr_remove_labels(
 		owner, repo, pr_number, labels, labels_size);
+}
+
+int
+gcli_pull_set_milestone(char const *owner,
+                        char const *repo,
+                        int pr_number,
+                        int milestone_id)
+{
+	return gcli_forge()->pr_set_milestone(owner, repo, pr_number, milestone_id);
+}
+
+int
+gcli_pull_clear_milestone(char const *owner,
+                          char const *repo,
+                          int pr_number)
+{
+	return gcli_forge()->pr_clear_milestone(owner, repo, pr_number);
 }

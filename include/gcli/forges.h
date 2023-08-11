@@ -321,6 +321,21 @@ struct gcli_forge_descriptor {
 		size_t labels_size);
 
 	/**
+	 * Assign a PR to a milestone */
+	int (*pr_set_milestone)(
+		char const *owner,
+		char const *repo,
+		int pr,
+		int milestone_id);
+
+	/**
+	 * Clear a milestone on a PR */
+	int (*pr_clear_milestone)(
+		char const *owner,
+		char const *repo,
+		int pr);
+
+	/**
 	 * Get a list of releases in the given repo */
 	int (*get_releases)(
 		char const *owner,

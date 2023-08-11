@@ -141,6 +141,11 @@ Squash the commits before merging.
 .It Fl -inhibit-delete , D
 Delete the source branch after merging.
 .El
+.It Cm milestone Ar milestone-id
+Assign the pull request to the given
+.Ar milestone-id .
+.It Cm milestone Fl d
+Clear a set milestone on the pull request.
 .It Cm notes
 Alias for the
 .Cm comments

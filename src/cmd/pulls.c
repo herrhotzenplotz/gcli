@@ -67,6 +67,7 @@ usage(void)
 	fprintf(stderr, "  op              Display original post\n");
 	fprintf(stderr, "  status          Display PR metadata\n");
 	fprintf(stderr, "  comments        Display comments\n");
+	fprintf(stderr, "  notes           Alias for notes\n");
 	fprintf(stderr, "  commits         Display commits of the PR\n");
 	fprintf(stderr, "  ci              Display CI/Pipeline status information about the PR\n");
 	fprintf(stderr, "  merge [-s] [-D] Merge the PR (-s = squash commits, -d = inhibit deleting source branch)\n");
@@ -415,7 +416,8 @@ handle_pull_actions(int argc, char *argv[],
 		} else if (strcmp(action, "diff") == 0) {
 			gcli_print_pull_diff(stdout, owner, repo, pr);
 
-		} else if (strcmp(action, "comments") == 0) {
+		} else if (strcmp(action, "comments") == 0 ||
+		           strcmp(action, "notes") == 0) {
 			gcli_pull_comments(owner, repo, pr);
 
 		} else if (strcmp(action, "ci") == 0) {

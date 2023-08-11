@@ -107,6 +107,10 @@ Remove the given label from the issue.
 .It Cm milestone Ar id
 Assign the issue to a milestone with the given
 .Ar id .
+.It Cm notes
+Alias for the
+.Cm comments
+action that prints the list of comments associated with the issue.
 .El
 .Sh EXAMPLES
 Print a list of issues in the current project:

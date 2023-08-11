@@ -30,6 +30,7 @@
 #include <gcli/config.h>
 #include <gcli/gitea/pulls.h>
 #include <gcli/github/pulls.h>
+#include <gcli/github/issues.h>
 
 int
 gitea_get_pulls(char const *owner,
@@ -181,4 +182,13 @@ gitea_pull_checks(char const *owner,
 	warnx("PR checks are not available on Gitea");
 
 	return 0;
+}
+
+int
+gitea_pull_set_milestone(char const *owner,
+                         char const *repo,
+                         int pr_number,
+                         int milestone_id)
+{
+	return github_issue_set_milestone(owner, repo, pr_number, milestone_id);
 }

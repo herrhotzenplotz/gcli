@@ -192,3 +192,15 @@ gitea_pull_set_milestone(char const *owner,
 {
 	return github_issue_set_milestone(owner, repo, pr_number, milestone_id);
 }
+
+int
+gitea_pull_clear_milestone(char const *owner,
+                           char const *repo,
+                           int pr_number)
+{
+	/* NOTE: The github routine for clearing issues sets the milestone
+	 * to null (not the integer zero). However this does not work in
+	 * the case of Gitea which clear the milestone by setting it to
+	 * the integer value zero. */
+	return github_issue_set_milestone(owner, repo, pr_number, 0);
+}

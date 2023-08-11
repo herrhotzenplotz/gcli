@@ -71,6 +71,8 @@ usage(void)
 	fprintf(stderr, "  commits         Display commits of the PR\n");
 	fprintf(stderr, "  ci              Display CI/Pipeline status information about the PR\n");
 	fprintf(stderr, "  merge [-s] [-D] Merge the PR (-s = squash commits, -d = inhibit deleting source branch)\n");
+	fprintf(stderr, "  milestone <id>  Assign this PR to a milestone\n");
+	fprintf(stderr, "  milestone -d    Clear associated milestones from the PR\n");
 	fprintf(stderr, "  close           Close the PR\n");
 	fprintf(stderr, "  reopen          Reopen a closed PR\n");
 	fprintf(stderr, "  labels ...      Add or remove labels:\n");
@@ -488,6 +490,27 @@ handle_pull_actions(int argc, char *argv[],
 			free(add_labels);
 			free(remove_labels);
 
+		} else if (strcmp("milestone", action) == 0) {
+			char const *arg = shift(&argc, &argv);
+
+			if (strcmp(arg, "-d") == 0) {
+				fprintf(stderr, "error: -d is not implemented for milestones action\n");
+				return EXIT_FAILURE;
+			} else {
+				int milestone_id = 0;
+				char *endptr;
+
+				milestone_id = strtoul(arg, &endptr, 10);
+				if (endptr != arg + strlen(arg)) {
+					fprintf(stderr, "error: cannot parse milestone id »%s«\n", arg);
+					return EXIT_FAILURE;
+				}
+
+				(void) milestone_id;
+
+				fprintf(stderr, "error: assigning milestones is not yet implemented\n");
+				return EXIT_FAILURE;
+			}
 		} else {
 			/* At this point we found an unknown action / stray
 			 * options on the command line. Error out in this case. */

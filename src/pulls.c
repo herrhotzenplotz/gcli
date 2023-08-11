@@ -399,11 +399,5 @@ gcli_pull_set_milestone(char const *owner,
                         int pr_number,
                         int milestone_id)
 {
-	(void) owner;
-	(void) repo;
-	(void) pr_number;
-	(void) milestone_id;
-
-	fprintf(stderr, "error: setting milestones on pulls is not yet implemented\n");
-	abort();
+	gcli_forge()->pr_set_milestone(owner, repo, pr_number, milestone_id);
 }

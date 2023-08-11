@@ -73,6 +73,7 @@ gcli_print_pulls_table(enum gcli_output_flags const flags,
 		{ .name = "STATE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
 		{ .name = "MERGED",  .type = GCLI_TBLCOLTYPE_BOOL,   .flags = 0 },
 		{ .name = "CREATOR", .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_BOLD },
+		{ .name = "NOTES",   .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "TITLE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
@@ -99,6 +100,7 @@ gcli_print_pulls_table(enum gcli_output_flags const flags,
 			                 list->pulls[n-i-1].state,
 			                 list->pulls[n-i-1].merged,
 			                 list->pulls[n-i-1].author,
+			                 list->pulls[n-i-1].comments,
 			                 list->pulls[n-i-1].title);
 		}
 	} else {
@@ -108,6 +110,7 @@ gcli_print_pulls_table(enum gcli_output_flags const flags,
 			                 list->pulls[i].state,
 			                 list->pulls[i].merged,
 			                 list->pulls[i].author,
+			                 list->pulls[i].comments,
 			                 list->pulls[i].title);
 		}
 	}

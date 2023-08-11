@@ -392,3 +392,18 @@ gcli_pull_remove_labels(char const *owner,
 	gcli_forge()->pr_remove_labels(
 		owner, repo, pr_number, labels, labels_size);
 }
+
+void
+gcli_pull_set_milestone(char const *owner,
+                        char const *repo,
+                        int pr_number,
+                        int milestone_id)
+{
+	(void) owner;
+	(void) repo;
+	(void) pr_number;
+	(void) milestone_id;
+
+	fprintf(stderr, "error: setting milestones on pulls is not yet implemented\n");
+	abort();
+}

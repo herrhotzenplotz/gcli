@@ -506,10 +506,7 @@ handle_pull_actions(int argc, char *argv[],
 					return EXIT_FAILURE;
 				}
 
-				(void) milestone_id;
-
-				fprintf(stderr, "error: assigning milestones is not yet implemented\n");
-				return EXIT_FAILURE;
+				gcli_pull_set_milestone(owner, repo, pr, milestone_id);
 			}
 		} else {
 			/* At this point we found an unknown action / stray

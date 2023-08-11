@@ -167,4 +167,9 @@ void gcli_pull_remove_labels(char const *owner,
                              char const *const labels[],
                              size_t labels_size);
 
+void gcli_pull_set_milestone(char const *owner,
+                             char const *repo,
+                             int pr_number,
+                             int milestone_id);
+
 #endif /* PULLS_H */

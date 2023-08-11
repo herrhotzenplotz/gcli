@@ -88,4 +88,9 @@ void gitlab_mr_remove_labels(char const *owner,
                              char const *const labels[],
                              size_t labels_size);
 
+void gitlab_mr_set_milestone(char const *owner,
+                             char const *repo,
+                             int mr,
+                             int milestone_id);
+
 #endif /* GITLAB_MERGE_REQUESTS_H */

@@ -430,3 +430,16 @@ gitlab_mr_remove_labels(char const *owner,
 	free(list);
 	free(buffer.data);
 }
+
+void
+gitlab_mr_set_milestone(char const *owner,
+                        char const *repo,
+                        int mr,
+                        int milestone_id)
+{
+	(void) owner;
+	(void) repo;
+	(void) mr;
+	(void) milestone_id;
+	errx(1, "%s is not yet implemented", __func__);
+}

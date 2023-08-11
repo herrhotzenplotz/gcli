@@ -112,6 +112,12 @@ github_forge_descriptor =
 	.perform_submit_pr         = github_perform_submit_pull,
 	.get_pull_commits          = github_get_pull_commits,
 	.get_pull                  = github_get_pull,
+
+	/* This works because the function signatures are the same and
+	 * GitHub treats pull requests as issues */
+	.pr_set_milestone          = github_issue_set_milestone,
+	.pr_clear_milestone        = github_issue_clear_milestone,
+
 	.get_releases              = github_get_releases,
 	.create_release            = github_create_release,
 	.delete_release            = github_delete_release,

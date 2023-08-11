@@ -61,6 +61,7 @@ struct gcli_pull {
 	char   *head_label;
 	char   *base_label;
 	char   *head_sha;
+	char   *milestone;
 	int     id;
 	int     number;
 	int     comments;

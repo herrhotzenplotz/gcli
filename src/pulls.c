@@ -144,6 +144,9 @@ gcli_pull_print_status(gcli_pull const *const it)
 	gcli_dict_add_string(dict,     "STATE", GCLI_TBLCOL_STATECOLOURED, 0, it->state);
 	gcli_dict_add(dict,            "COMMENTS", 0, 0, "%d", it->comments);
 
+	if (it->milestone)
+		gcli_dict_add_string(dict, "MILESTONE", 0, 0, it->milestone);
+
 	if (!(forge->pull_summary_quirks & GCLI_PRS_QUIRK_ADDDEL))
 		/* FIXME: move printing colours into the dictionary printer? */
 		gcli_dict_add(dict,        "ADD:DEL", 0, 0, "%s%d%s:%s%d%s",
@@ -281,7 +284,6 @@ gcli_pull_free(gcli_pull *const it)
 
 	free(it->labels);
 }
-
 
 void
 gcli_get_pull(char const *owner,

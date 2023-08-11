@@ -259,3 +259,11 @@ gitea_issue_set_milestone(char const *const owner,
 {
 	return github_issue_set_milestone(owner, repo, issue, milestone);
 }
+
+int
+gitea_issue_clear_milestone(char const *owner,
+                            char const *repo,
+                            int issue)
+{
+	return github_issue_set_milestone(owner, repo, issue, 0);
+}

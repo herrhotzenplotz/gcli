@@ -43,6 +43,7 @@
 #include <gcli/github/releases.h>
 #include <gcli/github/repos.h>
 #include <gcli/github/review.h>
+#include <gcli/github/sshkeys.h>
 #include <gcli/github/status.h>
 
 #include <gcli/gitlab/api.h>
@@ -58,6 +59,7 @@
 #include <gcli/gitlab/repos.h>
 #include <gcli/gitlab/review.h>
 #include <gcli/gitlab/status.h>
+#include <gcli/gitlab/sshkeys.h>
 
 #include <gcli/gitea/comments.h>
 #include <gcli/gitea/config.h>
@@ -68,6 +70,7 @@
 #include <gcli/gitea/pulls.h>
 #include <gcli/gitea/releases.h>
 #include <gcli/gitea/repos.h>
+#include <gcli/gitea/sshkeys.h>
 
 static gcli_forge_descriptor const
 github_forge_descriptor =
@@ -109,6 +112,12 @@ github_forge_descriptor =
 	.perform_submit_pr         = github_perform_submit_pull,
 	.get_pull_commits          = github_get_pull_commits,
 	.get_pull                  = github_get_pull,
+
+	/* This works because the function signatures are the same and
+	 * GitHub treats pull requests as issues */
+	.pr_set_milestone          = github_issue_set_milestone,
+	.pr_clear_milestone        = github_issue_clear_milestone,
+
 	.get_releases              = github_get_releases,
 	.create_release            = github_create_release,
 	.delete_release            = github_delete_release,
@@ -120,6 +129,11 @@ github_forge_descriptor =
 	.get_reviews               = github_review_get_reviews,
 	.repo_create               = github_repo_create,
 	.repo_delete               = github_repo_delete,
+
+	.get_sshkeys               = github_get_sshkeys,
+	.add_sshkey                = github_add_sshkey,
+	.delete_sshkey             = github_delete_sshkey,
+
 	.get_notifications         = github_get_notifications,
 	.notification_mark_as_read = github_notification_mark_as_read,
 	.get_authheader            = github_get_authheader,
@@ -168,6 +182,8 @@ gitlab_forge_descriptor =
 	.get_pull                  = gitlab_get_pull,
 	.pr_add_labels             = gitlab_mr_add_labels,
 	.pr_remove_labels          = gitlab_mr_remove_labels,
+	.pr_set_milestone          = gitlab_mr_set_milestone,
+	.pr_clear_milestone        = gitlab_mr_clear_milestone,
 	.get_releases              = gitlab_get_releases,
 	.create_release            = gitlab_create_release,
 	.delete_release            = gitlab_delete_release,
@@ -183,6 +199,9 @@ gitlab_forge_descriptor =
 	.notification_mark_as_read = gitlab_notification_mark_as_read,
 	.get_authheader            = gitlab_get_authheader,
 	.get_account               = gitlab_get_account,
+	.get_sshkeys               = gitlab_get_sshkeys,
+	.add_sshkey                = gitlab_add_sshkey,
+	.delete_sshkey             = gitlab_delete_sshkey,
 	.get_api_error_string      = gitlab_api_error_string,
 	.user_object_key           = "username",
 	.html_url_key              = "web_url",
@@ -203,6 +222,7 @@ gitea_forge_descriptor =
 	.issue_reopen              = gitea_issue_reopen,
 	.issue_assign              = gitea_issue_assign,
 	.issue_set_milestone       = gitea_issue_set_milestone,
+	.issue_clear_milestone     = gitea_issue_clear_milestone,
 	.get_issue_comments        = gitea_get_comments,
 	.get_milestones            = gitea_get_milestones,
 	.get_milestone             = gitea_get_milestone,
@@ -224,6 +244,8 @@ gitea_forge_descriptor =
 	.get_pull_comments         = gitea_get_comments,
 	.get_pull                  = gitea_get_pull,
 	.get_pull_commits          = gitea_get_pull_commits,
+	.pr_set_milestone          = gitea_pull_set_milestone,
+	.pr_clear_milestone        = gitea_pull_clear_milestone,
 	.get_releases              = gitea_get_releases,
 	.create_release            = gitea_create_release,
 	.delete_release            = gitea_delete_release,
@@ -238,6 +260,10 @@ gitea_forge_descriptor =
 	.get_own_repos             = gitea_get_own_repos,
 	.repo_create               = gitea_repo_create,
 	.repo_delete               = gitea_repo_delete,
+
+	.get_sshkeys               = gitea_get_sshkeys,
+	.add_sshkey                = gitea_add_sshkey,
+	.delete_sshkey             = gitea_delete_sshkey,
 
 	.get_authheader            = gitea_get_authheader,
 	.get_account               = gitea_get_account,

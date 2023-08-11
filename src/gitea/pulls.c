@@ -30,6 +30,7 @@
 #include <gcli/config.h>
 #include <gcli/gitea/pulls.h>
 #include <gcli/github/pulls.h>
+#include <gcli/github/issues.h>
 
 int
 gitea_get_pulls(char const *owner,
@@ -181,4 +182,25 @@ gitea_pull_checks(char const *owner,
 	warnx("PR checks are not available on Gitea");
 
 	return 0;
+}
+
+int
+gitea_pull_set_milestone(char const *owner,
+                         char const *repo,
+                         int pr_number,
+                         int milestone_id)
+{
+	return github_issue_set_milestone(owner, repo, pr_number, milestone_id);
+}
+
+int
+gitea_pull_clear_milestone(char const *owner,
+                           char const *repo,
+                           int pr_number)
+{
+	/* NOTE: The github routine for clearing issues sets the milestone
+	 * to null (not the integer zero). However this does not work in
+	 * the case of Gitea which clear the milestone by setting it to
+	 * the integer value zero. */
+	return github_issue_set_milestone(owner, repo, pr_number, 0);
 }

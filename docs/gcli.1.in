@@ -70,6 +70,10 @@ Create and manage releases. See
 .It Cm milestones
 List and manage milestones. See
 .Xr gcli-milestones 1 .
+.It Cm config
+Change user settings for the forge. Allows you to e.g. upload or
+delete ssh keys. See
+.Xr gcli-config 1 .
 .It Cm api
 Perform direct queries to the API and dump the JSON response to
 stdout. This is primarily intended to assist debugging gcli. See
@@ -280,6 +284,7 @@ working from contain the relevant forge and repository information.
 .Xr gcli-releases 1 ,
 .Xr gcli-comment 1
 .Xr gcli-pipelines 1
+.Xr gcli-config 1
 .Sh HISTORY
 The idea for
 .Nm

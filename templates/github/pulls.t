@@ -29,6 +29,10 @@ parser github_branch_label is
 object of gcli_pull with
 	("label" => base_label as string);
 
+parser github_pull_milestone is
+object of gcli_pull with
+	("title" => milestone as string);
+
 parser github_pull is
 object of gcli_pull with
 	("title"         => title as string,
@@ -49,7 +53,8 @@ object of gcli_pull with
 	 "draft"         => draft as bool,
 	 "user"          => author as user,
 	 "head"          => use parse_github_pull_head,
-	 "base"          => use parse_github_branch_label);
+	 "base"          => use parse_github_branch_label,
+	 "milestone"     => use parse_github_pull_milestone);
 
 parser github_pr_merge_message is object of char* select "message" as string;
 

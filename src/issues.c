@@ -83,6 +83,7 @@ gcli_print_issues_table(enum gcli_output_flags const flags,
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
 		{ .name = "NUMBER", .type = GCLI_TBLCOLTYPE_INT, .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "NOTES",  .type = GCLI_TBLCOLTYPE_INT, .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "STATE",  .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_STATECOLOURED },
 		{ .name = "TITLE",  .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
 	};
@@ -108,6 +109,7 @@ gcli_print_issues_table(enum gcli_output_flags const flags,
 			if (!list->issues[n - 1 - 1].is_pr) {
 				gcli_tbl_add_row(table,
 				                 list->issues[n - i - 1].number,
+				                 list->issues[n - i - 1].comments,
 				                 list->issues[n - i - 1].state,
 				                 list->issues[n - i - 1].title);
 			} else {
@@ -119,6 +121,7 @@ gcli_print_issues_table(enum gcli_output_flags const flags,
 			if (!list->issues[i].is_pr) {
 				gcli_tbl_add_row(table,
 				                 list->issues[i].number,
+				                 list->issues[i].comments,
 				                 list->issues[i].state,
 				                 list->issues[i].title);
 			} else {

@@ -46,7 +46,7 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: gcli pulls create [-o owner -r repo] [-f from]\n");
-	fprintf(stderr, "                         [-t to] [-d] [-l label]\n");
+	fprintf(stderr, "                         [-t to] [-d] [-l label] pull-request-title\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] [-a] [-A author ][-n number] [-s]\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] -i pull-id actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
@@ -67,9 +67,12 @@ usage(void)
 	fprintf(stderr, "  op              Display original post\n");
 	fprintf(stderr, "  status          Display PR metadata\n");
 	fprintf(stderr, "  comments        Display comments\n");
+	fprintf(stderr, "  notes           Alias for notes\n");
 	fprintf(stderr, "  commits         Display commits of the PR\n");
 	fprintf(stderr, "  ci              Display CI/Pipeline status information about the PR\n");
 	fprintf(stderr, "  merge [-s] [-D] Merge the PR (-s = squash commits, -d = inhibit deleting source branch)\n");
+	fprintf(stderr, "  milestone <id>  Assign this PR to a milestone\n");
+	fprintf(stderr, "  milestone -d    Clear associated milestones from the PR\n");
 	fprintf(stderr, "  close           Close the PR\n");
 	fprintf(stderr, "  reopen          Reopen a closed PR\n");
 	fprintf(stderr, "  labels ...      Add or remove labels:\n");
@@ -415,7 +418,8 @@ handle_pull_actions(int argc, char *argv[],
 		} else if (strcmp(action, "diff") == 0) {
 			gcli_print_pull_diff(stdout, owner, repo, pr);
 
-		} else if (strcmp(action, "comments") == 0) {
+		} else if (strcmp(action, "comments") == 0 ||
+		           strcmp(action, "notes") == 0) {
 			gcli_pull_comments(owner, repo, pr);
 
 		} else if (strcmp(action, "ci") == 0) {
@@ -486,6 +490,24 @@ handle_pull_actions(int argc, char *argv[],
 			free(add_labels);
 			free(remove_labels);
 
+		} else if (strcmp("milestone", action) == 0) {
+			char const *arg = shift(&argc, &argv);
+
+			if (strcmp(arg, "-d") == 0) {
+				gcli_pull_clear_milestone(owner, repo, pr);
+
+			} else {
+				int milestone_id = 0;
+				char *endptr;
+
+				milestone_id = strtoul(arg, &endptr, 10);
+				if (endptr != arg + strlen(arg)) {
+					fprintf(stderr, "error: cannot parse milestone id »%s«\n", arg);
+					return EXIT_FAILURE;
+				}
+
+				gcli_pull_set_milestone(owner, repo, pr, milestone_id);
+			}
 		} else {
 			/* At this point we found an unknown action / stray
 			 * options on the command line. Error out in this case. */

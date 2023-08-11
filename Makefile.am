@@ -39,6 +39,7 @@ gcli_LDADD = libgcli.la libpdjson.la libsn.la
 dist_man_MANS = \
 	docs/gcli-api.1 \
 	docs/gcli-comment.1 \
+	docs/gcli-config.1 \
 	docs/gcli-forks.1 \
 	docs/gcli-gists.1 \
 	docs/gcli-issues.1 \
@@ -58,6 +59,7 @@ gcli_SOURCES = \
 	src/cmd/api.c \
 	src/cmd/ci.c \
 	src/cmd/comment.c \
+	src/cmd/config.c \
 	src/cmd/forks.c \
 	src/cmd/gists.c \
 	src/cmd/issues.c \
@@ -102,6 +104,7 @@ TEMPLATES = \
 	templates/gitlab/releases.t \
 	templates/gitlab/repos.t \
 	templates/gitlab/review.t \
+	templates/gitlab/sshkeys.t \
 	templates/gitlab/status.t \
 	templates/gitlab/snippets.t \
 	templates/gitea/milestones.t
@@ -125,6 +128,7 @@ libgcli_la_SOURCES = \
 	src/review.c include/gcli/review.h \
 	src/gitlab/snippets.c include/gcli/gitlab/snippets.h \
 	src/status.c include/gcli/status.h \
+	src/sshkeys.c include/gcli/sshkeys.h \
 	src/table.c include/gcli/table.h \
 	src/gitlab/api.c include/gcli/gitlab/api.h \
 	src/gitlab/comments.c include/gcli/gitlab/comments.h \
@@ -139,6 +143,7 @@ libgcli_la_SOURCES = \
 	src/gitlab/repos.c include/gcli/gitlab/repos.h \
 	src/gitlab/review.c include/gcli/gitlab/review.h \
 	src/gitlab/status.c include/gcli/gitlab/status.h \
+	src/gitlab/sshkeys.c include/gcli/gitlab/sshkeys.h \
 	src/github/releases.c include/gcli/github/releases.h \
 	src/github/config.c include/gcli/github/config.h \
 	src/github/api.c include/gcli/github/api.h \
@@ -153,6 +158,7 @@ libgcli_la_SOURCES = \
 	src/github/review.c include/gcli/github/review.h \
 	src/github/checks.c include/gcli/github/checks.h \
 	src/github/gists.c include/gcli/github/gists.h \
+	src/github/sshkeys.c include/gcli/github/sshkeys.h \
 	src/gitea/issues.c include/gcli/gitea/issues.h \
 	src/gitea/labels.c include/gcli/gitea/labels.h \
 	src/gitea/forks.c include/gcli/gitea/forks.h \
@@ -161,6 +167,7 @@ libgcli_la_SOURCES = \
 	src/gitea/pulls.c include/gcli/gitea/pulls.h \
 	src/gitea/releases.c include/gcli/gitea/releases.h \
 	src/gitea/repos.c include/gcli/gitea/repos.h \
+	src/gitea/sshkeys.c include/gcli/gitea/sshkeys.h \
 	src/gitea/milestones.c include/gcli/gitea/milestones.h \
 	$(TEMPLATES)
 

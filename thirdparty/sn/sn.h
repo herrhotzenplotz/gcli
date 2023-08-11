@@ -110,6 +110,7 @@ void pretty_print(const char *input, int indent, int maxlinelen, FILE *out);
 
 /* io file mapping */
 int  sn_mmap_file(const char *path, void **buffer);
+int  sn_read_file(char const *path, char **buffer);
 
 /* stringview */
 typedef struct sn_sv sn_sv;

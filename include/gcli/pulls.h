@@ -61,6 +61,7 @@ struct gcli_pull {
 	char   *head_label;
 	char   *base_label;
 	char   *head_sha;
+	char   *milestone;
 	int     id;
 	int     number;
 	int     comments;
@@ -166,5 +167,14 @@ void gcli_pull_remove_labels(char const *owner,
                              int pr_number,
                              char const *const labels[],
                              size_t labels_size);
+
+int gcli_pull_set_milestone(char const *owner,
+                            char const *repo,
+                            int pr_number,
+                            int milestone_id);
+
+int gcli_pull_clear_milestone(char const *owner,
+                              char const *repo,
+                              int pr_number);
 
 #endif /* PULLS_H */

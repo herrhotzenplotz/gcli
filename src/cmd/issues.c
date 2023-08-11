@@ -68,6 +68,7 @@ usage(void)
 	fprintf(stderr, "                        remove <name>\n");
 	fprintf(stderr, "  milestone <id>     Assign this issue to the given milestone\n");
 	fprintf(stderr, "  milestone -d       Clear the assigned milestone of the given issue\n");
+	fprintf(stderr, "  notes              Alias for comments\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
@@ -378,7 +379,8 @@ handle_issues_actions(int argc, char *argv[],
 			puts("\nORIGINAL POST\n");
 			gcli_issue_print_op(&issue);
 
-		} else if (strcmp("comments", operation) == 0) {
+		} else if (strcmp("comments", operation) == 0 ||
+		           strcmp("notes", operation) == 0) {
 			/* Doesn't require fetching the issue data */
 			gcli_issue_comments(owner, repo, issue_id);
 

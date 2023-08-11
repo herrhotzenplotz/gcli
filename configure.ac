@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([gcli],[1.1.0],[nsonack@herrhotzenplotz.de],[gcli],[https://gitlab.com/herrhotzenplotz/gcli/])
+AC_INIT([gcli],[1.2.0],[nsonack@herrhotzenplotz.de],[gcli],[https://gitlab.com/herrhotzenplotz/gcli/])
 AM_INIT_AUTOMAKE([1.0 foreign subdir-objects dist-bzip2 dist-xz -Wall])
 
 dnl Release Date.
@@ -38,7 +38,7 @@ OPT_LIBCURL=$withval
 
 AS_IF([test "x$OPT_LIBCURL" = "xno"],
       [AC_MSG_ERROR([--with-libcurl must not be disabled])])
-AS_IF([test "x$OPT_LIBCURL" = "xcheck"],
+AS_IF([test "x$OPT_LIBCURL" = "xcheck" || test "x$OPT_LIBCURL" = "xyes"],
       [PKG_CHECK_MODULES([LIBCURL], [libcurl],,[AC_MSG_ERROR([Could not find libcurl])])
        CFLAGS="$LIBCURL_CFLAGS $CFLAGS"
        LDFLAGS="$LIBCURL_LIBS $LDFLAGS"],
@@ -64,6 +64,7 @@ dnl Generate and substitute various files
 AC_CONFIG_FILES([Makefile
                  docs/gcli-api.1
                  docs/gcli-comment.1
+                 docs/gcli-config.1
                  docs/gcli-forks.1
                  docs/gcli-gists.1
                  docs/gcli-issues.1

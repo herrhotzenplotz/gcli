@@ -236,6 +236,41 @@ sn_mmap_file(const char *path, void **buffer)
     return stat_buf.st_size;
 }
 
+int
+sn_read_file(char const *path, char **buffer)
+{
+	FILE *f;
+	size_t len;
+	int rc = 0;
+
+	/* open file and determine length */
+	f = fopen(path, "r");
+	if (!f)
+		return -1;
+
+	if (fseek(f, 0, SEEK_END) < 0)
+		goto err_seek;
+
+	len = ftell(f);
+	rewind(f);
+
+	*buffer = malloc(len + 1);
+	if (fread(*buffer, 1, len, f) != len) {
+		rc = -1;
+		goto err_read;
+	}
+
+	(*buffer)[len] = '\0';
+
+	rc = (int)(len);
+
+err_read:
+err_seek:
+	fclose(f);
+
+	return rc;
+}
+
 sn_sv
 sn_sv_trim_front(sn_sv it)
 {

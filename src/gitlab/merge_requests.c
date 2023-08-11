@@ -37,6 +37,16 @@
 
 #include <pdjson/pdjson.h>
 
+/* Workaround because gitlab doesn't give us an explicit field for
+ * this. */
+static void
+gitlab_mrs_fixup(gcli_pull_list *const list)
+{
+	for (size_t i = 0; i < list->pulls_size; ++i) {
+		list->pulls[i].merged = !strcmp(list->pulls[i].state, "merged");
+	}
+}
+
 int
 gitlab_fetch_mrs(char *url, int const max, gcli_pull_list *const list)
 {
@@ -55,6 +65,8 @@ gitlab_fetch_mrs(char *url, int const max, gcli_pull_list *const list)
 	} while ((url = next_url) && (max == -1 || (int)list->pulls_size < max));
 
 	free(url);
+
+	gitlab_mrs_fixup(list);
 
 	return 0;
 }
@@ -417,4 +429,41 @@ gitlab_mr_remove_labels(char const *owner,
 	free(data);
 	free(list);
 	free(buffer.data);
+}
+
+int
+gitlab_mr_set_milestone(char const *owner,
+                        char const *repo,
+                        int mr,
+                        int milestone_id)
+{
+	char *url  = NULL;
+	char *data = NULL;
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%d",
+	                  gitlab_get_apibase(), owner, repo, mr);
+
+	data = sn_asprintf("{ \"milestone_id\": \"%d\"}", milestone_id);
+
+	gcli_fetch_with_method("PUT", url, data, NULL, NULL);
+
+	free(url);
+	free(data);
+
+	return 0;
+}
+
+int
+gitlab_mr_clear_milestone(char const *owner,
+                          char const *repo,
+                          int mr)
+{
+	/* GitLab's REST API docs state:
+	 *
+	 * The global ID of a milestone to assign the merge request
+	 * to. Set to 0 or provide an empty value to unassign a
+	 * milestone. */
+	gitlab_mr_set_milestone(owner, repo, mr, 0);
+
+	return 0;
 }

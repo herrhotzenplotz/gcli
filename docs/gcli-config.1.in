@@ -1,0 +1,67 @@
+.Dd @PACKAGE_DATE@
+.Dt GCLI-ISSUES 1
+.Os @PACKAGE_STRING@
+.Sh NAME
+.Nm gcli config
+.Nd Git Forge Configuration
+.Sh SYNOPSIS
+.Nm
+.Cm ssh
+.Nm
+.Cm ssh add
+.Fl t Ar title
+.Fl k Ar keypath
+.Nm
+.Cm ssh delete
+.Fl i Ar id
+.Sh DESCRIPTION
+.Nm
+is used to change the settings of the Git Forge Account. You can use
+it to e.g. add or delete SSH Public Keys used to push to forges.
+.Sh OPTIONS
+.Bl -tag -width xxxxxxxxxxxxxxxxx
+.It Fl t , -title Ar title
+Set the title of the SSH Key to be added. This is a short description
+of the key.
+.It Fl k , -key Pa keypath
+Path to the file containing the SSH public key.
+.It Fl i , -id Ar id
+ID of the public key to delete.
+.El
+.
+.Sh SUBCOMMANDS
+.Bl -tag -width xxxxxxxxxxx
+.It Cm ssh
+List SSH public keys for the current user.
+.It Cm ssh add
+Add a SSH public key for the current user.
+.It Cm ssh delete
+Delete a SSH public key for the current user.
+.El
+.Sh EXAMPLES
+Print a list of registered SSH public keys:
+.Bd -literal -offset indent
+$ gcli config ssh
+.Ed
+.Pp
+Register ~/.ssh/id_rsa.pub on the default forge:
+.Bd -literal -offset indent
+$ gcli config ssh add \\
+      -t "Key for $(hostname)" \\
+      -k ~/.ssh/id_rsa.pub
+.Ed
+.Pp
+.Sh SEE ALSO
+.Xr git 1 ,
+.Xr gcli 1
+.Sh AUTHORS
+.An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+and contributors.
+.Sh BUGS
+When using this feature to manage SSH keys on Github be aware that you need the
+.Dq read:public_key
+scope enabled on your access token. You will receive HTTP 404 errors
+otherwise.
+.Pp
+Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
+or on Github.

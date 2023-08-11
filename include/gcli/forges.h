@@ -44,6 +44,7 @@
 #include <gcli/releases.h>
 #include <gcli/repos.h>
 #include <gcli/review.h>
+#include <gcli/sshkeys.h>
 #include <gcli/status.h>
 
 typedef struct gcli_forge_descriptor gcli_forge_descriptor;
@@ -320,6 +321,21 @@ struct gcli_forge_descriptor {
 		size_t labels_size);
 
 	/**
+	 * Assign a PR to a milestone */
+	int (*pr_set_milestone)(
+		char const *owner,
+		char const *repo,
+		int pr,
+		int milestone_id);
+
+	/**
+	 * Clear a milestone on a PR */
+	int (*pr_clear_milestone)(
+		char const *owner,
+		char const *repo,
+		int pr);
+
+	/**
 	 * Get a list of releases in the given repo */
 	int (*get_releases)(
 		char const *owner,
@@ -415,6 +431,20 @@ struct gcli_forge_descriptor {
 	/**
 	 * Get the user account name */
 	sn_sv (*get_account)(void);
+
+	/**
+	 * Get list of SSH keys */
+	int (*get_sshkeys)(gcli_sshkey_list *);
+
+	/**
+	 * Add an SSH public key */
+	int (*add_sshkey)(char const *title,
+	                  char const *public_key_path,
+	                  gcli_sshkey *out);
+
+	/**
+	 * Delete an SSH public key by its ID */
+	int (*delete_sshkey)(int id);
 
 	/**
 	 * Get the error string from the API */

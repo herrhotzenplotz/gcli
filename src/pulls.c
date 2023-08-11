@@ -73,6 +73,7 @@ gcli_print_pulls_table(enum gcli_output_flags const flags,
 		{ .name = "STATE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
 		{ .name = "MERGED",  .type = GCLI_TBLCOLTYPE_BOOL,   .flags = 0 },
 		{ .name = "CREATOR", .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_BOLD },
+		{ .name = "NOTES",   .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "TITLE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
@@ -99,6 +100,7 @@ gcli_print_pulls_table(enum gcli_output_flags const flags,
 			                 list->pulls[n-i-1].state,
 			                 list->pulls[n-i-1].merged,
 			                 list->pulls[n-i-1].author,
+			                 list->pulls[n-i-1].comments,
 			                 list->pulls[n-i-1].title);
 		}
 	} else {
@@ -108,6 +110,7 @@ gcli_print_pulls_table(enum gcli_output_flags const flags,
 			                 list->pulls[i].state,
 			                 list->pulls[i].merged,
 			                 list->pulls[i].author,
+			                 list->pulls[i].comments,
 			                 list->pulls[i].title);
 		}
 	}
@@ -140,6 +143,9 @@ gcli_pull_print_status(gcli_pull const *const it)
 	gcli_dict_add_string(dict,     "AUTHOR", GCLI_TBLCOL_BOLD, 0, it->author);
 	gcli_dict_add_string(dict,     "STATE", GCLI_TBLCOL_STATECOLOURED, 0, it->state);
 	gcli_dict_add(dict,            "COMMENTS", 0, 0, "%d", it->comments);
+
+	if (it->milestone)
+		gcli_dict_add_string(dict, "MILESTONE", 0, 0, it->milestone);
 
 	if (!(forge->pull_summary_quirks & GCLI_PRS_QUIRK_ADDDEL))
 		/* FIXME: move printing colours into the dictionary printer? */
@@ -279,7 +285,6 @@ gcli_pull_free(gcli_pull *const it)
 	free(it->labels);
 }
 
-
 void
 gcli_get_pull(char const *owner,
               char const *repo,
@@ -388,4 +393,21 @@ gcli_pull_remove_labels(char const *owner,
 {
 	gcli_forge()->pr_remove_labels(
 		owner, repo, pr_number, labels, labels_size);
+}
+
+int
+gcli_pull_set_milestone(char const *owner,
+                        char const *repo,
+                        int pr_number,
+                        int milestone_id)
+{
+	return gcli_forge()->pr_set_milestone(owner, repo, pr_number, milestone_id);
+}
+
+int
+gcli_pull_clear_milestone(char const *owner,
+                          char const *repo,
+                          int pr_number)
+{
+	return gcli_forge()->pr_clear_milestone(owner, repo, pr_number);
 }

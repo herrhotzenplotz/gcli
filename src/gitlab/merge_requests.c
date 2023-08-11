@@ -431,7 +431,7 @@ gitlab_mr_remove_labels(char const *owner,
 	free(buffer.data);
 }
 
-void
+int
 gitlab_mr_set_milestone(char const *owner,
                         char const *repo,
                         int mr,
@@ -449,9 +449,11 @@ gitlab_mr_set_milestone(char const *owner,
 
 	free(url);
 	free(data);
+
+	return 0;
 }
 
-void
+int
 gitlab_mr_clear_milestone(char const *owner,
                           char const *repo,
                           int mr)
@@ -462,4 +464,6 @@ gitlab_mr_clear_milestone(char const *owner,
 	 * to. Set to 0 or provide an empty value to unassign a
 	 * milestone. */
 	gitlab_mr_set_milestone(owner, repo, mr, 0);
+
+	return 0;
 }

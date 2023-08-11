@@ -393,19 +393,19 @@ gcli_pull_remove_labels(char const *owner,
 		owner, repo, pr_number, labels, labels_size);
 }
 
-void
+int
 gcli_pull_set_milestone(char const *owner,
                         char const *repo,
                         int pr_number,
                         int milestone_id)
 {
-	gcli_forge()->pr_set_milestone(owner, repo, pr_number, milestone_id);
+	return gcli_forge()->pr_set_milestone(owner, repo, pr_number, milestone_id);
 }
 
-void
+int
 gcli_pull_clear_milestone(char const *owner,
                           char const *repo,
                           int pr_number)
 {
-	gcli_forge()->pr_clear_milestone(owner, repo, pr_number);
+	return gcli_forge()->pr_clear_milestone(owner, repo, pr_number);
 }

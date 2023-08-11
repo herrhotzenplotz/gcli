@@ -322,7 +322,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Assign a PR to a milestone */
-	void (*pr_set_milestone)(
+	int (*pr_set_milestone)(
 		char const *owner,
 		char const *repo,
 		int pr,
@@ -330,7 +330,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Clear a milestone on a PR */
-	void (*pr_clear_milestone)(
+	int (*pr_clear_milestone)(
 		char const *owner,
 		char const *repo,
 		int pr);

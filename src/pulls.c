@@ -401,3 +401,11 @@ gcli_pull_set_milestone(char const *owner,
 {
 	gcli_forge()->pr_set_milestone(owner, repo, pr_number, milestone_id);
 }
+
+void
+gcli_pull_clear_milestone(char const *owner,
+                          char const *repo,
+                          int pr_number)
+{
+	gcli_forge()->pr_clear_milestone(owner, repo, pr_number);
+}

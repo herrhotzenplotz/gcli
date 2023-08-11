@@ -172,4 +172,8 @@ void gcli_pull_set_milestone(char const *owner,
                              int pr_number,
                              int milestone_id);
 
+void gcli_pull_clear_milestone(char const *owner,
+                               char const *repo,
+                               int pr_number);
+
 #endif /* PULLS_H */

@@ -494,8 +494,8 @@ handle_pull_actions(int argc, char *argv[],
 			char const *arg = shift(&argc, &argv);
 
 			if (strcmp(arg, "-d") == 0) {
-				fprintf(stderr, "error: -d is not implemented for milestones action\n");
-				return EXIT_FAILURE;
+				gcli_pull_clear_milestone(owner, repo, pr);
+
 			} else {
 				int milestone_id = 0;
 				char *endptr;

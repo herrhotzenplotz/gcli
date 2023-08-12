@@ -45,6 +45,7 @@ gitlab_get_labels(char const *owner,
 	char               *next_url = NULL;
 	gcli_fetch_buffer   buffer   = {0};
 	struct json_stream  stream   = {0};
+	int rc;
 
 	*out = (gcli_label_list) {0};
 
@@ -52,16 +53,23 @@ gitlab_get_labels(char const *owner,
 	                  gitlab_get_apibase(), owner, repo);
 
 	do {
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
-		parse_gitlab_labels(&stream, &out->labels, &out->labels_size);
+		rc = gcli_fetch(url, &next_url, &buffer);
+
+		if (rc == 0) {
+			json_open_buffer(&stream, buffer.data, buffer.length);
+			parse_gitlab_labels(&stream, &out->labels, &out->labels_size);
+		}
 
 		free(buffer.data);
 		free(url);
 		json_close(&stream);
+
+		if (rc < 0)
+			break;
+
 	} while ((url = next_url) && (max == -1 || (int)out->labels_size < max));
 
-	return 0;
+	return rc;
 }
 
 void

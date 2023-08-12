@@ -52,9 +52,9 @@ void gitlab_get_issue_summary(char const *owner,
                               int issue_number,
                               gcli_issue *out);
 
-void gitlab_issue_close(char const *owner,
-                        char const *repo,
-                        int issue_number);
+int gitlab_issue_close(char const *owner,
+                       char const *repo,
+                       int issue_number);
 
 void gitlab_issue_reopen(char const *owner,
                          char const *repo,

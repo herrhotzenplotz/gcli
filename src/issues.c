@@ -192,10 +192,10 @@ gcli_get_issue(char const *owner,
 	gcli_forge()->get_issue_summary(owner, repo, issue_number, out);
 }
 
-void
+int
 gcli_issue_close(char const *owner, char const *repo, int const issue_number)
 {
-	gcli_forge()->issue_close(owner, repo, issue_number);
+	return gcli_forge()->issue_close(owner, repo, issue_number);
 }
 
 void

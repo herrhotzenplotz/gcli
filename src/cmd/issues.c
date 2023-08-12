@@ -398,7 +398,8 @@ handle_issues_actions(int argc, char *argv[],
 
 		} else if (strcmp("close", operation) == 0) {
 
-			gcli_issue_close(owner, repo, issue_id);
+			if (gcli_issue_close(owner, repo, issue_id) < 0)
+				errx(1, "failed to close issue");
 
 		} else if (strcmp("reopen", operation) == 0) {
 

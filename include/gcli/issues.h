@@ -102,9 +102,9 @@ void gcli_issue_free(gcli_issue *it);
 void gcli_issue_print_summary(gcli_issue const *it);
 void gcli_issue_print_op(gcli_issue const *it);
 
-void gcli_issue_close(char const *owner,
-                      char const *repo,
-                      int issue_number);
+int gcli_issue_close(char const *owner,
+                     char const *repo,
+                     int issue_number);
 
 void gcli_issue_reopen(char const *owner,
                        char const *repo,

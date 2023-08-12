@@ -50,9 +50,9 @@ void gitea_get_issue_summary(char const *owner,
 void gitea_submit_issue(gcli_submit_issue_options opts,
                         gcli_fetch_buffer *out);
 
-void gitea_issue_close(char const *owner,
-                       char const *repo,
-                       int issue_number);
+int gitea_issue_close(char const *owner,
+                      char const *repo,
+                      int issue_number);
 
 void gitea_issue_reopen(char const *owner,
                         char const *repo,

@@ -52,9 +52,9 @@ void github_get_issue_summary(char const *owner,
                               int issue_number,
                               gcli_issue *out);
 
-void github_issue_close(char const *owner,
-                        char const *repo,
-                        int issue_number);
+int github_issue_close(char const *owner,
+                       char const *repo,
+                       int issue_number);
 
 void github_issue_reopen(char const *owner,
                          char const *repo,

@@ -101,8 +101,8 @@ gcli_create_label(char const *owner, char const *repo, gcli_label *const label)
 	return gcli_forge()->create_label(owner, repo, label);
 }
 
-void
+int
 gcli_delete_label(char const *owner, char const *repo, char const *const label)
 {
-	gcli_forge()->delete_label(owner, repo, label);
+	return gcli_forge()->delete_label(owner, repo, label);
 }

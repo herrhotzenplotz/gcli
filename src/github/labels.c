@@ -127,14 +127,14 @@ github_create_label(char const *owner,
 	return rc;
 }
 
-void
+int
 github_delete_label(char const *owner,
                     char const *repo,
                     char const *label)
 {
-	char              *url     = NULL;
-	char              *e_label = NULL;
-	gcli_fetch_buffer  buffer  = {0};
+	char *url     = NULL;
+	char *e_label = NULL;
+	int   rc      = 0;
 
 	e_label = gcli_urlencode(label);
 
@@ -143,9 +143,10 @@ github_delete_label(char const *owner,
 	                  gcli_get_apibase(),
 	                  owner, repo, e_label);
 
-	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	rc = gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
 
 	free(url);
 	free(e_label);
-	free(buffer.data);
+
+	return rc;
 }

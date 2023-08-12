@@ -69,8 +69,8 @@ int gcli_create_label(char const *owner,
                       char const *repo,
                       gcli_label *label);
 
-void gcli_delete_label(char const *owner,
-                       char const *repo,
-                       char const *label);
+int gcli_delete_label(char const *owner,
+                      char const *repo,
+                      char const *label);
 
 #endif /* LABELS_H */

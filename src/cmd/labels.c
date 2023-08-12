@@ -60,7 +60,7 @@ usage(void)
 static int
 subcommand_labels_delete(int argc, char *argv[])
 {
-	int         ch;
+	int         ch, rc;
 	char const *owner = NULL, *repo = NULL;
 	const struct option options[] = {
 		{.name = "repo",  .has_arg = required_argument, .val = 'r'},
@@ -94,7 +94,11 @@ subcommand_labels_delete(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	gcli_delete_label(owner, repo, argv[0]);
+	rc = gcli_delete_label(owner, repo, argv[0]);
+	if (rc < 0) {
+		fprintf(stderr, "error: couldn't delete label\n");
+		return EXIT_FAILURE;
+	}
 
 	return EXIT_SUCCESS;
 }

@@ -374,7 +374,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Delete the given label */
-	void (*delete_label)(
+	int (*delete_label)(
 		char const *owner,
 		char const *repo,
 		char const *label);

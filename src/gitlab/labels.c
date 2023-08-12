@@ -117,20 +117,21 @@ gitlab_create_label(char const *owner, char const *repo, gcli_label *const label
 	return rc;
 }
 
-void
+int
 gitlab_delete_label(char const *owner, char const *repo, char const *label)
 {
 	char              *url     = NULL;
 	char              *e_label = NULL;
-	gcli_fetch_buffer  buffer  = {0};
+	int rc;
 
 	e_label = gcli_urlencode(label);
 	url = sn_asprintf("%s/projects/%s%%2F%s/labels/%s",
 	                  gitlab_get_apibase(),
 	                  owner, repo, e_label);
 
-	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	rc = gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
 	free(url);
-	free(buffer.data);
 	free(e_label);
+
+	return rc;
 }

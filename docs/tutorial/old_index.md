@@ -6,40 +6,7 @@ started using it.
 ## Table of contents
 
 1. [Installing GCLI](./02-Installation.html)
-
-## First steps
-
-### Issues
-
-Let's start off by listing some issues - here for the curl project
-which is hosted on GitHub under curl/curl. To list issues for it one
-would run:
-
-    $ gcli -t github issues -o curl -r curl
-
-You will see the list of the 30 most recent open issue tickets. The
-command above does the following:
-
-  - invoke gcli
-  - as a global option we switch it into Github-Mode
-  - invoke the issues subcommand
-  - operate on the repository owner curl (`-o curl`)
-  - operate on the repository curl (`-r curl`)
-
-Note that the `-t github` option goes before the issues subcommand
-because it is a global option for gcli that affects how all the
-following things like subcommands operate.
-
-However, now I also want to see closed issues:
-
-    $ gcli -t github issues -o curl -r curl -a
-
-The `-a` option will disregard the status of the issue.
-
-Oh and the screen is a bit cluttered by all these tickets - let's only
-fetch the first 10 issues:
-
-    $ gcli -t github issues -o curl -r curl -n10
+1. [First steps](./03-First-Steps.html)
 
 #### Details about issues
 

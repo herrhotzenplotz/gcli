@@ -156,17 +156,17 @@ void gcli_pull_reopen(char const *owner,
                       char const *reponame,
                       int pr_number);
 
-void gcli_pull_add_labels(char const *owner,
-                          char const *repo,
-                          int pr_number,
-                          char const *const labels[],
-                          size_t labels_size);
+int gcli_pull_add_labels(char const *owner,
+                         char const *repo,
+                         int pr_number,
+                         char const *const labels[],
+                         size_t labels_size);
 
-void gcli_pull_remove_labels(char const *owner,
-                             char const *repo,
-                             int pr_number,
-                             char const *const labels[],
-                             size_t labels_size);
+int gcli_pull_remove_labels(char const *owner,
+                            char const *repo,
+                            int pr_number,
+                            char const *const labels[],
+                            size_t labels_size);
 
 int gcli_pull_set_milestone(char const *owner,
                             char const *repo,

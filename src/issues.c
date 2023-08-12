@@ -268,24 +268,24 @@ gcli_issue_assign(char const *owner,
 	gcli_forge()->issue_assign(owner, repo, issue_number, assignee);
 }
 
-void
+int
 gcli_issue_add_labels(char const *owner,
                       char const *repo,
                       int const issue,
                       char const *const labels[],
                       size_t const labels_size)
 {
-	gcli_forge()->issue_add_labels(owner, repo, issue, labels, labels_size);
+	return gcli_forge()->issue_add_labels(owner, repo, issue, labels, labels_size);
 }
 
-void
+int
 gcli_issue_remove_labels(char const *owner,
                          char const *repo,
                          int const issue,
                          char const *const labels[],
                          size_t const labels_size)
 {
-	gcli_forge()->issue_remove_labels(owner, repo, issue, labels, labels_size);
+	return gcli_forge()->issue_remove_labels(owner, repo, issue, labels, labels_size);
 }
 
 int

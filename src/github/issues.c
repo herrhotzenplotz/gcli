@@ -282,17 +282,17 @@ github_issue_assign(char const *owner,
 	free(url);
 }
 
-void
+int
 github_issue_add_labels(char const *owner,
                         char const *repo,
                         int const issue,
                         char const *const labels[],
                         size_t const labels_size)
 {
-	char              *url    = NULL;
-	char              *data   = NULL;
-	char              *list   = NULL;
-	gcli_fetch_buffer  buffer = {0};
+	char *url  = NULL;
+	char *data = NULL;
+	char *list = NULL;
+	int   rc   = 0;
 
 	assert(labels_size > 0);
 
@@ -302,24 +302,25 @@ github_issue_add_labels(char const *owner,
 	list = sn_join_with(labels, labels_size, "\",\"");
 	data = sn_asprintf("{ \"labels\": [\"%s\"]}", list);
 
-	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
+	rc = gcli_fetch_with_method("POST", url, data, NULL, NULL);
 
 	free(url);
 	free(data);
 	free(list);
-	free(buffer.data);
+
+	return rc;
 }
 
-void
+int
 github_issue_remove_labels(char const *owner,
                            char const *repo,
                            int const issue,
                            char const *const labels[],
                            size_t const labels_size)
 {
-	char              *url     = NULL;
-	char              *e_label = NULL;
-	gcli_fetch_buffer  buffer  = {0};
+	char *url     = NULL;
+	char *e_label = NULL;
+	int   rc      = 0;
 
 	if (labels_size != 1)
 		errx(1, "error: GitHub only supports removing labels from "
@@ -330,11 +331,12 @@ github_issue_remove_labels(char const *owner,
 	url = sn_asprintf("%s/repos/%s/%s/issues/%d/labels/%s",
 	                  gcli_get_apibase(), owner, repo, issue, e_label);
 
-	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	rc = gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
 
 	free(url);
 	free(e_label);
-	free(buffer.data);
+
+	return rc;
 }
 
 int

@@ -117,17 +117,17 @@ void gcli_issue_assign(char const *owner,
                        int issue_number,
                        char const *assignee);
 
-void gcli_issue_add_labels(char const *owner,
-                           char const *repo,
-                           int issue_number,
-                           char const *const labels[],
-                           size_t labels_size);
+int gcli_issue_add_labels(char const *owner,
+                          char const *repo,
+                          int issue_number,
+                          char const *const labels[],
+                          size_t labels_size);
 
-void gcli_issue_remove_labels(char const *owner,
-                              char const *repo,
-                              int issue_number,
-                              char const *const labels[],
-                              size_t labels_size);
+int gcli_issue_remove_labels(char const *owner,
+                             char const *repo,
+                             int issue_number,
+                             char const *const labels[],
+                             size_t labels_size);
 
 int gcli_issue_set_milestone(char const *owner,
                              char const *repo,

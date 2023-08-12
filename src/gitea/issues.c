@@ -193,17 +193,17 @@ free_id_list(char *list[], size_t const list_size)
 	free(list);
 }
 
-void
+int
 gitea_issue_add_labels(char const *owner,
                        char const *repo,
                        int const issue,
                        char const *const labels[],
                        size_t const labels_size)
 {
-	char              *list   = NULL;
-	char              *data   = NULL;
-	char              *url    = NULL;
-	gcli_fetch_buffer  buffer = {0};
+	char *list = NULL;
+	char *data = NULL;
+	char *url  = NULL;
+	int   rc   = 0;
 
 	/* First, convert to ids */
 	char **ids = label_names_to_ids(owner, repo, labels, labels_size);
@@ -216,40 +216,46 @@ gitea_issue_add_labels(char const *owner,
 
 	url = sn_asprintf("%s/repos/%s/%s/issues/%d/labels",
 	                  gitea_get_apibase(), owner, repo, issue);
-	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
+
+	rc = gcli_fetch_with_method("POST", url, data, NULL, NULL);
 
 	free(list);
 	free(data);
 	free(url);
-	free(buffer.data);
 	free_id_list(ids, labels_size);
+
+	return rc;
 }
 
-void
+int
 gitea_issue_remove_labels(char const *owner,
                           char const *repo,
                           int const issue,
                           char const *const labels[],
                           size_t const labels_size)
 {
+	int rc = 0;
 	/* Unfortunately the gitea api does not give us an endpoint to
 	 * delete labels from an issue in bulk. So, just iterate over the
 	 * given labels and delete them one after another. */
 	char **ids = label_names_to_ids(owner, repo, labels, labels_size);
 
 	for (size_t i = 0; i < labels_size; ++i) {
-		char              *url    = NULL;
-		gcli_fetch_buffer  buffer = {0};
+		char *url = NULL;
 
 		url = sn_asprintf("%s/repos/%s/%s/issues/%d/labels/%s",
 		                  gitea_get_apibase(), owner, repo, issue, ids[i]);
-		gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+		rc = gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
 
-		free(buffer.data);
 		free(url);
+
+		if (rc < 0)
+			break;
 	}
 
 	free_id_list(ids, labels_size);
+
+	return rc;
 }
 
 int

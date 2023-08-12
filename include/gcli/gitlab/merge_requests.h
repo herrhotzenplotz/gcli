@@ -76,17 +76,17 @@ int gitlab_get_pull_commits(char const *owner,
 
 void gitlab_perform_submit_mr(gcli_submit_pull_options opts);
 
-void gitlab_mr_add_labels(char const *owner,
-                          char const *repo,
-                          int mr,
-                          char const *const labels[],
-                          size_t labels_size);
+int gitlab_mr_add_labels(char const *owner,
+                         char const *repo,
+                         int mr,
+                         char const *const labels[],
+                         size_t labels_size);
 
-void gitlab_mr_remove_labels(char const *owner,
-                             char const *repo,
-                             int mr,
-                             char const *const labels[],
-                             size_t labels_size);
+int gitlab_mr_remove_labels(char const *owner,
+                            char const *repo,
+                            int mr,
+                            char const *const labels[],
+                            size_t labels_size);
 
 int gitlab_mr_set_milestone(char const *owner,
                             char const *repo,

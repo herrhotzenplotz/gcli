@@ -283,6 +283,7 @@ handle_issue_labels_action(int *argc, char ***argv,
 	size_t add_labels_size = 0;
 	char const **remove_labels = NULL;
 	size_t remove_labels_size = 0;
+	int rc = 0;
 
 	if (argc == 0) {
 		fprintf(stderr, "error: expected label operations\n");
@@ -294,12 +295,21 @@ handle_issue_labels_action(int *argc, char ***argv,
 	                     &remove_labels, &remove_labels_size);
 
 	/* actually go about deleting and adding the labels */
-	if (add_labels_size)
-		gcli_issue_add_labels(owner, repo, issue_id,
-		                      add_labels, add_labels_size);
-	if (remove_labels_size)
-		gcli_issue_remove_labels(owner, repo, issue_id,
-		                         remove_labels, remove_labels_size);
+	if (add_labels_size) {
+		rc = gcli_issue_add_labels(owner, repo, issue_id,
+		                           add_labels, add_labels_size);
+
+		if (rc < 0)
+			errx(1, "failed to add labels");
+	}
+
+	if (remove_labels_size) {
+		rc = gcli_issue_remove_labels(owner, repo, issue_id,
+		                              remove_labels, remove_labels_size);
+
+		if (rc < 0)
+			errx(1, "failed to remove labels");
+	}
 
 	free(add_labels);
 	free(remove_labels);

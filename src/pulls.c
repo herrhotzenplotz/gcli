@@ -373,25 +373,25 @@ gcli_pull_reopen(char const *owner, char const *reponame, int const pr_number)
 	gcli_forge()->pr_reopen(owner, reponame, pr_number);
 }
 
-void
+int
 gcli_pull_add_labels(char const *owner,
                      char const *repo,
                      int const pr_number,
                      char const *const labels[],
                      size_t const labels_size)
 {
-	gcli_forge()->pr_add_labels(
+	return gcli_forge()->pr_add_labels(
 		owner, repo, pr_number, labels, labels_size);
 }
 
-void
+int
 gcli_pull_remove_labels(char const *owner,
                         char const *repo,
                         int const pr_number,
                         char const *const labels[],
                         size_t const labels_size)
 {
-	gcli_forge()->pr_remove_labels(
+	return gcli_forge()->pr_remove_labels(
 		owner, repo, pr_number, labels, labels_size);
 }
 

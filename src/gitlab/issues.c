@@ -288,17 +288,17 @@ gitlab_issue_assign(char const *owner,
 	free(post_data);
 }
 
-void
+int
 gitlab_issue_add_labels(char const *owner,
                         char const *repo,
                         int const issue,
                         char const *const labels[],
                         size_t const labels_size)
 {
-	char              *url    = NULL;
-	char              *data   = NULL;
-	char              *list   = NULL;
-	gcli_fetch_buffer  buffer = {0};
+	char *url  = NULL;
+	char *data = NULL;
+	char *list = NULL;
+	int   rc   = 0;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%d",
 	                  gitlab_get_apibase(), owner, repo, issue);
@@ -306,25 +306,26 @@ gitlab_issue_add_labels(char const *owner,
 	list = sn_join_with(labels, labels_size, ",");
 	data = sn_asprintf("{ \"add_labels\": \"%s\"}", list);
 
-	gcli_fetch_with_method("PUT", url, data, NULL, &buffer);
+	rc = gcli_fetch_with_method("PUT", url, data, NULL, NULL);
 
 	free(url);
 	free(data);
 	free(list);
-	free(buffer.data);
+
+	return rc;
 }
 
-void
+int
 gitlab_issue_remove_labels(char const *owner,
                            char const *repo,
                            int const issue,
                            char const *const labels[],
                            size_t const labels_size)
 {
-	char              *url    = NULL;
-	char              *data   = NULL;
-	char              *list   = NULL;
-	gcli_fetch_buffer  buffer = {0};
+	char *url  = NULL;
+	char *data = NULL;
+	char *list = NULL;
+	int   rc   = 0;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%d",
 	                  gitlab_get_apibase(), owner, repo, issue);
@@ -332,12 +333,13 @@ gitlab_issue_remove_labels(char const *owner,
 	list = sn_join_with(labels, labels_size, ",");
 	data = sn_asprintf("{ \"remove_labels\": \"%s\"}", list);
 
-	gcli_fetch_with_method("PUT", url, data, NULL, &buffer);
+	rc = gcli_fetch_with_method("PUT", url, data, NULL, NULL);
 
 	free(url);
 	free(data);
 	free(list);
-	free(buffer.data);
+
+	return rc;
 }
 
 int

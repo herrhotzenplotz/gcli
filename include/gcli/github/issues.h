@@ -68,17 +68,17 @@ void github_issue_assign(char const *owner,
                          int issue_number,
                          char const *assignee);
 
-void github_issue_add_labels(char const *owner,
-                             char const *repo,
-                             int issue,
-                             char const *const labels[],
-                             size_t labels_size);
+int github_issue_add_labels(char const *owner,
+                            char const *repo,
+                            int issue,
+                            char const *const labels[],
+                            size_t labels_size);
 
-void github_issue_remove_labels(char const *owner,
-                                char const *repo,
-                                int issue,
-                                char const *const labels[],
-                                size_t labels_size);
+int github_issue_remove_labels(char const *owner,
+                               char const *repo,
+                               int issue,
+                               char const *const labels[],
+                               size_t labels_size);
 
 int github_issue_set_milestone(char const *owner,
                                char const *repo,

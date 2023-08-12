@@ -468,6 +468,7 @@ handle_pull_actions(int argc, char *argv[],
 			size_t       add_labels_size    = 0;
 			const char **remove_labels      = NULL;
 			size_t       remove_labels_size = 0;
+			int          rc = 0;
 
 			if (argc == 0) {
 				fprintf(stderr, "error: expected label action\n");
@@ -480,12 +481,19 @@ handle_pull_actions(int argc, char *argv[],
 			                     &remove_labels, &remove_labels_size);
 
 			/* actually go about deleting and adding the labels */
-			if (add_labels_size)
-				gcli_pull_add_labels(
+			if (add_labels_size) {
+				rc = gcli_pull_add_labels(
 					owner, repo, pr, add_labels, add_labels_size);
-			if (remove_labels_size)
-				gcli_pull_remove_labels(
+				if (rc < 0)
+					errx(1, "failed to add labels");
+			}
+			if (remove_labels_size) {
+				rc = gcli_pull_remove_labels(
 					owner, repo, pr, remove_labels, remove_labels_size);
+
+				if (rc < 0)
+					errx(1, "failed to remove labels");
+			}
 
 			free(add_labels);
 			free(remove_labels);

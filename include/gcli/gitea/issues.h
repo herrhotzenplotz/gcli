@@ -63,17 +63,17 @@ void gitea_issue_assign(char const *owner,
                         int issue_number,
                         char const *assignee);
 
-void gitea_issue_add_labels(char const *owner,
-                            char const *repo,
-                            int issue,
-                            char const *const labels[],
-                            size_t labels_size);
+int gitea_issue_add_labels(char const *owner,
+                           char const *repo,
+                           int issue,
+                           char const *const labels[],
+                           size_t labels_size);
 
-void gitea_issue_remove_labels(char const *owner,
-                               char const *repo,
-                               int issue,
-                               char const *const labels[],
-                               size_t labels_size);
+int gitea_issue_remove_labels(char const *owner,
+                              char const *repo,
+                              int issue,
+                              char const *const labels[],
+                              size_t labels_size);
 
 int gitea_issue_set_milestone(char const *owner,
                               char const *repo,

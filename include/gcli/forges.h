@@ -131,7 +131,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Add labels to issues */
-	void (*issue_add_labels)(
+	int (*issue_add_labels)(
 		char const *owner,
 		char const *repo,
 		int issue,
@@ -140,7 +140,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Removes labels from issues */
-	void (*issue_remove_labels)(
+	int (*issue_remove_labels)(
 		char const *owner,
 		char const *repo,
 		int issue,
@@ -304,7 +304,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Add labels to Pull Requests */
-	void (*pr_add_labels)(
+	int (*pr_add_labels)(
 		char const *owner,
 		char const *repo,
 		int pr,
@@ -313,7 +313,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Removes labels from Pull Requests */
-	void (*pr_remove_labels)(
+	int (*pr_remove_labels)(
 		char const *owner,
 		char const *repo,
 		int pr,

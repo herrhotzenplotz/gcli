@@ -89,29 +89,35 @@ gcli_curl_ensure(void)
 
 /* Check the given curl code for an OK result. If not, print an
  * appropriate error message and exit */
-static void
+static int
 gcli_curl_check_api_error(CURLcode code,
                           char const *url,
                           gcli_fetch_buffer *const result)
 {
 	long status_code = 0;
 
-	if (code != CURLE_OK)
-		errx(1,
-		     "error: request to %s failed\n"
-		     "     : curl error: %s",
-		     url,
-		     curl_easy_strerror(code));
+	if (code != CURLE_OK) {
+		fprintf(stderr,
+		        "error: request to %s failed\n"
+		        "     : curl error: %s",
+		        url,
+		        curl_easy_strerror(code));
+
+		return -1;
+	}
 
 	curl_easy_getinfo(gcli_curl_session, CURLINFO_RESPONSE_CODE, &status_code);
 
 	if (status_code >= 300L) {
-		errx(1,
-		     "error: request to %s failed with code %ld\n"
-		     "     : API error: %s",
-		     url, status_code,
-		     gcli_forge()->get_api_error_string(result));
+		fprintf(stderr,
+		        "error: request to %s failed with code %ld\n"
+		        "     : API error: %s",
+		        url, status_code,
+		        gcli_forge()->get_api_error_string(result));
+		return -1;
 	}
+
+	return 0;
 }
 
 /* Callback for writing data into the gcli_fetch_buffer passed by
@@ -136,13 +142,13 @@ fetch_write_callback(char *in, size_t size, size_t nmemb, void *data)
  *
  * pagination_next returns the next url to query for paged results.
  * Results are placed into the gcli_fetch_buffer. */
-void
+int
 gcli_fetch(
 	char const        *url,
 	char **const       pagination_next,
 	gcli_fetch_buffer *out)
 {
-	gcli_fetch_with_method("GET", url, NULL, pagination_next, out);
+	return gcli_fetch_with_method("GET", url, NULL, pagination_next, out);
 }
 
 /* Check the given url for a successful query */
@@ -312,7 +318,7 @@ parse_link_header(char *_header)
  * If pagination_next is non-null a URL that can be queried for more
  * data (pagination) is placed into it. If there is no more data, it
  * will be set to NULL. */
-void
+int
 gcli_fetch_with_method(
 	char const   *method,       /* HTTP method. e.g. POST, GET, DELETE etc. */
 	char const   *url,          /* Endpoint                                 */
@@ -320,11 +326,12 @@ gcli_fetch_with_method(
 	char **const  pagination_next, /* Next URL for pagination                  */
 	gcli_fetch_buffer *const out) /* output buffer                            */
 {
-	CURLcode           ret;
+	CURLcode ret;
 	struct curl_slist *headers;
 	gcli_fetch_buffer tmp = {0}; /* used for error codes when out is NULL */
 	gcli_fetch_buffer *buf = NULL;
 	char              *link_header = NULL;
+	int rc = 0;
 
 	char *auth_header = gcli_config_get_authheader();
 
@@ -370,10 +377,17 @@ gcli_fetch_with_method(
 	curl_easy_setopt(gcli_curl_session, CURLOPT_FOLLOWLOCATION, 1L);
 
 	ret = curl_easy_perform(gcli_curl_session);
-	gcli_curl_check_api_error(ret, url, buf);
+	rc = gcli_curl_check_api_error(ret, url, buf);
 
-	if (link_header && pagination_next)
-		*pagination_next = parse_link_header(link_header);
+	/* only parse these headers and continue if there was no error */
+	if (rc == 0) {
+		if (link_header && pagination_next)
+			*pagination_next = parse_link_header(link_header);
+	} else if (out) { /* error happened and we have an output buffer */
+		free(out->data);
+		out->data = NULL;
+		out->length = 0;
+	}
 
 	free(link_header);
 
@@ -386,6 +400,8 @@ gcli_fetch_with_method(
 		free(tmp.data);
 
 	free(auth_header);
+
+	return rc;
 }
 
 /* Perform a POST request to the given URL and upload the buffer to it.

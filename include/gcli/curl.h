@@ -47,19 +47,19 @@ struct gcli_fetch_buffer {
 	size_t  length;
 };
 
-void gcli_fetch(char const *url,
-                char **pagination_next,
-                gcli_fetch_buffer *out);
+int gcli_fetch(char const *url,
+               char **pagination_next,
+               gcli_fetch_buffer *out);
 
 void gcli_curl(FILE *stream,
                char const *url,
                char const *content_type);
 
-void gcli_fetch_with_method(char const *method,
-                            char const *url,
-                            char const *data,
-                            char **pagination_next,
-                            gcli_fetch_buffer *out);
+int gcli_fetch_with_method(char const *method,
+                           char const *url,
+                           char const *data,
+                           char **pagination_next,
+                           gcli_fetch_buffer *out);
 
 void gcli_post_upload(char const *url,
                       char const *content_type,

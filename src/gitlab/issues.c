@@ -350,19 +350,20 @@ gitlab_issue_set_milestone(char const *const owner,
                            int const milestone)
 {
 	char *url, *e_owner, *e_repo;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%d?milestone_id=%d",
 	                  gitlab_get_apibase(), e_owner, e_repo, issue, milestone);
 
-	gcli_fetch_with_method("PUT", url, NULL, NULL, NULL);
+	rc = gcli_fetch_with_method("PUT", url, NULL, NULL, NULL);
 
 	free(url);
 	free(e_repo);
 	free(e_owner);
 
-	return 0;
+	return rc;
 }
 
 int

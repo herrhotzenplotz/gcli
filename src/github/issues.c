@@ -347,6 +347,7 @@ github_issue_set_milestone(char const *const owner,
                            int const milestone)
 {
 	char *url, *e_owner, *e_repo, *body;
+	int rc;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -357,14 +358,14 @@ github_issue_set_milestone(char const *const owner,
 
 	body = sn_asprintf("{ \"milestone\": %d }", milestone);
 
-	gcli_fetch_with_method("PATCH", url, body, NULL, NULL);
+	rc = gcli_fetch_with_method("PATCH", url, body, NULL, NULL);
 
 	free(body);
 	free(url);
 	free(e_repo);
 	free(e_owner);
 
-	return 0;
+	return rc;
 }
 
 int

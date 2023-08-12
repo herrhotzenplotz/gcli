@@ -29,7 +29,7 @@ EOF
 
     echo "<ol>"
 
-    awk '{printf "<li><a href=\"./%s\">%s</a></li>\n", $1, $2}' < toc
+    awk -F\\t '{printf "<li><a href=\"./%s\">%s</a></li>\n", $1, $2}' < toc
 
     echo "</ol>"
 

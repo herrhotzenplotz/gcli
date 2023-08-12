@@ -372,6 +372,7 @@ gitlab_issue_clear_milestone(char const *const owner,
                              int const issue)
 {
 	char *url, *e_owner, *e_repo, *payload;
+	int rc;
 
 	/* The Gitlab API says:
 	 *
@@ -391,12 +392,12 @@ gitlab_issue_clear_milestone(char const *const owner,
 	                  gitlab_get_apibase(), e_owner, e_repo, issue);
 	payload = sn_asprintf("{ \"milestone_id\": null }");
 
-	gcli_fetch_with_method("PUT", url, payload, NULL, NULL);
+	rc = gcli_fetch_with_method("PUT", url, payload, NULL, NULL);
 
 	free(payload);
 	free(url);
 	free(e_repo);
 	free(e_owner);
 
-	return 0;
+	return rc;
 }

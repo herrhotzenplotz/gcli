@@ -502,7 +502,8 @@ handle_pull_actions(int argc, char *argv[],
 			char const *arg = shift(&argc, &argv);
 
 			if (strcmp(arg, "-d") == 0) {
-				gcli_pull_clear_milestone(owner, repo, pr);
+				if (gcli_pull_clear_milestone(owner, repo, pr) < 0)
+					errx(1, "failed to clear milestone");
 
 			} else {
 				int milestone_id = 0;

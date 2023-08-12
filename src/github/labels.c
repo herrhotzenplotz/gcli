@@ -66,7 +66,7 @@ github_get_labels(char const *owner,
 	return 0;
 }
 
-void
+int
 github_create_label(char const *owner,
                     char const *repo,
                     gcli_label *const label)
@@ -81,6 +81,7 @@ github_create_label(char const *owner,
 	sn_sv               label_colour = SV_NULL;
 	gcli_fetch_buffer   buffer       = {0};
 	struct json_stream  stream       = {0};
+	int                 rc           = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -105,11 +106,14 @@ github_create_label(char const *owner,
 	                   SV_ARGS(label_descr),
 	                   SV_ARGS(label_colour));
 
-	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
-	json_open_buffer(&stream, buffer.data, buffer.length);
-	parse_github_label(&stream, label);
+	rc = gcli_fetch_with_method("POST", url, data, NULL, &buffer);
 
-	json_close(&stream);
+	if (rc == 0) {
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		parse_github_label(&stream, label);
+		json_close(&stream);
+	}
+
 	free(url);
 	free(data);
 	free(e_owner);
@@ -119,6 +123,8 @@ github_create_label(char const *owner,
 	free(label_descr.data);
 	free(label_colour.data);
 	free(buffer.data);
+
+	return rc;
 }
 
 void

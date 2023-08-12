@@ -160,7 +160,10 @@ subcommand_labels_create(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	gcli_create_label(owner, repo, &label);
+	if (gcli_create_label(owner, repo, &label) < 0) {
+		fprintf(stderr, "error: could not create label\n");
+		return EXIT_FAILURE;
+	}
 
 	/* only if we are not quieted */
 	if (!sn_quiet())

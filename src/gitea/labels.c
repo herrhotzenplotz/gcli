@@ -44,12 +44,12 @@ gitea_get_labels(char const *owner,
 	return github_get_labels(owner, reponame, max, list);
 }
 
-void
+int
 gitea_create_label(char const *owner,
                    char const *repo,
                    gcli_label *const label)
 {
-	github_create_label(owner, repo, label);
+	return github_create_label(owner, repo, label);
 }
 
 void

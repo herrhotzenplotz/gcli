@@ -95,10 +95,10 @@ gcli_print_labels(gcli_label_list const *const list, int const max)
 	gcli_tbl_end(table);
 }
 
-void
+int
 gcli_create_label(char const *owner, char const *repo, gcli_label *const label)
 {
-	gcli_forge()->create_label(owner, repo, label);
+	return gcli_forge()->create_label(owner, repo, label);
 }
 
 void

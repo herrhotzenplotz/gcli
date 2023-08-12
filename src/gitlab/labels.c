@@ -72,7 +72,7 @@ gitlab_get_labels(char const *owner,
 	return rc;
 }
 
-void
+int
 gitlab_create_label(char const *owner, char const *repo, gcli_label *const label)
 {
 	char               *url           = NULL;
@@ -82,6 +82,7 @@ gitlab_create_label(char const *owner, char const *repo, gcli_label *const label
 	sn_sv               ldesc_escaped = SV_NULL;
 	gcli_fetch_buffer   buffer        = {0};
 	struct json_stream  stream        = {0};
+	int                 rc            = 0;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/labels",
 	                  gitlab_get_apibase(),
@@ -97,20 +98,23 @@ gitlab_create_label(char const *owner, char const *repo, gcli_label *const label
 		colour_string,
 		SV_ARGS(ldesc_escaped));
 
-	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
+	rc = gcli_fetch_with_method("POST", url, data, NULL, &buffer);
 
-	json_open_buffer(&stream, buffer.data, buffer.length);
-	json_set_streaming(&stream, 1);
+	if (rc == 0) {
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		json_set_streaming(&stream, 1);
+		parse_gitlab_label(&stream, label);
+		json_close(&stream);
+	}
 
-	parse_gitlab_label(&stream, label);
-
-	json_close(&stream);
 	free(lname_escaped.data);
 	free(ldesc_escaped.data);
 	free(colour_string);
 	free(data);
 	free(url);
 	free(buffer.data);
+
+	return rc;
 }
 
 void

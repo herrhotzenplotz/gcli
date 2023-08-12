@@ -367,7 +367,7 @@ struct gcli_forge_descriptor {
 	 * Create the given label
 	 *
 	 * The ID will be filled in for you */
-	void (*create_label)(
+	int (*create_label)(
 		char const *owner,
 		char const *repo,
 		gcli_label *label);

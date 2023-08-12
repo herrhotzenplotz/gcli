@@ -110,7 +110,7 @@ int gcli_issue_reopen(char const *owner,
                       char const *repo,
                       int issue_number);
 
-void gcli_issue_submit(gcli_submit_issue_options);
+int gcli_issue_submit(gcli_submit_issue_options);
 
 void gcli_issue_assign(char const *owner,
                        char const *repo,

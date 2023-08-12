@@ -222,10 +222,11 @@ gcli_issue_get_user_message(gcli_submit_issue_options *opts)
 	return gcli_editor_get_user_message(issue_init_user_file, opts);
 }
 
-void
+int
 gcli_issue_submit(gcli_submit_issue_options opts)
 {
 	gcli_fetch_buffer json_buffer = {0};
+	int rc = 0;
 
 	opts.body = gcli_issue_get_user_message(&opts);
 
@@ -246,12 +247,16 @@ gcli_issue_submit(gcli_submit_issue_options opts)
 			errx(1, "Submission aborted.");
 	}
 
-	gcli_forge()->perform_submit_issue(opts, &json_buffer);
-	gcli_print_html_url(json_buffer);
+	rc = gcli_forge()->perform_submit_issue(opts, &json_buffer);
+
+	if (rc == 0)
+		gcli_print_html_url(json_buffer);
 
 	free(opts.body.data);
 	free(opts.body.data);
 	free(json_buffer.data);
+
+	return rc;
 }
 
 void

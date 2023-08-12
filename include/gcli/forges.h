@@ -149,7 +149,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Submit an issue */
-	void (*perform_submit_issue)(
+	int (*perform_submit_issue)(
 		gcli_submit_issue_options opts,
 		gcli_fetch_buffer *out);
 

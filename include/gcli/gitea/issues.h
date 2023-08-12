@@ -47,8 +47,8 @@ void gitea_get_issue_summary(char const *owner,
                              int issue,
                              gcli_issue *out);
 
-void gitea_submit_issue(gcli_submit_issue_options opts,
-                        gcli_fetch_buffer *out);
+int gitea_submit_issue(gcli_submit_issue_options opts,
+                       gcli_fetch_buffer *out);
 
 int gitea_issue_close(char const *owner,
                       char const *repo,

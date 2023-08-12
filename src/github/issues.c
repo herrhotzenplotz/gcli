@@ -219,7 +219,7 @@ github_issue_reopen(char const *owner, char const *repo, int const issue_number)
 	return rc;
 }
 
-void
+int
 github_perform_submit_issue(gcli_submit_issue_options opts,
                             gcli_fetch_buffer *out)
 {
@@ -227,6 +227,7 @@ github_perform_submit_issue(gcli_submit_issue_options opts,
 	char  *e_repo  = gcli_urlencode(opts.repo);
 	sn_sv  e_title = gcli_json_escape(opts.title);
 	sn_sv  e_body  = gcli_json_escape(opts.body);
+	int    rc      = 0;
 
 	char *post_fields = sn_asprintf(
 		"{ \"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
@@ -235,7 +236,7 @@ github_perform_submit_issue(gcli_submit_issue_options opts,
 	char *url = sn_asprintf("%s/repos/%s/%s/issues",
 	                        gcli_get_apibase(), e_owner, e_repo);
 
-	gcli_fetch_with_method("POST", url, post_fields, NULL, out);
+	rc = gcli_fetch_with_method("POST", url, post_fields, NULL, out);
 
 	free(e_owner);
 	free(e_repo);
@@ -243,6 +244,8 @@ github_perform_submit_issue(gcli_submit_issue_options opts,
 	free(e_body.data);
 	free(post_fields);
 	free(url);
+
+	return rc;
 }
 
 void

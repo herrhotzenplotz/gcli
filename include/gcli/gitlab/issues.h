@@ -65,8 +65,8 @@ void gitlab_issue_assign(char const *owner,
                          int issue_number,
                          char const *assignee);
 
-void gitlab_perform_submit_issue(gcli_submit_issue_options opts,
-                                 gcli_fetch_buffer *out);
+int gitlab_perform_submit_issue(gcli_submit_issue_options opts,
+                                gcli_fetch_buffer *out);
 
 void gitlab_issue_add_labels(char const *owner,
                              char const *repo,

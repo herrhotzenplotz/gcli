@@ -56,11 +56,11 @@ gitea_get_issue_summary(char const *owner,
 	github_get_issue_summary(owner, repo, issue_number, out);
 }
 
-void
+int
 gitea_submit_issue(gcli_submit_issue_options opts,
                    gcli_fetch_buffer *const out)
 {
-	github_perform_submit_issue(opts, out);
+	return github_perform_submit_issue(opts, out);
 }
 
 /* Gitea has closed, Github has close ... go figure */

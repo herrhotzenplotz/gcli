@@ -127,7 +127,8 @@ subcommand_issue_create(int argc, char *argv[])
 
 	opts.title = SV(argv[0]);
 
-	gcli_issue_submit(opts);
+	if (gcli_issue_submit(opts) < 0)
+		errx(1, "failed to submit issue");
 
 	return EXIT_SUCCESS;
 }

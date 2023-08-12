@@ -112,18 +112,18 @@ gitea_issue_reopen(char const *owner,
 	return gitea_issue_patch_state(owner, repo, issue_number, "open");
 }
 
-void
+int
 gitea_issue_assign(char const *owner,
                    char const *repo,
                    int const issue_number,
                    char const *const assignee)
 {
-	gcli_fetch_buffer  buffer           = {0};
-	sn_sv              escaped_assignee = SV_NULL;
-	char              *post_fields      = NULL;
-	char              *url              = NULL;
-	char              *e_owner          = NULL;
-	char              *e_repo           = NULL;
+	sn_sv  escaped_assignee = SV_NULL;
+	char  *post_fields      = NULL;
+	char  *url              = NULL;
+	char  *e_owner          = NULL;
+	char  *e_repo           = NULL;
+	int    rc               = 0;
 
 	escaped_assignee = gcli_json_escape(SV((char *)assignee));
 	post_fields = sn_asprintf("{ \"assignees\": [\""SV_FMT"\"] }",
@@ -136,14 +136,15 @@ gitea_issue_assign(char const *owner,
 		"%s/repos/%s/%s/issues/%d",
 		gitea_get_apibase(), e_owner, e_repo, issue_number);
 
-	gcli_fetch_with_method("PATCH", url, post_fields, NULL, &buffer);
+	rc = gcli_fetch_with_method("PATCH", url, post_fields, NULL, NULL);
 
-	free(buffer.data);
 	free(escaped_assignee.data);
 	free(post_fields);
 	free(e_owner);
 	free(e_repo);
 	free(url);
+
+	return rc;
 }
 
 /* Return the stringified id of the given label */

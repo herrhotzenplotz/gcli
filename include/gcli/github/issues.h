@@ -63,10 +63,10 @@ int github_issue_reopen(char const *owner,
 int github_perform_submit_issue(gcli_submit_issue_options opts,
                                 gcli_fetch_buffer *out);
 
-void github_issue_assign(char const *owner,
-                         char const *repo,
-                         int issue_number,
-                         char const *assignee);
+int github_issue_assign(char const *owner,
+                        char const *repo,
+                        int issue_number,
+                        char const *assignee);
 
 int github_issue_add_labels(char const *owner,
                             char const *repo,

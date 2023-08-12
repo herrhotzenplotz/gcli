@@ -420,7 +420,8 @@ handle_issues_actions(int argc, char *argv[],
 		} else if (strcmp("assign", operation) == 0) {
 
 			char const *assignee = shift(&argc, &argv);
-			gcli_issue_assign(owner, repo, issue_id, assignee);
+			if (gcli_issue_assign(owner, repo, issue_id, assignee) < 0)
+				errx(1, "failed to assign issue");
 
 		} else if (strcmp("labels", operation) == 0) {
 

@@ -112,10 +112,10 @@ int gcli_issue_reopen(char const *owner,
 
 int gcli_issue_submit(gcli_submit_issue_options);
 
-void gcli_issue_assign(char const *owner,
-                       char const *repo,
-                       int issue_number,
-                       char const *assignee);
+int gcli_issue_assign(char const *owner,
+                      char const *repo,
+                      int issue_number,
+                      char const *assignee);
 
 int gcli_issue_add_labels(char const *owner,
                           char const *repo,

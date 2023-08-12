@@ -259,13 +259,13 @@ gcli_issue_submit(gcli_submit_issue_options opts)
 	return rc;
 }
 
-void
+int
 gcli_issue_assign(char const *owner,
                   char const *repo,
                   int const issue_number,
                   char const *assignee)
 {
-	gcli_forge()->issue_assign(owner, repo, issue_number, assignee);
+	return gcli_forge()->issue_assign(owner, repo, issue_number, assignee);
 }
 
 int

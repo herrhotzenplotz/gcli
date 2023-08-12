@@ -60,10 +60,10 @@ int gitlab_issue_reopen(char const *owner,
                         char const *repo,
                         int issue_number);
 
-void gitlab_issue_assign(char const *owner,
-                         char const *repo,
-                         int issue_number,
-                         char const *assignee);
+int gitlab_issue_assign(char const *owner,
+                        char const *repo,
+                        int issue_number,
+                        char const *assignee);
 
 int gitlab_perform_submit_issue(gcli_submit_issue_options opts,
                                 gcli_fetch_buffer *out);

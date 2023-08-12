@@ -257,18 +257,18 @@ gitlab_user_id(char const *user_name)
 	return uid;
 }
 
-void
+int
 gitlab_issue_assign(char const *owner,
                     char const *repo,
                     int const issue_number,
                     char const *assignee)
 {
-	int                assignee_uid = -1;
-	gcli_fetch_buffer  buffer       = {0};
-	char              *url          = NULL;
-	char              *post_data    = NULL;
-	char              *e_owner      = NULL;
-	char              *e_repo       = NULL;
+	int   assignee_uid = -1;
+	char *url          = NULL;
+	char *post_data    = NULL;
+	char *e_owner      = NULL;
+	char *e_repo       = NULL;
+	int   rc           = 0;
 
 	assignee_uid = gitlab_user_id(assignee);
 
@@ -279,13 +279,14 @@ gitlab_issue_assign(char const *owner,
 	                  gitlab_get_apibase(),
 	                  e_owner, e_repo, issue_number);
 	post_data = sn_asprintf("{ \"assignee_ids\": [ %d ] }", assignee_uid);
-	gcli_fetch_with_method("PUT", url, post_data, NULL, &buffer);
+	rc = gcli_fetch_with_method("PUT", url, post_data, NULL, NULL);
 
 	free(e_owner);
 	free(e_repo);
-	free(buffer.data);
 	free(url);
 	free(post_data);
+
+	return rc;
 }
 
 int

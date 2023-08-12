@@ -123,7 +123,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Assign an issue to a user */
-	void (*issue_assign)(
+	int (*issue_assign)(
 		char const *owner,
 		char const *repo,
 		int issue_number,

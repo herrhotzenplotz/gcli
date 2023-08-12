@@ -403,7 +403,8 @@ handle_issues_actions(int argc, char *argv[],
 
 		} else if (strcmp("reopen", operation) == 0) {
 
-			gcli_issue_reopen(owner, repo, issue_id);
+			if (gcli_issue_reopen(owner, repo, issue_id) < 0)
+				errx(1, "failed to reopen issue");
 
 		} else if (strcmp("assign", operation) == 0) {
 

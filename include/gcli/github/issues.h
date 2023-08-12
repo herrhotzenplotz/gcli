@@ -56,9 +56,9 @@ int github_issue_close(char const *owner,
                        char const *repo,
                        int issue_number);
 
-void github_issue_reopen(char const *owner,
-                         char const *repo,
-                         int issue_number);
+int github_issue_reopen(char const *owner,
+                        char const *repo,
+                        int issue_number);
 
 void github_perform_submit_issue(gcli_submit_issue_options opts,
                                  gcli_fetch_buffer *out);

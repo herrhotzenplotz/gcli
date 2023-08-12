@@ -106,9 +106,9 @@ int gcli_issue_close(char const *owner,
                      char const *repo,
                      int issue_number);
 
-void gcli_issue_reopen(char const *owner,
-                       char const *repo,
-                       int issue_number);
+int gcli_issue_reopen(char const *owner,
+                      char const *repo,
+                      int issue_number);
 
 void gcli_issue_submit(gcli_submit_issue_options);
 

@@ -198,10 +198,10 @@ gcli_issue_close(char const *owner, char const *repo, int const issue_number)
 	return gcli_forge()->issue_close(owner, repo, issue_number);
 }
 
-void
+int
 gcli_issue_reopen(char const *owner, char const *repo, int const issue_number)
 {
-	gcli_forge()->issue_reopen(owner, repo, issue_number);
+	return gcli_forge()->issue_reopen(owner, repo, issue_number);
 }
 
 static void

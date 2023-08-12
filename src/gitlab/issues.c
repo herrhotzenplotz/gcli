@@ -170,14 +170,14 @@ gitlab_issue_close(char const *owner, char const *repo, int const issue_number)
 	return rc;
 }
 
-void
+int
 gitlab_issue_reopen(char const *owner, char const *repo, int const issue_number)
 {
-	gcli_fetch_buffer  json_buffer = {0};
-	char              *url         = NULL;
-	char              *data        = NULL;
-	char              *e_owner     = NULL;
-	char              *e_repo      = NULL;
+	char *url     = NULL;
+	char *data    = NULL;
+	char *e_owner = NULL;
+	char *e_repo  = NULL;
+	int   rc      = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -189,13 +189,14 @@ gitlab_issue_reopen(char const *owner, char const *repo, int const issue_number)
 		issue_number);
 	data = sn_asprintf("{ \"state_event\": \"reopen\"}");
 
-	gcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
+	rc = gcli_fetch_with_method("PUT", url, data, NULL, NULL);
 
 	free(data);
 	free(url);
 	free(e_owner);
 	free(e_repo);
-	free(json_buffer.data);
+
+	return rc;
 }
 
 void

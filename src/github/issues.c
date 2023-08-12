@@ -190,14 +190,14 @@ github_issue_close(char const *owner, char const *repo, int const issue_number)
 	return rc;
 }
 
-void
+int
 github_issue_reopen(char const *owner, char const *repo, int const issue_number)
 {
-	gcli_fetch_buffer  json_buffer = {0};
-	char              *url         = NULL;
-	char              *data        = NULL;
-	char              *e_owner     = NULL;
-	char              *e_repo      = NULL;
+	char *url     = NULL;
+	char *data    = NULL;
+	char *e_owner = NULL;
+	char *e_repo  = NULL;
+	int   rc      = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -209,13 +209,14 @@ github_issue_reopen(char const *owner, char const *repo, int const issue_number)
 		issue_number);
 	data = sn_asprintf("{ \"state\": \"open\"}");
 
-	gcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
+	rc = gcli_fetch_with_method("PATCH", url, data, NULL, NULL);
 
 	free(data);
 	free(url);
 	free(e_owner);
 	free(e_repo);
-	free(json_buffer.data);
+
+	return rc;
 }
 
 void

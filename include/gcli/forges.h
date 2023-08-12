@@ -116,7 +116,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Reopen the given issue */
-	void (*issue_reopen)(
+	int (*issue_reopen)(
 		char const *owner,
 		char const *repo,
 		int issue_number);

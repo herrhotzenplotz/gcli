@@ -56,9 +56,9 @@ int gitlab_issue_close(char const *owner,
                        char const *repo,
                        int issue_number);
 
-void gitlab_issue_reopen(char const *owner,
-                         char const *repo,
-                         int issue_number);
+int gitlab_issue_reopen(char const *owner,
+                        char const *repo,
+                        int issue_number);
 
 void gitlab_issue_assign(char const *owner,
                          char const *repo,

@@ -104,12 +104,12 @@ gitea_issue_close(char const *owner,
 	return gitea_issue_patch_state(owner, repo, issue_number, "closed");
 }
 
-void
+int
 gitea_issue_reopen(char const *owner,
                    char const *repo,
                    int const issue_number)
 {
-	gitea_issue_patch_state(owner, repo, issue_number, "open");
+	return gitea_issue_patch_state(owner, repo, issue_number, "open");
 }
 
 void

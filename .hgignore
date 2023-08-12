@@ -29,4 +29,4 @@ missing
 test-driver
 ylwrap
 *~
-docs/gcli-tutorial.html
+docs/tutorial/*.html

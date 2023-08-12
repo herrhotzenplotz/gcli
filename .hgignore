@@ -29,3 +29,4 @@ missing
 test-driver
 ylwrap
 *~
+docs/tutorial/*.html

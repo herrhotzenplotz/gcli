@@ -133,6 +133,7 @@ int
 gitlab_create_milestone(struct gcli_milestone_create_args const *args)
 {
 	char *url, *e_owner, *e_repo, *e_title, *json_body, *description = NULL;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(args->owner);
 	e_repo = gcli_urlencode(args->repo);
@@ -155,7 +156,7 @@ gitlab_create_milestone(struct gcli_milestone_create_args const *args)
 	                        "}",
 	                        e_title, description ? description : "");
 
-	gcli_fetch_with_method("POST", url, json_body, NULL, NULL);
+	rc = gcli_fetch_with_method("POST", url, json_body, NULL, NULL);
 
 	free(json_body);
 	free(description);
@@ -164,7 +165,7 @@ gitlab_create_milestone(struct gcli_milestone_create_args const *args)
 	free(e_repo);
 	free(e_owner);
 
-	return 0;
+	return rc;
 }
 
 int

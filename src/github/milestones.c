@@ -132,6 +132,7 @@ github_create_milestone(struct gcli_milestone_create_args const *args)
 {
 	char *url, *e_owner, *e_repo;
 	char *json_body, *description;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(args->owner);
 	e_repo = gcli_urlencode(args->repo);
@@ -154,7 +155,7 @@ github_create_milestone(struct gcli_milestone_create_args const *args)
 	url = sn_asprintf("%s/repos/%s/%s/milestones",
 	                  gcli_get_apibase(), e_owner, e_repo);
 
-	gcli_fetch_with_method("POST", url, json_body, NULL, NULL);
+	rc = gcli_fetch_with_method("POST", url, json_body, NULL, NULL);
 
 	free(json_body);
 	free(description);
@@ -162,7 +163,7 @@ github_create_milestone(struct gcli_milestone_create_args const *args)
 	free(e_repo);
 	free(e_owner);
 
-	return 0;
+	return rc;
 }
 
 int

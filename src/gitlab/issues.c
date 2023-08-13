@@ -43,23 +43,29 @@ gitlab_fetch_issues(char *url,
                     int const max,
                     gcli_issue_list *const out)
 {
-	json_stream        stream      = {0};
-	gcli_fetch_buffer  json_buffer = {0};
-	char              *next_url    = NULL;
+	json_stream stream = {0};
+	gcli_fetch_buffer json_buffer = {0};
+	char *next_url = NULL;
+	int rc = 0;
 
 	do {
-		gcli_fetch(url, &next_url, &json_buffer);
+		rc = gcli_fetch(url, &next_url, &json_buffer);
 
-		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-
-		parse_gitlab_issues(&stream, &out->issues, &out->issues_size);
+		if (rc == 0) {
+			json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+			parse_gitlab_issues(&stream, &out->issues, &out->issues_size);
+			json_close(&stream);
+		}
 
 		free(json_buffer.data);
 		json_buffer.data = NULL;
 		json_buffer.length = 0;
 
 		free(url);
-		json_close(&stream);
+
+		if (rc < 0)
+			break;
+
 	} while ((url = next_url) && (max == -1 || (int)out->issues_size < max));
 	/* continue iterating if we have both a next_url and we are
 	 * supposed to fetch more issues (either max is -1 thus all issues
@@ -67,7 +73,7 @@ gitlab_fetch_issues(char *url,
 
 	free(next_url);
 
-	return 0;
+	return rc;
 }
 
 int

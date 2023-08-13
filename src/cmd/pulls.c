@@ -339,7 +339,9 @@ ensure_pull(char const *owner, char const *repo, int pr,
 	if (*fetched_pull)
 		return;
 
-	gcli_get_pull(owner, repo, pr, pull);
+	if (gcli_get_pull(owner, repo, pr, pull) < 0)
+		errx(1, "error: failed to fetch pull request data");
+
 	*fetched_pull = 1;
 }
 

@@ -43,10 +43,10 @@ int gitea_get_pulls(char const *owner,
                     int max,
                     gcli_pull_list *out);
 
-void gitea_get_pull(char const *owner,
-                    char const *repo,
-                    int	pr_number,
-                    gcli_pull *out);
+int gitea_get_pull(char const *owner,
+                   char const *repo,
+                   int pr_number,
+                   gcli_pull *out);
 
 int gitea_get_pull_commits(char const *owner,
                            char const *repo,

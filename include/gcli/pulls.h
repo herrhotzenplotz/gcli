@@ -127,10 +127,8 @@ void gcli_pull_commits(char const *owner,
                        char const *repo,
                        int pr_number);
 
-void gcli_get_pull(char const *owner,
-                   char const *repo,
-                   int pr_number,
-                   gcli_pull *out);
+int gcli_get_pull(char const *owner, char const *repo,
+                  int pr_number, gcli_pull *out);
 
 int gcli_pull_submit(gcli_submit_pull_options);
 

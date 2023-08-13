@@ -296,7 +296,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Get a summary of the given PR/MR */
-	void (*get_pull)(
+	int (*get_pull)(
 		char const *owner,
 		char const *repo,
 		int pr_number,

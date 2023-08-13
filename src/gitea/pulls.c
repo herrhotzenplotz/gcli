@@ -42,13 +42,13 @@ gitea_get_pulls(char const *owner,
 	return github_get_pulls(owner, repo, details, max, out);
 }
 
-void
+int
 gitea_get_pull(char const *owner,
                char const *repo,
                int const pr_number,
                gcli_pull *const out)
 {
-	github_get_pull(owner, repo, pr_number, out);
+	return github_get_pull(owner, repo, pr_number, out);
 }
 
 int

@@ -366,17 +366,17 @@ github_get_pull_commits(char const *owner,
 	return (int)count;
 }
 
-void
+int
 github_get_pull(char const *owner,
                 char const *repo,
                 int const pr_number,
                 gcli_pull *const out)
 {
-	json_stream        stream      = {0};
-	gcli_fetch_buffer  json_buffer = {0};
-	char              *url         = NULL;
-	char              *e_owner     = NULL;
-	char              *e_repo      = NULL;
+	int rc = 0;
+	gcli_fetch_buffer json_buffer = {0};
+	char *url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -385,17 +385,22 @@ github_get_pull(char const *owner,
 		"%s/repos/%s/%s/pulls/%d",
 		gcli_get_apibase(),
 		e_owner, e_repo, pr_number);
-	gcli_fetch(url, NULL, &json_buffer);
-
-	json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-
-	parse_github_pull(&stream, out);
-
-	json_close(&stream);
-	free(url);
 	free(e_owner);
 	free(e_repo);
+
+	rc = gcli_fetch(url, NULL, &json_buffer);
+	if (rc == 0) {
+		json_stream stream = {0};
+
+		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+		parse_github_pull(&stream, out);
+		json_close(&stream);
+	}
+
+	free(url);
 	free(json_buffer.data);
+
+	return rc;
 }
 
 int

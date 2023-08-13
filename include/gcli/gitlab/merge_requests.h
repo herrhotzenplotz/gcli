@@ -64,10 +64,10 @@ int gitlab_mr_reopen(char const *owner,
                      char const *reponame,
                      int pr_number);
 
-void gitlab_get_pull(char const *owner,
-                     char const *repo,
-                     int pr_number,
-                     gcli_pull *out);
+int gitlab_get_pull(char const *owner,
+                    char const *repo,
+                    int pr_number,
+                    gcli_pull *out);
 
 int gitlab_get_pull_commits(char const *owner,
                             char const *repo,

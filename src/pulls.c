@@ -285,13 +285,11 @@ gcli_pull_free(gcli_pull *const it)
 	free(it->labels);
 }
 
-void
-gcli_get_pull(char const *owner,
-              char const *repo,
-              int const pr_number,
-              gcli_pull *const out)
+int
+gcli_get_pull(char const *owner, char const *repo,
+              int const pr_number, gcli_pull *const out)
 {
-	gcli_forge()->get_pull(owner, repo, pr_number, out);
+	return gcli_forge()->get_pull(owner, repo, pr_number, out);
 }
 
 void

@@ -325,7 +325,7 @@ gcli_pull_get_user_message(gcli_submit_pull_options *opts)
 	return gcli_editor_get_user_message(pull_init_user_file, opts);
 }
 
-void
+int
 gcli_pull_submit(gcli_submit_pull_options opts)
 {
 	opts.body = gcli_pull_get_user_message(&opts);
@@ -349,7 +349,7 @@ gcli_pull_submit(gcli_submit_pull_options opts)
 		if (!sn_yesno("Do you want to continue?"))
 			errx(1, "PR aborted.");
 
-	gcli_forge()->perform_submit_pull(opts);
+	return gcli_forge()->perform_submit_pull(opts);
 }
 
 int

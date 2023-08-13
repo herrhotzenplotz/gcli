@@ -194,7 +194,8 @@ subcommand_pull_create(int argc, char *argv[])
 
 	opts.title = SV(argv[0]);
 
-	gcli_pull_submit(opts);
+	if (gcli_pull_submit(opts) < 0)
+		errx(1, "error: failed to submit pull request");
 
 	free(opts.labels);
 

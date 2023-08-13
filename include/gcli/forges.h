@@ -273,7 +273,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Submit PR/MR */
-	void (*perform_submit_pull)(
+	int (*perform_submit_pull)(
 		gcli_submit_pull_options opts);
 
 	/**

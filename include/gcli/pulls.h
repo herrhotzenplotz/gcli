@@ -132,7 +132,7 @@ void gcli_get_pull(char const *owner,
                    int pr_number,
                    gcli_pull *out);
 
-void gcli_pull_submit(gcli_submit_pull_options);
+int gcli_pull_submit(gcli_submit_pull_options);
 
 void gcli_pull_print_status(gcli_pull const *it);
 

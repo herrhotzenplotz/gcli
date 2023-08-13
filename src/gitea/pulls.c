@@ -60,12 +60,12 @@ gitea_get_pull_commits(char const *owner,
 	return github_get_pull_commits(owner, repo, pr_number, out);
 }
 
-void
+int
 gitea_pull_submit(gcli_submit_pull_options opts)
 {
 	warnx("In case the following process errors out, see: "
 	      "https://github.com/go-gitea/gitea/issues/20175");
-	github_perform_submit_pull(opts);
+	return github_perform_submit_pull(opts);
 }
 
 int

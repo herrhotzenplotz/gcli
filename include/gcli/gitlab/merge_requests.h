@@ -74,7 +74,7 @@ int gitlab_get_pull_commits(char const *owner,
                             int pr_number,
                             gcli_commit **out);
 
-void gitlab_perform_submit_mr(gcli_submit_pull_options opts);
+int gitlab_perform_submit_mr(gcli_submit_pull_options opts);
 
 int gitlab_mr_add_labels(char const *owner,
                          char const *repo,

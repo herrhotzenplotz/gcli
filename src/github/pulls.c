@@ -275,13 +275,14 @@ github_pull_reopen(char const *owner, char const *repo, int const pr_number)
 	return rc;
 }
 
-void
+int
 github_perform_submit_pull(gcli_submit_pull_options opts)
 {
-	sn_sv              e_head, e_base, e_title, e_body;
-	gcli_fetch_buffer  fetch_buffer = {0};
-	struct json_stream json         = {0};
-	gcli_pull          pull         = {0};
+	sn_sv e_head, e_base, e_title, e_body;
+	gcli_fetch_buffer fetch_buffer = {0};
+	struct json_stream json = {0};
+	gcli_pull pull = {0};
+	int rc = 0;
 
 	e_head  = gcli_json_escape(opts.from);
 	e_base  = gcli_json_escape(opts.to);
@@ -295,16 +296,16 @@ github_perform_submit_pull(gcli_submit_pull_options opts)
 		SV_ARGS(e_base),
 		SV_ARGS(e_title),
 		SV_ARGS(e_body));
-	char *url         = sn_asprintf(
+	char *url = sn_asprintf(
 		"%s/repos/%s/%s/pulls",
 		gcli_get_apibase(),
 		opts.owner, opts.repo);
 
-	gcli_fetch_with_method("POST", url, post_fields, NULL, &fetch_buffer);
+	rc = gcli_fetch_with_method("POST", url, post_fields, NULL, &fetch_buffer);
 
 	/* Add labels if requested. GitHub doesn't allow us to do this all
 	 * with one request. */
-	if (opts.labels_size) {
+	if (rc == 0 && opts.labels_size) {
 		json_open_buffer(&json, fetch_buffer.data, fetch_buffer.length);
 		parse_github_pull(&json, &pull);
 
@@ -322,6 +323,8 @@ github_perform_submit_pull(gcli_submit_pull_options opts)
 	free(e_body.data);
 	free(post_fields);
 	free(url);
+
+	return rc;
 }
 
 int

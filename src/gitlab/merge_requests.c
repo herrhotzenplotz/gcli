@@ -302,18 +302,18 @@ gitlab_mr_reopen(char const *owner, char const *repo, int const pr_number)
 	return rc;
 }
 
-void
+int
 gitlab_perform_submit_mr(gcli_submit_pull_options opts)
 {
 	/* Note: this doesn't really allow merging into repos with
 	 * different names. We need to figure out a way to make this
 	 * better for both github and gitlab. */
-	gcli_repo          target        = {0};
-	sn_sv              target_branch = {0};
-	sn_sv              source_owner  = {0};
-	sn_sv              source_branch = {0};
-	char              *labels        = NULL;
-	gcli_fetch_buffer  buffer        = {0};
+	gcli_repo target = {0};
+	sn_sv target_branch = {0};
+	sn_sv source_owner = {0};
+	sn_sv source_branch = {0};
+	char *labels = NULL;
+	int rc = 0;
 
 	/* json escaped variants */
 	sn_sv e_source_branch, e_target_branch, e_title, e_body;
@@ -325,7 +325,9 @@ gitlab_perform_submit_mr(gcli_submit_pull_options opts)
 	source_branch.data   += 1;
 
 	/* Figure out the project id */
-	gitlab_get_repo(opts.owner, opts.repo, &target);
+	rc = gitlab_get_repo(opts.owner, opts.repo, &target);
+	if (rc < 0)
+		return rc;
 
 	/* escape things in the post payload */
 	e_source_branch = gcli_json_escape(source_branch);
@@ -369,10 +371,9 @@ gitlab_perform_submit_mr(gcli_submit_pull_options opts)
 	    e_owner, e_repo);
 
 	/* perform request */
-	gcli_fetch_with_method("POST", url, post_fields, NULL, &buffer);
+	rc = gcli_fetch_with_method("POST", url, post_fields, NULL, NULL);
 
 	/* cleanup */
-	free(buffer.data);
 	free(e_source_branch.data);
 	free(e_target_branch.data);
 	free(e_title.data);
@@ -382,6 +383,8 @@ gitlab_perform_submit_mr(gcli_submit_pull_options opts)
 	free(labels);
 	free(post_fields);
 	free(url);
+
+	return rc;
 }
 
 int

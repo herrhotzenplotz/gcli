@@ -36,9 +36,9 @@
 
 #include <gcli/repos.h>
 
-void gitlab_get_repo(char const *owner,
-                     char const *repo,
-                     gcli_repo *out);
+int gitlab_get_repo(char const *owner,
+                    char const *repo,
+                    gcli_repo *out);
 
 int gitlab_get_repos(char const  *owner,
                      int max,

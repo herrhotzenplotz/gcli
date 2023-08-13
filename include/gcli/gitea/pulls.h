@@ -53,7 +53,7 @@ int gitea_get_pull_commits(char const *owner,
                            int pr_number,
                            gcli_commit **out);
 
-void gitea_pull_submit(gcli_submit_pull_options opts);
+int gitea_pull_submit(gcli_submit_pull_options opts);
 
 int gitea_pull_merge(char const *owner,
                      char const *reponame,

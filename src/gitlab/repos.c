@@ -36,17 +36,18 @@
 
 #include <templates/gitlab/repos.h>
 
-void
+int
 gitlab_get_repo(char const *owner,
                 char const *repo,
                 gcli_repo *const out)
 {
 	/* GET /projects/:id */
-	char              *url     = NULL;
-	gcli_fetch_buffer  buffer  = {0};
-	json_stream        stream  = {0};
-	char              *e_owner = {0};
-	char              *e_repo  = {0};
+	char *url = NULL;
+	gcli_fetch_buffer buffer = {0};
+	json_stream stream = {0};
+	char *e_owner = {0};
+	char *e_repo = {0};
+	int rc;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -56,16 +57,20 @@ gitlab_get_repo(char const *owner,
 		gitlab_get_apibase(),
 	    e_owner, e_repo);
 
-	gcli_fetch(url, NULL, &buffer);
-	json_open_buffer(&stream, buffer.data, buffer.length);
+	rc = gcli_fetch(url, NULL, &buffer);
 
-	parse_gitlab_repo(&stream, out);
+	if (rc == 0) {
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		parse_gitlab_repo(&stream, out);
+		json_close(&stream);
+	}
 
-	json_close(&stream);
 	free(buffer.data);
 	free(e_owner);
 	free(e_repo);
 	free(url);
+
+	return rc;
 }
 
 static void

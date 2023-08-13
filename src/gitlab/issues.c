@@ -239,24 +239,26 @@ gitlab_perform_submit_issue(gcli_submit_issue_options opts,
 static int
 gitlab_user_id(char const *user_name)
 {
-	gcli_fetch_buffer   buffer = {0};
-	struct json_stream  stream = {0};
-	char               *url    = NULL;
-	char               *e_username;
-	int                 uid    = -1;
+	gcli_fetch_buffer buffer = {0};
+	struct json_stream stream = {0};
+	char *url = NULL;
+	char *e_username;
+	int uid = -1;
 
 	e_username = gcli_urlencode(user_name);
 
 	url = sn_asprintf("%s/users?username=%s", gitlab_get_apibase(), e_username);
 
-	gcli_fetch(url, NULL, &buffer);
-	json_open_buffer(&stream, buffer.data, buffer.length);
-	json_set_streaming(&stream, 1);
+	uid = gcli_fetch(url, NULL, &buffer);
+	if (uid == 0) {
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		json_set_streaming(&stream, 1);
 
-	gcli_json_advance(&stream, "[{s", "id");
-	uid = get_int(&stream);
+		gcli_json_advance(&stream, "[{s", "id");
+		uid = get_int(&stream);
 
-	json_close(&stream);
+		json_close(&stream);
+	}
 
 	free(e_username);
 	free(url);
@@ -271,17 +273,19 @@ gitlab_issue_assign(char const *owner,
                     int const issue_number,
                     char const *assignee)
 {
-	int   assignee_uid = -1;
-	char *url          = NULL;
-	char *post_data    = NULL;
-	char *e_owner      = NULL;
-	char *e_repo       = NULL;
-	int   rc           = 0;
+	int assignee_uid = -1;
+	char *url = NULL;
+	char *post_data = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	int rc = 0;
 
 	assignee_uid = gitlab_user_id(assignee);
+	if (assignee_uid < 0)
+		return assignee_uid;
 
 	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
+	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%d",
 	                  gitlab_get_apibase(),

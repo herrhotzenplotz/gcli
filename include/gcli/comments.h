@@ -45,16 +45,16 @@ typedef struct gcli_submit_comment_opts gcli_submit_comment_opts;
 struct gcli_comment {
 	char const *author;         /* Login name of the comment author */
 	char const *date;           /* Creation date of the comment     */
-	int         id;             /* id of the comment                */
+	int id;                     /* id of the comment                */
 	char const *body;           /* Raw text of the comment          */
 };
 
 struct gcli_submit_comment_opts {
 	enum comment_target_type { ISSUE_COMMENT, PR_COMMENT }  target_type;
-	char const                                             *owner, *repo;
-	int                                                     target_id;
-	sn_sv                                                   message;
-	bool                                                    always_yes;
+	char const *owner, *repo;
+	int target_id;
+	sn_sv message;
+	bool always_yes;
 };
 
 void gcli_print_comment_list(gcli_comment const *comments,
@@ -62,6 +62,6 @@ void gcli_print_comment_list(gcli_comment const *comments,
 
 void gcli_issue_comments(char const *owner, char const *repo, int issue);
 void gcli_pull_comments(char const *owner, char const *repo, int issue);
-void gcli_comment_submit(gcli_submit_comment_opts opts);
+int gcli_comment_submit(gcli_submit_comment_opts opts);
 
 #endif /* COMMENTS_H */

@@ -126,12 +126,12 @@ gcli_comment_get_message(gcli_submit_comment_opts *info)
 	return gcli_editor_get_user_message(comment_init, info);
 }
 
-void
+int
 gcli_comment_submit(gcli_submit_comment_opts opts)
 {
-	gcli_fetch_buffer buffer = {0};
 	sn_sv const message = gcli_comment_get_message(&opts);
 	opts.message = gcli_json_escape(message);
+	int rc = 0;
 
 	fprintf(
 		stdout,
@@ -143,10 +143,10 @@ gcli_comment_submit(gcli_submit_comment_opts opts)
 			errx(1, "Aborted by user");
 	}
 
-	gcli_forge()->perform_submit_comment(opts, &buffer);
-	gcli_print_html_url(buffer);
+	rc = gcli_forge()->perform_submit_comment(opts, NULL);
 
-	free(buffer.data);
 	free(message.data);
 	free(opts.message.data);
+
+	return rc;
 }

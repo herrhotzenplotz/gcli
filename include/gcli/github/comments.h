@@ -37,7 +37,7 @@
 #include <gcli/comments.h>
 #include <gcli/curl.h>
 
-void github_perform_submit_comment(
+int github_perform_submit_comment(
 	gcli_submit_comment_opts opts,
 	gcli_fetch_buffer *out);
 

@@ -36,12 +36,14 @@
 
 #include <templates/github/comments.h>
 
-void
+int
 github_perform_submit_comment(gcli_submit_comment_opts opts,
                               gcli_fetch_buffer *out)
 {
-	char *e_owner     = gcli_urlencode(opts.owner);
-	char *e_repo      = gcli_urlencode(opts.repo);
+	int rc = 0;
+	char *e_owner = gcli_urlencode(opts.owner);
+	char *e_repo = gcli_urlencode(opts.repo);
+
 	char *post_fields = sn_asprintf(
 		"{ \"body\": \""SV_FMT"\" }",
 		SV_ARGS(opts.message));
@@ -50,11 +52,14 @@ github_perform_submit_comment(gcli_submit_comment_opts opts,
 		gcli_get_apibase(),
 		e_owner, e_repo, opts.target_id);
 
-	gcli_fetch_with_method("POST", url, post_fields, NULL, out);
+	rc = gcli_fetch_with_method("POST", url, post_fields, NULL, out);
+
 	free(post_fields);
 	free(e_owner);
 	free(e_repo);
 	free(url);
+
+	return rc;
 }
 
 static int

@@ -53,10 +53,10 @@ usage(void)
 int
 subcommand_comment(int argc, char *argv[])
 {
-	int                       ch, target_id = -1;
-	char const               *repo = NULL, *owner = NULL;
-	bool                      always_yes = false;
-	enum comment_target_type  target_type;
+	int ch, target_id = -1, rc = 0;
+	char const *repo = NULL, *owner = NULL;
+	bool always_yes = false;
+	enum comment_target_type target_type;
 
 	struct option const options[] = {
 		{ .name    = "yes",
@@ -121,12 +121,15 @@ subcommand_comment(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	gcli_comment_submit((gcli_submit_comment_opts) {
+	rc = gcli_comment_submit((gcli_submit_comment_opts) {
 			.owner       = owner,
 			.repo        = repo,
 			.target_type = target_type,
 			.target_id   = target_id,
 			.always_yes  = always_yes });
+
+	if (rc < 0)
+		errx(1, "error: failed to submit comment");
 
 	return EXIT_SUCCESS;
 }

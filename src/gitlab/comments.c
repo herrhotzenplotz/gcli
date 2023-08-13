@@ -33,13 +33,14 @@
 
 #include <templates/gitlab/comments.h>
 
-void
+int
 gitlab_perform_submit_comment(gcli_submit_comment_opts opts,
                               gcli_fetch_buffer *const out)
 {
-	char const *type    = NULL;
-	char       *e_owner = NULL;
-	char       *e_repo  = NULL;
+	char const *type = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(opts.owner);
 	e_repo  = gcli_urlencode(opts.repo);
@@ -61,11 +62,14 @@ gitlab_perform_submit_comment(gcli_submit_comment_opts opts,
 		gitlab_get_apibase(),
 		e_owner, e_repo, type, opts.target_id);
 
-	gcli_fetch_with_method("POST", url, post_fields, NULL, out);
+	rc = gcli_fetch_with_method("POST", url, post_fields, NULL, out);
+
 	free(post_fields);
 	free(e_owner);
 	free(e_repo);
 	free(url);
+
+	return rc;
 }
 
 static int

@@ -55,7 +55,7 @@ typedef struct gcli_forge_descriptor gcli_forge_descriptor;
 struct gcli_forge_descriptor {
 	/**
 	 * Submit a comment to a pull/mr or issue */
-	void (*perform_submit_comment)(
+	int (*perform_submit_comment)(
 		gcli_submit_comment_opts  opts,
 		gcli_fetch_buffer        *out);
 

@@ -37,8 +37,8 @@
 #include <gcli/comments.h>
 #include <gcli/curl.h>
 
-void gitlab_perform_submit_comment(gcli_submit_comment_opts opts,
-                                   gcli_fetch_buffer *out);
+int gitlab_perform_submit_comment(gcli_submit_comment_opts opts,
+                                  gcli_fetch_buffer *out);
 
 int gitlab_get_issue_comments(char const *owner,
                               char const *repo,

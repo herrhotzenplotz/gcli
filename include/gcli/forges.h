@@ -251,7 +251,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Merge the given PR/MR */
-	void (*pr_merge)(
+	int (*pr_merge)(
 		char const *owner,
 		char const *reponame,
 		int pr_number,

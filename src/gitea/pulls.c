@@ -68,17 +68,17 @@ gitea_pull_submit(gcli_submit_pull_options opts)
 	github_perform_submit_pull(opts);
 }
 
-void
+int
 gitea_pull_merge(char const *owner,
                  char const *repo,
                  int const pr_number,
                  enum gcli_merge_flags const flags)
 {
+	int rc = 0;
 	char *url = NULL;
 	char *e_owner = NULL;
 	char *e_repo = NULL;
 	char *data = NULL;
-	gcli_fetch_buffer buffer = {0};
 	bool const squash = flags & GCLI_PULL_MERGE_SQUASH;
 	bool const delete_branch = flags & GCLI_PULL_MERGE_DELETEHEAD;
 
@@ -90,13 +90,14 @@ gitea_pull_merge(char const *owner,
 	                   squash ? "squash" : "merge",
 	                   delete_branch ? "true" : "false");
 
-	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
+	rc = gcli_fetch_with_method("POST", url, data, NULL, NULL);
 
 	free(url);
 	free(e_owner);
 	free(e_repo);
 	free(data);
-	free(buffer.data);
+
+	return rc;
 }
 
 static void

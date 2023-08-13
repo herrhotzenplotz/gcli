@@ -131,7 +131,7 @@ gitlab_print_pr_diff(FILE *stream,
 	        "supported on GitLab. Blame the Gitlab people.\n");
 }
 
-void
+int
 gitlab_mr_merge(char const *owner,
                 char const *repo,
                 int const mr_number,
@@ -144,6 +144,7 @@ gitlab_mr_merge(char const *owner,
 	char const *data = "{}";
 	bool const squash = flags & GCLI_PULL_MERGE_SQUASH;
 	bool const delete_source = flags & GCLI_PULL_MERGE_DELETEHEAD;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -158,16 +159,18 @@ gitlab_mr_merge(char const *owner,
 		squash ? "true" : "false",
 		delete_source ? "true" : "false");
 
-	gcli_fetch_with_method("PUT", url, data, NULL, &buffer);
+	rc = gcli_fetch_with_method("PUT", url, data, NULL, &buffer);
 
 	/* if verbose or normal noise level, print the url */
-	if (!sn_quiet())
+	if (rc == 0 && !sn_quiet())
 		gcli_print_html_url(buffer);
 
 	free(buffer.data);
 	free(url);
 	free(e_owner);
 	free(e_repo);
+
+	return rc;
 }
 
 void

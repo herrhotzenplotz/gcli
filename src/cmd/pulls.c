@@ -447,7 +447,8 @@ handle_pull_actions(int argc, char *argv[],
 				}
 			}
 
-			gcli_pull_merge(owner, repo, pr, flags);
+			if (gcli_pull_merge(owner, repo, pr, flags) < 0)
+				errx(1, "error: failed to merge pull request");
 
 		} else if (strcmp(action, "close") == 0) {
 			gcli_pull_close(owner, repo, pr);

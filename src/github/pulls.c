@@ -152,7 +152,7 @@ github_print_pull_diff(FILE *stream,
 
 /* TODO: figure out a way to get rid of the 3 consecutive urlencode
  * calls */
-static void
+static int
 github_pull_delete_head_branch(char const *owner,
                                char const *repo,
                                int const pr_number)
@@ -160,6 +160,7 @@ github_pull_delete_head_branch(char const *owner,
 	gcli_pull pull = {0};
 	char *url, *e_owner, *e_repo;
 	char const *head_branch;
+	int rc = 0;
 
 	github_get_pull(owner, repo, pr_number, &pull);
 
@@ -173,15 +174,17 @@ github_pull_delete_head_branch(char const *owner,
 	                  github_get_apibase(), e_owner, e_repo,
 	                  head_branch);
 
-	gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
+	rc = gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
 
 	free(url);
 	free(e_owner);
 	free(e_repo);
 	gcli_pull_free(&pull);
+
+	return rc;
 }
 
-void
+int
 github_pull_merge(char const *owner,
                   char const *repo,
                   int const pr_number,
@@ -193,6 +196,7 @@ github_pull_merge(char const *owner,
 	char const *data = "{}";
 	bool const squash = flags & GCLI_PULL_MERGE_SQUASH;
 	bool const delete_source = flags & GCLI_PULL_MERGE_DELETEHEAD;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -203,14 +207,16 @@ github_pull_merge(char const *owner,
 		e_owner, e_repo, pr_number,
 		squash ? "squash" : "merge");
 
-	gcli_fetch_with_method("PUT", url, data, NULL, NULL);
+	rc = gcli_fetch_with_method("PUT", url, data, NULL, NULL);
 
-	if (delete_source)
-		github_pull_delete_head_branch(owner, repo, pr_number);
+	if (rc == 0 && delete_source)
+		rc = github_pull_delete_head_branch(owner, repo, pr_number);
 
 	free(url);
 	free(e_owner);
 	free(e_repo);
+
+	return rc;
 }
 
 void

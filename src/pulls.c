@@ -352,13 +352,13 @@ gcli_pull_submit(gcli_submit_pull_options opts)
 	gcli_forge()->perform_submit_pr(opts);
 }
 
-void
+int
 gcli_pull_merge(char const *owner,
                 char const *reponame,
                 int const pr_number,
                 enum gcli_merge_flags flags)
 {
-	gcli_forge()->pr_merge(owner, reponame, pr_number, flags);
+	return gcli_forge()->pr_merge(owner, reponame, pr_number, flags);
 }
 
 void

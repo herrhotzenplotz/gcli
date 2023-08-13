@@ -57,10 +57,10 @@ int github_pull_checks(char const *owner,
                        char const *repo,
                        int pr_number);
 
-void github_pull_merge(char const *owner,
-                       char const *reponame,
-                       int pr_number,
-                       enum gcli_merge_flags flags);
+int github_pull_merge(char const *owner,
+                      char const *reponame,
+                      int pr_number,
+                      enum gcli_merge_flags flags);
 
 void github_pull_reopen(char const *owner,
                         char const *reponame,

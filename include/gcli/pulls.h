@@ -143,10 +143,10 @@ enum gcli_merge_flags {
 	GCLI_PULL_MERGE_DELETEHEAD = 0x2, /* delete the source branch after merging */
 };
 
-void gcli_pull_merge(char const *owner,
-                     char const *reponame,
-                     int pr_number,
-                     enum gcli_merge_flags flags);
+int gcli_pull_merge(char const *owner,
+                    char const *reponame,
+                    int pr_number,
+                    enum gcli_merge_flags flags);
 
 void gcli_pull_close(char const *owner,
                      char const *reponame,

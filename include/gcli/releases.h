@@ -103,8 +103,8 @@ int gcli_create_release(gcli_new_release const *);
 void gcli_release_push_asset(gcli_new_release *,
                              gcli_release_asset_upload);
 
-void gcli_delete_release(char const *owner,
-                         char const *repo,
-                         char const *id);
+int gcli_delete_release(char const *owner,
+                        char const *repo,
+                        char const *id);
 
 #endif /* RELEASES_H */

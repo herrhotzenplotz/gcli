@@ -151,8 +151,8 @@ out:
 	return rc;
 }
 
-void
+int
 gitea_delete_release(char const *owner, char const *repo, char const *id)
 {
-	github_delete_release(owner, repo, id);
+	return github_delete_release(owner, repo, id);
 }

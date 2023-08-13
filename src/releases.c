@@ -203,10 +203,10 @@ gcli_release_push_asset(gcli_new_release *const release,
 	release->assets[release->assets_size++] = asset;
 }
 
-void
+int
 gcli_delete_release(char const *const owner,
                     char const *const repo,
                     char const *const id)
 {
-	gcli_forge()->delete_release(owner, repo, id);
+	return gcli_forge()->delete_release(owner, repo, id);
 }

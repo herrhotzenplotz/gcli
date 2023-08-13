@@ -170,13 +170,13 @@ gitlab_create_release(gcli_new_release const *release)
 	return rc;
 }
 
-void
+int
 gitlab_delete_release(char const *owner, char const *repo, char const *id)
 {
-	char              *url     = NULL;
-	char              *e_owner = NULL;
-	char              *e_repo  = NULL;
-	gcli_fetch_buffer  buffer  = {0};
+	char *url     = NULL;
+	char *e_owner = NULL;
+	char *e_repo  = NULL;
+	int   rc      = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -186,10 +186,11 @@ gitlab_delete_release(char const *owner, char const *repo, char const *id)
 		gitlab_get_apibase(),
 		e_owner, e_repo, id);
 
-	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	rc = gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
 
 	free(url);
 	free(e_owner);
 	free(e_repo);
-	free(buffer.data);
+
+	return rc;
 }

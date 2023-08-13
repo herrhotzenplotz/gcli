@@ -350,7 +350,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Delete the release */
-	void (*delete_release)(
+	int (*delete_release)(
 		char const *owner,
 		char const *repo,
 		char const *id);

@@ -164,6 +164,9 @@ gitlab_pipeline_jobs(char const *owner,
 {
 	gitlab_job *jobs = NULL;
 	int const jobs_size = gitlab_get_pipeline_jobs(owner, repo, id, count, &jobs);
+	if (jobs_size < 0)
+		errx(1, "error: failed to get jobs");
+
 	gitlab_print_jobs(jobs, jobs_size);
 	gitlab_free_jobs(jobs, jobs_size);
 }
@@ -175,24 +178,36 @@ gitlab_get_pipeline_jobs(char const *owner,
                          int const max,
                          gitlab_job **const out)
 {
-	char   *url      = NULL;
-	char   *next_url = NULL;
-	size_t  out_size = 0;
+	char *url = NULL;
+	char *next_url = NULL;
+	size_t out_size = 0;
+	int rc;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/pipelines/%ld/jobs",
 	                  gitlab_get_apibase(), owner, repo, pipeline);
 
 	do {
 		gcli_fetch_buffer  buffer = {0};
-		struct json_stream stream = {0};
 
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
+		rc = gcli_fetch(url, &next_url, &buffer);
+		if (rc == 0) {
+			json_stream stream = {0};
 
-		parse_gitlab_jobs(&stream, out, &out_size);
+			json_open_buffer(&stream, buffer.data, buffer.length);
+			parse_gitlab_jobs(&stream, out, &out_size);
+			json_close(&stream);
+		}
 
 		free(url);
+
+		if (rc < 0)
+			break;
 	} while ((url = next_url) && (((int)out_size < max) || (max == -1)));
+
+	free(next_url);
+
+	if (rc < 0)
+		return rc;
 
 	return (int)out_size;
 }

@@ -99,7 +99,8 @@ subcommand_snippet_delete(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	gcli_snippet_delete(snippet_id);
+	if (gcli_snippet_delete(snippet_id) < 0)
+		errx(1, "error: failed to delete snippet");
 
 	return EXIT_SUCCESS;
 }

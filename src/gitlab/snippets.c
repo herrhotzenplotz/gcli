@@ -191,16 +191,18 @@ gcli_snippets_print(enum gcli_output_flags const flags,
 		gcli_print_snippets_short(flags, list, max);
 }
 
-void
+int
 gcli_snippet_delete(char const *snippet_id)
 {
-	gcli_fetch_buffer buffer = {0};
-	char *url = sn_asprintf("%s/snippets/%s", gitlab_get_apibase(), snippet_id);
+	int rc = 0;
+	char *url;
 
-	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	url = sn_asprintf("%s/snippets/%s", gitlab_get_apibase(), snippet_id);
+	rc = gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
 
 	free(url);
-	free(buffer.data);
+
+	return rc;
 }
 
 void

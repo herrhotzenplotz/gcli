@@ -37,31 +37,40 @@
 
 #include <templates/github/status.h>
 
-size_t
+int
 github_get_notifications(gcli_notification **const notifications,
                          int const count)
 {
-	char               *url                = NULL;
-	char               *next_url           = NULL;
-	gcli_fetch_buffer   buffer             = {0};
-	struct json_stream  stream             = {0};
-	size_t              notifications_size = 0;
+	char *url = NULL;
+	char *next_url = NULL;
+	gcli_fetch_buffer buffer = {0};
+	struct json_stream stream = {0};
+	size_t notifications_size = 0;
+	int rc = 0;
 
 	url = sn_asprintf("%s/notifications", gcli_get_apibase());
 
 	do {
-		gcli_fetch(url, &next_url, &buffer);
+		rc = gcli_fetch(url, &next_url, &buffer);
 
-		json_open_buffer(&stream, buffer.data, buffer.length);
+		if (rc == 0) {
+			json_open_buffer(&stream, buffer.data, buffer.length);
+			parse_github_notifications(&stream, notifications, &notifications_size);
+			json_close(&stream);
+		}
 
-		parse_github_notifications(&stream, notifications, &notifications_size);
-
-		json_close(&stream);
 		free(url);
 		free(buffer.data);
+
+		if (rc < 0)
+			break;
 	} while ((url = next_url) && (count < 0 || ((int)notifications_size < count)));
 
-	return notifications_size;
+	/* TODO: don't leak the list on error */
+	if (rc < 0)
+		return rc;
+
+	return (int)(notifications_size);
 }
 
 int

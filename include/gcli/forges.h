@@ -414,7 +414,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Status summary for the account */
-	size_t (*get_notifications)(
+    int (*get_notifications)(
 		gcli_notification **notifications,
 		int count);
 

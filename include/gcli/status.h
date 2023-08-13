@@ -49,7 +49,7 @@ typedef struct gcli_notification gcli_notification;
 
 void gcli_status(int count);
 
-size_t gcli_get_notifications(gcli_notification **out, int count);
+int gcli_get_notifications(gcli_notification **out, int count);
 
 int gcli_notification_mark_as_read(char const *id);
 

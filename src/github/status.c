@@ -64,18 +64,19 @@ github_get_notifications(gcli_notification **const notifications,
 	return notifications_size;
 }
 
-void
+int
 github_notification_mark_as_read(char const *id)
 {
-	char              *url    = NULL;
-	gcli_fetch_buffer  buffer = {0};
+	char *url = NULL;
+	int rc = 0;
 
 	url = sn_asprintf(
 		"%s/notifications/threads/%s",
 		gcli_get_apibase(),
 		id);
-	gcli_fetch_with_method("PATCH", url, NULL, NULL, &buffer);
+	rc = gcli_fetch_with_method("PATCH", url, NULL, NULL, NULL);
 
 	free(url);
-	free(buffer.data);
+
+	return rc;
 }

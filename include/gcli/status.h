@@ -51,7 +51,7 @@ void gcli_status(int count);
 
 size_t gcli_get_notifications(gcli_notification **out, int count);
 
-void gcli_notification_mark_as_read(char const *id);
+int gcli_notification_mark_as_read(char const *id);
 
 void gcli_free_notifications(gcli_notification *, size_t);
 

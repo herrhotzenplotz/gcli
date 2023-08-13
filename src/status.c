@@ -87,8 +87,8 @@ gcli_print_notifications(gcli_notification const *const notifications,
 	}
 }
 
-void
+int
 gcli_notification_mark_as_read(char const *id)
 {
-	gcli_forge()->notification_mark_as_read(id);
+	return gcli_forge()->notification_mark_as_read(id);
 }

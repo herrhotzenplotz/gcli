@@ -421,7 +421,7 @@ struct gcli_forge_descriptor {
 	 * Mark notification with the given id as read
 	 *
 	 * Returns 0 on success or negative code on failure. */
-	void (*notification_mark_as_read)(
+	int (*notification_mark_as_read)(
 		char const *id);
 
 	/**

@@ -64,15 +64,16 @@ gitlab_get_notifications(gcli_notification **const notifications,
 	return notifications_size;
 }
 
-void
+int
 gitlab_notification_mark_as_read(char const *id)
 {
-	char              *url    = NULL;
-	gcli_fetch_buffer  buffer = {0};
+	char *url = NULL;
+	int rc = 0;
 
 	url = sn_asprintf("%s/todos/%s/mark_as_done", gitlab_get_apibase(), id);
-	gcli_fetch_with_method("POST", url, NULL, NULL, &buffer);
+	rc = gcli_fetch_with_method("POST", url, NULL, NULL, NULL);
 
 	free(url);
-	free(buffer.data);
+
+	return rc;
 }

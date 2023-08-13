@@ -42,12 +42,11 @@ gitlab_get_forks(char const *owner,
                  int const max,
                  gcli_fork_list *const list)
 {
-	gcli_fetch_buffer   buffer   = {0};
-	char               *url      = NULL;
-	char               *e_owner  = NULL;
-	char               *e_repo   = NULL;
-	char               *next_url = NULL;
-	struct json_stream  stream   = {0};
+	char *url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	char *next_url = NULL;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -60,20 +59,32 @@ gitlab_get_forks(char const *owner,
 		e_owner, e_repo);
 
 	do {
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
-		parse_gitlab_forks(&stream, &list->forks, &list->forks_size);
+		gcli_fetch_buffer buffer = {0};
 
-		json_close(&stream);
+		rc = gcli_fetch(url, &next_url, &buffer);
+		if (rc == 0) {
+			struct json_stream stream = {0};
+
+			json_open_buffer(&stream, buffer.data, buffer.length);
+			parse_gitlab_forks(&stream, &list->forks, &list->forks_size);
+			json_close(&stream);
+		}
+
 		free(buffer.data);
 		free(url);
+
+		if (rc < 0)
+			break;
+
 	} while ((url = next_url) && (max == -1 || (int)list->forks_size < max));
+
+	/* TODO: don't leak the list on error */
 
 	free(next_url);
 	free(e_owner);
 	free(e_repo);
 
-	return 0;
+	return rc;
 }
 
 int

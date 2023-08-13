@@ -50,25 +50,36 @@ gitlab_mrs_fixup(gcli_pull_list *const list)
 int
 gitlab_fetch_mrs(char *url, int const max, gcli_pull_list *const list)
 {
-	json_stream        stream      = {0};
-	gcli_fetch_buffer  json_buffer = {0};
-	char              *next_url    = NULL;
+	char *next_url = NULL;
+	int rc = 0;
 
 	do {
-		gcli_fetch(url, &next_url, &json_buffer);
-		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-		parse_gitlab_mrs(&stream, &list->pulls, &list->pulls_size);
+		gcli_fetch_buffer json_buffer = {0};
 
-		free(json_buffer.data);
+		rc = gcli_fetch(url, &next_url, &json_buffer);
+
+		if (rc == 0) {
+			json_stream stream = {0};
+
+			json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+			parse_gitlab_mrs(&stream, &list->pulls, &list->pulls_size);
+			json_close(&stream);
+		}
+
 		free(url);
-		json_close(&stream);
+		free(json_buffer.data);
+
+		if (rc < 0)
+			break;
 	} while ((url = next_url) && (max == -1 || (int)list->pulls_size < max));
 
 	free(url);
 
-	gitlab_mrs_fixup(list);
+	/* TODO: don't leak the list on error */
+	if (rc == 0)
+		gitlab_mrs_fixup(list);
 
-	return 0;
+	return rc;
 }
 
 int

@@ -45,24 +45,32 @@ int
 gitlab_get_sshkeys(gcli_sshkey_list *list)
 {
 	char *url, *next_url = NULL;
+	int rc = 0;
 
 	*list = (gcli_sshkey_list) {0};
 	url = sn_asprintf("%s/user/keys", gcli_get_apibase());
 
 	do {
 		gcli_fetch_buffer buf = {0};
-		json_stream str;
 
-		gcli_fetch(url, &next_url, &buf);
-		json_open_buffer(&str, buf.data, buf.length);
-		parse_gitlab_sshkeys(&str, &list->keys, &list->keys_size);
+		rc = gcli_fetch(url, &next_url, &buf);
 
-		json_close(&str);
+		if (rc == 0) {
+			json_stream str;
+
+			json_open_buffer(&str, buf.data, buf.length);
+			parse_gitlab_sshkeys(&str, &list->keys, &list->keys_size);
+			json_close(&str);
+		}
+
 		free(buf.data);
 		free(url);
-	} while ((url = next_url));
 
-	return 0;
+	} while ((rc == 0) && (url = next_url));
+
+	/* TODO: don't leak the list on error */
+
+	return rc;
 }
 
 int

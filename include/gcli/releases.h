@@ -98,7 +98,7 @@ void gcli_print_releases(enum gcli_output_flags flags,
 
 void gcli_free_releases(gcli_release_list *);
 
-void gcli_create_release(gcli_new_release const *);
+int gcli_create_release(gcli_new_release const *);
 
 void gcli_release_push_asset(gcli_new_release *,
                              gcli_release_asset_upload);

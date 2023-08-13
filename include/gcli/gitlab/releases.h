@@ -41,7 +41,7 @@ int gitlab_get_releases(char const *owner,
                         int max,
                         gcli_release_list *list);
 
-void gitlab_create_release(gcli_new_release const *release);
+int gitlab_create_release(gcli_new_release const *release);
 
 void gitlab_delete_release(char const *owner,
                            char const *repo,

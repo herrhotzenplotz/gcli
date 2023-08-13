@@ -41,7 +41,7 @@ int gitea_get_releases(char const *owner,
                        int max,
                        gcli_release_list *list);
 
-void gitea_create_release(gcli_new_release const *release);
+int gitea_create_release(gcli_new_release const *release);
 
 void gitea_delete_release(char const *owner,
                           char const *repo,

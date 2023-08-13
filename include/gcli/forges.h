@@ -345,7 +345,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Create a new release */
-	void (*create_release)(
+	int (*create_release)(
 		gcli_new_release const *release);
 
 	/**

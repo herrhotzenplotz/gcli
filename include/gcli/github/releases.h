@@ -41,7 +41,7 @@ int github_get_releases(char const *owner,
                         int max,
                         gcli_release_list *list);
 
-void github_create_release(gcli_new_release const *release);
+int github_create_release(gcli_new_release const *release);
 
 void github_delete_release(char const *owner,
                            char const *repo,

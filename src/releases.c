@@ -187,10 +187,10 @@ gcli_free_releases(gcli_release_list *const list)
 	list->releases_size = 0;
 }
 
-void
+int
 gcli_create_release(gcli_new_release const *release)
 {
-	gcli_forge()->create_release(release);
+	return gcli_forge()->create_release(release);
 }
 
 void

@@ -192,7 +192,8 @@ subcommand_releases_create(int argc, char *argv[])
 		if (!sn_yesno("Do you want to create this release?"))
 			errx(1, "Aborted by user");
 
-	gcli_create_release(&release);
+	if (gcli_create_release(&release) < 0)
+		errx(1, "failed to create release");
 
 	return EXIT_SUCCESS;
 }

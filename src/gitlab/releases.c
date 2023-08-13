@@ -101,18 +101,18 @@ gitlab_get_releases(char const *owner,
 	return 0;
 }
 
-void
+int
 gitlab_create_release(gcli_new_release const *release)
 {
-	char              *url            = NULL;
-	char              *upload_url     = NULL;
-	char              *post_data      = NULL;
-	char              *name_json      = NULL;
-	char              *e_owner        = NULL;
-	char              *e_repo         = NULL;
-	char              *commitish_json = NULL;
-	sn_sv              escaped_body   = {0};
-	gcli_fetch_buffer  buffer         = {0};
+	char  *url            = NULL;
+	char  *upload_url     = NULL;
+	char  *post_data      = NULL;
+	char  *name_json      = NULL;
+	char  *e_owner        = NULL;
+	char  *e_repo         = NULL;
+	char  *commitish_json = NULL;
+	sn_sv  escaped_body   = {0};
+	int    rc             = 0;
 
 	e_owner = gcli_urlencode(release->owner);
 	e_repo  = gcli_urlencode(release->repo);
@@ -153,13 +153,12 @@ gitlab_create_release(gcli_new_release const *release)
 		commitish_json ? commitish_json : "",
 		name_json ? name_json : "");
 
-	gcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
+	rc = gcli_fetch_with_method("POST", url, post_data, NULL, NULL);
 
 	if (release->assets_size)
 		warnx("GitLab release asset uploads are not yet supported");
 
 	free(upload_url);
-	free(buffer.data);
 	free(url);
 	free(post_data);
 	free(escaped_body.data);
@@ -167,6 +166,8 @@ gitlab_create_release(gcli_new_release const *release)
 	free(commitish_json);
 	free(e_owner);
 	free(e_repo);
+
+	return rc;
 }
 
 void

@@ -71,7 +71,7 @@ gitea_upload_release_asset(char *const url,
 	free(buffer.data);
 }
 
-void
+int
 gitea_create_release(gcli_new_release const *release)
 {
 	char              *commitish_json = NULL;
@@ -84,6 +84,7 @@ gitea_create_release(gcli_new_release const *release)
 	gcli_fetch_buffer  buffer         = {0};
 	gcli_release       response       = {0};
 	sn_sv              escaped_body   = {0};
+	int                rc             = 0;
 
 	e_owner = gcli_urlencode(release->owner);
 	e_repo  = gcli_urlencode(release->repo);
@@ -119,7 +120,10 @@ gitea_create_release(gcli_new_release const *release)
 		commitish_json ? commitish_json : "",
 		name_json ? name_json : "");
 
-	gcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
+	rc = gcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
+	if (rc < 0)
+		goto out;
+
 	gitea_parse_release(&buffer, &response);
 
 	printf("INFO : Release at "SV_FMT"\n", SV_ARGS(response.html_url));
@@ -133,6 +137,7 @@ gitea_create_release(gcli_new_release const *release)
 		gitea_upload_release_asset(upload_url, release->assets[i]);
 	}
 
+out:
 	free(upload_url);
 	free(buffer.data);
 	free(url);
@@ -142,6 +147,8 @@ gitea_create_release(gcli_new_release const *release)
 	free(e_repo);
 	free(name_json);
 	free(commitish_json);
+
+	return rc;
 }
 
 void

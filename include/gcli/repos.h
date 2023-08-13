@@ -75,7 +75,7 @@ void gcli_print_repos_table(enum gcli_output_flags flags,
                             gcli_repo_list const *repos,
                             int max);
 
-void gcli_repo_delete(char const *owner, char const *repo);
+int gcli_repo_delete(char const *owner, char const *repo);
 
 gcli_repo *gcli_repo_create(gcli_repo_create_options const *);
 

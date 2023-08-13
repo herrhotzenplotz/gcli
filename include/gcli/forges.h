@@ -399,7 +399,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Delete the given repo */
-	void (*repo_delete)(
+	int (*repo_delete)(
 		char const *owner,
 		char const *repo);
 

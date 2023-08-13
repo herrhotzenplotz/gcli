@@ -449,18 +449,19 @@ gitlab_mr_set_milestone(char const *owner,
 {
 	char *url  = NULL;
 	char *data = NULL;
+	int rc = 0;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%d",
 	                  gitlab_get_apibase(), owner, repo, mr);
 
 	data = sn_asprintf("{ \"milestone_id\": \"%d\"}", milestone_id);
 
-	gcli_fetch_with_method("PUT", url, data, NULL, NULL);
+	rc = gcli_fetch_with_method("PUT", url, data, NULL, NULL);
 
 	free(url);
 	free(data);
 
-	return 0;
+	return rc;
 }
 
 int

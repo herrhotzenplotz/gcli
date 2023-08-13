@@ -45,7 +45,7 @@ int gitea_get_own_repos(int max,
 
 gcli_repo *gitea_repo_create(gcli_repo_create_options const *options);
 
-void gitea_repo_delete(char const *owner,
-                       char const *repo);
+int gitea_repo_delete(char const *owner,
+                      char const *repo);
 
 #endif /* GITEA_REPOS_H */

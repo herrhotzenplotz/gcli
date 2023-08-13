@@ -46,8 +46,8 @@ int gitlab_get_repos(char const  *owner,
 
 int gitlab_get_own_repos(int max, gcli_repo_list *out);
 
-void gitlab_repo_delete(char const *owner,
-                        char const *repo);
+int gitlab_repo_delete(char const *owner,
+                       char const *repo);
 
 gcli_repo *gitlab_repo_create(gcli_repo_create_options const *options);
 

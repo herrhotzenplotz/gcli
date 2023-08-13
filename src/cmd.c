@@ -129,8 +129,9 @@ delete_repo(bool always_yes, const char *owner, const char *repo)
 		delete = true;
 	}
 
-	if (delete)
-		gcli_repo_delete(owner, repo);
-	else
+	if (!delete)
 		errx(1, "Operation aborted");
+
+	if (gcli_repo_delete(owner, repo) < 0)
+		errx(1, "error: failed to delete repo");
 }

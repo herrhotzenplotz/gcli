@@ -48,8 +48,8 @@ gitea_repo_create(gcli_repo_create_options const *options)
 	return github_repo_create(options);
 }
 
-void
+int
 gitea_repo_delete(char const *owner, char const *repo)
 {
-	github_repo_delete(owner, repo);
+	return github_repo_delete(owner, repo);
 }

@@ -115,10 +115,10 @@ gcli_get_own_repos(int const max, gcli_repo_list *const out)
 	return gcli_forge()->get_own_repos(max, out);
 }
 
-void
+int
 gcli_repo_delete(char const *owner, char const *repo)
 {
-	gcli_forge()->repo_delete(owner, repo);
+	return gcli_forge()->repo_delete(owner, repo);
 }
 
 gcli_repo *

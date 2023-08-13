@@ -121,4 +121,7 @@
 	+ https://api.github.com/repos/zorchenhimer/MovieNight/pulls/156/reviews/611653998
   - A review comment has got a diff hunk and a body attached to it.
 	+ https://api.github.com/repos/zorchenhimer/MovieNight/pulls/156/reviews/611653998/comments
-https://open.spotify.com/track/spotify:tracks:5Xc7TIjrQ74V8B2qq4uCwS
+
+* Big refactor for libraryfication
+** TODO Check errx calls if they print "error: "
+** TODO Check for calls to errx in submit routines

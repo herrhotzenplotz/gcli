@@ -108,13 +108,13 @@ github_get_own_repos(int const max, gcli_repo_list *const list)
 	return 0;
 }
 
-void
+int
 github_repo_delete(char const *owner, char const *repo)
 {
-	char              *url     = NULL;
-	char              *e_owner = NULL;
-	char              *e_repo  = NULL;
-	gcli_fetch_buffer  buffer  = {0};
+	char *url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -123,12 +123,13 @@ github_repo_delete(char const *owner, char const *repo)
 	                  gcli_get_apibase(),
 	                  e_owner, e_repo);
 
-	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	rc = gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
 
-	free(buffer.data);
 	free(e_owner);
 	free(e_repo);
 	free(url);
+
+	return rc;
 }
 
 gcli_repo *

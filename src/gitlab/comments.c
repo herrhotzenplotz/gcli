@@ -75,23 +75,30 @@ gitlab_perform_submit_comment(gcli_submit_comment_opts opts,
 static int
 gitlab_perform_get_comments(char const *_url, gcli_comment **const comments)
 {
-	size_t             count       = 0;
-	json_stream        stream      = {0};
-	gcli_fetch_buffer  json_buffer = {0};
-	char              *url         = (char *)_url;
-	char              *next_url    = NULL;
+	size_t count = 0;
+	json_stream stream = {0};
+	gcli_fetch_buffer json_buffer = {0};
+	char *url = (char *)_url;
+	char *next_url = NULL;
+	int rc = 0;
 
 	do {
-		gcli_fetch(url, &next_url, &json_buffer);
-		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+		rc = gcli_fetch(url, &next_url, &json_buffer);
 
-		parse_gitlab_comments(&stream, comments, &count);
+		if (rc == 0) {
+			json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+			parse_gitlab_comments(&stream, comments, &count);
+			json_close(&stream);
+		}
 
-		json_close(&stream);
 		free(json_buffer.data);
 
 		if (url != _url)
 			free(url);
+
+		/* TODO: don't leak the list on error */
+		if (rc < 0)
+			return rc;
 
 	} while ((url = next_url));
 

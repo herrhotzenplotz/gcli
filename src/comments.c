@@ -65,6 +65,9 @@ gcli_issue_comments(char const *owner, char const *repo, int const issue)
 	int           n        = -1;
 
 	n = gcli_forge()->get_issue_comments(owner, repo, issue, &comments);
+	if (n < 0)
+		errx(1, "error: failed to fetch issue comments");
+
 	gcli_print_comment_list(comments, (size_t)n);
 
 	for (int i = 0; i < n; ++i)

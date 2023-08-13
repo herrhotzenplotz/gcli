@@ -126,3 +126,4 @@
 ** TODO Check errx calls if they print "error: "
 ** TODO Check for calls to errx in submit routines
 ** TODO [[file:src/github/review.c::github_review_get_reviews(char const *owner)][github_review_get_reviews]] is garbage
+** TODO Clean up the generic comments code

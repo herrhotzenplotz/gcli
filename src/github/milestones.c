@@ -226,6 +226,7 @@ github_milestone_set_duedate(char const *const owner,
                              char const *const date)
 {
 	char *url, *e_owner, *e_repo, *payload, norm_date[21] = {0};
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -237,12 +238,12 @@ github_milestone_set_duedate(char const *const owner,
 	normalize_date_to_iso8601(date, norm_date, sizeof norm_date);
 
 	payload = sn_asprintf("{ \"due_on\": \"%s\"}", norm_date);
-	gcli_fetch_with_method("PATCH", url, payload, NULL, NULL);
+	rc = gcli_fetch_with_method("PATCH", url, payload, NULL, NULL);
 
 	free(payload);
 	free(url);
 	free(e_repo);
 	free(e_owner);
 
-	return 0;
+	return rc;
 }

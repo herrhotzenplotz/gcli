@@ -227,6 +227,7 @@ gitlab_milestone_set_duedate(char const *const owner,
                              char const *const date)
 {
 	char *url, *e_owner, *e_repo, norm_date[9] = {0};
+	int rc = 0;
 
 	normalize_date_to_gitlab_format(date, norm_date, sizeof norm_date);
 
@@ -237,11 +238,11 @@ gitlab_milestone_set_duedate(char const *const owner,
 	                  gitlab_get_apibase(), e_owner, e_repo, milestone,
 	                  norm_date);
 
-	gcli_fetch_with_method("PUT", url, "", NULL, NULL);
+	rc = gcli_fetch_with_method("PUT", url, "", NULL, NULL);
 
 	free(url);
 	free(e_repo);
 	free(e_owner);
 
-	return 0;
+	return rc;
 }

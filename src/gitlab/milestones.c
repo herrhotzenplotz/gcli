@@ -101,12 +101,13 @@ gitlab_get_milestone(char const *owner,
 	url = sn_asprintf("%s/projects/%s%%2F%s/milestones/%d",
 	                  gitlab_get_apibase(), e_owner, e_repo, milestone);
 
-	gcli_fetch(url, NULL, &buffer);
-	json_open_buffer(&stream, buffer.data, buffer.length);
+	rc = gcli_fetch(url, NULL, &buffer);
+	if (rc == 0) {
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		parse_gitlab_milestone(&stream, out);
+		json_close(&stream);
+	}
 
-	parse_gitlab_milestone(&stream, out);
-
-	json_close(&stream);
 	free(buffer.data);
 	free(url);
 	free(e_owner);

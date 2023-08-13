@@ -72,44 +72,11 @@ gitlab_perform_submit_comment(gcli_submit_comment_opts opts,
 	return rc;
 }
 
-static int
-gitlab_perform_get_comments(char const *_url, gcli_comment **const comments)
-{
-	size_t count = 0;
-	json_stream stream = {0};
-	gcli_fetch_buffer json_buffer = {0};
-	char *url = (char *)_url;
-	char *next_url = NULL;
-	int rc = 0;
-
-	do {
-		rc = gcli_fetch(url, &next_url, &json_buffer);
-
-		if (rc == 0) {
-			json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-			parse_gitlab_comments(&stream, comments, &count);
-			json_close(&stream);
-		}
-
-		free(json_buffer.data);
-
-		if (url != _url)
-			free(url);
-
-		/* TODO: don't leak the list on error */
-		if (rc < 0)
-			return rc;
-
-	} while ((url = next_url));
-
-	return (int)(count);
-}
-
 int
 gitlab_get_mr_comments(char const *owner,
                        char const *repo,
                        int const mr,
-                       gcli_comment **const out)
+                       gcli_comment_list *const out)
 {
 	char *e_owner = gcli_urlencode(owner);
 	char *e_repo  = gcli_urlencode(repo);
@@ -118,21 +85,17 @@ gitlab_get_mr_comments(char const *owner,
 		"%s/projects/%s%%2F%s/merge_requests/%d/notes",
 		gitlab_get_apibase(),
 		e_owner, e_repo, mr);
-
-	int n = gitlab_perform_get_comments(url, out);
-
-	free(url);
 	free(e_owner);
 	free(e_repo);
 
-	return n;
+	return gcli_fetch_list(url, (parsefn)parse_gitlab_comments,
+	                       &out->comments, &out->comments_size,
+	                       -1);
 }
 
 int
-gitlab_get_issue_comments(char const *owner,
-                          char const *repo,
-                          int const issue,
-                          gcli_comment **const out)
+gitlab_get_issue_comments(char const *owner, char const *repo,
+                          int const issue, gcli_comment_list *const out)
 {
 	char *e_owner = gcli_urlencode(owner);
 	char *e_repo  = gcli_urlencode(repo);
@@ -141,12 +104,10 @@ gitlab_get_issue_comments(char const *owner,
 		"%s/projects/%s%%2F%s/issues/%d/notes",
 		gitlab_get_apibase(),
 		e_owner, e_repo, issue);
-
-	int n = gitlab_perform_get_comments(url, out);
-
-	free(url);
 	free(e_owner);
 	free(e_repo);
 
-	return n;
+	return gcli_fetch_list(url, (parsefn)parse_gitlab_comments,
+	                       &out->comments, &out->comments_size,
+	                       -1);
 }

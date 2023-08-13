@@ -31,10 +31,8 @@
 #include <gcli/github/comments.h>
 
 int
-gitea_get_comments(char const *owner,
-                   char const *repo,
-                   int const issue,
-                   gcli_comment **const out)
+gitea_get_comments(char const *owner, char const *repo,
+                   int const issue, gcli_comment_list *const out)
 {
 	return github_get_comments(owner, repo, issue, out);
 }

@@ -65,7 +65,7 @@ struct gcli_forge_descriptor {
 		char const *owner,
 		char const *repo,
 		int issue,
-		gcli_comment **out);
+		gcli_comment_list *out);
 
 	/**
 	 * List comments on the given PR */
@@ -73,7 +73,7 @@ struct gcli_forge_descriptor {
 		char const *owner,
 		char const *repo,
 		int pr,
-		gcli_comment **out);
+		gcli_comment_list *out);
 
 	/**
 	 * List forks of the given repo */

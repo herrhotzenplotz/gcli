@@ -600,7 +600,7 @@ gcli_fetch_list(char *url, parsefn parse,
 			struct json_stream stream = {0};
 
 			json_open_buffer(&stream, buffer.data, buffer.length);
-			parse(&stream, list, listsize);
+			parse(&stream, listptr, listsize);
 			json_close(&stream);
 		}
 

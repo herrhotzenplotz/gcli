@@ -36,10 +36,8 @@
 #include <stdlib.h>
 
 int
-gcli_get_releases(char const *owner,
-                  char const *repo,
-                  int const max,
-                  gcli_release_list *const list)
+gcli_get_releases(char const *owner, char const *repo,
+                  int const max, gcli_release_list *const list)
 {
 	return gcli_forge()->get_releases(owner, repo, max, list);
 }

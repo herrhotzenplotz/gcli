@@ -44,13 +44,13 @@ github_get_releases(char const *owner,
                     int const max,
                     gcli_release_list *const list)
 {
-	char               *url      = NULL;
-	char               *e_owner  = NULL;
-	char               *e_repo   = NULL;
-	char               *next_url = NULL;
-	gcli_fetch_buffer   buffer   = {0};
-	struct json_stream  stream   = {0};
-
+	char *url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	char *next_url = NULL;
+	gcli_fetch_buffer buffer = {0};
+	struct json_stream stream = {0};
+	int rc = 0;
 
 	*list = (gcli_release_list) {0};
 
@@ -63,20 +63,27 @@ github_get_releases(char const *owner,
 		e_owner, e_repo);
 
 	do {
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
-		parse_github_releases(&stream, &list->releases, &list->releases_size);
+		rc = gcli_fetch(url, &next_url, &buffer);
+		if (rc == 0) {
+			json_open_buffer(&stream, buffer.data, buffer.length);
+			parse_github_releases(&stream, &list->releases, &list->releases_size);
+			json_close(&stream);
+		}
 
-		json_close(&stream);
 		free(url);
 		free(buffer.data);
+
+		if (rc < 0)
+			break;
 	} while ((url = next_url) && (max == -1 || (int)list->releases_size < max));
 
 	free(next_url);
 	free(e_owner);
 	free(e_repo);
 
-	return 0;
+	/* TODO: Don't leak the list in case of an error */
+
+	return rc;
 }
 
 static void

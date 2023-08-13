@@ -64,13 +64,13 @@ gitlab_get_releases(char const *owner,
                     int const max,
                     gcli_release_list *const list)
 {
-	char              *url      = NULL;
-	char              *next_url = NULL;
-	char              *e_owner  = NULL;
-	char              *e_repo   = NULL;
-	gcli_fetch_buffer  buffer   = {0};
-	json_stream        stream   = {0};
-
+	char *url = NULL;
+	char *next_url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	gcli_fetch_buffer buffer = {0};
+	json_stream stream = {0};
+	int rc = 0;
 
 	*list = (gcli_release_list) {0};
 
@@ -83,22 +83,30 @@ gitlab_get_releases(char const *owner,
 		e_owner, e_repo);
 
 	do {
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
+		rc = gcli_fetch(url, &next_url, &buffer);
 
-		parse_gitlab_releases(&stream, &list->releases, &list->releases_size);
+		if (rc == 0) {
+			json_open_buffer(&stream, buffer.data, buffer.length);
+			parse_gitlab_releases(&stream, &list->releases, &list->releases_size);
+			json_close(&stream);
+		}
 
 		free(url);
 		free(buffer.data);
+
+		if (rc < 0)
+			break;
 	} while ((url = next_url) && (max == -1 || (int)list->releases_size < max));
 
 	free(e_owner);
 	free(e_repo);
 	free(next_url);
 
-	fixup_release_asset_names(list);
+	/* TODO: Don't leak the list in case of an error */
+	if (rc == 0)
+		fixup_release_asset_names(list);
 
-	return 0;
+	return rc;
 }
 
 int

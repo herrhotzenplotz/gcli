@@ -48,7 +48,7 @@ github_get_milestones(char const *const owner,
                       int const max,
                       gcli_milestone_list *const out)
 {
-	char *url, *next_url = NULL, *e_owner, *e_repo;
+	char *url, *e_owner, *e_repo;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -57,23 +57,12 @@ github_get_milestones(char const *const owner,
 	                  gcli_get_apibase(),
 	                  e_owner, e_repo);
 
-	do {
-		gcli_fetch_buffer buffer = {0};
-		json_stream stream = {0};
+	free(e_owner);
+	free(e_repo);
 
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
-
-		parse_github_milestones(&stream, &out->milestones, &out->milestones_size);
-
-		json_close(&stream);
-		free(url);
-		free(buffer.data);
-	} while ((url = next_url) && ((max < 0) || (out->milestones_size < (size_t)max)));
-
-	free(url);
-
-	return 0;
+	return gcli_fetch_list(url, (parsefn)parse_github_milestones,
+	                       &out->milestones, &out->milestones_size,
+	                       max);
 }
 
 int

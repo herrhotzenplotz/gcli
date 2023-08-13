@@ -58,7 +58,7 @@ gcli_get_pulls(char const *owner,
                int const max,
                gcli_pull_list *const out)
 {
-	return gcli_forge()->get_prs(owner, repo, details, max, out);
+	return gcli_forge()->get_pulls(owner, repo, details, max, out);
 }
 
 void
@@ -124,7 +124,7 @@ gcli_print_pull_diff(FILE *stream,
                      char const *reponame,
                      int const pr_number)
 {
-	gcli_forge()->print_pr_diff(stream, owner, reponame, pr_number);
+	gcli_forge()->print_pull_diff(stream, owner, reponame, pr_number);
 }
 
 void
@@ -304,7 +304,7 @@ gcli_pull_print_op(gcli_pull *const pull)
 void
 gcli_pull_checks(char const *owner, char const *repo, int const pr_number)
 {
-	gcli_forge()->print_pr_checks(owner, repo, pr_number);
+	gcli_forge()->print_pull_checks(owner, repo, pr_number);
 }
 
 static void
@@ -349,7 +349,7 @@ gcli_pull_submit(gcli_submit_pull_options opts)
 		if (!sn_yesno("Do you want to continue?"))
 			errx(1, "PR aborted.");
 
-	gcli_forge()->perform_submit_pr(opts);
+	gcli_forge()->perform_submit_pull(opts);
 }
 
 int
@@ -358,19 +358,19 @@ gcli_pull_merge(char const *owner,
                 int const pr_number,
                 enum gcli_merge_flags flags)
 {
-	return gcli_forge()->pr_merge(owner, reponame, pr_number, flags);
+	return gcli_forge()->pull_merge(owner, reponame, pr_number, flags);
 }
 
 void
 gcli_pull_close(char const *owner, char const *reponame, int const pr_number)
 {
-	gcli_forge()->pr_close(owner, reponame, pr_number);
+	gcli_forge()->pull_close(owner, reponame, pr_number);
 }
 
 void
 gcli_pull_reopen(char const *owner, char const *reponame, int const pr_number)
 {
-	gcli_forge()->pr_reopen(owner, reponame, pr_number);
+	gcli_forge()->pull_reopen(owner, reponame, pr_number);
 }
 
 int
@@ -380,7 +380,7 @@ gcli_pull_add_labels(char const *owner,
                      char const *const labels[],
                      size_t const labels_size)
 {
-	return gcli_forge()->pr_add_labels(
+	return gcli_forge()->pull_add_labels(
 		owner, repo, pr_number, labels, labels_size);
 }
 
@@ -391,7 +391,7 @@ gcli_pull_remove_labels(char const *owner,
                         char const *const labels[],
                         size_t const labels_size)
 {
-	return gcli_forge()->pr_remove_labels(
+	return gcli_forge()->pull_remove_labels(
 		owner, repo, pr_number, labels, labels_size);
 }
 
@@ -401,7 +401,7 @@ gcli_pull_set_milestone(char const *owner,
                         int pr_number,
                         int milestone_id)
 {
-	return gcli_forge()->pr_set_milestone(owner, repo, pr_number, milestone_id);
+	return gcli_forge()->pull_set_milestone(owner, repo, pr_number, milestone_id);
 }
 
 int
@@ -409,5 +409,5 @@ gcli_pull_clear_milestone(char const *owner,
                           char const *repo,
                           int pr_number)
 {
-	return gcli_forge()->pr_clear_milestone(owner, repo, pr_number);
+	return gcli_forge()->pull_clear_milestone(owner, repo, pr_number);
 }

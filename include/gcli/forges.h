@@ -222,7 +222,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Get a list of PRs/MRs on the given repo */
-	int (*get_prs)(
+	int (*get_pulls)(
 		char const *owner,
 		char const *reponame,
 		gcli_pull_fetch_details const *details,
@@ -231,7 +231,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Print a diff of the changes of a PR/MR to the stream */
-	void (*print_pr_diff)(
+	void (*print_pull_diff)(
 		FILE *stream,
 		char const *owner,
 		char const *reponame,
@@ -244,14 +244,14 @@ struct gcli_forge_descriptor {
 	 * underlying the forge are so different that we cannot properly
 	 * unify them. For Gitlab this will call into the pipelines code,
 	 * for Github into the actions code. */
-	int (*print_pr_checks)(
+	int (*print_pull_checks)(
 		char const *owner,
 		char const *reponame,
 		int pr_number);
 
 	/**
 	 * Merge the given PR/MR */
-	int (*pr_merge)(
+	int (*pull_merge)(
 		char const *owner,
 		char const *reponame,
 		int pr_number,
@@ -259,21 +259,21 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Reopen the given PR/MR */
-	void (*pr_reopen)(
+	void (*pull_reopen)(
 		char const *owner,
 		char const *reponame,
 		int pr_number);
 
 	/**
 	 * Close the given PR/MR */
-	void (*pr_close)(
+	void (*pull_close)(
 		char const *owner,
 		char const *reponame,
 		int pr_number);
 
 	/**
 	 * Submit PR/MR */
-	void (*perform_submit_pr)(
+	void (*perform_submit_pull)(
 		gcli_submit_pull_options opts);
 
 	/**
@@ -286,7 +286,7 @@ struct gcli_forge_descriptor {
 
 	/** Bitmask of unsupported fields in the pull summary for this
 	 * forge */
-	enum gcli_pr_summary_quirks {
+	enum gcli_pull_summary_quirks {
 		GCLI_PRS_QUIRK_ADDDEL     = 0x01,
 		GCLI_PRS_QUIRK_COMMITS    = 0x02,
 		GCLI_PRS_QUIRK_CHANGES    = 0x04,
@@ -304,7 +304,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Add labels to Pull Requests */
-	int (*pr_add_labels)(
+	int (*pull_add_labels)(
 		char const *owner,
 		char const *repo,
 		int pr,
@@ -313,7 +313,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Removes labels from Pull Requests */
-	int (*pr_remove_labels)(
+	int (*pull_remove_labels)(
 		char const *owner,
 		char const *repo,
 		int pr,
@@ -322,18 +322,18 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Assign a PR to a milestone */
-	int (*pr_set_milestone)(
+	int (*pull_set_milestone)(
 		char const *owner,
 		char const *repo,
-		int pr,
+		int pull,
 		int milestone_id);
 
 	/**
 	 * Clear a milestone on a PR */
-	int (*pr_clear_milestone)(
+	int (*pull_clear_milestone)(
 		char const *owner,
 		char const *repo,
-		int pr);
+		int pull);
 
 	/**
 	 * Get a list of releases in the given repo */

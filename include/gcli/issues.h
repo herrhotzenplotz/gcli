@@ -92,10 +92,8 @@ void gcli_print_issues_table(enum gcli_output_flags flags,
                              gcli_issue_list const *list,
                              int max);
 
-void gcli_get_issue(char const *owner,
-                    char const *reponame,
-                    int issue_number,
-                    gcli_issue *out);
+int gcli_get_issue(char const *owner, char const *reponame,
+                   int issue_number, gcli_issue *out);
 
 void gcli_issue_free(gcli_issue *it);
 

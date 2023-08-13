@@ -269,7 +269,9 @@ ensure_issue(char const *const owner, char const *const repo,
 	if (*have_fetched_issue)
 		return;
 
-	gcli_get_issue(owner, repo, issue_id, issue);
+	if (gcli_get_issue(owner, repo, issue_id, issue) < 0)
+		errx(1, "error: failed to retrieve issue data");
+
 	*have_fetched_issue = 1;
 }
 

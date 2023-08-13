@@ -183,13 +183,11 @@ gcli_issue_print_op(gcli_issue const *const it)
 		pretty_print(it->body.data, 4, 80, stdout);
 }
 
-void
-gcli_get_issue(char const *owner,
-               char const *repo,
-               int const issue_number,
-               gcli_issue *const out)
+int
+gcli_get_issue(char const *owner, char const *repo,
+               int const issue_number, gcli_issue *const out)
 {
-	gcli_forge()->get_issue_summary(owner, repo, issue_number, out);
+	return gcli_forge()->get_issue_summary(owner, repo, issue_number, out);
 }
 
 int

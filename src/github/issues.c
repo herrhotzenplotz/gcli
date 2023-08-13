@@ -127,17 +127,16 @@ github_get_issues(char const *owner,
 	return github_fetch_issues(url, max, out);
 }
 
-void
-github_get_issue_summary(char const *owner,
-                         char const *repo,
-                         int const issue_number,
-                         gcli_issue *const out)
+int
+github_get_issue_summary(char const *owner, char const *repo,
+                         int const issue_number, gcli_issue *const out)
 {
-	char			  *url     = NULL;
-	char			  *e_owner = NULL;
-	char			  *e_repo  = NULL;
-	gcli_fetch_buffer  buffer  = {0};
-	json_stream		   parser  = {0};
+	char *url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	gcli_fetch_buffer buffer = {0};
+	json_stream	parser = {0};
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -147,18 +146,22 @@ github_get_issue_summary(char const *owner,
 		gcli_get_apibase(),
 		e_owner, e_repo,
 		issue_number);
-	gcli_fetch(url, NULL, &buffer);
 
-	json_open_buffer(&parser, buffer.data, buffer.length);
-	json_set_streaming(&parser, true);
+	rc = gcli_fetch(url, NULL, &buffer);
 
-	parse_github_issue(&parser, out);
+	if (rc == 0) {
+		json_open_buffer(&parser, buffer.data, buffer.length);
+		json_set_streaming(&parser, true);
+		parse_github_issue(&parser, out);
+		json_close(&parser);
+	}
 
-	json_close(&parser);
 	free(url);
 	free(e_owner);
 	free(e_repo);
 	free(buffer.data);
+
+	return rc;
 }
 
 int

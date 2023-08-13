@@ -47,13 +47,11 @@ gitea_get_issues(char const *owner,
 	return github_get_issues(owner, repo, details, max, out);
 }
 
-void
-gitea_get_issue_summary(char const *owner,
-                        char const *repo,
-                        int const issue_number,
-                        gcli_issue *const out)
+int
+gitea_get_issue_summary(char const *owner, char const *repo,
+                        int const issue_number, gcli_issue *const out)
 {
-	github_get_issue_summary(owner, repo, issue_number, out);
+	return github_get_issue_summary(owner, repo, issue_number, out);
 }
 
 int

@@ -42,10 +42,10 @@ int gitea_get_issues(char const *owner,
                      int max,
                      gcli_issue_list *out);
 
-void gitea_get_issue_summary(char const *owner,
-                             char const *repo,
-                             int issue,
-                             gcli_issue *out);
+int gitea_get_issue_summary(char const *owner,
+                            char const *repo,
+                            int issue,
+                            gcli_issue *out);
 
 int gitea_submit_issue(gcli_submit_issue_options opts,
                        gcli_fetch_buffer *out);

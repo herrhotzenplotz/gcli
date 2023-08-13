@@ -113,17 +113,16 @@ gitlab_get_issues(char const *owner,
 	return gitlab_fetch_issues(url, max, out);
 }
 
-void
-gitlab_get_issue_summary(char const *owner,
-                         char const *repo,
-                         int const issue_number,
-                         gcli_issue *const out)
+int
+gitlab_get_issue_summary(char const *owner, char const *repo,
+                         int const issue_number, gcli_issue *const out)
 {
-	char              *url     = NULL;
-	char              *e_owner = NULL;
-	char              *e_repo  = NULL;
-	gcli_fetch_buffer  buffer  = {0};
-	json_stream        parser  = {0};
+	char *url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	gcli_fetch_buffer buffer = {0};
+	json_stream parser = {0};
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -133,18 +132,21 @@ gitlab_get_issue_summary(char const *owner,
 		gitlab_get_apibase(),
 		e_owner, e_repo,
 		issue_number);
-	gcli_fetch(url, NULL, &buffer);
 
-	json_open_buffer(&parser, buffer.data, buffer.length);
-	json_set_streaming(&parser, true);
+	rc = gcli_fetch(url, NULL, &buffer);
+	if (rc == 0) {
+		json_open_buffer(&parser, buffer.data, buffer.length);
+		json_set_streaming(&parser, true);
+		parse_gitlab_issue(&parser, out);
+		json_close(&parser);
+	}
 
-	parse_gitlab_issue(&parser, out);
-
-	json_close(&parser);
 	free(url);
 	free(e_owner);
 	free(e_repo);
 	free(buffer.data);
+
+	return rc;
 }
 
 int

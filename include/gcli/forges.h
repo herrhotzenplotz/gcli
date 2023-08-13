@@ -101,7 +101,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Get a summary of an issue */
-	void (*get_issue_summary)(
+	int (*get_issue_summary)(
 		char const *owner,
 		char const *repo,
 		int issue_number,

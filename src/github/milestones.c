@@ -84,7 +84,7 @@ github_get_milestone(char const *const owner,
 {
 	char *url, *e_owner, *e_repo;
 	gcli_fetch_buffer buffer = {0};
-	json_stream stream = {0};
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -92,18 +92,22 @@ github_get_milestone(char const *const owner,
 	url = sn_asprintf("%s/repos/%s/%s/milestones/%d",
 	                  gcli_get_apibase(), e_owner, e_repo, milestone);
 
-	gcli_fetch(url, NULL, &buffer);
-	json_open_buffer(&stream, buffer.data, buffer.length);
-
-	parse_github_milestone(&stream, out);
-
-	json_close(&stream);
-	free(url);
-	free(buffer.data);
 	free(e_repo);
 	free(e_owner);
 
-	return 0;
+	rc = gcli_fetch(url, NULL, &buffer);
+	if (rc == 0) {
+		json_stream stream = {0};
+
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		parse_github_milestone(&stream, out);
+		json_close(&stream);
+	}
+
+	free(url);
+	free(buffer.data);
+
+	return rc;
 }
 
 int

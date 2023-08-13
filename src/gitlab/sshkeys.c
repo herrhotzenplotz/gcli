@@ -73,6 +73,7 @@ gitlab_add_sshkey(char const *const title,
 	char *url, *payload;
 	char *e_title, *e_key;
 	gcli_fetch_buffer buf = {0};
+	int rc = 0;
 
 	url = sn_asprintf("%s/user/keys", gcli_get_apibase());
 
@@ -85,8 +86,8 @@ gitlab_add_sshkey(char const *const title,
 	free(e_title);
 	free(e_key);
 
-	gcli_fetch_with_method("POST", url, payload, NULL, &buf);
-	if (out) {
+	rc = gcli_fetch_with_method("POST", url, payload, NULL, &buf);
+	if (rc == 0 && out) {
 		json_stream str;
 
 		json_open_buffer(&str, buf.data, buf.length);
@@ -96,7 +97,7 @@ gitlab_add_sshkey(char const *const title,
 
 	free(buf.data);
 
-	return 0;
+	return rc;
 }
 
 int

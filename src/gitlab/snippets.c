@@ -61,28 +61,40 @@ gcli_snippets_free(gcli_snippet_list *const list)
 int
 gcli_snippets_get(int const max, gcli_snippet_list *const out)
 {
-	char               *url      = NULL;
-	char               *next_url = NULL;
-	gcli_fetch_buffer   buffer   = {0};
-	struct json_stream  stream   = {0};
+	char *url = NULL;
+	char *next_url = NULL;
+	int rc = 0;
 
 	*out = (gcli_snippet_list) {0};
 
 	url = sn_asprintf("%s/snippets", gitlab_get_apibase());
 
 	do {
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
-		parse_gitlab_snippets(&stream, &out->snippets, &out->snippets_size);
+		gcli_fetch_buffer buffer = {0};
 
-		json_close(&stream);
+		rc = gcli_fetch(url, &next_url, &buffer);
+
+		if (rc == 0) {
+			struct json_stream stream = {0};
+
+			json_open_buffer(&stream, buffer.data, buffer.length);
+			parse_gitlab_snippets(&stream, &out->snippets, &out->snippets_size);
+			json_close(&stream);
+		}
+
 		free(url);
 		free(buffer.data);
+
+		if (rc < 0)
+			break;
+
 	} while ((url = next_url) && (max == -1 || (int)out->snippets_size < max));
+
+	/* TODO: don't leak list in case of an error */
 
 	free(next_url);
 
-	return 0;
+	return rc;
 }
 
 static void

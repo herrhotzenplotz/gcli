@@ -173,7 +173,9 @@ subcommand_snippets(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	gcli_snippets_get(count, &list);
+	if (gcli_snippets_get(count, &list) < 0)
+		errx(1, "error: failed to fetch snippets");
+
 	gcli_snippets_print(flags, &list, count);
 	gcli_snippets_free(&list);
 

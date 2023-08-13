@@ -266,7 +266,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Close the given PR/MR */
-	void (*pull_close)(
+	int (*pull_close)(
 		char const *owner,
 		char const *reponame,
 		int pr_number);

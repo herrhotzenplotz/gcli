@@ -148,9 +148,9 @@ int gcli_pull_merge(char const *owner,
                     int pr_number,
                     enum gcli_merge_flags flags);
 
-void gcli_pull_close(char const *owner,
-                     char const *reponame,
-                     int pr_number);
+int gcli_pull_close(char const *owner,
+                    char const *reponame,
+                    int pr_number);
 
 void gcli_pull_reopen(char const *owner,
                       char const *reponame,

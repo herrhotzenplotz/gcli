@@ -60,9 +60,9 @@ int gitea_pull_merge(char const *owner,
                      int pr_number,
                      enum gcli_merge_flags flags);
 
-void gitea_pull_close(char const *owner,
-                      char const *repo,
-                      int pr_number);
+int gitea_pull_close(char const *owner,
+                     char const *repo,
+                     int pr_number);
 
 void gitea_pull_reopen(char const *owner,
                        char const *repo,

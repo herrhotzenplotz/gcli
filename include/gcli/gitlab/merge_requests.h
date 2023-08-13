@@ -56,9 +56,9 @@ int gitlab_mr_merge(char const *owner,
                     int mr_number,
                     enum gcli_merge_flags flags);
 
-void gitlab_mr_close(char const *owner,
-                     char const *reponame,
-                     int pr_number);
+int gitlab_mr_close(char const *owner,
+                    char const *reponame,
+                    int pr_number);
 
 void gitlab_mr_reopen(char const *owner,
                       char const *reponame,

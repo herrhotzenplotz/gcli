@@ -66,9 +66,9 @@ void github_pull_reopen(char const *owner,
                         char const *reponame,
                         int pr_number);
 
-void github_pull_close(char const *owner,
-                       char const *reponame,
-                       int pr_number);
+int github_pull_close(char const *owner,
+                      char const *reponame,
+                      int pr_number);
 
 void github_perform_submit_pull(gcli_submit_pull_options opts);
 

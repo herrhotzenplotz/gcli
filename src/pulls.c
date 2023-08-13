@@ -361,10 +361,10 @@ gcli_pull_merge(char const *owner,
 	return gcli_forge()->pull_merge(owner, reponame, pr_number, flags);
 }
 
-void
+int
 gcli_pull_close(char const *owner, char const *reponame, int const pr_number)
 {
-	gcli_forge()->pull_close(owner, reponame, pr_number);
+	return gcli_forge()->pull_close(owner, reponame, pr_number);
 }
 
 void

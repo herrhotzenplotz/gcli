@@ -38,8 +38,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <pdjson/pdjson.h>
 #include <sn/sn.h>
 
+typedef void (*parsefn)(json_stream *stream, void *list, size_t *listsize);
 typedef struct gcli_fetch_buffer gcli_fetch_buffer;
 
 struct gcli_fetch_buffer {
@@ -75,5 +77,8 @@ bool gcli_curl_test_success(char const *url);
 char *gcli_urlencode(char const *);
 sn_sv gcli_urlencode_sv(sn_sv const);
 char *gcli_urldecode(char const *input);
+int gcli_fetch_list(char *url, parsefn fn,
+                    void *list, size_t *listsize,
+                    int max);
 
 #endif /* CURL_H */

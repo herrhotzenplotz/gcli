@@ -572,3 +572,47 @@ gcli_urldecode(char const *input)
 
 	return result;
 }
+
+/* Convenience function for fetching lists.
+ *
+ * listptr must be a double-pointer (pointer to a pointer to the start
+ * of the array). e.g.
+ *
+ *    struct foolist { struct foo *foos; size_t foos_size; } *out = ...;
+ *
+ *    listptr = &out->foos;
+ *    listsize = &out->foos_size;
+ *
+ * If max is -1 then everything will be fetched. */
+int
+gcli_fetch_list(char *url, parsefn parse,
+                void *listptr, size_t *listsize,
+                int const max)
+{
+	char *next_url = NULL;
+	int rc;
+
+	do {
+		gcli_fetch_buffer buffer = {0};
+
+		rc = gcli_fetch(url, &next_url, &buffer);
+		if (rc == 0) {
+			struct json_stream stream = {0};
+
+			json_open_buffer(&stream, buffer.data, buffer.length);
+			parse(&stream, list, listsize);
+			json_close(&stream);
+		}
+
+		free(buffer.data);
+		free(url);
+
+		if (rc < 0)
+			break;
+
+	} while ((url = next_url) && (max == -1 || (int)(*listsize) < max));
+
+	free(next_url);
+
+	return rc;
+}

@@ -77,36 +77,35 @@ github_get_forks(char const *owner,
 	return 0;
 }
 
-void
+int
 github_fork_create(char const *owner, char const *repo, char const *_in)
 {
-	char              *url       = NULL;
-	char              *e_owner   = NULL;
-	char              *e_repo    = NULL;
-	char              *post_data = NULL;
-	sn_sv              in        = SV_NULL;
-	gcli_fetch_buffer  buffer    = {0};
+	char *url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	char *post_data = NULL;
+	sn_sv in = SV_NULL;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf(
-		"%s/repos/%s/%s/forks",
-		gcli_get_apibase(),
-		e_owner, e_repo);
+	url = sn_asprintf("%s/repos/%s/%s/forks",
+	                  gcli_get_apibase(),
+	                  e_owner, e_repo);
 	if (_in) {
 		in        = gcli_json_escape(SV((char *)_in));
 		post_data = sn_asprintf("{\"organization\":\""SV_FMT"\"}",
 		                        SV_ARGS(in));
 	}
 
-	gcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
-	gcli_print_html_url(buffer);
+	rc = gcli_fetch_with_method("POST", url, post_data, NULL, NULL);
 
 	free(in.data);
 	free(url);
 	free(e_owner);
 	free(e_repo);
 	free(post_data);
-	free(buffer.data);
+
+	return rc;
 }

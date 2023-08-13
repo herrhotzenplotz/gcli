@@ -251,45 +251,54 @@ gitlab_free_jobs(gitlab_job *jobs, int const jobs_size)
 	free(jobs);
 }
 
-void
+int
 gitlab_job_get_log(char const *owner, char const *repo, long const job_id)
 {
-	gcli_fetch_buffer  buffer = {0};
-	char              *url    = NULL;
+	gcli_fetch_buffer buffer = {0};
+	char *url = NULL;
+	int rc = 0;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld/trace",
 	                  gitlab_get_apibase(), owner, repo, job_id);
 
-	gcli_fetch(url, NULL, &buffer);
-
-	fwrite(buffer.data, buffer.length, 1, stdout);
+	rc = gcli_fetch(url, NULL, &buffer);
+	if (rc == 0) {
+		fwrite(buffer.data, buffer.length, 1, stdout);
+	}
 
 	free(buffer.data);
 	free(url);
+
+	return rc;
 }
 
-static void
+static int
 gitlab_get_job(char const *owner,
                char const *repo,
                long const jid,
                gitlab_job *const out)
 {
-	gcli_fetch_buffer   buffer = {0};
-	char               *url    = NULL;
-	struct json_stream  stream = {0};
+	gcli_fetch_buffer buffer = {0};
+	char *url = NULL;
+	int rc = 0;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld",
 	                  gitlab_get_apibase(), owner, repo, jid);
-	gcli_fetch(url, NULL, &buffer);
 
-	json_open_buffer(&stream, buffer.data, buffer.length);
-	json_set_streaming(&stream, 1);
+	rc = gcli_fetch(url, NULL, &buffer);
+	if (rc == 0) {
+		struct json_stream  stream = {0};
 
-	parse_gitlab_job(&stream, out);
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		json_set_streaming(&stream, 1);
+		parse_gitlab_job(&stream, out);
+		json_close(&stream);
+	}
 
 	free(buffer.data);
 	free(url);
-	json_close(&stream);
+
+	return rc;
 }
 
 static void
@@ -314,69 +323,78 @@ gitlab_print_job_status(gitlab_job const *const job)
 	gcli_dict_end(printer);
 }
 
-void
+int
 gitlab_job_status(char const *owner, char const *repo, long const jid)
 {
 	gitlab_job job = {0};
+	int rc = 0;
 
-	gitlab_get_job(owner, repo, jid, &job);
-	gitlab_print_job_status(&job);
+	rc = gitlab_get_job(owner, repo, jid, &job);
+	if (rc == 0)
+		gitlab_print_job_status(&job);
+
 	gitlab_free_job_data(&job);
+
+	return rc;
 }
 
-void
+int
 gitlab_job_cancel(char const *owner, char const *repo, long const jid)
 {
-	gcli_fetch_buffer  buffer = {0};
-	char              *url    = NULL;
+	char *url = NULL;
+	int rc = 0;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld/cancel",
 	                  gitlab_get_apibase(), owner, repo, jid);
-	gcli_fetch_with_method("POST", url, NULL, NULL, &buffer);
+	rc = gcli_fetch_with_method("POST", url, NULL, NULL, NULL);
 
 	free(url);
-	free(buffer.data);
+
+	return rc;
 }
 
-void
+int
 gitlab_job_retry(char const *owner, char const *repo, long const jid)
 {
-	gcli_fetch_buffer  buffer = {0};
-	char              *url    = NULL;
+	int   rc  = 0;
+	char *url = NULL;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld/retry",
 	                  gitlab_get_apibase(), owner, repo, jid);
-	gcli_fetch_with_method("POST", url, NULL, NULL, &buffer);
+	rc = gcli_fetch_with_method("POST", url, NULL, NULL, NULL);
 
 	free(url);
-	free(buffer.data);
+
+	return rc;
 }
 
 int
 gitlab_mr_pipelines(char const *owner, char const *repo, int const mr_id)
 {
 	gitlab_pipeline_list list = {0};
+	int rc = 0;
 
-	if (gitlab_get_mr_pipelines(owner, repo, mr_id, &list) < 0)
-		return -1;
+	rc = gitlab_get_mr_pipelines(owner, repo, mr_id, &list);
+	if (rc == 0)
+		gitlab_print_pipelines(&list);
 
-	gitlab_print_pipelines(&list);
 	gitlab_free_pipelines(&list);
 
-	return 0;
+	return rc;
 }
 
-void
+int
 gitlab_job_download_artifacts(char const *owner, char const *repo,
                               long const jid, char const *const outfile)
 {
 	char *url;
 	char *e_owner, *e_repo;
 	FILE *f;
+	int rc = 0;
 
 	f = fopen(outfile, "wb");
 	if (f == NULL)
-		err(1, "could not open %s", outfile);
+		return -1;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -391,4 +409,6 @@ gitlab_job_download_artifacts(char const *owner, char const *repo,
 	free(url);
 	free(e_owner);
 	free(e_repo);
+
+	return rc;
 }

@@ -97,29 +97,29 @@ void gitlab_print_jobs(gitlab_job const *jobs,
 void gitlab_free_jobs(gitlab_job *jobs,
                       int jobs_size);
 
-void gitlab_job_get_log(char const *owner,
-                        char const *repo,
-                        long job_id);
-
-void gitlab_job_status(char const *owner,
+int gitlab_job_get_log(char const *owner,
                        char const *repo,
                        long job_id);
 
-void gitlab_job_cancel(char const *owner,
-                       char const *repo,
-                       long job_id);
-
-void gitlab_job_retry(char const *owner,
+int gitlab_job_status(char const *owner,
                       char const *repo,
                       long job_id);
+
+int gitlab_job_cancel(char const *owner,
+                      char const *repo,
+                      long job_id);
+
+int gitlab_job_retry(char const *owner,
+                     char const *repo,
+                     long job_id);
 
 int gitlab_mr_pipelines(char const *owner,
                         char const *repo,
                         int mr_id);
 
-void gitlab_job_download_artifacts(char const *owner,
-                                   char const *repo,
-                                   long jid,
-                                   char const *outfile);
+int gitlab_job_download_artifacts(char const *owner,
+                                  char const *repo,
+                                  long jid,
+                                  char const *outfile);
 
 #endif /* GITLAB_PIPELINES_H */

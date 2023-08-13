@@ -172,7 +172,7 @@ subcommand_pipelines(int argc, char *argv[])
 	/* Definition of the action list */
 	struct {
 		char const *name;                               /* Name on the cli */
-		void (*fn)(char const *, char const *, long);   /* Function to be invoked for this action */
+		int (*fn)(char const *, char const *, long);   /* Function to be invoked for this action */
 	} job_actions[] = {
 		{ .name = "log",    .fn = gitlab_job_get_log },
 		{ .name = "status", .fn = gitlab_job_status  },
@@ -202,14 +202,16 @@ next_action:
 				argc -= 2;
 				argv += 2;
 			}
-			gitlab_job_download_artifacts(owner, repo, jid, outfile);
+			if (gitlab_job_download_artifacts(owner, repo, jid, outfile) < 0)
+				errx(1, "error: failed to download file");
 			goto next_action;
 		}
 
 		/* Find the action and invoke it */
 		for (size_t i = 0; i < ARRAY_SIZE(job_actions); ++i) {
 			if (strcmp(action, job_actions[i].name) == 0) {
-				job_actions[i].fn(owner, repo, jid);
+				if (job_actions[i].fn(owner, repo, jid) < 0)
+					errx(1, "error: failed to perform action '%s'", action);
 				goto next_action;
 			}
 		}

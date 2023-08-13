@@ -455,7 +455,8 @@ handle_pull_actions(int argc, char *argv[],
 				errx(1, "error: failed to close pull request");
 
 		} else if (strcmp(action, "reopen") == 0) {
-			gcli_pull_reopen(owner, repo, pr);
+			if (gcli_pull_reopen(owner, repo, pr) < 0)
+				errx(1, "error: failed to reopen pull request");
 
 		} else if (strcmp(action, "reviews") == 0) {
 			/* list reviews */

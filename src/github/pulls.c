@@ -247,17 +247,17 @@ github_pull_close(char const *owner, char const *repo, int const pr_number)
 	return rc;
 }
 
-void
+int
 github_pull_reopen(char const *owner, char const *repo, int const pr_number)
 {
-	gcli_fetch_buffer  json_buffer = {0};
-	char              *url         = NULL;
-	char              *data        = NULL;
-	char              *e_owner     = NULL;
-	char              *e_repo      = NULL;
+	char *url = NULL;
+	char *data = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
+	e_repo = gcli_urlencode(repo);
 
 	url  = sn_asprintf(
 		"%s/repos/%s/%s/pulls/%d",
@@ -265,13 +265,14 @@ github_pull_reopen(char const *owner, char const *repo, int const pr_number)
 		e_owner, e_repo, pr_number);
 	data = sn_asprintf("{ \"state\": \"open\"}");
 
-	gcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
+	rc = gcli_fetch_with_method("PATCH", url, data, NULL, NULL);
 
-	free(json_buffer.data);
 	free(url);
 	free(data);
 	free(e_owner);
 	free(e_repo);
+
+	return rc;
 }
 
 void

@@ -259,7 +259,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Reopen the given PR/MR */
-	void (*pull_reopen)(
+	int (*pull_reopen)(
 		char const *owner,
 		char const *reponame,
 		int pr_number);

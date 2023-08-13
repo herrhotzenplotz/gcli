@@ -140,12 +140,12 @@ gitea_pull_close(char const *owner,
 	return gitea_pulls_patch_state(owner, repo, pr_number, "closed");
 }
 
-void
+int
 gitea_pull_reopen(char const *owner,
                   char const *repo,
                   int const pr_number)
 {
-	gitea_pulls_patch_state(owner, repo, pr_number, "open");
+	return gitea_pulls_patch_state(owner, repo, pr_number, "open");
 }
 
 void

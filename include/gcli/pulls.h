@@ -152,9 +152,9 @@ int gcli_pull_close(char const *owner,
                     char const *reponame,
                     int pr_number);
 
-void gcli_pull_reopen(char const *owner,
-                      char const *reponame,
-                      int pr_number);
+int gcli_pull_reopen(char const *owner,
+                     char const *reponame,
+                     int pr_number);
 
 int gcli_pull_add_labels(char const *owner,
                          char const *repo,

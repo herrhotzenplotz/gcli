@@ -367,10 +367,10 @@ gcli_pull_close(char const *owner, char const *reponame, int const pr_number)
 	return gcli_forge()->pull_close(owner, reponame, pr_number);
 }
 
-void
+int
 gcli_pull_reopen(char const *owner, char const *reponame, int const pr_number)
 {
-	gcli_forge()->pull_reopen(owner, reponame, pr_number);
+	return gcli_forge()->pull_reopen(owner, reponame, pr_number);
 }
 
 int

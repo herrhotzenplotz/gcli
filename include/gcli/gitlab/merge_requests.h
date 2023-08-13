@@ -60,9 +60,9 @@ int gitlab_mr_close(char const *owner,
                     char const *reponame,
                     int pr_number);
 
-void gitlab_mr_reopen(char const *owner,
-                      char const *reponame,
-                      int pr_number);
+int gitlab_mr_reopen(char const *owner,
+                     char const *reponame,
+                     int pr_number);
 
 void gitlab_get_pull(char const *owner,
                      char const *repo,

@@ -227,13 +227,12 @@ gitlab_get_pull_commits(char const *owner,
                         int const pr_number,
                         gcli_commit **const out)
 {
-	char              *url         = NULL;
-	char              *next_url    = NULL;
-	char              *e_owner     = NULL;
-	char              *e_repo      = NULL;
-	size_t             count       = 0;
-	json_stream        stream      = {0};
-	gcli_fetch_buffer  json_buffer = {0};
+	char *url = NULL;
+	char *next_url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	size_t count = 0;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -244,19 +243,28 @@ gitlab_get_pull_commits(char const *owner,
 		gitlab_get_apibase(),
 		e_owner, e_repo, pr_number);
 
-	do {
-		gcli_fetch(url, &next_url, &json_buffer);
-		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-
-		parse_gitlab_commits(&stream, out, &count);
-
-		json_close(&stream);
-		free(url);
-		free(json_buffer.data);
-	} while ((url = next_url));
-
 	free(e_owner);
 	free(e_repo);
+
+	do {
+		gcli_fetch_buffer json_buffer = {0};
+
+		rc = gcli_fetch(url, &next_url, &json_buffer);
+		if (rc == 0) {
+			json_stream stream = {0};
+
+			json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+			parse_gitlab_commits(&stream, out, &count);
+			json_close(&stream);
+		}
+
+		free(url);
+		free(json_buffer.data);
+
+		/* TODO: don't leak the list on error */
+		if (rc < 0)
+			return rc;
+	} while ((url = next_url));
 
 	return (int)(count);
 }

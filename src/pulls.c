@@ -259,10 +259,13 @@ gcli_pull_commits(char const *owner,
                   char const *repo,
                   int const pr_number)
 {
-	gcli_commit *commits      = NULL;
-	int          commits_size = 0;
+	gcli_commit *commits = NULL;
+	int commits_size = 0;
 
 	commits_size = gcli_get_pull_commits(owner, repo, pr_number, &commits);
+	if (commits_size < 0)
+		errx(1, "error: failed to fetch commits of the pull request");
+
 	gcli_print_commits_table(commits, commits_size);
 	gcli_commits_free(commits, commits_size);
 }

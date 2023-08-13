@@ -139,27 +139,35 @@ static char const *get_reviews_fmt =
 	"  }"
 	"}";
 
-size_t
+int
 github_review_get_reviews(char const *owner,
                           char const *repo,
                           int const pr,
                           gcli_pr_review **const out)
 {
-	gcli_fetch_buffer   buffer        = {0};
-	char               *url           = NULL;
-	char               *query         = NULL;
-	sn_sv               query_escaped = {0};
-	char               *post_data     = NULL;
-	struct json_stream  stream        = {0};
-	enum   json_type    next          = JSON_NULL;
-	size_t              size          = 0;
+	gcli_fetch_buffer buffer = {0};
+	char *url = NULL;
+	char *query = NULL;
+	sn_sv query_escaped = {0};
+	char *post_data = NULL;
+	struct json_stream stream = {0};
+	enum json_type next = JSON_NULL;
+	int size = 0;
 
-	url           = sn_asprintf("%s/graphql", gcli_get_apibase());
-	query         = sn_asprintf(get_reviews_fmt, owner, repo, pr);
+	url = sn_asprintf("%s/graphql", gcli_get_apibase());
+	query = sn_asprintf(get_reviews_fmt, owner, repo, pr);
 	query_escaped = gcli_json_escape(SV(query));
-	post_data     = sn_asprintf("{\"query\": \""SV_FMT"\"}",
-	                            SV_ARGS(query_escaped));
-	gcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
+	post_data = sn_asprintf("{\"query\": \""SV_FMT"\"}",
+	                        SV_ARGS(query_escaped));
+
+	size = gcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
+	free(url);
+	free(query);
+	free(query_escaped.data);
+	free(post_data);
+
+	if (size < 0)
+		return size;
 
 	json_open_buffer(&stream, buffer.data, buffer.length);
 	json_set_streaming(&stream, true);
@@ -188,12 +196,8 @@ github_review_get_reviews(char const *owner,
 
 	gcli_json_advance(&stream, "}}}}}");
 
-	free(buffer.data);
-	free(url);
-	free(query);
-	free(query_escaped.data);
-	free(post_data);
 	json_close(&stream);
+	free(buffer.data);
 
 	return size;
 }

@@ -406,7 +406,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Fetch MR/PR reviews including comments */
-	size_t (*get_reviews)(
+    int (*get_reviews)(
 		char const *owner,
 		char const *repo,
 		int pr,

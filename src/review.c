@@ -120,7 +120,7 @@ gcli_review_comments_free(gcli_pr_review_comment *it, size_t const size)
 	free(it);
 }
 
-size_t
+int
 gcli_review_get_reviews(char const *owner,
                         char const *repo,
                         int const pr,

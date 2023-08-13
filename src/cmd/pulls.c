@@ -461,9 +461,13 @@ handle_pull_actions(int argc, char *argv[],
 
 		} else if (strcmp(action, "reviews") == 0) {
 			/* list reviews */
-			gcli_pr_review *reviews      = NULL;
-			size_t          reviews_size = gcli_review_get_reviews(
+			gcli_pr_review *reviews = NULL;
+		    int reviews_size = gcli_review_get_reviews(
 				owner, repo, pr, &reviews);
+
+		    if (reviews_size < 0)
+			    errx(1, "error: failed to fetch reviews");
+
 			gcli_review_print_review_table(reviews, reviews_size);
 			gcli_review_reviews_free(reviews, reviews_size);
 

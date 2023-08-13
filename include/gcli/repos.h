@@ -70,13 +70,16 @@ int gcli_get_own_repos(int max,
                        gcli_repo_list *list);
 
 void gcli_repos_free(gcli_repo_list *list);
+void gcli_repo_free(gcli_repo *it);
 
 void gcli_print_repos_table(enum gcli_output_flags flags,
                             gcli_repo_list const *repos,
                             int max);
 
+void gcli_repo_print(gcli_repo const *it);
+
 int gcli_repo_delete(char const *owner, char const *repo);
 
-gcli_repo *gcli_repo_create(gcli_repo_create_options const *);
+int gcli_repo_create(gcli_repo_create_options const *, gcli_repo *out);
 
 #endif /* REPOS_H */

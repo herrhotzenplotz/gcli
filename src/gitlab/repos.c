@@ -170,16 +170,14 @@ gitlab_repo_delete(char const *owner, char const *repo)
 	return rc;
 }
 
-gcli_repo *
-gitlab_repo_create(gcli_repo_create_options const *options) /* Options descriptor */
+int
+gitlab_repo_create(gcli_repo_create_options const *options,
+                   gcli_repo *out)
 {
-	gcli_repo         *repo;
-	char              *url, *data;
-	gcli_fetch_buffer  buffer = {0};
-	json_stream        stream = {0};
-
-	/* Will be freed by the caller with gcli_repos_free */
-	repo = calloc(1, sizeof(gcli_repo));
+	char *url, *data;
+	gcli_fetch_buffer buffer = {0};
+	json_stream stream = {0};
+	int rc;
 
 	/* Request preparation */
 	url = sn_asprintf("%s/projects", gitlab_get_apibase());
@@ -192,15 +190,17 @@ gitlab_repo_create(gcli_repo_create_options const *options) /* Options descripto
 	                   options->private ? "private" : "public");
 
 	/* Fetch and parse result */
-	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
-	json_open_buffer(&stream, buffer.data, buffer.length);
-	parse_gitlab_repo(&stream, repo);
+	rc = gcli_fetch_with_method("POST", url, data, NULL, out ? &buffer : NULL);
+	if (rc == 0 && out) {
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		parse_gitlab_repo(&stream, out);
 
-	/* Cleanup */
-	json_close(&stream);
+		json_close(&stream);
+	}
+
 	free(buffer.data);
 	free(data);
 	free(url);
 
-	return repo;
+	return rc;
 }

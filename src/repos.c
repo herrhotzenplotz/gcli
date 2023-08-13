@@ -93,14 +93,38 @@ gcli_print_repos_table(enum gcli_output_flags const flags,
 }
 
 void
+gcli_repo_print(gcli_repo const *it)
+{
+	gcli_dict dict;
+
+	dict = gcli_dict_begin();
+	gcli_dict_add(dict, "ID",         0, 0, "%d", it->id);
+	gcli_dict_add(dict, "FULL NAME",  0, 0, SV_FMT, SV_ARGS(it->full_name));
+	gcli_dict_add(dict, "NAME",       0, 0, SV_FMT, SV_ARGS(it->name));
+	gcli_dict_add(dict, "OWNER",      0, 0, SV_FMT, SV_ARGS(it->owner));
+	gcli_dict_add(dict, "DATE",       0, 0, SV_FMT, SV_ARGS(it->date));
+	gcli_dict_add(dict, "VISIBILITY", 0, 0, SV_FMT, SV_ARGS(it->visibility));
+	gcli_dict_add(dict, "IS FORK",    0, 0, "%s", sn_bool_yesno(it->is_fork));
+
+	gcli_dict_end(dict);
+}
+
+void
+gcli_repo_free(gcli_repo *it)
+{
+	free(it->full_name.data);
+	free(it->name.data);
+	free(it->owner.data);
+	free(it->date.data);
+	free(it->visibility.data);
+	memset(it, 0, sizeof(*it));
+}
+
+void
 gcli_repos_free(gcli_repo_list *const list)
 {
 	for (size_t i = 0; i < list->repos_size; ++i) {
-		free(list->repos[i].full_name.data);
-		free(list->repos[i].name.data);
-		free(list->repos[i].owner.data);
-		free(list->repos[i].date.data);
-		free(list->repos[i].visibility.data);
+		gcli_repo_free(&list->repos[i]);
 	}
 
 	free(list->repos);
@@ -121,9 +145,8 @@ gcli_repo_delete(char const *owner, char const *repo)
 	return gcli_forge()->repo_delete(owner, repo);
 }
 
-gcli_repo *
-gcli_repo_create(
-	gcli_repo_create_options const *options) /* Options descriptor */
+int
+gcli_repo_create(gcli_repo_create_options const *options, gcli_repo *out)
 {
-	return gcli_forge()->repo_create(options);
+	return gcli_forge()->repo_create(options, out);
 }

@@ -394,8 +394,9 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Create the given repo */
-	gcli_repo *(*repo_create)(
-		gcli_repo_create_options const *options);
+	int (*repo_create)(
+		gcli_repo_create_options const *options,
+		gcli_repo *out);
 
 	/**
 	 * Delete the given repo */

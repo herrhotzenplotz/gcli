@@ -59,18 +59,20 @@ fixup_release_asset_names(gcli_release_list *list)
 }
 
 int
-gitlab_get_releases(char const *owner,
-                    char const *repo,
-                    int const max,
-                    gcli_release_list *const list)
+gitlab_get_releases(char const *owner, char const *repo,
+                    int const max, gcli_release_list *const list)
 {
 	char *url = NULL;
-	char *next_url = NULL;
 	char *e_owner = NULL;
 	char *e_repo = NULL;
-	gcli_fetch_buffer buffer = {0};
-	json_stream stream = {0};
 	int rc = 0;
+
+	gcli_fetch_list_ctx ctx = {
+		.listp = &list->releases,
+		.sizep = &list->releases_size,
+		.max = max,
+		.parse = (parsefn)(parse_gitlab_releases),
+	};
 
 	*list = (gcli_release_list) {0};
 
@@ -82,27 +84,11 @@ gitlab_get_releases(char const *owner,
 		gitlab_get_apibase(),
 		e_owner, e_repo);
 
-	do {
-		rc = gcli_fetch(url, &next_url, &buffer);
-
-		if (rc == 0) {
-			json_open_buffer(&stream, buffer.data, buffer.length);
-			parse_gitlab_releases(&stream, &list->releases, &list->releases_size);
-			json_close(&stream);
-		}
-
-		free(url);
-		free(buffer.data);
-
-		if (rc < 0)
-			break;
-	} while ((url = next_url) && (max == -1 || (int)list->releases_size < max));
-
 	free(e_owner);
 	free(e_repo);
-	free(next_url);
 
-	/* TODO: Don't leak the list in case of an error */
+	rc = gcli_fetch_list(url, &ctx);
+
 	if (rc == 0)
 		fixup_release_asset_names(list);
 

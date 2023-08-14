@@ -36,9 +36,7 @@
 
 #include <gcli/review.h>
 
-int github_review_get_reviews(char const *owner,
-                              char const *repo,
-                              int pr,
-                              gcli_pr_review **out);
+int github_review_get_reviews(char const *owner, char const *repo,
+                              int pr, gcli_pr_review_list *out);
 
 #endif /* GITHUB_REVIEW_H */

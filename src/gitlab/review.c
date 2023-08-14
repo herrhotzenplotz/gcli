@@ -40,39 +40,21 @@
 #include <templates/gitlab/review.h>
 
 int
-gitlab_review_get_reviews(char const *owner,
-                          char const *repo,
-                          int const pr,
-                          gcli_pr_review **const out)
+gitlab_review_get_reviews(char const *owner, char const *repo,
+                          int const pr, gcli_pr_review_list *const out)
 {
-	gcli_fetch_buffer buffer = {0};
-	json_stream stream = {0};
 	char *url = NULL;
-	char *next_url = NULL;
-    size_t size = 0;
-	int rc = 0;
+
+	gcli_fetch_list_ctx ctx = {
+		.listp = &out->reviews,
+		.sizep = &out->reviews_size,
+		.max = -1,
+		.parse = (parsefn)(parse_gitlab_reviews),
+	};
 
 	url = sn_asprintf(
 		"%s/projects/%s%%2F%s/merge_requests/%d/notes?sort=asc",
 		gitlab_get_apibase(), owner, repo, pr);
 
-	do {
-		rc = gcli_fetch(url, &next_url, &buffer);
-
-		if (rc == 0) {
-			json_open_buffer(&stream, buffer.data, buffer.length);
-			parse_gitlab_reviews(&stream, out, &size);
-			json_close(&stream);
-		}
-
-		free(url);
-		free(buffer.data);
-	} while ((rc == 0) && (url = next_url));
-
-	free(next_url);
-
-	if (rc < 0)
-		return rc;
-
-	return (int)(size);
+	return gcli_fetch_list(url, &ctx);
 }

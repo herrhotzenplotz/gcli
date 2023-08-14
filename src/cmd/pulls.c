@@ -465,15 +465,13 @@ handle_pull_actions(int argc, char *argv[],
 
 		} else if (strcmp(action, "reviews") == 0) {
 			/* list reviews */
-			gcli_pr_review *reviews = NULL;
-		    int reviews_size = gcli_review_get_reviews(
-				owner, repo, pr, &reviews);
+			gcli_pr_review_list reviews = {0};
 
-		    if (reviews_size < 0)
-			    errx(1, "error: failed to fetch reviews");
+			if (gcli_review_get_reviews(owner, repo, pr, &reviews) < 0)
+				errx(1, "error: failed to fetch reviews");
 
-			gcli_review_print_review_table(reviews, reviews_size);
-			gcli_review_reviews_free(reviews, reviews_size);
+			gcli_review_print_review_table(&reviews);
+			gcli_review_reviews_free(&reviews);
 
 		} else if (strcmp("labels", action) == 0) {
 			const char **add_labels         = NULL;

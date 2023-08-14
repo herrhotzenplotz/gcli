@@ -407,10 +407,8 @@ struct gcli_forge_descriptor {
 	/**
 	 * Fetch MR/PR reviews including comments */
     int (*get_reviews)(
-		char const *owner,
-		char const *repo,
-		int pr,
-		gcli_pr_review **out);
+		char const *owner, char const *repo,
+		int pr, gcli_pr_review_list *out);
 
 	/**
 	 * Status summary for the account */

@@ -46,8 +46,11 @@
  * request issues. This function nukes them from the list, readjusts
  * the allocation size and fixes the reported list size. */
 static void
-github_hack_fixup_issues_that_are_actually_pulls(gcli_issue **list, size_t *size)
+github_hack_fixup_issues_that_are_actually_pulls(gcli_issue **list, size_t *size,
+                                                 void *_data)
 {
+	(void) _data;
+
 	for (size_t i = *size; i > 0; --i) {
 		if ((*list)[i-1].is_pr) {
 			gcli_issue *l = *list;

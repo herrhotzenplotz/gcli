@@ -600,7 +600,7 @@ gcli_fetch_list(char *url, gcli_fetch_list_ctx *ctx)
 			json_open_buffer(&stream, buffer.data, buffer.length);
 			ctx->parse(&stream, ctx->listp, ctx->sizep);
 			if (ctx->filter)
-				ctx->filter(ctx->listp, ctx->sizep);
+				ctx->filter(ctx->listp, ctx->sizep, ctx->userdata);
 
 			json_close(&stream);
 		}

@@ -53,49 +53,35 @@
  * the actual storage and instead just record the new size of the
  * allocation. */
 static void
-github_pulls_filter_author(char const *const author, gcli_pull_list *const list)
+github_pulls_filter_author(gcli_pull **listp, size_t *sizep, char const *const author)
 {
-	for (size_t i = list->pulls_size; i > 0; --i) {
-		if (strcmp(author, list->pulls[i-1].author) == 0)
+	for (size_t i = *sizep; i > 0; --i) {
+		gcli_pull *pulls = *listp;
+
+		if (strcmp(author, pulls[i-1].author) == 0)
 			continue;
 
-		gcli_pull_free(&list->pulls[i - 1]);
+		gcli_pull_free(&pulls[i - 1]);
 
-		memmove(&list->pulls[i - 1], &list->pulls[i],
-		        sizeof(*list->pulls) * (list->pulls_size - i));
-		list->pulls = realloc(
-			list->pulls,
-			sizeof(*list->pulls) * (--list->pulls_size));
+		memmove(&pulls[i - 1], &pulls[i], sizeof(*pulls) * (*sizep - i));
+		*listp = realloc(pulls, sizeof(*pulls) * (--(*sizep)));
 	}
 }
 
 int
-github_fetch_pulls(char *url,
-                   char const *const filter_author,
-                   int max,
-                   gcli_pull_list *const list)
+github_fetch_pulls(char *url, char const *const filter_author,
+                   int max, gcli_pull_list *const list)
 {
-	json_stream stream = {0};
-	gcli_fetch_buffer json_buffer = {0};
-	char *next_url = NULL;
+	gcli_fetch_list_ctx ctx = {
+		.listp = &list->pulls,
+		.sizep = &list->pulls_size,
+		.parse = (parsefn)(parse_github_pulls),
+		.filter = (filterfn)(github_pulls_filter_author),
+		.userdata = filter_author,
+		.max = max,
+	};
 
-	do {
-		gcli_fetch(url, &next_url, &json_buffer);
-		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-		parse_github_pulls(&stream, &list->pulls, &list->pulls_size);
-
-		/* Filter out PRs manually - but only when requested */
-		if (filter_author)
-			github_pulls_filter_author(filter_author, list);
-
-		free(json_buffer.data);
-		free(url);
-		json_close(&stream);
-	} while ((url = next_url) && (max == -1 || (int)(list->pulls_size) < max));
-
-	free(url);
-
-	return 0;
+	return gcli_fetch_list(url, &ctx);
 }
 
 int

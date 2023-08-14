@@ -92,10 +92,10 @@ gcli_print_forks(enum gcli_output_flags const flags,
 	gcli_tbl_end(table);
 }
 
-void
+int
 gcli_fork_create(char const *owner, char const *repo, char const *_in)
 {
-	gcli_forge()->fork_create(owner, repo, _in);
+	return gcli_forge()->fork_create(owner, repo, _in);
 }
 
 void

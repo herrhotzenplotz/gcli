@@ -127,7 +127,8 @@ subcommand_issue_create(int argc, char *argv[])
 
 	opts.title = SV(argv[0]);
 
-	gcli_issue_submit(opts);
+	if (gcli_issue_submit(opts) < 0)
+		errx(1, "failed to submit issue");
 
 	return EXIT_SUCCESS;
 }
@@ -268,7 +269,9 @@ ensure_issue(char const *const owner, char const *const repo,
 	if (*have_fetched_issue)
 		return;
 
-	gcli_get_issue(owner, repo, issue_id, issue);
+	if (gcli_get_issue(owner, repo, issue_id, issue) < 0)
+		errx(1, "error: failed to retrieve issue data");
+
 	*have_fetched_issue = 1;
 }
 
@@ -282,6 +285,7 @@ handle_issue_labels_action(int *argc, char ***argv,
 	size_t add_labels_size = 0;
 	char const **remove_labels = NULL;
 	size_t remove_labels_size = 0;
+	int rc = 0;
 
 	if (argc == 0) {
 		fprintf(stderr, "error: expected label operations\n");
@@ -293,12 +297,21 @@ handle_issue_labels_action(int *argc, char ***argv,
 	                     &remove_labels, &remove_labels_size);
 
 	/* actually go about deleting and adding the labels */
-	if (add_labels_size)
-		gcli_issue_add_labels(owner, repo, issue_id,
-		                      add_labels, add_labels_size);
-	if (remove_labels_size)
-		gcli_issue_remove_labels(owner, repo, issue_id,
-		                         remove_labels, remove_labels_size);
+	if (add_labels_size) {
+		rc = gcli_issue_add_labels(owner, repo, issue_id,
+		                           add_labels, add_labels_size);
+
+		if (rc < 0)
+			errx(1, "failed to add labels");
+	}
+
+	if (remove_labels_size) {
+		rc = gcli_issue_remove_labels(owner, repo, issue_id,
+		                              remove_labels, remove_labels_size);
+
+		if (rc < 0)
+			errx(1, "failed to remove labels");
+	}
 
 	free(add_labels);
 	free(remove_labels);
@@ -398,16 +411,19 @@ handle_issues_actions(int argc, char *argv[],
 
 		} else if (strcmp("close", operation) == 0) {
 
-			gcli_issue_close(owner, repo, issue_id);
+			if (gcli_issue_close(owner, repo, issue_id) < 0)
+				errx(1, "failed to close issue");
 
 		} else if (strcmp("reopen", operation) == 0) {
 
-			gcli_issue_reopen(owner, repo, issue_id);
+			if (gcli_issue_reopen(owner, repo, issue_id) < 0)
+				errx(1, "failed to reopen issue");
 
 		} else if (strcmp("assign", operation) == 0) {
 
 			char const *assignee = shift(&argc, &argv);
-			gcli_issue_assign(owner, repo, issue_id, assignee);
+			if (gcli_issue_assign(owner, repo, issue_id, assignee) < 0)
+				errx(1, "failed to assign issue");
 
 		} else if (strcmp("labels", operation) == 0) {
 

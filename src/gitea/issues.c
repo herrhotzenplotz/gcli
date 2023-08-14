@@ -47,34 +47,32 @@ gitea_get_issues(char const *owner,
 	return github_get_issues(owner, repo, details, max, out);
 }
 
-void
-gitea_get_issue_summary(char const *owner,
-                        char const *repo,
-                        int const issue_number,
-                        gcli_issue *const out)
+int
+gitea_get_issue_summary(char const *owner, char const *repo,
+                        int const issue_number, gcli_issue *const out)
 {
-	github_get_issue_summary(owner, repo, issue_number, out);
+	return github_get_issue_summary(owner, repo, issue_number, out);
 }
 
-void
+int
 gitea_submit_issue(gcli_submit_issue_options opts,
                    gcli_fetch_buffer *const out)
 {
-	github_perform_submit_issue(opts, out);
+	return github_perform_submit_issue(opts, out);
 }
 
 /* Gitea has closed, Github has close ... go figure */
-static void
+static int
 gitea_issue_patch_state(char const *owner,
                         char const *repo,
                         int const issue_number,
                         char const *const state)
 {
-	gcli_fetch_buffer  json_buffer = {0};
-	char              *url         = NULL;
-	char              *data        = NULL;
-	char              *e_owner     = NULL;
-	char              *e_repo      = NULL;
+	char *url     = NULL;
+	char *data    = NULL;
+	char *e_owner = NULL;
+	char *e_repo  = NULL;
+	int   rc      = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -86,43 +84,44 @@ gitea_issue_patch_state(char const *owner,
 		issue_number);
 	data = sn_asprintf("{ \"state\": \"%s\"}", state);
 
-	gcli_fetch_with_method("PATCH", url, data, NULL, &json_buffer);
+	rc = gcli_fetch_with_method("PATCH", url, data, NULL, NULL);
 
 	free(data);
 	free(url);
 	free(e_owner);
 	free(e_repo);
-	free(json_buffer.data);
+
+	return rc;
 }
 
-void
+int
 gitea_issue_close(char const *owner,
                   char const *repo,
                   int const issue_number)
 {
-	gitea_issue_patch_state(owner, repo, issue_number, "closed");
+	return gitea_issue_patch_state(owner, repo, issue_number, "closed");
 }
 
-void
+int
 gitea_issue_reopen(char const *owner,
                    char const *repo,
                    int const issue_number)
 {
-	gitea_issue_patch_state(owner, repo, issue_number, "open");
+	return gitea_issue_patch_state(owner, repo, issue_number, "open");
 }
 
-void
+int
 gitea_issue_assign(char const *owner,
                    char const *repo,
                    int const issue_number,
                    char const *const assignee)
 {
-	gcli_fetch_buffer  buffer           = {0};
-	sn_sv              escaped_assignee = SV_NULL;
-	char              *post_fields      = NULL;
-	char              *url              = NULL;
-	char              *e_owner          = NULL;
-	char              *e_repo           = NULL;
+	sn_sv  escaped_assignee = SV_NULL;
+	char  *post_fields      = NULL;
+	char  *url              = NULL;
+	char  *e_owner          = NULL;
+	char  *e_repo           = NULL;
+	int    rc               = 0;
 
 	escaped_assignee = gcli_json_escape(SV((char *)assignee));
 	post_fields = sn_asprintf("{ \"assignees\": [\""SV_FMT"\"] }",
@@ -135,14 +134,15 @@ gitea_issue_assign(char const *owner,
 		"%s/repos/%s/%s/issues/%d",
 		gitea_get_apibase(), e_owner, e_repo, issue_number);
 
-	gcli_fetch_with_method("PATCH", url, post_fields, NULL, &buffer);
+	rc = gcli_fetch_with_method("PATCH", url, post_fields, NULL, NULL);
 
-	free(buffer.data);
 	free(escaped_assignee.data);
 	free(post_fields);
 	free(e_owner);
 	free(e_repo);
 	free(url);
+
+	return rc;
 }
 
 /* Return the stringified id of the given label */
@@ -192,17 +192,17 @@ free_id_list(char *list[], size_t const list_size)
 	free(list);
 }
 
-void
+int
 gitea_issue_add_labels(char const *owner,
                        char const *repo,
                        int const issue,
                        char const *const labels[],
                        size_t const labels_size)
 {
-	char              *list   = NULL;
-	char              *data   = NULL;
-	char              *url    = NULL;
-	gcli_fetch_buffer  buffer = {0};
+	char *list = NULL;
+	char *data = NULL;
+	char *url  = NULL;
+	int   rc   = 0;
 
 	/* First, convert to ids */
 	char **ids = label_names_to_ids(owner, repo, labels, labels_size);
@@ -215,40 +215,46 @@ gitea_issue_add_labels(char const *owner,
 
 	url = sn_asprintf("%s/repos/%s/%s/issues/%d/labels",
 	                  gitea_get_apibase(), owner, repo, issue);
-	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
+
+	rc = gcli_fetch_with_method("POST", url, data, NULL, NULL);
 
 	free(list);
 	free(data);
 	free(url);
-	free(buffer.data);
 	free_id_list(ids, labels_size);
+
+	return rc;
 }
 
-void
+int
 gitea_issue_remove_labels(char const *owner,
                           char const *repo,
                           int const issue,
                           char const *const labels[],
                           size_t const labels_size)
 {
+	int rc = 0;
 	/* Unfortunately the gitea api does not give us an endpoint to
 	 * delete labels from an issue in bulk. So, just iterate over the
 	 * given labels and delete them one after another. */
 	char **ids = label_names_to_ids(owner, repo, labels, labels_size);
 
 	for (size_t i = 0; i < labels_size; ++i) {
-		char              *url    = NULL;
-		gcli_fetch_buffer  buffer = {0};
+		char *url = NULL;
 
 		url = sn_asprintf("%s/repos/%s/%s/issues/%d/labels/%s",
 		                  gitea_get_apibase(), owner, repo, issue, ids[i]);
-		gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+		rc = gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
 
-		free(buffer.data);
 		free(url);
+
+		if (rc < 0)
+			break;
 	}
 
 	free_id_list(ids, labels_size);
+
+	return rc;
 }
 
 int

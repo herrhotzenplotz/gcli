@@ -55,7 +55,7 @@ typedef struct gcli_forge_descriptor gcli_forge_descriptor;
 struct gcli_forge_descriptor {
 	/**
 	 * Submit a comment to a pull/mr or issue */
-	void (*perform_submit_comment)(
+	int (*perform_submit_comment)(
 		gcli_submit_comment_opts  opts,
 		gcli_fetch_buffer        *out);
 
@@ -65,7 +65,7 @@ struct gcli_forge_descriptor {
 		char const *owner,
 		char const *repo,
 		int issue,
-		gcli_comment **out);
+		gcli_comment_list *out);
 
 	/**
 	 * List comments on the given PR */
@@ -73,7 +73,7 @@ struct gcli_forge_descriptor {
 		char const *owner,
 		char const *repo,
 		int pr,
-		gcli_comment **out);
+		gcli_comment_list *out);
 
 	/**
 	 * List forks of the given repo */
@@ -85,7 +85,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Fork the given repo into the owner _in */
-	void (*fork_create)(
+	int (*fork_create)(
 		char const *owner,
 		char const *repo,
 		char const *_in);
@@ -101,7 +101,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Get a summary of an issue */
-	void (*get_issue_summary)(
+	int (*get_issue_summary)(
 		char const *owner,
 		char const *repo,
 		int issue_number,
@@ -109,21 +109,21 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Close the given issue */
-	void (*issue_close)(
+	int (*issue_close)(
 		char const *owner,
 		char const *repo,
 		int issue_number);
 
 	/**
 	 * Reopen the given issue */
-	void (*issue_reopen)(
+	int (*issue_reopen)(
 		char const *owner,
 		char const *repo,
 		int issue_number);
 
 	/**
 	 * Assign an issue to a user */
-	void (*issue_assign)(
+	int (*issue_assign)(
 		char const *owner,
 		char const *repo,
 		int issue_number,
@@ -131,7 +131,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Add labels to issues */
-	void (*issue_add_labels)(
+	int (*issue_add_labels)(
 		char const *owner,
 		char const *repo,
 		int issue,
@@ -140,7 +140,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Removes labels from issues */
-	void (*issue_remove_labels)(
+	int (*issue_remove_labels)(
 		char const *owner,
 		char const *repo,
 		int issue,
@@ -149,7 +149,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Submit an issue */
-	void (*perform_submit_issue)(
+	int (*perform_submit_issue)(
 		gcli_submit_issue_options opts,
 		gcli_fetch_buffer *out);
 
@@ -222,7 +222,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Get a list of PRs/MRs on the given repo */
-	int (*get_prs)(
+	int (*get_pulls)(
 		char const *owner,
 		char const *reponame,
 		gcli_pull_fetch_details const *details,
@@ -231,7 +231,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Print a diff of the changes of a PR/MR to the stream */
-	void (*print_pr_diff)(
+	int (*print_pull_diff)(
 		FILE *stream,
 		char const *owner,
 		char const *reponame,
@@ -244,14 +244,14 @@ struct gcli_forge_descriptor {
 	 * underlying the forge are so different that we cannot properly
 	 * unify them. For Gitlab this will call into the pipelines code,
 	 * for Github into the actions code. */
-	int (*print_pr_checks)(
+	int (*print_pull_checks)(
 		char const *owner,
 		char const *reponame,
 		int pr_number);
 
 	/**
 	 * Merge the given PR/MR */
-	void (*pr_merge)(
+	int (*pull_merge)(
 		char const *owner,
 		char const *reponame,
 		int pr_number,
@@ -259,21 +259,21 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Reopen the given PR/MR */
-	void (*pr_reopen)(
+	int (*pull_reopen)(
 		char const *owner,
 		char const *reponame,
 		int pr_number);
 
 	/**
 	 * Close the given PR/MR */
-	void (*pr_close)(
+	int (*pull_close)(
 		char const *owner,
 		char const *reponame,
 		int pr_number);
 
 	/**
 	 * Submit PR/MR */
-	void (*perform_submit_pr)(
+	int (*perform_submit_pull)(
 		gcli_submit_pull_options opts);
 
 	/**
@@ -282,11 +282,11 @@ struct gcli_forge_descriptor {
 		char const *owner,
 		char const *repo,
 		int pr_number,
-		gcli_commit **out);
+		gcli_commit_list *out);
 
 	/** Bitmask of unsupported fields in the pull summary for this
 	 * forge */
-	enum gcli_pr_summary_quirks {
+	enum gcli_pull_summary_quirks {
 		GCLI_PRS_QUIRK_ADDDEL     = 0x01,
 		GCLI_PRS_QUIRK_COMMITS    = 0x02,
 		GCLI_PRS_QUIRK_CHANGES    = 0x04,
@@ -296,7 +296,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Get a summary of the given PR/MR */
-	void (*get_pull)(
+	int (*get_pull)(
 		char const *owner,
 		char const *repo,
 		int pr_number,
@@ -304,7 +304,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Add labels to Pull Requests */
-	void (*pr_add_labels)(
+	int (*pull_add_labels)(
 		char const *owner,
 		char const *repo,
 		int pr,
@@ -313,7 +313,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Removes labels from Pull Requests */
-	void (*pr_remove_labels)(
+	int (*pull_remove_labels)(
 		char const *owner,
 		char const *repo,
 		int pr,
@@ -322,18 +322,18 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Assign a PR to a milestone */
-	int (*pr_set_milestone)(
+	int (*pull_set_milestone)(
 		char const *owner,
 		char const *repo,
-		int pr,
+		int pull,
 		int milestone_id);
 
 	/**
 	 * Clear a milestone on a PR */
-	int (*pr_clear_milestone)(
+	int (*pull_clear_milestone)(
 		char const *owner,
 		char const *repo,
-		int pr);
+		int pull);
 
 	/**
 	 * Get a list of releases in the given repo */
@@ -345,12 +345,12 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Create a new release */
-	void (*create_release)(
+	int (*create_release)(
 		gcli_new_release const *release);
 
 	/**
 	 * Delete the release */
-	void (*delete_release)(
+	int (*delete_release)(
 		char const *owner,
 		char const *repo,
 		char const *id);
@@ -367,14 +367,14 @@ struct gcli_forge_descriptor {
 	 * Create the given label
 	 *
 	 * The ID will be filled in for you */
-	void (*create_label)(
+	int (*create_label)(
 		char const *owner,
 		char const *repo,
 		gcli_label *label);
 
 	/**
 	 * Delete the given label */
-	void (*delete_label)(
+	int (*delete_label)(
 		char const *owner,
 		char const *repo,
 		char const *label);
@@ -394,26 +394,25 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Create the given repo */
-	gcli_repo *(*repo_create)(
-		gcli_repo_create_options const *options);
+	int (*repo_create)(
+		gcli_repo_create_options const *options,
+		gcli_repo *out);
 
 	/**
 	 * Delete the given repo */
-	void (*repo_delete)(
+	int (*repo_delete)(
 		char const *owner,
 		char const *repo);
 
 	/**
 	 * Fetch MR/PR reviews including comments */
-	size_t (*get_reviews)(
-		char const *owner,
-		char const *repo,
-		int pr,
-		gcli_pr_review **out);
+    int (*get_reviews)(
+		char const *owner, char const *repo,
+		int pr, gcli_pr_review_list *out);
 
 	/**
 	 * Status summary for the account */
-	size_t (*get_notifications)(
+    int (*get_notifications)(
 		gcli_notification **notifications,
 		int count);
 
@@ -421,7 +420,7 @@ struct gcli_forge_descriptor {
 	 * Mark notification with the given id as read
 	 *
 	 * Returns 0 on success or negative code on failure. */
-	void (*notification_mark_as_read)(
+	int (*notification_mark_as_read)(
 		char const *id);
 
 	/**

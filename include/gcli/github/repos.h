@@ -43,9 +43,10 @@ int github_get_repos(char const *owner,
 int github_get_own_repos(int max,
                          gcli_repo_list *out);
 
-void github_repo_delete(char const *owner,
-                        char const *repo);
+int github_repo_delete(char const *owner,
+                       char const *repo);
 
-gcli_repo *github_repo_create(gcli_repo_create_options const *options);
+int github_repo_create(gcli_repo_create_options const *options,
+                       gcli_repo *out);
 
 #endif /* GITHUB_REPOS_H */

@@ -40,28 +40,27 @@
 #include <limits.h>
 
 void
-gcli_review_print_review_table(gcli_pr_review const *const headers,
-                               size_t const headers_size)
+gcli_review_print_review_table(gcli_pr_review_list const *const list)
 {
-	for (size_t i = 0; i < headers_size; ++i) {
-		if (headers[i].state) {
+	for (size_t i = 0; i < list->reviews_size; ++i) {
+		if (list->reviews[i].state) {
 			printf("   %s%s%s - %s - %s%s%s\n",
-			       gcli_setbold(), headers[i].author, gcli_resetbold(),
-			       headers[i].date,
-			       gcli_state_colour_str(headers[i].state),
-			       headers[i].state,
+			       gcli_setbold(), list->reviews[i].author, gcli_resetbold(),
+			       list->reviews[i].date,
+			       gcli_state_colour_str(list->reviews[i].state),
+			       list->reviews[i].state,
 			       gcli_resetcolour());
 		} else {
 			printf("   %s%s%s - %s\n",
-			       gcli_setbold(), headers[i].author, gcli_resetbold(),
-			       headers[i].date);
+			       gcli_setbold(), list->reviews[i].author, gcli_resetbold(),
+			       list->reviews[i].date);
 		}
 
-		pretty_print(headers[i].body, 9, 80, stdout);
+		pretty_print(list->reviews[i].body, 9, 80, stdout);
 
 		gcli_review_print_comments(
-			headers[i].comments,
-			headers[i].comments_size);
+			list->reviews[i].comments,
+			list->reviews[i].comments_size);
 
 		putchar('\n');
 	}
@@ -84,22 +83,23 @@ gcli_review_print_comments(gcli_pr_review_comment const *const comments,
 }
 
 void
-gcli_review_reviews_free(gcli_pr_review *it, size_t const size)
+gcli_review_reviews_free(gcli_pr_review_list *list)
 {
-	if (!it)
+	if (!list)
 		return;
 
-	for (size_t i = 0; i < size; ++i) {
-		free(it[i].author);
-		free(it[i].date);
-		free(it[i].state);
-		free(it[i].body);
-		free(it[i].id);
+	for (size_t i = 0; i < list->reviews_size; ++i) {
+		free(list->reviews[i].author);
+		free(list->reviews[i].date);
+		free(list->reviews[i].state);
+		free(list->reviews[i].body);
+		free(list->reviews[i].id);
 	}
 
-	gcli_review_comments_free(it->comments, it->comments_size);
+	free(list->reviews);
 
-	free(it);
+	list->reviews = NULL;
+	list->reviews_size = 0;
 }
 
 void
@@ -120,11 +120,9 @@ gcli_review_comments_free(gcli_pr_review_comment *it, size_t const size)
 	free(it);
 }
 
-size_t
-gcli_review_get_reviews(char const *owner,
-                        char const *repo,
-                        int const pr,
-                        gcli_pr_review **const out)
+int
+gcli_review_get_reviews(char const *owner, char const *repo,
+                        int const pr, gcli_pr_review_list *const out)
 {
 	return gcli_forge()->get_reviews(owner, repo, pr, out);
 }

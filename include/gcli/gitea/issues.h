@@ -42,38 +42,38 @@ int gitea_get_issues(char const *owner,
                      int max,
                      gcli_issue_list *out);
 
-void gitea_get_issue_summary(char const *owner,
-                             char const *repo,
-                             int issue,
-                             gcli_issue *out);
+int gitea_get_issue_summary(char const *owner,
+                            char const *repo,
+                            int issue,
+                            gcli_issue *out);
 
-void gitea_submit_issue(gcli_submit_issue_options opts,
-                        gcli_fetch_buffer *out);
+int gitea_submit_issue(gcli_submit_issue_options opts,
+                       gcli_fetch_buffer *out);
 
-void gitea_issue_close(char const *owner,
+int gitea_issue_close(char const *owner,
+                      char const *repo,
+                      int issue_number);
+
+int gitea_issue_reopen(char const *owner,
                        char const *repo,
                        int issue_number);
 
-void gitea_issue_reopen(char const *owner,
-                        char const *repo,
-                        int issue_number);
+int gitea_issue_assign(char const *owner,
+                       char const *repo,
+                       int issue_number,
+                       char const *assignee);
 
-void gitea_issue_assign(char const *owner,
-                        char const *repo,
-                        int issue_number,
-                        char const *assignee);
+int gitea_issue_add_labels(char const *owner,
+                           char const *repo,
+                           int issue,
+                           char const *const labels[],
+                           size_t labels_size);
 
-void gitea_issue_add_labels(char const *owner,
-                            char const *repo,
-                            int issue,
-                            char const *const labels[],
-                            size_t labels_size);
-
-void gitea_issue_remove_labels(char const *owner,
-                               char const *repo,
-                               int issue,
-                               char const *const labels[],
-                               size_t labels_size);
+int gitea_issue_remove_labels(char const *owner,
+                              char const *repo,
+                              int issue,
+                              char const *const labels[],
+                              size_t labels_size);
 
 int gitea_issue_set_milestone(char const *owner,
                               char const *repo,

@@ -42,15 +42,18 @@
 #include <time.h>
 
 int
-gitlab_get_milestones(char const *owner,
-                      char const *repo,
-                      int max,
-                      gcli_milestone_list *const out)
+gitlab_get_milestones(char const *owner, char const *repo,
+                      int max, gcli_milestone_list *const out)
 {
-	char *url, *next_url = NULL;
+	char *url;
 	char *e_owner, *e_repo;
-	gcli_fetch_buffer buffer = {0};
-	json_stream stream = {0};
+
+	gcli_fetch_list_ctx ctx = {
+		.listp = &out->milestones,
+		.sizep = &out->milestones_size,
+		.max = max,
+		.parse = (parsefn)(parse_gitlab_milestones),
+	};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -58,23 +61,10 @@ gitlab_get_milestones(char const *owner,
 	url = sn_asprintf("%s/projects/%s%%2F%s/milestones",
 	                  gitlab_get_apibase(), e_owner, e_repo);
 
-	do {
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
-
-		parse_gitlab_milestones(&stream, &out->milestones, &out->milestones_size);
-
-		free(buffer.data);
-		free(url);
-		json_close(&stream);
-	} while ((url = next_url) && (max == -1 || (int)out->milestones_size < max));
-
-	free(next_url);
-
 	free(e_owner);
 	free(e_repo);
 
-	return 0;
+	return gcli_fetch_list(url, &ctx);
 }
 
 int
@@ -94,12 +84,13 @@ gitlab_get_milestone(char const *owner,
 	url = sn_asprintf("%s/projects/%s%%2F%s/milestones/%d",
 	                  gitlab_get_apibase(), e_owner, e_repo, milestone);
 
-	gcli_fetch(url, NULL, &buffer);
-	json_open_buffer(&stream, buffer.data, buffer.length);
+	rc = gcli_fetch(url, NULL, &buffer);
+	if (rc == 0) {
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		parse_gitlab_milestone(&stream, out);
+		json_close(&stream);
+	}
 
-	parse_gitlab_milestone(&stream, out);
-
-	json_close(&stream);
 	free(buffer.data);
 	free(url);
 	free(e_owner);
@@ -133,6 +124,7 @@ int
 gitlab_create_milestone(struct gcli_milestone_create_args const *args)
 {
 	char *url, *e_owner, *e_repo, *e_title, *json_body, *description = NULL;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(args->owner);
 	e_repo = gcli_urlencode(args->repo);
@@ -155,7 +147,7 @@ gitlab_create_milestone(struct gcli_milestone_create_args const *args)
 	                        "}",
 	                        e_title, description ? description : "");
 
-	gcli_fetch_with_method("POST", url, json_body, NULL, NULL);
+	rc = gcli_fetch_with_method("POST", url, json_body, NULL, NULL);
 
 	free(json_body);
 	free(description);
@@ -164,7 +156,7 @@ gitlab_create_milestone(struct gcli_milestone_create_args const *args)
 	free(e_repo);
 	free(e_owner);
 
-	return 0;
+	return rc;
 }
 
 int
@@ -173,6 +165,7 @@ gitlab_delete_milestone(char const *const owner,
                         int const milestone)
 {
 	char *url, *e_owner, *e_repo;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -180,13 +173,13 @@ gitlab_delete_milestone(char const *const owner,
 	url = sn_asprintf("%s/projects/%s%%2F%s/milestones/%d",
 	                  gitlab_get_apibase(), e_owner, e_repo, milestone);
 
-	gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
+	rc = gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
 
 	free(url);
 	free(e_repo);
 	free(e_owner);
 
-	return 0;
+	return rc;
 }
 
 /* TODO: merge this with the github code */
@@ -225,6 +218,7 @@ gitlab_milestone_set_duedate(char const *const owner,
                              char const *const date)
 {
 	char *url, *e_owner, *e_repo, norm_date[9] = {0};
+	int rc = 0;
 
 	normalize_date_to_gitlab_format(date, norm_date, sizeof norm_date);
 
@@ -235,11 +229,11 @@ gitlab_milestone_set_duedate(char const *const owner,
 	                  gitlab_get_apibase(), e_owner, e_repo, milestone,
 	                  norm_date);
 
-	gcli_fetch_with_method("PUT", url, "", NULL, NULL);
+	rc = gcli_fetch_with_method("PUT", url, "", NULL, NULL);
 
 	free(url);
 	free(e_repo);
 	free(e_owner);
 
-	return 0;
+	return rc;
 }

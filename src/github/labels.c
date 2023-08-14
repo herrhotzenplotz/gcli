@@ -42,8 +42,12 @@ github_get_labels(char const *owner,
                   gcli_label_list *const out)
 {
 	char *url = NULL;
-	char *next_url = NULL;
-	gcli_fetch_buffer buffer = {0};
+	gcli_fetch_list_ctx ctx = {
+		.listp = &out->labels,
+		.sizep= &out->labels_size,
+		.parse = (parsefn)(parse_github_labels),
+		.max = max,
+	};
 
 	*out = (gcli_label_list) {0};
 
@@ -51,22 +55,10 @@ github_get_labels(char const *owner,
 		"%s/repos/%s/%s/labels",
 		gcli_get_apibase(), owner, reponame);
 
-	do {
-		struct json_stream stream = {0};
-
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
-		parse_github_labels(&stream, &out->labels, &out->labels_size);
-
-		json_close(&stream);
-		free(url);
-		free(buffer.data);
-	} while ((url = next_url) && ((int)(out->labels_size) < max || max < 0));
-
-	return 0;
+	return gcli_fetch_list(url, &ctx);
 }
 
-void
+int
 github_create_label(char const *owner,
                     char const *repo,
                     gcli_label *const label)
@@ -81,6 +73,7 @@ github_create_label(char const *owner,
 	sn_sv               label_colour = SV_NULL;
 	gcli_fetch_buffer   buffer       = {0};
 	struct json_stream  stream       = {0};
+	int                 rc           = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -105,11 +98,14 @@ github_create_label(char const *owner,
 	                   SV_ARGS(label_descr),
 	                   SV_ARGS(label_colour));
 
-	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
-	json_open_buffer(&stream, buffer.data, buffer.length);
-	parse_github_label(&stream, label);
+	rc = gcli_fetch_with_method("POST", url, data, NULL, &buffer);
 
-	json_close(&stream);
+	if (rc == 0) {
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		parse_github_label(&stream, label);
+		json_close(&stream);
+	}
+
 	free(url);
 	free(data);
 	free(e_owner);
@@ -119,16 +115,18 @@ github_create_label(char const *owner,
 	free(label_descr.data);
 	free(label_colour.data);
 	free(buffer.data);
+
+	return rc;
 }
 
-void
+int
 github_delete_label(char const *owner,
                     char const *repo,
                     char const *label)
 {
-	char              *url     = NULL;
-	char              *e_label = NULL;
-	gcli_fetch_buffer  buffer  = {0};
+	char *url     = NULL;
+	char *e_label = NULL;
+	int   rc      = 0;
 
 	e_label = gcli_urlencode(label);
 
@@ -137,9 +135,10 @@ github_delete_label(char const *owner,
 	                  gcli_get_apibase(),
 	                  owner, repo, e_label);
 
-	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	rc = gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
 
 	free(url);
 	free(e_label);
-	free(buffer.data);
+
+	return rc;
 }

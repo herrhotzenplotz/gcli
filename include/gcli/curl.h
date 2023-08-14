@@ -38,42 +38,57 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <pdjson/pdjson.h>
 #include <sn/sn.h>
 
+typedef void (*parsefn)(json_stream *stream, void *list, size_t *listsize);
+typedef void (*filterfn)(void *list, size_t *listsize, void const *userdata);
 typedef struct gcli_fetch_buffer gcli_fetch_buffer;
+typedef struct gcli_fetch_list_ctx gcli_fetch_list_ctx;
 
 struct gcli_fetch_buffer {
 	char   *data;
 	size_t  length;
 };
 
-void gcli_fetch(char const *url,
-                char **pagination_next,
-                gcli_fetch_buffer *out);
+struct gcli_fetch_list_ctx {
+	void *listp;                /* pointer to pointer of start of list */
+	size_t *sizep;              /* pointer to list size */
+	int max;
 
-void gcli_curl(FILE *stream,
-               char const *url,
-               char const *content_type);
+	parsefn parse;              /* json parse routine */
+	filterfn filter;            /* optional filter */
+	void const *userdata;
+};
 
-void gcli_fetch_with_method(char const *method,
-                            char const *url,
-                            char const *data,
-                            char **pagination_next,
-                            gcli_fetch_buffer *out);
+int gcli_fetch(char const *url,
+               char **pagination_next,
+               gcli_fetch_buffer *out);
 
-void gcli_post_upload(char const *url,
-                      char const *content_type,
-                      void *buffer,
-                      size_t buffer_size,
-                      gcli_fetch_buffer *out);
+int gcli_curl(FILE *stream,
+              char const *url,
+              char const *content_type);
 
-void gcli_curl_gitea_upload_attachment(char const *url,
-                                       char const *filename,
-                                       gcli_fetch_buffer *out);
+int gcli_fetch_with_method(char const *method,
+                           char const *url,
+                           char const *data,
+                           char **pagination_next,
+                           gcli_fetch_buffer *out);
+
+int gcli_post_upload(char const *url,
+                     char const *content_type,
+                     void *buffer,
+                     size_t buffer_size,
+                     gcli_fetch_buffer *out);
+
+int gcli_curl_gitea_upload_attachment(char const *url,
+                                      char const *filename,
+                                      gcli_fetch_buffer *out);
 
 bool gcli_curl_test_success(char const *url);
 char *gcli_urlencode(char const *);
 sn_sv gcli_urlencode_sv(sn_sv const);
 char *gcli_urldecode(char const *input);
+int gcli_fetch_list(char *url, gcli_fetch_list_ctx *ctx);
 
 #endif /* CURL_H */

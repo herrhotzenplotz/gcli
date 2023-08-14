@@ -41,12 +41,12 @@ int github_get_labels(char const *owner,
                       int max,
                       gcli_label_list *out);
 
-void github_create_label(char const *owner,
-                         char const *repo,
-                         gcli_label *label);
+int github_create_label(char const *owner,
+                        char const *repo,
+                        gcli_label *label);
 
-void github_delete_label(char const *owner,
-                         char const *repo,
-                         char const *label);
+int github_delete_label(char const *owner,
+                        char const *repo,
+                        char const *label);
 
 #endif /* GITHUB_LABELS_H */

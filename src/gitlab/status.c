@@ -37,42 +37,52 @@
 
 #include <templates/gitlab/status.h>
 
-size_t
+int
 gitlab_get_notifications(gcli_notification **const notifications,
                          int const count)
 {
-	char              *url                = NULL;
-	char              *next_url           = NULL;
-	gcli_fetch_buffer  buffer             = {0};
-	json_stream        stream             = {0};
-	size_t             notifications_size = 0;
+	char *url = NULL;
+	char *next_url = NULL;
+	gcli_fetch_buffer buffer = {0};
+	json_stream stream = {0};
+	size_t notifications_size = 0;
+	int rc = 0;
 
 	url = sn_asprintf("%s/todos", gitlab_get_apibase());
 
 	do {
-		gcli_fetch(url, &next_url, &buffer);
+		rc = gcli_fetch(url, &next_url, &buffer);
 
-		json_open_buffer(&stream, buffer.data, buffer.length);
+		if (rc == 0) {
+			json_open_buffer(&stream, buffer.data, buffer.length);
+			parse_gitlab_todos(&stream, notifications, &notifications_size);
+			json_close(&stream);
+		}
 
-		parse_gitlab_todos(&stream, notifications, &notifications_size);
-
-		json_close(&stream);
 		free(url);
 		free(buffer.data);
+
+		if (rc < 0)
+			break;
 	} while ((url = next_url) && (count < 0 || (int)notifications_size < count));
 
-	return notifications_size;
+	/* TODO: don't leak the list on error */
+	if (rc < 0)
+		return rc;
+
+	return (int)(notifications_size);
 }
 
-void
+int
 gitlab_notification_mark_as_read(char const *id)
 {
-	char              *url    = NULL;
-	gcli_fetch_buffer  buffer = {0};
+	char *url = NULL;
+	int rc = 0;
 
 	url = sn_asprintf("%s/todos/%s/mark_as_done", gitlab_get_apibase(), id);
-	gcli_fetch_with_method("POST", url, NULL, NULL, &buffer);
+	rc = gcli_fetch_with_method("POST", url, NULL, NULL, NULL);
 
 	free(url);
-	free(buffer.data);
+
+	return rc;
 }

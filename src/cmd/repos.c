@@ -60,7 +60,7 @@ subcommand_repos_create(int argc, char *argv[])
 {
 	int ch;
 	gcli_repo_create_options create_options = {0};
-	gcli_repo_list list = {0};
+	gcli_repo repo = {0};
 
 	const struct option options[] = {
 		{ .name    = "repo",
@@ -107,11 +107,11 @@ subcommand_repos_create(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	list.repos = gcli_repo_create(&create_options);
-	list.repos_size = 1;
+	if (gcli_repo_create(&create_options, &repo) < 0)
+		errx(1, "error: failed to create repository");
 
-	gcli_print_repos_table(0, &list, 1);
-	gcli_repos_free(&list);
+	gcli_repo_print(&repo);
+	gcli_repo_free(&repo);
 
 	return EXIT_SUCCESS;
 }
@@ -191,6 +191,8 @@ subcommand_repos(int argc, char *argv[])
 
 	/* List repos of the owner */
 	if (argc == 0) {
+		int rc = 0;
+
 		if (repo) {
 			fprintf(stderr, "error: repos: no actions specified\n");
 			usage();
@@ -198,9 +200,12 @@ subcommand_repos(int argc, char *argv[])
 		}
 
 		if (!owner)
-		    gcli_get_own_repos(n, &repos);
+		    rc = gcli_get_own_repos(n, &repos);
 		else
-			gcli_get_repos(owner, n, &repos);
+			rc = gcli_get_repos(owner, n, &repos);
+
+		if (rc < 0)
+			errx(1, "error: failed to fetch repos");
 
 		gcli_print_repos_table(flags, &repos, n);
 		gcli_repos_free(&repos);

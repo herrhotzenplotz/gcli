@@ -36,10 +36,8 @@
 #include <stdlib.h>
 
 int
-gcli_get_releases(char const *owner,
-                  char const *repo,
-                  int const max,
-                  gcli_release_list *const list)
+gcli_get_releases(char const *owner, char const *repo,
+                  int const max, gcli_release_list *const list)
 {
 	return gcli_forge()->get_releases(owner, repo, max, list);
 }
@@ -168,10 +166,13 @@ void
 gcli_free_releases(gcli_release_list *const list)
 {
 	for (size_t i = 0; i < list->releases_size; ++i) {
+		free(list->releases[i].id.data);
 		free(list->releases[i].name.data);
 		free(list->releases[i].body.data);
 		free(list->releases[i].author.data);
 		free(list->releases[i].date.data);
+		free(list->releases[i].upload_url.data);
+		free(list->releases[i].html_url.data);
 
 		for (size_t j = 0; j < list->releases[i].assets_size; ++j) {
 			free(list->releases[i].assets[j].name);
@@ -187,10 +188,10 @@ gcli_free_releases(gcli_release_list *const list)
 	list->releases_size = 0;
 }
 
-void
+int
 gcli_create_release(gcli_new_release const *release)
 {
-	gcli_forge()->create_release(release);
+	return gcli_forge()->create_release(release);
 }
 
 void
@@ -203,10 +204,10 @@ gcli_release_push_asset(gcli_new_release *const release,
 	release->assets[release->assets_size++] = asset;
 }
 
-void
+int
 gcli_delete_release(char const *const owner,
                     char const *const repo,
                     char const *const id)
 {
-	gcli_forge()->delete_release(owner, repo, id);
+	return gcli_forge()->delete_release(owner, repo, id);
 }

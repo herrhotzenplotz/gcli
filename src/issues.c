@@ -183,25 +183,23 @@ gcli_issue_print_op(gcli_issue const *const it)
 		pretty_print(it->body.data, 4, 80, stdout);
 }
 
-void
-gcli_get_issue(char const *owner,
-               char const *repo,
-               int const issue_number,
-               gcli_issue *const out)
+int
+gcli_get_issue(char const *owner, char const *repo,
+               int const issue_number, gcli_issue *const out)
 {
-	gcli_forge()->get_issue_summary(owner, repo, issue_number, out);
+	return gcli_forge()->get_issue_summary(owner, repo, issue_number, out);
 }
 
-void
+int
 gcli_issue_close(char const *owner, char const *repo, int const issue_number)
 {
-	gcli_forge()->issue_close(owner, repo, issue_number);
+	return gcli_forge()->issue_close(owner, repo, issue_number);
 }
 
-void
+int
 gcli_issue_reopen(char const *owner, char const *repo, int const issue_number)
 {
-	gcli_forge()->issue_reopen(owner, repo, issue_number);
+	return gcli_forge()->issue_reopen(owner, repo, issue_number);
 }
 
 static void
@@ -222,10 +220,11 @@ gcli_issue_get_user_message(gcli_submit_issue_options *opts)
 	return gcli_editor_get_user_message(issue_init_user_file, opts);
 }
 
-void
+int
 gcli_issue_submit(gcli_submit_issue_options opts)
 {
 	gcli_fetch_buffer json_buffer = {0};
+	int rc = 0;
 
 	opts.body = gcli_issue_get_user_message(&opts);
 
@@ -246,41 +245,45 @@ gcli_issue_submit(gcli_submit_issue_options opts)
 			errx(1, "Submission aborted.");
 	}
 
-	gcli_forge()->perform_submit_issue(opts, &json_buffer);
-	gcli_print_html_url(json_buffer);
+	rc = gcli_forge()->perform_submit_issue(opts, &json_buffer);
+
+	if (rc == 0)
+		gcli_print_html_url(json_buffer);
 
 	free(opts.body.data);
 	free(opts.body.data);
 	free(json_buffer.data);
+
+	return rc;
 }
 
-void
+int
 gcli_issue_assign(char const *owner,
                   char const *repo,
                   int const issue_number,
                   char const *assignee)
 {
-	gcli_forge()->issue_assign(owner, repo, issue_number, assignee);
+	return gcli_forge()->issue_assign(owner, repo, issue_number, assignee);
 }
 
-void
+int
 gcli_issue_add_labels(char const *owner,
                       char const *repo,
                       int const issue,
                       char const *const labels[],
                       size_t const labels_size)
 {
-	gcli_forge()->issue_add_labels(owner, repo, issue, labels, labels_size);
+	return gcli_forge()->issue_add_labels(owner, repo, issue, labels, labels_size);
 }
 
-void
+int
 gcli_issue_remove_labels(char const *owner,
                          char const *repo,
                          int const issue,
                          char const *const labels[],
                          size_t const labels_size)
 {
-	gcli_forge()->issue_remove_labels(owner, repo, issue, labels, labels_size);
+	return gcli_forge()->issue_remove_labels(owner, repo, issue, labels, labels_size);
 }
 
 int

@@ -36,9 +36,8 @@
 
 #include <gcli/status.h>
 
-size_t github_get_notifications(gcli_notification **notifications,
-                                int count);
+int github_get_notifications(gcli_notification **notifications, int count);
 
-void github_notification_mark_as_read(char const *id);
+int github_notification_mark_as_read(char const *id);
 
 #endif /* GITHUB_STATUS_H */

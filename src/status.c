@@ -33,24 +33,26 @@
 void
 gcli_status(int const count)
 {
-	gcli_notification *notifications      = NULL;
-	size_t             notifications_size = 0;
+	gcli_notification *notifications = NULL;
+	int notifications_size = 0;
 
 	notifications_size = gcli_get_notifications(&notifications, count);
+	if (notifications_size < 0)
+		errx(1, "error: failed to get notifications");
 
 	if (count < 0) {
 		gcli_print_notifications(notifications, notifications_size);
 	} else {
 		gcli_print_notifications(
 			notifications,
-			count < (int)notifications_size
-			? (size_t)count : notifications_size);
+			(size_t)(count < (int)notifications_size
+			         ? count : notifications_size));
 	}
 
 	gcli_free_notifications(notifications, notifications_size);
 }
 
-size_t
+int
 gcli_get_notifications(gcli_notification **const out, int const count)
 {
 	return gcli_forge()->get_notifications(out, count);
@@ -87,8 +89,8 @@ gcli_print_notifications(gcli_notification const *const notifications,
 	}
 }
 
-void
+int
 gcli_notification_mark_as_read(char const *id)
 {
-	gcli_forge()->notification_mark_as_read(id);
+	return gcli_forge()->notification_mark_as_read(id);
 }

@@ -47,38 +47,38 @@ int github_get_issues(char const *owner,
                       int max,
                       gcli_issue_list *out);
 
-void github_get_issue_summary(char const *owner,
-                              char const *repo,
-                              int issue_number,
-                              gcli_issue *out);
+int github_get_issue_summary(char const *owner,
+                             char const *repo,
+                             int issue_number,
+                             gcli_issue *out);
 
-void github_issue_close(char const *owner,
+int github_issue_close(char const *owner,
+                       char const *repo,
+                       int issue_number);
+
+int github_issue_reopen(char const *owner,
                         char const *repo,
                         int issue_number);
 
-void github_issue_reopen(char const *owner,
-                         char const *repo,
-                         int issue_number);
+int github_perform_submit_issue(gcli_submit_issue_options opts,
+                                gcli_fetch_buffer *out);
 
-void github_perform_submit_issue(gcli_submit_issue_options opts,
-                                 gcli_fetch_buffer *out);
+int github_issue_assign(char const *owner,
+                        char const *repo,
+                        int issue_number,
+                        char const *assignee);
 
-void github_issue_assign(char const *owner,
-                         char const *repo,
-                         int issue_number,
-                         char const *assignee);
+int github_issue_add_labels(char const *owner,
+                            char const *repo,
+                            int issue,
+                            char const *const labels[],
+                            size_t labels_size);
 
-void github_issue_add_labels(char const *owner,
-                             char const *repo,
-                             int issue,
-                             char const *const labels[],
-                             size_t labels_size);
-
-void github_issue_remove_labels(char const *owner,
-                                char const *repo,
-                                int issue,
-                                char const *const labels[],
-                                size_t labels_size);
+int github_issue_remove_labels(char const *owner,
+                               char const *repo,
+                               int issue,
+                               char const *const labels[],
+                               size_t labels_size);
 
 int github_issue_set_milestone(char const *owner,
                                char const *repo,

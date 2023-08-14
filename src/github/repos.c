@@ -40,11 +40,14 @@
 int
 github_get_repos(char const *owner, int const max, gcli_repo_list *const list)
 {
-	char               *url      = NULL;
-	char               *next_url = NULL;
-	char               *e_owner  = NULL;
-	gcli_fetch_buffer   buffer   = {0};
-	struct json_stream  stream   = {0};
+	char *url = NULL;
+	char *e_owner = NULL;
+	gcli_fetch_list_ctx ctx = {
+		.listp = &list->repos,
+		.sizep = &list->repos_size,
+		.max = max,
+		.parse = (parsefn)(parse_github_repos),
+	};
 
 	e_owner = gcli_urlencode(owner);
 
@@ -66,55 +69,34 @@ github_get_repos(char const *owner, int const max, gcli_repo_list *const list)
 		                  e_owner);
 	}
 
-	do {
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
-		parse_github_repos(&stream, &list->repos, &list->repos_size);
-
-		free(url);
-		free(buffer.data);
-		json_close(&stream);
-	} while ((url = next_url) && (max == -1 || (int)list->repos_size < max));
-
-	free(url);
 	free(e_owner);
 
-	return 0;
+	return gcli_fetch_list(url, &ctx);
 }
 
 int
 github_get_own_repos(int const max, gcli_repo_list *const list)
 {
-	char               *url      = NULL;
-	char               *next_url = NULL;
-	gcli_fetch_buffer   buffer   = {0};
-	struct json_stream  stream   = {0};
+	char *url = NULL;
+	gcli_fetch_list_ctx ctx = {
+		.listp = &list->repos,
+		.sizep = &list->repos_size,
+		.max = max,
+		.parse = (parsefn)(parse_github_repos),
+	};
 
 	url = sn_asprintf("%s/user/repos", gcli_get_apibase());
 
-	do {
-		buffer.length = 0;
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
-		parse_github_repos(&stream, &list->repos, &list->repos_size);
-
-		free(buffer.data);
-		json_close(&stream);
-		free(url);
-	} while ((url = next_url) && (max == -1 || (int)list->repos_size < max));
-
-	free(next_url);
-
-	return 0;
+	return gcli_fetch_list(url, &ctx);
 }
 
-void
+int
 github_repo_delete(char const *owner, char const *repo)
 {
-	char              *url     = NULL;
-	char              *e_owner = NULL;
-	char              *e_repo  = NULL;
-	gcli_fetch_buffer  buffer  = {0};
+	char *url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -123,25 +105,24 @@ github_repo_delete(char const *owner, char const *repo)
 	                  gcli_get_apibase(),
 	                  e_owner, e_repo);
 
-	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	rc = gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
 
-	free(buffer.data);
 	free(e_owner);
 	free(e_repo);
 	free(url);
+
+	return rc;
 }
 
-gcli_repo *
-github_repo_create(gcli_repo_create_options const *options) /* Options descriptor */
+int
+github_repo_create(gcli_repo_create_options const *options,
+                   gcli_repo *const out)
 {
-	gcli_repo          *repo;
-	char               *url, *data;
-	gcli_fetch_buffer   buffer = {0};
-	struct json_stream  stream = {0};
-	sn_sv               e_name, e_description;
-
-	/* Will be freed by the caller with gcli_repos_free */
-	repo = calloc(1, sizeof(gcli_repo));
+	char *url, *data;
+	gcli_fetch_buffer buffer = {0};
+	struct json_stream stream = {0};
+	sn_sv e_name, e_description;
+	int rc = 0;
 
 	/* Request preparation */
 	url = sn_asprintf("%s/user/repos", gcli_get_apibase());
@@ -158,17 +139,20 @@ github_repo_create(gcli_repo_create_options const *options) /* Options descripto
 	                   gcli_json_bool(options->private));
 
 	/* Fetch and parse result */
-	gcli_fetch_with_method("POST", url, data, NULL, &buffer);
-	json_open_buffer(&stream, buffer.data, buffer.length);
-	parse_github_repo(&stream, repo);
+	rc = gcli_fetch_with_method("POST", url, data, NULL, out ? &buffer : NULL);
+
+	if (rc == 0 && out) {
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		parse_github_repo(&stream, out);
+		json_close(&stream);
+	}
 
 	/* Cleanup */
-	json_close(&stream);
 	free(buffer.data);
 	free(e_name.data);
 	free(e_description.data);
 	free(data);
 	free(url);
 
-	return repo;
+	return rc;
 }

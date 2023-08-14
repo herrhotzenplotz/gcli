@@ -58,7 +58,7 @@ gcli_get_pulls(char const *owner,
                int const max,
                gcli_pull_list *const out)
 {
-	return gcli_forge()->get_prs(owner, repo, details, max, out);
+	return gcli_forge()->get_pulls(owner, repo, details, max, out);
 }
 
 void
@@ -124,7 +124,7 @@ gcli_print_pull_diff(FILE *stream,
                      char const *reponame,
                      int const pr_number)
 {
-	gcli_forge()->print_pr_diff(stream, owner, reponame, pr_number);
+	gcli_forge()->print_pull_diff(stream, owner, reponame, pr_number);
 }
 
 void
@@ -183,7 +183,7 @@ static int
 gcli_get_pull_commits(char const *owner,
                       char const *repo,
                       int const pr_number,
-                      gcli_commit **const out)
+                      gcli_commit_list *const out)
 {
 	return gcli_forge()->get_pull_commits(owner, repo, pr_number, out);
 }
@@ -208,8 +208,7 @@ cut_newline(char const *const _it)
 }
 
 static void
-gcli_print_commits_table(gcli_commit const *const commits,
-                         int const commits_size)
+gcli_print_commits_table(gcli_commit_list const *const list)
 {
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
@@ -220,7 +219,7 @@ gcli_print_commits_table(gcli_commit const *const commits,
 		{ .name = "MESSAGE", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
-	if (commits_size == 0) {
+	if (list->commits_size == 0) {
 		puts("No commits");
 		return;
 	}
@@ -229,10 +228,12 @@ gcli_print_commits_table(gcli_commit const *const commits,
 	if (!table)
 		errx(1, "error: could not initialize table");
 
-	for (int i = 0; i < commits_size; ++i) {
-		char *message = cut_newline(commits[i].message);
-		gcli_tbl_add_row(table, GCLI_COLOR_YELLOW, commits[i].sha,
-		                 commits[i].author, commits[i].email, commits[i].date,
+	for (size_t i = 0; i < list->commits_size; ++i) {
+		char *message = cut_newline(list->commits[i].message);
+		gcli_tbl_add_row(table, GCLI_COLOR_YELLOW, list->commits[i].sha,
+		                 list->commits[i].author,
+		                 list->commits[i].email,
+		                 list->commits[i].date,
 		                 message);
 		free(message);          /* message is copied by the function above */
 	}
@@ -241,30 +242,32 @@ gcli_print_commits_table(gcli_commit const *const commits,
 }
 
 static void
-gcli_commits_free(gcli_commit *it, int const size)
+gcli_commits_free(gcli_commit_list *list)
 {
-	for (int i = 0; i < size; ++i) {
-		free((void *)it[i].sha);
-		free((void *)it[i].message);
-		free((void *)it[i].date);
-		free((void *)it[i].author);
-		free((void *)it[i].email);
+	for (size_t i = 0; i < list->commits_size; ++i) {
+		free(list->commits[i].sha);
+		free(list->commits[i].message);
+		free(list->commits[i].date);
+		free(list->commits[i].author);
+		free(list->commits[i].email);
 	}
 
-	free(it);
+	free(list->commits);
+
+	list->commits = NULL;
+	list->commits_size = 0;
 }
 
 void
-gcli_pull_commits(char const *owner,
-                  char const *repo,
-                  int const pr_number)
+gcli_pull_commits(char const *owner, char const *repo, int const pr_number)
 {
-	gcli_commit *commits      = NULL;
-	int          commits_size = 0;
+	gcli_commit_list commits = {0};
 
-	commits_size = gcli_get_pull_commits(owner, repo, pr_number, &commits);
-	gcli_print_commits_table(commits, commits_size);
-	gcli_commits_free(commits, commits_size);
+	if (gcli_get_pull_commits(owner, repo, pr_number, &commits) < 0)
+		errx(1, "error: failed to fetch commits of the pull request");
+
+	gcli_print_commits_table(&commits);
+	gcli_commits_free(&commits);
 }
 
 void
@@ -285,13 +288,11 @@ gcli_pull_free(gcli_pull *const it)
 	free(it->labels);
 }
 
-void
-gcli_get_pull(char const *owner,
-              char const *repo,
-              int const pr_number,
-              gcli_pull *const out)
+int
+gcli_get_pull(char const *owner, char const *repo,
+              int const pr_number, gcli_pull *const out)
 {
-	gcli_forge()->get_pull(owner, repo, pr_number, out);
+	return gcli_forge()->get_pull(owner, repo, pr_number, out);
 }
 
 void
@@ -301,10 +302,10 @@ gcli_pull_print_op(gcli_pull *const pull)
 		pretty_print(pull->body, 4, 80, stdout);
 }
 
-void
+int
 gcli_pull_checks(char const *owner, char const *repo, int const pr_number)
 {
-	gcli_forge()->print_pr_checks(owner, repo, pr_number);
+	return gcli_forge()->print_pull_checks(owner, repo, pr_number);
 }
 
 static void
@@ -325,7 +326,7 @@ gcli_pull_get_user_message(gcli_submit_pull_options *opts)
 	return gcli_editor_get_user_message(pull_init_user_file, opts);
 }
 
-void
+int
 gcli_pull_submit(gcli_submit_pull_options opts)
 {
 	opts.body = gcli_pull_get_user_message(&opts);
@@ -349,49 +350,49 @@ gcli_pull_submit(gcli_submit_pull_options opts)
 		if (!sn_yesno("Do you want to continue?"))
 			errx(1, "PR aborted.");
 
-	gcli_forge()->perform_submit_pr(opts);
+	return gcli_forge()->perform_submit_pull(opts);
 }
 
-void
+int
 gcli_pull_merge(char const *owner,
                 char const *reponame,
                 int const pr_number,
                 enum gcli_merge_flags flags)
 {
-	gcli_forge()->pr_merge(owner, reponame, pr_number, flags);
+	return gcli_forge()->pull_merge(owner, reponame, pr_number, flags);
 }
 
-void
+int
 gcli_pull_close(char const *owner, char const *reponame, int const pr_number)
 {
-	gcli_forge()->pr_close(owner, reponame, pr_number);
+	return gcli_forge()->pull_close(owner, reponame, pr_number);
 }
 
-void
+int
 gcli_pull_reopen(char const *owner, char const *reponame, int const pr_number)
 {
-	gcli_forge()->pr_reopen(owner, reponame, pr_number);
+	return gcli_forge()->pull_reopen(owner, reponame, pr_number);
 }
 
-void
+int
 gcli_pull_add_labels(char const *owner,
                      char const *repo,
                      int const pr_number,
                      char const *const labels[],
                      size_t const labels_size)
 {
-	gcli_forge()->pr_add_labels(
+	return gcli_forge()->pull_add_labels(
 		owner, repo, pr_number, labels, labels_size);
 }
 
-void
+int
 gcli_pull_remove_labels(char const *owner,
                         char const *repo,
                         int const pr_number,
                         char const *const labels[],
                         size_t const labels_size)
 {
-	gcli_forge()->pr_remove_labels(
+	return gcli_forge()->pull_remove_labels(
 		owner, repo, pr_number, labels, labels_size);
 }
 
@@ -401,7 +402,7 @@ gcli_pull_set_milestone(char const *owner,
                         int pr_number,
                         int milestone_id)
 {
-	return gcli_forge()->pr_set_milestone(owner, repo, pr_number, milestone_id);
+	return gcli_forge()->pull_set_milestone(owner, repo, pr_number, milestone_id);
 }
 
 int
@@ -409,5 +410,5 @@ gcli_pull_clear_milestone(char const *owner,
                           char const *repo,
                           int pr_number)
 {
-	return gcli_forge()->pr_clear_milestone(owner, repo, pr_number);
+	return gcli_forge()->pull_clear_milestone(owner, repo, pr_number);
 }

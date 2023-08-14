@@ -192,7 +192,8 @@ subcommand_releases_create(int argc, char *argv[])
 		if (!sn_yesno("Do you want to create this release?"))
 			errx(1, "Aborted by user");
 
-	gcli_create_release(&release);
+	if (gcli_create_release(&release) < 0)
+		errx(1, "failed to create release");
 
 	return EXIT_SUCCESS;
 }
@@ -254,7 +255,8 @@ subcommand_releases_delete(int argc, char *argv[])
 		if (!sn_yesno("Are you sure you want to delete this release?"))
 			errx(1, "Aborted by user");
 
-	gcli_delete_release(owner, repo, argv[0]);
+	if (gcli_delete_release(owner, repo, argv[0]) < 0)
+		errx(1, "failed to delete the release");
 
 	return EXIT_SUCCESS;
 }

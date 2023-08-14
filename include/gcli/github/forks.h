@@ -41,8 +41,8 @@ int github_get_forks(char const *owner,
                      int max,
                      gcli_fork_list *out);
 
-void github_fork_create(char const *owner,
-                        char const *repo,
-                        char const *_in);
+int github_fork_create(char const *owner,
+                       char const *repo,
+                       char const *_in);
 
 #endif /* GITHUB_FORKS_H */

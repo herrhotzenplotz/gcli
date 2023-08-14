@@ -41,12 +41,12 @@ int gitea_get_labels(char const *owner,
                      int max,
                      gcli_label_list *out);
 
-void gitea_create_label(char const *owner,
-                        char const *repo,
-                        gcli_label *label);
+int gitea_create_label(char const *owner,
+                       char const *repo,
+                       gcli_label *label);
 
-void gitea_delete_label(char const *owner,
-                        char const *repo,
-                        char const *label);
+int gitea_delete_label(char const *owner,
+                       char const *repo,
+                       char const *label);
 
 #endif /* GITEA_LABELS_H */

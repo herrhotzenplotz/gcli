@@ -36,12 +36,14 @@
 
 #include <templates/github/comments.h>
 
-void
+int
 github_perform_submit_comment(gcli_submit_comment_opts opts,
                               gcli_fetch_buffer *out)
 {
-	char *e_owner     = gcli_urlencode(opts.owner);
-	char *e_repo      = gcli_urlencode(opts.repo);
+	int rc = 0;
+	char *e_owner = gcli_urlencode(opts.owner);
+	char *e_repo = gcli_urlencode(opts.repo);
+
 	char *post_fields = sn_asprintf(
 		"{ \"body\": \""SV_FMT"\" }",
 		SV_ARGS(opts.message));
@@ -50,59 +52,38 @@ github_perform_submit_comment(gcli_submit_comment_opts opts,
 		gcli_get_apibase(),
 		e_owner, e_repo, opts.target_id);
 
-	gcli_fetch_with_method("POST", url, post_fields, NULL, out);
+	rc = gcli_fetch_with_method("POST", url, post_fields, NULL, out);
+
 	free(post_fields);
 	free(e_owner);
 	free(e_repo);
 	free(url);
-}
 
-static int
-github_perform_get_comments(char const *_url, gcli_comment **const comments)
-{
-	size_t             count       = 0;
-	json_stream        stream      = {0};
-	gcli_fetch_buffer  json_buffer = {0};
-	char              *next_url    = NULL;
-	char              *url         = (char *)(_url);
-
-	do {
-		gcli_fetch(url, &next_url, &json_buffer);
-		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-
-		parse_github_comments(&stream, comments, &count);
-
-		json_close(&stream);
-		free(json_buffer.data);
-
-		if (url != _url)
-			free(url);
-	} while ((url = next_url));
-
-	return (int)count;
+	return rc;
 }
 
 int
-github_get_comments(char const *owner,
-                    char const *repo,
-                    int const issue,
-                    gcli_comment **const out)
+github_get_comments(char const *owner, char const *repo,
+                    int const issue, gcli_comment_list *const out)
 {
 	char *e_owner = NULL;
-	char *e_repo  = NULL;
-	char *url     = NULL;
+	char *e_repo = NULL;
+	char *url = NULL;
+	gcli_fetch_list_ctx ctx = {
+		.listp = &out->comments,
+		.sizep = &out->comments_size,
+		.parse = (parsefn)parse_github_comments,
+		.max = -1,
+	};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf(
-		"%s/repos/%s/%s/issues/%d/comments",
-		gcli_get_apibase(),
-		e_owner, e_repo, issue);
-	int n = github_perform_get_comments(url, out);
-
+	url = sn_asprintf("%s/repos/%s/%s/issues/%d/comments",
+	                  gcli_get_apibase(),
+	                  e_owner, e_repo, issue);
 	free(e_owner);
 	free(e_repo);
-	free(url);
-	return n;
+
+	return gcli_fetch_list(url, &ctx);
 }

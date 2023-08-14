@@ -194,7 +194,8 @@ subcommand_pull_create(int argc, char *argv[])
 
 	opts.title = SV(argv[0]);
 
-	gcli_pull_submit(opts);
+	if (gcli_pull_submit(opts) < 0)
+		errx(1, "error: failed to submit pull request");
 
 	free(opts.labels);
 
@@ -338,7 +339,9 @@ ensure_pull(char const *owner, char const *repo, int pr,
 	if (*fetched_pull)
 		return;
 
-	gcli_get_pull(owner, repo, pr, pull);
+	if (gcli_get_pull(owner, repo, pr, pull) < 0)
+		errx(1, "error: failed to fetch pull request data");
+
 	*fetched_pull = 1;
 }
 
@@ -392,7 +395,8 @@ handle_pull_actions(int argc, char *argv[],
 
 			/* Checks */
 			puts("\nCHECKS");
-			gcli_pull_checks(owner, repo, pr);
+			if (gcli_pull_checks(owner, repo, pr) < 0)
+				errx(1, "error: failed to fetch pull request checks");
 
 		} else if (strcmp(action, "op") == 0) {
 
@@ -423,7 +427,8 @@ handle_pull_actions(int argc, char *argv[],
 			gcli_pull_comments(owner, repo, pr);
 
 		} else if (strcmp(action, "ci") == 0) {
-			gcli_pull_checks(owner, repo, pr);
+			if (gcli_pull_checks(owner, repo, pr) < 0)
+				errx(1, "error: failed to fetch pull request checks");
 
 		} else if (strcmp(action, "merge") == 0) {
 			enum gcli_merge_flags flags = GCLI_PULL_MERGE_DELETEHEAD;
@@ -447,27 +452,33 @@ handle_pull_actions(int argc, char *argv[],
 				}
 			}
 
-			gcli_pull_merge(owner, repo, pr, flags);
+			if (gcli_pull_merge(owner, repo, pr, flags) < 0)
+				errx(1, "error: failed to merge pull request");
 
 		} else if (strcmp(action, "close") == 0) {
-			gcli_pull_close(owner, repo, pr);
+			if (gcli_pull_close(owner, repo, pr) < 0)
+				errx(1, "error: failed to close pull request");
 
 		} else if (strcmp(action, "reopen") == 0) {
-			gcli_pull_reopen(owner, repo, pr);
+			if (gcli_pull_reopen(owner, repo, pr) < 0)
+				errx(1, "error: failed to reopen pull request");
 
 		} else if (strcmp(action, "reviews") == 0) {
 			/* list reviews */
-			gcli_pr_review *reviews      = NULL;
-			size_t          reviews_size = gcli_review_get_reviews(
-				owner, repo, pr, &reviews);
-			gcli_review_print_review_table(reviews, reviews_size);
-			gcli_review_reviews_free(reviews, reviews_size);
+			gcli_pr_review_list reviews = {0};
+
+			if (gcli_review_get_reviews(owner, repo, pr, &reviews) < 0)
+				errx(1, "error: failed to fetch reviews");
+
+			gcli_review_print_review_table(&reviews);
+			gcli_review_reviews_free(&reviews);
 
 		} else if (strcmp("labels", action) == 0) {
 			const char **add_labels         = NULL;
 			size_t       add_labels_size    = 0;
 			const char **remove_labels      = NULL;
 			size_t       remove_labels_size = 0;
+			int          rc = 0;
 
 			if (argc == 0) {
 				fprintf(stderr, "error: expected label action\n");
@@ -480,12 +491,19 @@ handle_pull_actions(int argc, char *argv[],
 			                     &remove_labels, &remove_labels_size);
 
 			/* actually go about deleting and adding the labels */
-			if (add_labels_size)
-				gcli_pull_add_labels(
+			if (add_labels_size) {
+				rc = gcli_pull_add_labels(
 					owner, repo, pr, add_labels, add_labels_size);
-			if (remove_labels_size)
-				gcli_pull_remove_labels(
+				if (rc < 0)
+					errx(1, "failed to add labels");
+			}
+			if (remove_labels_size) {
+				rc = gcli_pull_remove_labels(
 					owner, repo, pr, remove_labels, remove_labels_size);
+
+				if (rc < 0)
+					errx(1, "failed to remove labels");
+			}
 
 			free(add_labels);
 			free(remove_labels);
@@ -494,7 +512,8 @@ handle_pull_actions(int argc, char *argv[],
 			char const *arg = shift(&argc, &argv);
 
 			if (strcmp(arg, "-d") == 0) {
-				gcli_pull_clear_milestone(owner, repo, pr);
+				if (gcli_pull_clear_milestone(owner, repo, pr) < 0)
+					errx(1, "failed to clear milestone");
 
 			} else {
 				int milestone_id = 0;
@@ -506,7 +525,8 @@ handle_pull_actions(int argc, char *argv[],
 					return EXIT_FAILURE;
 				}
 
-				gcli_pull_set_milestone(owner, repo, pr, milestone_id);
+				if (gcli_pull_set_milestone(owner, repo, pr, milestone_id) < 0)
+					errx(1, "error: failed to set milestone");
 			}
 		} else {
 			/* At this point we found an unknown action / stray

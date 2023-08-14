@@ -61,28 +61,19 @@ gcli_snippets_free(gcli_snippet_list *const list)
 int
 gcli_snippets_get(int const max, gcli_snippet_list *const out)
 {
-	char               *url      = NULL;
-	char               *next_url = NULL;
-	gcli_fetch_buffer   buffer   = {0};
-	struct json_stream  stream   = {0};
+	char *url = NULL;
+
+	gcli_fetch_list_ctx ctx = {
+		.listp = &out->snippets,
+		.sizep = &out->snippets_size,
+		.max = max,
+		.parse = (parsefn)(parse_gitlab_snippets),
+	};
 
 	*out = (gcli_snippet_list) {0};
-
 	url = sn_asprintf("%s/snippets", gitlab_get_apibase());
 
-	do {
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
-		parse_gitlab_snippets(&stream, &out->snippets, &out->snippets_size);
-
-		json_close(&stream);
-		free(url);
-		free(buffer.data);
-	} while ((url = next_url) && (max == -1 || (int)out->snippets_size < max));
-
-	free(next_url);
-
-	return 0;
+	return gcli_fetch_list(url, &ctx);;
 }
 
 static void
@@ -191,24 +182,29 @@ gcli_snippets_print(enum gcli_output_flags const flags,
 		gcli_print_snippets_short(flags, list, max);
 }
 
-void
+int
 gcli_snippet_delete(char const *snippet_id)
 {
-	gcli_fetch_buffer buffer = {0};
-	char *url = sn_asprintf("%s/snippets/%s", gitlab_get_apibase(), snippet_id);
+	int rc = 0;
+	char *url;
 
-	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	url = sn_asprintf("%s/snippets/%s", gitlab_get_apibase(), snippet_id);
+	rc = gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
 
 	free(url);
-	free(buffer.data);
+
+	return rc;
 }
 
-void
+int
 gcli_snippet_get(char const *snippet_id)
 {
+	int rc = 0;
 	char *url = sn_asprintf("%s/snippets/%s/raw",
 	                        gitlab_get_apibase(),
 	                        snippet_id);
-	gcli_curl(stdout, url, NULL);
+	rc = gcli_curl(stdout, url, NULL);
 	free(url);
+
+	return rc;
 }

@@ -48,7 +48,13 @@ github_get_milestones(char const *const owner,
                       int const max,
                       gcli_milestone_list *const out)
 {
-	char *url, *next_url = NULL, *e_owner, *e_repo;
+	char *url, *e_owner, *e_repo;
+	gcli_fetch_list_ctx ctx = {
+		.listp = &out->milestones,
+		.sizep = &out->milestones_size,
+		.parse = (parsefn)parse_github_milestones,
+		.max = max,
+	};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -57,23 +63,10 @@ github_get_milestones(char const *const owner,
 	                  gcli_get_apibase(),
 	                  e_owner, e_repo);
 
-	do {
-		gcli_fetch_buffer buffer = {0};
-		json_stream stream = {0};
+	free(e_owner);
+	free(e_repo);
 
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
-
-		parse_github_milestones(&stream, &out->milestones, &out->milestones_size);
-
-		json_close(&stream);
-		free(url);
-		free(buffer.data);
-	} while ((url = next_url) && ((max < 0) || (out->milestones_size < (size_t)max)));
-
-	free(url);
-
-	return 0;
+	return gcli_fetch_list(url, &ctx);
 }
 
 int
@@ -84,7 +77,7 @@ github_get_milestone(char const *const owner,
 {
 	char *url, *e_owner, *e_repo;
 	gcli_fetch_buffer buffer = {0};
-	json_stream stream = {0};
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -92,18 +85,22 @@ github_get_milestone(char const *const owner,
 	url = sn_asprintf("%s/repos/%s/%s/milestones/%d",
 	                  gcli_get_apibase(), e_owner, e_repo, milestone);
 
-	gcli_fetch(url, NULL, &buffer);
-	json_open_buffer(&stream, buffer.data, buffer.length);
-
-	parse_github_milestone(&stream, out);
-
-	json_close(&stream);
-	free(url);
-	free(buffer.data);
 	free(e_repo);
 	free(e_owner);
 
-	return 0;
+	rc = gcli_fetch(url, NULL, &buffer);
+	if (rc == 0) {
+		json_stream stream = {0};
+
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		parse_github_milestone(&stream, out);
+		json_close(&stream);
+	}
+
+	free(url);
+	free(buffer.data);
+
+	return rc;
 }
 
 int
@@ -132,6 +129,7 @@ github_create_milestone(struct gcli_milestone_create_args const *args)
 {
 	char *url, *e_owner, *e_repo;
 	char *json_body, *description;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(args->owner);
 	e_repo = gcli_urlencode(args->repo);
@@ -154,7 +152,7 @@ github_create_milestone(struct gcli_milestone_create_args const *args)
 	url = sn_asprintf("%s/repos/%s/%s/milestones",
 	                  gcli_get_apibase(), e_owner, e_repo);
 
-	gcli_fetch_with_method("POST", url, json_body, NULL, NULL);
+	rc = gcli_fetch_with_method("POST", url, json_body, NULL, NULL);
 
 	free(json_body);
 	free(description);
@@ -162,7 +160,7 @@ github_create_milestone(struct gcli_milestone_create_args const *args)
 	free(e_repo);
 	free(e_owner);
 
-	return 0;
+	return rc;
 }
 
 int
@@ -171,6 +169,7 @@ github_delete_milestone(char const *const owner,
                         int const milestone)
 {
 	char *url, *e_owner, *e_repo;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -180,13 +179,13 @@ github_delete_milestone(char const *const owner,
 	                  e_owner, e_repo,
 	                  milestone);
 
-	gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
+	rc = gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
 
 	free(url);
 	free(e_repo);
 	free(e_owner);
 
-	return 0;
+	return rc;
 }
 
 static void
@@ -224,6 +223,7 @@ github_milestone_set_duedate(char const *const owner,
                              char const *const date)
 {
 	char *url, *e_owner, *e_repo, *payload, norm_date[21] = {0};
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -235,12 +235,12 @@ github_milestone_set_duedate(char const *const owner,
 	normalize_date_to_iso8601(date, norm_date, sizeof norm_date);
 
 	payload = sn_asprintf("{ \"due_on\": \"%s\"}", norm_date);
-	gcli_fetch_with_method("PATCH", url, payload, NULL, NULL);
+	rc = gcli_fetch_with_method("PATCH", url, payload, NULL, NULL);
 
 	free(payload);
 	free(url);
 	free(e_repo);
 	free(e_owner);
 
-	return 0;
+	return rc;
 }

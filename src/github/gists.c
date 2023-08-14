@@ -65,11 +65,13 @@ parse_github_gist_files_idiot_hack(json_stream *stream, gcli_gist *const gist)
 int
 gcli_get_gists(char const *user, int const max, gcli_gist_list *const list)
 {
-	char               *url      = NULL;
-	char               *next_url = NULL;
-	gcli_fetch_buffer   buffer   = {0};
-	struct json_stream  stream   = {0};
-	size_t              size     = 0;
+	char *url = NULL;
+	gcli_fetch_list_ctx ctx = {
+		.listp = &list->gists,
+		.sizep = &list->gists_size,
+		.parse = (parsefn)(parse_github_gists),
+		.max = max,
+	};
 
 	if (user)
 		url = sn_asprintf(
@@ -79,19 +81,7 @@ gcli_get_gists(char const *user, int const max, gcli_gist_list *const list)
 	else
 		url = sn_asprintf("%s/gists", github_get_apibase());
 
-	do {
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
-		parse_github_gists(&stream, &list->gists, &list->gists_size);
-
-		json_close(&stream);
-		free(buffer.data);
-		free(url);
-	} while ((url = next_url) && (max == -1 || (int)size < max));
-
-	free(next_url);
-
-	return (int)size;
+	return gcli_fetch_list(url, &ctx);
 }
 
 static char const *
@@ -240,22 +230,26 @@ gcli_print_gists(enum gcli_output_flags const flags,
 gcli_gist *
 gcli_get_gist(char const *gist_id)
 {
-	char               *url    = NULL;
-	gcli_fetch_buffer   buffer = {0};
-	struct json_stream  stream = {0};
-	gcli_gist          *it     = NULL;
+	char *url = NULL;
+	gcli_fetch_buffer buffer = {0};
+	gcli_gist *it = NULL;
+	int rc = 0;
 
 	url = sn_asprintf("%s/gists/%s", github_get_apibase(), gist_id);
+	rc = gcli_fetch(url, NULL, &buffer);
 
-	gcli_fetch(url, NULL, &buffer);
+	if (rc == 0) {
+		struct json_stream  stream = {0};
 
-	json_open_buffer(&stream, buffer.data, buffer.length);
-	json_set_streaming(&stream, 1);
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		json_set_streaming(&stream, 1);
 
-	it = calloc(sizeof(gcli_gist), 1);
-	parse_github_gist(&stream, it);
+		it = calloc(sizeof(gcli_gist), 1);
+		parse_github_gist(&stream, it);
 
-	json_close(&stream);
+		json_close(&stream);
+	}
+
 	free(buffer.data);
 	free(url);
 

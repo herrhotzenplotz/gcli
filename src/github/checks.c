@@ -41,16 +41,14 @@
 
 #include <pdjson/pdjson.h>
 
-void
-github_get_checks(char const *owner,
-                  char const *repo,
-                  char const *ref,
-                  int const max,
+int
+github_get_checks(char const *owner, char const *repo,
+                  char const *ref, int const max,
                   gcli_github_checks *const out)
 {
-	gcli_fetch_buffer  buffer   = {0};
-	char              *url      = NULL;
-	char              *next_url = NULL;
+	gcli_fetch_buffer buffer = {0};
+	char *url = NULL, *next_url = NULL;
+	int rc = 0;
 
 	assert(out);
 
@@ -59,17 +57,26 @@ github_get_checks(char const *owner,
 	                  owner, repo, ref);
 
 	do {
-		struct json_stream stream = {0};
+		rc = gcli_fetch(url, &next_url, &buffer);
+		if (rc == 0) {
+			struct json_stream stream = {0};
 
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
+			json_open_buffer(&stream, buffer.data, buffer.length);
+			parse_github_checks(&stream, out);
+			json_close(&stream);
+		}
 
-		parse_github_checks(&stream, out);
-
-		json_close(&stream);
 		free(url);
 		free(buffer.data);
+
+		if (rc < 0)
+			break;
 	} while ((url = next_url) && ((int)(out->checks_size) < max || max < 0));
+
+	/* TODO: don't leak list on error */
+	free(next_url);
+
+	return rc;
 }
 
 void
@@ -121,14 +128,16 @@ github_free_checks(gcli_github_checks *const list)
 }
 
 int
-github_checks(char const *owner,
-              char const *repo,
-              char const *ref,
-              int const max)
+github_checks(char const *owner, char const *repo,
+              char const *ref, int const max)
 {
 	gcli_github_checks checks = {0};
+	int rc;
 
-	github_get_checks(owner, repo, ref, max, &checks);
+	rc = github_get_checks(owner, repo, ref, max, &checks);
+	if (rc < 0)
+		return rc;
+
 	github_print_checks(&checks);
 	github_free_checks(&checks);
 

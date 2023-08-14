@@ -266,8 +266,10 @@ handle_milestone_actions(int argc, char *argv[],
 			                 &fetched_milestone, &milestone);
 
 			gcli_print_milestone(&milestone);
+			if (gcli_milestone_get_issues(owner, repo, milestone_id, &issues) < 0)
+				errx(1, "error: failed to fetch issues");
+
 			printf("\nISSUES:\n");
-			gcli_milestone_get_issues(owner, repo, milestone_id, &issues);
 			gcli_print_issues_table(0, &issues, -1);
 			gcli_issues_free(&issues);
 
@@ -276,7 +278,8 @@ handle_milestone_actions(int argc, char *argv[],
 			gcli_issue_list issues = {0};
 
 			/* Fetch list of issues associated with milestone */
-			gcli_milestone_get_issues(owner, repo, milestone_id, &issues);
+			if (gcli_milestone_get_issues(owner, repo, milestone_id, &issues) < 0)
+				errx(1, "error: failed to fetch issues");
 
 			/* Print them as a table */
 			gcli_print_issues_table(0, &issues, -1);

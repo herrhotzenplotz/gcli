@@ -110,7 +110,8 @@ subcommand_forks_create(int argc, char *argv[])
 
 	check_owner_and_repo(&owner, &repo);
 
-	gcli_fork_create(owner, repo, in);
+	if (gcli_fork_create(owner, repo, in) < 0)
+		errx(1, "error: failed to fork repository");
 
 	if (!always_yes) {
 		if (!sn_yesno("Do you want to add a remote for the fork?"))

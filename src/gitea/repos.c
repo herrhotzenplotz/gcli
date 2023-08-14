@@ -42,14 +42,15 @@ gitea_get_own_repos(int const max, gcli_repo_list *const list)
 	return github_get_own_repos(max, list);
 }
 
-gcli_repo *
-gitea_repo_create(gcli_repo_create_options const *options)
+int
+gitea_repo_create(gcli_repo_create_options const *options,
+                  gcli_repo *const out)
 {
-	return github_repo_create(options);
+	return github_repo_create(options, out);
 }
 
-void
+int
 gitea_repo_delete(char const *owner, char const *repo)
 {
-	github_repo_delete(owner, repo);
+	return github_repo_delete(owner, repo);
 }

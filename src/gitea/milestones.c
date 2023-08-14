@@ -45,10 +45,15 @@ gitea_get_milestones(char const *const owner,
                      int const max,
                      gcli_milestone_list *const out)
 {
-	char *url = NULL, *next_url = NULL;
+	char *url;
 	char *e_owner, *e_repo;
-	gcli_fetch_buffer buffer = {0};
-	json_stream stream = {0};
+
+	gcli_fetch_list_ctx ctx = {
+		.listp = &out->milestones,
+		.sizep = &out->milestones_size,
+		.max = max,
+		.parse = (parsefn)(parse_gitea_milestones),
+	};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -56,33 +61,19 @@ gitea_get_milestones(char const *const owner,
 	url = sn_asprintf("%s/repos/%s/%s/milestones",
 	                  gcli_get_apibase(), e_owner, e_repo);
 
-	do {
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
-
-		parse_gitea_milestones(&stream, &out->milestones, &out->milestones_size);
-
-		json_close(&stream);
-		free(url);
-		free(buffer.data);
-	} while ((url = next_url) && ((max < 0) || (out->milestones_size < (size_t)max)));
-
-	free(url);
 	free(e_owner);
 	free(e_repo);
 
-	return 0;
+	return gcli_fetch_list(url, &ctx);
 }
 
 int
-gitea_get_milestone(char const *const owner,
-                    char const *const repo,
-                    int const milestone,
-                    gcli_milestone *const out)
+gitea_get_milestone(char const *const owner, char const *const repo,
+                    int const milestone, gcli_milestone *const out)
 {
 	char *url, *e_owner, *e_repo;
 	gcli_fetch_buffer buffer = {0};
-	json_stream stream = {0};
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -90,20 +81,23 @@ gitea_get_milestone(char const *const owner,
 	url = sn_asprintf("%s/repos/%s/%s/milestones/%d",
 	                  gcli_get_apibase(), e_owner, e_repo, milestone);
 
-	gcli_fetch(url, NULL, &buffer);
-	json_open_buffer(&stream, buffer.data, buffer.length);
+	free(e_owner);
+	free(e_repo);
 
-	parse_gitea_milestone(&stream, out);
+	rc = gcli_fetch(url, NULL, &buffer);
 
-	json_close(&stream);
+	if (rc == 0) {
+		json_stream stream = {0};
+
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		parse_gitea_milestone(&stream, out);
+		json_close(&stream);
+	}
 
 	free(buffer.data);
 	free(url);
 
-	free(e_owner);
-	free(e_repo);
-
-	return 0;
+	return rc;
 }
 
 int

@@ -41,8 +41,8 @@ int gitlab_get_forks(char const *owner,
                      int max,
                      gcli_fork_list *out);
 
-void gitlab_fork_create(char const *owner,
-                        char const *repo,
-                        char const *_in);
+int gitlab_fork_create(char const *owner,
+                       char const *repo,
+                       char const *_in);
 
 #endif /* GITLAB_FORKS_H */

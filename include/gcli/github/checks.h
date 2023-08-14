@@ -53,11 +53,9 @@ struct gcli_github_checks {
 	size_t             checks_size;
 };
 
-void github_get_checks(char const *owner,
-                       char const *repo,
-                       char const *ref,
-                       int max,
-                       gcli_github_checks *checks);
+int github_get_checks(char const *owner, char const *repo,
+                      char const *ref, int max,
+                      gcli_github_checks *checks);
 
 void github_print_checks(gcli_github_checks const *checks);
 

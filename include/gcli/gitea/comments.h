@@ -37,13 +37,10 @@
 #include <gcli/comments.h>
 #include <gcli/curl.h>
 
-int gitea_get_comments(
-	char const *owner,
-	char const *repo,
-	int issue,
-	gcli_comment **out);
+int gitea_get_comments(char const *owner, char const *repo,
+                       int issue, gcli_comment_list *out);
 
-void gitea_perform_submit_comment(
+int gitea_perform_submit_comment(
 	gcli_submit_comment_opts opts,
 	gcli_fetch_buffer *out);
 

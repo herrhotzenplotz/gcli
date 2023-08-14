@@ -48,39 +48,37 @@ int github_get_pulls(char const *owner,
                      int max,
                      gcli_pull_list *out);
 
-void github_print_pull_diff(FILE *stream,
-                            char const *owner,
-                            char const *reponame,
-                            int pr_number);
+int github_print_pull_diff(FILE *stream,
+                           char const *owner,
+                           char const *reponame,
+                           int pr_number);
 
 int github_pull_checks(char const *owner,
                        char const *repo,
                        int pr_number);
 
-void github_pull_merge(char const *owner,
-                       char const *reponame,
-                       int pr_number,
-                       enum gcli_merge_flags flags);
+int github_pull_merge(char const *owner,
+                      char const *reponame,
+                      int pr_number,
+                      enum gcli_merge_flags flags);
 
-void github_pull_reopen(char const *owner,
-                        char const *reponame,
-                        int pr_number);
-
-void github_pull_close(char const *owner,
+int github_pull_reopen(char const *owner,
                        char const *reponame,
                        int pr_number);
 
-void github_perform_submit_pull(gcli_submit_pull_options opts);
+int github_pull_close(char const *owner,
+                      char const *reponame,
+                      int pr_number);
 
-int github_get_pull_commits(char const *owner,
-                            char const *repo,
-                            int pr_number,
-                            gcli_commit **out);
+int github_perform_submit_pull(gcli_submit_pull_options opts);
 
-void github_get_pull(char const *owner,
-                     char const *repo,
-                     int pr_number,
-                     gcli_pull *out);
+int github_get_pull_commits(char const *owner, char const *repo,
+                            int pr_number, gcli_commit_list *out);
+
+int github_get_pull(char const *owner,
+                    char const *repo,
+                    int pr_number,
+                    gcli_pull *out);
 
 sn_sv github_pull_try_derive_head(void);
 

@@ -44,6 +44,7 @@ typedef struct gcli_pull                gcli_pull;
 typedef struct gcli_pull_fetch_details  gcli_pull_fetch_details;
 typedef struct gcli_submit_pull_options gcli_submit_pull_options;
 typedef struct gcli_commit              gcli_commit;
+typedef struct gcli_commit_list         gcli_commit_list;
 typedef struct gcli_pull_list           gcli_pull_list;
 
 struct gcli_pull_list {
@@ -78,7 +79,12 @@ struct gcli_pull {
 };
 
 struct gcli_commit {
-	char const *sha, *message, *date, *author, *email;
+	char *sha, *message, *date, *author, *email;
+};
+
+struct gcli_commit_list {
+	gcli_commit *commits;
+	size_t commits_size;
 };
 
 /* Options to submit to the gh api for creating a PR */
@@ -119,20 +125,18 @@ void gcli_print_pull_diff(FILE *stream,
                           char const *reponame,
                           int pr_number);
 
-void gcli_pull_checks(char const *owner,
-                      char const *repo,
-                      int pr_number);
+int gcli_pull_checks(char const *owner,
+                     char const *repo,
+                     int pr_number);
 
 void gcli_pull_commits(char const *owner,
                        char const *repo,
                        int pr_number);
 
-void gcli_get_pull(char const *owner,
-                   char const *repo,
-                   int pr_number,
-                   gcli_pull *out);
+int gcli_get_pull(char const *owner, char const *repo,
+                  int pr_number, gcli_pull *out);
 
-void gcli_pull_submit(gcli_submit_pull_options);
+int gcli_pull_submit(gcli_submit_pull_options);
 
 void gcli_pull_print_status(gcli_pull const *it);
 
@@ -143,30 +147,30 @@ enum gcli_merge_flags {
 	GCLI_PULL_MERGE_DELETEHEAD = 0x2, /* delete the source branch after merging */
 };
 
-void gcli_pull_merge(char const *owner,
-                     char const *reponame,
-                     int pr_number,
-                     enum gcli_merge_flags flags);
+int gcli_pull_merge(char const *owner,
+                    char const *reponame,
+                    int pr_number,
+                    enum gcli_merge_flags flags);
 
-void gcli_pull_close(char const *owner,
+int gcli_pull_close(char const *owner,
+                    char const *reponame,
+                    int pr_number);
+
+int gcli_pull_reopen(char const *owner,
                      char const *reponame,
                      int pr_number);
 
-void gcli_pull_reopen(char const *owner,
-                      char const *reponame,
-                      int pr_number);
+int gcli_pull_add_labels(char const *owner,
+                         char const *repo,
+                         int pr_number,
+                         char const *const labels[],
+                         size_t labels_size);
 
-void gcli_pull_add_labels(char const *owner,
-                          char const *repo,
-                          int pr_number,
-                          char const *const labels[],
-                          size_t labels_size);
-
-void gcli_pull_remove_labels(char const *owner,
-                             char const *repo,
-                             int pr_number,
-                             char const *const labels[],
-                             size_t labels_size);
+int gcli_pull_remove_labels(char const *owner,
+                            char const *repo,
+                            int pr_number,
+                            char const *const labels[],
+                            size_t labels_size);
 
 int gcli_pull_set_milestone(char const *owner,
                             char const *repo,

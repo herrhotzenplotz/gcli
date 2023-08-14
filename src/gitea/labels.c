@@ -44,28 +44,29 @@ gitea_get_labels(char const *owner,
 	return github_get_labels(owner, reponame, max, list);
 }
 
-void
+int
 gitea_create_label(char const *owner,
                    char const *repo,
                    gcli_label *const label)
 {
-	github_create_label(owner, repo, label);
+	return github_create_label(owner, repo, label);
 }
 
-void
+int
 gitea_delete_label(char const *owner,
                    char const *repo,
                    char const *label)
 {
-	char              *url    = NULL;
-	gcli_fetch_buffer  buffer = {0};
-	gcli_label_list    list   = {0};
-	int                id     = -1;
+	char            *url  = NULL;
+	gcli_label_list  list = {0};
+	int              id   = -1;
+	int              rc   = 0;
 
 	/* Gitea wants the id of the label, not its name. thus fetch all
 	 * the labels first to then find out what the id is we need. */
-	if (gitea_get_labels(owner, repo, -1, &list) < 0)
-		errx(1, "error: could not get list of labels");
+	rc = gitea_get_labels(owner, repo, -1, &list);
+	if (rc < 0)
+		return rc;
 
 	/* Search for the id */
 	for (size_t i = 0; i < list.labels_size; ++i) {
@@ -76,17 +77,21 @@ gitea_delete_label(char const *owner,
 	}
 
 	/* did we find a label? */
-	if (id < 0)
-		errx(1, "error: label '%s' does not exist", label);
+	if (id < 0) {
+		/* TODO: Save error message
+		 *  errx(1, "error: label '%s' does not exist", label); */
+		return -1;
+	}
 
 	/* DELETE /repos/{owner}/{repo}/labels/{} */
 	url = sn_asprintf("%s/repos/%s/%s/labels/%d",
 	                  gitea_get_apibase(),
 	                  owner, repo, id);
 
-	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	rc = gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
 
 	gcli_free_labels(&list);
 	free(url);
-	free(buffer.data);
+
+	return rc;
 }

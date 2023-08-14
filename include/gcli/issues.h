@@ -92,42 +92,40 @@ void gcli_print_issues_table(enum gcli_output_flags flags,
                              gcli_issue_list const *list,
                              int max);
 
-void gcli_get_issue(char const *owner,
-                    char const *reponame,
-                    int issue_number,
-                    gcli_issue *out);
+int gcli_get_issue(char const *owner, char const *reponame,
+                   int issue_number, gcli_issue *out);
 
 void gcli_issue_free(gcli_issue *it);
 
 void gcli_issue_print_summary(gcli_issue const *it);
 void gcli_issue_print_op(gcli_issue const *it);
 
-void gcli_issue_close(char const *owner,
+int gcli_issue_close(char const *owner,
+                     char const *repo,
+                     int issue_number);
+
+int gcli_issue_reopen(char const *owner,
                       char const *repo,
                       int issue_number);
 
-void gcli_issue_reopen(char const *owner,
-                       char const *repo,
-                       int issue_number);
+int gcli_issue_submit(gcli_submit_issue_options);
 
-void gcli_issue_submit(gcli_submit_issue_options);
+int gcli_issue_assign(char const *owner,
+                      char const *repo,
+                      int issue_number,
+                      char const *assignee);
 
-void gcli_issue_assign(char const *owner,
-                       char const *repo,
-                       int issue_number,
-                       char const *assignee);
+int gcli_issue_add_labels(char const *owner,
+                          char const *repo,
+                          int issue_number,
+                          char const *const labels[],
+                          size_t labels_size);
 
-void gcli_issue_add_labels(char const *owner,
-                           char const *repo,
-                           int issue_number,
-                           char const *const labels[],
-                           size_t labels_size);
-
-void gcli_issue_remove_labels(char const *owner,
-                              char const *repo,
-                              int issue_number,
-                              char const *const labels[],
-                              size_t labels_size);
+int gcli_issue_remove_labels(char const *owner,
+                             char const *repo,
+                             int issue_number,
+                             char const *const labels[],
+                             size_t labels_size);
 
 int gcli_issue_set_milestone(char const *owner,
                              char const *repo,

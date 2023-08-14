@@ -226,22 +226,26 @@ gcli_print_gists(enum gcli_output_flags const flags,
 gcli_gist *
 gcli_get_gist(char const *gist_id)
 {
-	char               *url    = NULL;
-	gcli_fetch_buffer   buffer = {0};
-	struct json_stream  stream = {0};
-	gcli_gist          *it     = NULL;
+	char *url = NULL;
+	gcli_fetch_buffer buffer = {0};
+	gcli_gist *it = NULL;
+	int rc = 0;
 
 	url = sn_asprintf("%s/gists/%s", github_get_apibase(), gist_id);
+	rc = gcli_fetch(url, NULL, &buffer);
 
-	gcli_fetch(url, NULL, &buffer);
+	if (rc == 0) {
+		struct json_stream  stream = {0};
 
-	json_open_buffer(&stream, buffer.data, buffer.length);
-	json_set_streaming(&stream, 1);
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		json_set_streaming(&stream, 1);
 
-	it = calloc(sizeof(gcli_gist), 1);
-	parse_github_gist(&stream, it);
+		it = calloc(sizeof(gcli_gist), 1);
+		parse_github_gist(&stream, it);
 
-	json_close(&stream);
+		json_close(&stream);
+	}
+
 	free(buffer.data);
 	free(url);
 

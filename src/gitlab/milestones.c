@@ -42,16 +42,18 @@
 #include <time.h>
 
 int
-gitlab_get_milestones(char const *owner,
-                      char const *repo,
-                      int max,
-                      gcli_milestone_list *const out)
+gitlab_get_milestones(char const *owner, char const *repo,
+                      int max, gcli_milestone_list *const out)
 {
-	char *url, *next_url = NULL;
+	char *url;
 	char *e_owner, *e_repo;
-	gcli_fetch_buffer buffer = {0};
-	json_stream stream = {0};
-	int rc = 0;
+
+	gcli_fetch_list_ctx ctx = {
+		.listp = &out->milestones,
+		.sizep = &out->milestones_size,
+		.max = max,
+		.parse = (parsefn)(parse_gitlab_milestones),
+	};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -59,29 +61,10 @@ gitlab_get_milestones(char const *owner,
 	url = sn_asprintf("%s/projects/%s%%2F%s/milestones",
 	                  gitlab_get_apibase(), e_owner, e_repo);
 
-	do {
-		rc = gcli_fetch(url, &next_url, &buffer);
-
-		if (rc == 0) {
-			json_open_buffer(&stream, buffer.data, buffer.length);
-			parse_gitlab_milestones(&stream, &out->milestones, &out->milestones_size);
-			json_close(&stream);
-		}
-
-		free(buffer.data);
-		free(url);
-
-		if (rc < 0)
-			break;
-	} while ((url = next_url) && (max == -1 || (int)out->milestones_size < max));
-
-	free(next_url);
 	free(e_owner);
 	free(e_repo);
 
-	/* TODO: don't leak the list on error */
-
-	return rc;
+	return gcli_fetch_list(url, &ctx);
 }
 
 int

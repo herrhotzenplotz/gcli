@@ -166,10 +166,13 @@ void
 gcli_free_releases(gcli_release_list *const list)
 {
 	for (size_t i = 0; i < list->releases_size; ++i) {
+		free(list->releases[i].id.data);
 		free(list->releases[i].name.data);
 		free(list->releases[i].body.data);
 		free(list->releases[i].author.data);
 		free(list->releases[i].date.data);
+		free(list->releases[i].upload_url.data);
+		free(list->releases[i].html_url.data);
 
 		for (size_t j = 0; j < list->releases[i].assets_size; ++j) {
 			free(list->releases[i].assets[j].name);

@@ -65,11 +65,7 @@ parse_github_gist_files_idiot_hack(json_stream *stream, gcli_gist *const gist)
 int
 gcli_get_gists(char const *user, int const max, gcli_gist_list *const list)
 {
-	char               *url      = NULL;
-	char               *next_url = NULL;
-	gcli_fetch_buffer   buffer   = {0};
-	struct json_stream  stream   = {0};
-	size_t              size     = 0;
+	char *url = NULL;
 
 	if (user)
 		url = sn_asprintf(
@@ -79,19 +75,9 @@ gcli_get_gists(char const *user, int const max, gcli_gist_list *const list)
 	else
 		url = sn_asprintf("%s/gists", github_get_apibase());
 
-	do {
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
-		parse_github_gists(&stream, &list->gists, &list->gists_size);
-
-		json_close(&stream);
-		free(buffer.data);
-		free(url);
-	} while ((url = next_url) && (max == -1 || (int)size < max));
-
-	free(next_url);
-
-	return (int)size;
+	return gcli_fetch_list(url, (parsefn)(parse_github_gists),
+	                       &list->gists, &list->gists_size,
+	                       max);
 }
 
 static char const *

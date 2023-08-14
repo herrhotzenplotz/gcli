@@ -65,9 +65,9 @@ int gcli_fetch(char const *url,
                char **pagination_next,
                gcli_fetch_buffer *out);
 
-void gcli_curl(FILE *stream,
-               char const *url,
-               char const *content_type);
+int gcli_curl(FILE *stream,
+              char const *url,
+              char const *content_type);
 
 int gcli_fetch_with_method(char const *method,
                            char const *url,

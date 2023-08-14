@@ -198,13 +198,14 @@ gcli_curl_test_success(char const *url)
  * STREAM.
  *
  * content_type may be NULL. */
-void
+int
 gcli_curl(FILE *stream, char const *url, char const *content_type)
 {
-	CURLcode           ret;
+	CURLcode ret;
 	struct curl_slist *headers;
-	gcli_fetch_buffer  buffer      = {0};
-	char              *auth_header = NULL;
+	gcli_fetch_buffer buffer = {0};
+	char *auth_header = NULL;
+	int rc = 0;
 
 	headers = NULL;
 
@@ -234,14 +235,18 @@ gcli_curl(FILE *stream, char const *url, char const *content_type)
 	curl_easy_setopt(gcli_curl_session, CURLOPT_FOLLOWLOCATION, 1L);
 
 	ret = curl_easy_perform(gcli_curl_session);
-	gcli_curl_check_api_error(ret, url, &buffer);
+	rc = gcli_curl_check_api_error(ret, url, &buffer);
 
-	fwrite(buffer.data, 1, buffer.length, stream);
+	if (rc == 0)
+		fwrite(buffer.data, 1, buffer.length, stream);
+
 	free(buffer.data);
 
 	curl_slist_free_all(headers);
 
 	free(auth_header);
+
+	return rc;
 }
 
 /* Callback to extract the link header for pagination handling. */

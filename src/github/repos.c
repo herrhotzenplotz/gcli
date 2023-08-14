@@ -77,27 +77,17 @@ github_get_repos(char const *owner, int const max, gcli_repo_list *const list)
 int
 github_get_own_repos(int const max, gcli_repo_list *const list)
 {
-	char               *url      = NULL;
-	char               *next_url = NULL;
-	gcli_fetch_buffer   buffer   = {0};
-	struct json_stream  stream   = {0};
+	char *url = NULL;
+	gcli_fetch_list_ctx ctx = {
+		.listp = &list->repos,
+		.sizep = &list->repos_size,
+		.max = max,
+		.parse = (parsefn)(parse_github_repos),
+	};
 
 	url = sn_asprintf("%s/user/repos", gcli_get_apibase());
 
-	do {
-		buffer.length = 0;
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
-		parse_github_repos(&stream, &list->repos, &list->repos_size);
-
-		free(buffer.data);
-		json_close(&stream);
-		free(url);
-	} while ((url = next_url) && (max == -1 || (int)list->repos_size < max));
-
-	free(next_url);
-
-	return 0;
+	return gcli_fetch_list(url, &ctx);
 }
 
 int

@@ -39,41 +39,17 @@
 
 /** Given the url fetch issues */
 int
-gitlab_fetch_issues(char *url,
-                    int const max,
+gitlab_fetch_issues(char *url, int const max,
                     gcli_issue_list *const out)
 {
-	json_stream stream = {0};
-	gcli_fetch_buffer json_buffer = {0};
-	char *next_url = NULL;
-	int rc = 0;
+	gcli_fetch_list_ctx ctx = {
+		.listp = &out->issues,
+		.sizep = &out->issues_size,
+		.max = max,
+		.parse = (parsefn)(parse_gitlab_issues),
+	};
 
-	do {
-		rc = gcli_fetch(url, &next_url, &json_buffer);
-
-		if (rc == 0) {
-			json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-			parse_gitlab_issues(&stream, &out->issues, &out->issues_size);
-			json_close(&stream);
-		}
-
-		free(json_buffer.data);
-		json_buffer.data = NULL;
-		json_buffer.length = 0;
-
-		free(url);
-
-		if (rc < 0)
-			break;
-
-	} while ((url = next_url) && (max == -1 || (int)out->issues_size < max));
-	/* continue iterating if we have both a next_url and we are
-	 * supposed to fetch more issues (either max is -1 thus all issues
-	 * or we haven't fetched enough yet). */
-
-	free(next_url);
-
-	return rc;
+	return gcli_fetch_list(url, &ctx);
 }
 
 int

@@ -302,10 +302,10 @@ gcli_pull_print_op(gcli_pull *const pull)
 		pretty_print(pull->body, 4, 80, stdout);
 }
 
-void
+int
 gcli_pull_checks(char const *owner, char const *repo, int const pr_number)
 {
-	gcli_forge()->print_pull_checks(owner, repo, pr_number);
+	return gcli_forge()->print_pull_checks(owner, repo, pr_number);
 }
 
 static void

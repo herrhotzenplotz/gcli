@@ -119,9 +119,9 @@ void gcli_print_pull_diff(FILE *stream,
                           char const *reponame,
                           int pr_number);
 
-void gcli_pull_checks(char const *owner,
-                      char const *repo,
-                      int pr_number);
+int gcli_pull_checks(char const *owner,
+                     char const *repo,
+                     int pr_number);
 
 void gcli_pull_commits(char const *owner,
                        char const *repo,

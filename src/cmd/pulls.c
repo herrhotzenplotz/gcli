@@ -395,7 +395,8 @@ handle_pull_actions(int argc, char *argv[],
 
 			/* Checks */
 			puts("\nCHECKS");
-			gcli_pull_checks(owner, repo, pr);
+			if (gcli_pull_checks(owner, repo, pr) < 0)
+				errx(1, "error: failed to fetch pull request checks");
 
 		} else if (strcmp(action, "op") == 0) {
 
@@ -426,7 +427,8 @@ handle_pull_actions(int argc, char *argv[],
 			gcli_pull_comments(owner, repo, pr);
 
 		} else if (strcmp(action, "ci") == 0) {
-			gcli_pull_checks(owner, repo, pr);
+			if (gcli_pull_checks(owner, repo, pr) < 0)
+				errx(1, "error: failed to fetch pull request checks");
 
 		} else if (strcmp(action, "merge") == 0) {
 			enum gcli_merge_flags flags = GCLI_PULL_MERGE_DELETEHEAD;

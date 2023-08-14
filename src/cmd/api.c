@@ -64,7 +64,8 @@ fetch_all(char *_url)
 	do {
 		gcli_fetch_buffer buffer = {0};
 
-		gcli_fetch(url, &next_url, &buffer);
+		if (gcli_fetch(url, &next_url, &buffer) < 0)
+			errx(1, "error: failed to fetch data");
 
 		fwrite(buffer.data, buffer.length, 1, stdout);
 

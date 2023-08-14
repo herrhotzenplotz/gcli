@@ -72,10 +72,8 @@ int github_pull_close(char const *owner,
 
 int github_perform_submit_pull(gcli_submit_pull_options opts);
 
-int github_get_pull_commits(char const *owner,
-                            char const *repo,
-                            int pr_number,
-                            gcli_commit **out);
+int github_get_pull_commits(char const *owner, char const *repo,
+                            int pr_number, gcli_commit_list *out);
 
 int github_get_pull(char const *owner,
                     char const *repo,

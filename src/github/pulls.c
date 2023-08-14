@@ -314,18 +314,19 @@ github_perform_submit_pull(gcli_submit_pull_options opts)
 }
 
 int
-github_get_pull_commits(char const *owner,
-                        char const *repo,
-                        int const pr_number,
-                        gcli_commit **const out)
+github_get_pull_commits(char const *owner, char const *repo,
+                        int const pr_number, gcli_commit_list *const out)
 {
-	char              *url         = NULL;
-	char              *next_url    = NULL;
-	char              *e_owner     = NULL;
-	char              *e_repo      = NULL;
-	size_t             count       = 0;
-	json_stream        stream      = {0};
-	gcli_fetch_buffer  json_buffer = {0};
+	char *url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+
+	gcli_fetch_list_ctx ctx = {
+		.listp = &out->commits,
+		.sizep = &out->commits_size,
+		.max = -1,
+		.parse = (parsefn)(parse_github_commits),
+	};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -335,21 +336,10 @@ github_get_pull_commits(char const *owner,
 		gcli_get_apibase(),
 		e_owner, e_repo, pr_number);
 
-	do {
-		gcli_fetch(url, &next_url, &json_buffer);
-		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-
-		parse_github_commits(&stream, out, &count);
-
-		json_close(&stream);
-		free(json_buffer.data);
-		free(url);
-	} while ((url = next_url));
-
 	free(e_owner);
 	free(e_repo);
 
-	return (int)count;
+	return gcli_fetch_list(url, &ctx);
 }
 
 int

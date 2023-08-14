@@ -44,6 +44,7 @@ typedef struct gcli_pull                gcli_pull;
 typedef struct gcli_pull_fetch_details  gcli_pull_fetch_details;
 typedef struct gcli_submit_pull_options gcli_submit_pull_options;
 typedef struct gcli_commit              gcli_commit;
+typedef struct gcli_commit_list         gcli_commit_list;
 typedef struct gcli_pull_list           gcli_pull_list;
 
 struct gcli_pull_list {
@@ -78,7 +79,12 @@ struct gcli_pull {
 };
 
 struct gcli_commit {
-	char const *sha, *message, *date, *author, *email;
+	char *sha, *message, *date, *author, *email;
+};
+
+struct gcli_commit_list {
+	gcli_commit *commits;
+	size_t commits_size;
 };
 
 /* Options to submit to the gh api for creating a PR */

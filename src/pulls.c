@@ -183,7 +183,7 @@ static int
 gcli_get_pull_commits(char const *owner,
                       char const *repo,
                       int const pr_number,
-                      gcli_commit **const out)
+                      gcli_commit_list *const out)
 {
 	return gcli_forge()->get_pull_commits(owner, repo, pr_number, out);
 }
@@ -208,8 +208,7 @@ cut_newline(char const *const _it)
 }
 
 static void
-gcli_print_commits_table(gcli_commit const *const commits,
-                         int const commits_size)
+gcli_print_commits_table(gcli_commit_list const *const list)
 {
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
@@ -220,7 +219,7 @@ gcli_print_commits_table(gcli_commit const *const commits,
 		{ .name = "MESSAGE", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
-	if (commits_size == 0) {
+	if (list->commits_size == 0) {
 		puts("No commits");
 		return;
 	}
@@ -229,10 +228,12 @@ gcli_print_commits_table(gcli_commit const *const commits,
 	if (!table)
 		errx(1, "error: could not initialize table");
 
-	for (int i = 0; i < commits_size; ++i) {
-		char *message = cut_newline(commits[i].message);
-		gcli_tbl_add_row(table, GCLI_COLOR_YELLOW, commits[i].sha,
-		                 commits[i].author, commits[i].email, commits[i].date,
+	for (size_t i = 0; i < list->commits_size; ++i) {
+		char *message = cut_newline(list->commits[i].message);
+		gcli_tbl_add_row(table, GCLI_COLOR_YELLOW, list->commits[i].sha,
+		                 list->commits[i].author,
+		                 list->commits[i].email,
+		                 list->commits[i].date,
 		                 message);
 		free(message);          /* message is copied by the function above */
 	}
@@ -241,33 +242,32 @@ gcli_print_commits_table(gcli_commit const *const commits,
 }
 
 static void
-gcli_commits_free(gcli_commit *it, int const size)
+gcli_commits_free(gcli_commit_list *list)
 {
-	for (int i = 0; i < size; ++i) {
-		free((void *)it[i].sha);
-		free((void *)it[i].message);
-		free((void *)it[i].date);
-		free((void *)it[i].author);
-		free((void *)it[i].email);
+	for (size_t i = 0; i < list->commits_size; ++i) {
+		free(list->commits[i].sha);
+		free(list->commits[i].message);
+		free(list->commits[i].date);
+		free(list->commits[i].author);
+		free(list->commits[i].email);
 	}
 
-	free(it);
+	free(list->commits);
+
+	list->commits = NULL;
+	list->commits_size = 0;
 }
 
 void
-gcli_pull_commits(char const *owner,
-                  char const *repo,
-                  int const pr_number)
+gcli_pull_commits(char const *owner, char const *repo, int const pr_number)
 {
-	gcli_commit *commits = NULL;
-	int commits_size = 0;
+	gcli_commit_list commits = {0};
 
-	commits_size = gcli_get_pull_commits(owner, repo, pr_number, &commits);
-	if (commits_size < 0)
+	if (gcli_get_pull_commits(owner, repo, pr_number, &commits) < 0)
 		errx(1, "error: failed to fetch commits of the pull request");
 
-	gcli_print_commits_table(commits, commits_size);
-	gcli_commits_free(commits, commits_size);
+	gcli_print_commits_table(&commits);
+	gcli_commits_free(&commits);
 }
 
 void

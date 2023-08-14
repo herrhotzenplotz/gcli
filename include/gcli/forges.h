@@ -282,7 +282,7 @@ struct gcli_forge_descriptor {
 		char const *owner,
 		char const *repo,
 		int pr_number,
-		gcli_commit **out);
+		gcli_commit_list *out);
 
 	/** Bitmask of unsupported fields in the pull summary for this
 	 * forge */

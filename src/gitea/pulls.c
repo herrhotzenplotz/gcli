@@ -55,7 +55,7 @@ int
 gitea_get_pull_commits(char const *owner,
                        char const *repo,
                        int const pr_number,
-                       gcli_commit **const out)
+                       gcli_commit_list *const out)
 {
 	return github_get_pull_commits(owner, repo, pr_number, out);
 }

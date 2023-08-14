@@ -50,30 +50,16 @@ gitlab_mrs_fixup(gcli_pull_list *const list)
 int
 gitlab_fetch_mrs(char *url, int const max, gcli_pull_list *const list)
 {
-	char *next_url = NULL;
 	int rc = 0;
 
-	do {
-		gcli_fetch_buffer json_buffer = {0};
+	gcli_fetch_list_ctx ctx = {
+		.listp = &list->pulls,
+		.sizep = &list->pulls_size,
+		.max = max,
+		.parse = (parsefn)(parse_gitlab_mrs),
+	};
 
-		rc = gcli_fetch(url, &next_url, &json_buffer);
-
-		if (rc == 0) {
-			json_stream stream = {0};
-
-			json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-			parse_gitlab_mrs(&stream, &list->pulls, &list->pulls_size);
-			json_close(&stream);
-		}
-
-		free(url);
-		free(json_buffer.data);
-
-		if (rc < 0)
-			break;
-	} while ((url = next_url) && (max == -1 || (int)list->pulls_size < max));
-
-	free(url);
+	rc = gcli_fetch_list(url, &ctx);
 
 	/* TODO: don't leak the list on error */
 	if (rc == 0)
@@ -185,10 +171,8 @@ gitlab_mr_merge(char const *owner,
 }
 
 int
-gitlab_get_pull(char const *owner,
-                char const *repo,
-                int const pr_number,
-                gcli_pull *const out)
+gitlab_get_pull(char const *owner, char const *repo,
+                int const pr_number, gcli_pull *const out)
 {
 	gcli_fetch_buffer json_buffer = {0};
 	char *url = NULL;
@@ -222,17 +206,19 @@ gitlab_get_pull(char const *owner,
 }
 
 int
-gitlab_get_pull_commits(char const *owner,
-                        char const *repo,
-                        int const pr_number,
-                        gcli_commit **const out)
+gitlab_get_pull_commits(char const *owner, char const *repo,
+                        int const pr_number, gcli_commit_list *const out)
 {
 	char *url = NULL;
-	char *next_url = NULL;
 	char *e_owner = NULL;
 	char *e_repo = NULL;
-	size_t count = 0;
-	int rc = 0;
+
+	gcli_fetch_list_ctx ctx = {
+		.listp = &out->commits,
+		.sizep = &out->commits_size,
+		.max = -1,
+		.parse = (parsefn)(parse_gitlab_commits),
+	};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -246,27 +232,7 @@ gitlab_get_pull_commits(char const *owner,
 	free(e_owner);
 	free(e_repo);
 
-	do {
-		gcli_fetch_buffer json_buffer = {0};
-
-		rc = gcli_fetch(url, &next_url, &json_buffer);
-		if (rc == 0) {
-			json_stream stream = {0};
-
-			json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-			parse_gitlab_commits(&stream, out, &count);
-			json_close(&stream);
-		}
-
-		free(url);
-		free(json_buffer.data);
-
-		/* TODO: don't leak the list on error */
-		if (rc < 0)
-			return rc;
-	} while ((url = next_url));
-
-	return (int)(count);
+	return gcli_fetch_list(url, &ctx);
 }
 
 int

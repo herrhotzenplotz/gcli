@@ -69,10 +69,8 @@ int gitlab_get_pull(char const *owner,
                     int pr_number,
                     gcli_pull *out);
 
-int gitlab_get_pull_commits(char const *owner,
-                            char const *repo,
-                            int pr_number,
-                            gcli_commit **out);
+int gitlab_get_pull_commits(char const *owner, char const *repo,
+                            int pr_number, gcli_commit_list *out);
 
 int gitlab_perform_submit_mr(gcli_submit_pull_options opts);
 

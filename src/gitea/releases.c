@@ -53,38 +53,41 @@ gitea_parse_release(gcli_fetch_buffer const *const buffer,
 	json_close(&stream);
 }
 
-static void
+static int
 gitea_upload_release_asset(char *const url,
                            gcli_release_asset_upload const asset)
 {
-	char              *e_assetname = NULL;
-	char              *request     = NULL;
-	gcli_fetch_buffer  buffer      = {0};
+	char *e_assetname = NULL;
+	char *request = NULL;
+	gcli_fetch_buffer buffer = {0};
+	int rc = 0;
 
 	e_assetname = gcli_urlencode(asset.name);
 	request = sn_asprintf("%s?name=%s", url, e_assetname);
 
-	gcli_curl_gitea_upload_attachment(request, asset.path, &buffer);
+	rc = gcli_curl_gitea_upload_attachment(request, asset.path, &buffer);
 
 	free(request);
 	free(e_assetname);
 	free(buffer.data);
+
+	return rc;
 }
 
 int
 gitea_create_release(gcli_new_release const *release)
 {
-	char              *commitish_json = NULL;
-	char              *e_owner        = NULL;
-	char              *e_repo         = NULL;
-	char              *name_json      = NULL;
-	char              *post_data      = NULL;
-	char              *upload_url     = NULL;
-	char              *url            = NULL;
-	gcli_fetch_buffer  buffer         = {0};
-	gcli_release       response       = {0};
-	sn_sv              escaped_body   = {0};
-	int                rc             = 0;
+	char *commitish_json = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	char *name_json = NULL;
+	char *post_data = NULL;
+	char *upload_url = NULL;
+	char *url = NULL;
+	gcli_fetch_buffer buffer = {0};
+	gcli_release response = {0};
+	sn_sv escaped_body = {0};
+	int rc = 0;
 
 	e_owner = gcli_urlencode(release->owner);
 	e_repo  = gcli_urlencode(release->repo);
@@ -134,7 +137,10 @@ gitea_create_release(gcli_new_release const *release)
 
 	for (size_t i = 0; i < release->assets_size; ++i) {
 		printf("INFO : Uploading asset %s...\n", release->assets[i].path);
-		gitea_upload_release_asset(upload_url, release->assets[i]);
+		rc = gitea_upload_release_asset(upload_url, release->assets[i]);
+
+		if (rc < 0)
+			break;
 	}
 
 out:

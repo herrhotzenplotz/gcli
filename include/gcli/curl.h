@@ -75,11 +75,11 @@ int gcli_fetch_with_method(char const *method,
                            char **pagination_next,
                            gcli_fetch_buffer *out);
 
-void gcli_post_upload(char const *url,
-                      char const *content_type,
-                      void *buffer,
-                      size_t buffer_size,
-                      gcli_fetch_buffer *out);
+int gcli_post_upload(char const *url,
+                     char const *content_type,
+                     void *buffer,
+                     size_t buffer_size,
+                     gcli_fetch_buffer *out);
 
 void gcli_curl_gitea_upload_attachment(char const *url,
                                        char const *filename,

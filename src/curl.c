@@ -415,15 +415,16 @@ gcli_fetch_with_method(
  *
  * content_type may not be NULL.
  */
-void
+int
 gcli_post_upload(char const *url,
                  char const *content_type,
                  void *buffer,
                  size_t const buffer_size,
                  gcli_fetch_buffer *const out)
 {
-	CURLcode              ret;
-	struct curl_slist    *headers;
+	CURLcode ret;
+	struct curl_slist *headers;
+	int rc = 0;
 
 	char *auth_header = gcli_config_get_authheader();
 	char *contenttype_header = sn_asprintf(
@@ -457,7 +458,7 @@ gcli_post_upload(char const *url,
 	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
 
 	ret = curl_easy_perform(gcli_curl_session);
-	gcli_curl_check_api_error(ret, url, out);
+	rc = gcli_curl_check_api_error(ret, url, out);
 
 	curl_slist_free_all(headers);
 	headers = NULL;
@@ -465,6 +466,8 @@ gcli_post_upload(char const *url,
 	free(auth_header);
 	free(contentsize_header);
 	free(contenttype_header);
+
+	return rc;
 }
 
 /** gcli_gitea_upload_attachment:

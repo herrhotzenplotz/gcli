@@ -39,18 +39,19 @@
 #include <templates/github/releases.h>
 
 int
-github_get_releases(char const *owner,
-                    char const *repo,
-                    int const max,
-                    gcli_release_list *const list)
+github_get_releases(char const *owner, char const *repo,
+                    int const max, gcli_release_list *const list)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
 	char *e_repo = NULL;
-	char *next_url = NULL;
-	gcli_fetch_buffer buffer = {0};
-	struct json_stream stream = {0};
-	int rc = 0;
+
+	gcli_fetch_list_ctx ctx = {
+		.listp = &list->releases,
+		.sizep = &list->releases_size,
+		.max = max,
+		.parse = (parsefn)(parse_github_releases),
+	};
 
 	*list = (gcli_release_list) {0};
 
@@ -62,28 +63,10 @@ github_get_releases(char const *owner,
 		gcli_get_apibase(),
 		e_owner, e_repo);
 
-	do {
-		rc = gcli_fetch(url, &next_url, &buffer);
-		if (rc == 0) {
-			json_open_buffer(&stream, buffer.data, buffer.length);
-			parse_github_releases(&stream, &list->releases, &list->releases_size);
-			json_close(&stream);
-		}
-
-		free(url);
-		free(buffer.data);
-
-		if (rc < 0)
-			break;
-	} while ((url = next_url) && (max == -1 || (int)list->releases_size < max));
-
-	free(next_url);
 	free(e_owner);
 	free(e_repo);
 
-	/* TODO: Don't leak the list in case of an error */
-
-	return rc;
+	return gcli_fetch_list(url, &ctx);
 }
 
 static void

@@ -134,7 +134,9 @@ gitlab_pipelines(char const *owner, char const *repo, int const count)
 {
 	gitlab_pipeline_list pipelines = {0};
 
-	gitlab_get_pipelines(owner, repo, count, &pipelines);
+	if (gitlab_get_pipelines(owner, repo, count, &pipelines) < 0)
+		errx(1,"error: could not fetch list of pipelines");
+
 	gitlab_print_pipelines(&pipelines);
 	gitlab_free_pipelines(&pipelines);
 }

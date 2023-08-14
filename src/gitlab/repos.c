@@ -97,35 +97,20 @@ gitlab_get_repos(char const *owner,
                  gcli_repo_list *const list)
 {
 	char *url = NULL;
-	char *next_url = NULL;
 	char *e_owner = NULL;
 	int rc = 0;
+	gcli_fetch_list_ctx ctx = {
+		.listp = &list->repos,
+		.sizep = &list->repos_size,
+		.parse = (parsefn)(parse_gitlab_repos),
+		.max = max,
+	};
 
 	e_owner = gcli_urlencode(owner);
 	url = sn_asprintf("%s/users/%s/projects", gitlab_get_apibase(), e_owner);
 	free(e_owner);
 
-	do {
-		gcli_fetch_buffer buffer = {0};
-
-		rc = gcli_fetch(url, &next_url, &buffer);
-
-		if (rc == 0) {
-			json_stream stream = {0};
-
-			json_open_buffer(&stream, buffer.data, buffer.length);
-			parse_gitlab_repos(&stream, &list->repos, &list->repos_size);
-			json_close(&stream);
-		}
-
-		free(url);
-		free(buffer.data);
-
-		if (rc < 0)
-			break;
-	} while ((url = next_url) && (max == -1 || (int)list->repos_size < max));
-
-	free(url);
+	rc = gcli_fetch_list(url, &ctx);
 
 	if (rc == 0)
 		gitlab_repos_fixup_missing_visibility(list);

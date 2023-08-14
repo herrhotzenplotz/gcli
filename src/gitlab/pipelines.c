@@ -42,31 +42,14 @@
 static int
 fetch_pipelines(char *url, int const max, gitlab_pipeline_list *const list)
 {
-	char *next_url = NULL;
-	gcli_fetch_buffer buffer = {0};
-	struct json_stream stream = {0};
-	int rc = 0;
+	gcli_fetch_list_ctx ctx = {
+		.listp = &list->pipelines,
+		.sizep = &list->pipelines_size,
+		.max = max,
+		.parse = (parsefn)(parse_gitlab_pipelines),
+	};
 
-	*list = (gitlab_pipeline_list) {0};
-
-	do {
-		rc = gcli_fetch(url, &next_url, &buffer);
-
-		if (rc == 0) {
-			json_open_buffer(&stream, buffer.data, buffer.length);
-			parse_gitlab_pipelines(&stream, &list->pipelines, &list->pipelines_size);
-			json_close(&stream);
-		}
-
-		free(buffer.data);
-		free(url);
-
-		if (rc < 0)
-			break;
-	} while ((url = next_url) && (max == -1 || (int)list->pipelines_size < max));
-
-	/* TODO: don't leak the list on error */
-	return rc;
+	return gcli_fetch_list(url, &ctx);
 }
 
 int

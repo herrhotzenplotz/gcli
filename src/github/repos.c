@@ -40,11 +40,14 @@
 int
 github_get_repos(char const *owner, int const max, gcli_repo_list *const list)
 {
-	char               *url      = NULL;
-	char               *next_url = NULL;
-	char               *e_owner  = NULL;
-	gcli_fetch_buffer   buffer   = {0};
-	struct json_stream  stream   = {0};
+	char *url = NULL;
+	char *e_owner = NULL;
+	gcli_fetch_list_ctx ctx = {
+		.listp = &list->repos,
+		.sizep = &list->repos_size,
+		.max = max,
+		.parse = (parsefn)(parse_github_repos),
+	};
 
 	e_owner = gcli_urlencode(owner);
 
@@ -66,20 +69,9 @@ github_get_repos(char const *owner, int const max, gcli_repo_list *const list)
 		                  e_owner);
 	}
 
-	do {
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
-		parse_github_repos(&stream, &list->repos, &list->repos_size);
-
-		free(url);
-		free(buffer.data);
-		json_close(&stream);
-	} while ((url = next_url) && (max == -1 || (int)list->repos_size < max));
-
-	free(url);
 	free(e_owner);
 
-	return 0;
+	return gcli_fetch_list(url, &ctx);
 }
 
 int

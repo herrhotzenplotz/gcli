@@ -475,15 +475,16 @@ gcli_post_upload(char const *url,
  *  Upload the given file to the given url. This is gitea-specific
  *  code.
  */
-void
+int
 gcli_curl_gitea_upload_attachment(char const *url,
                                   char const *filename,
                                   gcli_fetch_buffer *const out)
 {
-	CURLcode           ret;
-	curl_mime         *mime;
-	curl_mimepart     *contentpart;
+	CURLcode ret;
+	curl_mime *mime;
+	curl_mimepart *contentpart;
 	struct curl_slist *headers;
+	int rc = 0;
 
 	char *auth_header = gcli_config_get_authheader();
 
@@ -520,13 +521,15 @@ gcli_curl_gitea_upload_attachment(char const *url,
 	curl_easy_setopt(gcli_curl_session, CURLOPT_WRITEFUNCTION, fetch_write_callback);
 
 	ret = curl_easy_perform(gcli_curl_session);
-	gcli_curl_check_api_error(ret, url, out);
+	rc = gcli_curl_check_api_error(ret, url, out);
 
 	/* Cleanup */
 	curl_slist_free_all(headers);
 	headers = NULL;
 	curl_mime_free(mime);
 	free(auth_header);
+
+	return rc;
 }
 
 sn_sv

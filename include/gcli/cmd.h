@@ -34,6 +34,8 @@
 #include <config.h>
 #endif
 
+#include <gcli/gcli.h>
+
 #include <sn/sn.h>
 
 static inline char *
@@ -48,7 +50,7 @@ shift(int *argc, char ***argv)
 
 void version(void);
 void copyright(void);
-void check_owner_and_repo(const char **owner, const char **repo);
+void check_owner_and_repo(gcli_ctx *ctx, const char **owner, const char **repo);
 
 void parse_labels_options(
 	int *argc, char ***argv,

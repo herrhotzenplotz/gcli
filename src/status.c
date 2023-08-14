@@ -31,12 +31,12 @@
 #include <gcli/forges.h>
 
 void
-gcli_status(int const count)
+gcli_status(gcli_ctx *ctx, int const count)
 {
 	gcli_notification *notifications = NULL;
 	int notifications_size = 0;
 
-	notifications_size = gcli_get_notifications(&notifications, count);
+	notifications_size = gcli_get_notifications(ctx, &notifications, count);
 	if (notifications_size < 0)
 		errx(1, "error: failed to get notifications");
 
@@ -53,9 +53,10 @@ gcli_status(int const count)
 }
 
 int
-gcli_get_notifications(gcli_notification **const out, int const count)
+gcli_get_notifications(gcli_ctx *ctx, gcli_notification **const out,
+                       int const count)
 {
-	return gcli_forge()->get_notifications(out, count);
+	return gcli_forge(ctx)->get_notifications(ctx, out, count);
 }
 
 void
@@ -90,7 +91,7 @@ gcli_print_notifications(gcli_notification const *const notifications,
 }
 
 int
-gcli_notification_mark_as_read(char const *id)
+gcli_notification_mark_as_read(gcli_ctx *ctx, char const *id)
 {
-	return gcli_forge()->notification_mark_as_read(id);
+	return gcli_forge(ctx)->notification_mark_as_read(ctx, id);
 }

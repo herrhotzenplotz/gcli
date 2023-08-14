@@ -279,9 +279,9 @@ gitea_forge_descriptor =
 };
 
 gcli_forge_descriptor const *
-gcli_forge(void)
+gcli_forge(gcli_ctx *ctx)
 {
-	switch (gcli_config_get_forge_type()) {
+	switch (gcli_config_get_forge_type(ctx)) {
 	case GCLI_FORGE_GITHUB:
 		return &github_forge_descriptor;
 	case GCLI_FORGE_GITLAB:

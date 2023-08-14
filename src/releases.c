@@ -36,21 +36,21 @@
 #include <stdlib.h>
 
 int
-gcli_get_releases(char const *owner, char const *repo,
+gcli_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
                   int const max, gcli_release_list *const list)
 {
-	return gcli_forge()->get_releases(owner, repo, max, list);
+	return gcli_forge(ctx)->get_releases(ctx, owner, repo, max, list);
 }
 
 static void
-gcli_print_release(enum gcli_output_flags const flags,
+gcli_print_release(gcli_ctx *ctx, enum gcli_output_flags const flags,
                    gcli_release const *const it)
 {
 	gcli_dict dict;
 
 	(void) flags;
 
-	dict = gcli_dict_begin();
+	dict = gcli_dict_begin(ctx);
 
 	gcli_dict_add(dict,        "ID",         0, 0, SV_FMT, SV_ARGS(it->id));
 	gcli_dict_add(dict,        "NAME",       0, 0, SV_FMT, SV_ARGS(it->name));
@@ -78,9 +78,8 @@ gcli_print_release(enum gcli_output_flags const flags,
 }
 
 static void
-gcli_print_releases_long(enum gcli_output_flags const flags,
-                         gcli_release_list const *const list,
-                         int const max)
+gcli_print_releases_long(gcli_ctx *ctx, enum gcli_output_flags const flags,
+                         gcli_release_list const *const list, int const max)
 {
 	int n;
 
@@ -92,17 +91,16 @@ gcli_print_releases_long(enum gcli_output_flags const flags,
 
 	if (flags & OUTPUT_SORTED) {
 		for (int i = 0; i < n; ++i)
-			gcli_print_release(flags, &list->releases[n-i-1]);
+			gcli_print_release(ctx, flags, &list->releases[n-i-1]);
 	} else {
 		for (int i = 0; i < n; ++i)
-			gcli_print_release(flags, &list->releases[i]);
+			gcli_print_release(ctx, flags, &list->releases[i]);
 	}
 }
 
 static void
-gcli_print_releases_short(enum gcli_output_flags const flags,
-                          gcli_release_list const *const list,
-                          int const max)
+gcli_print_releases_short(gcli_ctx *ctx, enum gcli_output_flags const flags,
+                          gcli_release_list const *const list, int const max)
 {
 	size_t n;
 	gcli_tbl table;
@@ -119,7 +117,7 @@ gcli_print_releases_short(enum gcli_output_flags const flags,
 	else
 		n = max;
 
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not init table");
 
@@ -147,9 +145,8 @@ gcli_print_releases_short(enum gcli_output_flags const flags,
 }
 
 void
-gcli_print_releases(enum gcli_output_flags const flags,
-                    gcli_release_list const *const list,
-                    int const max)
+gcli_print_releases(gcli_ctx *ctx, enum gcli_output_flags const flags,
+                    gcli_release_list const *const list, int const max)
 {
 	if (list->releases_size == 0) {
 		puts("No releases");
@@ -157,9 +154,9 @@ gcli_print_releases(enum gcli_output_flags const flags,
 	}
 
 	if (flags & OUTPUT_LONG)
-		gcli_print_releases_long(flags, list, max);
+		gcli_print_releases_long(ctx, flags, list, max);
 	else
-		gcli_print_releases_short(flags, list, max);
+		gcli_print_releases_short(ctx, flags, list, max);
 }
 
 void
@@ -189,9 +186,9 @@ gcli_free_releases(gcli_release_list *const list)
 }
 
 int
-gcli_create_release(gcli_new_release const *release)
+gcli_create_release(gcli_ctx *ctx, gcli_new_release const *release)
 {
-	return gcli_forge()->create_release(release);
+	return gcli_forge(ctx)->create_release(ctx, release);
 }
 
 void
@@ -205,9 +202,8 @@ gcli_release_push_asset(gcli_new_release *const release,
 }
 
 int
-gcli_delete_release(char const *const owner,
-                    char const *const repo,
-                    char const *const id)
+gcli_delete_release(gcli_ctx *ctx, char const *const owner,
+                    char const *const repo, char const *const id)
 {
-	return gcli_forge()->delete_release(owner, repo, id);
+	return gcli_forge(ctx)->delete_release(ctx, owner, repo, id);
 }

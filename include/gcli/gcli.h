@@ -34,6 +34,10 @@
 #include <config.h>
 #endif
 
+#ifdef IN_LIBGCLI
+#include <gcli/ctx.h>
+#endif /* IN_LIBGCLI */
+
 enum gcli_output_flags {
 	OUTPUT_SORTED = (1 << 0),
 	OUTPUT_LONG   = (1 << 1),
@@ -44,5 +48,11 @@ typedef enum gcli_forge_type {
 	GCLI_FORGE_GITLAB,
 	GCLI_FORGE_GITEA,
 } gcli_forge_type;
+
+typedef struct gcli_ctx gcli_ctx;
+
+char const *gcli_init(gcli_ctx **);
+void gcli_destroy(gcli_ctx **ctx);
+char const *gcli_get_error(gcli_ctx *ctx);
 
 #endif /* GCLI_H */

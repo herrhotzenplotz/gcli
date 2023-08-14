@@ -80,60 +80,46 @@ struct gcli_issue_fetch_details {
 	char const *author;         /* A username who issued */
 };
 
-int gcli_get_issues(char const *owner,
-                    char const *reponame,
-                    gcli_issue_fetch_details const *details,
-                    int max,
+int gcli_get_issues(gcli_ctx *ctx, char const *owner, char const *reponame,
+                    gcli_issue_fetch_details const *details, int max,
                     gcli_issue_list *out);
 
 void gcli_issues_free(gcli_issue_list *);
 
-void gcli_print_issues_table(enum gcli_output_flags flags,
-                             gcli_issue_list const *list,
-                             int max);
+void gcli_print_issues_table(gcli_ctx *ctx, enum gcli_output_flags flags,
+                             gcli_issue_list const *list, int max);
 
-int gcli_get_issue(char const *owner, char const *reponame,
+int gcli_get_issue(gcli_ctx *ctx, char const *owner, char const *reponame,
                    int issue_number, gcli_issue *out);
 
 void gcli_issue_free(gcli_issue *it);
 
-void gcli_issue_print_summary(gcli_issue const *it);
+void gcli_issue_print_summary(gcli_ctx *ctx, gcli_issue const *it);
 void gcli_issue_print_op(gcli_issue const *it);
 
-int gcli_issue_close(char const *owner,
-                     char const *repo,
+int gcli_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
                      int issue_number);
 
-int gcli_issue_reopen(char const *owner,
-                      char const *repo,
+int gcli_issue_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
                       int issue_number);
 
-int gcli_issue_submit(gcli_submit_issue_options);
+int gcli_issue_submit(gcli_ctx *ctx, gcli_submit_issue_options);
 
-int gcli_issue_assign(char const *owner,
-                      char const *repo,
-                      int issue_number,
-                      char const *assignee);
+int gcli_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
+                      int issue_number, char const *assignee);
 
-int gcli_issue_add_labels(char const *owner,
-                          char const *repo,
-                          int issue_number,
-                          char const *const labels[],
+int gcli_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+                          int issue_number, char const *const labels[],
                           size_t labels_size);
 
-int gcli_issue_remove_labels(char const *owner,
-                             char const *repo,
-                             int issue_number,
-                             char const *const labels[],
+int gcli_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+                             int issue_number, char const *const labels[],
                              size_t labels_size);
 
-int gcli_issue_set_milestone(char const *owner,
-                             char const *repo,
-                             int issue,
-                             int milestone);
+int gcli_issue_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
+                             int issue, int milestone);
 
-int gcli_issue_clear_milestone(char const *owner,
-                               char const *repo,
-                               int issue);
+int gcli_issue_clear_milestone(gcli_ctx *cxt, char const *owner,
+                               char const *repo, int issue);
 
 #endif /* ISSUES_H */

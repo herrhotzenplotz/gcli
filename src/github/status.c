@@ -38,7 +38,8 @@
 #include <templates/github/status.h>
 
 int
-github_get_notifications(gcli_notification **const notifications,
+github_get_notifications(gcli_ctx *ctx,
+                         gcli_notification **const notifications,
                          int const count)
 {
 	char *url = NULL;
@@ -48,14 +49,15 @@ github_get_notifications(gcli_notification **const notifications,
 	size_t notifications_size = 0;
 	int rc = 0;
 
-	url = sn_asprintf("%s/notifications", gcli_get_apibase());
+	url = sn_asprintf("%s/notifications", gcli_get_apibase(ctx));
 
 	do {
-		rc = gcli_fetch(url, &next_url, &buffer);
+		rc = gcli_fetch(ctx, url, &next_url, &buffer);
 
 		if (rc == 0) {
 			json_open_buffer(&stream, buffer.data, buffer.length);
-			parse_github_notifications(&stream, notifications, &notifications_size);
+			parse_github_notifications(ctx, &stream, notifications,
+			                           &notifications_size);
 			json_close(&stream);
 		}
 
@@ -74,16 +76,16 @@ github_get_notifications(gcli_notification **const notifications,
 }
 
 int
-github_notification_mark_as_read(char const *id)
+github_notification_mark_as_read(gcli_ctx *ctx, char const *id)
 {
 	char *url = NULL;
 	int rc = 0;
 
 	url = sn_asprintf(
 		"%s/notifications/threads/%s",
-		gcli_get_apibase(),
+		gcli_get_apibase(ctx),
 		id);
-	rc = gcli_fetch_with_method("PATCH", url, NULL, NULL, NULL);
+	rc = gcli_fetch_with_method(ctx, "PATCH", url, NULL, NULL, NULL);
 
 	free(url);
 

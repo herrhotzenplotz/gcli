@@ -34,10 +34,12 @@
 #include <config.h>
 #endif
 
+#include <gcli/gcli.h>
+
 #include <sn/sn.h>
 
-char *gitea_get_apibase(void);
-char *gitea_get_authheader(void);
-sn_sv gitea_get_account(void);
+char *gitea_get_apibase(gcli_ctx *ctx);
+char *gitea_get_authheader(gcli_ctx *ctx);
+sn_sv gitea_get_account(gcli_ctx *ctx);
 
 #endif /* GITEA_CONFIG_H */

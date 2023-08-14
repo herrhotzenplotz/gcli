@@ -42,8 +42,11 @@
 
 /* /!\ Before changing this, see comment in gists.h /!\ */
 void
-parse_github_gist_files_idiot_hack(json_stream *stream, gcli_gist *const gist)
+parse_github_gist_files_idiot_hack(gcli_ctx *ctx, json_stream *stream,
+                                   gcli_gist *const gist)
 {
+	(void) ctx;
+
 	enum json_type next = JSON_NULL;
 
 	gist->files = NULL;
@@ -55,7 +58,7 @@ parse_github_gist_files_idiot_hack(json_stream *stream, gcli_gist *const gist)
 	while ((next = json_next(stream)) == JSON_STRING) {
 		gist->files = realloc(gist->files, sizeof(*gist->files) * (gist->files_size + 1));
 		gcli_gist_file *it = &gist->files[gist->files_size++];
-		parse_github_gist_file(stream, it);
+		parse_github_gist_file(ctx, stream, it);
 	}
 
 	if (next != JSON_OBJECT_END)
@@ -63,10 +66,11 @@ parse_github_gist_files_idiot_hack(json_stream *stream, gcli_gist *const gist)
 }
 
 int
-gcli_get_gists(char const *user, int const max, gcli_gist_list *const list)
+gcli_get_gists(gcli_ctx *ctx, char const *user, int const max,
+               gcli_gist_list *const list)
 {
 	char *url = NULL;
-	gcli_fetch_list_ctx ctx = {
+	gcli_fetch_list_ctx fl = {
 		.listp = &list->gists,
 		.sizep = &list->gists_size,
 		.parse = (parsefn)(parse_github_gists),
@@ -76,12 +80,12 @@ gcli_get_gists(char const *user, int const max, gcli_gist_list *const list)
 	if (user)
 		url = sn_asprintf(
 			"%s/users/%s/gists",
-			github_get_apibase(),
+			github_get_apibase(ctx),
 			user);
 	else
-		url = sn_asprintf("%s/gists", github_get_apibase());
+		url = sn_asprintf("%s/gists", github_get_apibase(ctx));
 
-	return gcli_fetch_list(url, &ctx);
+	return gcli_fetch_list(ctx, url, &fl);
 }
 
 static char const *
@@ -118,7 +122,8 @@ print_gist_file(gcli_gist_file const *const file)
 }
 
 static void
-print_gist(enum gcli_output_flags const flags, gcli_gist const *const gist)
+print_gist(gcli_ctx *ctx, enum gcli_output_flags const flags,
+           gcli_gist const *const gist)
 {
 	(void) flags;
 
@@ -128,8 +133,8 @@ print_gist(enum gcli_output_flags const flags, gcli_gist const *const gist)
 	       " DATE : "SV_FMT"\n"
 	       "  URL : "SV_FMT"\n"
 	       " PULL : "SV_FMT"\n",
-	       gcli_setcolour(GCLI_COLOR_YELLOW), SV_ARGS(gist->id), gcli_resetcolour(),
-	       gcli_setbold(), SV_ARGS(gist->owner), gcli_resetbold(),
+	       gcli_setcolour(ctx, GCLI_COLOR_YELLOW), SV_ARGS(gist->id), gcli_resetcolour(ctx),
+	       gcli_setbold(ctx), SV_ARGS(gist->owner), gcli_resetbold(ctx),
 	       SV_ARGS(gist->description),
 	       SV_ARGS(gist->date),
 	       SV_ARGS(gist->url),
@@ -144,9 +149,8 @@ print_gist(enum gcli_output_flags const flags, gcli_gist const *const gist)
 }
 
 static void
-gcli_print_gists_long(enum gcli_output_flags const flags,
-                      gcli_gist_list const *const list,
-                      int const max)
+gcli_print_gists_long(gcli_ctx *ctx, enum gcli_output_flags const flags,
+                      gcli_gist_list const *const list, int const max)
 {
 	size_t n;
 
@@ -157,17 +161,16 @@ gcli_print_gists_long(enum gcli_output_flags const flags,
 
 	if (flags & OUTPUT_SORTED) {
 		for (size_t i = 0; i < n; ++i)
-			print_gist(flags, &list->gists[n-i-1]);
+			print_gist(ctx, flags, &list->gists[n-i-1]);
 	} else {
 		for (size_t i = 0; i < n; ++i)
-			print_gist(flags, &list->gists[i]);
+			print_gist(ctx, flags, &list->gists[i]);
 	}
 }
 
 static void
-gcli_print_gists_short(enum gcli_output_flags const flags,
-                       gcli_gist_list const *const list,
-                       int const max)
+gcli_print_gists_short(gcli_ctx *ctx, enum gcli_output_flags const flags,
+                       gcli_gist_list const *const list, int const max)
 {
 	size_t n;
 	gcli_tbl table;
@@ -184,7 +187,7 @@ gcli_print_gists_short(enum gcli_output_flags const flags,
 	else
 		n = max;
 
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not init table");
 
@@ -212,9 +215,8 @@ gcli_print_gists_short(enum gcli_output_flags const flags,
 }
 
 void
-gcli_print_gists(enum gcli_output_flags const flags,
-                 gcli_gist_list const *const list,
-                 int const max)
+gcli_print_gists(gcli_ctx *ctx, enum gcli_output_flags const flags,
+                 gcli_gist_list const *const list, int const max)
 {
 	if (list->gists_size == 0) {
 		puts("No Gists");
@@ -222,21 +224,21 @@ gcli_print_gists(enum gcli_output_flags const flags,
 	}
 
 	if (flags & OUTPUT_LONG)	/* if we are in long mode (no pun intended) */
-		gcli_print_gists_long(flags, list, max);
+		gcli_print_gists_long(ctx, flags, list, max);
 	else                        /* real mode (bad joke, I know) */
-		gcli_print_gists_short(flags, list, max);
+		gcli_print_gists_short(ctx, flags, list, max);
 }
 
 gcli_gist *
-gcli_get_gist(char const *gist_id)
+gcli_get_gist(gcli_ctx *ctx, char const *gist_id)
 {
 	char *url = NULL;
 	gcli_fetch_buffer buffer = {0};
 	gcli_gist *it = NULL;
 	int rc = 0;
 
-	url = sn_asprintf("%s/gists/%s", github_get_apibase(), gist_id);
-	rc = gcli_fetch(url, NULL, &buffer);
+	url = sn_asprintf("%s/gists/%s", github_get_apibase(ctx), gist_id);
+	rc = gcli_fetch(ctx, url, NULL, &buffer);
 
 	if (rc == 0) {
 		struct json_stream  stream = {0};
@@ -245,7 +247,7 @@ gcli_get_gist(char const *gist_id)
 		json_set_streaming(&stream, 1);
 
 		it = calloc(sizeof(gcli_gist), 1);
-		parse_github_gist(&stream, it);
+		parse_github_gist(ctx, &stream, it);
 
 		json_close(&stream);
 	}
@@ -276,7 +278,7 @@ read_file(FILE *f, char **out)
 }
 
 void
-gcli_create_gist(gcli_new_gist opts)
+gcli_create_gist(gcli_ctx *ctx, gcli_new_gist opts)
 {
 	char              *url          = NULL;
 	char              *post_data    = NULL;
@@ -306,7 +308,7 @@ gcli_create_gist(gcli_new_gist opts)
 	 */
 
 	/* TODO: Escape gist_description and file_name */
-	url = sn_asprintf("%s/gists", github_get_apibase());
+	url = sn_asprintf("%s/gists", github_get_apibase(ctx));
 	post_data = sn_asprintf(
 		"{\"description\":\"%s\",\"public\":true,\"files\":"
 		"{\"%s\": {\"content\":\""SV_FMT"\"}}}",
@@ -314,8 +316,8 @@ gcli_create_gist(gcli_new_gist opts)
 		opts.file_name,
 		SV_ARGS(content));
 
-	gcli_fetch_with_method("POST", url, post_data, NULL, &fetch_buffer);
-	gcli_print_html_url(fetch_buffer);
+	gcli_fetch_with_method(ctx, "POST", url, post_data, NULL, &fetch_buffer);
+	gcli_print_html_url(ctx, fetch_buffer);
 
 	free(read_buffer.data);
 	free(fetch_buffer.data);
@@ -324,20 +326,20 @@ gcli_create_gist(gcli_new_gist opts)
 }
 
 void
-gcli_delete_gist(char const *gist_id, bool const always_yes)
+gcli_delete_gist(gcli_ctx *ctx, char const *gist_id, bool const always_yes)
 {
 	char              *url    = NULL;
 	gcli_fetch_buffer  buffer = {0};
 
 	url = sn_asprintf(
 		"%s/gists/%s",
-		github_get_apibase(),
+		github_get_apibase(ctx),
 		gist_id);
 
 	if (!always_yes && !sn_yesno("Are you sure you want to delete this gist?"))
 		errx(1, "Aborted by user");
 
-	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, &buffer);
 
 	free(buffer.data);
 	free(url);

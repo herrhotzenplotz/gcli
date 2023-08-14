@@ -33,7 +33,7 @@
 #include <pdjson/pdjson.h>
 
 char const *
-gitlab_api_error_string(gcli_fetch_buffer *const it)
+gitlab_api_error_string(gcli_ctx *ctx, gcli_fetch_buffer *const it)
 {
 	struct json_stream stream = {0};
 	enum json_type     next   = JSON_NULL;
@@ -45,12 +45,12 @@ gitlab_api_error_string(gcli_fetch_buffer *const it)
 	json_set_streaming(&stream, true);
 
 	while ((next = json_next(&stream)) != JSON_OBJECT_END) {
-		char *key = get_string(&stream);
+		char *key = get_string(ctx, &stream);
 		if (strcmp(key, "message") == 0) {
 			if ((next = json_peek(&stream)) == JSON_STRING)
-				return get_string(&stream);
+				return get_string(ctx, &stream);
 			else if ((next = json_next(&stream)) == JSON_ARRAY)
-				return get_string(&stream);
+				return get_string(ctx, &stream);
 			else if (next == JSON_ARRAY_END)
 				;
 			else

@@ -52,19 +52,16 @@ gcli_pulls_free(gcli_pull_list *const it)
 }
 
 int
-gcli_get_pulls(char const *owner,
-               char const *repo,
-               gcli_pull_fetch_details const *const details,
-               int const max,
+gcli_get_pulls(gcli_ctx *ctx, char const *owner, char const *repo,
+               gcli_pull_fetch_details const *const details, int const max,
                gcli_pull_list *const out)
 {
-	return gcli_forge()->get_pulls(owner, repo, details, max, out);
+	return gcli_forge(ctx)->get_pulls(ctx, owner, repo, details, max, out);
 }
 
 void
-gcli_print_pulls_table(enum gcli_output_flags const flags,
-                       gcli_pull_list const *const list,
-                       int const max)
+gcli_print_pulls_table(gcli_ctx *ctx, enum gcli_output_flags const flags,
+                       gcli_pull_list const *const list, int const max)
 {
 	int n;
 	gcli_tbl table;
@@ -89,7 +86,7 @@ gcli_print_pulls_table(enum gcli_output_flags const flags,
 		n = max;
 
 	/* Fill the table */
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: cannot init table");
 
@@ -119,21 +116,19 @@ gcli_print_pulls_table(enum gcli_output_flags const flags,
 }
 
 void
-gcli_print_pull_diff(FILE *stream,
-                     char const *owner,
-                     char const *reponame,
-                     int const pr_number)
+gcli_print_pull_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
+                     char const *reponame, int const pr_number)
 {
-	gcli_forge()->print_pull_diff(stream, owner, reponame, pr_number);
+	gcli_forge(ctx)->print_pull_diff(ctx, stream, owner, reponame, pr_number);
 }
 
 void
-gcli_pull_print_status(gcli_pull const *const it)
+gcli_pull_print_status(gcli_ctx *ctx, gcli_pull const *const it)
 {
 	gcli_dict dict;
-	gcli_forge_descriptor const *const forge = gcli_forge();
+	gcli_forge_descriptor const *const forge = gcli_forge(ctx);
 
-	dict = gcli_dict_begin();
+	dict = gcli_dict_begin(ctx);
 
 	gcli_dict_add(dict,            "NUMBER", 0, 0, "%d", it->number);
 	gcli_dict_add_string(dict,     "TITLE", 0, 0, it->title);
@@ -150,12 +145,12 @@ gcli_pull_print_status(gcli_pull const *const it)
 	if (!(forge->pull_summary_quirks & GCLI_PRS_QUIRK_ADDDEL))
 		/* FIXME: move printing colours into the dictionary printer? */
 		gcli_dict_add(dict,        "ADD:DEL", 0, 0, "%s%d%s:%s%d%s",
-		              gcli_setcolour(GCLI_COLOR_GREEN),
+		              gcli_setcolour(ctx, GCLI_COLOR_GREEN),
 		              it->additions,
-		              gcli_resetcolour(),
-		              gcli_setcolour(GCLI_COLOR_RED),
+		              gcli_resetcolour(ctx),
+		              gcli_setcolour(ctx, GCLI_COLOR_RED),
 		              it->deletions,
-		              gcli_resetcolour());
+		              gcli_resetcolour(ctx));
 
 	if (!(forge->pull_summary_quirks & GCLI_PRS_QUIRK_COMMITS))
 		gcli_dict_add(dict,        "COMMITS", 0, 0, "%d", it->commits);
@@ -180,12 +175,10 @@ gcli_pull_print_status(gcli_pull const *const it)
 }
 
 static int
-gcli_get_pull_commits(char const *owner,
-                      char const *repo,
-                      int const pr_number,
-                      gcli_commit_list *const out)
+gcli_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
+                      int const pr_number, gcli_commit_list *const out)
 {
-	return gcli_forge()->get_pull_commits(owner, repo, pr_number, out);
+	return gcli_forge(ctx)->get_pull_commits(ctx, owner, repo, pr_number, out);
 }
 
 /**
@@ -208,7 +201,7 @@ cut_newline(char const *const _it)
 }
 
 static void
-gcli_print_commits_table(gcli_commit_list const *const list)
+gcli_print_commits_table(gcli_ctx *ctx, gcli_commit_list const *const list)
 {
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
@@ -224,7 +217,7 @@ gcli_print_commits_table(gcli_commit_list const *const list)
 		return;
 	}
 
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not initialize table");
 
@@ -259,14 +252,15 @@ gcli_commits_free(gcli_commit_list *list)
 }
 
 void
-gcli_pull_commits(char const *owner, char const *repo, int const pr_number)
+gcli_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
+                  int const pr_number)
 {
 	gcli_commit_list commits = {0};
 
-	if (gcli_get_pull_commits(owner, repo, pr_number, &commits) < 0)
+	if (gcli_get_pull_commits(ctx, owner, repo, pr_number, &commits) < 0)
 		errx(1, "error: failed to fetch commits of the pull request");
 
-	gcli_print_commits_table(&commits);
+	gcli_print_commits_table(ctx, &commits);
 	gcli_commits_free(&commits);
 }
 
@@ -289,10 +283,10 @@ gcli_pull_free(gcli_pull *const it)
 }
 
 int
-gcli_get_pull(char const *owner, char const *repo,
+gcli_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
               int const pr_number, gcli_pull *const out)
 {
-	return gcli_forge()->get_pull(owner, repo, pr_number, out);
+	return gcli_forge(ctx)->get_pull(ctx, owner, repo, pr_number, out);
 }
 
 void
@@ -303,15 +297,17 @@ gcli_pull_print_op(gcli_pull *const pull)
 }
 
 int
-gcli_pull_checks(char const *owner, char const *repo, int const pr_number)
+gcli_pull_checks(gcli_ctx *ctx, char const *owner, char const *repo, int const pr_number)
 {
-	return gcli_forge()->print_pull_checks(owner, repo, pr_number);
+	return gcli_forge(ctx)->print_pull_checks(ctx, owner, repo, pr_number);
 }
 
 static void
-pull_init_user_file(FILE *stream, void *_opts)
+pull_init_user_file(gcli_ctx *ctx, FILE *stream, void *_opts)
 {
 	gcli_submit_pull_options *opts = _opts;
+
+	(void) ctx;
 	fprintf(
 		stream,
 		"! PR TITLE : "SV_FMT"\n"
@@ -321,15 +317,15 @@ pull_init_user_file(FILE *stream, void *_opts)
 }
 
 static sn_sv
-gcli_pull_get_user_message(gcli_submit_pull_options *opts)
+gcli_pull_get_user_message(gcli_ctx *ctx, gcli_submit_pull_options *opts)
 {
-	return gcli_editor_get_user_message(pull_init_user_file, opts);
+	return gcli_editor_get_user_message(ctx, pull_init_user_file, opts);
 }
 
 int
-gcli_pull_submit(gcli_submit_pull_options opts)
+gcli_pull_submit(gcli_ctx *ctx, gcli_submit_pull_options opts)
 {
-	opts.body = gcli_pull_get_user_message(&opts);
+	opts.body = gcli_pull_get_user_message(ctx, &opts);
 
 	fprintf(stdout,
 	        "The following PR will be created:\n"
@@ -350,65 +346,59 @@ gcli_pull_submit(gcli_submit_pull_options opts)
 		if (!sn_yesno("Do you want to continue?"))
 			errx(1, "PR aborted.");
 
-	return gcli_forge()->perform_submit_pull(opts);
+	return gcli_forge(ctx)->perform_submit_pull(ctx, opts);
 }
 
 int
-gcli_pull_merge(char const *owner,
-                char const *reponame,
-                int const pr_number,
-                enum gcli_merge_flags flags)
+gcli_pull_merge(gcli_ctx *ctx, char const *owner, char const *reponame,
+                int const pr_number, enum gcli_merge_flags flags)
 {
-	return gcli_forge()->pull_merge(owner, reponame, pr_number, flags);
+	return gcli_forge(ctx)->pull_merge(ctx, owner, reponame, pr_number, flags);
 }
 
 int
-gcli_pull_close(char const *owner, char const *reponame, int const pr_number)
+gcli_pull_close(gcli_ctx *ctx, char const *owner, char const *reponame,
+                int const pr_number)
 {
-	return gcli_forge()->pull_close(owner, reponame, pr_number);
+	return gcli_forge(ctx)->pull_close(ctx, owner, reponame, pr_number);
 }
 
 int
-gcli_pull_reopen(char const *owner, char const *reponame, int const pr_number)
+gcli_pull_reopen(gcli_ctx *ctx, char const *owner, char const *reponame,
+                 int const pr_number)
 {
-	return gcli_forge()->pull_reopen(owner, reponame, pr_number);
+	return gcli_forge(ctx)->pull_reopen(ctx, owner, reponame, pr_number);
 }
 
 int
-gcli_pull_add_labels(char const *owner,
-                     char const *repo,
-                     int const pr_number,
-                     char const *const labels[],
+gcli_pull_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+                     int const pr_number, char const *const labels[],
                      size_t const labels_size)
 {
-	return gcli_forge()->pull_add_labels(
-		owner, repo, pr_number, labels, labels_size);
+	return gcli_forge(ctx)->pull_add_labels(
+		ctx, owner, repo, pr_number, labels, labels_size);
 }
 
 int
-gcli_pull_remove_labels(char const *owner,
-                        char const *repo,
-                        int const pr_number,
-                        char const *const labels[],
+gcli_pull_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+                        int const pr_number, char const *const labels[],
                         size_t const labels_size)
 {
-	return gcli_forge()->pull_remove_labels(
-		owner, repo, pr_number, labels, labels_size);
+	return gcli_forge(ctx)->pull_remove_labels(
+		ctx, owner, repo, pr_number, labels, labels_size);
 }
 
 int
-gcli_pull_set_milestone(char const *owner,
-                        char const *repo,
-                        int pr_number,
-                        int milestone_id)
+gcli_pull_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
+                        int pr_number, int milestone_id)
 {
-	return gcli_forge()->pull_set_milestone(owner, repo, pr_number, milestone_id);
+	return gcli_forge(ctx)->pull_set_milestone(
+		ctx, owner, repo, pr_number, milestone_id);
 }
 
 int
-gcli_pull_clear_milestone(char const *owner,
-                          char const *repo,
+gcli_pull_clear_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
                           int pr_number)
 {
-	return gcli_forge()->pull_clear_milestone(owner, repo, pr_number);
+	return gcli_forge(ctx)->pull_clear_milestone(ctx, owner, repo, pr_number);
 }

@@ -65,19 +65,16 @@ gcli_issues_free(gcli_issue_list *const list)
 }
 
 int
-gcli_get_issues(char const *owner,
-                char const *repo,
-                gcli_issue_fetch_details const *details,
-                int const max,
+gcli_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
+                gcli_issue_fetch_details const *details, int const max,
                 gcli_issue_list *const out)
 {
-	return gcli_forge()->get_issues(owner, repo, details, max, out);
+	return gcli_forge(ctx)->get_issues(ctx, owner, repo, details, max, out);
 }
 
 void
-gcli_print_issues_table(enum gcli_output_flags const flags,
-                        gcli_issue_list const *const list,
-                        int const max)
+gcli_print_issues_table(gcli_ctx *ctx, enum gcli_output_flags const flags,
+                        gcli_issue_list const *const list, int const max)
 {
 	int n, pruned = 0;
 	gcli_tbl table;
@@ -93,7 +90,7 @@ gcli_print_issues_table(enum gcli_output_flags const flags,
 		return;
 	}
 
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "could not init table printer");
 
@@ -139,11 +136,11 @@ gcli_print_issues_table(enum gcli_output_flags const flags,
 }
 
 void
-gcli_issue_print_summary(gcli_issue const *const it)
+gcli_issue_print_summary(gcli_ctx *ctx, gcli_issue const *const it)
 {
 	gcli_dict dict;
 
-	dict = gcli_dict_begin();
+	dict = gcli_dict_begin(ctx);
 
 	gcli_dict_add(dict, "NAME", 0, 0, "%d", it->number);
 	gcli_dict_add(dict, "TITLE", 0, 0, SV_FMT, SV_ARGS(it->title));
@@ -184,27 +181,31 @@ gcli_issue_print_op(gcli_issue const *const it)
 }
 
 int
-gcli_get_issue(char const *owner, char const *repo,
+gcli_get_issue(gcli_ctx *ctx, char const *owner, char const *repo,
                int const issue_number, gcli_issue *const out)
 {
-	return gcli_forge()->get_issue_summary(owner, repo, issue_number, out);
+	return gcli_forge(ctx)->get_issue_summary(
+		ctx, owner, repo, issue_number, out);
 }
 
 int
-gcli_issue_close(char const *owner, char const *repo, int const issue_number)
+gcli_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
+                 int const issue_number)
 {
-	return gcli_forge()->issue_close(owner, repo, issue_number);
+	return gcli_forge(ctx)->issue_close(ctx, owner, repo, issue_number);
 }
 
 int
-gcli_issue_reopen(char const *owner, char const *repo, int const issue_number)
+gcli_issue_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
+                  int const issue_number)
 {
-	return gcli_forge()->issue_reopen(owner, repo, issue_number);
+	return gcli_forge(ctx)->issue_reopen(ctx, owner, repo, issue_number);
 }
 
 static void
-issue_init_user_file(FILE *stream, void *_opts)
+issue_init_user_file(gcli_ctx *ctx, FILE *stream, void *_opts)
 {
+	(void) ctx;
 	gcli_submit_issue_options *opts = _opts;
 	fprintf(
 		stream,
@@ -215,18 +216,18 @@ issue_init_user_file(FILE *stream, void *_opts)
 }
 
 static sn_sv
-gcli_issue_get_user_message(gcli_submit_issue_options *opts)
+gcli_issue_get_user_message(gcli_ctx *ctx, gcli_submit_issue_options *opts)
 {
-	return gcli_editor_get_user_message(issue_init_user_file, opts);
+	return gcli_editor_get_user_message(ctx, issue_init_user_file, opts);
 }
 
 int
-gcli_issue_submit(gcli_submit_issue_options opts)
+gcli_issue_submit(gcli_ctx *ctx, gcli_submit_issue_options opts)
 {
 	gcli_fetch_buffer json_buffer = {0};
 	int rc = 0;
 
-	opts.body = gcli_issue_get_user_message(&opts);
+	opts.body = gcli_issue_get_user_message(ctx, &opts);
 
 	printf("The following issue will be created:\n"
 	       "\n"
@@ -245,10 +246,10 @@ gcli_issue_submit(gcli_submit_issue_options opts)
 			errx(1, "Submission aborted.");
 	}
 
-	rc = gcli_forge()->perform_submit_issue(opts, &json_buffer);
+	rc = gcli_forge(ctx)->perform_submit_issue(ctx, opts, &json_buffer);
 
 	if (rc == 0)
-		gcli_print_html_url(json_buffer);
+		gcli_print_html_url(ctx, json_buffer);
 
 	free(opts.body.data);
 	free(opts.body.data);
@@ -258,47 +259,42 @@ gcli_issue_submit(gcli_submit_issue_options opts)
 }
 
 int
-gcli_issue_assign(char const *owner,
-                  char const *repo,
-                  int const issue_number,
-                  char const *assignee)
+gcli_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
+                  int const issue_number, char const *assignee)
 {
-	return gcli_forge()->issue_assign(owner, repo, issue_number, assignee);
+	return gcli_forge(ctx)->issue_assign(ctx, owner, repo, issue_number, assignee);
 }
 
 int
-gcli_issue_add_labels(char const *owner,
-                      char const *repo,
-                      int const issue,
-                      char const *const labels[],
+gcli_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+                      int const issue, char const *const labels[],
                       size_t const labels_size)
 {
-	return gcli_forge()->issue_add_labels(owner, repo, issue, labels, labels_size);
+	return gcli_forge(ctx)->issue_add_labels(ctx,owner, repo, issue, labels,
+	                                         labels_size);
 }
 
 int
-gcli_issue_remove_labels(char const *owner,
-                         char const *repo,
-                         int const issue,
-                         char const *const labels[],
+gcli_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+                         int const issue, char const *const labels[],
                          size_t const labels_size)
 {
-	return gcli_forge()->issue_remove_labels(owner, repo, issue, labels, labels_size);
+	return gcli_forge(ctx)->issue_remove_labels(
+		ctx, owner, repo, issue, labels, labels_size);
 }
 
 int
-gcli_issue_set_milestone(char const *const owner,
-                         char const *const repo,
-                         int const issue,
+gcli_issue_set_milestone(gcli_ctx *ctx, char const *const owner,
+                         char const *const repo, int const issue,
                          int const milestone)
 {
-	return gcli_forge()->issue_set_milestone(owner, repo, issue, milestone);
+	return gcli_forge(ctx)->issue_set_milestone(
+		ctx, owner, repo, issue, milestone);
 }
 
 int
-gcli_issue_clear_milestone(char const *const owner,
-                           char const *const repo,
-                           int const issue)
+gcli_issue_clear_milestone(gcli_ctx *ctx, char const *const owner,
+                           char const *const repo, int const issue)
 {
-	return gcli_forge()->issue_clear_milestone(owner, repo, issue);
+	return gcli_forge(ctx)->issue_clear_milestone(ctx, owner, repo, issue);
 }

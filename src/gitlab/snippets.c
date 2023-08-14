@@ -59,11 +59,11 @@ gcli_snippets_free(gcli_snippet_list *const list)
 }
 
 int
-gcli_snippets_get(int const max, gcli_snippet_list *const out)
+gcli_snippets_get(gcli_ctx *ctx, int const max, gcli_snippet_list *const out)
 {
 	char *url = NULL;
 
-	gcli_fetch_list_ctx ctx = {
+	gcli_fetch_list_ctx fl = {
 		.listp = &out->snippets,
 		.sizep = &out->snippets_size,
 		.max = max,
@@ -71,20 +71,20 @@ gcli_snippets_get(int const max, gcli_snippet_list *const out)
 	};
 
 	*out = (gcli_snippet_list) {0};
-	url = sn_asprintf("%s/snippets", gitlab_get_apibase());
+	url = sn_asprintf("%s/snippets", gitlab_get_apibase(ctx));
 
-	return gcli_fetch_list(url, &ctx);;
+	return gcli_fetch_list(ctx, url, &fl);
 }
 
 static void
-gcli_print_snippet(enum gcli_output_flags const flags,
+gcli_print_snippet(gcli_ctx *ctx, enum gcli_output_flags const flags,
                    gcli_snippet const *const it)
 {
 	gcli_dict dict;
 
 	(void) flags;
 
-	dict = gcli_dict_begin();
+	dict = gcli_dict_begin(ctx);
 
 	gcli_dict_add(dict,        "ID",     0, 0, "%d", it->id);
 	gcli_dict_add_string(dict, "TITLE",  0, 0, it->title);
@@ -98,9 +98,8 @@ gcli_print_snippet(enum gcli_output_flags const flags,
 }
 
 static void
-gcli_print_snippets_long(enum gcli_output_flags const flags,
-                         gcli_snippet_list const *const list,
-                         int const max)
+gcli_print_snippets_long(gcli_ctx *ctx, enum gcli_output_flags const flags,
+                         gcli_snippet_list const *const list, int const max)
 {
 	int n;
 
@@ -112,17 +111,16 @@ gcli_print_snippets_long(enum gcli_output_flags const flags,
 
 	if (flags & OUTPUT_SORTED) {
 		for (int i = 0; i < n; ++i)
-			gcli_print_snippet(flags, &list->snippets[n-i-1]);
+			gcli_print_snippet(ctx, flags, &list->snippets[n-i-1]);
 	} else {
 		for (int i = 0; i < n; ++i)
-			gcli_print_snippet(flags, &list->snippets[i]);
+			gcli_print_snippet(ctx, flags, &list->snippets[i]);
 	}
 }
 
 static void
-gcli_print_snippets_short(enum gcli_output_flags const flags,
-                          gcli_snippet_list const *const list,
-                          int const max)
+gcli_print_snippets_short(gcli_ctx *ctx, enum gcli_output_flags const flags,
+                          gcli_snippet_list const *const list, int const max)
 {
 	int n;
 	gcli_tbl table;
@@ -141,7 +139,7 @@ gcli_print_snippets_short(enum gcli_output_flags const flags,
 		n = max;
 
 	/* Fill table */
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not init table");
 
@@ -167,9 +165,8 @@ gcli_print_snippets_short(enum gcli_output_flags const flags,
 }
 
 void
-gcli_snippets_print(enum gcli_output_flags const flags,
-                    gcli_snippet_list const *const list,
-                    int const max)
+gcli_snippets_print(gcli_ctx *ctx, enum gcli_output_flags const flags,
+                    gcli_snippet_list const *const list, int const max)
 {
 	if (list->snippets_size == 0) {
 		puts("No Snippets");
@@ -177,19 +174,19 @@ gcli_snippets_print(enum gcli_output_flags const flags,
 	}
 
 	if (flags & OUTPUT_LONG)
-		gcli_print_snippets_long(flags, list, max);
+		gcli_print_snippets_long(ctx, flags, list, max);
 	else
-		gcli_print_snippets_short(flags, list, max);
+		gcli_print_snippets_short(ctx, flags, list, max);
 }
 
 int
-gcli_snippet_delete(char const *snippet_id)
+gcli_snippet_delete(gcli_ctx *ctx, char const *snippet_id)
 {
 	int rc = 0;
 	char *url;
 
-	url = sn_asprintf("%s/snippets/%s", gitlab_get_apibase(), snippet_id);
-	rc = gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
+	url = sn_asprintf("%s/snippets/%s", gitlab_get_apibase(ctx), snippet_id);
+	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
 	free(url);
 
@@ -197,13 +194,13 @@ gcli_snippet_delete(char const *snippet_id)
 }
 
 int
-gcli_snippet_get(char const *snippet_id)
+gcli_snippet_get(gcli_ctx *ctx, char const *snippet_id)
 {
 	int rc = 0;
 	char *url = sn_asprintf("%s/snippets/%s/raw",
-	                        gitlab_get_apibase(),
+	                        gitlab_get_apibase(ctx),
 	                        snippet_id);
-	rc = gcli_curl(stdout, url, NULL);
+	rc = gcli_curl(ctx, stdout, url, NULL);
 	free(url);
 
 	return rc;

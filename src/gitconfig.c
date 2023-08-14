@@ -485,8 +485,9 @@ gcli_gitconfig_add_fork_remote(char const *org, char const *repo)
  * Return the gcli_forge_type for the given remote or -1 if
  * unknown */
 int
-gcli_gitconfig_get_forgetype(char const *const remote_name)
+gcli_gitconfig_get_forgetype(gcli_ctx *ctx, char const *const remote_name)
 {
+	(void) ctx;
 	gcli_gitconfig_read_gitconfig();
 
 	if (remote_name) {

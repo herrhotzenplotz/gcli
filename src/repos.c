@@ -35,16 +35,16 @@
 #include <stdlib.h>
 
 int
-gcli_get_repos(char const *owner, int const max, gcli_repo_list *const out)
+gcli_get_repos(gcli_ctx *ctx, char const *owner, int const max,
+               gcli_repo_list *const out)
 {
-	return gcli_forge()->get_repos(owner, max, out);
+	return gcli_forge(ctx)->get_repos(ctx, owner, max, out);
 }
 
 
 void
-gcli_print_repos_table(enum gcli_output_flags const flags,
-                       gcli_repo_list const *const list,
-                       int const max)
+gcli_print_repos_table(gcli_ctx *ctx, enum gcli_output_flags const flags,
+                       gcli_repo_list const *const list, int const max)
 {
 	size_t n;
 	gcli_tbl table;
@@ -67,7 +67,7 @@ gcli_print_repos_table(enum gcli_output_flags const flags,
 		n = max;
 
 	/* init table */
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not init table");
 
@@ -93,11 +93,11 @@ gcli_print_repos_table(enum gcli_output_flags const flags,
 }
 
 void
-gcli_repo_print(gcli_repo const *it)
+gcli_repo_print(gcli_ctx *ctx, gcli_repo const *it)
 {
 	gcli_dict dict;
 
-	dict = gcli_dict_begin();
+	dict = gcli_dict_begin(ctx);
 	gcli_dict_add(dict, "ID",         0, 0, "%d", it->id);
 	gcli_dict_add(dict, "FULL NAME",  0, 0, SV_FMT, SV_ARGS(it->full_name));
 	gcli_dict_add(dict, "NAME",       0, 0, SV_FMT, SV_ARGS(it->name));
@@ -134,19 +134,20 @@ gcli_repos_free(gcli_repo_list *const list)
 }
 
 int
-gcli_get_own_repos(int const max, gcli_repo_list *const out)
+gcli_get_own_repos(gcli_ctx *ctx, int const max, gcli_repo_list *const out)
 {
-	return gcli_forge()->get_own_repos(max, out);
+	return gcli_forge(ctx)->get_own_repos(ctx, max, out);
 }
 
 int
-gcli_repo_delete(char const *owner, char const *repo)
+gcli_repo_delete(gcli_ctx *ctx, char const *owner, char const *repo)
 {
-	return gcli_forge()->repo_delete(owner, repo);
+	return gcli_forge(ctx)->repo_delete(ctx, owner, repo);
 }
 
 int
-gcli_repo_create(gcli_repo_create_options const *options, gcli_repo *out)
+gcli_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *options,
+                 gcli_repo *out)
 {
-	return gcli_forge()->repo_create(options, out);
+	return gcli_forge(ctx)->repo_create(ctx, options, out);
 }

@@ -61,6 +61,7 @@ gcli_SOURCES = \
 	src/cmd/comment.c \
 	src/cmd/config.c \
 	src/cmd/forks.c \
+	src/cmd/gcli.c \
 	src/cmd/gists.c \
 	src/cmd/issues.c \
 	src/cmd/labels.c \
@@ -70,9 +71,7 @@ gcli_SOURCES = \
 	src/cmd/releases.c \
 	src/cmd/repos.c \
 	src/cmd/snippets.c \
-	src/cmd/status.c \
-	include/gcli/gcli.h \
-	src/gcli.c
+	src/cmd/status.c
 
 libsn_la_SOURCES = \
 	thirdparty/sn/sn.c \
@@ -110,6 +109,7 @@ TEMPLATES = \
 	templates/gitea/milestones.t
 
 libgcli_la_SOURCES = \
+	include/gcli/gcli.h src/gcli.c \
 	src/colour.c include/gcli/colour.h \
 	src/comments.c include/gcli/comments.h \
 	src/config.c include/gcli/config.h \
@@ -170,6 +170,10 @@ libgcli_la_SOURCES = \
 	src/gitea/sshkeys.c include/gcli/gitea/sshkeys.h \
 	src/gitea/milestones.c include/gcli/gitea/milestones.h \
 	$(TEMPLATES)
+
+libgcli_la_CPPFLAGS = \
+	$(AM_CPPFLAGS) \
+	-DIN_LIBGCLI=1
 
 BUILT_SOURCES = \
 	$(TEMPLATES:.t=.c) \

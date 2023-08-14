@@ -34,18 +34,15 @@
 #include <gcli/table.h>
 
 int
-gcli_get_forks(char const *owner,
-               char const *repo,
-               int const max,
-               gcli_fork_list *const out)
+gcli_get_forks(gcli_ctx *ctx, char const *owner, char const *repo,
+               int const max, gcli_fork_list *const out)
 {
-	return gcli_forge()->get_forks(owner, repo, max, out);
+	return gcli_forge(ctx)->get_forks(ctx, owner, repo, max, out);
 }
 
 void
-gcli_print_forks(enum gcli_output_flags const flags,
-                 gcli_fork_list const *const list,
-                 int const max)
+gcli_print_forks(gcli_ctx *ctx, enum gcli_output_flags const flags,
+                 gcli_fork_list const *const list, int const max)
 {
 	size_t n;
 	gcli_tbl table;
@@ -67,7 +64,7 @@ gcli_print_forks(enum gcli_output_flags const flags,
 	else
 		n = max;
 
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not initialize table");
 
@@ -93,9 +90,10 @@ gcli_print_forks(enum gcli_output_flags const flags,
 }
 
 int
-gcli_fork_create(char const *owner, char const *repo, char const *_in)
+gcli_fork_create(gcli_ctx *ctx, char const *owner, char const *repo,
+                 char const *_in)
 {
-	return gcli_forge()->fork_create(owner, repo, _in);
+	return gcli_forge(ctx)->fork_create(ctx, owner, repo, _in);
 }
 
 void

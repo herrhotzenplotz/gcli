@@ -37,48 +37,35 @@
 #include <gcli/curl.h>
 #include <gcli/pulls.h>
 
-int github_fetch_pulls(char *url,
-                       char const *filter_author,
-                       int max,
-                       gcli_pull_list *list);
+int github_fetch_pulls(gcli_ctx *ctx, char *url, char const *filter_author,
+                       int max, gcli_pull_list *list);
 
-int github_get_pulls(char const *owner,
-                     char const *reponame,
-                     gcli_pull_fetch_details const *details,
-                     int max,
+int github_get_pulls(gcli_ctx *ctx, char const *owner, char const *reponame,
+                     gcli_pull_fetch_details const *details, int max,
                      gcli_pull_list *out);
 
-int github_print_pull_diff(FILE *stream,
-                           char const *owner,
-                           char const *reponame,
-                           int pr_number);
+int github_print_pull_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
+                           char const *reponame, int pr_number);
 
-int github_pull_checks(char const *owner,
-                       char const *repo,
+int github_pull_checks(gcli_ctx *ctx, char const *owner, char const *repo,
                        int pr_number);
 
-int github_pull_merge(char const *owner,
-                      char const *reponame,
-                      int pr_number,
-                      enum gcli_merge_flags flags);
+int github_pull_merge(gcli_ctx *ctx, char const *owner, char const *reponame,
+                      int pr_number, enum gcli_merge_flags flags);
 
-int github_pull_reopen(char const *owner,
-                       char const *reponame,
+int github_pull_reopen(gcli_ctx *ctx, char const *owner, char const *reponame,
                        int pr_number);
 
-int github_pull_close(char const *owner,
-                      char const *reponame,
+int github_pull_close(gcli_ctx *ctx, char const *owner, char const *reponame,
                       int pr_number);
 
-int github_perform_submit_pull(gcli_submit_pull_options opts);
+int github_perform_submit_pull(gcli_ctx *ctx, gcli_submit_pull_options opts);
 
-int github_get_pull_commits(char const *owner, char const *repo,
+int github_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
                             int pr_number, gcli_commit_list *out);
 
-int github_get_pull(char const *owner,
-                    char const *repo,
-                    int pr_number,
-                    gcli_pull *out);
+int github_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
+                    int pr_number, gcli_pull *out);
 
 sn_sv github_pull_try_derive_head(void);
 

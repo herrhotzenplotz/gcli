@@ -1,5 +1,5 @@
 /*
- * Copyright 2021,2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,140 +27,40 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <config.h>
+#include <gcli/gcli.h>
 
-#ifdef HAVE_GETOPT_h
-#include <getopt.h>
-#endif
-
-#include <stdio.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
-#include <gcli/cmd.h>
-#include <gcli/config.h>
-
-static void usage(void);
-
-static int
-subcommand_version(int argc, char *argv[])
+char const *
+gcli_init(gcli_ctx **ctx)
 {
-	(void) argc;
-	(void) argv;
+	*ctx = calloc(sizeof (struct gcli_ctx), 1);
+	if (!(*ctx))
+		return strerror(errno);
 
-	version();
-	copyright();
+	if (gcli_config_init_ctx(*ctx) < 0)
+		return (*ctx)->last_error; /* TODO: cleanup */
 
-	return EXIT_SUCCESS;
+	(*ctx)->last_error = "imagine having useful error messages in the year 2023";
+
+	return NULL;
 }
 
-static struct subcommand {
-	char const *const cmd_name;
-	char const *const docstring;
-	int (*fn)(int, char **);
-} subcommands[] = {
-	{ .cmd_name = "ci",
-	  .fn = subcommand_ci,
-	  .docstring = "Github CI status info" },
-	{ .cmd_name = "comment",
-	  .fn = subcommand_comment,
-	  .docstring = "Comment under issues and PRs" },
-	{ .cmd_name = "config",
-	  .fn = subcommand_config,
-	  .docstring = "Configure forges" },
-	{ .cmd_name = "forks",
-	  .fn = subcommand_forks,
-	  .docstring = "Create, delete and list repository forks" },
-	{ .cmd_name = "gists",
-	  .fn = subcommand_gists,
-	  .docstring = "Create, fetch and list Github Gists" },
-	{ .cmd_name = "issues",
-	  .fn = subcommand_issues,
-	  .docstring = "Manage issues" },
-	{ .cmd_name = "labels",
-	  .fn = subcommand_labels,
-	  .docstring = "Manage issue and PR labels" },
-	{ .cmd_name = "milestones",
-	  .fn = subcommand_milestones,
-	  .docstring = "Milestone handling" },
-	{ .cmd_name = "pipelines",
-	  .fn = subcommand_pipelines,
-	  .docstring = "Gitlab CI management" },
-	{ .cmd_name = "pulls",
-	  .fn = subcommand_pulls,
-	  .docstring = "Create, view and manage PRs" },
-	{ .cmd_name = "releases",
-	  .fn = subcommand_releases,
-	  .docstring = "Manage releases of repositories" },
-	{ .cmd_name = "repos",
-	  .fn = subcommand_repos,
-	  .docstring = "Remote Repository management" },
-	{ .cmd_name = "snippets",
-	  .fn = subcommand_snippets,
-	  .docstring = "Fetch and list Gitlab snippets" },
-	{ .cmd_name = "status",
-	  .fn = subcommand_status,
-	  .docstring = "General user status and notifications" },
-	{ .cmd_name = "api",
-	  .fn = subcommand_api,
-	  .docstring = "Fetch plain JSON info from an API (for debugging purposes)" },
-	{ .cmd_name = "version",
-	  .fn = subcommand_version,
-	  .docstring = "Print version" },
-};
-
-static void
-usage(void)
+void
+gcli_destroy(gcli_ctx **ctx)
 {
-	fprintf(stderr, "usage: gcli [options] subcommand\n\n");
-	fprintf(stderr, "OPTIONS:\n");
-	fprintf(stderr, "  -a account     Use the configured account instead of inferring it\n");
-	fprintf(stderr, "  -r remote      Infer account from the given git remote\n");
-	fprintf(stderr, "  -t type        Force the account type:\n");
-	fprintf(stderr, "                    - github (default: github.com)\n");
-	fprintf(stderr, "                    - gitlab (default: gitlab.com)\n");
-	fprintf(stderr, "                    - gitea (default: codeberg.org)\n");
-	fprintf(stderr, "  -c             Force colour and text formatting.\n");
-	fprintf(stderr, "  -q             Be quiet. (Not implemented yet)\n\n");
-	fprintf(stderr, "  -v             Be verbose.\n\n");
-	fprintf(stderr, "SUBCOMMANDS:\n");
-	for (size_t i = 0; i < ARRAY_SIZE(subcommands); ++i) {
-		fprintf(stderr,
-		        "  %-13.13s  %s\n",
-		        subcommands[i].cmd_name,
-		        subcommands[i].docstring);
+	if (ctx && *ctx) {
+		free(*ctx);
+		*ctx = NULL;
+
+		/* TODO: other deinit stuff? */
 	}
-	fprintf(stderr, "\n");
-	version();
-	copyright();
 }
 
-int
-main(int argc, char *argv[])
+char const *
+gcli_get_error(gcli_ctx *ctx)
 {
-	/* Parse first arguments */
-	if (gcli_config_init(&argc, &argv)) {
-		usage();
-		return EXIT_FAILURE;
-	}
-
-	/* Make sure we have a subcommand */
-	if (argc == 0) {
-		fprintf(stderr, "error: missing subcommand\n");
-		usage();
-		return EXIT_FAILURE;
-	}
-
-	/* Find and invoke the subcommand handler */
-	for (size_t i = 0; i < ARRAY_SIZE(subcommands); ++i) {
-		if (strcmp(subcommands[i].cmd_name, argv[0]) == 0)
-			return subcommands[i].fn(argc, argv);
-	}
-
-	/* No subcommand matched */
-	fprintf(stderr, "error: unknown subcommand %s\n", argv[0]);
-	usage();
-
-	return EXIT_FAILURE;
+	return ctx->last_error;
 }

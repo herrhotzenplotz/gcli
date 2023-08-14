@@ -60,14 +60,14 @@ version(void)
 }
 
 void
-check_owner_and_repo(const char **owner, const char **repo)
+check_owner_and_repo(gcli_ctx *ctx, const char **owner, const char **repo)
 {
 	/* If no remote was specified, try to autodetect */
 	if ((*owner == NULL) != (*repo == NULL))
 		errx(1, "error: missing either explicit owner or repo");
 
 	if (*owner == NULL)
-		gcli_config_get_repo(owner, repo);
+		gcli_config_get_repo(ctx, owner, repo);
 }
 
 /* Parses (and updates) the given argument list into two seperate lists:

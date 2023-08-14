@@ -33,18 +33,15 @@
 #include <gcli/forks.h>
 
 int
-gitea_get_forks(char const *owner,
-                char const *repo,
-                int const max,
-                gcli_fork_list *const out)
+gitea_get_forks(gcli_ctx *ctx, char const *owner, char const *repo,
+                int const max, gcli_fork_list *const out)
 {
-	return github_get_forks(owner, repo, max, out);
+	return github_get_forks(ctx, owner, repo, max, out);
 }
 
 void
-gitea_fork_create(char const *owner,
-                  char const *repo,
+gitea_fork_create(gcli_ctx *ctx, char const *owner, char const *repo,
                   char const *_in)
 {
-	github_fork_create(owner, repo, _in);
+	github_fork_create(ctx, owner, repo, _in);
 }

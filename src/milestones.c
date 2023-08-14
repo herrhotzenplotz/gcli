@@ -32,39 +32,36 @@
 #include <gcli/table.h>
 
 int
-gcli_get_milestones(char const *const owner,
-                    char const *const repo,
-                    int const max,
+gcli_get_milestones(gcli_ctx *ctx, char const *const owner,
+                    char const *const repo, int const max,
                     gcli_milestone_list *const out)
 {
-	return gcli_forge()->get_milestones(owner, repo, max, out);
+	return gcli_forge(ctx)->get_milestones(ctx, owner, repo, max, out);
 }
 
 int
-gcli_get_milestone(char const *owner,
-                   char const *repo,
-                   int const milestone,
-                   gcli_milestone *const out)
+gcli_get_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
+                   int const milestone, gcli_milestone *const out)
 {
-	return gcli_forge()->get_milestone(owner, repo, milestone, out);
+	return gcli_forge(ctx)->get_milestone(ctx, owner, repo, milestone, out);
 }
 
 int
-gcli_create_milestone(struct gcli_milestone_create_args const *args)
+gcli_create_milestone(gcli_ctx *ctx,
+                      struct gcli_milestone_create_args const *args)
 {
-	return gcli_forge()->create_milestone(args);
+	return gcli_forge(ctx)->create_milestone(ctx, args);
 }
 
 int
-gcli_delete_milestone(char const *const owner,
-                      char const *const repo,
-                      int const milestone)
+gcli_delete_milestone(gcli_ctx *ctx, char const *const owner,
+                      char const *const repo, int const milestone)
 {
-	return gcli_forge()->delete_milestone(owner, repo, milestone);
+	return gcli_forge(ctx)->delete_milestone(ctx, owner, repo, milestone);
 }
 
 void
-gcli_print_milestones(gcli_milestone_list const *const list,
+gcli_print_milestones(gcli_ctx *ctx, gcli_milestone_list const *const list,
                       int max)
 {
 	size_t n;
@@ -81,7 +78,7 @@ gcli_print_milestones(gcli_milestone_list const *const list,
 		return;
 	}
 
-	tbl = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	tbl = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
 	if (!tbl)
 		errx(1, "error: could not init table printer");
 
@@ -102,12 +99,12 @@ gcli_print_milestones(gcli_milestone_list const *const list,
 }
 
 void
-gcli_print_milestone(gcli_milestone const *const milestone)
+gcli_print_milestone(gcli_ctx *ctx, gcli_milestone const *const milestone)
 {
 	gcli_dict dict;
-	uint32_t const quirks = gcli_forge()->milestone_quirks;
+	uint32_t const quirks = gcli_forge(ctx)->milestone_quirks;
 
-	dict = gcli_dict_begin();
+	dict = gcli_dict_begin(ctx);
 	gcli_dict_add(dict,        "ID", 0, 0, "%d", milestone->id);
 	gcli_dict_add_string(dict, "TITLE", 0, 0, milestone->title);
 	gcli_dict_add_string(dict, "STATE", GCLI_TBLCOL_STATECOLOURED, 0, milestone->state);
@@ -163,19 +160,19 @@ gcli_free_milestones(gcli_milestone_list *const it)
 }
 
 int
-gcli_milestone_get_issues(char const *const owner,
-                          char const *const repo,
-                          int const milestone,
+gcli_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
+                          char const *const repo, int const milestone,
                           gcli_issue_list *const out)
 {
-	return gcli_forge()->get_milestone_issues(owner, repo, milestone, out);
+	return gcli_forge(ctx)->get_milestone_issues(
+		ctx, owner, repo, milestone, out);
 }
 
 int
-gcli_milestone_set_duedate(char const *const owner,
-                           char const *const repo,
-                           int const milestone,
+gcli_milestone_set_duedate(gcli_ctx *ctx, char const *const owner,
+                           char const *const repo, int const milestone,
                            char const *const date)
 {
-	return gcli_forge()->milestone_set_duedate(owner, repo, milestone, date);
+	return gcli_forge(ctx)->milestone_set_duedate(
+		ctx, owner, repo, milestone, date);
 }

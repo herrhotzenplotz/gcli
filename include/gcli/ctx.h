@@ -27,16 +27,23 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GCLI_GITEA_SSHKEYS_H
-#define GCLI_GITEA_SSHKEYS_H
+#ifndef GCLI_CTX_H
+#define GCLI_CTX_H
 
-#include <gcli/sshkeys.h>
+#include <curl/curl.h>
 
-int gitea_get_sshkeys(gcli_ctx *ctx, gcli_sshkey_list *out);
+/* Strictly internal structure containing the gcli library context
+ * data */
+struct gcli_ctx {
+	CURL *curl;
+	struct gcli_config *config;
+	struct gcli_dotgcli *dotgcli;
 
-int gitea_add_sshkey(gcli_ctx *ctx, char const *title,
-                     char const *public_key_data, gcli_sshkey *out);
+	char *last_error;
+};
 
-int gitea_delete_sshkey(gcli_ctx *ctx, int id);
+/* Functions that are strictly called from the init / deinit routines
+ * and not exposed to the public interface */
+int gcli_config_init_ctx(struct gcli_ctx *);
 
-#endif /* GCLI_GITEA_SSHKEYS_H */
+#endif /* GCLI_CTX_H */

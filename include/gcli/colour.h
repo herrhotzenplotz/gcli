@@ -34,6 +34,8 @@
 #include <config.h>
 #endif
 
+#include <gcli/gcli.h>
+
 #include <stdint.h>
 
 #include <sn/sn.h>
@@ -53,12 +55,12 @@ enum {
 	GCLI_COLOR_DEFAULT,
 };
 
-char const *gcli_setcolour256(uint32_t colourcode);
-char const *gcli_resetcolour(void);
-char const *gcli_setcolour(int colour);
-char const *gcli_state_colour_sv(sn_sv const state);
-char const *gcli_state_colour_str(char const *it);
-char const *gcli_setbold(void);
-char const *gcli_resetbold(void);
+char const *gcli_setcolour256(gcli_ctx *ctx, uint32_t colourcode);
+char const *gcli_resetcolour(gcli_ctx *ctx);
+char const *gcli_setcolour(gcli_ctx *ctx, int colour);
+char const *gcli_state_colour_sv(gcli_ctx *ctx, sn_sv const state);
+char const *gcli_state_colour_str(gcli_ctx *ctx, char const *it);
+char const *gcli_setbold(gcli_ctx *ctx);
+char const *gcli_resetbold(gcli_ctx *ctx);
 
 #endif /* COLOR_H */

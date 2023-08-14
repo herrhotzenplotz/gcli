@@ -32,14 +32,15 @@
 #include <sn/sn.h>
 
 static sn_sv
-github_default_account_name(void)
+github_default_account_name(gcli_ctx *ctx)
 {
 	sn_sv section_name;
 
-	section_name = gcli_config_get_override_default_account();
+	section_name = gcli_config_get_override_default_account(ctx);
 
 	if (sn_sv_null(section_name)) {
 		section_name = gcli_config_find_by_key(
+			ctx,
 			SV("defaults"),
 			"github-default-account");
 
@@ -51,13 +52,13 @@ github_default_account_name(void)
 }
 
 char *
-github_get_apibase(void)
+github_get_apibase(gcli_ctx *ctx)
 {
-	sn_sv account_name = github_default_account_name();
+	sn_sv account_name = github_default_account_name(ctx);
 	if (sn_sv_null(account_name))
 		goto default_val;
 
-	sn_sv api_base = gcli_config_find_by_key(account_name, "apibase");
+	sn_sv api_base = gcli_config_find_by_key(ctx, account_name, "apibase");
 
 	if (sn_sv_null(api_base))
 		goto default_val;
@@ -69,26 +70,26 @@ default_val:
 }
 
 char *
-github_get_authheader(void)
+github_get_authheader(gcli_ctx *ctx)
 {
-	sn_sv const account = github_default_account_name();
+	sn_sv const account = github_default_account_name(ctx);
 	if (sn_sv_null(account))
 		return NULL;
 
-	sn_sv const token = gcli_config_find_by_key(account, "token");;
+	sn_sv const token = gcli_config_find_by_key(ctx, account, "token");
 	if (sn_sv_null(token))
 		errx(1, "Missing Github token");
 	return sn_asprintf("Authorization: token "SV_FMT, SV_ARGS(token));
 }
 
 sn_sv
-github_get_account(void)
+github_get_account(gcli_ctx *ctx)
 {
-	sn_sv const section = github_default_account_name();
+	sn_sv const section = github_default_account_name(ctx);
 	if (sn_sv_null(section))
 		return SV_NULL;
 
-	sn_sv const account = gcli_config_find_by_key(section, "account");;
+	sn_sv const account = gcli_config_find_by_key(ctx, section, "account");;
 	if (!account.length)
 		errx(1, "Missing Github account name");
 	return account;

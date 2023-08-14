@@ -36,7 +36,8 @@ pregen_array_parser(struct objparser *p, struct objentry *it)
 {
 	fprintf(outfile,
 	        "static void\n"
-	        "parse_%s_%s_array(struct json_stream *stream, %s *out)\n",
+	        "parse_%s_%s_array(gcli_ctx *ctx, struct json_stream *stream, "
+	        "%s *out)\n",
 	        p->name, it->name, p->returntype);
 	fprintf(outfile, "{\n");
 	fprintf(outfile, "\tif (json_peek(stream) == JSON_NULL) {\n");
@@ -55,7 +56,7 @@ pregen_array_parser(struct objparser *p, struct objentry *it)
 	        it->name, it->name, it->name, it->name);
 	fprintf(outfile, "\t\tmemset(&out->%s[out->%s_size], 0, sizeof(out->%s[out->%s_size]));\n",
 	        it->name, it->name, it->name, it->name);
-	fprintf(outfile, "\t\t%s(stream, &out->%s[out->%s_size++]);\n",
+	fprintf(outfile, "\t\t%s(ctx, stream, &out->%s[out->%s_size++]);\n",
 	        it->parser, it->name, it->name);
 	fprintf(outfile, "\t}\n\n");
 
@@ -81,20 +82,23 @@ objparser_dump_entries(struct objparser *p)
 
 	for (struct objentry *it = p->entries; it; it = it->next)
 	{
-		fprintf(outfile, "\t\tif (strncmp(\"%s\", key, len) == 0)\n", it->jsonname);
+		fprintf(outfile, "\t\tif (strncmp(\"%s\", key, len) == 0)\n",
+		        it->jsonname);
 
 		if (it->kind == OBJENTRY_SIMPLE) {
 
 			if (it->parser)
-				fprintf(outfile, "\t\t\t%s(stream, &out->%s);\n", it->parser, it->name);
+				fprintf(outfile, "\t\t\t%s(ctx, stream, &out->%s);\n",
+				        it->parser, it->name);
 			else
-				fprintf(outfile, "\t\t\tout->%s = get_%s(stream);\n", it->name, it->type);
+				fprintf(outfile, "\t\t\tout->%s = get_%s(ctx, stream);\n", it->name,
+				        it->type);
 
 		} else if (it->kind == OBJENTRY_ARRAY) {
-			fprintf(outfile, "\t\t\tparse_%s_%s_array(stream, out);\n",
+			fprintf(outfile, "\t\t\tparse_%s_%s_array(ctx, stream, out);\n",
 			        p->name, it->name);
 		} else if (it->kind == OBJENTRY_CONTINUATION) {
-			fprintf(outfile, "\t\t\t%s(stream, out);\n", it->parser);
+			fprintf(outfile, "\t\t\t%s(ctx, stream, out);\n", it->parser);
 		}
 		fprintf(outfile, "\t\telse ");
 	}
@@ -111,7 +115,7 @@ objparser_dump_select(struct objparser *p)
 	fprintf(outfile, "\t\tsize_t len;\n");
 	fprintf(outfile, "\t\tkey = json_get_string(stream, &len);\n");
 	fprintf(outfile, "\t\tif (strncmp(\"%s\", key, len) == 0)\n", p->select.fieldname);
-	fprintf(outfile, "\t\t\t*out = get_%s(stream);\n", p->select.fieldtype);
+	fprintf(outfile, "\t\t\t*out = get_%s(ctx, stream);\n", p->select.fieldtype);
 	fprintf(outfile, "\t\telse ");
 	fprintf(outfile, "\n\t\t\tSKIP_OBJECT_VALUE(stream);\n");
 	fprintf(outfile, "\t}\n");
@@ -124,7 +128,7 @@ objparser_dump_c(struct objparser *p)
 
 	fprintf(outfile,
 	        "void\n"
-	        "parse_%s(struct json_stream *stream, %s *out)\n",
+	        "parse_%s(gcli_ctx *ctx, struct json_stream *stream, %s *out)\n",
 	        p->name, p->returntype);
 	fprintf(outfile, "{\n");
 	fprintf(outfile, "\tenum json_type key_type;\n");
@@ -148,7 +152,8 @@ arrayparser_dump_c(struct arrayparser *p)
 {
 	fprintf(outfile,
 	        "void\n"
-	        "parse_%s(struct json_stream *stream, %s **out, size_t *out_size)\n",
+	        "parse_%s(gcli_ctx *ctx, struct json_stream *stream, %s **out, "
+	        "size_t *out_size)\n",
 	        p->name, p->returntype);
 	fprintf(outfile, "{\n");
 	fprintf(outfile, "\tif (json_peek(stream) == JSON_NULL) {\n");
@@ -167,7 +172,7 @@ arrayparser_dump_c(struct arrayparser *p)
 	fprintf(outfile, "\t\t*out = realloc(*out, sizeof(**out) * (*out_size + 1));\n");
 	fprintf(outfile, "\t\tit = &(*out)[(*out_size)++];\n");
 	fprintf(outfile, "\t\tmemset(it, 0, sizeof(*it));\n");
-	fprintf(outfile, "\t\t%s(stream, it);\n", p->parser);
+	fprintf(outfile, "\t\t%s(ctx, stream, it);\n", p->parser);
 	fprintf(outfile, "\t}\n\n");
 
 	fprintf(outfile, "\tassert(json_next(stream) == JSON_ARRAY_END);\n");
@@ -185,6 +190,7 @@ header_dump_c(void)
 {
 	fprintf(outfile, "#include <assert.h>\n");
 	fprintf(outfile, "#include <gcli/json_util.h>\n");
+	fprintf(outfile, "#include <gcli/gcli.h>\n");
 	fprintf(outfile, "#include <pdjson/pdjson.h>\n");
 	fprintf(outfile, "#include <stdlib.h>\n");
 	fprintf(outfile, "#include <string.h>\n");

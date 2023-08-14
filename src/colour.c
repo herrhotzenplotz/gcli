@@ -64,12 +64,12 @@ colour_cache_insert(uint32_t const code, char *sequence)
 }
 
 char const *
-gcli_setcolour256(uint32_t const code)
+gcli_setcolour256(struct gcli_ctx *ctx, uint32_t const code)
 {
 	char       *result    = NULL;
 	char const *oldresult = NULL;
 
-	if (!gcli_config_have_colours())
+	if (!gcli_config_have_colours(ctx))
 		return "";
 
 	if (colour_table_size == 0)
@@ -90,18 +90,18 @@ gcli_setcolour256(uint32_t const code)
 }
 
 const char *
-gcli_resetcolour(void)
+gcli_resetcolour(gcli_ctx *ctx)
 {
-	if (!gcli_config_have_colours())
+	if (!gcli_config_have_colours(ctx))
 		return "";
 
 	return "\033[m";
 }
 
 const char *
-gcli_setcolour(int code)
+gcli_setcolour(gcli_ctx *ctx, int code)
 {
-	if (!gcli_config_have_colours())
+	if (!gcli_config_have_colours(ctx))
 		return "";
 
 	switch (code) {
@@ -121,28 +121,28 @@ gcli_setcolour(int code)
 }
 
 char const *
-gcli_setbold(void)
+gcli_setbold(gcli_ctx *ctx)
 {
-	if (!gcli_config_have_colours())
+	if (!gcli_config_have_colours(ctx))
 		return "";
 	else
 		return "\033[1m";
 }
 
 char const *
-gcli_resetbold(void)
+gcli_resetbold(gcli_ctx *ctx)
 {
-	if (!gcli_config_have_colours())
+	if (!gcli_config_have_colours(ctx))
 		return "";
 	else
 		return "\033[22m";
 }
 
 char const *
-gcli_state_colour_str(char const *it)
+gcli_state_colour_str(gcli_ctx *ctx, char const *it)
 {
 	if (it)
-		return gcli_state_colour_sv(SV((char *)it));
+		return gcli_state_colour_sv(ctx, SV((char *)it));
 	else
 		return "";
 }
@@ -166,14 +166,14 @@ static const struct { char const *name; int code; }
 };
 
 char const *
-gcli_state_colour_sv(sn_sv const state)
+gcli_state_colour_sv(gcli_ctx *ctx, sn_sv const state)
 {
 	if (!sn_sv_null(state)) {
 		for (size_t i = 0; i < ARRAY_SIZE(state_colour_table); ++i) {
 			if (sn_sv_has_prefix(state, state_colour_table[i].name))
-				return gcli_setcolour(state_colour_table[i].code);
+				return gcli_setcolour(ctx, state_colour_table[i].code);
 		}
 	}
 
-	return gcli_setcolour(GCLI_COLOR_DEFAULT);
+	return gcli_setcolour(ctx, GCLI_COLOR_DEFAULT);
 }

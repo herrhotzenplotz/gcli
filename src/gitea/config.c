@@ -33,16 +33,17 @@
 #include <sn/sn.h>
 
 static sn_sv
-gitea_default_account_name(void)
+gitea_default_account_name(gcli_ctx *ctx)
 {
 	sn_sv section_name;
 
 	/* Use default override account */
-	section_name = gcli_config_get_override_default_account();
+	section_name = gcli_config_get_override_default_account(ctx);
 
 	/* If not manually overridden */
 	if (sn_sv_null(section_name)) {
 		section_name = gcli_config_find_by_key(
+			ctx,
 			SV("defaults"),
 			"gitea-default-account");
 
@@ -55,13 +56,13 @@ gitea_default_account_name(void)
 }
 
 char *
-gitea_get_apibase(void)
+gitea_get_apibase(gcli_ctx *ctx)
 {
-	sn_sv const account = gitea_default_account_name();
+	sn_sv const account = gitea_default_account_name(ctx);
 	if (sn_sv_null(account))
 		goto default_val;
 
-	sn_sv const api_base = gcli_config_find_by_key(account, "apibase");
+	sn_sv const api_base = gcli_config_find_by_key(ctx, account, "apibase");
 	if (sn_sv_null(api_base))
 		goto default_val;
 
@@ -72,13 +73,13 @@ default_val:
 }
 
 char *
-gitea_get_authheader(void)
+gitea_get_authheader(gcli_ctx *ctx)
 {
-	sn_sv const account = gitea_default_account_name();
+	sn_sv const account = gitea_default_account_name(ctx);
 	if (sn_sv_null(account))
 		return NULL;
 
-	sn_sv const token = gcli_config_find_by_key(account, "token");;
+	sn_sv const token = gcli_config_find_by_key(ctx, account, "token");;
 	if (sn_sv_null(token)) {
 		warnx("Missing Gitea token");
 		return NULL;
@@ -88,13 +89,13 @@ gitea_get_authheader(void)
 }
 
 sn_sv
-gitea_get_account(void)
+gitea_get_account(gcli_ctx *ctx)
 {
-	sn_sv const section = gitea_default_account_name();
+	sn_sv const section = gitea_default_account_name(ctx);
 	if (sn_sv_null(section))
 		return SV_NULL;
 
-	sn_sv const account = gcli_config_find_by_key(section, "account");;
+	sn_sv const account = gcli_config_find_by_key(ctx, section, "account");;
 	if (!account.length)
 		errx(1, "Missing Gitea account name");
 	return account;

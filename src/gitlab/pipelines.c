@@ -40,47 +40,46 @@
 #include <templates/gitlab/pipelines.h>
 
 static int
-fetch_pipelines(char *url, int const max, gitlab_pipeline_list *const list)
+fetch_pipelines(gcli_ctx *ctx, char *url, int const max,
+                gitlab_pipeline_list *const list)
 {
-	gcli_fetch_list_ctx ctx = {
+	gcli_fetch_list_ctx fl = {
 		.listp = &list->pipelines,
 		.sizep = &list->pipelines_size,
 		.max = max,
 		.parse = (parsefn)(parse_gitlab_pipelines),
 	};
 
-	return gcli_fetch_list(url, &ctx);
+	return gcli_fetch_list(ctx, url, &fl);
 }
 
 int
-gitlab_get_pipelines(char const *owner,
-                     char const *repo,
-                     int const max,
-                     gitlab_pipeline_list *const list)
+gitlab_get_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
+                     int const max, gitlab_pipeline_list *const list)
 {
 	char *url = NULL;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/pipelines",
-	                  gitlab_get_apibase(), owner, repo);
+	                  gitlab_get_apibase(ctx), owner, repo);
 
-	return fetch_pipelines(url, max, list);
+	return fetch_pipelines(ctx, url, max, list);
 }
 
 static int
-gitlab_get_mr_pipelines(char const *owner, char const *repo, int const mr_id,
-                        gitlab_pipeline_list *const list)
+gitlab_get_mr_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
+                        int const mr_id, gitlab_pipeline_list *const list)
 {
 	char *url = NULL;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%d/pipelines",
-	                  gitlab_get_apibase(), owner, repo, mr_id);
+	                  gitlab_get_apibase(ctx), owner, repo, mr_id);
 
 	/* fetch everything */
-	return fetch_pipelines(url, -1, list);
+	return fetch_pipelines(ctx, url, -1, list);
 }
 
 void
-gitlab_print_pipelines(gitlab_pipeline_list const *const list)
+gitlab_print_pipelines(gcli_ctx *ctx, gitlab_pipeline_list const *const list)
 {
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
@@ -96,7 +95,7 @@ gitlab_print_pipelines(gitlab_pipeline_list const *const list)
 		return;
 	}
 
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not init table");
 
@@ -130,41 +129,40 @@ gitlab_free_pipelines(gitlab_pipeline_list *const list)
 }
 
 void
-gitlab_pipelines(char const *owner, char const *repo, int const count)
+gitlab_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
+                 int const count)
 {
 	gitlab_pipeline_list pipelines = {0};
 
-	if (gitlab_get_pipelines(owner, repo, count, &pipelines) < 0)
+	if (gitlab_get_pipelines(ctx, owner, repo, count, &pipelines) < 0)
 		errx(1,"error: could not fetch list of pipelines");
 
-	gitlab_print_pipelines(&pipelines);
+	gitlab_print_pipelines(ctx, &pipelines);
 	gitlab_free_pipelines(&pipelines);
 }
 
 void
-gitlab_pipeline_jobs(char const *owner,
-                     char const *repo,
-                     long const id,
-                     int const count)
+gitlab_pipeline_jobs(gcli_ctx *ctx, char const *owner, char const *repo,
+                     long const id, int const count)
 {
 	gitlab_job_list jobs = {0};
 	int rc;
 
-	rc = gitlab_get_pipeline_jobs(owner, repo, id, count, &jobs);
+	rc = gitlab_get_pipeline_jobs(ctx, owner, repo, id, count, &jobs);
 	if (rc < 0)
 		errx(1, "error: failed to get jobs");
 
-	gitlab_print_jobs(&jobs);
+	gitlab_print_jobs(ctx, &jobs);
 	gitlab_free_jobs(&jobs);
 }
 
 int
-gitlab_get_pipeline_jobs(char const *owner, char const *repo,
+gitlab_get_pipeline_jobs(gcli_ctx *ctx, char const *owner, char const *repo,
                          long const pipeline, int const max,
                          gitlab_job_list *const out)
 {
 	char *url = NULL;
-	gcli_fetch_list_ctx ctx = {
+	gcli_fetch_list_ctx fl = {
 		.listp = &out->jobs,
 		.sizep = &out->jobs_size,
 		.max = max,
@@ -172,13 +170,13 @@ gitlab_get_pipeline_jobs(char const *owner, char const *repo,
 	};
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/pipelines/%ld/jobs",
-	                  gitlab_get_apibase(), owner, repo, pipeline);
+	                  gitlab_get_apibase(ctx), owner, repo, pipeline);
 
-	return gcli_fetch_list(url, &ctx);
+	return gcli_fetch_list(ctx, url, &fl);
 }
 
 void
-gitlab_print_jobs(gitlab_job_list const *const list)
+gitlab_print_jobs(gcli_ctx *ctx, gitlab_job_list const *const list)
 {
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
@@ -196,7 +194,7 @@ gitlab_print_jobs(gitlab_job_list const *const list)
 		return;
 	}
 
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not initialize table");
 
@@ -241,16 +239,17 @@ gitlab_free_jobs(gitlab_job_list *list)
 }
 
 int
-gitlab_job_get_log(char const *owner, char const *repo, long const job_id)
+gitlab_job_get_log(gcli_ctx *ctx, char const *owner, char const *repo,
+                   long const job_id)
 {
 	gcli_fetch_buffer buffer = {0};
 	char *url = NULL;
 	int rc = 0;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld/trace",
-	                  gitlab_get_apibase(), owner, repo, job_id);
+	                  gitlab_get_apibase(ctx), owner, repo, job_id);
 
-	rc = gcli_fetch(url, NULL, &buffer);
+	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc == 0) {
 		fwrite(buffer.data, buffer.length, 1, stdout);
 	}
@@ -262,25 +261,23 @@ gitlab_job_get_log(char const *owner, char const *repo, long const job_id)
 }
 
 static int
-gitlab_get_job(char const *owner,
-               char const *repo,
-               long const jid,
-               gitlab_job *const out)
+gitlab_get_job(gcli_ctx *ctx, char const *owner, char const *repo,
+               long const jid, gitlab_job *const out)
 {
 	gcli_fetch_buffer buffer = {0};
 	char *url = NULL;
 	int rc = 0;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld",
-	                  gitlab_get_apibase(), owner, repo, jid);
+	                  gitlab_get_apibase(ctx), owner, repo, jid);
 
-	rc = gcli_fetch(url, NULL, &buffer);
+	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc == 0) {
 		struct json_stream  stream = {0};
 
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		json_set_streaming(&stream, 1);
-		parse_gitlab_job(&stream, out);
+		parse_gitlab_job(ctx, &stream, out);
 		json_close(&stream);
 	}
 
@@ -291,11 +288,11 @@ gitlab_get_job(char const *owner,
 }
 
 static void
-gitlab_print_job_status(gitlab_job const *const job)
+gitlab_print_job_status(gcli_ctx *ctx, gitlab_job const *const job)
 {
 	gcli_dict printer;
 
-	printer = gcli_dict_begin();
+	printer = gcli_dict_begin(ctx);
 
 	gcli_dict_add(printer,        "ID", 0, 0, "%ld", job->id);
 	gcli_dict_add_string(printer, "STATUS", GCLI_TBLCOL_STATECOLOURED, 0, job->status);
@@ -313,14 +310,15 @@ gitlab_print_job_status(gitlab_job const *const job)
 }
 
 int
-gitlab_job_status(char const *owner, char const *repo, long const jid)
+gitlab_job_status(gcli_ctx *ctx, char const *owner, char const *repo,
+                  long const jid)
 {
 	gitlab_job job = {0};
 	int rc = 0;
 
-	rc = gitlab_get_job(owner, repo, jid, &job);
+	rc = gitlab_get_job(ctx, owner, repo, jid, &job);
 	if (rc == 0)
-		gitlab_print_job_status(&job);
+		gitlab_print_job_status(ctx, &job);
 
 	gitlab_free_job(&job);
 
@@ -328,14 +326,15 @@ gitlab_job_status(char const *owner, char const *repo, long const jid)
 }
 
 int
-gitlab_job_cancel(char const *owner, char const *repo, long const jid)
+gitlab_job_cancel(gcli_ctx *ctx, char const *owner, char const *repo,
+                  long const jid)
 {
 	char *url = NULL;
 	int rc = 0;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld/cancel",
-	                  gitlab_get_apibase(), owner, repo, jid);
-	rc = gcli_fetch_with_method("POST", url, NULL, NULL, NULL);
+	                  gitlab_get_apibase(ctx), owner, repo, jid);
+	rc = gcli_fetch_with_method(ctx, "POST", url, NULL, NULL, NULL);
 
 	free(url);
 
@@ -343,14 +342,15 @@ gitlab_job_cancel(char const *owner, char const *repo, long const jid)
 }
 
 int
-gitlab_job_retry(char const *owner, char const *repo, long const jid)
+gitlab_job_retry(gcli_ctx *ctx, char const *owner, char const *repo,
+                 long const jid)
 {
-	int   rc  = 0;
+	int rc = 0;
 	char *url = NULL;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld/retry",
-	                  gitlab_get_apibase(), owner, repo, jid);
-	rc = gcli_fetch_with_method("POST", url, NULL, NULL, NULL);
+	                  gitlab_get_apibase(ctx), owner, repo, jid);
+	rc = gcli_fetch_with_method(ctx, "POST", url, NULL, NULL, NULL);
 
 	free(url);
 
@@ -358,14 +358,15 @@ gitlab_job_retry(char const *owner, char const *repo, long const jid)
 }
 
 int
-gitlab_mr_pipelines(char const *owner, char const *repo, int const mr_id)
+gitlab_mr_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
+                    int const mr_id)
 {
 	gitlab_pipeline_list list = {0};
 	int rc = 0;
 
-	rc = gitlab_get_mr_pipelines(owner, repo, mr_id, &list);
+	rc = gitlab_get_mr_pipelines(ctx, owner, repo, mr_id, &list);
 	if (rc == 0)
-		gitlab_print_pipelines(&list);
+		gitlab_print_pipelines(ctx, &list);
 
 	gitlab_free_pipelines(&list);
 
@@ -373,8 +374,9 @@ gitlab_mr_pipelines(char const *owner, char const *repo, int const mr_id)
 }
 
 int
-gitlab_job_download_artifacts(char const *owner, char const *repo,
-                              long const jid, char const *const outfile)
+gitlab_job_download_artifacts(gcli_ctx *ctx, char const *owner,
+                              char const *repo, long const jid,
+                              char const *const outfile)
 {
 	char *url;
 	char *e_owner, *e_repo;
@@ -389,10 +391,10 @@ gitlab_job_download_artifacts(char const *owner, char const *repo,
 	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld/artifacts",
-	                  gitlab_get_apibase(),
+	                  gitlab_get_apibase(ctx),
 	                  e_owner, e_repo, jid);
 
-	rc = gcli_curl(f, url, "application/zip");
+	rc = gcli_curl(ctx, f, url, "application/zip");
 
 	fclose(f);
 	free(url);

@@ -40,12 +40,12 @@
 #include <templates/gitlab/review.h>
 
 int
-gitlab_review_get_reviews(char const *owner, char const *repo,
+gitlab_review_get_reviews(gcli_ctx *ctx, char const *owner, char const *repo,
                           int const pr, gcli_pr_review_list *const out)
 {
 	char *url = NULL;
 
-	gcli_fetch_list_ctx ctx = {
+	gcli_fetch_list_ctx fl = {
 		.listp = &out->reviews,
 		.sizep = &out->reviews_size,
 		.max = -1,
@@ -54,7 +54,7 @@ gitlab_review_get_reviews(char const *owner, char const *repo,
 
 	url = sn_asprintf(
 		"%s/projects/%s%%2F%s/merge_requests/%d/notes?sort=asc",
-		gitlab_get_apibase(), owner, repo, pr);
+		gitlab_get_apibase(ctx), owner, repo, pr);
 
-	return gcli_fetch_list(url, &ctx);
+	return gcli_fetch_list(ctx, url, &fl);
 }

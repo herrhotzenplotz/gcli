@@ -34,6 +34,8 @@
 #include <config.h>
 #endif
 
+#include <gcli/gcli.h>
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,27 +63,20 @@ struct gcli_fetch_list_ctx {
 	void const *userdata;
 };
 
-int gcli_fetch(char const *url,
-               char **pagination_next,
+int gcli_fetch(gcli_ctx *ctx, char const *url, char **pagination_next,
                gcli_fetch_buffer *out);
 
-int gcli_curl(FILE *stream,
-              char const *url,
+int gcli_curl(gcli_ctx *ctx, FILE *stream, char const *url,
               char const *content_type);
 
-int gcli_fetch_with_method(char const *method,
-                           char const *url,
-                           char const *data,
-                           char **pagination_next,
-                           gcli_fetch_buffer *out);
+int gcli_fetch_with_method(gcli_ctx *ctx, char const *method,
+                           char const *url, char const *data,
+                           char **pagination_next, gcli_fetch_buffer *out);
 
-int gcli_post_upload(char const *url,
-                     char const *content_type,
-                     void *buffer,
-                     size_t buffer_size,
-                     gcli_fetch_buffer *out);
+int gcli_post_upload(gcli_ctx *ctx, char const *url, char const *content_type,
+                     void *buffer, size_t buffer_size, gcli_fetch_buffer *out);
 
-int gcli_curl_gitea_upload_attachment(char const *url,
+int gcli_curl_gitea_upload_attachment(gcli_ctx *ctx, char const *url,
                                       char const *filename,
                                       gcli_fetch_buffer *out);
 
@@ -89,6 +84,6 @@ bool gcli_curl_test_success(char const *url);
 char *gcli_urlencode(char const *);
 sn_sv gcli_urlencode_sv(sn_sv const);
 char *gcli_urldecode(char const *input);
-int gcli_fetch_list(char *url, gcli_fetch_list_ctx *ctx);
+int gcli_fetch_list(gcli_ctx *ctx, char *url, gcli_fetch_list_ctx *fctx);
 
 #endif /* CURL_H */

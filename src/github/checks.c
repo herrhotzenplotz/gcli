@@ -42,9 +42,8 @@
 #include <pdjson/pdjson.h>
 
 int
-github_get_checks(char const *owner, char const *repo,
-                  char const *ref, int const max,
-                  gcli_github_checks *const out)
+github_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
+                  char const *ref, int const max, gcli_github_checks *const out)
 {
 	gcli_fetch_buffer buffer = {0};
 	char *url = NULL, *next_url = NULL;
@@ -53,16 +52,16 @@ github_get_checks(char const *owner, char const *repo,
 	assert(out);
 
 	url = sn_asprintf("%s/repos/%s/%s/commits/%s/check-runs",
-	                  gcli_get_apibase(),
+	                  gcli_get_apibase(ctx),
 	                  owner, repo, ref);
 
 	do {
-		rc = gcli_fetch(url, &next_url, &buffer);
+		rc = gcli_fetch(ctx, url, &next_url, &buffer);
 		if (rc == 0) {
 			struct json_stream stream = {0};
 
 			json_open_buffer(&stream, buffer.data, buffer.length);
-			parse_github_checks(&stream, out);
+			parse_github_checks(ctx, &stream, out);
 			json_close(&stream);
 		}
 
@@ -80,7 +79,7 @@ github_get_checks(char const *owner, char const *repo,
 }
 
 void
-github_print_checks(gcli_github_checks const *const list)
+github_print_checks(gcli_ctx *ctx, gcli_github_checks const *const list)
 {
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
@@ -98,7 +97,7 @@ github_print_checks(gcli_github_checks const *const list)
 		return;
 	}
 
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not init table");
 
@@ -128,17 +127,17 @@ github_free_checks(gcli_github_checks *const list)
 }
 
 int
-github_checks(char const *owner, char const *repo,
+github_checks(gcli_ctx *ctx, char const *owner, char const *repo,
               char const *ref, int const max)
 {
 	gcli_github_checks checks = {0};
 	int rc;
 
-	rc = github_get_checks(owner, repo, ref, max, &checks);
+	rc = github_get_checks(ctx, owner, repo, ref, max, &checks);
 	if (rc < 0)
 		return rc;
 
-	github_print_checks(&checks);
+	github_print_checks(ctx, &checks);
 	github_free_checks(&checks);
 
 	return 0;

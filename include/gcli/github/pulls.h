@@ -48,10 +48,10 @@ int github_get_pulls(char const *owner,
                      int max,
                      gcli_pull_list *out);
 
-void github_print_pull_diff(FILE *stream,
-                            char const *owner,
-                            char const *reponame,
-                            int pr_number);
+int github_print_pull_diff(FILE *stream,
+                           char const *owner,
+                           char const *reponame,
+                           int pr_number);
 
 int github_pull_checks(char const *owner,
                        char const *repo,

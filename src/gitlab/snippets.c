@@ -196,12 +196,15 @@ gcli_snippet_delete(char const *snippet_id)
 	return rc;
 }
 
-void
+int
 gcli_snippet_get(char const *snippet_id)
 {
+	int rc = 0;
 	char *url = sn_asprintf("%s/snippets/%s/raw",
 	                        gitlab_get_apibase(),
 	                        snippet_id);
-	gcli_curl(stdout, url, NULL);
+	rc = gcli_curl(stdout, url, NULL);
 	free(url);
+
+	return rc;
 }

@@ -113,7 +113,7 @@ gitlab_get_mrs(char const *owner,
 	return gitlab_fetch_mrs(url, max, list);
 }
 
-void
+int
 gitlab_print_pr_diff(FILE *stream,
                      char const *owner,
                      char const *repo,
@@ -126,6 +126,8 @@ gitlab_print_pr_diff(FILE *stream,
 	fprintf(stream,
 	        "note : Getting the diff of a Merge Request is not "
 	        "supported on GitLab. Blame the Gitlab people.\n");
+
+	return -1;
 }
 
 int

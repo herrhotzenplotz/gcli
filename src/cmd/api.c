@@ -118,8 +118,8 @@ subcommand_api(int argc, char *argv[])
 
 	if (do_all)
 		fetch_all(url);
-	else
-		gcli_curl(stdout, url, "application/json");
+	else if (gcli_curl(stdout, url, "application/json") < 0)
+		errx(1, "error: failed to fetch data");
 
 	free(url);
 

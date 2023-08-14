@@ -46,10 +46,10 @@ int gitlab_get_mrs(char const *owner,
                    int max,
                    gcli_pull_list *out);
 
-void gitlab_print_pr_diff(FILE *stream,
-                          char const *owner,
-                          char const *reponame,
-                          int pr_number);
+int gitlab_print_pr_diff(FILE *stream,
+                         char const *owner,
+                         char const *reponame,
+                         int pr_number);
 
 int gitlab_mr_merge(char const *owner,
                     char const *reponame,

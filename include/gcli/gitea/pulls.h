@@ -68,10 +68,10 @@ int gitea_pull_reopen(char const *owner,
                       char const *repo,
                       int pr_number);
 
-void gitea_print_pr_diff(FILE *stream,
-                         char const *owner,
-                         char const *repo,
-                         int pr_number);
+int gitea_print_pr_diff(FILE *stream,
+                        char const *owner,
+                        char const *repo,
+                        int pr_number);
 
 int gitea_pull_checks(char const *owner,
                       char const *repo,

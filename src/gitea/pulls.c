@@ -148,15 +148,16 @@ gitea_pull_reopen(char const *owner,
 	return gitea_pulls_patch_state(owner, repo, pr_number, "open");
 }
 
-void
+int
 gitea_print_pr_diff(FILE *const stream,
                     char const *owner,
                     char const *repo,
                     int const pr_number)
 {
-	char *url     = NULL;
+	char *url = NULL;
 	char *e_owner = NULL;
-	char *e_repo  = NULL;
+	char *e_repo = NULL;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -165,11 +166,14 @@ gitea_print_pr_diff(FILE *const stream,
 		"%s/repos/%s/%s/pulls/%d.patch",
 		gcli_get_apibase(),
 		e_owner, e_repo, pr_number);
-	gcli_curl(stream, url, NULL);
+
+	rc = gcli_curl(stream, url, NULL);
 
 	free(e_owner);
 	free(e_repo);
 	free(url);
+
+	return rc;
 }
 
 int

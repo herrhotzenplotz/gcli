@@ -64,6 +64,6 @@ void gcli_snippets_print(enum gcli_output_flags flags,
 
 int gcli_snippet_delete(char const *snippet_id);
 
-void gcli_snippet_get(char const *snippet_id);
+int gcli_snippet_get(char const *snippet_id);
 
 #endif /* GITLAB_SNIPPETS_H */

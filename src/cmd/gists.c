@@ -88,7 +88,9 @@ file_found:
 	if (isatty(STDOUT_FILENO) && (file->size >= 4 * 1024 * 1024))
 		errx(1, "File is bigger than 4 MiB, refusing to print to stdout.");
 
-	gcli_curl(stdout, file->url.data, file->type.data);
+	if (gcli_curl(stdout, file->url.data, file->type.data) < 0)
+		errx(1, "error: failed to fetch gist");
+
 	return EXIT_SUCCESS;
 }
 

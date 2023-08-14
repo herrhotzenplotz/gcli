@@ -392,7 +392,7 @@ gitlab_job_download_artifacts(char const *owner, char const *repo,
 	                  gitlab_get_apibase(),
 	                  e_owner, e_repo, jid);
 
-	gcli_curl(f, url, "application/zip");
+	rc = gcli_curl(f, url, "application/zip");
 
 	fclose(f);
 	free(url);

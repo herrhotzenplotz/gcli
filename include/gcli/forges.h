@@ -231,7 +231,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Print a diff of the changes of a PR/MR to the stream */
-	void (*print_pull_diff)(
+	int (*print_pull_diff)(
 		FILE *stream,
 		char const *owner,
 		char const *reponame,

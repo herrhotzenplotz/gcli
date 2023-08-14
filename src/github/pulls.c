@@ -112,15 +112,15 @@ github_get_pulls(char const *owner,
 	return github_fetch_pulls(url, details->author, max, list);
 }
 
-void
+int
 github_print_pull_diff(FILE *stream,
-                       char const *owner,
-                       char const *repo,
+                       char const *owner, char const *repo,
                        int const pr_number)
 {
-	char *url     = NULL;
+	char *url = NULL;
 	char *e_owner = NULL;
-	char *e_repo  = NULL;
+	char *e_repo = NULL;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -129,11 +129,13 @@ github_print_pull_diff(FILE *stream,
 		"%s/repos/%s/%s/pulls/%d",
 		gcli_get_apibase(),
 		e_owner, e_repo, pr_number);
-	gcli_curl(stream, url, "Accept: application/vnd.github.v3.diff");
+	rc = gcli_curl(stream, url, "Accept: application/vnd.github.v3.diff");
 
 	free(e_owner);
 	free(e_repo);
 	free(url);
+
+	return rc;
 }
 
 /* TODO: figure out a way to get rid of the 3 consecutive urlencode

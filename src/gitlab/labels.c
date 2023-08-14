@@ -36,40 +36,23 @@
 #include <pdjson/pdjson.h>
 
 int
-gitlab_get_labels(char const *owner,
-                  char const *repo,
-                  int const max,
-                  gcli_label_list *const out)
+gitlab_get_labels(char const *owner, char const *repo,
+                  int const max, gcli_label_list *const out)
 {
-	char               *url      = NULL;
-	char               *next_url = NULL;
-	gcli_fetch_buffer   buffer   = {0};
-	struct json_stream  stream   = {0};
-	int rc;
+	char *url = NULL;
+	gcli_fetch_list_ctx ctx = {
+		.listp = &out->labels,
+		.sizep = &out->labels_size,
+		.max = max,
+		.parse = (parsefn)(parse_gitlab_labels),
+	};
 
 	*out = (gcli_label_list) {0};
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/labels",
 	                  gitlab_get_apibase(), owner, repo);
 
-	do {
-		rc = gcli_fetch(url, &next_url, &buffer);
-
-		if (rc == 0) {
-			json_open_buffer(&stream, buffer.data, buffer.length);
-			parse_gitlab_labels(&stream, &out->labels, &out->labels_size);
-		}
-
-		free(buffer.data);
-		free(url);
-		json_close(&stream);
-
-		if (rc < 0)
-			break;
-
-	} while ((url = next_url) && (max == -1 || (int)out->labels_size < max));
-
-	return rc;
+	return gcli_fetch_list(url, &ctx);
 }
 
 int

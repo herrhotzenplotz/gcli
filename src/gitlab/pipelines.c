@@ -147,58 +147,38 @@ gitlab_pipeline_jobs(char const *owner,
                      long const id,
                      int const count)
 {
-	gitlab_job *jobs = NULL;
-	int const jobs_size = gitlab_get_pipeline_jobs(owner, repo, id, count, &jobs);
-	if (jobs_size < 0)
+	gitlab_job_list jobs = {0};
+	int rc;
+
+	rc = gitlab_get_pipeline_jobs(owner, repo, id, count, &jobs);
+	if (rc < 0)
 		errx(1, "error: failed to get jobs");
 
-	gitlab_print_jobs(jobs, jobs_size);
-	gitlab_free_jobs(jobs, jobs_size);
+	gitlab_print_jobs(&jobs);
+	gitlab_free_jobs(&jobs);
 }
 
 int
-gitlab_get_pipeline_jobs(char const *owner,
-                         char const *repo,
-                         long const pipeline,
-                         int const max,
-                         gitlab_job **const out)
+gitlab_get_pipeline_jobs(char const *owner, char const *repo,
+                         long const pipeline, int const max,
+                         gitlab_job_list *const out)
 {
 	char *url = NULL;
-	char *next_url = NULL;
-	size_t out_size = 0;
-	int rc;
+	gcli_fetch_list_ctx ctx = {
+		.listp = &out->jobs,
+		.sizep = &out->jobs_size,
+		.max = max,
+		.parse = (parsefn)(parse_gitlab_jobs),
+	};
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/pipelines/%ld/jobs",
 	                  gitlab_get_apibase(), owner, repo, pipeline);
 
-	do {
-		gcli_fetch_buffer  buffer = {0};
-
-		rc = gcli_fetch(url, &next_url, &buffer);
-		if (rc == 0) {
-			json_stream stream = {0};
-
-			json_open_buffer(&stream, buffer.data, buffer.length);
-			parse_gitlab_jobs(&stream, out, &out_size);
-			json_close(&stream);
-		}
-
-		free(url);
-
-		if (rc < 0)
-			break;
-	} while ((url = next_url) && (((int)out_size < max) || (max == -1)));
-
-	free(next_url);
-
-	if (rc < 0)
-		return rc;
-
-	return (int)out_size;
+	return gcli_fetch_list(url, &ctx);
 }
 
 void
-gitlab_print_jobs(gitlab_job const *const jobs, int const jobs_size)
+gitlab_print_jobs(gitlab_job_list const *const list)
 {
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
@@ -211,7 +191,7 @@ gitlab_print_jobs(gitlab_job const *const jobs, int const jobs_size)
 		{ .name = "REF",        .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
-	if (!jobs_size) {
+	if (!list->jobs_size) {
 		printf("No jobs\n");
 		return;
 	}
@@ -220,22 +200,22 @@ gitlab_print_jobs(gitlab_job const *const jobs, int const jobs_size)
 	if (!table)
 		errx(1, "error: could not initialize table");
 
-	for (int i = 0; i < jobs_size; ++i) {
+	for (size_t i = 0; i < list->jobs_size; ++i) {
 		gcli_tbl_add_row(table,
-		                 jobs[i].id,
-		                 jobs[i].name,
-		                 jobs[i].status,
-		                 jobs[i].started_at,
-		                 jobs[i].finished_at,
-		                 jobs[i].runner_description,
-		                 jobs[i].ref);
+		                 list->jobs[i].id,
+		                 list->jobs[i].name,
+		                 list->jobs[i].status,
+		                 list->jobs[i].started_at,
+		                 list->jobs[i].finished_at,
+		                 list->jobs[i].runner_description,
+		                 list->jobs[i].ref);
 	}
 
 	gcli_tbl_end(table);
 }
 
-static void
-gitlab_free_job_data(gitlab_job *const job)
+void
+gitlab_free_job(gitlab_job *const job)
 {
 	free(job->status);
 	free(job->stage);
@@ -249,12 +229,15 @@ gitlab_free_job_data(gitlab_job *const job)
 }
 
 void
-gitlab_free_jobs(gitlab_job *jobs, int const jobs_size)
+gitlab_free_jobs(gitlab_job_list *list)
 {
-	for (int i = 0; i < jobs_size; ++i) {
-		gitlab_free_job_data(&jobs[i]);
-	}
-	free(jobs);
+	for (size_t i = 0; i < list->jobs_size; ++i)
+		gitlab_free_job(&list->jobs[i]);
+
+	free(list->jobs);
+
+	list->jobs = NULL;
+	list->jobs_size = 0;
 }
 
 int
@@ -339,7 +322,7 @@ gitlab_job_status(char const *owner, char const *repo, long const jid)
 	if (rc == 0)
 		gitlab_print_job_status(&job);
 
-	gitlab_free_job_data(&job);
+	gitlab_free_job(&job);
 
 	return rc;
 }

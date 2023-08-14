@@ -46,50 +46,35 @@
  * request issues. This function nukes them from the list, readjusts
  * the allocation size and fixes the reported list size. */
 static void
-github_hack_fixup_issues_that_are_actually_pulls(gcli_issue_list *const it)
+github_hack_fixup_issues_that_are_actually_pulls(gcli_issue **list, size_t *size)
 {
-	for (size_t i = it->issues_size; i > 0; --i) {
-		if (it->issues[i-1].is_pr) {
+	for (size_t i = *size; i > 0; --i) {
+		if ((*list)[i-1].is_pr) {
+			gcli_issue *l = *list;
 			/*  len = 7, i = 5, to move = 7 - 5 = 2
 			 *   0   1   2   3   4   5   6
 			 * | x | x | x | x | X | x | x | */
-			gcli_issue_free(&it->issues[i-1]);
-			memmove(&it->issues[i-1], &it->issues[i],
-			        sizeof(*it->issues) * (it->issues_size - i));
-			it->issues = realloc(
-				it->issues,
-				(--it->issues_size) * sizeof(*it->issues));
+			gcli_issue_free(&l[i-1]);
+			memmove(&l[i-1], &l[i],
+			        sizeof(*l) * (*size - i));
+			*list = realloc(l, (--(*size)) * sizeof(*l));
 		}
 	}
 }
 
 int
-github_fetch_issues(char *url,
-                    int const max,
+github_fetch_issues(char *url, int const max,
                     gcli_issue_list *const out)
 {
-	json_stream        stream      = {0};
-	gcli_fetch_buffer  json_buffer = {0};
-	char              *next_url    = NULL;
+	gcli_fetch_list_ctx ctx = {
+		.listp = &out->issues,
+		.sizep = &out->issues_size,
+		.parse = (parsefn)(parse_github_issues),
+		.filter = (filterfn)(github_hack_fixup_issues_that_are_actually_pulls),
+		.max = max,
+	};
 
-	do {
-		gcli_fetch(url, &next_url, &json_buffer);
-
-		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-
-		parse_github_issues(&stream, &out->issues, &out->issues_size);
-		/* Hack: Remove PRs from the issue list because github. */
-		github_hack_fixup_issues_that_are_actually_pulls(out);
-
-		free(json_buffer.data);
-		free(url);
-		json_close(&stream);
-
-	} while ((url = next_url) && (max == -1 || (int)out->issues_size < max));
-
-	free(url);
-
-	return 0;
+	return gcli_fetch_list(url, &ctx);
 }
 
 int

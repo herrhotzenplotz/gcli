@@ -49,6 +49,12 @@ github_get_milestones(char const *const owner,
                       gcli_milestone_list *const out)
 {
 	char *url, *e_owner, *e_repo;
+	gcli_fetch_list_ctx ctx = {
+		.listp = &out->milestones,
+		.sizep = &out->milestones_size,
+		.parse = (parsefn)parse_github_milestones,
+		.max = max,
+	};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -60,9 +66,7 @@ github_get_milestones(char const *const owner,
 	free(e_owner);
 	free(e_repo);
 
-	return gcli_fetch_list(url, (parsefn)parse_github_milestones,
-	                       &out->milestones, &out->milestones_size,
-	                       max);
+	return gcli_fetch_list(url, &ctx);
 }
 
 int

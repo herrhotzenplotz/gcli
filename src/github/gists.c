@@ -66,6 +66,12 @@ int
 gcli_get_gists(char const *user, int const max, gcli_gist_list *const list)
 {
 	char *url = NULL;
+	gcli_fetch_list_ctx ctx = {
+		.listp = &list->gists,
+		.sizep = &list->gists_size,
+		.parse = (parsefn)(parse_github_gists),
+		.max = max,
+	};
 
 	if (user)
 		url = sn_asprintf(
@@ -75,9 +81,7 @@ gcli_get_gists(char const *user, int const max, gcli_gist_list *const list)
 	else
 		url = sn_asprintf("%s/gists", github_get_apibase());
 
-	return gcli_fetch_list(url, (parsefn)(parse_github_gists),
-	                       &list->gists, &list->gists_size,
-	                       max);
+	return gcli_fetch_list(url, &ctx);
 }
 
 static char const *

@@ -42,6 +42,12 @@ github_get_labels(char const *owner,
                   gcli_label_list *const out)
 {
 	char *url = NULL;
+	gcli_fetch_list_ctx ctx = {
+		.listp = &out->labels,
+		.sizep= &out->labels_size,
+		.parse = (parsefn)(parse_github_labels),
+		.max = max,
+	};
 
 	*out = (gcli_label_list) {0};
 
@@ -49,9 +55,7 @@ github_get_labels(char const *owner,
 		"%s/repos/%s/%s/labels",
 		gcli_get_apibase(), owner, reponame);
 
-	return gcli_fetch_list(url, (parsefn)(parse_github_labels),
-	                       &out->labels, &out->labels_size,
-	                       max);
+	return gcli_fetch_list(url, &ctx);
 }
 
 int

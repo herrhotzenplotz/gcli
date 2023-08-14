@@ -80,17 +80,22 @@ gitlab_get_mr_comments(char const *owner,
 {
 	char *e_owner = gcli_urlencode(owner);
 	char *e_repo  = gcli_urlencode(repo);
+	gcli_fetch_list_ctx ctx = {
+			.listp = &out->comments,
+			.sizep = &out->comments_size,
+			.parse = (parsefn)parse_gitlab_comments,
+			.max = -1,
+	};
 
 	char *url = sn_asprintf(
 		"%s/projects/%s%%2F%s/merge_requests/%d/notes",
 		gitlab_get_apibase(),
 		e_owner, e_repo, mr);
+
 	free(e_owner);
 	free(e_repo);
 
-	return gcli_fetch_list(url, (parsefn)parse_gitlab_comments,
-	                       &out->comments, &out->comments_size,
-	                       -1);
+	return gcli_fetch_list(url, &ctx);
 }
 
 int
@@ -99,6 +104,12 @@ gitlab_get_issue_comments(char const *owner, char const *repo,
 {
 	char *e_owner = gcli_urlencode(owner);
 	char *e_repo  = gcli_urlencode(repo);
+	gcli_fetch_list_ctx ctx = {
+		.listp = &out->comments,
+		.sizep = &out->comments_size,
+		.parse = (parsefn)parse_gitlab_comments,
+		.max = -1,
+	};
 
 	char *url = sn_asprintf(
 		"%s/projects/%s%%2F%s/issues/%d/notes",
@@ -107,7 +118,5 @@ gitlab_get_issue_comments(char const *owner, char const *repo,
 	free(e_owner);
 	free(e_repo);
 
-	return gcli_fetch_list(url, (parsefn)parse_gitlab_comments,
-	                       &out->comments, &out->comments_size,
-	                       -1);
+	return gcli_fetch_list(url, &ctx);
 }

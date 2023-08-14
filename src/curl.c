@@ -585,9 +585,7 @@ gcli_urldecode(char const *input)
  *
  * If max is -1 then everything will be fetched. */
 int
-gcli_fetch_list(char *url, parsefn parse,
-                void *listptr, size_t *listsize,
-                int const max)
+gcli_fetch_list(char *url, gcli_fetch_list_ctx *ctx)
 {
 	char *next_url = NULL;
 	int rc;
@@ -600,7 +598,10 @@ gcli_fetch_list(char *url, parsefn parse,
 			struct json_stream stream = {0};
 
 			json_open_buffer(&stream, buffer.data, buffer.length);
-			parse(&stream, listptr, listsize);
+			ctx->parse(&stream, ctx->listp, ctx->sizep);
+			if (ctx->filter)
+				ctx->filter(ctx->listp, ctx->sizep);
+
 			json_close(&stream);
 		}
 
@@ -610,7 +611,7 @@ gcli_fetch_list(char *url, parsefn parse,
 		if (rc < 0)
 			break;
 
-	} while ((url = next_url) && (max == -1 || (int)(*listsize) < max));
+	} while ((url = next_url) && (ctx->max == -1 || (int)(*ctx->sizep) < ctx->max));
 
 	free(next_url);
 

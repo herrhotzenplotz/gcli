@@ -45,7 +45,13 @@ gitlab_get_forks(char const *owner,
 	char *url = NULL;
 	char *e_owner = NULL;
 	char *e_repo = NULL;
-	int rc = 0;
+
+	gcli_fetch_list_ctx ctx = {
+		.listp = &list->forks,
+		.sizep = &list->forks_size,
+		.parse = (parsefn)parse_gitlab_forks,
+		.max = max,
+	};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -60,13 +66,7 @@ gitlab_get_forks(char const *owner,
 	free(e_owner);
 	free(e_repo);
 
-	rc = gcli_fetch_list(url, (parsefn)parse_gitlab_forks,
-	                     &list->forks, &list->forks_size,
-	                     max);
-
-	/* TODO: don't leak the list on error */
-
-	return rc;
+	return gcli_fetch_list(url, &ctx);
 }
 
 int

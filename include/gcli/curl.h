@@ -42,11 +42,22 @@
 #include <sn/sn.h>
 
 typedef void (*parsefn)(json_stream *stream, void *list, size_t *listsize);
+typedef void (*filterfn)(void *list, size_t *listsize);
 typedef struct gcli_fetch_buffer gcli_fetch_buffer;
+typedef struct gcli_fetch_list_ctx gcli_fetch_list_ctx;
 
 struct gcli_fetch_buffer {
 	char   *data;
 	size_t  length;
+};
+
+struct gcli_fetch_list_ctx {
+	void *listp;                /* pointer to pointer of start of list */
+	size_t *sizep;              /* pointer to list size */
+	int max;
+
+	parsefn parse;              /* json parse routine */
+	filterfn filter;            /* optional filter */
 };
 
 int gcli_fetch(char const *url,
@@ -77,8 +88,6 @@ bool gcli_curl_test_success(char const *url);
 char *gcli_urlencode(char const *);
 sn_sv gcli_urlencode_sv(sn_sv const);
 char *gcli_urldecode(char const *input);
-int gcli_fetch_list(char *url, parsefn fn,
-                    void *list, size_t *listsize,
-                    int max);
+int gcli_fetch_list(char *url, gcli_fetch_list_ctx *ctx);
 
 #endif /* CURL_H */

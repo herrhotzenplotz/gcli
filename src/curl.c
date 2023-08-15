@@ -605,7 +605,7 @@ gcli_fetch_list(gcli_ctx *ctx, char *url, gcli_fetch_list_ctx *fl)
 			struct json_stream stream = {0};
 
 			json_open_buffer(&stream, buffer.data, buffer.length);
-			fl->parse(&stream, fl->listp, fl->sizep);
+			fl->parse(ctx, &stream, fl->listp, fl->sizep);
 			if (fl->filter)
 				fl->filter(fl->listp, fl->sizep, fl->userdata);
 

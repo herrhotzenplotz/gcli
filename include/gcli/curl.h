@@ -43,7 +43,8 @@
 #include <pdjson/pdjson.h>
 #include <sn/sn.h>
 
-typedef void (*parsefn)(json_stream *stream, void *list, size_t *listsize);
+typedef void (*parsefn)(gcli_ctx *, json_stream *stream, void *list,
+                        size_t *listsize);
 typedef void (*filterfn)(void *list, size_t *listsize, void const *userdata);
 typedef struct gcli_fetch_buffer gcli_fetch_buffer;
 typedef struct gcli_fetch_list_ctx gcli_fetch_list_ctx;

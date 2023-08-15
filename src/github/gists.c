@@ -277,14 +277,15 @@ read_file(FILE *f, char **out)
 	return size;
 }
 
-void
+int
 gcli_create_gist(gcli_ctx *ctx, gcli_new_gist opts)
 {
-	char              *url          = NULL;
-	char              *post_data    = NULL;
-	gcli_fetch_buffer  fetch_buffer = {0};
-	sn_sv              read_buffer  = {0};
-	sn_sv              content      = {0};
+	char *url = NULL;
+	char *post_data = NULL;
+	gcli_fetch_buffer fetch_buffer = {0};
+	sn_sv read_buffer = {0};
+	sn_sv content = {0};
+	int rc = 0;
 
 	read_buffer.length = read_file(opts.file, &read_buffer.data);
 	content = gcli_json_escape(read_buffer);
@@ -316,20 +317,22 @@ gcli_create_gist(gcli_ctx *ctx, gcli_new_gist opts)
 		opts.file_name,
 		SV_ARGS(content));
 
-	gcli_fetch_with_method(ctx, "POST", url, post_data, NULL, &fetch_buffer);
-	gcli_print_html_url(ctx, fetch_buffer);
+	rc = gcli_fetch_with_method(ctx, "POST", url, post_data, NULL, &fetch_buffer);
 
 	free(read_buffer.data);
 	free(fetch_buffer.data);
 	free(url);
 	free(post_data);
+
+	return rc;
 }
 
-void
+int
 gcli_delete_gist(gcli_ctx *ctx, char const *gist_id, bool const always_yes)
 {
-	char              *url    = NULL;
-	gcli_fetch_buffer  buffer = {0};
+	char *url = NULL;
+	gcli_fetch_buffer buffer = {0};
+	int rc = 0;
 
 	url = sn_asprintf(
 		"%s/gists/%s",
@@ -339,10 +342,12 @@ gcli_delete_gist(gcli_ctx *ctx, char const *gist_id, bool const always_yes)
 	if (!always_yes && !sn_yesno("Are you sure you want to delete this gist?"))
 		errx(1, "Aborted by user");
 
-	gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, &buffer);
+	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, &buffer);
 
 	free(buffer.data);
 	free(url);
+
+	return rc;
 }
 
 void

@@ -65,9 +65,11 @@ usage(void)
 }
 
 static void
-releasemsg_init(FILE *f, void *_data)
+releasemsg_init(gcli_ctx *ctx, FILE *f, void *_data)
 {
 	gcli_new_release const *info = _data;
+
+	(void) ctx;
 
 	fprintf(
 		f,
@@ -83,7 +85,8 @@ releasemsg_init(FILE *f, void *_data)
 static sn_sv
 get_release_message(gcli_new_release const *info)
 {
-	return gcli_editor_get_user_message(releasemsg_init, (void *)info);
+	return gcli_editor_get_user_message(g_clictx, releasemsg_init,
+	                                    (void *)info);
 }
 
 static int
@@ -192,7 +195,7 @@ subcommand_releases_create(int argc, char *argv[])
 		if (!sn_yesno("Do you want to create this release?"))
 			errx(1, "Aborted by user");
 
-	if (gcli_create_release(&release) < 0)
+	if (gcli_create_release(g_clictx, &release) < 0)
 		errx(1, "failed to create release");
 
 	return EXIT_SUCCESS;
@@ -255,7 +258,7 @@ subcommand_releases_delete(int argc, char *argv[])
 		if (!sn_yesno("Are you sure you want to delete this release?"))
 			errx(1, "Aborted by user");
 
-	if (gcli_delete_release(owner, repo, argv[0]) < 0)
+	if (gcli_delete_release(g_clictx, owner, repo, argv[0]) < 0)
 		errx(1, "failed to delete the release");
 
 	return EXIT_SUCCESS;
@@ -355,10 +358,10 @@ subcommand_releases(int argc, char *argv[])
 
 	check_owner_and_repo(&owner, &repo);
 
-	if (gcli_get_releases(owner, repo, count, &releases) < 0)
+	if (gcli_get_releases(g_clictx, owner, repo, count, &releases) < 0)
 		errx(1, "error: could not get releases");
 
-	gcli_print_releases(flags, &releases, count);
+	gcli_print_releases(g_clictx, flags, &releases, count);
 	gcli_free_releases(&releases);
 
 	return EXIT_SUCCESS;

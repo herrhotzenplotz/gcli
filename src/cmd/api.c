@@ -64,7 +64,7 @@ fetch_all(char *_url)
 	do {
 		gcli_fetch_buffer buffer = {0};
 
-		if (gcli_fetch(url, &next_url, &buffer) < 0)
+		if (gcli_fetch(g_clictx, url, &next_url, &buffer) < 0)
 			errx(1, "error: failed to fetch data");
 
 		fwrite(buffer.data, buffer.length, 1, stdout);
@@ -112,13 +112,13 @@ subcommand_api(int argc, char *argv[])
 	}
 
 	if (path[0] == '/')
-		url = sn_asprintf("%s%s", gcli_get_apibase(), path);
+		url = sn_asprintf("%s%s", gcli_get_apibase(g_clictx), path);
 	else
-		url = sn_asprintf("%s/%s", gcli_get_apibase(), path);
+		url = sn_asprintf("%s/%s", gcli_get_apibase(g_clictx), path);
 
 	if (do_all)
 		fetch_all(url);
-	else if (gcli_curl(stdout, url, "application/json") < 0)
+	else if (gcli_curl(g_clictx, stdout, url, "application/json") < 0)
 		errx(1, "error: failed to fetch data");
 
 	free(url);

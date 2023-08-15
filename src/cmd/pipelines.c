@@ -135,7 +135,7 @@ subcommand_pipelines(int argc, char *argv[])
 
 	/* Make sure we are actually talking about a gitlab remote because
 	 * we might be incorrectly inferring it */
-	if (gcli_config_get_forge_type() != GCLI_FORGE_GITLAB)
+	if (gcli_config_get_forge_type(g_clictx) != GCLI_FORGE_GITLAB)
 		errx(1, "error: The pipelines subcommand only works for GitLab. "
 		     "Use gcli -t gitlab ... to force a GitLab remote.");
 
@@ -149,7 +149,7 @@ subcommand_pipelines(int argc, char *argv[])
 			return EXIT_FAILURE;
 		}
 
-		gitlab_pipeline_jobs(owner, repo, pid, count);
+		gitlab_pipeline_jobs(g_clictx, owner, repo, pid, count);
 		return EXIT_SUCCESS;
 	}
 
@@ -163,7 +163,7 @@ subcommand_pipelines(int argc, char *argv[])
 			return EXIT_FAILURE;
 		}
 
-		gitlab_pipelines(owner, repo, count);
+		gitlab_pipelines(g_clictx, owner, repo, count);
 		return EXIT_SUCCESS;
 	}
 
@@ -172,7 +172,7 @@ subcommand_pipelines(int argc, char *argv[])
 	/* Definition of the action list */
 	struct {
 		char const *name;                               /* Name on the cli */
-		int (*fn)(char const *, char const *, long);   /* Function to be invoked for this action */
+		int (*fn)(gcli_ctx *ctx, char const *, char const *, long);   /* Function to be invoked for this action */
 	} job_actions[] = {
 		{ .name = "log",    .fn = gitlab_job_get_log },
 		{ .name = "status", .fn = gitlab_job_status  },
@@ -202,7 +202,7 @@ next_action:
 				argc -= 2;
 				argv += 2;
 			}
-			if (gitlab_job_download_artifacts(owner, repo, jid, outfile) < 0)
+			if (gitlab_job_download_artifacts(g_clictx, owner, repo, jid, outfile) < 0)
 				errx(1, "error: failed to download file");
 			goto next_action;
 		}
@@ -210,7 +210,7 @@ next_action:
 		/* Find the action and invoke it */
 		for (size_t i = 0; i < ARRAY_SIZE(job_actions); ++i) {
 			if (strcmp(action, job_actions[i].name) == 0) {
-				if (job_actions[i].fn(owner, repo, jid) < 0)
+				if (job_actions[i].fn(g_clictx, owner, repo, jid) < 0)
 					errx(1, "error: failed to perform action '%s'", action);
 				goto next_action;
 			}

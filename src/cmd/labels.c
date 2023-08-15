@@ -94,7 +94,7 @@ subcommand_labels_delete(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	rc = gcli_delete_label(owner, repo, argv[0]);
+	rc = gcli_delete_label(g_clictx, owner, repo, argv[0]);
 	if (rc < 0) {
 		fprintf(stderr, "error: couldn't delete label\n");
 		return EXIT_FAILURE;
@@ -164,14 +164,14 @@ subcommand_labels_create(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	if (gcli_create_label(owner, repo, &label) < 0) {
+	if (gcli_create_label(g_clictx, owner, repo, &label) < 0) {
 		fprintf(stderr, "error: could not create label\n");
 		return EXIT_FAILURE;
 	}
 
 	/* only if we are not quieted */
 	if (!sn_quiet())
-		gcli_print_labels(&labels, 1);
+		gcli_print_labels(g_clictx, &labels, 1);
 
 	gcli_free_label(&label);
 
@@ -246,10 +246,10 @@ subcommand_labels(int argc, char *argv[])
 
 	check_owner_and_repo(&owner, &repo);
 
-	if (gcli_get_labels(owner, repo, count, &labels) < 0)
+	if (gcli_get_labels(g_clictx, owner, repo, count, &labels) < 0)
 		errx(1, "error: could not fetch list of labels");
 
-	gcli_print_labels(&labels, count);
+	gcli_print_labels(g_clictx, &labels, count);
 	gcli_free_labels(&labels);
 
 	return EXIT_SUCCESS;

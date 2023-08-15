@@ -58,10 +58,10 @@ usage(void)
 int
 subcommand_ci(int argc, char *argv[])
 {
-	int         ch    = 0;
+	int ch = 0;
 	char const *owner = NULL, *repo = NULL;
-	char const *ref   = NULL;
-	int         count = -1;     /* fetch all checks by default */
+	char const *ref = NULL;
+	int count = -1;             /* fetch all checks by default */
 
 	/* Parse options */
 	struct option const options[] = {
@@ -116,11 +116,11 @@ subcommand_ci(int argc, char *argv[])
 
 	/* Make sure we are actually talking about a github remote because
 	 * we might be incorrectly inferring it */
-	if (gcli_config_get_forge_type() != GCLI_FORGE_GITHUB)
+	if (gcli_config_get_forge_type(g_clictx) != GCLI_FORGE_GITHUB)
 		errx(1, "error: The ci subcommand only works for GitHub. "
 		     "Use gcli -t github ... to force a GitHub remote.");
 
-	github_checks(owner, repo, ref, count);
+	github_checks(g_clictx, owner, repo, ref, count);
 
 	return EXIT_SUCCESS;
 }

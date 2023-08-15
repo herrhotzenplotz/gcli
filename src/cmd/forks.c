@@ -110,7 +110,7 @@ subcommand_forks_create(int argc, char *argv[])
 
 	check_owner_and_repo(&owner, &repo);
 
-	if (gcli_fork_create(owner, repo, in) < 0)
+	if (gcli_fork_create(g_clictx, owner, repo, in) < 0)
 		errx(1, "error: failed to fork repository");
 
 	if (!always_yes) {
@@ -119,7 +119,7 @@ subcommand_forks_create(int argc, char *argv[])
 	}
 
 	if (!in)
-		in = sn_sv_to_cstr(gcli_config_get_account());
+		in = sn_sv_to_cstr(gcli_config_get_account(g_clictx));
 
 	gcli_gitconfig_add_fork_remote(in, repo);
 
@@ -129,12 +129,12 @@ subcommand_forks_create(int argc, char *argv[])
 int
 subcommand_forks(int argc, char *argv[])
 {
-	gcli_fork_list          forks      = {0};
-	char const             *owner      = NULL, *repo = NULL;
-	int                     ch         = 0;
-	int                     count      = 30;
-	bool                    always_yes = false;
-	enum gcli_output_flags  flags      = 0;
+	gcli_fork_list forks = {0};
+	char const *owner = NULL, *repo = NULL;
+	int ch = 0;
+	int count = 30;
+	bool always_yes = false;
+	enum gcli_output_flags flags = 0;
 
 	/* detect whether we wanna create a fork */
 	if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
@@ -203,10 +203,10 @@ subcommand_forks(int argc, char *argv[])
 	check_owner_and_repo(&owner, &repo);
 
 	if (argc == 0) {
-		if (gcli_get_forks(owner, repo, count, &forks) < 0)
+		if (gcli_get_forks(g_clictx, owner, repo, count, &forks) < 0)
 			errx(1, "error: could not get forks");
 
-		gcli_print_forks(flags, &forks, count);
+		gcli_print_forks(g_clictx, flags, &forks, count);
 		gcli_forks_free(&forks);
 
 		return EXIT_SUCCESS;

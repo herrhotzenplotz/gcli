@@ -74,7 +74,7 @@ subcommand_snippet_get(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	gcli_snippet_get(snippet_id);
+	gcli_snippet_get(g_clictx, snippet_id);
 
 	return EXIT_SUCCESS;
 }
@@ -99,7 +99,7 @@ subcommand_snippet_delete(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	if (gcli_snippet_delete(snippet_id) < 0)
+	if (gcli_snippet_delete(g_clictx, snippet_id) < 0)
 		errx(1, "error: failed to delete snippet");
 
 	return EXIT_SUCCESS;
@@ -173,10 +173,10 @@ subcommand_snippets(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	if (gcli_snippets_get(count, &list) < 0)
+	if (gcli_snippets_get(g_clictx, count, &list) < 0)
 		errx(1, "error: failed to fetch snippets");
 
-	gcli_snippets_print(flags, &list, count);
+	gcli_snippets_print(g_clictx, flags, &list, count);
 	gcli_snippets_free(&list);
 
 	return EXIT_SUCCESS;

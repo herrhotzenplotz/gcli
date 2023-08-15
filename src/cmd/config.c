@@ -60,12 +60,12 @@ list_sshkeys(void)
 {
 	gcli_sshkey_list list = {0};
 
-	if (gcli_sshkeys_get_keys(&list) < 0) {
+	if (gcli_sshkeys_get_keys(g_clictx, &list) < 0) {
 		fprintf(stderr, "error: could not get list of SSH keys\n");
 		return EXIT_FAILURE;
 	}
 
-	gcli_sshkeys_print_keys(&list);
+	gcli_sshkeys_print_keys(g_clictx, &list);
 	gcli_sshkeys_free_keys(&list);
 
 	return 0;
@@ -116,7 +116,7 @@ add_sshkey(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	if (gcli_sshkeys_add_key(title, keypath, NULL) < 0)
+	if (gcli_sshkeys_add_key(g_clictx, title, keypath, NULL) < 0)
 		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;
@@ -145,7 +145,7 @@ delete_sshkey(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	if (gcli_sshkeys_delete_key(id) < 0)
+	if (gcli_sshkeys_delete_key(g_clictx, id) < 0)
 		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;

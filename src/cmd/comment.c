@@ -121,7 +121,7 @@ subcommand_comment(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	rc = gcli_comment_submit((gcli_submit_comment_opts) {
+	rc = gcli_comment_submit(g_clictx, (gcli_submit_comment_opts) {
 			.owner       = owner,
 			.repo        = repo,
 			.target_type = target_type,

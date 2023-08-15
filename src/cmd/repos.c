@@ -107,10 +107,10 @@ subcommand_repos_create(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	if (gcli_repo_create(&create_options, &repo) < 0)
+	if (gcli_repo_create(g_clictx, &create_options, &repo) < 0)
 		errx(1, "error: failed to create repository");
 
-	gcli_repo_print(&repo);
+	gcli_repo_print(g_clictx, &repo);
 	gcli_repo_free(&repo);
 
 	return EXIT_SUCCESS;
@@ -200,14 +200,14 @@ subcommand_repos(int argc, char *argv[])
 		}
 
 		if (!owner)
-		    rc = gcli_get_own_repos(n, &repos);
+			rc = gcli_get_own_repos(g_clictx, n, &repos);
 		else
-			rc = gcli_get_repos(owner, n, &repos);
+			rc = gcli_get_repos(g_clictx, owner, n, &repos);
 
 		if (rc < 0)
 			errx(1, "error: failed to fetch repos");
 
-		gcli_print_repos_table(flags, &repos, n);
+		gcli_print_repos_table(g_clictx, flags, &repos, n);
 		gcli_repos_free(&repos);
 	} else {
 		check_owner_and_repo(&owner, &repo);

@@ -471,6 +471,10 @@ gcli_config_init_ctx(struct gcli_ctx *ctx)
 		(struct gcli_config_sections)
 		TAILQ_HEAD_INITIALIZER(ctx->config->sections);
 
+	ctx->dotgcli->entries =
+		(struct gcli_config_entries)
+		TAILQ_HEAD_INITIALIZER(ctx->dotgcli->entries);
+
 	return 0;
 }
 

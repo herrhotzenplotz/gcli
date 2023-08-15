@@ -91,7 +91,7 @@ pr_try_derive_head(void)
 	sn_sv account = {0};
 	sn_sv branch  = {0};
 
-	if (!(account = gcli_config_get_account()).length)
+	if (!(account = gcli_config_get_account(g_clictx)).length)
 		errx(1,
 		     "error: Cannot derive PR head. Please specify --from or set the\n"
 		     "       account in the users gcli config file.");
@@ -178,7 +178,7 @@ subcommand_pull_create(int argc, char *argv[])
 		opts.from = pr_try_derive_head();
 
 	if (!opts.to.length) {
-		if (!(opts.to = gcli_config_get_base()).length)
+		if (!(opts.to = gcli_config_get_base(g_clictx)).length)
 			errx(1,
 			     "error: PR base is missing. Please either specify "
 			     "--to branch-name or set pr.base in .gcli.");
@@ -194,7 +194,7 @@ subcommand_pull_create(int argc, char *argv[])
 
 	opts.title = SV(argv[0]);
 
-	if (gcli_pull_submit(opts) < 0)
+	if (gcli_pull_submit(g_clictx, opts) < 0)
 		errx(1, "error: failed to submit pull request");
 
 	free(opts.labels);
@@ -311,10 +311,10 @@ subcommand_pulls(int argc, char *argv[])
 	/* In case no explicit PR number was specified, list all
 	 * open PRs and exit */
 	if (pr < 0) {
-		if (gcli_get_pulls(owner, repo, &details, n, &pulls) < 0)
+		if (gcli_get_pulls(g_clictx, owner, repo, &details, n, &pulls) < 0)
 			errx(1, "error: could not fetch pull requests");
 
-		gcli_print_pulls_table(flags, &pulls, n);
+		gcli_print_pulls_table(g_clictx, flags, &pulls, n);
 		gcli_pulls_free(&pulls);
 
 		return EXIT_SUCCESS;
@@ -339,7 +339,7 @@ ensure_pull(char const *owner, char const *repo, int pr,
 	if (*fetched_pull)
 		return;
 
-	if (gcli_get_pull(owner, repo, pr, pull) < 0)
+	if (gcli_get_pull(g_clictx, owner, repo, pr, pull) < 0)
 		errx(1, "error: failed to fetch pull request data");
 
 	*fetched_pull = 1;
@@ -383,7 +383,7 @@ handle_pull_actions(int argc, char *argv[],
 			ensure_pull(owner, repo, pr, &fetched_pull, &pull);
 
 			/* Print meta */
-			gcli_pull_print_status(&pull);
+			gcli_pull_print_status(g_clictx, &pull);
 
 			/* OP */
 			puts("\nORIGINAL POST");
@@ -391,11 +391,11 @@ handle_pull_actions(int argc, char *argv[],
 
 			/* Commits */
 			puts("\nCOMMITS");
-			gcli_pull_commits(owner, repo, pr);
+			gcli_pull_commits(g_clictx, owner, repo, pr);
 
 			/* Checks */
 			puts("\nCHECKS");
-			if (gcli_pull_checks(owner, repo, pr) < 0)
+			if (gcli_pull_checks(g_clictx, owner, repo, pr) < 0)
 				errx(1, "error: failed to fetch pull request checks");
 
 		} else if (strcmp(action, "op") == 0) {
@@ -412,29 +412,29 @@ handle_pull_actions(int argc, char *argv[],
 			ensure_pull(owner, repo, pr, &fetched_pull, &pull);
 
 			/* Print meta information */
-			gcli_pull_print_status(&pull);
+			gcli_pull_print_status(g_clictx, &pull);
 
 		} else if (strcmp(action, "commits") == 0) {
 
 			/* Does not require the summary */
-			gcli_pull_commits(owner, repo, pr);
+			gcli_pull_commits(g_clictx, owner, repo, pr);
 
 		} else if (strcmp(action, "diff") == 0) {
-			gcli_print_pull_diff(stdout, owner, repo, pr);
+			gcli_print_pull_diff(g_clictx, stdout, owner, repo, pr);
 
 		} else if (strcmp(action, "comments") == 0 ||
 		           strcmp(action, "notes") == 0) {
-			gcli_pull_comments(owner, repo, pr);
+			gcli_pull_comments(g_clictx, owner, repo, pr);
 
 		} else if (strcmp(action, "ci") == 0) {
-			if (gcli_pull_checks(owner, repo, pr) < 0)
+			if (gcli_pull_checks(g_clictx, owner, repo, pr) < 0)
 				errx(1, "error: failed to fetch pull request checks");
 
 		} else if (strcmp(action, "merge") == 0) {
 			enum gcli_merge_flags flags = GCLI_PULL_MERGE_DELETEHEAD;
 
 			/* Default behaviour */
-			if (gcli_config_pr_inhibit_delete_source_branch())
+			if (gcli_config_pr_inhibit_delete_source_branch(g_clictx))
 			    flags = 0;
 
 			if (argc > 0) {
@@ -452,33 +452,33 @@ handle_pull_actions(int argc, char *argv[],
 				}
 			}
 
-			if (gcli_pull_merge(owner, repo, pr, flags) < 0)
+			if (gcli_pull_merge(g_clictx, owner, repo, pr, flags) < 0)
 				errx(1, "error: failed to merge pull request");
 
 		} else if (strcmp(action, "close") == 0) {
-			if (gcli_pull_close(owner, repo, pr) < 0)
+			if (gcli_pull_close(g_clictx, owner, repo, pr) < 0)
 				errx(1, "error: failed to close pull request");
 
 		} else if (strcmp(action, "reopen") == 0) {
-			if (gcli_pull_reopen(owner, repo, pr) < 0)
+			if (gcli_pull_reopen(g_clictx, owner, repo, pr) < 0)
 				errx(1, "error: failed to reopen pull request");
 
 		} else if (strcmp(action, "reviews") == 0) {
 			/* list reviews */
 			gcli_pr_review_list reviews = {0};
 
-			if (gcli_review_get_reviews(owner, repo, pr, &reviews) < 0)
+			if (gcli_review_get_reviews(g_clictx, owner, repo, pr, &reviews) < 0)
 				errx(1, "error: failed to fetch reviews");
 
-			gcli_review_print_review_table(&reviews);
+			gcli_review_print_review_table(g_clictx, &reviews);
 			gcli_review_reviews_free(&reviews);
 
 		} else if (strcmp("labels", action) == 0) {
-			const char **add_labels         = NULL;
-			size_t       add_labels_size    = 0;
-			const char **remove_labels      = NULL;
-			size_t       remove_labels_size = 0;
-			int          rc = 0;
+			const char **add_labels = NULL;
+			size_t add_labels_size = 0;
+			const char **remove_labels = NULL;
+			size_t remove_labels_size = 0;
+			int rc = 0;
 
 			if (argc == 0) {
 				fprintf(stderr, "error: expected label action\n");
@@ -493,13 +493,15 @@ handle_pull_actions(int argc, char *argv[],
 			/* actually go about deleting and adding the labels */
 			if (add_labels_size) {
 				rc = gcli_pull_add_labels(
-					owner, repo, pr, add_labels, add_labels_size);
+					g_clictx, owner, repo, pr, add_labels,
+					add_labels_size);
 				if (rc < 0)
 					errx(1, "failed to add labels");
 			}
 			if (remove_labels_size) {
 				rc = gcli_pull_remove_labels(
-					owner, repo, pr, remove_labels, remove_labels_size);
+					g_clictx, owner, repo, pr, remove_labels,
+					remove_labels_size);
 
 				if (rc < 0)
 					errx(1, "failed to remove labels");
@@ -512,12 +514,13 @@ handle_pull_actions(int argc, char *argv[],
 			char const *arg = shift(&argc, &argv);
 
 			if (strcmp(arg, "-d") == 0) {
-				if (gcli_pull_clear_milestone(owner, repo, pr) < 0)
+				if (gcli_pull_clear_milestone(g_clictx, owner, repo, pr) < 0)
 					errx(1, "failed to clear milestone");
 
 			} else {
 				int milestone_id = 0;
 				char *endptr;
+				int rc = 0;
 
 				milestone_id = strtoul(arg, &endptr, 10);
 				if (endptr != arg + strlen(arg)) {
@@ -525,7 +528,9 @@ handle_pull_actions(int argc, char *argv[],
 					return EXIT_FAILURE;
 				}
 
-				if (gcli_pull_set_milestone(owner, repo, pr, milestone_id) < 0)
+				rc = gcli_pull_set_milestone(g_clictx, owner, repo, pr,
+				                             milestone_id);
+				if (rc < 0)
 					errx(1, "error: failed to set milestone");
 			}
 		} else {

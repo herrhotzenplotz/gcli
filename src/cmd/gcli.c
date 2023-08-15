@@ -136,18 +136,20 @@ usage(void)
 	copyright();
 }
 
+/** The CMD global gcli context */
+gcli_ctx *g_clictx = NULL;
+
 int
 main(int argc, char *argv[])
 {
-	gcli_ctx *ctx;
 	char const *errmsg;
 
-	errmsg = gcli_init(&ctx);
+	errmsg = gcli_init(&g_clictx);
 	if (errmsg)
 		errx(1, "error: %s", errmsg);
 
 	/* Parse first arguments */
-	if (gcli_config_parse_args(ctx, &argc, &argv)) {
+	if (gcli_config_parse_args(g_clictx, &argc, &argv)) {
 		usage();
 		return EXIT_FAILURE;
 	}

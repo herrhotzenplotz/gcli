@@ -127,7 +127,7 @@ subcommand_issue_create(int argc, char *argv[])
 
 	opts.title = SV(argv[0]);
 
-	if (gcli_issue_submit(opts) < 0)
+	if (gcli_issue_submit(g_clictx, opts) < 0)
 		errx(1, "failed to submit issue");
 
 	return EXIT_SUCCESS;
@@ -241,10 +241,10 @@ subcommand_issues(int argc, char *argv[])
 
 	/* No issue number was given, so list all open issues */
 	if (issue_id < 0) {
-		if (gcli_get_issues(owner, repo, &details, n, &list) < 0)
+		if (gcli_get_issues(g_clictx, owner, repo, &details, n, &list) < 0)
 			errx(1, "error: could not get issues");
 
-		gcli_print_issues_table(flags, &list, n);
+		gcli_print_issues_table(g_clictx, flags, &list, n);
 
 		gcli_issues_free(&list);
 		return EXIT_SUCCESS;
@@ -269,7 +269,7 @@ ensure_issue(char const *const owner, char const *const repo,
 	if (*have_fetched_issue)
 		return;
 
-	if (gcli_get_issue(owner, repo, issue_id, issue) < 0)
+	if (gcli_get_issue(g_clictx, owner, repo, issue_id, issue) < 0)
 		errx(1, "error: failed to retrieve issue data");
 
 	*have_fetched_issue = 1;
@@ -298,7 +298,7 @@ handle_issue_labels_action(int *argc, char ***argv,
 
 	/* actually go about deleting and adding the labels */
 	if (add_labels_size) {
-		rc = gcli_issue_add_labels(owner, repo, issue_id,
+		rc = gcli_issue_add_labels(g_clictx, owner, repo, issue_id,
 		                           add_labels, add_labels_size);
 
 		if (rc < 0)
@@ -306,7 +306,7 @@ handle_issue_labels_action(int *argc, char ***argv,
 	}
 
 	if (remove_labels_size) {
-		rc = gcli_issue_remove_labels(owner, repo, issue_id,
+		rc = gcli_issue_remove_labels(g_clictx, owner, repo, issue_id,
 		                              remove_labels, remove_labels_size);
 
 		if (rc < 0)
@@ -342,7 +342,7 @@ handle_issue_milestone_action(int *argc, char ***argv,
 	/* Check if the milestone_str is -d indicating that we should
 	 * clear the milestone */
 	if (strcmp(milestone_str, "-d") == 0) {
-		rc = gcli_issue_clear_milestone(owner, repo, issue_id);
+		rc = gcli_issue_clear_milestone(g_clictx, owner, repo, issue_id);
 		if (rc < 0)
 			errx(1, "error: could not clear milestone of issue #%d", issue_id);
 		return;
@@ -359,7 +359,7 @@ handle_issue_milestone_action(int *argc, char ***argv,
 	}
 
 	/* Pass it to the dispatch */
-	if (gcli_issue_set_milestone(owner, repo, issue_id, milestone) < 0)
+	if (gcli_issue_set_milestone(g_clictx, owner, repo, issue_id, milestone) < 0)
 		errx(1, "error: could not assign milestone");
 }
 
@@ -387,7 +387,7 @@ handle_issues_actions(int argc, char *argv[],
 			/* Make sure we have fetched the issue data */
 			ensure_issue(owner, repo, issue_id, &have_fetched_issue, &issue);
 
-			gcli_issue_print_summary(&issue);
+			gcli_issue_print_summary(g_clictx, &issue);
 
 			puts("\nORIGINAL POST\n");
 			gcli_issue_print_op(&issue);
@@ -395,7 +395,7 @@ handle_issues_actions(int argc, char *argv[],
 		} else if (strcmp("comments", operation) == 0 ||
 		           strcmp("notes", operation) == 0) {
 			/* Doesn't require fetching the issue data */
-			gcli_issue_comments(owner, repo, issue_id);
+			gcli_issue_comments(g_clictx, owner, repo, issue_id);
 
 		} else if (strcmp("op", operation) == 0) {
 			/* Make sure we have fetched the issue data */
@@ -407,22 +407,22 @@ handle_issues_actions(int argc, char *argv[],
 			/* Make sure we have fetched the issue data */
 			ensure_issue(owner, repo, issue_id, &have_fetched_issue, &issue);
 
-			gcli_issue_print_summary(&issue);
+			gcli_issue_print_summary(g_clictx, &issue);
 
 		} else if (strcmp("close", operation) == 0) {
 
-			if (gcli_issue_close(owner, repo, issue_id) < 0)
+			if (gcli_issue_close(g_clictx, owner, repo, issue_id) < 0)
 				errx(1, "failed to close issue");
 
 		} else if (strcmp("reopen", operation) == 0) {
 
-			if (gcli_issue_reopen(owner, repo, issue_id) < 0)
+			if (gcli_issue_reopen(g_clictx, owner, repo, issue_id) < 0)
 				errx(1, "failed to reopen issue");
 
 		} else if (strcmp("assign", operation) == 0) {
 
 			char const *assignee = shift(&argc, &argv);
-			if (gcli_issue_assign(owner, repo, issue_id, assignee) < 0)
+			if (gcli_issue_assign(g_clictx, owner, repo, issue_id, assignee) < 0)
 				errx(1, "failed to assign issue");
 
 		} else if (strcmp("labels", operation) == 0) {

@@ -89,7 +89,7 @@ subcommand_status(int argc, char *argv[])
 	argv += optind;
 
 	if (!mark) {
-		gcli_status(count);
+		gcli_status(g_clictx, count);
 	} else {
 		if (count != 30)
 			warnx("ignoring -n/--count argument");
@@ -106,7 +106,7 @@ subcommand_status(int argc, char *argv[])
 			return EXIT_FAILURE;
 		}
 
-		if (gcli_notification_mark_as_read(argv[0]) < 0)
+		if (gcli_notification_mark_as_read(g_clictx, argv[0]) < 0)
 			errx(1, "failed to mark the notification as read");
 	}
 

@@ -27,8 +27,6 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/cmd/colour.h>
-#include <gcli/cmd/table.h>
 #include <gcli/editor.h>
 #include <gcli/forges.h>
 #include <gcli/github/issues.h>
@@ -70,118 +68,6 @@ gcli_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
                 gcli_issue_list *const out)
 {
 	return gcli_forge(ctx)->get_issues(ctx, owner, repo, details, max, out);
-}
-
-void
-gcli_print_issues_table(gcli_ctx *ctx, enum gcli_output_flags const flags,
-                        gcli_issue_list const *const list, int const max)
-{
-	int n, pruned = 0;
-	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
-		{ .name = "NUMBER", .type = GCLI_TBLCOLTYPE_INT, .flags = GCLI_TBLCOL_JUSTIFYR },
-		{ .name = "NOTES",  .type = GCLI_TBLCOLTYPE_INT, .flags = GCLI_TBLCOL_JUSTIFYR },
-		{ .name = "STATE",  .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_STATECOLOURED },
-		{ .name = "TITLE",  .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
-	};
-
-	(void) ctx;
-
-	if (list->issues_size == 0) {
-		puts("No issues");
-		return;
-	}
-
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
-	if (!table)
-		errx(1, "could not init table printer");
-
-	/* Determine the correct number of items to print */
-	if (max < 0 || (size_t)(max) > list->issues_size)
-		n = list->issues_size;
-	else
-		n = max;
-
-	/* Iterate depending on the output order */
-	if (flags & OUTPUT_SORTED) {
-		for (int i = 0; i < n; ++i) {
-			if (!list->issues[n - 1 - 1].is_pr) {
-				gcli_tbl_add_row(table,
-				                 list->issues[n - i - 1].number,
-				                 list->issues[n - i - 1].comments,
-				                 list->issues[n - i - 1].state,
-				                 list->issues[n - i - 1].title);
-			} else {
-				pruned++;
-			}
-		}
-	} else {
-		for (int i = 0; i < n; ++i) {
-			if (!list->issues[i].is_pr) {
-				gcli_tbl_add_row(table,
-				                 list->issues[i].number,
-				                 list->issues[i].comments,
-				                 list->issues[i].state,
-				                 list->issues[i].title);
-			} else {
-				pruned++;
-			}
-		}
-	}
-
-	/* Dump the table */
-	gcli_tbl_end(table);
-
-	/* Inform the user that we pruned pull requests from the output */
-	if (pruned && sn_getverbosity() != VERBOSITY_QUIET)
-		fprintf(stderr, "info: %d pull requests pruned\n", pruned);
-}
-
-void
-gcli_issue_print_summary(gcli_ctx *ctx, gcli_issue const *const it)
-{
-	gcli_dict dict;
-
-	(void) ctx;
-
-	dict = gcli_dict_begin();
-
-	gcli_dict_add(dict, "NAME", 0, 0, "%d", it->number);
-	gcli_dict_add(dict, "TITLE", 0, 0, SV_FMT, SV_ARGS(it->title));
-	gcli_dict_add(dict, "CREATED", 0, 0, SV_FMT, SV_ARGS(it->created_at));
-	gcli_dict_add(dict, "AUTHOR",  GCLI_TBLCOL_BOLD, 0,
-	              SV_FMT, SV_ARGS(it->author));
-	gcli_dict_add(dict, "STATE", GCLI_TBLCOL_STATECOLOURED, 0,
-	              SV_FMT, SV_ARGS(it->state));
-	gcli_dict_add(dict, "COMMENTS", 0, 0, "%d", it->comments);
-	gcli_dict_add(dict, "LOCKED", 0, 0, "%s", sn_bool_yesno(it->locked));
-
-	if (it->milestone.length)
-		gcli_dict_add(dict, "MILESTONE", 0, 0, SV_FMT, SV_ARGS(it->milestone));
-
-	if (it->labels_size) {
-		gcli_dict_add_sv_list(dict, "LABELS", it->labels, it->labels_size);
-	} else {
-		gcli_dict_add(dict, "LABELS", 0, 0, "none");
-	}
-
-	if (it->assignees_size) {
-		gcli_dict_add_sv_list(dict, "ASSIGNEES",
-		                      it->assignees, it->assignees_size);
-	} else {
-		gcli_dict_add(dict, "ASSIGNEES", 0, 0, "none");
-	}
-
-	/* Dump the dictionary */
-	gcli_dict_end(dict);
-
-}
-
-void
-gcli_issue_print_op(gcli_issue const *const it)
-{
-	if (it->body.length && it->body.data)
-		pretty_print(it->body.data, 4, 80, stdout);
 }
 
 int

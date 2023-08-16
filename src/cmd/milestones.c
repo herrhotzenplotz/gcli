@@ -30,6 +30,7 @@
 #include <config.h>
 
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/issues.h>
 #include <gcli/cmd/table.h>
 
 #include <gcli/forges.h>
@@ -347,7 +348,7 @@ handle_milestone_actions(int argc, char *argv[],
 				errx(1, "error: failed to fetch issues");
 
 			printf("\nISSUES:\n");
-			gcli_print_issues_table(g_clictx, 0, &issues, -1);
+			gcli_print_issues(0, &issues, -1);
 			gcli_issues_free(&issues);
 
 		} else if (strcmp(action, "issues") == 0) {
@@ -361,7 +362,7 @@ handle_milestone_actions(int argc, char *argv[],
 				errx(1, "error: failed to fetch issues");
 
 			/* Print them as a table */
-			gcli_print_issues_table(g_clictx, 0, &issues, -1);
+			gcli_print_issues(0, &issues, -1);
 
 			/* Cleanup */
 			gcli_issues_free(&issues);

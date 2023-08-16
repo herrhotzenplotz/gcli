@@ -86,16 +86,10 @@ int gcli_get_issues(gcli_ctx *ctx, char const *owner, char const *reponame,
 
 void gcli_issues_free(gcli_issue_list *);
 
-void gcli_print_issues_table(gcli_ctx *ctx, enum gcli_output_flags flags,
-                             gcli_issue_list const *list, int max);
-
 int gcli_get_issue(gcli_ctx *ctx, char const *owner, char const *reponame,
                    int issue_number, gcli_issue *out);
 
 void gcli_issue_free(gcli_issue *it);
-
-void gcli_issue_print_summary(gcli_ctx *ctx, gcli_issue const *it);
-void gcli_issue_print_op(gcli_issue const *it);
 
 int gcli_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
                      int issue_number);

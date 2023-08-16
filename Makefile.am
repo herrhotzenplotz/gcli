@@ -67,7 +67,7 @@ gcli_SOURCES = \
 	src/cmd/forks.c \
 	src/cmd/gcli.c \
 	src/cmd/gists.c \
-	src/cmd/issues.c \
+	include/gcli/cmd/issues.h src/cmd/issues.c \
 	include/gcli/cmd/labels.h src/cmd/labels.c \
 	include/gcli/cmd/milestones.h src/cmd/milestones.c \
 	src/cmd/pipelines.c \

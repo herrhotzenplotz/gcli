@@ -18,11 +18,12 @@ pgen_SOURCES = \
 	src/pgen/parser.y \
 	src/pgen/lexer.l
 
-noinst_LTLIBRARIES = libgcli.la libsn.la libpdjson.la
+lib_LTLIBRARIES = libgcli.la
+noinst_LTLIBRARIES = libsn.la libpdjson.la
 
 .NOTPARALLEL: pgen$(EXEEXT) $(builddir)/src/pgen/parser.c $(builddir)/src/pgen/parser.h $(builddir)/src/pgen/lexer.c
 
-libgcli_la_DEPENDENCIES = pgen$(EXEEXT)
+libgcli_la_DEPENDENCIES = pgen$(EXEEXT) libpdjson.la libsn.la
 
 $(BUILT_SOURCES): pgen$(EXEEXT)
 
@@ -34,7 +35,9 @@ SUFFIXES = .t
 	$(AM_V_GEN)./pgen -tc -o $@ $<
 
 bin_PROGRAMS = gcli$(EXEEXT)
-gcli_LDADD = libgcli.la libpdjson.la libsn.la
+gcli_LDADD = libgcli.la
+
+libgcli_la_LIBADD = libpdjson.la libsn.la
 
 dist_man_MANS = \
 	docs/gcli-api.1 \
@@ -107,6 +110,17 @@ TEMPLATES = \
 	templates/gitlab/status.t \
 	templates/gitlab/snippets.t \
 	templates/gitea/milestones.t
+
+include_HEADERS = \
+	include/gcli/gcli.h include/gcli/comments.h \
+	include/gcli/config.h include/gcli/curl.h \
+	include/gcli/editor.h include/gcli/forks.h \
+	include/gcli/gitconfig.h include/gcli/issues.h \
+	include/gcli/labels.h include/gcli/milestones.h \
+	include/gcli/pulls.h include/gcli/releases.h \
+	include/gcli/repos.h include/gcli/review.h \
+	include/gcli/gitlab/snippets.h include/gcli/status.h \
+	include/gcli/sshkeys.h
 
 libgcli_la_SOURCES = \
 	include/gcli/ctx.h src/ctx.c \

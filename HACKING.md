@@ -54,11 +54,18 @@ Then you can configure each build directory with appropriate options:
     $ ../configure \
         CC=/usr/bin/cc \
         CFLAGS='-std=iso9899:1999 -pedantic -Wall -Wextra -Wno-misleading-indentation -Werror -g -O0' \
-        LDFLAGS='-g'
+        LDFLAGS='-g' \
+        --disable-shared
 
 The above will give you a fully debuggable and build with strict C99
 compiler errors. I very much suggest that you use those options while
 working on and debugging gcli.
+
+*Note*: The `--disable-shared` is required because if you build a
+shared version of libgcli, libtool will replace the gcli binary with a
+shell script that alters the dld search path to read the correct
+`libgcli.so`. Because of `build/gcli` now not being a an ELF
+executable but a shell script debuggers can't load gcli properly.
 
 #### Sanitized Builds
 
@@ -69,7 +76,8 @@ for common bugs:
         CFLAGS='-std=iso9899:1999 -pedantic -Wall -Wextra
                 -Wno-misleading-indentation -Werror -g -O0
                 -fsanitize=address,undefined' \
-        LDFLAGS=-g
+        LDFLAGS=-g \
+        --disable-shared
 
 #### Cross-Compilation
 

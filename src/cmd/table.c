@@ -27,9 +27,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <gcli/cmd/colour.h>
 #include <gcli/cmd/table.h>
 
-#include <gcli/colour.h>
 #include <gcli/gcli.h>
 
 #include <stdarg.h>
@@ -44,7 +44,6 @@ struct gcli_tblrow;
 /* Internal state of a table printer. We return a handle to it in
  * gcli_table_init. */
 struct gcli_tbl {
-	gcli_ctx *ctx;              /* pointer to the gcli context */
 	gcli_tblcoldef const *cols; /* user provided column definitons */
 	int *col_widths;            /* minimum width of the columns */
 	size_t cols_size;           /* size of above arrays */
@@ -76,8 +75,7 @@ table_pushrow(struct gcli_tbl *const table, struct gcli_tblrow row)
 
 /** Initialize the internal state structure of the table printer. */
 gcli_tbl
-gcli_tbl_begin(gcli_ctx *ctx, gcli_tblcoldef const *const cols,
-               size_t const cols_size)
+gcli_tbl_begin(gcli_tblcoldef const *const cols, size_t const cols_size)
 {
 	struct gcli_tbl *tbl;
 
@@ -85,8 +83,6 @@ gcli_tbl_begin(gcli_ctx *ctx, gcli_tblcoldef const *const cols,
 	tbl = calloc(sizeof(*tbl), 1);
 	if (!tbl)
 		return NULL;
-
-	tbl->ctx = ctx;
 
 	/* Reserve memory for the column sizes */
 	tbl->col_widths = calloc(sizeof(*tbl->col_widths), cols_size);
@@ -132,12 +128,12 @@ tablerow_add_cell(struct gcli_tbl *const table,
 		int code = va_arg(*vp, int);
 
 		/* don't free that! it's allocated and free'ed inside colour.c */
-		row->cells[col].colour = gcli_setcolour(table->ctx, code);
+		row->cells[col].colour = gcli_setcolour(code);
 	} else if (table->cols[col].flags & GCLI_TBLCOL_256COLOUR) {
 		uint64_t hexcode = va_arg(*vp, uint64_t);
 
 		/* see comment above */
-		row->cells[col].colour = gcli_setcolour256(table->ctx, hexcode);
+		row->cells[col].colour = gcli_setcolour256(hexcode);
 	}
 
 
@@ -250,15 +246,14 @@ dump_row(struct gcli_tbl const *const table, size_t const i)
 
 		/* State colour */
 		if (table->cols[col].flags & GCLI_TBLCOL_STATECOLOURED)
-			printf("%s", gcli_state_colour_str(
-				       table->ctx, row->cells[col].text));
+			printf("%s", gcli_state_colour_str(row->cells[col].text));
 		else if (table->cols[col].flags &
 		         (GCLI_TBLCOL_COLOUREXPL|GCLI_TBLCOL_256COLOUR))
 			printf("%s", row->cells[col].colour);
 
 		/* Bold */
 		if (table->cols[col].flags & GCLI_TBLCOL_BOLD)
-			printf("%s", gcli_setbold(table->ctx));
+			printf("%s", gcli_setbold());
 
 		/* Print cell if it is not NULL, otherwise indicate it by
 		 * printing <empty> */
@@ -269,11 +264,11 @@ dump_row(struct gcli_tbl const *const table, size_t const i)
 		    (GCLI_TBLCOL_STATECOLOURED
 		     |GCLI_TBLCOL_COLOUREXPL
 		     |GCLI_TBLCOL_256COLOUR))
-			printf("%s", gcli_resetcolour(table->ctx));
+			printf("%s", gcli_resetcolour());
 
 		/* Stop printing in bold */
 		if (table->cols[col].flags & GCLI_TBLCOL_BOLD)
-			printf("%s", gcli_resetbold(table->ctx));
+			printf("%s", gcli_resetbold());
 
 		/* If not last column, print padding of 2 spaces */
 		if ((col + 1) < table->cols_size) {
@@ -360,11 +355,9 @@ struct gcli_dict {
 
 /* Create a new long list printer and return a handle to it */
 gcli_dict
-gcli_dict_begin(gcli_ctx *ctx)
+gcli_dict_begin(void)
 {
-	struct gcli_dict *d = calloc(sizeof(struct gcli_dict), 1);
-	d->ctx = ctx;
-	return d;
+	return calloc(sizeof(struct gcli_dict), 1);
 }
 
 static int
@@ -489,32 +482,26 @@ gcli_dict_end(gcli_dict _list)
 		printf("%s : ", list->entries[i].key);
 
 		if (flags & GCLI_TBLCOL_BOLD)
-			printf("%s", gcli_setbold(list->ctx));
+			printf("%s", gcli_setbold());
 
 		if (flags & GCLI_TBLCOL_COLOUREXPL)
-			printf("%s", gcli_setcolour(
-				       list->ctx,
-				       list->entries[i].colour_args));
+			printf("%s", gcli_setcolour(list->entries[i].colour_args));
 
 		if (flags & GCLI_TBLCOL_STATECOLOURED)
-			printf("%s", gcli_state_colour_str(
-				       list->ctx,
-				       list->entries[i].value));
+			printf("%s", gcli_state_colour_str(list->entries[i].value));
 
 		if (flags & GCLI_TBLCOL_256COLOUR)
-			printf("%s", gcli_setcolour256(
-				       list->ctx,
-				       list->entries[i].colour_args));
+			printf("%s", gcli_setcolour256(list->entries[i].colour_args));
 
 		puts(list->entries[i].value);
 
 		if (flags & (GCLI_TBLCOL_COLOUREXPL
 		             |GCLI_TBLCOL_STATECOLOURED
 		             |GCLI_TBLCOL_256COLOUR))
-			printf("%s", gcli_resetcolour(list->ctx));
+			printf("%s", gcli_resetcolour());
 
 		if (flags & GCLI_TBLCOL_BOLD)
-			printf("%s", gcli_resetbold(list->ctx));
+			printf("%s", gcli_resetbold());
 	}
 
 	gcli_dict_free(list);

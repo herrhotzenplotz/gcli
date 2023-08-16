@@ -58,6 +58,7 @@ dist_man_MANS = \
 
 gcli_SOURCES = \
 	include/gcli/cmd/cmd.h src/cmd/cmd.c \
+	include/gcli/cmd/colour.h src/cmd/colour.c \
 	include/gcli/cmd/table.h src/cmd/table.c \
 	src/cmd/api.c \
 	src/cmd/ci.c \
@@ -125,7 +126,6 @@ include_HEADERS = \
 libgcli_la_SOURCES = \
 	include/gcli/ctx.h src/ctx.c \
 	include/gcli/gcli.h src/gcli.c \
-	src/colour.c include/gcli/colour.h \
 	src/comments.c include/gcli/comments.h \
 	src/config.c include/gcli/config.h \
 	src/curl.c include/gcli/curl.h \

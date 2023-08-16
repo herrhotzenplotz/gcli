@@ -80,7 +80,7 @@ struct gcli_tblcoldef {
 };
 
 /* Init a table printer */
-gcli_tbl gcli_tbl_begin(gcli_ctx *ctx, gcli_tblcoldef const *cols,
+gcli_tbl gcli_tbl_begin(gcli_tblcoldef const *cols,
                         size_t cols_size);
 
 /* Print the table contents and free all the resources allocated in
@@ -90,7 +90,7 @@ void gcli_tbl_end(gcli_tbl table);
 /* Add a single to an initialized table */
 int gcli_tbl_add_row(gcli_tbl table, ...);
 
-gcli_dict gcli_dict_begin(gcli_ctx *ctx);
+gcli_dict gcli_dict_begin(void);
 
 int gcli_dict_add(gcli_dict list,
                   char const *key,

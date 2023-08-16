@@ -82,9 +82,10 @@ gcli_print_snippet(gcli_ctx *ctx, enum gcli_output_flags const flags,
 {
 	gcli_dict dict;
 
+	(void) ctx;
 	(void) flags;
 
-	dict = gcli_dict_begin(ctx);
+	dict = gcli_dict_begin();
 
 	gcli_dict_add(dict,        "ID",     0, 0, "%d", it->id);
 	gcli_dict_add_string(dict, "TITLE",  0, 0, it->title);
@@ -132,6 +133,8 @@ gcli_print_snippets_short(gcli_ctx *ctx, enum gcli_output_flags const flags,
 		{ .name = "TITLE",      .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
+	(void) ctx;
+
 	/* Determine number of items to print */
 	if (max < 0 || (size_t)(max) > list->snippets_size)
 		n = list->snippets_size;
@@ -139,7 +142,7 @@ gcli_print_snippets_short(gcli_ctx *ctx, enum gcli_output_flags const flags,
 		n = max;
 
 	/* Fill table */
-	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not init table");
 

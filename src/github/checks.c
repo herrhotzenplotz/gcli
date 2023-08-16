@@ -29,13 +29,13 @@
 
 #include <assert.h>
 
-#include <gcli/colour.h>
+#include <gcli/cmd/colour.h>
+#include <gcli/cmd/table.h>
 #include <gcli/config.h>
 #include <gcli/curl.h>
 #include <gcli/github/checks.h>
 #include <gcli/github/checks.h>
 #include <gcli/json_util.h>
-#include <gcli/cmd/table.h>
 
 #include <templates/github/checks.h>
 
@@ -91,13 +91,15 @@ github_print_checks(gcli_ctx *ctx, gcli_github_checks const *const list)
 		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
+	(void) ctx;
+
 
 	if (!list->checks_size) {
 		fprintf(stderr, "No checks\n");
 		return;
 	}
 
-	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not init table");
 

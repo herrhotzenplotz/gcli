@@ -27,12 +27,12 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/colour.h>
+#include <gcli/cmd/colour.h>
+#include <gcli/cmd/table.h>
 #include <gcli/config.h>
 #include <gcli/curl.h>
 #include <gcli/github/gists.h>
 #include <gcli/json_util.h>
-#include <gcli/cmd/table.h>
 
 #include <gcli/github/config.h>
 
@@ -125,6 +125,7 @@ static void
 print_gist(gcli_ctx *ctx, enum gcli_output_flags const flags,
            gcli_gist const *const gist)
 {
+	(void) ctx;
 	(void) flags;
 
 	printf("   ID : %s"SV_FMT"%s\n"
@@ -133,8 +134,8 @@ print_gist(gcli_ctx *ctx, enum gcli_output_flags const flags,
 	       " DATE : "SV_FMT"\n"
 	       "  URL : "SV_FMT"\n"
 	       " PULL : "SV_FMT"\n",
-	       gcli_setcolour(ctx, GCLI_COLOR_YELLOW), SV_ARGS(gist->id), gcli_resetcolour(ctx),
-	       gcli_setbold(ctx), SV_ARGS(gist->owner), gcli_resetbold(ctx),
+	       gcli_setcolour(GCLI_COLOR_YELLOW), SV_ARGS(gist->id), gcli_resetcolour(),
+	       gcli_setbold(), SV_ARGS(gist->owner), gcli_resetbold(),
 	       SV_ARGS(gist->description),
 	       SV_ARGS(gist->date),
 	       SV_ARGS(gist->url),
@@ -182,12 +183,14 @@ gcli_print_gists_short(gcli_ctx *ctx, enum gcli_output_flags const flags,
 		{ .name = "DESCRIPTION", .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
 	};
 
+	(void) ctx;
+
 	if (max < 0 || (size_t)(max) > list->gists_size)
 		n = list->gists_size;
 	else
 		n = max;
 
-	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not init table");
 

@@ -27,7 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/colour.h>
+#include <gcli/cmd/colour.h>
+#include <gcli/cmd/table.h>
 #include <gcli/config.h>
 #include <gcli/editor.h>
 #include <gcli/forges.h>
@@ -36,7 +37,6 @@
 #include <gcli/gitlab/pipelines.h>
 #include <gcli/json_util.h>
 #include <gcli/pulls.h>
-#include <gcli/cmd/table.h>
 #include <sn/sn.h>
 
 void
@@ -74,6 +74,8 @@ gcli_print_pulls_table(gcli_ctx *ctx, enum gcli_output_flags const flags,
 		{ .name = "TITLE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
+	(void) ctx;
+
 	if (list->pulls_size == 0) {
 		puts("No Pull Requests");
 		return;
@@ -86,7 +88,7 @@ gcli_print_pulls_table(gcli_ctx *ctx, enum gcli_output_flags const flags,
 		n = max;
 
 	/* Fill the table */
-	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: cannot init table");
 
@@ -128,7 +130,7 @@ gcli_pull_print_status(gcli_ctx *ctx, gcli_pull const *const it)
 	gcli_dict dict;
 	gcli_forge_descriptor const *const forge = gcli_forge(ctx);
 
-	dict = gcli_dict_begin(ctx);
+	dict = gcli_dict_begin();
 
 	gcli_dict_add(dict,            "NUMBER", 0, 0, "%d", it->number);
 	gcli_dict_add_string(dict,     "TITLE", 0, 0, it->title);
@@ -145,12 +147,12 @@ gcli_pull_print_status(gcli_ctx *ctx, gcli_pull const *const it)
 	if (!(forge->pull_summary_quirks & GCLI_PRS_QUIRK_ADDDEL))
 		/* FIXME: move printing colours into the dictionary printer? */
 		gcli_dict_add(dict,        "ADD:DEL", 0, 0, "%s%d%s:%s%d%s",
-		              gcli_setcolour(ctx, GCLI_COLOR_GREEN),
+		              gcli_setcolour(GCLI_COLOR_GREEN),
 		              it->additions,
-		              gcli_resetcolour(ctx),
-		              gcli_setcolour(ctx, GCLI_COLOR_RED),
+		              gcli_resetcolour(),
+		              gcli_setcolour(GCLI_COLOR_RED),
 		              it->deletions,
-		              gcli_resetcolour(ctx));
+		              gcli_resetcolour());
 
 	if (!(forge->pull_summary_quirks & GCLI_PRS_QUIRK_COMMITS))
 		gcli_dict_add(dict,        "COMMITS", 0, 0, "%d", it->commits);
@@ -212,12 +214,14 @@ gcli_print_commits_table(gcli_ctx *ctx, gcli_commit_list const *const list)
 		{ .name = "MESSAGE", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
+	(void) ctx;
+
 	if (list->commits_size == 0) {
 		puts("No commits");
 		return;
 	}
 
-	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not initialize table");
 

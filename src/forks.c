@@ -27,11 +27,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/colour.h>
+#include <gcli/cmd/colour.h>
+#include <gcli/cmd/table.h>
 #include <gcli/forges.h>
 #include <gcli/forks.h>
 #include <gcli/github/forks.h>
-#include <gcli/cmd/table.h>
 
 int
 gcli_get_forks(gcli_ctx *ctx, char const *owner, char const *repo,
@@ -53,6 +53,8 @@ gcli_print_forks(gcli_ctx *ctx, enum gcli_output_flags const flags,
 		{ .name = "FULLNAME", .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
 	};
 
+	(void) ctx;
+
 	if (list->forks_size == 0) {
 		puts("No forks");
 		return;
@@ -64,7 +66,7 @@ gcli_print_forks(gcli_ctx *ctx, enum gcli_output_flags const flags,
 	else
 		n = max;
 
-	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not initialize table");
 

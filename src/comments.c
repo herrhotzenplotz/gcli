@@ -27,7 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/colour.h>
+#include <gcli/cmd/colour.h>
+
 #include <gcli/comments.h>
 #include <gcli/config.h>
 #include <gcli/editor.h>
@@ -58,10 +59,11 @@ gcli_comment_list_free(gcli_comment_list *list)
 void
 gcli_print_comment_list(gcli_ctx *ctx, gcli_comment_list const *const list)
 {
+	(void) ctx;
 	for (size_t i = 0; i < list->comments_size; ++i) {
 		printf("AUTHOR : %s%s%s\n"
 		       "DATE   : %s\n",
-		       gcli_setbold(ctx), list->comments[i].author, gcli_resetbold(ctx),
+		       gcli_setbold(), list->comments[i].author, gcli_resetbold(),
 		       list->comments[i].date);
 		pretty_print(list->comments[i].body, 9, 80, stdout);
 		putchar('\n');

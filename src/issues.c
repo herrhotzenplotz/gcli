@@ -27,13 +27,13 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/colour.h>
+#include <gcli/cmd/colour.h>
+#include <gcli/cmd/table.h>
 #include <gcli/editor.h>
 #include <gcli/forges.h>
 #include <gcli/github/issues.h>
 #include <gcli/issues.h>
 #include <gcli/json_util.h>
-#include <gcli/cmd/table.h>
 #include <sn/sn.h>
 
 void
@@ -85,12 +85,14 @@ gcli_print_issues_table(gcli_ctx *ctx, enum gcli_output_flags const flags,
 		{ .name = "TITLE",  .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
 	};
 
+	(void) ctx;
+
 	if (list->issues_size == 0) {
 		puts("No issues");
 		return;
 	}
 
-	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "could not init table printer");
 
@@ -140,7 +142,9 @@ gcli_issue_print_summary(gcli_ctx *ctx, gcli_issue const *const it)
 {
 	gcli_dict dict;
 
-	dict = gcli_dict_begin(ctx);
+	(void) ctx;
+
+	dict = gcli_dict_begin();
 
 	gcli_dict_add(dict, "NAME", 0, 0, "%d", it->number);
 	gcli_dict_add(dict, "TITLE", 0, 0, SV_FMT, SV_ARGS(it->title));

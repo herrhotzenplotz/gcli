@@ -73,12 +73,14 @@ gcli_print_milestones(gcli_ctx *ctx, gcli_milestone_list const *const list,
 		{ .name = "TITLE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
+	(void) ctx;
+
 	if (!list->milestones_size) {
 		puts("No milestones");
 		return;
 	}
 
-	tbl = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
+	tbl = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!tbl)
 		errx(1, "error: could not init table printer");
 
@@ -104,7 +106,7 @@ gcli_print_milestone(gcli_ctx *ctx, gcli_milestone const *const milestone)
 	gcli_dict dict;
 	uint32_t const quirks = gcli_forge(ctx)->milestone_quirks;
 
-	dict = gcli_dict_begin(ctx);
+	dict = gcli_dict_begin();
 	gcli_dict_add(dict,        "ID", 0, 0, "%d", milestone->id);
 	gcli_dict_add_string(dict, "TITLE", 0, 0, milestone->title);
 	gcli_dict_add_string(dict, "STATE", GCLI_TBLCOL_STATECOLOURED, 0, milestone->state);

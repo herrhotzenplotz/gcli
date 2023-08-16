@@ -52,12 +52,15 @@ gcli_sshkeys_print_keys(gcli_ctx *ctx, gcli_sshkey_list const *list)
 		{ .name = "TITLE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
+	(void) ctx;
+
+
 	if (list->keys_size == 0) {
 		printf("No SSH keys\n");
 		return;
 	}
 
-	tbl = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
+	tbl = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 
 	for (size_t i = 0; i < list->keys_size; ++i) {
 		gcli_tbl_add_row(tbl, list->keys[i].id, list->keys[i].created_at, list->keys[i].title);

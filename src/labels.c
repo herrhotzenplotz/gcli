@@ -27,11 +27,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/colour.h>
+#include <gcli/cmd/colour.h>
+#include <gcli/cmd/table.h>
 #include <gcli/config.h>
 #include <gcli/forges.h>
 #include <gcli/labels.h>
-#include <gcli/cmd/table.h>
 
 int
 gcli_get_labels(gcli_ctx *ctx, char const *owner, char const *reponame,
@@ -78,7 +78,7 @@ gcli_print_labels(gcli_ctx *ctx, gcli_label_list const *const list,
 		n = max;
 
 	/* Fill table */
-	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not init table");
 

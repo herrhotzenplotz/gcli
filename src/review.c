@@ -27,7 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/colour.h>
+#include <gcli/cmd/colour.h>
 #include <gcli/config.h>
 #include <gcli/curl.h>
 #include <gcli/forges.h>
@@ -43,17 +43,19 @@ void
 gcli_review_print_review_table(gcli_ctx *ctx,
                                gcli_pr_review_list const *const list)
 {
+	(void) ctx;
+
 	for (size_t i = 0; i < list->reviews_size; ++i) {
 		if (list->reviews[i].state) {
 			printf("   %s%s%s - %s - %s%s%s\n",
-			       gcli_setbold(ctx), list->reviews[i].author, gcli_resetbold(ctx),
+			       gcli_setbold(), list->reviews[i].author, gcli_resetbold(),
 			       list->reviews[i].date,
-			       gcli_state_colour_str(ctx, list->reviews[i].state),
+			       gcli_state_colour_str(list->reviews[i].state),
 			       list->reviews[i].state,
-			       gcli_resetcolour(ctx));
+			       gcli_resetcolour());
 		} else {
 			printf("   %s%s%s - %s\n",
-			       gcli_setbold(ctx), list->reviews[i].author, gcli_resetbold(ctx),
+			       gcli_setbold(), list->reviews[i].author, gcli_resetbold(),
 			       list->reviews[i].date);
 		}
 

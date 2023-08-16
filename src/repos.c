@@ -55,6 +55,8 @@ gcli_print_repos_table(gcli_ctx *ctx, enum gcli_output_flags const flags,
 		{ .name = "FULLNAME", .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
 	};
 
+	(void) ctx;
+
 	if (list->repos_size == 0) {
 		puts("No repos");
 		return;
@@ -67,7 +69,7 @@ gcli_print_repos_table(gcli_ctx *ctx, enum gcli_output_flags const flags,
 		n = max;
 
 	/* init table */
-	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not init table");
 
@@ -97,7 +99,9 @@ gcli_repo_print(gcli_ctx *ctx, gcli_repo const *it)
 {
 	gcli_dict dict;
 
-	dict = gcli_dict_begin(ctx);
+	(void) ctx;
+
+	dict = gcli_dict_begin();
 	gcli_dict_add(dict, "ID",         0, 0, "%d", it->id);
 	gcli_dict_add(dict, "FULL NAME",  0, 0, SV_FMT, SV_ARGS(it->full_name));
 	gcli_dict_add(dict, "NAME",       0, 0, SV_FMT, SV_ARGS(it->name));

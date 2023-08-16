@@ -27,11 +27,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/colour.h>
+#include <gcli/cmd/colour.h>
+#include <gcli/cmd/table.h>
 #include <gcli/gitlab/config.h>
 #include <gcli/gitlab/pipelines.h>
 #include <gcli/json_util.h>
-#include <gcli/cmd/table.h>
 #include <pdjson/pdjson.h>
 #include <sn/sn.h>
 
@@ -90,12 +90,14 @@ gitlab_print_pipelines(gcli_ctx *ctx, gitlab_pipeline_list const *const list)
 		{ .name = "REF",     .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
+	(void) ctx;
+
 	if (!list->pipelines_size) {
 		printf("No pipelines\n");
 		return;
 	}
 
-	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not init table");
 
@@ -189,12 +191,14 @@ gitlab_print_jobs(gcli_ctx *ctx, gitlab_job_list const *const list)
 		{ .name = "REF",        .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
+	(void) ctx;
+
 	if (!list->jobs_size) {
 		printf("No jobs\n");
 		return;
 	}
 
-	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not initialize table");
 
@@ -292,7 +296,9 @@ gitlab_print_job_status(gcli_ctx *ctx, gitlab_job const *const job)
 {
 	gcli_dict printer;
 
-	printer = gcli_dict_begin(ctx);
+	(void) ctx;
+
+	printer = gcli_dict_begin();
 
 	gcli_dict_add(printer,        "ID", 0, 0, "%ld", job->id);
 	gcli_dict_add_string(printer, "STATUS", GCLI_TBLCOL_STATECOLOURED, 0, job->status);

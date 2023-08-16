@@ -48,9 +48,10 @@ gcli_print_release(gcli_ctx *ctx, enum gcli_output_flags const flags,
 {
 	gcli_dict dict;
 
+	(void) ctx;
 	(void) flags;
 
-	dict = gcli_dict_begin(ctx);
+	dict = gcli_dict_begin();
 
 	gcli_dict_add(dict,        "ID",         0, 0, SV_FMT, SV_ARGS(it->id));
 	gcli_dict_add(dict,        "NAME",       0, 0, SV_FMT, SV_ARGS(it->name));
@@ -112,12 +113,14 @@ gcli_print_releases_short(gcli_ctx *ctx, enum gcli_output_flags const flags,
 		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
 	};
 
+	(void) ctx;
+
 	if (max < 0 || (size_t)(max) > list->releases_size)
 		n = list->releases_size;
 	else
 		n = max;
 
-	table = gcli_tbl_begin(ctx, cols, ARRAY_SIZE(cols));
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
 		errx(1, "error: could not init table");
 

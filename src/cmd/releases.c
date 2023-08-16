@@ -30,6 +30,9 @@
 #include <config.h>
 
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/releases.h>
+#include <gcli/cmd/table.h>
+
 #include <gcli/editor.h>
 #include <gcli/releases.h>
 
@@ -62,6 +65,123 @@ usage(void)
 	fprintf(stderr, "\n");
 	version();
 	copyright();
+}
+
+static void
+gcli_print_release(enum gcli_output_flags const flags,
+                   gcli_release const *const it)
+{
+	gcli_dict dict;
+
+	(void) flags;
+
+	dict = gcli_dict_begin();
+
+	gcli_dict_add(dict,        "ID",         0, 0, SV_FMT, SV_ARGS(it->id));
+	gcli_dict_add(dict,        "NAME",       0, 0, SV_FMT, SV_ARGS(it->name));
+	gcli_dict_add(dict,        "AUTHOR",     0, 0, SV_FMT, SV_ARGS(it->author));
+	gcli_dict_add(dict,        "DATE",       0, 0, SV_FMT, SV_ARGS(it->date));
+	gcli_dict_add_string(dict, "DRAFT",      0, 0, sn_bool_yesno(it->draft));
+	gcli_dict_add_string(dict, "PRERELEASE", 0, 0, sn_bool_yesno(it->prerelease));
+	gcli_dict_add_string(dict, "ASSETS",     0, 0, "");
+
+	/* asset urls */
+	for (size_t i = 0; i < it->assets_size; ++i) {
+		gcli_dict_add(dict, "", 0, 0, "• %s", it->assets[i].name);
+		gcli_dict_add(dict, "", 0, 0, "  %s", it->assets[i].url);
+	}
+
+	gcli_dict_end(dict);
+
+	/* body */
+	if (it->body.length) {
+		putchar('\n');
+		pretty_print(it->body.data, 13, 80, stdout);
+	}
+
+	putchar('\n');
+}
+
+static void
+gcli_releases_print_long(enum gcli_output_flags const flags,
+                         gcli_release_list const *const list, int const max)
+{
+	int n;
+
+	/* Determine how many items to print */
+	if (max < 0 || (size_t)(max) > list->releases_size)
+		n = list->releases_size;
+	else
+		n = max;
+
+	if (flags & OUTPUT_SORTED) {
+		for (int i = 0; i < n; ++i)
+			gcli_print_release(flags, &list->releases[n-i-1]);
+	} else {
+		for (int i = 0; i < n; ++i)
+			gcli_print_release(flags, &list->releases[i]);
+	}
+}
+
+static void
+gcli_releases_print_short(enum gcli_output_flags const flags,
+                          gcli_release_list const *const list, int const max)
+{
+	size_t n;
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
+		{ .name = "DATE",       .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
+		{ .name = "DRAFT",      .type = GCLI_TBLCOLTYPE_BOOL, .flags = 0 },
+		{ .name = "PRERELEASE", .type = GCLI_TBLCOLTYPE_BOOL, .flags = 0 },
+		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
+	};
+
+	if (max < 0 || (size_t)(max) > list->releases_size)
+		n = list->releases_size;
+	else
+		n = max;
+
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
+		errx(1, "error: could not init table");
+
+	if (flags & OUTPUT_SORTED) {
+		for (size_t i = 0; i < n; ++i) {
+			gcli_tbl_add_row(table,
+			                 list->releases[n-i-1].id,
+			                 list->releases[n-i-1].date,
+			                 list->releases[n-i-1].draft,
+			                 list->releases[n-i-1].prerelease,
+			                 list->releases[n-i-1].name);
+		}
+	} else {
+		for (size_t i = 0; i < n; ++i) {
+			gcli_tbl_add_row(table,
+			                 list->releases[i].id,
+			                 list->releases[i].date,
+			                 list->releases[i].draft,
+			                 list->releases[i].prerelease,
+			                 list->releases[i].name);
+		}
+	}
+
+	gcli_tbl_end(table);
+}
+
+void
+gcli_releases_print(enum gcli_output_flags const flags,
+                    gcli_release_list const *const list, int const max)
+{
+	if (list->releases_size == 0) {
+		puts("No releases");
+		return;
+	}
+
+	if (flags & OUTPUT_LONG)
+		gcli_releases_print_long(flags, list, max);
+	else
+		gcli_releases_print_short(flags, list, max);
 }
 
 static void
@@ -361,7 +481,8 @@ subcommand_releases(int argc, char *argv[])
 	if (gcli_get_releases(g_clictx, owner, repo, count, &releases) < 0)
 		errx(1, "error: could not get releases");
 
-	gcli_print_releases(g_clictx, flags, &releases, count);
+	gcli_releases_print(flags, &releases, count);
+
 	gcli_free_releases(&releases);
 
 	return EXIT_SUCCESS;

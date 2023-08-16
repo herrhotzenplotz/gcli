@@ -90,9 +90,6 @@ struct gcli_new_release {
 int gcli_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
                       int max, gcli_release_list *list);
 
-void gcli_print_releases(gcli_ctx *ctx, enum gcli_output_flags flags,
-                         gcli_release_list const *list, int max);
-
 void gcli_free_releases(gcli_release_list *);
 
 int gcli_create_release(gcli_ctx *ctx, gcli_new_release const *);

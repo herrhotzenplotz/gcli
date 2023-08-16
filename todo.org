@@ -132,4 +132,6 @@
 ** TODO Move printing routines to cmd code
 ** TODO Build a shared library
 ** TODO Remove global curl handle
+   - [X] Put it into the context
+   - [ ] Clean up handle on exit
 ** TODO Return errors from parsers

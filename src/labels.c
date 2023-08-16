@@ -27,9 +27,6 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/cmd/colour.h>
-#include <gcli/cmd/table.h>
-#include <gcli/config.h>
 #include <gcli/forges.h>
 #include <gcli/labels.h>
 
@@ -56,42 +53,6 @@ gcli_free_labels(gcli_label_list *const list)
 
 	list->labels = NULL;
 	list->labels_size = 0;
-}
-
-void
-gcli_print_labels(gcli_ctx *ctx, gcli_label_list const *const list,
-                  int const max)
-{
-	size_t n;
-	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
-		{ .name = "ID",          .type = GCLI_TBLCOLTYPE_LONG,   .flags = GCLI_TBLCOL_JUSTIFYR },
-		{ .name = "",            .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_256COLOUR|GCLI_TBLCOL_TIGHT },
-		{ .name = "NAME",        .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "DESCRIPTION", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-	};
-
-	/* Determine number of items to print */
-	if (max < 0 || (size_t)(max) > list->labels_size)
-		n = list->labels_size;
-	else
-		n = max;
-
-	/* Fill table */
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
-	if (!table)
-		errx(1, "error: could not init table");
-
-	for (size_t i = 0; i < n; ++i) {
-		gcli_tbl_add_row(table,
-		                 (long)list->labels[i].id, /* Cast is important here (#165) */
-		                 list->labels[i].colour,
-		                 gcli_config_have_colours(ctx) ? "  " : "",
-		                 list->labels[i].name,
-		                 list->labels[i].description);
-	}
-
-	gcli_tbl_end(table);
 }
 
 int

@@ -68,7 +68,7 @@ gcli_SOURCES = \
 	src/cmd/gcli.c \
 	src/cmd/gists.c \
 	src/cmd/issues.c \
-	src/cmd/labels.c \
+	include/gcli/cmd/labels.h src/cmd/labels.c \
 	src/cmd/milestones.c \
 	src/cmd/pipelines.c \
 	src/cmd/pulls.c \

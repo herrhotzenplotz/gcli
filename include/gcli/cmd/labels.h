@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,45 +27,17 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LABELS_H
-#define LABELS_H
+#ifndef GCLI_CMD_LABELS_H
+#define GCLI_CMD_LABELS_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
+#include <gcli/labels.h>
 
-#include <gcli/gcli.h>
+void gcli_labels_print(gcli_label_list const *list, int max);
 
-typedef struct gcli_label gcli_label;
-typedef struct gcli_label_list gcli_label_list;
+int subcommand_labels(int argc, char *argv[]);
 
-struct gcli_label {
-	long      id;
-	char     *name;
-	char     *description;
-	uint32_t  colour;
-};
-
-struct gcli_label_list {
-	gcli_label *labels;
-	size_t labels_size;
-};
-
-int gcli_get_labels(gcli_ctx *ctx, char const *owner, char const *reponame,
-                    int max, gcli_label_list *out);
-
-void gcli_free_label(gcli_label *label);
-
-void gcli_free_labels(gcli_label_list *labels);
-
-int gcli_create_label(gcli_ctx *ctx, char const *owner, char const *repo,
-                      gcli_label *label);
-
-int gcli_delete_label(gcli_ctx *ctx, char const *owner, char const *repo,
-                      char const *label);
-
-#endif /* LABELS_H */
+#endif /* GCLI_CMD_LABELS_H */

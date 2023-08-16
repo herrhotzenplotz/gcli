@@ -29,8 +29,12 @@
 
 #include <config.h>
 
-#include <gcli/cmd/cmd.h>
+#include <gcli/config.h>
 #include <gcli/labels.h>
+
+#include <gcli/cmd/cmd.h>
+#include <gcli/cmd/colour.h>
+#include <gcli/cmd/table.h>
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -55,6 +59,41 @@ usage(void)
 	fprintf(stderr, "\n");
 	version();
 	copyright();
+}
+
+void
+gcli_labels_print(gcli_label_list const *const list, int const max)
+{
+	size_t n;
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "ID",          .type = GCLI_TBLCOLTYPE_LONG,   .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "",            .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_256COLOUR|GCLI_TBLCOL_TIGHT },
+		{ .name = "NAME",        .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "DESCRIPTION", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+	};
+
+	/* Determine number of items to print */
+	if (max < 0 || (size_t)(max) > list->labels_size)
+		n = list->labels_size;
+	else
+		n = max;
+
+	/* Fill table */
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
+		errx(1, "error: could not init table");
+
+	for (size_t i = 0; i < n; ++i) {
+		gcli_tbl_add_row(table,
+		                 (long)list->labels[i].id, /* Cast is important here (#165) */
+		                 list->labels[i].colour,
+		                 gcli_config_have_colours(g_clictx) ? "  " : "",
+		                 list->labels[i].name,
+		                 list->labels[i].description);
+	}
+
+	gcli_tbl_end(table);
 }
 
 static int
@@ -171,7 +210,7 @@ subcommand_labels_create(int argc, char *argv[])
 
 	/* only if we are not quieted */
 	if (!sn_quiet())
-		gcli_print_labels(g_clictx, &labels, 1);
+		gcli_labels_print(&labels, 1);
 
 	gcli_free_label(&label);
 
@@ -249,7 +288,8 @@ subcommand_labels(int argc, char *argv[])
 	if (gcli_get_labels(g_clictx, owner, repo, count, &labels) < 0)
 		errx(1, "error: could not fetch list of labels");
 
-	gcli_print_labels(g_clictx, &labels, count);
+	gcli_labels_print(&labels, count);
+
 	gcli_free_labels(&labels);
 
 	return EXIT_SUCCESS;

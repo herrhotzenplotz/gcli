@@ -39,4 +39,6 @@
 void gcli_releases_print(enum gcli_output_flags flags,
                          gcli_release_list const *list, int max);
 
+int subcommand_releases(int argc, char *argv[]);
+
 #endif /* GCLI_CMD_RELEASES_H */

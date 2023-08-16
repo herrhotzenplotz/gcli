@@ -31,7 +31,7 @@
 #include <gcli/forges.h>
 #include <gcli/forks.h>
 #include <gcli/github/forks.h>
-#include <gcli/table.h>
+#include <gcli/cmd/table.h>
 
 int
 gcli_get_forks(gcli_ctx *ctx, char const *owner, char const *repo,

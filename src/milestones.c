@@ -29,7 +29,7 @@
 
 #include <gcli/forges.h>
 #include <gcli/milestones.h>
-#include <gcli/table.h>
+#include <gcli/cmd/table.h>
 
 int
 gcli_get_milestones(gcli_ctx *ctx, char const *const owner,

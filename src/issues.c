@@ -33,7 +33,7 @@
 #include <gcli/github/issues.h>
 #include <gcli/issues.h>
 #include <gcli/json_util.h>
-#include <gcli/table.h>
+#include <gcli/cmd/table.h>
 #include <sn/sn.h>
 
 void

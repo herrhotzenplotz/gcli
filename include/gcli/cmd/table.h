@@ -27,8 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GCLI_TABLE_H
-#define GCLI_TABLE_H
+#ifndef GCLI_CMD_TABLE_H
+#define GCLI_CMD_TABLE_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -112,4 +112,4 @@ int gcli_dict_add_sv_list(gcli_dict dict,
 
 int gcli_dict_end(gcli_dict _list);
 
-#endif /* GCLI_TABLE_H */
+#endif /* GCLI_CMD_TABLE_H */

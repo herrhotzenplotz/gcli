@@ -27,8 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GCLI_CMD_H
-#define GCLI_CMD_H
+#ifndef GCLI_CMD_CMD_H
+#define GCLI_CMD_CMD_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -78,4 +78,4 @@ int subcommand_repos(int argc, char *argv[]);
 int subcommand_snippets(int argc, char *argv[]);
 int subcommand_status(int argc, char *argv[]);
 
-#endif /* GCLI_CMD_H */
+#endif /* GCLI_CMD_CMD_H */

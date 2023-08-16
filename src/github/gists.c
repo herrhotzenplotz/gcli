@@ -32,7 +32,7 @@
 #include <gcli/curl.h>
 #include <gcli/github/gists.h>
 #include <gcli/json_util.h>
-#include <gcli/table.h>
+#include <gcli/cmd/table.h>
 
 #include <gcli/github/config.h>
 

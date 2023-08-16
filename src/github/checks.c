@@ -35,7 +35,7 @@
 #include <gcli/github/checks.h>
 #include <gcli/github/checks.h>
 #include <gcli/json_util.h>
-#include <gcli/table.h>
+#include <gcli/cmd/table.h>
 
 #include <templates/github/checks.h>
 

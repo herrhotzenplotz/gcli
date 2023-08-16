@@ -30,7 +30,7 @@
 #include <gcli/forges.h>
 #include <gcli/github/repos.h>
 #include <gcli/repos.h>
-#include <gcli/table.h>
+#include <gcli/cmd/table.h>
 
 #include <stdlib.h>
 

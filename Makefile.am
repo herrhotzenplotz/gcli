@@ -57,8 +57,8 @@ dist_man_MANS = \
 	docs/gcli.1
 
 gcli_SOURCES = \
-	include/gcli/cmd.h \
-	src/cmd.c \
+	include/gcli/cmd/cmd.h src/cmd/cmd.c \
+	include/gcli/cmd/table.h src/cmd/table.c \
 	src/cmd/api.c \
 	src/cmd/ci.c \
 	src/cmd/comment.c \
@@ -144,7 +144,6 @@ libgcli_la_SOURCES = \
 	src/gitlab/snippets.c include/gcli/gitlab/snippets.h \
 	src/status.c include/gcli/status.h \
 	src/sshkeys.c include/gcli/sshkeys.h \
-	src/table.c include/gcli/table.h \
 	src/gitlab/api.c include/gcli/gitlab/api.h \
 	src/gitlab/comments.c include/gcli/gitlab/comments.h \
 	src/gitlab/config.c include/gcli/gitlab/config.h \

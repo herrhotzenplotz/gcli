@@ -30,7 +30,7 @@
 #include <gcli/forges.h>
 #include <gcli/github/releases.h>
 #include <gcli/releases.h>
-#include <gcli/table.h>
+#include <gcli/cmd/table.h>
 
 #include <assert.h>
 #include <stdlib.h>

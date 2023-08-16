@@ -38,7 +38,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <gcli/cmd.h>
+#include <gcli/cmd/cmd.h>
 #include <gcli/config.h>
 
 static void usage(void);

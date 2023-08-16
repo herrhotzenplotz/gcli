@@ -29,7 +29,7 @@
 
 #include <config.h>
 
-#include <gcli/cmd.h>
+#include <gcli/cmd/cmd.h>
 #include <gcli/repos.h>
 
 #ifdef HAVE_GETOPT_H

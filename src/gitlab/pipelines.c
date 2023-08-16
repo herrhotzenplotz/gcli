@@ -31,7 +31,7 @@
 #include <gcli/gitlab/config.h>
 #include <gcli/gitlab/pipelines.h>
 #include <gcli/json_util.h>
-#include <gcli/table.h>
+#include <gcli/cmd/table.h>
 #include <pdjson/pdjson.h>
 #include <sn/sn.h>
 

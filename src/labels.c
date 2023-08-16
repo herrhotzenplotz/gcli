@@ -31,7 +31,7 @@
 #include <gcli/config.h>
 #include <gcli/forges.h>
 #include <gcli/labels.h>
-#include <gcli/table.h>
+#include <gcli/cmd/table.h>
 
 int
 gcli_get_labels(gcli_ctx *ctx, char const *owner, char const *reponame,

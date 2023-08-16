@@ -27,7 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/table.h>
+#include <gcli/cmd/table.h>
 
 #include <gcli/colour.h>
 #include <gcli/gcli.h>

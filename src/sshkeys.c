@@ -34,7 +34,7 @@
 #include <gcli/config.h>
 #include <gcli/forges.h>
 #include <gcli/sshkeys.h>
-#include <gcli/table.h>
+#include <gcli/cmd/table.h>
 
 int
 gcli_sshkeys_get_keys(gcli_ctx *ctx, gcli_sshkey_list *out)

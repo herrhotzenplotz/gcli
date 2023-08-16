@@ -35,7 +35,7 @@
 
 #include <stdlib.h>
 
-#include <gcli/cmd.h>
+#include <gcli/cmd/cmd.h>
 #include <gcli/config.h>
 #include <gcli/gitconfig.h>
 #include <gcli/forks.h>

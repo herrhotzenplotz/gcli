@@ -135,3 +135,4 @@
    - [X] Put it into the context
    - [ ] Clean up handle on exit
 ** TODO Return errors from parsers
+** TODO [[file:src/releases.c::gcli_release_push_asset(gcli_new_release *const release,][push_asset]] should not call errx but return an error code

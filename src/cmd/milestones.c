@@ -30,6 +30,9 @@
 #include <config.h>
 
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/table.h>
+
+#include <gcli/forges.h>
 #include <gcli/milestones.h>
 
 #ifdef HAVE_GETOPT_H
@@ -57,6 +60,75 @@ usage(void)
 	fprintf(stderr, "\n");
 	version();
 	copyright();
+}
+
+void
+gcli_print_milestones(gcli_milestone_list const *const list, int max)
+{
+	size_t n;
+	gcli_tbl tbl;
+	gcli_tblcoldef cols[] = {
+		{ .name = "ID",      .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "STATE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
+		{ .name = "CREATED", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "TITLE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+	};
+
+	if (!list->milestones_size) {
+		puts("No milestones");
+		return;
+	}
+
+	tbl = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!tbl)
+		errx(1, "error: could not init table printer");
+
+	if (max < 0 || (size_t)(max) > list->milestones_size)
+		n = list->milestones_size;
+	else
+		n = max;
+
+	for (size_t i = 0; i < n; ++i) {
+		gcli_tbl_add_row(tbl,
+		                 list->milestones[i].id,
+		                 list->milestones[i].state,
+		                 list->milestones[i].created_at,
+		                 list->milestones[i].title);
+	}
+
+	gcli_tbl_end(tbl);
+}
+
+void
+gcli_print_milestone(gcli_milestone const *const milestone)
+{
+	gcli_dict dict;
+	uint32_t const quirks = gcli_forge(g_clictx)->milestone_quirks;
+
+	dict = gcli_dict_begin();
+	gcli_dict_add(dict,        "ID", 0, 0, "%d", milestone->id);
+	gcli_dict_add_string(dict, "TITLE", 0, 0, milestone->title);
+	gcli_dict_add_string(dict, "STATE", GCLI_TBLCOL_STATECOLOURED, 0, milestone->state);
+	gcli_dict_add_string(dict, "CREATED", 0, 0, milestone->created_at);
+	gcli_dict_add_string(dict, "UPDATED", 0, 0, milestone->created_at);
+
+	if ((quirks & GCLI_MILESTONE_QUIRKS_DUEDATE) == 0)
+		gcli_dict_add_string(dict, "DUE", 0, 0, milestone->due_date);
+
+	if ((quirks & GCLI_MILESTONE_QUIRKS_EXPIRED) == 0)
+		gcli_dict_add_string(dict, "EXPIRED", 0, 0, sn_bool_yesno(milestone->expired));
+
+	if ((quirks & GCLI_MILESTONE_QUIRKS_NISSUES) == 0) {
+		gcli_dict_add(dict, "OPEN ISSUES", 0, 0, "%d", milestone->open_issues);
+		gcli_dict_add(dict, "CLOSED ISSUES", 0, 0, "%d", milestone->closed_issues);
+	}
+
+	gcli_dict_end(dict);
+
+	if (milestone->description && strlen(milestone->description)) {
+		printf("\nDESCRIPTION:\n");
+		pretty_print(milestone->description, 4, 80, stdout);
+	}
 }
 
 static int handle_milestone_actions(int argc, char *argv[],
@@ -207,7 +279,8 @@ subcommand_milestones(int argc, char *argv[])
 		if (rc < 0)
 			errx(1, "error: cannot get list of milestones");
 
-		gcli_print_milestones(g_clictx, &list, max);
+		gcli_print_milestones(&list, max);
+
 		gcli_free_milestones(&list);
 
 		return 0;
@@ -266,7 +339,7 @@ handle_milestone_actions(int argc, char *argv[],
 			ensure_milestone(owner, repo, milestone_id,
 			                 &fetched_milestone, &milestone);
 
-			gcli_print_milestone(g_clictx, &milestone);
+			gcli_print_milestone(&milestone);
 			rc = gcli_milestone_get_issues(g_clictx, owner, repo, milestone_id,
 			                               &issues);
 
@@ -300,7 +373,7 @@ handle_milestone_actions(int argc, char *argv[],
 			                 &fetched_milestone, &milestone);
 
 			/* Print meta */
-			gcli_print_milestone(g_clictx, &milestone);
+			gcli_print_milestone(&milestone);
 		} else if (strcmp(action, "delete") == 0) {
 
 			/* Delete the milestone */

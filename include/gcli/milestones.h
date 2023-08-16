@@ -86,11 +86,6 @@ int gcli_create_milestone(gcli_ctx *ctx,
 int gcli_delete_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
                           int milestone);
 
-void gcli_print_milestones(gcli_ctx *ctx, gcli_milestone_list const *it,
-                           int max);
-
-void gcli_print_milestone(gcli_ctx *ctx, gcli_milestone const *it);
-
 void gcli_free_milestone(gcli_milestone *it);
 void gcli_free_milestones(gcli_milestone_list *it);
 

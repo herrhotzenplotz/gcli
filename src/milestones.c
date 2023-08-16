@@ -29,7 +29,6 @@
 
 #include <gcli/forges.h>
 #include <gcli/milestones.h>
-#include <gcli/cmd/table.h>
 
 int
 gcli_get_milestones(gcli_ctx *ctx, char const *const owner,
@@ -58,78 +57,6 @@ gcli_delete_milestone(gcli_ctx *ctx, char const *const owner,
                       char const *const repo, int const milestone)
 {
 	return gcli_forge(ctx)->delete_milestone(ctx, owner, repo, milestone);
-}
-
-void
-gcli_print_milestones(gcli_ctx *ctx, gcli_milestone_list const *const list,
-                      int max)
-{
-	size_t n;
-	gcli_tbl tbl;
-	gcli_tblcoldef cols[] = {
-		{ .name = "ID",      .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
-		{ .name = "STATE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
-		{ .name = "CREATED", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "TITLE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-	};
-
-	(void) ctx;
-
-	if (!list->milestones_size) {
-		puts("No milestones");
-		return;
-	}
-
-	tbl = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
-	if (!tbl)
-		errx(1, "error: could not init table printer");
-
-	if (max < 0 || (size_t)(max) > list->milestones_size)
-		n = list->milestones_size;
-	else
-		n = max;
-
-	for (size_t i = 0; i < n; ++i) {
-		gcli_tbl_add_row(tbl,
-		                 list->milestones[i].id,
-		                 list->milestones[i].state,
-		                 list->milestones[i].created_at,
-		                 list->milestones[i].title);
-	}
-
-	gcli_tbl_end(tbl);
-}
-
-void
-gcli_print_milestone(gcli_ctx *ctx, gcli_milestone const *const milestone)
-{
-	gcli_dict dict;
-	uint32_t const quirks = gcli_forge(ctx)->milestone_quirks;
-
-	dict = gcli_dict_begin();
-	gcli_dict_add(dict,        "ID", 0, 0, "%d", milestone->id);
-	gcli_dict_add_string(dict, "TITLE", 0, 0, milestone->title);
-	gcli_dict_add_string(dict, "STATE", GCLI_TBLCOL_STATECOLOURED, 0, milestone->state);
-	gcli_dict_add_string(dict, "CREATED", 0, 0, milestone->created_at);
-	gcli_dict_add_string(dict, "UPDATED", 0, 0, milestone->created_at);
-
-	if ((quirks & GCLI_MILESTONE_QUIRKS_DUEDATE) == 0)
-		gcli_dict_add_string(dict, "DUE", 0, 0, milestone->due_date);
-
-	if ((quirks & GCLI_MILESTONE_QUIRKS_EXPIRED) == 0)
-		gcli_dict_add_string(dict, "EXPIRED", 0, 0, sn_bool_yesno(milestone->expired));
-
-	if ((quirks & GCLI_MILESTONE_QUIRKS_NISSUES) == 0) {
-		gcli_dict_add(dict, "OPEN ISSUES", 0, 0, "%d", milestone->open_issues);
-		gcli_dict_add(dict, "CLOSED ISSUES", 0, 0, "%d", milestone->closed_issues);
-	}
-
-	gcli_dict_end(dict);
-
-	if (milestone->description && strlen(milestone->description)) {
-		printf("\nDESCRIPTION:\n");
-		pretty_print(milestone->description, 4, 80, stdout);
-	}
 }
 
 void

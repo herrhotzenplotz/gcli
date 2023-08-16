@@ -43,6 +43,8 @@ github_get_repos(gcli_ctx *ctx, char const *owner, int const max,
 {
 	char *url = NULL;
 	char *e_owner = NULL;
+	int rc = 0;
+
 	gcli_fetch_list_ctx lf = {
 		.listp = &list->repos,
 		.sizep = &list->repos_size,
@@ -56,7 +58,17 @@ github_get_repos(gcli_ctx *ctx, char const *owner, int const max,
 	 * organizations and users. Thus, we have to find out, whether the
 	 * <org> param is a user or an actual organization. */
 	url = sn_asprintf("%s/users/%s", gcli_get_apibase(ctx), e_owner);
-	if (gcli_curl_test_success(url)) {
+	free(e_owner);
+
+	/* 0 = failed, 1 = success, -1 = error (just like a BOOL in Win32
+	 * /sarc) */
+	rc = gcli_curl_test_success(ctx, url);
+	if (rc < 0) {
+		free(url);
+		return rc;
+	}
+
+	if (rc) {
 		/* it is a user */
 		free(url);
 		url = sn_asprintf("%s/users/%s/repos",
@@ -69,8 +81,6 @@ github_get_repos(gcli_ctx *ctx, char const *owner, int const max,
 		                  gcli_get_apibase(ctx),
 		                  e_owner);
 	}
-
-	free(e_owner);
 
 	return gcli_fetch_list(ctx, url, &lf);
 }

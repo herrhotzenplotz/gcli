@@ -111,7 +111,7 @@ gcli_json_bool(bool it)
 static inline void
 parse_sv(gcli_ctx *ctx, json_stream *stream, sn_sv *out)
 {
-	(void) *ctx;
+	(void) ctx;
 	*out = get_sv(ctx, stream);
 }
 

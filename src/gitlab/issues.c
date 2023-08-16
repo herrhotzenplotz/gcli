@@ -63,7 +63,7 @@ gitlab_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
 	char *e_author = NULL;
 
 	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
+	e_repo = gcli_urlencode(repo);
 
 	if (details->author) {
 		char *tmp = gcli_urlencode(details->author);
@@ -134,7 +134,7 @@ gitlab_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
 	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
+	e_repo = gcli_urlencode(repo);
 
 	url  = sn_asprintf(
 		"%s/projects/%s%%2F%s/issues/%d",

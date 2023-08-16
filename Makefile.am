@@ -109,6 +109,7 @@ TEMPLATES = \
 	templates/gitea/milestones.t
 
 libgcli_la_SOURCES = \
+	include/gcli/ctx.h src/ctx.c \
 	include/gcli/gcli.h src/gcli.c \
 	src/colour.c include/gcli/colour.h \
 	src/comments.c include/gcli/comments.h \

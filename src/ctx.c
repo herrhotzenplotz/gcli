@@ -27,26 +27,33 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GCLI_CTX_H
-#define GCLI_CTX_H
+#include <gcli/gcli.h>
 
-#include <curl/curl.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-/* Strictly internal structure containing the gcli library context
- * data */
-struct gcli_ctx {
-	CURL *curl;
-	struct gcli_config *config;
-	struct gcli_dotgcli *dotgcli;
+int
+gcli_error(struct gcli_ctx *ctx, char const *const fmt, ...)
+{
+	va_list vp;
+	char *buf;
+	size_t len;
 
-	char *last_error;
-};
+	va_start(vp, fmt);
+	len = vsnprintf(NULL, 0, fmt, vp);
+	va_end(vp);
 
-/* Error routine */
-int gcli_error(struct gcli_ctx *ctx, char const *const fmt, ...);
+	buf = malloc(len + 1);
 
-/* Functions that are strictly called from the init / deinit routines
- * and not exposed to the public interface */
-int gcli_config_init_ctx(struct gcli_ctx *);
+	va_start(vp, fmt);
+	vsnprintf(buf, len + 1, fmt, vp);
+	va_end(vp);
 
-#endif /* GCLI_CTX_H */
+	if (ctx->last_error)
+		free(ctx->last_error);
+
+	ctx->last_error = buf;
+
+	return -1;
+}

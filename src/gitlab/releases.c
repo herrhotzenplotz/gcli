@@ -39,21 +39,21 @@
 #include <string.h>
 
 static void
-fixup_asset_name(gcli_release_asset *const asset)
+fixup_asset_name(gcli_ctx *ctx, gcli_release_asset *const asset)
 {
 	if (!asset->name) {
-		asset->name = gcli_urldecode(strrchr(asset->url, '/') + 1);
+		asset->name = gcli_urldecode(ctx, strrchr(asset->url, '/') + 1);
 	}
 }
 
 static void
-fixup_release_asset_names(gcli_release_list *list)
+fixup_release_asset_names(gcli_ctx *ctx, gcli_release_list *list)
 {
 	/* Iterate over releases */
 	for (size_t j = 0; j < list->releases_size; ++j) {
 		/* iterate over releases */
 		for (size_t i = 0; i < list->releases[j].assets_size; ++i) {
-			fixup_asset_name(&list->releases[j].assets[i]);
+			fixup_asset_name(ctx, &list->releases[j].assets[i]);
 		}
 	}
 }
@@ -90,7 +90,7 @@ gitlab_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
 	rc = gcli_fetch_list(ctx, url, &fl);
 
 	if (rc == 0)
-		fixup_release_asset_names(list);
+		fixup_release_asset_names(ctx, list);
 
 	return rc;
 }

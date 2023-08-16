@@ -43,7 +43,7 @@ gitlab_perform_submit_comment(gcli_ctx *ctx, gcli_submit_comment_opts opts,
 	int rc = 0;
 
 	e_owner = gcli_urlencode(opts.owner);
-	e_repo  = gcli_urlencode(opts.repo);
+	e_repo = gcli_urlencode(opts.repo);
 
 	switch (opts.target_type) {
 	case ISSUE_COMMENT:
@@ -77,7 +77,8 @@ gitlab_get_mr_comments(gcli_ctx *ctx, char const *owner, char const *repo,
                        int const mr, gcli_comment_list *const out)
 {
 	char *e_owner = gcli_urlencode(owner);
-	char *e_repo  = gcli_urlencode(repo);
+	char *e_repo = gcli_urlencode(repo);
+
 	gcli_fetch_list_ctx fl = {
 			.listp = &out->comments,
 			.sizep = &out->comments_size,
@@ -101,7 +102,8 @@ gitlab_get_issue_comments(gcli_ctx *ctx, char const *owner, char const *repo,
                           int const issue, gcli_comment_list *const out)
 {
 	char *e_owner = gcli_urlencode(owner);
-	char *e_repo  = gcli_urlencode(repo);
+	char *e_repo = gcli_urlencode(repo);
+
 	gcli_fetch_list_ctx fl = {
 		.listp = &out->comments,
 		.sizep = &out->comments_size,

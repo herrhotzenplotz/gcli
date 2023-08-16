@@ -81,10 +81,10 @@ int gcli_curl_gitea_upload_attachment(gcli_ctx *ctx, char const *url,
                                       char const *filename,
                                       gcli_fetch_buffer *out);
 
-bool gcli_curl_test_success(char const *url);
+int gcli_curl_test_success(gcli_ctx *ctx, char const *url);
 char *gcli_urlencode(char const *);
 sn_sv gcli_urlencode_sv(sn_sv const);
-char *gcli_urldecode(char const *input);
+char *gcli_urldecode(gcli_ctx *ctx, char const *input);
 int gcli_fetch_list(gcli_ctx *ctx, char *url, gcli_fetch_list_ctx *fctx);
 
 #endif /* CURL_H */

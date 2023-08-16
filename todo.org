@@ -123,7 +123,13 @@
 	+ https://api.github.com/repos/zorchenhimer/MovieNight/pulls/156/reviews/611653998/comments
 
 * Big refactor for libraryfication
+** TODO Fix test suite
+   - [ ] Add support for a testing gcli context
 ** TODO Check errx calls if they print "error: "
 ** TODO Check for calls to errx in submit routines
 ** TODO [[file:src/github/review.c::github_review_get_reviews(char const *owner)][github_review_get_reviews]] is garbage
 ** TODO Clean up the generic comments code
+** TODO Move printing routines to cmd code
+** TODO Build a shared library
+** TODO Remove global curl handle
+** TODO Return errors from parsers

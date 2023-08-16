@@ -52,7 +52,7 @@ gitlab_get_forks(gcli_ctx *ctx, char const *owner, char const *repo,
 	};
 
 	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
+	e_repo = gcli_urlencode(repo);
 
 	*list = (gcli_fork_list) {0};
 
@@ -79,7 +79,7 @@ gitlab_fork_create(gcli_ctx *ctx, char const *owner, char const *repo,
 	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
+	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/fork",
 	                  gitlab_get_apibase(ctx),

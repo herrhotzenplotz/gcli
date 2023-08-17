@@ -30,8 +30,13 @@
 #include <config.h>
 
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/colour.h>
+#include <gcli/cmd/pulls.h>
+#include <gcli/cmd/table.h>
+
 #include <gcli/comments.h>
 #include <gcli/config.h>
+#include <gcli/forges.h>
 #include <gcli/gitconfig.h>
 #include <gcli/pulls.h>
 #include <gcli/review.h>
@@ -83,6 +88,129 @@ usage(void)
 	fprintf(stderr, "\n");
 	version();
 	copyright();
+}
+
+void
+gcli_print_pulls(enum gcli_output_flags const flags,
+                 gcli_pull_list const *const list, int const max)
+{
+	int n;
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "NUMBER",  .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "STATE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
+		{ .name = "MERGED",  .type = GCLI_TBLCOLTYPE_BOOL,   .flags = 0 },
+		{ .name = "CREATOR", .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_BOLD },
+		{ .name = "NOTES",   .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "TITLE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+	};
+
+	if (list->pulls_size == 0) {
+		puts("No Pull Requests");
+		return;
+	}
+
+	/* Determine number of items to print */
+	if (max < 0 || (size_t)(max) > list->pulls_size)
+		n = list->pulls_size;
+	else
+		n = max;
+
+	/* Fill the table */
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
+		errx(1, "error: cannot init table");
+
+	if (flags & OUTPUT_SORTED) {
+		for (int i = 0; i < n; ++i) {
+			gcli_tbl_add_row(table,
+			                 list->pulls[n-i-1].number,
+			                 list->pulls[n-i-1].state,
+			                 list->pulls[n-i-1].merged,
+			                 list->pulls[n-i-1].author,
+			                 list->pulls[n-i-1].comments,
+			                 list->pulls[n-i-1].title);
+		}
+	} else {
+		for (int i = 0; i < n; ++i) {
+			gcli_tbl_add_row(table,
+			                 list->pulls[i].number,
+			                 list->pulls[i].state,
+			                 list->pulls[i].merged,
+			                 list->pulls[i].author,
+			                 list->pulls[i].comments,
+			                 list->pulls[i].title);
+		}
+	}
+
+	gcli_tbl_end(table);
+}
+
+void
+gcli_print_pull_diff(FILE *stream, char const *owner, char const *reponame,
+                     int pr_number)
+{
+	gcli_pull_get_diff(g_clictx, stream, owner, reponame, pr_number);
+}
+
+void
+gcli_pull_print(gcli_pull const *const it)
+{
+	gcli_dict dict;
+	gcli_forge_descriptor const *const forge = gcli_forge(g_clictx);
+    int const quirks = forge->pull_summary_quirks;
+
+	dict = gcli_dict_begin();
+
+	gcli_dict_add(dict,        "NUMBER", 0, 0, "%d", it->number);
+	gcli_dict_add_string(dict, "TITLE", 0, 0, it->title);
+	gcli_dict_add_string(dict, "HEAD", 0, 0, it->head_label);
+	gcli_dict_add_string(dict, "BASE", 0, 0, it->base_label);
+	gcli_dict_add_string(dict, "CREATED", 0, 0, it->created_at);
+	gcli_dict_add_string(dict, "AUTHOR", GCLI_TBLCOL_BOLD, 0, it->author);
+	gcli_dict_add_string(dict, "STATE", GCLI_TBLCOL_STATECOLOURED, 0, it->state);
+	gcli_dict_add(dict,        "COMMENTS", 0, 0, "%d", it->comments);
+
+	if (it->milestone)
+		gcli_dict_add_string(dict, "MILESTONE", 0, 0, it->milestone);
+
+	if ((quirks & GCLI_PRS_QUIRK_ADDDEL) == 0)
+		/* FIXME: move printing colours into the dictionary printer? */
+		gcli_dict_add(dict, "ADD:DEL", 0, 0, "%s%d%s:%s%d%s",
+		              gcli_setcolour(GCLI_COLOR_GREEN),
+		              it->additions,
+		              gcli_resetcolour(),
+		              gcli_setcolour(GCLI_COLOR_RED),
+		              it->deletions,
+		              gcli_resetcolour());
+
+	if ((quirks & GCLI_PRS_QUIRK_COMMITS) == 0)
+		gcli_dict_add(dict, "COMMITS", 0, 0, "%d", it->commits);
+
+	if ((quirks & GCLI_PRS_QUIRK_CHANGES) == 0)
+		gcli_dict_add(dict, "CHANGED", 0, 0, "%d", it->changed_files);
+
+	if ((quirks & GCLI_PRS_QUIRK_MERGED) == 0)
+		gcli_dict_add_string(dict, "MERGED", 0, 0, sn_bool_yesno(it->merged));
+
+	gcli_dict_add_string(dict, "MERGEABLE", 0, 0, sn_bool_yesno(it->mergeable));
+	if ((quirks & GCLI_PRS_QUIRK_DRAFT) == 0)
+		gcli_dict_add_string(dict, "DRAFT", 0, 0, sn_bool_yesno(it->draft));
+
+	if (it->labels_size) {
+		gcli_dict_add_sv_list(dict, "LABELS", it->labels, it->labels_size);
+	} else {
+		gcli_dict_add_string(dict, "LABELS", 0, 0, "none");
+	}
+
+	gcli_dict_end(dict);
+}
+
+void
+gcli_pull_print_op(gcli_pull const *const pull)
+{
+	if (pull->body)
+		pretty_print(pull->body, 4, 80, stdout);
 }
 
 static sn_sv
@@ -314,7 +442,7 @@ subcommand_pulls(int argc, char *argv[])
 		if (gcli_get_pulls(g_clictx, owner, repo, &details, n, &pulls) < 0)
 			errx(1, "error: could not fetch pull requests");
 
-		gcli_print_pulls_table(g_clictx, flags, &pulls, n);
+		gcli_print_pulls(flags, &pulls, n);
 		gcli_pulls_free(&pulls);
 
 		return EXIT_SUCCESS;
@@ -383,7 +511,7 @@ handle_pull_actions(int argc, char *argv[],
 			ensure_pull(owner, repo, pr, &fetched_pull, &pull);
 
 			/* Print meta */
-			gcli_pull_print_status(g_clictx, &pull);
+			gcli_pull_print(&pull);
 
 			/* OP */
 			puts("\nORIGINAL POST");
@@ -412,7 +540,7 @@ handle_pull_actions(int argc, char *argv[],
 			ensure_pull(owner, repo, pr, &fetched_pull, &pull);
 
 			/* Print meta information */
-			gcli_pull_print_status(g_clictx, &pull);
+			gcli_pull_print(&pull);
 
 		} else if (strcmp(action, "commits") == 0) {
 
@@ -420,7 +548,7 @@ handle_pull_actions(int argc, char *argv[],
 			gcli_pull_commits(g_clictx, owner, repo, pr);
 
 		} else if (strcmp(action, "diff") == 0) {
-			gcli_print_pull_diff(g_clictx, stdout, owner, repo, pr);
+			gcli_print_pull_diff(stdout, owner, repo, pr);
 
 		} else if (strcmp(action, "comments") == 0 ||
 		           strcmp(action, "notes") == 0) {

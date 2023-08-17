@@ -114,11 +114,8 @@ void gcli_pull_free(gcli_pull *it);
 
 void gcli_pulls_free(gcli_pull_list *list);
 
-void gcli_print_pulls_table(gcli_ctx *ctx, enum gcli_output_flags flags,
-                            gcli_pull_list const *list, int max);
-
-void gcli_print_pull_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
-                          char const *reponame, int pr_number);
+void gcli_pull_get_diff(gcli_ctx *ctx, FILE *fout, char const *owner,
+                        char const *repo, int pr_number);
 
 int gcli_pull_checks(gcli_ctx *ctx, char const *owner, char const *repo,
                      int pr_number);
@@ -130,10 +127,6 @@ int gcli_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
                   int pr_number, gcli_pull *out);
 
 int gcli_pull_submit(gcli_ctx *ctx, gcli_submit_pull_options);
-
-void gcli_pull_print_status(gcli_ctx *ctx, gcli_pull const *it);
-
-void gcli_pull_print_op(gcli_pull *summary);
 
 enum gcli_merge_flags {
 	GCLI_PULL_MERGE_SQUASH = 0x1, /* squash commits when merging */

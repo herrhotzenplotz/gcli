@@ -29,6 +29,7 @@
 
 #include <config.h>
 
+#include <gcli/cmd/ci.h>
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/colour.h>
 #include <gcli/cmd/pulls.h>
@@ -38,6 +39,7 @@
 #include <gcli/config.h>
 #include <gcli/forges.h>
 #include <gcli/gitconfig.h>
+#include <gcli/gitlab/pipelines.h>
 #include <gcli/pulls.h>
 #include <gcli/review.h>
 
@@ -45,6 +47,7 @@
 #include <getopt.h>
 #endif
 
+#include <assert.h>
 #include <stdlib.h>
 
 static void
@@ -211,6 +214,47 @@ gcli_pull_print_op(gcli_pull const *const pull)
 {
 	if (pull->body)
 		pretty_print(pull->body, 4, 80, stdout);
+}
+
+static void
+gcli_print_checks_list(gcli_pull_checks_list const *const list)
+{
+	switch (list->forge_type) {
+	case GCLI_FORGE_GITHUB:
+		github_print_checks((github_check_list const *)(list));
+		break;
+	case GCLI_FORGE_GITLAB:
+		gitlab_print_pipelines(g_clictx, (gitlab_pipeline_list const*)(list));
+		break;
+	default:
+		assert(0 && "unreachable");
+	}
+}
+
+int
+gcli_pull_checks(char const *owner, char const *repo, int pr_number)
+{
+	gcli_pull_checks_list list = {0};
+	gcli_forge_type t = gcli_config_get_forge_type(g_clictx);
+
+	list.forge_type = t;
+
+	switch (t) {
+	case GCLI_FORGE_GITHUB:
+	case GCLI_FORGE_GITLAB: {
+		int rc = gcli_pull_get_checks(g_clictx, owner, repo, pr_number, &list);
+		if (rc < 0)
+			return rc;
+
+		gcli_print_checks_list(&list);
+		gcli_pull_checks_free(&list);
+
+		return 0;
+	} break;
+	default:
+		puts("No checks.");
+		return 0;               /* no CI support / not implemented */
+	}
 }
 
 static sn_sv
@@ -523,7 +567,7 @@ handle_pull_actions(int argc, char *argv[],
 
 			/* Checks */
 			puts("\nCHECKS");
-			if (gcli_pull_checks(g_clictx, owner, repo, pr) < 0)
+			if (gcli_pull_checks(owner, repo, pr) < 0)
 				errx(1, "error: failed to fetch pull request checks");
 
 		} else if (strcmp(action, "op") == 0) {
@@ -555,7 +599,7 @@ handle_pull_actions(int argc, char *argv[],
 			gcli_pull_comments(g_clictx, owner, repo, pr);
 
 		} else if (strcmp(action, "ci") == 0) {
-			if (gcli_pull_checks(g_clictx, owner, repo, pr) < 0)
+			if (gcli_pull_checks(owner, repo, pr) < 0)
 				errx(1, "error: failed to fetch pull request checks");
 
 		} else if (strcmp(action, "merge") == 0) {

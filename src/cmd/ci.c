@@ -31,7 +31,9 @@
 #include <config.h>
 #endif
 
+#include <gcli/cmd/ci.h>
 #include <gcli/cmd/cmd.h>
+
 #include <gcli/config.h>
 #include <gcli/forges.h>
 #include <gcli/github/checks.h>
@@ -53,6 +55,19 @@ usage(void)
 	fprintf(stderr, "\n");
 	version();
 	copyright();
+}
+
+void
+github_checks(char const *const owner, char const *const repo,
+              char const *const ref, int const max)
+{
+	github_check_list list = {0};
+	if (github_get_checks(g_clictx, owner, repo, ref, max, &list) < 0)
+		errx(1, "error: failed to get github checks: %s",
+		     gcli_get_error(g_clictx));
+
+	github_print_checks(&list);
+	github_free_checks(&list);
 }
 
 int
@@ -120,7 +135,7 @@ subcommand_ci(int argc, char *argv[])
 		errx(1, "error: The ci subcommand only works for GitHub. "
 		     "Use gcli -t github ... to force a GitHub remote.");
 
-	github_checks(g_clictx, owner, repo, ref, count);
+	github_checks(owner, repo, ref, count);
 
 	return EXIT_SUCCESS;
 }

@@ -34,6 +34,8 @@
 #include <config.h>
 #endif
 
+#include <gcli/pulls.h>
+
 typedef struct gitlab_pipeline      gitlab_pipeline;
 typedef struct gitlab_pipeline_list gitlab_pipeline_list;
 typedef struct gitlab_job           gitlab_job;
@@ -107,11 +109,12 @@ int gitlab_job_cancel(gcli_ctx *ctx, char const *owner, char const *repo,
 int gitlab_job_retry(gcli_ctx *ctx, char const *owner, char const *repo,
                      long job_id);
 
-int gitlab_mr_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
-                        int mr_id);
-
 int gitlab_job_download_artifacts(gcli_ctx *ctx, char const *owner,
                                   char const *repo, long jid,
                                   char const *outfile);
+
+int gitlab_get_mr_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
+                            int mr_id, gitlab_pipeline_list *list);
+
 
 #endif /* GITLAB_PIPELINES_H */

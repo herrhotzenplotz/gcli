@@ -49,6 +49,11 @@
 
 typedef struct gcli_forge_descriptor gcli_forge_descriptor;
 
+/* Hopefully temporary hack */
+typedef int (*gcli_get_pull_checks_cb)(
+	gcli_ctx *, char const *, char const *, int,
+	gcli_pull_checks_list *);
+
 /**
  * Struct of function pointers to perform actions in the given
  * forge. It is like a plugin system to dispatch. */
@@ -261,17 +266,11 @@ struct gcli_forge_descriptor {
 		int pr_number);
 
 	/**
-	 * Print a list of checks associated with the given pull.
+	 * Return a list of checks associated with the given pull.
 	 *
-	 * NOTE(Nico): This is a print routine here because the CI systems
-	 * underlying the forge are so different that we cannot properly
-	 * unify them. For Gitlab this will call into the pipelines code,
-	 * for Github into the actions code. */
-	int (*print_pull_checks)(
-		gcli_ctx *ctx,
-		char const *owner,
-		char const *reponame,
-		int pr_number);
+	 * The type of the returned list depends on the forge type. See
+	 * the definition of gcli_pull_checks_list. */
+	gcli_get_pull_checks_cb get_pull_checks;
 
 	/**
 	 * Merge the given PR/MR */

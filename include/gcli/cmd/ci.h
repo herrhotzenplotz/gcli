@@ -27,27 +27,17 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GCLI_CMD_PULLS_H
-#define GCLI_CMD_PULLS_H
+#ifndef GCLI_CMD_CI_H
+#define GCLI_CMD_CI_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#include <gcli/pulls.h>
+#include <gcli/github/checks.h>
 
-void gcli_print_pulls(enum gcli_output_flags flags, gcli_pull_list const *list,
-                      int max);
+void github_print_checks(github_check_list const *checks);
 
-void gcli_print_pull_diff(FILE *stream, char const *owner, char const *reponame,
-                          int pr_number);
+int subcommand_ci(int argc, char *argv[]);
 
-void gcli_print_pull(gcli_pull const *pull);
-
-void gcli_pull_print_op(gcli_pull const *pull);
-
-int gcli_pull_checks(char const *owner, char const *repo, int pr_number);
-
-int subcommand_pulls(int argc, char *argv[]);
-
-#endif /* GCLI_CMD_PULLS_H */
+#endif /* GCLI_CMD_CI_H */

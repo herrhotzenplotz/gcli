@@ -163,17 +163,16 @@ gitea_print_pr_diff(gcli_ctx *ctx, FILE *const stream, char const *owner,
 }
 
 int
-gitea_pull_checks(gcli_ctx *ctx, char const *owner, char const *repo,
-                  int const pr_number)
+gitea_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
+                      int const pr_number, gcli_pull_checks_list *out)
 {
 	(void) ctx;
 	(void) owner;
 	(void) repo;
 	(void) pr_number;
+	(void) out;
 
-	warnx("PR checks are not available on Gitea");
-
-	return 0;
+	return gcli_error(ctx, "Pull Request checks are not available on Gitea");
 }
 
 int

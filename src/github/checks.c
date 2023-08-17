@@ -43,7 +43,7 @@
 
 int
 github_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
-                  char const *ref, int const max, gcli_github_checks *const out)
+                  char const *ref, int const max, github_check_list *const out)
 {
 	gcli_fetch_buffer buffer = {0};
 	char *url = NULL, *next_url = NULL;
@@ -79,7 +79,7 @@ github_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 void
-github_print_checks(gcli_ctx *ctx, gcli_github_checks const *const list)
+github_print_checks(gcli_ctx *ctx, github_check_list const *const list)
 {
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
@@ -113,7 +113,7 @@ github_print_checks(gcli_ctx *ctx, gcli_github_checks const *const list)
 }
 
 void
-github_free_checks(gcli_github_checks *const list)
+github_free_checks(github_check_list *const list)
 {
 	for (size_t i = 0; i < list->checks_size; ++i) {
 		free(list->checks[i].name);
@@ -126,21 +126,4 @@ github_free_checks(gcli_github_checks *const list)
 	free(list->checks);
 	list->checks = NULL;
 	list->checks_size = 0;
-}
-
-int
-github_checks(gcli_ctx *ctx, char const *owner, char const *repo,
-              char const *ref, int const max)
-{
-	gcli_github_checks checks = {0};
-	int rc;
-
-	rc = github_get_checks(ctx, owner, repo, ref, max, &checks);
-	if (rc < 0)
-		return rc;
-
-	github_print_checks(ctx, &checks);
-	github_free_checks(&checks);
-
-	return 0;
 }

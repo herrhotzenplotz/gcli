@@ -29,9 +29,12 @@
 
 #include <gcli/cmd/colour.h>
 #include <gcli/cmd/table.h>
+
 #include <gcli/gitlab/config.h>
 #include <gcli/gitlab/pipelines.h>
 #include <gcli/json_util.h>
+#include <gcli/pulls.h>
+
 #include <pdjson/pdjson.h>
 #include <sn/sn.h>
 
@@ -65,7 +68,7 @@ gitlab_get_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
 	return fetch_pipelines(ctx, url, max, list);
 }
 
-static int
+int
 gitlab_get_mr_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
                         int const mr_id, gitlab_pipeline_list *const list)
 {

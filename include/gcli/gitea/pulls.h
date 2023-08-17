@@ -61,8 +61,8 @@ int gitea_pull_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
 int gitea_print_pr_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
                         char const *repo, int pr_number);
 
-int gitea_pull_checks(gcli_ctx *ctx, char const *owner, char const *repo,
-                      int pr_number);
+int gitea_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
+                          int pr_number, gcli_pull_checks_list *out);
 
 int gitea_pull_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
                              int pr_number, int milestone_id);

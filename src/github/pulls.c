@@ -377,13 +377,14 @@ github_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-github_pull_checks(gcli_ctx *ctx, char const *owner, char const *repo,
-                   int const pr_number)
+github_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
+                       int const pr_number, gcli_pull_checks_list *out)
 {
 	char refname[64] = {0};
 
 	/* This is kind of a hack, but it works! */
 	snprintf(refname, sizeof refname, "refs%%2Fpull%%2F%d%%2Fhead", pr_number);
 
-	return github_checks(ctx, owner, repo, refname, -1);
+	return github_get_checks(ctx, owner, repo, refname, -1,
+	                         (github_check_list *)out);
 }

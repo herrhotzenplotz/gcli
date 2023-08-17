@@ -38,10 +38,12 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <gcli/cmd/ci.h>
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/issues.h>
 #include <gcli/cmd/labels.h>
 #include <gcli/cmd/milestones.h>
+#include <gcli/cmd/pulls.h>
 #include <gcli/cmd/releases.h>
 
 #include <gcli/config.h>

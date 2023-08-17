@@ -47,8 +47,8 @@ int github_get_pulls(gcli_ctx *ctx, char const *owner, char const *reponame,
 int github_print_pull_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
                            char const *reponame, int pr_number);
 
-int github_pull_checks(gcli_ctx *ctx, char const *owner, char const *repo,
-                       int pr_number);
+int github_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
+                           int pr_number, gcli_pull_checks_list *out);
 
 int github_pull_merge(gcli_ctx *ctx, char const *owner, char const *reponame,
                       int pr_number, enum gcli_merge_flags flags);

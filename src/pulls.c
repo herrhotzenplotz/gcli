@@ -39,6 +39,8 @@
 #include <gcli/pulls.h>
 #include <sn/sn.h>
 
+#include <assert.h>
+
 void
 gcli_pulls_free(gcli_pull_list *const it)
 {
@@ -183,11 +185,26 @@ gcli_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
 	return gcli_forge(ctx)->get_pull(ctx, owner, repo, pr_number, out);
 }
 
-/* This one is going to be nasty */
 int
-gcli_pull_checks(gcli_ctx *ctx, char const *owner, char const *repo, int const pr_number)
+gcli_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
+                     int const pr_number, gcli_pull_checks_list *out)
 {
-	return gcli_forge(ctx)->print_pull_checks(ctx, owner, repo, pr_number);
+	return gcli_forge(ctx)->get_pull_checks(ctx, owner, repo, pr_number, out);
+}
+
+void
+gcli_pull_checks_free(gcli_pull_checks_list *list)
+{
+	switch (list->forge_type) {
+	case GCLI_FORGE_GITHUB:
+		github_free_checks((github_check_list *)list);
+		break;
+	case GCLI_FORGE_GITLAB:
+		gitlab_free_pipelines((gitlab_pipeline_list *)list);
+		break;
+	default:
+		assert(0 && "unreachable");
+	}
 }
 
 static void

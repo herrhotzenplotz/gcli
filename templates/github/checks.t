@@ -10,6 +10,6 @@ object of gcli_github_check with
 	 "id"           => id as int);
 
 parser github_checks is
-object of gcli_github_checks with
+object of github_check_list with
 	("check_runs" => checks as array of gcli_github_check
 	                 use parse_github_check);

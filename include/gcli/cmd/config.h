@@ -35,6 +35,9 @@
 #endif
 
 #include <gcli/gcli.h>
+#include <gcli/sshkeys.h>
+
+void gcli_sshkeys_print_keys(gcli_sshkey_list const *list);
 
 int subcommand_config(int argc, char *argv[]);
 

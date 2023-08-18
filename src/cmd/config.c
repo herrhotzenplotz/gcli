@@ -32,6 +32,9 @@
 #endif
 
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/config.h>
+#include <gcli/cmd/table.h>
+
 #include <gcli/config.h>
 #include <gcli/sshkeys.h>
 
@@ -55,6 +58,31 @@ usage(void)
 	copyright();
 }
 
+void
+gcli_sshkeys_print_keys(gcli_sshkey_list const *list)
+{
+	gcli_tbl *tbl;
+	gcli_tblcoldef cols[] = {
+		{ .name = "ID",      .type = GCLI_TBLCOLTYPE_INT,    .flags = 0 },
+		{ .name = "CREATED", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "TITLE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+	};
+
+	if (list->keys_size == 0) {
+		printf("No SSH keys\n");
+		return;
+	}
+
+	tbl = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+
+	for (size_t i = 0; i < list->keys_size; ++i) {
+		gcli_tbl_add_row(tbl, list->keys[i].id, list->keys[i].created_at,
+		                 list->keys[i].title);
+	}
+
+	gcli_tbl_end(tbl);
+}
+
 static int
 list_sshkeys(void)
 {
@@ -65,7 +93,7 @@ list_sshkeys(void)
 		return EXIT_FAILURE;
 	}
 
-	gcli_sshkeys_print_keys(g_clictx, &list);
+	gcli_sshkeys_print_keys(&list);
 	gcli_sshkeys_free_keys(&list);
 
 	return 0;

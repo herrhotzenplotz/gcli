@@ -57,7 +57,6 @@ int gcli_sshkeys_get_keys(gcli_ctx *ctx, gcli_sshkey_list *out);
 int gcli_sshkeys_add_key(gcli_ctx *ctx, char const *title,
                          char const *public_key_path, gcli_sshkey *out);
 int gcli_sshkeys_delete_key(gcli_ctx *ctx, int id);
-void gcli_sshkeys_print_keys(gcli_ctx *ctx, gcli_sshkey_list const *list);
 void gcli_sshkeys_free_keys(gcli_sshkey_list *list);
 
 #endif /* GCLI_SSHKEYS_H */

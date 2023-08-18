@@ -63,6 +63,5 @@ void delete_repo(bool always_yes, const char *owner, const char *repo);
 
 /* List of subcommand entry points */
 int subcommand_api(int argc, char *argv[]);
-int subcommand_status(int argc, char *argv[]);
 
 #endif /* GCLI_CMD_CMD_H */

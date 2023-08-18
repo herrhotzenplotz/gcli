@@ -30,6 +30,8 @@
 #include <config.h>
 
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/status.h>
+
 #include <gcli/status.h>
 
 #ifdef HAVE_GETOPT_H
@@ -47,6 +49,37 @@ usage(void)
 	fprintf(stderr, "\n");
 	version();
 	copyright();
+}
+
+int
+gcli_status(int const count)
+{
+	gcli_notification_list list = {0};
+	int rc = 0;
+
+	rc = gcli_get_notifications(g_clictx, count, &list);
+	if (rc < 0)
+		return rc;
+
+	gcli_print_notifications(&list);
+	gcli_free_notifications(&list);
+
+	return rc;
+}
+
+void
+gcli_print_notifications(gcli_notification_list const *const list)
+{
+	for (size_t i = 0; i < list->notifications_size; ++i) {
+		printf("%s - %s - %s - %s - %s\n",
+		       list->notifications[i].id,
+		       list->notifications[i].repository,
+		       list->notifications[i].type, list->notifications[i].date,
+		       list->notifications[i].reason);
+
+		pretty_print(list->notifications[i].title, 4, 80, stdout);
+		putchar('\n');
+	}
 }
 
 int
@@ -89,7 +122,7 @@ subcommand_status(int argc, char *argv[])
 	argv += optind;
 
 	if (!mark) {
-		gcli_status(g_clictx, count);
+		gcli_status(count);
 	} else {
 		if (count != 30)
 			warnx("ignoring -n/--count argument");

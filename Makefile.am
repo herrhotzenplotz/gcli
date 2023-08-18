@@ -75,7 +75,7 @@ gcli_SOURCES = \
 	include/gcli/cmd/releases.h src/cmd/releases.c \
 	include/gcli/cmd/repos.h src/cmd/repos.c \
 	include/gcli/cmd/snippets.h src/cmd/snippets.c \
-	src/cmd/status.c
+	include/gcli/cmd/status.h src/cmd/status.c
 
 libsn_la_SOURCES = \
 	thirdparty/sn/sn.c \

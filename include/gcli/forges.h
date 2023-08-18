@@ -457,8 +457,8 @@ struct gcli_forge_descriptor {
 	 * Status summary for the account */
     int (*get_notifications)(
 	    gcli_ctx *ctx,
-		gcli_notification **notifications,
-		int count);
+	    int max,
+		gcli_notification_list *notifications);
 
 	/**
 	 * Mark notification with the given id as read

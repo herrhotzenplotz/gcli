@@ -52,6 +52,7 @@
 #include <gcli/cmd/releases.h>
 #include <gcli/cmd/repos.h>
 #include <gcli/cmd/snippets.h>
+#include <gcli/cmd/status.h>
 
 #include <gcli/config.h>
 

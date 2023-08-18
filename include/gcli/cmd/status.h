@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,44 +27,18 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/curl.h>
-#include <gcli/gitlab/config.h>
-#include <gcli/gitlab/status.h>
-#include <gcli/json_util.h>
+#ifndef GCLI_CMD_STATUS_H
+#define GCLI_CMD_STATUS_H
 
-#include <sn/sn.h>
-#include <pdjson/pdjson.h>
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
-#include <templates/gitlab/status.h>
+#include <gcli/gcli.h>
+#include <gcli/status.h>
 
-int
-gitlab_get_notifications(gcli_ctx *ctx, int const max,
-                         gcli_notification_list *const out)
-{
-	char *url = NULL;
+int gcli_status(int count);
+void gcli_print_notifications(gcli_notification_list const *);
+int subcommand_status(int argc, char *argv[]);
 
-	gcli_fetch_list_ctx fl = {
-		.listp = &out->notifications,
-		.sizep = &out->notifications_size,
-		.parse = (parsefn)(parse_gitlab_todos),
-		.max = max,
-	};
-
-	url = sn_asprintf("%s/todos", gitlab_get_apibase(ctx));
-
-	return gcli_fetch_list(ctx, url, &fl);
-}
-
-int
-gitlab_notification_mark_as_read(gcli_ctx *ctx, char const *id)
-{
-	char *url = NULL;
-	int rc = 0;
-
-	url = sn_asprintf("%s/todos/%s/mark_as_done", gitlab_get_apibase(ctx), id);
-	rc = gcli_fetch_with_method(ctx, "POST", url, NULL, NULL, NULL);
-
-	free(url);
-
-	return rc;
-}
+#endif /* GCLI_CMD_STATUS_H */

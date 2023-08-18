@@ -116,6 +116,60 @@ gitlab_pipelines(char const *owner, char const *repo, int const count)
 	return rc;
 }
 
+void
+gitlab_print_jobs(gitlab_job_list const *const list)
+{
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_LONG,   .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "STATUS",     .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
+		{ .name = "STARTED",    .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "FINISHED",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "RUNNERDESC", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "REF",        .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+	};
+
+	if (!list->jobs_size) {
+		printf("No jobs\n");
+		return;
+	}
+
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
+		errx(1, "error: could not initialize table");
+
+	for (size_t i = 0; i < list->jobs_size; ++i) {
+		gcli_tbl_add_row(table,
+		                 list->jobs[i].id,
+		                 list->jobs[i].name,
+		                 list->jobs[i].status,
+		                 list->jobs[i].started_at,
+		                 list->jobs[i].finished_at,
+		                 list->jobs[i].runner_description,
+		                 list->jobs[i].ref);
+	}
+
+	gcli_tbl_end(table);
+}
+
+int
+gitlab_pipeline_jobs(char const *owner, char const *repo,
+                     long const id, int const count)
+{
+	gitlab_job_list jobs = {0};
+	int rc = 0;
+
+	rc = gitlab_get_pipeline_jobs(g_clictx, owner, repo, id, count, &jobs);
+	if (rc < 0)
+		return rc;
+
+	gitlab_print_jobs(&jobs);
+	gitlab_free_jobs(&jobs);
+
+	return rc;
+}
+
 int
 subcommand_pipelines(int argc, char *argv[])
 {
@@ -201,7 +255,9 @@ subcommand_pipelines(int argc, char *argv[])
 			return EXIT_FAILURE;
 		}
 
-		gitlab_pipeline_jobs(g_clictx, owner, repo, pid, count);
+		if (gitlab_pipeline_jobs(owner, repo, pid, count) < 0)
+			errx(1, "error: failed to get pipeline jobs: %s",
+			     gcli_get_error(g_clictx));
 		return EXIT_SUCCESS;
 	}
 

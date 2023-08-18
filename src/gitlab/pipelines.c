@@ -99,21 +99,6 @@ gitlab_free_pipelines(gitlab_pipeline_list *const list)
 	list->pipelines_size = 0;
 }
 
-void
-gitlab_pipeline_jobs(gcli_ctx *ctx, char const *owner, char const *repo,
-                     long const id, int const count)
-{
-	gitlab_job_list jobs = {0};
-	int rc;
-
-	rc = gitlab_get_pipeline_jobs(ctx, owner, repo, id, count, &jobs);
-	if (rc < 0)
-		errx(1, "error: failed to get jobs");
-
-	gitlab_print_jobs(ctx, &jobs);
-	gitlab_free_jobs(&jobs);
-}
-
 int
 gitlab_get_pipeline_jobs(gcli_ctx *ctx, char const *owner, char const *repo,
                          long const pipeline, int const max,
@@ -131,45 +116,6 @@ gitlab_get_pipeline_jobs(gcli_ctx *ctx, char const *owner, char const *repo,
 	                  gitlab_get_apibase(ctx), owner, repo, pipeline);
 
 	return gcli_fetch_list(ctx, url, &fl);
-}
-
-void
-gitlab_print_jobs(gcli_ctx *ctx, gitlab_job_list const *const list)
-{
-	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
-		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_LONG,   .flags = GCLI_TBLCOL_JUSTIFYR },
-		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "STATUS",     .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
-		{ .name = "STARTED",    .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "FINISHED",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "RUNNERDESC", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "REF",        .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-	};
-
-	(void) ctx;
-
-	if (!list->jobs_size) {
-		printf("No jobs\n");
-		return;
-	}
-
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
-	if (!table)
-		errx(1, "error: could not initialize table");
-
-	for (size_t i = 0; i < list->jobs_size; ++i) {
-		gcli_tbl_add_row(table,
-		                 list->jobs[i].id,
-		                 list->jobs[i].name,
-		                 list->jobs[i].status,
-		                 list->jobs[i].started_at,
-		                 list->jobs[i].finished_at,
-		                 list->jobs[i].runner_description,
-		                 list->jobs[i].ref);
-	}
-
-	gcli_tbl_end(table);
 }
 
 void

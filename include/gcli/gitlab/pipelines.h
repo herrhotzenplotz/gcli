@@ -80,13 +80,8 @@ int gitlab_get_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
 
 void gitlab_free_pipelines(gitlab_pipeline_list *list);
 
-void gitlab_pipeline_jobs(gcli_ctx *ctx, char const *owner, char const *repo,
-                          long pipeline, int count);
-
 int gitlab_get_pipeline_jobs(gcli_ctx *ctx, char const *owner, char const *repo,
                              long pipeline, int count, gitlab_job_list *out);
-
-void gitlab_print_jobs(gcli_ctx *ctx, gitlab_job_list const *jobs);
 
 void gitlab_free_jobs(gitlab_job_list *jobs);
 void gitlab_free_job(gitlab_job *job);

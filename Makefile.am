@@ -63,7 +63,7 @@ gcli_SOURCES = \
 	src/cmd/api.c \
 	include/gcli/cmd/ci.h src/cmd/ci.c \
 	src/cmd/comment.c \
-	src/cmd/config.c \
+	include/gcli/cmd/config.h src/cmd/config.c \
 	include/gcli/cmd/forks.h src/cmd/forks.c \
 	src/cmd/gcli.c \
 	src/cmd/gists.c \

@@ -40,57 +40,6 @@ gcli_get_forks(gcli_ctx *ctx, char const *owner, char const *repo,
 	return gcli_forge(ctx)->get_forks(ctx, owner, repo, max, out);
 }
 
-void
-gcli_print_forks(gcli_ctx *ctx, enum gcli_output_flags const flags,
-                 gcli_fork_list const *const list, int const max)
-{
-	size_t n;
-	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
-		{ .name = "OWNER",    .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_BOLD },
-		{ .name = "DATE",     .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
-		{ .name = "FORKS",    .type = GCLI_TBLCOLTYPE_INT, .flags = GCLI_TBLCOL_JUSTIFYR },
-		{ .name = "FULLNAME", .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
-	};
-
-	(void) ctx;
-
-	if (list->forks_size == 0) {
-		puts("No forks");
-		return;
-	}
-
-	/* Determine number of items to print */
-	if (max < 0 || (size_t)(max) > list->forks_size)
-		n = list->forks_size;
-	else
-		n = max;
-
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
-	if (!table)
-		errx(1, "error: could not initialize table");
-
-	if (flags & OUTPUT_SORTED) {
-		for (size_t i = 0; i < n; ++i) {
-			gcli_tbl_add_row(table,
-			                 list->forks[n-i-1].owner,
-			                 list->forks[n-i-1].date,
-			                 list->forks[n-i-1].forks,
-			                 list->forks[n-i-1].full_name);
-		}
-	} else {
-		for (size_t i = 0; i < n; ++i) {
-			gcli_tbl_add_row(table,
-			                 list->forks[i].owner,
-			                 list->forks[i].date,
-			                 list->forks[i].forks,
-			                 list->forks[i].full_name);
-		}
-	}
-
-	gcli_tbl_end(table);
-}
-
 int
 gcli_fork_create(gcli_ctx *ctx, char const *owner, char const *repo,
                  char const *_in)

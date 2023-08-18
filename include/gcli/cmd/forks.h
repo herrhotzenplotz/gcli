@@ -34,8 +34,12 @@
 #include <config.h>
 #endif
 
+#include <gcli/forks.h>
 #include <gcli/gcli.h>
 
 int subcommand_forks(int argc, char *argv[]);
+
+void gcli_print_forks(enum gcli_output_flags flags, gcli_fork_list const *list,
+                      int max);
 
 #endif /* GCLI_CMD_FORKS_H */

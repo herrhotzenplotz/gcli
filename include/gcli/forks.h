@@ -58,9 +58,6 @@ int gcli_get_forks(gcli_ctx *ctx, char const *owner, char const *reponame,
 int gcli_fork_create(gcli_ctx *ctx, char const *owner, char const *repo,
                      char const *in);
 
-void gcli_print_forks(gcli_ctx *ctx, enum gcli_output_flags flags,
-                      gcli_fork_list const *list, int max);
-
 void gcli_fork_delete(char const *owner,
                       char const *repo);
 

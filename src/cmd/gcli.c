@@ -40,6 +40,7 @@
 
 #include <gcli/cmd/ci.h>
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/comment.h>
 #include <gcli/cmd/config.h>
 #include <gcli/cmd/forks.h>
 #include <gcli/cmd/issues.h>

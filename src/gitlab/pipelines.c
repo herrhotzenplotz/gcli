@@ -28,6 +28,7 @@
  */
 
 #include <gcli/cmd/colour.h>
+#include <gcli/cmd/pipelines.h>
 #include <gcli/cmd/table.h>
 
 #include <gcli/gitlab/config.h>
@@ -82,41 +83,6 @@ gitlab_get_mr_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 void
-gitlab_print_pipelines(gcli_ctx *ctx, gitlab_pipeline_list const *const list)
-{
-	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
-		{ .name = "ID",      .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
-		{ .name = "STATUS",  .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
-		{ .name = "CREATED", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "UPDATED", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "REF",     .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-	};
-
-	(void) ctx;
-
-	if (!list->pipelines_size) {
-		printf("No pipelines\n");
-		return;
-	}
-
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
-	if (!table)
-		errx(1, "error: could not init table");
-
-	for (size_t i = 0; i < list->pipelines_size; ++i) {
-		gcli_tbl_add_row(table,
-		                 (int)(list->pipelines[i].id),
-		                 list->pipelines[i].status,
-		                 list->pipelines[i].created_at,
-		                 list->pipelines[i].updated_at,
-		                 list->pipelines[i].ref);
-	}
-
-	gcli_tbl_end(table);
-}
-
-void
 gitlab_free_pipelines(gitlab_pipeline_list *const list)
 {
 	for (size_t i = 0; i < list->pipelines_size; ++i) {
@@ -131,19 +97,6 @@ gitlab_free_pipelines(gitlab_pipeline_list *const list)
 
 	list->pipelines = NULL;
 	list->pipelines_size = 0;
-}
-
-void
-gitlab_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
-                 int const count)
-{
-	gitlab_pipeline_list pipelines = {0};
-
-	if (gitlab_get_pipelines(ctx, owner, repo, count, &pipelines) < 0)
-		errx(1,"error: could not fetch list of pipelines");
-
-	gitlab_print_pipelines(ctx, &pipelines);
-	gitlab_free_pipelines(&pipelines);
 }
 
 void
@@ -375,7 +328,7 @@ gitlab_mr_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
 
 	rc = gitlab_get_mr_pipelines(ctx, owner, repo, mr_id, &list);
 	if (rc == 0)
-		gitlab_print_pipelines(ctx, &list);
+		gitlab_print_pipelines(&list);
 
 	gitlab_free_pipelines(&list);
 

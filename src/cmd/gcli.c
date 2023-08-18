@@ -43,6 +43,7 @@
 #include <gcli/cmd/issues.h>
 #include <gcli/cmd/labels.h>
 #include <gcli/cmd/milestones.h>
+#include <gcli/cmd/pipelines.h>
 #include <gcli/cmd/pulls.h>
 #include <gcli/cmd/releases.h>
 

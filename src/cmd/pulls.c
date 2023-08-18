@@ -32,6 +32,7 @@
 #include <gcli/cmd/ci.h>
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/colour.h>
+#include <gcli/cmd/pipelines.h>
 #include <gcli/cmd/pulls.h>
 #include <gcli/cmd/table.h>
 
@@ -224,7 +225,7 @@ gcli_print_checks_list(gcli_pull_checks_list const *const list)
 		github_print_checks((github_check_list const *)(list));
 		break;
 	case GCLI_FORGE_GITLAB:
-		gitlab_print_pipelines(g_clictx, (gitlab_pipeline_list const*)(list));
+		gitlab_print_pipelines((gitlab_pipeline_list const*)(list));
 		break;
 	default:
 		assert(0 && "unreachable");

@@ -70,7 +70,7 @@ gcli_SOURCES = \
 	include/gcli/cmd/issues.h src/cmd/issues.c \
 	include/gcli/cmd/labels.h src/cmd/labels.c \
 	include/gcli/cmd/milestones.h src/cmd/milestones.c \
-	src/cmd/pipelines.c \
+	include/gcli/cmd/pipelines.h src/cmd/pipelines.c \
 	include/gcli/cmd/pulls.h src/cmd/pulls.c \
 	include/gcli/cmd/releases.h src/cmd/releases.c \
 	src/cmd/repos.c \

@@ -30,8 +30,11 @@
 #include <config.h>
 
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/table.h>
+
 #include <gcli/config.h>
 #include <gcli/forges.h>
+
 #include <gcli/gitlab/pipelines.h>
 
 #ifdef HAVE_GETOPT_H
@@ -62,6 +65,55 @@ usage(void)
 	fprintf(stderr, "\n");
 	version();
 	copyright();
+}
+
+void
+gitlab_print_pipelines(gitlab_pipeline_list const *const list)
+{
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "ID",      .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "STATUS",  .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
+		{ .name = "CREATED", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "UPDATED", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "REF",     .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+	};
+
+	if (!list->pipelines_size) {
+		printf("No pipelines\n");
+		return;
+	}
+
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
+		errx(1, "error: could not init table");
+
+	for (size_t i = 0; i < list->pipelines_size; ++i) {
+		gcli_tbl_add_row(table,
+		                 (int)(list->pipelines[i].id),
+		                 list->pipelines[i].status,
+		                 list->pipelines[i].created_at,
+		                 list->pipelines[i].updated_at,
+		                 list->pipelines[i].ref);
+	}
+
+	gcli_tbl_end(table);
+}
+
+int
+gitlab_pipelines(char const *owner, char const *repo, int const count)
+{
+	gitlab_pipeline_list pipelines = {0};
+	int rc = 0;
+
+	rc = gitlab_get_pipelines(g_clictx, owner, repo, count, &pipelines);
+	if (rc < 0)
+		return rc;
+
+	gitlab_print_pipelines(&pipelines);
+	gitlab_free_pipelines(&pipelines);
+
+	return rc;
 }
 
 int
@@ -163,7 +215,10 @@ subcommand_pipelines(int argc, char *argv[])
 			return EXIT_FAILURE;
 		}
 
-		gitlab_pipelines(g_clictx, owner, repo, count);
+		if (gitlab_pipelines(owner, repo, count) < 0)
+			errx(1, "error: failed to get pipelines: %s",
+			     gcli_get_error(g_clictx));
+
 		return EXIT_SUCCESS;
 	}
 

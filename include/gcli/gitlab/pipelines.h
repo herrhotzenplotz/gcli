@@ -78,12 +78,7 @@ struct gitlab_job_list {
 int gitlab_get_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
                          int max, gitlab_pipeline_list *out);
 
-void gitlab_print_pipelines(gcli_ctx *ctx, gitlab_pipeline_list const *list);
-
 void gitlab_free_pipelines(gitlab_pipeline_list *list);
-
-void gitlab_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
-                      int count);
 
 void gitlab_pipeline_jobs(gcli_ctx *ctx, char const *owner, char const *repo,
                           long pipeline, int count);

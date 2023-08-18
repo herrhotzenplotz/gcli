@@ -37,6 +37,11 @@
 #include <gcli/gcli.h>
 #include <gcli/repos.h>
 
+void gcli_print_repos(enum gcli_output_flags flags, gcli_repo_list const *repos,
+                      int max);
+
+void gcli_repo_print(gcli_repo const *it);
+
 int subcommand_repos(int argc, char *argv[]);
 
 #endif /* GCLI_CMD_REPOS_H */

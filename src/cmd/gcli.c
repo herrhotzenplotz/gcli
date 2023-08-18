@@ -40,6 +40,7 @@
 
 #include <gcli/cmd/ci.h>
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/forks.h>
 #include <gcli/cmd/issues.h>
 #include <gcli/cmd/labels.h>
 #include <gcli/cmd/milestones.h>

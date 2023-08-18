@@ -88,7 +88,7 @@ void gitlab_free_job(gitlab_job *job);
 
 
 int gitlab_job_get_log(gcli_ctx *ctx, char const *owner, char const *repo,
-                       long job_id);
+                       long job_id, FILE *stream);
 
 int gitlab_job_cancel(gcli_ctx *ctx, char const *owner, char const *repo,
                       long job_id);

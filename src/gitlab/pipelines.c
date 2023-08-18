@@ -146,21 +146,16 @@ gitlab_free_jobs(gitlab_job_list *list)
 
 int
 gitlab_job_get_log(gcli_ctx *ctx, char const *owner, char const *repo,
-                   long const job_id)
+                   long const job_id, FILE *stream)
 {
-	gcli_fetch_buffer buffer = {0};
 	char *url = NULL;
 	int rc = 0;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld/trace",
 	                  gitlab_get_apibase(ctx), owner, repo, job_id);
 
-	rc = gcli_fetch(ctx, url, NULL, &buffer);
-	if (rc == 0) {
-		fwrite(buffer.data, buffer.length, 1, stdout);
-	}
+	rc = gcli_curl(ctx, stream, url, NULL);
 
-	free(buffer.data);
 	free(url);
 
 	return rc;

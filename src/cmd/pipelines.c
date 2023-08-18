@@ -213,7 +213,7 @@ gitlab_job_status(char const *owner, char const *repo, long const jid)
 static int
 gitlab_job_log_cb(char const *owner, char const *repo, long const jid)
 {
-	return gitlab_job_get_log(g_clictx, owner, repo, jid);
+	return gitlab_job_get_log(g_clictx, owner, repo, jid, stdout);
 }
 
 static int

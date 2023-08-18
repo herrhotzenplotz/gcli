@@ -58,9 +58,6 @@ void gcli_snippets_free(gcli_snippet_list *list);
 
 int gcli_snippets_get(gcli_ctx *ctx, int max, gcli_snippet_list *out);
 
-void gcli_snippets_print(gcli_ctx *ctx, enum gcli_output_flags flags,
-                         gcli_snippet_list const *list, int max);
-
 int gcli_snippet_delete(gcli_ctx *ctx, char const *snippet_id);
 
 int gcli_snippet_get(gcli_ctx *ctx, char const *snippet_id);

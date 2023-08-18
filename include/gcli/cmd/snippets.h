@@ -36,6 +36,10 @@
 
 #include <gcli/gcli.h>
 
+#include <gcli/gitlab/snippets.h>
+
+void gcli_snippets_print(enum gcli_output_flags const flags,
+                         gcli_snippet_list const *const list, int const max);
 int subcommand_snippets(int argc, char *argv[]);
 
 #endif /* GCLI_CMD_SNIPPETS_H */

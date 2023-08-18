@@ -60,6 +60,6 @@ int gcli_snippets_get(gcli_ctx *ctx, int max, gcli_snippet_list *out);
 
 int gcli_snippet_delete(gcli_ctx *ctx, char const *snippet_id);
 
-int gcli_snippet_get(gcli_ctx *ctx, char const *snippet_id);
+int gcli_snippet_get(gcli_ctx *ctx, char const *snippet_id, FILE *stream);
 
 #endif /* GITLAB_SNIPPETS_H */

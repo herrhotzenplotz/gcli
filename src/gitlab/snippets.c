@@ -91,13 +91,13 @@ gcli_snippet_delete(gcli_ctx *ctx, char const *snippet_id)
 }
 
 int
-gcli_snippet_get(gcli_ctx *ctx, char const *snippet_id)
+gcli_snippet_get(gcli_ctx *ctx, char const *snippet_id, FILE *stream)
 {
 	int rc = 0;
 	char *url = sn_asprintf("%s/snippets/%s/raw",
 	                        gitlab_get_apibase(ctx),
 	                        snippet_id);
-	rc = gcli_curl(ctx, stdout, url, NULL);
+	rc = gcli_curl(ctx, stream, url, NULL);
 	free(url);
 
 	return rc;

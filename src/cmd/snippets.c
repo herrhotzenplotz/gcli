@@ -179,7 +179,9 @@ subcommand_snippet_get(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	gcli_snippet_get(g_clictx, snippet_id);
+	if (gcli_snippet_get(g_clictx, snippet_id, stdout) < 0)
+		errx(1, "error: failed to fetch snippet contents: %s",
+		     gcli_get_error(g_clictx));
 
 	return EXIT_SUCCESS;
 }

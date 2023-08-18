@@ -46,6 +46,7 @@
 #include <gcli/cmd/pipelines.h>
 #include <gcli/cmd/pulls.h>
 #include <gcli/cmd/releases.h>
+#include <gcli/cmd/repos.h>
 
 #include <gcli/config.h>
 

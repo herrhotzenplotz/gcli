@@ -30,6 +30,7 @@
 #include <config.h>
 
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/colour.h>
 #include <gcli/cmd/table.h>
 
 #include <gcli/config.h>
@@ -170,6 +171,63 @@ gitlab_pipeline_jobs(char const *owner, char const *repo,
 	return rc;
 }
 
+void
+gitlab_print_job_status(gitlab_job const *const job)
+{
+	gcli_dict printer;
+
+	printer = gcli_dict_begin();
+
+	gcli_dict_add(printer,        "ID", 0, 0, "%ld", job->id);
+	gcli_dict_add_string(printer, "STATUS", GCLI_TBLCOL_STATECOLOURED, 0, job->status);
+	gcli_dict_add_string(printer, "STAGE", 0, 0, job->stage);
+	gcli_dict_add_string(printer, "NAME", GCLI_TBLCOL_BOLD, 0, job->name);
+	gcli_dict_add_string(printer, "REF", GCLI_TBLCOL_COLOUREXPL, GCLI_COLOR_YELLOW, job->ref);
+	gcli_dict_add_string(printer, "CREATED", 0, 0, job->created_at);
+	gcli_dict_add_string(printer, "STARTED", 0, 0, job->started_at);
+	gcli_dict_add_string(printer, "FINISHED", 0, 0, job->finished_at);
+	gcli_dict_add(printer,        "DURATION", 0, 0, "%-.2lfs", job->duration);
+	gcli_dict_add_string(printer, "RUNNER NAME", 0, 0, job->runner_name);
+	gcli_dict_add_string(printer, "RUNNER DESCR", 0, 0, job->runner_description);
+
+	gcli_dict_end(printer);
+}
+
+int
+gitlab_job_status(char const *owner, char const *repo, long const jid)
+{
+	gitlab_job job = {0};
+	int rc = 0;
+
+	rc = gitlab_get_job(g_clictx, owner, repo, jid, &job);
+	if (rc < 0)
+		return rc;
+
+	gitlab_print_job_status(&job);
+	gitlab_free_job(&job);
+
+	return rc;
+}
+
+/* Wrappers that pass in the context to the library functions */
+static int
+gitlab_job_log_cb(char const *owner, char const *repo, long const jid)
+{
+	return gitlab_job_get_log(g_clictx, owner, repo, jid);
+}
+
+static int
+gitlab_job_cancel_cb(char const *owner, char const *repo, long const jid)
+{
+	return gitlab_job_cancel(g_clictx, owner, repo, jid);
+}
+
+static int
+gitlab_job_retry_cb(char const *owner, char const *repo, long const jid)
+{
+	return gitlab_job_retry(g_clictx, owner, repo, jid);
+}
+
 int
 subcommand_pipelines(int argc, char *argv[])
 {
@@ -283,12 +341,12 @@ subcommand_pipelines(int argc, char *argv[])
 	/* Definition of the action list */
 	struct {
 		char const *name;                               /* Name on the cli */
-		int (*fn)(gcli_ctx *ctx, char const *, char const *, long);   /* Function to be invoked for this action */
+		int (*fn)(char const *, char const *, long);   /* Function to be invoked for this action */
 	} job_actions[] = {
-		{ .name = "log",    .fn = gitlab_job_get_log },
-		{ .name = "status", .fn = gitlab_job_status  },
-		{ .name = "cancel", .fn = gitlab_job_cancel  },
-		{ .name = "retry",  .fn = gitlab_job_retry   },
+		{ .name = "log",    .fn = gitlab_job_log_cb    },
+		{ .name = "status", .fn = gitlab_job_status    },
+		{ .name = "cancel", .fn = gitlab_job_cancel_cb },
+		{ .name = "retry",  .fn = gitlab_job_retry_cb  },
 	};
 
 	/* Check if the user missed out on supplying actions */
@@ -321,7 +379,7 @@ next_action:
 		/* Find the action and invoke it */
 		for (size_t i = 0; i < ARRAY_SIZE(job_actions); ++i) {
 			if (strcmp(action, job_actions[i].name) == 0) {
-				if (job_actions[i].fn(g_clictx, owner, repo, jid) < 0)
+				if (job_actions[i].fn(owner, repo, jid) < 0)
 					errx(1, "error: failed to perform action '%s'", action);
 				goto next_action;
 			}

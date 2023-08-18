@@ -166,7 +166,7 @@ gitlab_job_get_log(gcli_ctx *ctx, char const *owner, char const *repo,
 	return rc;
 }
 
-static int
+int
 gitlab_get_job(gcli_ctx *ctx, char const *owner, char const *repo,
                long const jid, gitlab_job *const out)
 {
@@ -189,46 +189,6 @@ gitlab_get_job(gcli_ctx *ctx, char const *owner, char const *repo,
 
 	free(buffer.data);
 	free(url);
-
-	return rc;
-}
-
-static void
-gitlab_print_job_status(gcli_ctx *ctx, gitlab_job const *const job)
-{
-	gcli_dict printer;
-
-	(void) ctx;
-
-	printer = gcli_dict_begin();
-
-	gcli_dict_add(printer,        "ID", 0, 0, "%ld", job->id);
-	gcli_dict_add_string(printer, "STATUS", GCLI_TBLCOL_STATECOLOURED, 0, job->status);
-	gcli_dict_add_string(printer, "STAGE", 0, 0, job->stage);
-	gcli_dict_add_string(printer, "NAME", GCLI_TBLCOL_BOLD, 0, job->name);
-	gcli_dict_add_string(printer, "REF", GCLI_TBLCOL_COLOUREXPL, GCLI_COLOR_YELLOW, job->ref);
-	gcli_dict_add_string(printer, "CREATED", 0, 0, job->created_at);
-	gcli_dict_add_string(printer, "STARTED", 0, 0, job->started_at);
-	gcli_dict_add_string(printer, "FINISHED", 0, 0, job->finished_at);
-	gcli_dict_add(printer,        "DURATION", 0, 0, "%-.2lfs", job->duration);
-	gcli_dict_add_string(printer, "RUNNER NAME", 0, 0, job->runner_name);
-	gcli_dict_add_string(printer, "RUNNER DESCR", 0, 0, job->runner_description);
-
-	gcli_dict_end(printer);
-}
-
-int
-gitlab_job_status(gcli_ctx *ctx, char const *owner, char const *repo,
-                  long const jid)
-{
-	gitlab_job job = {0};
-	int rc = 0;
-
-	rc = gitlab_get_job(ctx, owner, repo, jid, &job);
-	if (rc == 0)
-		gitlab_print_job_status(ctx, &job);
-
-	gitlab_free_job(&job);
 
 	return rc;
 }

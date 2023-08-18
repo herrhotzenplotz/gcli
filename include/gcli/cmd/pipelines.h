@@ -41,6 +41,9 @@ int gitlab_pipeline_jobs(char const *owner, char const *repo, long pipeline,
                          int count);
 void gitlab_print_jobs(gitlab_job_list const *const list);
 
+void gitlab_print_job_status(gitlab_job const *const job);
+int gitlab_job_status(char const *owner, char const *repo, long const jid);
+
 int subcommand_pipelines(int argc, char *argv[]);
 
 #endif /* GCLI_CMD_PIPELINES_H */

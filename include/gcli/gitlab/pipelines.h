@@ -90,9 +90,6 @@ void gitlab_free_job(gitlab_job *job);
 int gitlab_job_get_log(gcli_ctx *ctx, char const *owner, char const *repo,
                        long job_id);
 
-int gitlab_job_status(gcli_ctx *ctx, char const *owner, char const *repo,
-                      long job_id);
-
 int gitlab_job_cancel(gcli_ctx *ctx, char const *owner, char const *repo,
                       long job_id);
 
@@ -106,5 +103,7 @@ int gitlab_job_download_artifacts(gcli_ctx *ctx, char const *owner,
 int gitlab_get_mr_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
                             int mr_id, gitlab_pipeline_list *list);
 
+int gitlab_get_job(gcli_ctx *ctx, char const *owner, char const *repo,
+                   long const jid, gitlab_job *const out);
 
 #endif /* GITLAB_PIPELINES_H */

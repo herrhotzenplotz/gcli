@@ -61,7 +61,7 @@ gcli_SOURCES = \
 	include/gcli/cmd/colour.h src/cmd/colour.c \
 	include/gcli/cmd/table.h src/cmd/table.c \
 	src/cmd/api.c \
-	src/cmd/ci.c \
+	include/gcli/cmd/ci.h src/cmd/ci.c \
 	src/cmd/comment.c \
 	src/cmd/config.c \
 	include/gcli/cmd/forks.h src/cmd/forks.c \

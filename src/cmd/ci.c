@@ -33,6 +33,7 @@
 
 #include <gcli/cmd/ci.h>
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/table.h>
 
 #include <gcli/config.h>
 #include <gcli/forges.h>
@@ -58,16 +59,51 @@ usage(void)
 }
 
 void
+github_print_checks(github_check_list const *const list)
+{
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_LONG,   .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "STATUS",     .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "CONCLUSION", .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
+		{ .name = "STARTED",    .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "COMPLETED",  .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+	};
+
+	if (!list->checks_size) {
+		fprintf(stderr, "No checks\n");
+		return;
+	}
+
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
+		errx(1, "error: could not init table");
+
+	for (size_t i = 0; i < list->checks_size; ++i) {
+		gcli_tbl_add_row(table, list->checks[i].id, list->checks[i].status,
+		                 list->checks[i].conclusion, list->checks[i].started_at,
+		                 list->checks[i].completed_at, list->checks[i].name);
+	}
+
+	gcli_tbl_end(table);
+}
+
+int
 github_checks(char const *const owner, char const *const repo,
               char const *const ref, int const max)
 {
 	github_check_list list = {0};
-	if (github_get_checks(g_clictx, owner, repo, ref, max, &list) < 0)
-		errx(1, "error: failed to get github checks: %s",
-		     gcli_get_error(g_clictx));
+	int rc = 0;
+
+	rc = github_get_checks(g_clictx, owner, repo, ref, max, &list);
+	if (rc < 0)
+		return rc;
 
 	github_print_checks(&list);
 	github_free_checks(&list);
+
+	return rc;
 }
 
 int
@@ -135,7 +171,10 @@ subcommand_ci(int argc, char *argv[])
 		errx(1, "error: The ci subcommand only works for GitHub. "
 		     "Use gcli -t github ... to force a GitHub remote.");
 
-	github_checks(owner, repo, ref, count);
+	if (github_checks(owner, repo, ref, count) < 0)
+		errx(1, "error: failed to get github checks: %s",
+		     gcli_get_error(g_clictx));
+
 
 	return EXIT_SUCCESS;
 }

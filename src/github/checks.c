@@ -79,40 +79,6 @@ github_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 void
-github_print_checks(gcli_ctx *ctx, github_check_list const *const list)
-{
-	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
-		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_LONG,   .flags = GCLI_TBLCOL_JUSTIFYR },
-		{ .name = "STATUS",     .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "CONCLUSION", .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
-		{ .name = "STARTED",    .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "COMPLETED",  .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-	};
-
-	(void) ctx;
-
-
-	if (!list->checks_size) {
-		fprintf(stderr, "No checks\n");
-		return;
-	}
-
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
-	if (!table)
-		errx(1, "error: could not init table");
-
-	for (size_t i = 0; i < list->checks_size; ++i) {
-		gcli_tbl_add_row(table, list->checks[i].id, list->checks[i].status,
-		                 list->checks[i].conclusion, list->checks[i].started_at,
-		                 list->checks[i].completed_at, list->checks[i].name);
-	}
-
-	gcli_tbl_end(table);
-}
-
-void
 github_free_checks(github_check_list *const list)
 {
 	for (size_t i = 0; i < list->checks_size; ++i) {

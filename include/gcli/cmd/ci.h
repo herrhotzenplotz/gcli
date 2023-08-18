@@ -37,7 +37,9 @@
 #include <gcli/github/checks.h>
 
 void github_print_checks(github_check_list const *checks);
-
+void github_print_checks(github_check_list const *const list);
+int github_checks(char const *const owner, char const *const repo,
+                  char const *const ref, int const max);
 int subcommand_ci(int argc, char *argv[]);
 
 #endif /* GCLI_CMD_CI_H */

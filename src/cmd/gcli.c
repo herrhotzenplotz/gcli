@@ -43,6 +43,7 @@
 #include <gcli/cmd/comment.h>
 #include <gcli/cmd/config.h>
 #include <gcli/cmd/forks.h>
+#include <gcli/cmd/gists.h>
 #include <gcli/cmd/issues.h>
 #include <gcli/cmd/labels.h>
 #include <gcli/cmd/milestones.h>

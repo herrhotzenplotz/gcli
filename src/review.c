@@ -27,7 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/colour.h>
+#include <gcli/cmd/colour.h>
 #include <gcli/config.h>
 #include <gcli/curl.h>
 #include <gcli/forges.h>
@@ -40,8 +40,11 @@
 #include <limits.h>
 
 void
-gcli_review_print_review_table(gcli_pr_review_list const *const list)
+gcli_review_print_review_table(gcli_ctx *ctx,
+                               gcli_pr_review_list const *const list)
 {
+	(void) ctx;
+
 	for (size_t i = 0; i < list->reviews_size; ++i) {
 		if (list->reviews[i].state) {
 			printf("   %s%s%s - %s - %s%s%s\n",
@@ -121,8 +124,8 @@ gcli_review_comments_free(gcli_pr_review_comment *it, size_t const size)
 }
 
 int
-gcli_review_get_reviews(char const *owner, char const *repo,
+gcli_review_get_reviews(gcli_ctx *ctx, char const *owner, char const *repo,
                         int const pr, gcli_pr_review_list *const out)
 {
-	return gcli_forge()->get_reviews(owner, repo, pr, out);
+	return gcli_forge(ctx)->get_reviews(ctx, owner, repo, pr, out);
 }

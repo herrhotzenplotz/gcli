@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,38 +27,33 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef COLOR_H
-#define COLOR_H
+#include <gcli/gcli.h>
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-#include <stdint.h>
+int
+gcli_error(struct gcli_ctx *ctx, char const *const fmt, ...)
+{
+	va_list vp;
+	char *buf;
+	size_t len;
 
-#include <sn/sn.h>
+	va_start(vp, fmt);
+	len = vsnprintf(NULL, 0, fmt, vp);
+	va_end(vp);
 
-#define GCLI_256COLOR_DONE 0x3F0FAF00
-#define GCLI_256COLOR_OPEN 0x04FF0100
+	buf = malloc(len + 1);
 
-enum {
-	GCLI_COLOR_BLACK,
-	GCLI_COLOR_RED,
-	GCLI_COLOR_GREEN,
-	GCLI_COLOR_YELLOW,
-	GCLI_COLOR_BLUE,
-	GCLI_COLOR_MAGENTA,
-	GCLI_COLOR_CYAN,
-	GCLI_COLOR_WHITE,
-	GCLI_COLOR_DEFAULT,
-};
+	va_start(vp, fmt);
+	vsnprintf(buf, len + 1, fmt, vp);
+	va_end(vp);
 
-char const *gcli_setcolour256(uint32_t colourcode);
-char const *gcli_resetcolour(void);
-char const *gcli_setcolour(int colour);
-char const *gcli_state_colour_sv(sn_sv const state);
-char const *gcli_state_colour_str(char const *it);
-char const *gcli_setbold(void);
-char const *gcli_resetbold(void);
+	if (ctx->last_error)
+		free(ctx->last_error);
 
-#endif /* COLOR_H */
+	ctx->last_error = buf;
+
+	return -1;
+}

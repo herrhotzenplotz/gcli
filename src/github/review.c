@@ -34,7 +34,8 @@
 #include <pdjson/pdjson.h>
 
 static void
-github_parse_review_comment(json_stream *input, gcli_pr_review_comment *it)
+github_parse_review_comment(gcli_ctx *ctx, json_stream *input,
+                            gcli_pr_review_comment *it)
 {
 	if (json_next(input) != JSON_OBJECT)
 		errx(1, "Expected review comment object");
@@ -45,26 +46,27 @@ github_parse_review_comment(json_stream *input, gcli_pr_review_comment *it)
 		char const *key = json_get_string(input, &len);
 
 		if (strncmp("bodyText", key, len) == 0)
-			it->body = get_string(input);
+			it->body = get_string(ctx, input);
 		else if (strncmp("id", key, len) == 0)
-			it->id = get_string(input);
+			it->id = get_string(ctx, input);
 		else if (strncmp("createdAt", key, len) == 0)
-			it->date = get_string(input);
+			it->date = get_string(ctx, input);
 		else if (strncmp("author", key, len) == 0)
-			it->author = get_user(input);
+			it->author = get_user(ctx, input);
 		else if (strncmp("diffHunk", key, len) == 0)
-			it->diff = get_string(input);
+			it->diff = get_string(ctx, input);
 		else if (strncmp("path", key, len) == 0)
-			it->path = get_string(input);
+			it->path = get_string(ctx, input);
 		else if (strncmp("originalPosition", key, len) == 0)
-			it->original_position = get_int(input);
+			it->original_position = get_int(ctx, input);
 		else
 			SKIP_OBJECT_VALUE(input);
 	}
 }
 
 static void
-github_parse_review_comments(json_stream *input, gcli_pr_review *it)
+github_parse_review_comments(gcli_ctx *ctx, json_stream *input,
+                             gcli_pr_review *it)
 {
 	gcli_json_advance(input, "{s[", "nodes");
 	while (json_peek(input) == JSON_OBJECT) {
@@ -73,13 +75,14 @@ github_parse_review_comments(json_stream *input, gcli_pr_review *it)
 			sizeof(*it->comments) * (it->comments_size + 1));
 		gcli_pr_review_comment *comment = &it->comments[it->comments_size++];
 		*comment = (gcli_pr_review_comment) {0};
-		github_parse_review_comment(input, comment);
+		github_parse_review_comment(ctx, input, comment);
 	}
 	gcli_json_advance(input, "]}");
 }
 
 static void
-github_parse_review_header(json_stream *input, gcli_pr_review *it)
+github_parse_review_header(gcli_ctx *ctx, json_stream *input,
+                           gcli_pr_review *it)
 {
 	if (json_next(input) != JSON_OBJECT)
 		errx(1, "Expected review object");
@@ -90,17 +93,17 @@ github_parse_review_header(json_stream *input, gcli_pr_review *it)
 		char const *key = json_get_string(input, &len);
 
 		if (strncmp("bodyText", key, len) == 0)
-			it->body = get_string(input);
+			it->body = get_string(ctx, input);
 		else if (strncmp("state", key, len) == 0)
-			it->state = get_string(input);
+			it->state = get_string(ctx, input);
 		else if (strncmp("id", key, len) == 0)
-			it->id = get_string(input);
+			it->id = get_string(ctx, input);
 		else if (strncmp("createdAt", key, len) == 0)
-			it->date = get_string(input);
+			it->date = get_string(ctx, input);
 		else if (strncmp("author", key, len) == 0)
-			it->author = get_user(input);
+			it->author = get_user(ctx, input);
 		else if (strncmp("comments", key, len) == 0)
-			github_parse_review_comments(input, it);
+			github_parse_review_comments(ctx, input, it);
 		else
 			SKIP_OBJECT_VALUE(input);
 	}
@@ -140,7 +143,7 @@ static char const *get_reviews_fmt =
 	"}";
 
 int
-github_review_get_reviews(char const *owner, char const *repo,
+github_review_get_reviews(gcli_ctx *ctx, char const *owner, char const *repo,
                           int const pr, gcli_pr_review_list *const out)
 {
 	gcli_fetch_buffer buffer = {0};
@@ -152,13 +155,13 @@ github_review_get_reviews(char const *owner, char const *repo,
 	enum json_type next = JSON_NULL;
 	int rc = 0;
 
-	url = sn_asprintf("%s/graphql", gcli_get_apibase());
+	url = sn_asprintf("%s/graphql", gcli_get_apibase(ctx));
 	query = sn_asprintf(get_reviews_fmt, owner, repo, pr);
 	query_escaped = gcli_json_escape(SV(query));
 	post_data = sn_asprintf("{\"query\": \""SV_FMT"\"}",
 	                        SV_ARGS(query_escaped));
 
-	rc = gcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
+	rc = gcli_fetch_with_method(ctx, "POST", url, post_data, NULL, &buffer);
 	free(url);
 	free(query);
 	free(query_escaped.data);
@@ -185,7 +188,7 @@ github_review_get_reviews(char const *owner, char const *repo,
 
 		*it = (gcli_pr_review) {0};
 
-		github_parse_review_header(&stream, it);
+		github_parse_review_header(ctx, &stream, it);
 
 		out->reviews_size++;
 	}

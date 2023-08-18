@@ -50,13 +50,14 @@ sv_append(sn_sv this, sn_sv const that)
 
 sn_sv
 gcli_editor_get_user_message(
-	void (*file_initializer)(FILE *, void *),
+	gcli_ctx *ctx,
+	void (*file_initializer)(gcli_ctx *, FILE *, void *),
 	void *user_data)
 {
 	char *editor     = getenv("EDITOR");
 	char *env_editor = editor;
 	if (!editor) {
-		editor = gcli_config_get_editor();
+		editor = gcli_config_get_editor(ctx);
 		if (!editor)
 			errx(1,
 			     "I have no editor. Either set editor=... in your config "
@@ -67,7 +68,7 @@ gcli_editor_get_user_message(
 	int    fd           = mkstemp(filename);
 
 	FILE *file = fdopen(fd, "w");
-	file_initializer(file, user_data);
+	file_initializer(ctx, file, user_data);
 	fclose(file);
 
 	pid_t pid = fork();

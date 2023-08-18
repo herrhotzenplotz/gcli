@@ -40,15 +40,14 @@
 #include <pdjson/pdjson.h>
 
 int
-gitea_get_milestones(char const *const owner,
-                     char const *const repo,
-                     int const max,
+gitea_get_milestones(gcli_ctx *ctx, char const *const owner,
+                     char const *const repo, int const max,
                      gcli_milestone_list *const out)
 {
 	char *url;
 	char *e_owner, *e_repo;
 
-	gcli_fetch_list_ctx ctx = {
+	gcli_fetch_list_ctx fl = {
 		.listp = &out->milestones,
 		.sizep = &out->milestones_size,
 		.max = max,
@@ -59,17 +58,18 @@ gitea_get_milestones(char const *const owner,
 	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/repos/%s/%s/milestones",
-	                  gcli_get_apibase(), e_owner, e_repo);
+	                  gcli_get_apibase(ctx), e_owner, e_repo);
 
 	free(e_owner);
 	free(e_repo);
 
-	return gcli_fetch_list(url, &ctx);
+	return gcli_fetch_list(ctx, url, &fl);
 }
 
 int
-gitea_get_milestone(char const *const owner, char const *const repo,
-                    int const milestone, gcli_milestone *const out)
+gitea_get_milestone(gcli_ctx *ctx, char const *const owner,
+                    char const *const repo, int const milestone,
+                    gcli_milestone *const out)
 {
 	char *url, *e_owner, *e_repo;
 	gcli_fetch_buffer buffer = {0};
@@ -78,19 +78,19 @@ gitea_get_milestone(char const *const owner, char const *const repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/milestones/%d",
-	                  gcli_get_apibase(), e_owner, e_repo, milestone);
+	url = sn_asprintf("%s/repos/%s/%s/milestones/%d", gcli_get_apibase(ctx),
+	                  e_owner, e_repo, milestone);
 
 	free(e_owner);
 	free(e_repo);
 
-	rc = gcli_fetch(url, NULL, &buffer);
+	rc = gcli_fetch(ctx, url, NULL, &buffer);
 
 	if (rc == 0) {
 		json_stream stream = {0};
 
 		json_open_buffer(&stream, buffer.data, buffer.length);
-		parse_gitea_milestone(&stream, out);
+		parse_gitea_milestone(ctx, &stream, out);
 		json_close(&stream);
 	}
 
@@ -101,15 +101,15 @@ gitea_get_milestone(char const *const owner, char const *const repo,
 }
 
 int
-gitea_create_milestone(struct gcli_milestone_create_args const *args)
+gitea_create_milestone(gcli_ctx *ctx,
+                       struct gcli_milestone_create_args const *args)
 {
-	return github_create_milestone(args);
+	return github_create_milestone(ctx, args);
 }
 
 int
-gitea_milestone_get_issues(char const *const owner,
-                           char const *const repo,
-                           int const milestone,
+gitea_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
+                           char const *const repo, int const milestone,
                            gcli_issue_list *const out)
 {
 	char *url, *e_owner, *e_repo;
@@ -118,27 +118,25 @@ gitea_milestone_get_issues(char const *const owner,
 	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/repos/%s/%s/issues?state=all&milestones=%d",
-	                  gcli_get_apibase(), e_owner, e_repo, milestone);
+	                  gcli_get_apibase(ctx), e_owner, e_repo, milestone);
 
 	free(e_repo);
 	free(e_owner);
 
-	return github_fetch_issues(url, -1, out);
+	return github_fetch_issues(ctx, url, -1, out);
 }
 
 int
-gitea_delete_milestone(char const *const owner,
-                       char const *const repo,
-                       int const milestone)
+gitea_delete_milestone(gcli_ctx *ctx, char const *const owner,
+                       char const *const repo, int const milestone)
 {
-	return github_delete_milestone(owner, repo, milestone);
+	return github_delete_milestone(ctx, owner, repo, milestone);
 }
 
 int
-gitea_milestone_set_duedate(char const *const owner,
-                            char const *const repo,
-                            int const milestone,
+gitea_milestone_set_duedate(gcli_ctx *ctx, char const *const owner,
+                            char const *const repo, int const milestone,
                             char const *const date)
 {
-	return github_milestone_set_duedate(owner, repo, milestone, date);
+	return github_milestone_set_duedate(ctx, owner, repo, milestone, date);
 }

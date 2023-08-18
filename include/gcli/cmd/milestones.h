@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,51 +27,20 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GCLI_CMD_H
-#define GCLI_CMD_H
+#ifndef GCLI_CMD_MILESTONES_H
+#define GCLI_CMD_MILESTONES_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#include <sn/sn.h>
+#include <gcli/milestones.h>
 
-static inline char *
-shift(int *argc, char ***argv)
-{
-	if (*argc == 0)
-		errx(1, "error: Not enough arguments");
+void gcli_print_milestones(gcli_ctx *ctx, gcli_milestone_list const *it,
+                           int max);
 
-	(*argc)--;
-	return *((*argv)++);
-}
+void gcli_print_milestone(gcli_ctx *ctx, gcli_milestone const *it);
 
-void version(void);
-void copyright(void);
-void check_owner_and_repo(const char **owner, const char **repo);
-
-void parse_labels_options(
-	int *argc, char ***argv,
-	const char ***_add_labels, size_t *_add_labels_size,
-	const char ***_remove_labels, size_t *_remove_labels_size);
-
-void delete_repo(bool always_yes, const char *owner, const char *repo);
-
-/* List of subcommand entry points */
-int subcommand_api(int argc, char *argv[]);
-int subcommand_ci(int argc, char *argv[]);
-int subcommand_comment(int argc, char *argv[]);
-int subcommand_config(int argc, char *argv[]);
-int subcommand_forks(int argc, char *argv[]);
-int subcommand_gists(int argc, char *argv[]);
-int subcommand_issues(int argc, char *argv[]);
-int subcommand_labels(int argc, char *argv[]);
 int subcommand_milestones(int argc, char *argv[]);
-int subcommand_pipelines(int argc, char *argv[]);
-int subcommand_pulls(int argc, char *argv[]);
-int subcommand_releases(int argc, char *argv[]);
-int subcommand_repos(int argc, char *argv[]);
-int subcommand_snippets(int argc, char *argv[]);
-int subcommand_status(int argc, char *argv[]);
 
-#endif /* GCLI_CMD_H */
+#endif /* GCLI_CMD_MILESTONES_H */

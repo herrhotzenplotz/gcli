@@ -38,11 +38,14 @@
 #include <templates/github/repos.h>
 
 int
-github_get_repos(char const *owner, int const max, gcli_repo_list *const list)
+github_get_repos(gcli_ctx *ctx, char const *owner, int const max,
+                 gcli_repo_list *const list)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
-	gcli_fetch_list_ctx ctx = {
+	int rc = 0;
+
+	gcli_fetch_list_ctx lf = {
 		.listp = &list->repos,
 		.sizep = &list->repos_size,
 		.max = max,
@@ -54,44 +57,53 @@ github_get_repos(char const *owner, int const max, gcli_repo_list *const list)
 	/* Github is a little stupid in that it distinguishes
 	 * organizations and users. Thus, we have to find out, whether the
 	 * <org> param is a user or an actual organization. */
-	url = sn_asprintf("%s/users/%s", gcli_get_apibase(), e_owner);
-	if (gcli_curl_test_success(url)) {
+	url = sn_asprintf("%s/users/%s", gcli_get_apibase(ctx), e_owner);
+
+	/* 0 = failed, 1 = success, -1 = error (just like a BOOL in Win32
+	 * /sarc) */
+	rc = gcli_curl_test_success(ctx, url);
+	if (rc < 0) {
+		free(url);
+		return rc;
+	}
+
+	if (rc) {
 		/* it is a user */
 		free(url);
 		url = sn_asprintf("%s/users/%s/repos",
-		                  gcli_get_apibase(),
+		                  gcli_get_apibase(ctx),
 		                  e_owner);
 	} else {
 		/* this is an actual organization */
 		free(url);
 		url = sn_asprintf("%s/orgs/%s/repos",
-		                  gcli_get_apibase(),
+		                  gcli_get_apibase(ctx),
 		                  e_owner);
 	}
 
 	free(e_owner);
 
-	return gcli_fetch_list(url, &ctx);
+	return gcli_fetch_list(ctx, url, &lf);
 }
 
 int
-github_get_own_repos(int const max, gcli_repo_list *const list)
+github_get_own_repos(gcli_ctx *ctx, int const max, gcli_repo_list *const list)
 {
 	char *url = NULL;
-	gcli_fetch_list_ctx ctx = {
+	gcli_fetch_list_ctx fl = {
 		.listp = &list->repos,
 		.sizep = &list->repos_size,
 		.max = max,
 		.parse = (parsefn)(parse_github_repos),
 	};
 
-	url = sn_asprintf("%s/user/repos", gcli_get_apibase());
+	url = sn_asprintf("%s/user/repos", gcli_get_apibase(ctx));
 
-	return gcli_fetch_list(url, &ctx);
+	return gcli_fetch_list(ctx, url, &fl);
 }
 
 int
-github_repo_delete(char const *owner, char const *repo)
+github_repo_delete(gcli_ctx *ctx, char const *owner, char const *repo)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -102,10 +114,10 @@ github_repo_delete(char const *owner, char const *repo)
 	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/repos/%s/%s",
-	                  gcli_get_apibase(),
+	                  gcli_get_apibase(ctx),
 	                  e_owner, e_repo);
 
-	rc = gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
+	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
 	free(e_owner);
 	free(e_repo);
@@ -115,7 +127,7 @@ github_repo_delete(char const *owner, char const *repo)
 }
 
 int
-github_repo_create(gcli_repo_create_options const *options,
+github_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *options,
                    gcli_repo *const out)
 {
 	char *url, *data;
@@ -125,7 +137,7 @@ github_repo_create(gcli_repo_create_options const *options,
 	int rc = 0;
 
 	/* Request preparation */
-	url = sn_asprintf("%s/user/repos", gcli_get_apibase());
+	url = sn_asprintf("%s/user/repos", gcli_get_apibase(ctx));
 
 	/* JSON-escape repo name and description */
 	e_name = gcli_json_escape(options->name);
@@ -139,11 +151,12 @@ github_repo_create(gcli_repo_create_options const *options,
 	                   gcli_json_bool(options->private));
 
 	/* Fetch and parse result */
-	rc = gcli_fetch_with_method("POST", url, data, NULL, out ? &buffer : NULL);
+	rc = gcli_fetch_with_method(ctx, "POST", url, data, NULL,
+	                            out ? &buffer : NULL);
 
 	if (rc == 0 && out) {
 		json_open_buffer(&stream, buffer.data, buffer.length);
-		parse_github_repo(&stream, out);
+		parse_github_repo(ctx, &stream, out);
 		json_close(&stream);
 	}
 

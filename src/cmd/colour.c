@@ -27,7 +27,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/colour.h>
+#include <gcli/cmd/cmd.h>
+#include <gcli/cmd/colour.h>
+
 #include <gcli/config.h>
 
 #include <stdlib.h>
@@ -69,7 +71,7 @@ gcli_setcolour256(uint32_t const code)
 	char       *result    = NULL;
 	char const *oldresult = NULL;
 
-	if (!gcli_config_have_colours())
+	if (!gcli_config_have_colours(g_clictx))
 		return "";
 
 	if (colour_table_size == 0)
@@ -92,7 +94,7 @@ gcli_setcolour256(uint32_t const code)
 const char *
 gcli_resetcolour(void)
 {
-	if (!gcli_config_have_colours())
+	if (!gcli_config_have_colours(g_clictx))
 		return "";
 
 	return "\033[m";
@@ -101,7 +103,7 @@ gcli_resetcolour(void)
 const char *
 gcli_setcolour(int code)
 {
-	if (!gcli_config_have_colours())
+	if (!gcli_config_have_colours(g_clictx))
 		return "";
 
 	switch (code) {
@@ -123,7 +125,7 @@ gcli_setcolour(int code)
 char const *
 gcli_setbold(void)
 {
-	if (!gcli_config_have_colours())
+	if (!gcli_config_have_colours(g_clictx))
 		return "";
 	else
 		return "\033[1m";
@@ -132,7 +134,7 @@ gcli_setbold(void)
 char const *
 gcli_resetbold(void)
 {
-	if (!gcli_config_have_colours())
+	if (!gcli_config_have_colours(g_clictx))
 		return "";
 	else
 		return "\033[22m";

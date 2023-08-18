@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([gcli],[1.3.0-devel],[nsonack@herrhotzenplotz.de],[gcli],[https://gitlab.com/herrhotzenplotz/gcli/])
+AC_INIT([gcli],[2.0.0-devel],[nsonack@herrhotzenplotz.de],[gcli],[https://gitlab.com/herrhotzenplotz/gcli/])
 AM_INIT_AUTOMAKE([1.0 foreign subdir-objects dist-bzip2 dist-xz -Wall])
 
 dnl Release Date.
@@ -50,7 +50,7 @@ AC_CHECK_LIB([curl],[curl_easy_init],,[AC_MSG_ERROR([-lcurl doesn not contain cu
 dnl Go looking for headers that may define getopt_long
 AC_CHECK_HEADERS([getopt.h unistd.h])
 dnl Other headers that we require
-AC_CHECK_HEADERS([string.h signal.h sys/wait.h unistd.h sys/mman.h sys/types.h],
+AC_CHECK_HEADERS([string.h signal.h sys/wait.h unistd.h sys/mman.h sys/types.h sys/queue.h],
                  ,
                  [AC_MSG_ERROR([Required header not found])])
 

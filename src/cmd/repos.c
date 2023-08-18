@@ -29,7 +29,10 @@
 
 #include <config.h>
 
-#include <gcli/cmd.h>
+#include <gcli/cmd/cmd.h>
+#include <gcli/cmd/repos.h>
+#include <gcli/cmd/table.h>
+
 #include <gcli/repos.h>
 
 #ifdef HAVE_GETOPT_H
@@ -53,6 +56,73 @@ usage(void)
 	fprintf(stderr, "\n");
 	version();
 	copyright();
+}
+
+void
+gcli_print_repos(enum gcli_output_flags const flags,
+                 gcli_repo_list const *const list, int const max)
+{
+	size_t n;
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "FORK",     .type = GCLI_TBLCOLTYPE_BOOL, .flags = 0 },
+		{ .name = "VISBLTY",  .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
+		{ .name = "DATE",     .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
+		{ .name = "FULLNAME", .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
+	};
+
+	if (list->repos_size == 0) {
+		puts("No repos");
+		return;
+	}
+
+	/* Determine number of repos to print */
+	if (max < 0 || (size_t)(max) > list->repos_size)
+		n = list->repos_size;
+	else
+		n = max;
+
+	/* init table */
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
+		errx(1, "error: could not init table");
+
+	/* put data into table */
+	if (flags & OUTPUT_SORTED) {
+		for (size_t i = 0; i < n; ++i)
+			gcli_tbl_add_row(table,
+			                 list->repos[n-i-1].is_fork,
+			                 list->repos[n-i-1].visibility,
+			                 list->repos[n-i-1].date,
+			                 list->repos[n-i-1].full_name);
+	} else {
+		for (size_t i = 0; i < n; ++i)
+			gcli_tbl_add_row(table,
+			                 list->repos[i].is_fork,
+			                 list->repos[i].visibility,
+			                 list->repos[i].date,
+			                 list->repos[i].full_name);
+	}
+
+	/* print it */
+	gcli_tbl_end(table);
+}
+
+void
+gcli_repo_print(gcli_repo const *it)
+{
+	gcli_dict dict;
+
+	dict = gcli_dict_begin();
+	gcli_dict_add(dict, "ID",         0, 0, "%d", it->id);
+	gcli_dict_add(dict, "FULL NAME",  0, 0, SV_FMT, SV_ARGS(it->full_name));
+	gcli_dict_add(dict, "NAME",       0, 0, SV_FMT, SV_ARGS(it->name));
+	gcli_dict_add(dict, "OWNER",      0, 0, SV_FMT, SV_ARGS(it->owner));
+	gcli_dict_add(dict, "DATE",       0, 0, SV_FMT, SV_ARGS(it->date));
+	gcli_dict_add(dict, "VISIBILITY", 0, 0, SV_FMT, SV_ARGS(it->visibility));
+	gcli_dict_add(dict, "IS FORK",    0, 0, "%s", sn_bool_yesno(it->is_fork));
+
+	gcli_dict_end(dict);
 }
 
 static int
@@ -107,7 +177,7 @@ subcommand_repos_create(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	if (gcli_repo_create(&create_options, &repo) < 0)
+	if (gcli_repo_create(g_clictx, &create_options, &repo) < 0)
 		errx(1, "error: failed to create repository");
 
 	gcli_repo_print(&repo);
@@ -200,14 +270,14 @@ subcommand_repos(int argc, char *argv[])
 		}
 
 		if (!owner)
-		    rc = gcli_get_own_repos(n, &repos);
+			rc = gcli_get_own_repos(g_clictx, n, &repos);
 		else
-			rc = gcli_get_repos(owner, n, &repos);
+			rc = gcli_get_repos(g_clictx, owner, n, &repos);
 
 		if (rc < 0)
 			errx(1, "error: failed to fetch repos");
 
-		gcli_print_repos_table(flags, &repos, n);
+		gcli_print_repos(flags, &repos, n);
 		gcli_repos_free(&repos);
 	} else {
 		check_owner_and_repo(&owner, &repo);

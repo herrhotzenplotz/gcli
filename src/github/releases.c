@@ -39,14 +39,14 @@
 #include <templates/github/releases.h>
 
 int
-github_get_releases(char const *owner, char const *repo,
+github_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
                     int const max, gcli_release_list *const list)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
 	char *e_repo = NULL;
 
-	gcli_fetch_list_ctx ctx = {
+	gcli_fetch_list_ctx fl = {
 		.listp = &list->releases,
 		.sizep = &list->releases_size,
 		.max = max,
@@ -60,23 +60,24 @@ github_get_releases(char const *owner, char const *repo,
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/releases",
-		gcli_get_apibase(),
+		gcli_get_apibase(ctx),
 		e_owner, e_repo);
 
 	free(e_owner);
 	free(e_repo);
 
-	return gcli_fetch_list(url, &ctx);
+	return gcli_fetch_list(ctx, url, &fl);
 }
 
 static void
-github_parse_single_release(gcli_fetch_buffer buffer, gcli_release *const out)
+github_parse_single_release(gcli_ctx *ctx, gcli_fetch_buffer buffer,
+                            gcli_release *const out)
 {
 	struct json_stream stream = {0};
 
 	json_open_buffer(&stream, buffer.data, buffer.length);
 	json_set_streaming(&stream, 1);
-	parse_github_release(&stream, out);
+	parse_github_release(ctx, &stream, out);
 	json_close(&stream);
 }
 
@@ -92,7 +93,7 @@ github_get_upload_url(gcli_release *const it)
 }
 
 static int
-github_upload_release_asset(char const *url,
+github_upload_release_asset(gcli_ctx *ctx, char const *url,
                             gcli_release_asset_upload const asset)
 {
 	char *req = NULL;
@@ -108,6 +109,7 @@ github_upload_release_asset(char const *url,
 	req = sn_asprintf("%s?name=%s", url, asset.name);
 
 	rc = gcli_post_upload(
+		ctx,
 		req,
 		"application/octet-stream", /* HACK */
 		file_content.data,
@@ -121,7 +123,7 @@ github_upload_release_asset(char const *url,
 }
 
 int
-github_create_release(gcli_new_release const *release)
+github_create_release(gcli_ctx *ctx, gcli_new_release const *release)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -143,7 +145,7 @@ github_create_release(gcli_new_release const *release)
 	/* https://docs.github.com/en/rest/reference/repos#create-a-release */
 	url = sn_asprintf(
 		"%s/repos/%s/%s/releases",
-		gcli_get_apibase(), e_owner, e_repo);
+		gcli_get_apibase(ctx), e_owner, e_repo);
 
 	escaped_body = gcli_json_escape(release->body);
 
@@ -173,11 +175,11 @@ github_create_release(gcli_new_release const *release)
 		commitish_json ? commitish_json : "",
 		name_json ? name_json : "");
 
-	rc = gcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
+	rc = gcli_fetch_with_method(ctx, "POST", url, post_data, NULL, &buffer);
 	if (rc < 0)
 		goto out;
 
-	github_parse_single_release(buffer, &response);
+	github_parse_single_release(ctx, buffer, &response);
 
 	printf("INFO : Release at "SV_FMT"\n", SV_ARGS(response.html_url));
 
@@ -185,7 +187,7 @@ github_create_release(gcli_new_release const *release)
 
 	for (size_t i = 0; i < release->assets_size; ++i) {
 		printf("INFO : Uploading asset %s...\n", release->assets[i].path);
-		rc = github_upload_release_asset(upload_url, release->assets[i]);
+		rc = github_upload_release_asset(ctx, upload_url, release->assets[i]);
 
 		if (rc < 0)
 			break;
@@ -206,7 +208,8 @@ out:
 }
 
 int
-github_delete_release(char const *owner, char const *repo, char const *id)
+github_delete_release(gcli_ctx *ctx, char const *owner, char const *repo,
+                      char const *id)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -218,9 +221,9 @@ github_delete_release(char const *owner, char const *repo, char const *id)
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/releases/%s",
-		gcli_get_apibase(), e_owner, e_repo, id);
+		gcli_get_apibase(ctx), e_owner, e_repo, id);
 
-	rc = gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
+	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
 	free(url);
 	free(e_owner);

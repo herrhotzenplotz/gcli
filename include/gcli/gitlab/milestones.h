@@ -36,30 +36,24 @@
 
 #include <gcli/milestones.h>
 
-int gitlab_get_milestones(char const *owner,
-                          char const *repo,
-                          int max,
-                          gcli_milestone_list *const out);
+int gitlab_get_milestones(gcli_ctx *ctx, char const *owner, char const *repo,
+                          int max, gcli_milestone_list *const out);
 
-int gitlab_create_milestone(struct gcli_milestone_create_args const *args);
+int gitlab_create_milestone(gcli_ctx *ctx,
+                            struct gcli_milestone_create_args const *args);
 
-int gitlab_delete_milestone(char const *owner,
-                            char const *repo,
-                            int milestone);
+int gitlab_delete_milestone(gcli_ctx *ctx, char const *owner,
+                            char const *repo, int milestone);
 
-int gitlab_get_milestone(char const *owner,
-                         char const *repo,
-                         int milestone,
-                         gcli_milestone *out);
+int gitlab_get_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
+                         int milestone, gcli_milestone *out);
 
-int gitlab_milestone_get_issues(char const *owner,
-                                char const *repo,
-                                int milestone,
+int gitlab_milestone_get_issues(gcli_ctx *ctx, char const *owner,
+                                char const *repo, int milestone,
                                 gcli_issue_list *out);
 
-int gitlab_milestone_set_duedate(char const *owner,
-                                 char const *repo,
-                                 int milestone,
+int gitlab_milestone_set_duedate(gcli_ctx *ctx, char const *owner,
+                                 char const *repo, int milestone,
                                  char const *date);
 
 #endif /* GCLI_GITLAB_MILESTONES_H */

@@ -38,14 +38,14 @@
 #include <templates/github/forks.h>
 
 int
-github_get_forks(char const *owner, char const *repo,
+github_get_forks(gcli_ctx *ctx, char const *owner, char const *repo,
                  int const max, gcli_fork_list *const list)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
 	char *e_repo = NULL;
 
-	gcli_fetch_list_ctx ctx = {
+	gcli_fetch_list_ctx fl = {
 		.listp = &list->forks,
 		.sizep = &list->forks_size,
 		.max = max,
@@ -59,17 +59,18 @@ github_get_forks(char const *owner, char const *repo,
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/forks",
-		gcli_get_apibase(),
+		gcli_get_apibase(ctx),
 		e_owner, e_repo);
 
 	free(e_owner);
 	free(e_repo);
 
-	return gcli_fetch_list(url, &ctx);
+	return gcli_fetch_list(ctx, url, &fl);
 }
 
 int
-github_fork_create(char const *owner, char const *repo, char const *_in)
+github_fork_create(gcli_ctx *ctx, char const *owner, char const *repo,
+                   char const *_in)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -82,7 +83,7 @@ github_fork_create(char const *owner, char const *repo, char const *_in)
 	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/repos/%s/%s/forks",
-	                  gcli_get_apibase(),
+	                  gcli_get_apibase(ctx),
 	                  e_owner, e_repo);
 	if (_in) {
 		in = gcli_json_escape(SV((char *)_in));
@@ -90,7 +91,7 @@ github_fork_create(char const *owner, char const *repo, char const *_in)
 		                        SV_ARGS(in));
 	}
 
-	rc = gcli_fetch_with_method("POST", url, post_data, NULL, NULL);
+	rc = gcli_fetch_with_method(ctx, "POST", url, post_data, NULL, NULL);
 
 	free(in.data);
 	free(url);

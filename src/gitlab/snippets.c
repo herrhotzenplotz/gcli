@@ -31,7 +31,7 @@
 #include <gcli/gitlab/config.h>
 #include <gcli/gitlab/snippets.h>
 #include <gcli/json_util.h>
-#include <gcli/table.h>
+#include <gcli/cmd/table.h>
 
 #include <pdjson/pdjson.h>
 #include <sn/sn.h>
@@ -59,11 +59,11 @@ gcli_snippets_free(gcli_snippet_list *const list)
 }
 
 int
-gcli_snippets_get(int const max, gcli_snippet_list *const out)
+gcli_snippets_get(gcli_ctx *ctx, int const max, gcli_snippet_list *const out)
 {
 	char *url = NULL;
 
-	gcli_fetch_list_ctx ctx = {
+	gcli_fetch_list_ctx fl = {
 		.listp = &out->snippets,
 		.sizep = &out->snippets_size,
 		.max = max,
@@ -71,125 +71,19 @@ gcli_snippets_get(int const max, gcli_snippet_list *const out)
 	};
 
 	*out = (gcli_snippet_list) {0};
-	url = sn_asprintf("%s/snippets", gitlab_get_apibase());
+	url = sn_asprintf("%s/snippets", gitlab_get_apibase(ctx));
 
-	return gcli_fetch_list(url, &ctx);;
-}
-
-static void
-gcli_print_snippet(enum gcli_output_flags const flags,
-                   gcli_snippet const *const it)
-{
-	gcli_dict dict;
-
-	(void) flags;
-
-	dict = gcli_dict_begin();
-
-	gcli_dict_add(dict,        "ID",     0, 0, "%d", it->id);
-	gcli_dict_add_string(dict, "TITLE",  0, 0, it->title);
-	gcli_dict_add_string(dict, "AUTHOR", 0, 0, it->author);
-	gcli_dict_add_string(dict, "FILE",   0, 0, it->filename);
-	gcli_dict_add_string(dict, "DATE",   0, 0, it->date);
-	gcli_dict_add_string(dict, "VSBLTY", 0, 0, it->visibility);
-	gcli_dict_add_string(dict, "URL",    0, 0, it->raw_url);
-
-	gcli_dict_end(dict);
-}
-
-static void
-gcli_print_snippets_long(enum gcli_output_flags const flags,
-                         gcli_snippet_list const *const list,
-                         int const max)
-{
-	int n;
-
-	/* Determine number of items to print */
-	if (max < 0 || (size_t)(max) > list->snippets_size)
-		n = list->snippets_size;
-	else
-		n = max;
-
-	if (flags & OUTPUT_SORTED) {
-		for (int i = 0; i < n; ++i)
-			gcli_print_snippet(flags, &list->snippets[n-i-1]);
-	} else {
-		for (int i = 0; i < n; ++i)
-			gcli_print_snippet(flags, &list->snippets[i]);
-	}
-}
-
-static void
-gcli_print_snippets_short(enum gcli_output_flags const flags,
-                          gcli_snippet_list const *const list,
-                          int const max)
-{
-	int n;
-	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
-		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
-		{ .name = "DATE",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "VISIBILITY", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "AUTHOR",     .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "TITLE",      .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-	};
-
-	/* Determine number of items to print */
-	if (max < 0 || (size_t)(max) > list->snippets_size)
-		n = list->snippets_size;
-	else
-		n = max;
-
-	/* Fill table */
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
-	if (!table)
-		errx(1, "error: could not init table");
-
-	if (flags & OUTPUT_SORTED) {
-		for (int i = 0; i < n; ++i)
-			gcli_tbl_add_row(table,
-			                 list->snippets[n-i-1].id,
-			                 list->snippets[n-i-1].date,
-			                 list->snippets[n-i-1].visibility,
-			                 list->snippets[n-i-1].author,
-			                 list->snippets[n-i-1].title);
-	} else {
-		for (int i = 0; i < n; ++i)
-			gcli_tbl_add_row(table,
-			                 list->snippets[i].id,
-			                 list->snippets[i].date,
-			                 list->snippets[i].visibility,
-			                 list->snippets[i].author,
-			                 list->snippets[i].title);
-	}
-
-	gcli_tbl_end(table);
-}
-
-void
-gcli_snippets_print(enum gcli_output_flags const flags,
-                    gcli_snippet_list const *const list,
-                    int const max)
-{
-	if (list->snippets_size == 0) {
-		puts("No Snippets");
-		return;
-	}
-
-	if (flags & OUTPUT_LONG)
-		gcli_print_snippets_long(flags, list, max);
-	else
-		gcli_print_snippets_short(flags, list, max);
+	return gcli_fetch_list(ctx, url, &fl);
 }
 
 int
-gcli_snippet_delete(char const *snippet_id)
+gcli_snippet_delete(gcli_ctx *ctx, char const *snippet_id)
 {
 	int rc = 0;
 	char *url;
 
-	url = sn_asprintf("%s/snippets/%s", gitlab_get_apibase(), snippet_id);
-	rc = gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
+	url = sn_asprintf("%s/snippets/%s", gitlab_get_apibase(ctx), snippet_id);
+	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
 	free(url);
 
@@ -197,13 +91,13 @@ gcli_snippet_delete(char const *snippet_id)
 }
 
 int
-gcli_snippet_get(char const *snippet_id)
+gcli_snippet_get(gcli_ctx *ctx, char const *snippet_id, FILE *stream)
 {
 	int rc = 0;
 	char *url = sn_asprintf("%s/snippets/%s/raw",
-	                        gitlab_get_apibase(),
+	                        gitlab_get_apibase(ctx),
 	                        snippet_id);
-	rc = gcli_curl(stdout, url, NULL);
+	rc = gcli_curl(ctx, stream, url, NULL);
 	free(url);
 
 	return rc;

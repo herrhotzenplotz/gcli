@@ -98,7 +98,7 @@ github_forge_descriptor =
 	.get_milestone_issues      = github_milestone_get_issues,
 	.get_pulls                 = github_get_pulls,
 	.print_pull_diff           = github_print_pull_diff,
-	.print_pull_checks         = github_pull_checks,
+	.get_pull_checks           = github_pull_get_checks,
 	.pull_merge                = github_pull_merge,
 	.pull_reopen               = github_pull_reopen,
 	.pull_close                = github_pull_close,
@@ -173,7 +173,7 @@ gitlab_forge_descriptor =
 	.issue_clear_milestone     = gitlab_issue_clear_milestone,
 	.get_pulls                 = gitlab_get_mrs,
 	.print_pull_diff           = gitlab_print_pr_diff,
-	.print_pull_checks         = gitlab_mr_pipelines,
+	.get_pull_checks           = (gcli_get_pull_checks_cb)gitlab_get_mr_pipelines,
 	.pull_merge                = gitlab_mr_merge,
 	.pull_reopen               = gitlab_mr_reopen,
 	.pull_close                = gitlab_mr_close,
@@ -237,7 +237,7 @@ gitea_forge_descriptor =
 	.create_label              = gitea_create_label,
 	.delete_label              = gitea_delete_label,
 	.get_pulls                 = gitea_get_pulls,
-	.print_pull_checks         = gitea_pull_checks, /* stub */
+	.get_pull_checks           = gitea_pull_get_checks, /* stub, will always return an error */
 	.pull_merge                = gitea_pull_merge,
 	.pull_reopen               = gitea_pull_reopen,
 	.pull_close                = gitea_pull_close,
@@ -279,9 +279,9 @@ gitea_forge_descriptor =
 };
 
 gcli_forge_descriptor const *
-gcli_forge(void)
+gcli_forge(gcli_ctx *ctx)
 {
-	switch (gcli_config_get_forge_type()) {
+	switch (gcli_config_get_forge_type(ctx)) {
 	case GCLI_FORGE_GITHUB:
 		return &github_forge_descriptor;
 	case GCLI_FORGE_GITLAB:

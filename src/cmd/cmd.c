@@ -31,7 +31,7 @@
 #include <config.h>
 #endif
 
-#include <gcli/cmd.h>
+#include <gcli/cmd/cmd.h>
 #include <gcli/config.h>
 #include <gcli/repos.h>
 
@@ -67,7 +67,7 @@ check_owner_and_repo(const char **owner, const char **repo)
 		errx(1, "error: missing either explicit owner or repo");
 
 	if (*owner == NULL)
-		gcli_config_get_repo(owner, repo);
+		gcli_config_get_repo(g_clictx, owner, repo);
 }
 
 /* Parses (and updates) the given argument list into two seperate lists:
@@ -132,6 +132,6 @@ delete_repo(bool always_yes, const char *owner, const char *repo)
 	if (!delete)
 		errx(1, "Operation aborted");
 
-	if (gcli_repo_delete(owner, repo) < 0)
+	if (gcli_repo_delete(g_clictx, owner, repo) < 0)
 		errx(1, "error: failed to delete repo");
 }

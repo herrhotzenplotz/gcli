@@ -29,7 +29,7 @@
 
 #include <config.h>
 
-#include <gcli/cmd.h>
+#include <gcli/cmd/cmd.h>
 #include <gcli/config.h>
 #include <gcli/curl.h>
 #include <gcli/github/gists.h>
@@ -66,12 +66,12 @@ subcommand_gist_get(int argc, char *argv[])
 {
 	shift(&argc, &argv); /* Discard the *get* */
 
-	char const     *gist_id   = shift(&argc, &argv);
-	char const     *file_name = shift(&argc, &argv);
-	gcli_gist      *gist      = NULL;
-	gcli_gist_file *file      = NULL;
+	char const *gist_id = shift(&argc, &argv);
+	char const *file_name = shift(&argc, &argv);
+	gcli_gist *gist = NULL;
+	gcli_gist_file *file = NULL;
 
-	gist = gcli_get_gist(gist_id);
+	gist = gcli_get_gist(g_clictx, gist_id);
 
 	for (size_t f = 0; f < gist->files_size; ++f) {
 		if (sn_sv_eq_to(gist->files[f].filename, file_name)) {
@@ -88,7 +88,7 @@ file_found:
 	if (isatty(STDOUT_FILENO) && (file->size >= 4 * 1024 * 1024))
 		errx(1, "File is bigger than 4 MiB, refusing to print to stdout.");
 
-	if (gcli_curl(stdout, file->url.data, file->type.data) < 0)
+	if (gcli_curl(g_clictx, stdout, file->url.data, file->type.data) < 0)
 		errx(1, "error: failed to fetch gist");
 
 	return EXIT_SUCCESS;
@@ -149,7 +149,8 @@ subcommand_gist_create(int argc, char *argv[])
 	if (!opts.gist_description)
 		opts.gist_description = "gcli paste";
 
-	gcli_create_gist(opts);
+	if (gcli_create_gist(g_clictx, opts) < 0)
+		errx(1, "error: failed to create gist");
 
 	return EXIT_SUCCESS;
 }
@@ -185,7 +186,7 @@ subcommand_gist_delete(int argc, char *argv[])
 	argv += optind;
 
 	gist_id = shift(&argc, &argv);
-	gcli_delete_gist(gist_id, always_yes);
+	gcli_delete_gist(g_clictx, gist_id, always_yes);
 
 	return EXIT_SUCCESS;
 }
@@ -209,7 +210,7 @@ subcommand_gists(int argc, char *argv[])
 	enum gcli_output_flags  flags = 0;
 
 	/* Make sure we are looking at a GitHub forge */
-	if (gcli_config_get_forge_type() != GCLI_FORGE_GITHUB) {
+	if (gcli_config_get_forge_type(g_clictx) != GCLI_FORGE_GITHUB) {
 		errx(1, "error: The gists subcommand only works for Github "
 		     "forges. Please use either -a or -t to force using a "
 		     "Github account.");
@@ -270,8 +271,10 @@ subcommand_gists(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-    gcli_get_gists(user, count, &gists);
-	gcli_print_gists(flags, &gists, count);
+	if (gcli_get_gists(g_clictx, user, count, &gists) < 0)
+		errx(1, "error: failed to get gists");
+
+	gcli_print_gists(g_clictx, flags, &gists, count);
 	gcli_gists_free(&gists);
 
 	return EXIT_SUCCESS;

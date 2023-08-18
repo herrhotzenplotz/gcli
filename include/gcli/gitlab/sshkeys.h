@@ -36,10 +36,11 @@
 
 #include <gcli/sshkeys.h>
 
-int gitlab_get_sshkeys(gcli_sshkey_list *list);
-int gitlab_add_sshkey(char const *const title,
-                      char const *const pubkey,
-                      gcli_sshkey *const out);
-int gitlab_delete_sshkey(int id);
+int gitlab_get_sshkeys(gcli_ctx *ctx, gcli_sshkey_list *list);
+
+int gitlab_add_sshkey(gcli_ctx *ctx, char const *const title,
+                      char const *const pubkey, gcli_sshkey *const out);
+
+int gitlab_delete_sshkey(gcli_ctx *ctx, int id);
 
 #endif /* GCLI_GITLAB_SSHKEYS_H */

@@ -35,7 +35,10 @@
 
 #include <stdlib.h>
 
-#include <gcli/cmd.h>
+#include <gcli/cmd/cmd.h>
+#include <gcli/cmd/forks.h>
+#include <gcli/cmd/table.h>
+
 #include <gcli/config.h>
 #include <gcli/gitconfig.h>
 #include <gcli/forks.h>
@@ -55,6 +58,55 @@ usage(void)
 	fprintf(stderr, "\n");
 	version();
 	copyright();
+}
+
+void
+gcli_print_forks(enum gcli_output_flags const flags,
+                 gcli_fork_list const *const list, int const max)
+{
+	size_t n;
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "OWNER",    .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_BOLD },
+		{ .name = "DATE",     .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
+		{ .name = "FORKS",    .type = GCLI_TBLCOLTYPE_INT, .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "FULLNAME", .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
+	};
+
+	if (list->forks_size == 0) {
+		puts("No forks");
+		return;
+	}
+
+	/* Determine number of items to print */
+	if (max < 0 || (size_t)(max) > list->forks_size)
+		n = list->forks_size;
+	else
+		n = max;
+
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
+		errx(1, "error: could not initialize table");
+
+	if (flags & OUTPUT_SORTED) {
+		for (size_t i = 0; i < n; ++i) {
+			gcli_tbl_add_row(table,
+			                 list->forks[n-i-1].owner,
+			                 list->forks[n-i-1].date,
+			                 list->forks[n-i-1].forks,
+			                 list->forks[n-i-1].full_name);
+		}
+	} else {
+		for (size_t i = 0; i < n; ++i) {
+			gcli_tbl_add_row(table,
+			                 list->forks[i].owner,
+			                 list->forks[i].date,
+			                 list->forks[i].forks,
+			                 list->forks[i].full_name);
+		}
+	}
+
+	gcli_tbl_end(table);
 }
 
 static int
@@ -110,7 +162,7 @@ subcommand_forks_create(int argc, char *argv[])
 
 	check_owner_and_repo(&owner, &repo);
 
-	if (gcli_fork_create(owner, repo, in) < 0)
+	if (gcli_fork_create(g_clictx, owner, repo, in) < 0)
 		errx(1, "error: failed to fork repository");
 
 	if (!always_yes) {
@@ -119,7 +171,7 @@ subcommand_forks_create(int argc, char *argv[])
 	}
 
 	if (!in)
-		in = sn_sv_to_cstr(gcli_config_get_account());
+		in = sn_sv_to_cstr(gcli_config_get_account(g_clictx));
 
 	gcli_gitconfig_add_fork_remote(in, repo);
 
@@ -129,12 +181,12 @@ subcommand_forks_create(int argc, char *argv[])
 int
 subcommand_forks(int argc, char *argv[])
 {
-	gcli_fork_list          forks      = {0};
-	char const             *owner      = NULL, *repo = NULL;
-	int                     ch         = 0;
-	int                     count      = 30;
-	bool                    always_yes = false;
-	enum gcli_output_flags  flags      = 0;
+	gcli_fork_list forks = {0};
+	char const *owner = NULL, *repo = NULL;
+	int ch = 0;
+	int count = 30;
+	bool always_yes = false;
+	enum gcli_output_flags flags = 0;
 
 	/* detect whether we wanna create a fork */
 	if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
@@ -203,8 +255,9 @@ subcommand_forks(int argc, char *argv[])
 	check_owner_and_repo(&owner, &repo);
 
 	if (argc == 0) {
-		if (gcli_get_forks(owner, repo, count, &forks) < 0)
-			errx(1, "error: could not get forks");
+		if (gcli_get_forks(g_clictx, owner, repo, count, &forks) < 0)
+			errx(1, "error: could not get forks: %s",
+			     gcli_get_error(g_clictx));
 
 		gcli_print_forks(flags, &forks, count);
 		gcli_forks_free(&forks);

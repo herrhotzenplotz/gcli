@@ -34,7 +34,12 @@
 #include <config.h>
 #endif
 
+#include <gcli/gcli.h>
+
 #include <stdlib.h>
+
+typedef struct gcli_notification gcli_notification;
+typedef struct gcli_notification_list gcli_notification_list;
 
 struct gcli_notification {
 	char *id;
@@ -45,16 +50,13 @@ struct gcli_notification {
 	char *repository;
 };
 
-typedef struct gcli_notification gcli_notification;
+struct gcli_notification_list {
+	gcli_notification *notifications;
+	size_t notifications_size;
+};
 
-void gcli_status(int count);
-
-int gcli_get_notifications(gcli_notification **out, int count);
-
-int gcli_notification_mark_as_read(char const *id);
-
-void gcli_free_notifications(gcli_notification *, size_t);
-
-void gcli_print_notifications(gcli_notification const *, size_t);
+int gcli_get_notifications(gcli_ctx *ctx, int count, gcli_notification_list *out);
+int gcli_notification_mark_as_read(gcli_ctx *ctx, char const *id);
+void gcli_free_notifications(gcli_notification_list *);
 
 #endif /* STATUS_H */

@@ -27,19 +27,14 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/colour.h>
-#include <gcli/config.h>
 #include <gcli/forges.h>
 #include <gcli/labels.h>
-#include <gcli/table.h>
 
 int
-gcli_get_labels(char const *owner,
-                char const *reponame,
-                int const max,
-                gcli_label_list *const out)
+gcli_get_labels(gcli_ctx *ctx, char const *owner, char const *reponame,
+                int const max, gcli_label_list *const out)
 {
-	return gcli_forge()->get_labels(owner, reponame, max, out);
+	return gcli_forge(ctx)->get_labels(ctx, owner, reponame, max, out);
 }
 
 void
@@ -60,49 +55,16 @@ gcli_free_labels(gcli_label_list *const list)
 	list->labels_size = 0;
 }
 
-void
-gcli_print_labels(gcli_label_list const *const list, int const max)
+int
+gcli_create_label(gcli_ctx *ctx, char const *owner, char const *repo,
+                  gcli_label *const label)
 {
-	size_t n;
-	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
-		{ .name = "ID",          .type = GCLI_TBLCOLTYPE_LONG,   .flags = GCLI_TBLCOL_JUSTIFYR },
-		{ .name = "",            .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_256COLOUR|GCLI_TBLCOL_TIGHT },
-		{ .name = "NAME",        .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "DESCRIPTION", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-	};
-
-	/* Determine number of items to print */
-	if (max < 0 || (size_t)(max) > list->labels_size)
-		n = list->labels_size;
-	else
-		n = max;
-
-	/* Fill table */
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
-	if (!table)
-		errx(1, "error: could not init table");
-
-	for (size_t i = 0; i < n; ++i) {
-		gcli_tbl_add_row(table,
-		                 (long)list->labels[i].id, /* Cast is important here (#165) */
-		                 list->labels[i].colour,
-		                 gcli_config_have_colours() ? "  " : "",
-		                 list->labels[i].name,
-		                 list->labels[i].description);
-	}
-
-	gcli_tbl_end(table);
+	return gcli_forge(ctx)->create_label(ctx, owner, repo, label);
 }
 
 int
-gcli_create_label(char const *owner, char const *repo, gcli_label *const label)
+gcli_delete_label(gcli_ctx *ctx, char const *owner, char const *repo,
+                  char const *const label)
 {
-	return gcli_forge()->create_label(owner, repo, label);
-}
-
-int
-gcli_delete_label(char const *owner, char const *repo, char const *const label)
-{
-	return gcli_forge()->delete_label(owner, repo, label);
+	return gcli_forge(ctx)->delete_label(ctx, owner, repo, label);
 }

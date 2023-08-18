@@ -66,10 +66,10 @@ github_hack_fixup_issues_that_are_actually_pulls(gcli_issue **list, size_t *size
 }
 
 int
-github_fetch_issues(char *url, int const max,
+github_fetch_issues(gcli_ctx *ctx, char *url, int const max,
                     gcli_issue_list *const out)
 {
-	gcli_fetch_list_ctx ctx = {
+	gcli_fetch_list_ctx fl = {
 		.listp = &out->issues,
 		.sizep = &out->issues_size,
 		.parse = (parsefn)(parse_github_issues),
@@ -77,14 +77,12 @@ github_fetch_issues(char *url, int const max,
 		.max = max,
 	};
 
-	return gcli_fetch_list(url, &ctx);
+	return gcli_fetch_list(ctx, url, &fl);
 }
 
 int
-github_get_issues(char const *owner,
-                  char const *repo,
-                  gcli_issue_fetch_details const *details,
-                  int const max,
+github_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
+                  gcli_issue_fetch_details const *details, int const max,
                   gcli_issue_list *const out)
 {
 	char *url = NULL;
@@ -103,7 +101,7 @@ github_get_issues(char const *owner,
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/issues?state=%s%s",
-		gcli_get_apibase(),
+		gcli_get_apibase(ctx),
 		e_owner, e_repo,
 		details->all ? "all" : "open",
 		e_author ? e_author : "");
@@ -112,11 +110,11 @@ github_get_issues(char const *owner,
 	free(e_owner);
 	free(e_repo);
 
-	return github_fetch_issues(url, max, out);
+	return github_fetch_issues(ctx, url, max, out);
 }
 
 int
-github_get_issue_summary(char const *owner, char const *repo,
+github_get_issue_summary(gcli_ctx *ctx, char const *owner, char const *repo,
                          int const issue_number, gcli_issue *const out)
 {
 	char *url = NULL;
@@ -131,16 +129,16 @@ github_get_issue_summary(char const *owner, char const *repo,
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/issues/%d",
-		gcli_get_apibase(),
+		gcli_get_apibase(ctx),
 		e_owner, e_repo,
 		issue_number);
 
-	rc = gcli_fetch(url, NULL, &buffer);
+	rc = gcli_fetch(ctx, url, NULL, &buffer);
 
 	if (rc == 0) {
 		json_open_buffer(&parser, buffer.data, buffer.length);
 		json_set_streaming(&parser, true);
-		parse_github_issue(&parser, out);
+		parse_github_issue(ctx, &parser, out);
 		json_close(&parser);
 	}
 
@@ -153,25 +151,26 @@ github_get_issue_summary(char const *owner, char const *repo,
 }
 
 int
-github_issue_close(char const *owner, char const *repo, int const issue_number)
+github_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
+                   int const issue_number)
 {
-	char *url     = NULL;
-	char *data    = NULL;
+	char *url = NULL;
+	char *data = NULL;
 	char *e_owner = NULL;
-	char *e_repo  = NULL;
-	int   rc      = 0;
+	char *e_repo = NULL;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
+	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/issues/%d",
-		gcli_get_apibase(),
+		gcli_get_apibase(ctx),
 		e_owner, e_repo,
 		issue_number);
 	data = sn_asprintf("{ \"state\": \"close\"}");
 
-	rc = gcli_fetch_with_method("PATCH", url, data, NULL, NULL);
+	rc = gcli_fetch_with_method(ctx, "PATCH", url, data, NULL, NULL);
 
 	free(data);
 	free(url);
@@ -182,25 +181,26 @@ github_issue_close(char const *owner, char const *repo, int const issue_number)
 }
 
 int
-github_issue_reopen(char const *owner, char const *repo, int const issue_number)
+github_issue_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
+                    int const issue_number)
 {
-	char *url     = NULL;
-	char *data    = NULL;
+	char *url = NULL;
+	char *data = NULL;
 	char *e_owner = NULL;
-	char *e_repo  = NULL;
-	int   rc      = 0;
+	char *e_repo = NULL;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/issues/%d",
-		gcli_get_apibase(),
+		gcli_get_apibase(ctx),
 		e_owner, e_repo,
 		issue_number);
 	data = sn_asprintf("{ \"state\": \"open\"}");
 
-	rc = gcli_fetch_with_method("PATCH", url, data, NULL, NULL);
+	rc = gcli_fetch_with_method(ctx, "PATCH", url, data, NULL, NULL);
 
 	free(data);
 	free(url);
@@ -211,23 +211,23 @@ github_issue_reopen(char const *owner, char const *repo, int const issue_number)
 }
 
 int
-github_perform_submit_issue(gcli_submit_issue_options opts,
+github_perform_submit_issue(gcli_ctx *ctx, gcli_submit_issue_options opts,
                             gcli_fetch_buffer *out)
 {
-	char  *e_owner = gcli_urlencode(opts.owner);
-	char  *e_repo  = gcli_urlencode(opts.repo);
-	sn_sv  e_title = gcli_json_escape(opts.title);
-	sn_sv  e_body  = gcli_json_escape(opts.body);
-	int    rc      = 0;
+	char *e_owner = gcli_urlencode(opts.owner);
+	char *e_repo = gcli_urlencode(opts.repo);
+	sn_sv e_title = gcli_json_escape(opts.title);
+	sn_sv e_body = gcli_json_escape(opts.body);
+	int rc = 0;
 
 	char *post_fields = sn_asprintf(
 		"{ \"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
 		SV_ARGS(e_title), SV_ARGS(e_body));
 
 	char *url = sn_asprintf("%s/repos/%s/%s/issues",
-	                        gcli_get_apibase(), e_owner, e_repo);
+	                        gcli_get_apibase(ctx), e_owner, e_repo);
 
-	rc = gcli_fetch_with_method("POST", url, post_fields, NULL, out);
+	rc = gcli_fetch_with_method(ctx, "POST", url, post_fields, NULL, out);
 
 	free(e_owner);
 	free(e_repo);
@@ -240,30 +240,28 @@ github_perform_submit_issue(gcli_submit_issue_options opts,
 }
 
 int
-github_issue_assign(char const *owner,
-                    char const *repo,
-                    int const issue_number,
-                    char const *assignee)
+github_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
+                    int const issue_number, char const *assignee)
 {
-	sn_sv  escaped_assignee = SV_NULL;
-	char  *post_fields      = NULL;
-	char  *url              = NULL;
-	char  *e_owner          = NULL;
-	char  *e_repo           = NULL;
-	int    rc               = 0;
+	sn_sv escaped_assignee = SV_NULL;
+	char *post_fields = NULL;
+	char *url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	int rc = 0;
 
 	escaped_assignee = gcli_json_escape(SV((char *)assignee));
 	post_fields = sn_asprintf("{ \"assignees\": [\""SV_FMT"\"] }",
 	                          SV_ARGS(escaped_assignee));
 
 	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
+	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/issues/%d/assignees",
-		gcli_get_apibase(), e_owner, e_repo, issue_number);
+		gcli_get_apibase(ctx), e_owner, e_repo, issue_number);
 
-	rc = gcli_fetch_with_method("POST", url, post_fields, NULL, NULL);
+	rc = gcli_fetch_with_method(ctx, "POST", url, post_fields, NULL, NULL);
 
 	free(escaped_assignee.data);
 	free(post_fields);
@@ -275,26 +273,24 @@ github_issue_assign(char const *owner,
 }
 
 int
-github_issue_add_labels(char const *owner,
-                        char const *repo,
-                        int const issue,
-                        char const *const labels[],
+github_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+                        int const issue, char const *const labels[],
                         size_t const labels_size)
 {
-	char *url  = NULL;
+	char *url = NULL;
 	char *data = NULL;
 	char *list = NULL;
-	int   rc   = 0;
+	int rc = 0;
 
 	assert(labels_size > 0);
 
 	url = sn_asprintf("%s/repos/%s/%s/issues/%d/labels",
-	                  gcli_get_apibase(), owner, repo, issue);
+	                  gcli_get_apibase(ctx), owner, repo, issue);
 
 	list = sn_join_with(labels, labels_size, "\",\"");
 	data = sn_asprintf("{ \"labels\": [\"%s\"]}", list);
 
-	rc = gcli_fetch_with_method("POST", url, data, NULL, NULL);
+	rc = gcli_fetch_with_method(ctx, "POST", url, data, NULL, NULL);
 
 	free(url);
 	free(data);
@@ -304,15 +300,13 @@ github_issue_add_labels(char const *owner,
 }
 
 int
-github_issue_remove_labels(char const *owner,
-                           char const *repo,
-                           int const issue,
-                           char const *const labels[],
+github_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+                           int const issue, char const *const labels[],
                            size_t const labels_size)
 {
-	char *url     = NULL;
+	char *url = NULL;
 	char *e_label = NULL;
-	int   rc      = 0;
+	int rc = 0;
 
 	if (labels_size != 1)
 		errx(1, "error: GitHub only supports removing labels from "
@@ -321,9 +315,9 @@ github_issue_remove_labels(char const *owner,
 	e_label = gcli_urlencode(labels[0]);
 
 	url = sn_asprintf("%s/repos/%s/%s/issues/%d/labels/%s",
-	                  gcli_get_apibase(), owner, repo, issue, e_label);
+	                  gcli_get_apibase(ctx), owner, repo, issue, e_label);
 
-	rc = gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
+	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
 	free(url);
 	free(e_label);
@@ -332,9 +326,8 @@ github_issue_remove_labels(char const *owner,
 }
 
 int
-github_issue_set_milestone(char const *const owner,
-                           char const *const repo,
-                           int const issue,
+github_issue_set_milestone(gcli_ctx *ctx, char const *const owner,
+                           char const *const repo, int const issue,
                            int const milestone)
 {
 	char *url, *e_owner, *e_repo, *body;
@@ -344,12 +337,12 @@ github_issue_set_milestone(char const *const owner,
 	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/repos/%s/%s/issues/%d",
-	                  gcli_get_apibase(),
+	                  gcli_get_apibase(ctx),
 	                  e_owner, e_repo, issue);
 
 	body = sn_asprintf("{ \"milestone\": %d }", milestone);
 
-	rc = gcli_fetch_with_method("PATCH", url, body, NULL, NULL);
+	rc = gcli_fetch_with_method(ctx, "PATCH", url, body, NULL, NULL);
 
 	free(body);
 	free(url);
@@ -360,9 +353,8 @@ github_issue_set_milestone(char const *const owner,
 }
 
 int
-github_issue_clear_milestone(char const *const owner,
-                             char const *const repo,
-                             int const issue)
+github_issue_clear_milestone(gcli_ctx *ctx, char const *const owner,
+                             char const *const repo, int const issue)
 {
 	char *url, *e_owner, *e_repo, *body;
 	int rc;
@@ -371,12 +363,12 @@ github_issue_clear_milestone(char const *const owner,
 	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/repos/%s/%s/issues/%d",
-	                  gcli_get_apibase(),
+	                  gcli_get_apibase(ctx),
 	                  e_owner, e_repo, issue);
 
 	body = sn_asprintf("{ \"milestone\": null }");
 
-	rc = gcli_fetch_with_method("PATCH", url, body, NULL, NULL);
+	rc = gcli_fetch_with_method(ctx, "PATCH", url, body, NULL, NULL);
 
 	free(body);
 	free(url);

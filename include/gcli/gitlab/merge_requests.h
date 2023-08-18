@@ -36,63 +36,47 @@
 
 #include <gcli/pulls.h>
 
-int gitlab_fetch_mrs(char *url,
-                     int max,
+int gitlab_fetch_mrs(gcli_ctx *ctx, char *url, int max,
                      gcli_pull_list *list);
 
-int gitlab_get_mrs(char const *owner,
+int gitlab_get_mrs(gcli_ctx *ctx, char const *owner,
                    char const *reponame,
                    gcli_pull_fetch_details const *details,
                    int max,
                    gcli_pull_list *out);
 
-int gitlab_print_pr_diff(FILE *stream,
-                         char const *owner,
-                         char const *reponame,
-                         int pr_number);
+int gitlab_print_pr_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
+                         char const *reponame, int pr_number);
 
-int gitlab_mr_merge(char const *owner,
-                    char const *reponame,
-                    int mr_number,
-                    enum gcli_merge_flags flags);
+int gitlab_mr_merge(gcli_ctx *ctx, char const *owner, char const *reponame,
+                    int mr_number, enum gcli_merge_flags flags);
 
-int gitlab_mr_close(char const *owner,
-                    char const *reponame,
+int gitlab_mr_close(gcli_ctx *ctx, char const *owner, char const *reponame,
                     int pr_number);
 
-int gitlab_mr_reopen(char const *owner,
-                     char const *reponame,
+int gitlab_mr_reopen(gcli_ctx *ctx, char const *owner, char const *reponame,
                      int pr_number);
 
-int gitlab_get_pull(char const *owner,
-                    char const *repo,
-                    int pr_number,
-                    gcli_pull *out);
+int gitlab_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
+                    int pr_number, gcli_pull *out);
 
-int gitlab_get_pull_commits(char const *owner, char const *repo,
+int gitlab_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
                             int pr_number, gcli_commit_list *out);
 
-int gitlab_perform_submit_mr(gcli_submit_pull_options opts);
+int gitlab_perform_submit_mr(gcli_ctx *ctx, gcli_submit_pull_options opts);
 
-int gitlab_mr_add_labels(char const *owner,
-                         char const *repo,
-                         int mr,
-                         char const *const labels[],
+int gitlab_mr_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+                         int mr, char const *const labels[],
                          size_t labels_size);
 
-int gitlab_mr_remove_labels(char const *owner,
-                            char const *repo,
-                            int mr,
-                            char const *const labels[],
+int gitlab_mr_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+                            int mr, char const *const labels[],
                             size_t labels_size);
 
-int gitlab_mr_set_milestone(char const *owner,
-                            char const *repo,
-                            int mr,
-                            int milestone_id);
+int gitlab_mr_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
+                            int mr, int milestone_id);
 
-int gitlab_mr_clear_milestone(char const *owner,
-                              char const *repo,
-                              int mr);
+int gitlab_mr_clear_milestone(gcli_ctx *ctx, char const *owner,
+                              char const *repo, int mr);
 
 #endif /* GITLAB_MERGE_REQUESTS_H */

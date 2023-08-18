@@ -36,6 +36,8 @@
 
 #include <sn/sn.h>
 
+#include <gcli/gcli.h>
+
 typedef struct gcli_pr_review         gcli_pr_review;
 typedef struct gcli_pr_review_list    gcli_pr_review_list;
 typedef struct gcli_pr_review_comment gcli_pr_review_comment;
@@ -69,10 +71,11 @@ void gcli_review_reviews_free(gcli_pr_review_list *list);
 
 void gcli_review_comments_free(gcli_pr_review_comment *it, size_t size);
 
-int gcli_review_get_reviews(char const *owner, char const *repo,
+int gcli_review_get_reviews(gcli_ctx *ctx, char const *owner, char const *repo,
                             int pr, gcli_pr_review_list *out);
 
-void gcli_review_print_review_table(gcli_pr_review_list const *reviews);
+void gcli_review_print_review_table(gcli_ctx *ctx,
+                                    gcli_pr_review_list const *reviews);
 
 void gcli_review_print_comments(gcli_pr_review_comment const *comments,
                                 size_t comments_size);

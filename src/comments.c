@@ -27,7 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/colour.h>
+#include <gcli/cmd/colour.h>
+
 #include <gcli/comments.h>
 #include <gcli/config.h>
 #include <gcli/editor.h>
@@ -55,69 +56,32 @@ gcli_comment_list_free(gcli_comment_list *list)
 	list->comments_size = 0;
 }
 
-void
-gcli_print_comment_list(gcli_comment_list const *const list)
+int
+gcli_get_issue_comments(gcli_ctx *ctx, char const *owner, char const *repo,
+                        int const issue, gcli_comment_list *out)
 {
-	for (size_t i = 0; i < list->comments_size; ++i) {
-		printf("AUTHOR : %s%s%s\n"
-		       "DATE   : %s\n",
-		       gcli_setbold(), list->comments[i].author, gcli_resetbold(),
-		       list->comments[i].date);
-		pretty_print(list->comments[i].body, 9, 80, stdout);
-		putchar('\n');
-	}
+	return gcli_forge(ctx)->get_issue_comments(ctx, owner, repo, issue, out);
 }
 
 int
-gcli_get_issue_comments(char const *owner, char const *repo, int const issue,
-                        gcli_comment_list *out)
+gcli_get_pull_comments(gcli_ctx *ctx, char const *owner, char const *repo,
+                       int const pull, gcli_comment_list *out)
 {
-	return gcli_forge()->get_issue_comments(owner, repo, issue, out);
-}
-
-void
-gcli_issue_comments(char const *owner, char const *repo, int const issue)
-{
-	gcli_comment_list list = {0};
-
-	if (gcli_get_issue_comments(owner, repo, issue, &list) < 0)
-		errx(1, "error: failed to fetch comments");
-
-	gcli_print_comment_list(&list);
-	gcli_comment_list_free(&list);
-}
-
-int
-gcli_get_pull_comments(char const *owner, char const *repo, int const pull,
-                       gcli_comment_list *out)
-{
-	return gcli_forge()->get_pull_comments(owner, repo, pull, out);
-}
-
-void
-gcli_pull_comments(char const *owner, char const *repo, int const issue)
-{
-	gcli_comment_list list = {0};
-
-	if (gcli_get_pull_comments(owner, repo, issue, &list) < 0)
-		errx(1, "error: failed to fetch pull request comments");
-
-	gcli_print_comment_list(&list);
-	gcli_comment_list_free(&list);
+	return gcli_forge(ctx)->get_pull_comments(ctx, owner, repo, pull, out);
 }
 
 static void
-comment_init(FILE *f, void *_data)
+comment_init(gcli_ctx *ctx, FILE *f, void *_data)
 {
-	gcli_submit_comment_opts *info        = _data;
-	const char               *target_type = NULL;
+	gcli_submit_comment_opts *info = _data;
+	const char *target_type = NULL;
 
 	switch (info->target_type) {
 	case ISSUE_COMMENT:
 		target_type = "issue";
 		break;
 	case PR_COMMENT: {
-		switch (gcli_config_get_forge_type()) {
+		switch (gcli_config_get_forge_type(ctx)) {
 		case GCLI_FORGE_GITEA:
 		case GCLI_FORGE_GITHUB:
 			target_type = "Pull Request";
@@ -139,15 +103,15 @@ comment_init(FILE *f, void *_data)
 }
 
 static sn_sv
-gcli_comment_get_message(gcli_submit_comment_opts *info)
+gcli_comment_get_message(gcli_ctx *ctx, gcli_submit_comment_opts *info)
 {
-	return gcli_editor_get_user_message(comment_init, info);
+	return gcli_editor_get_user_message(ctx, comment_init, info);
 }
 
 int
-gcli_comment_submit(gcli_submit_comment_opts opts)
+gcli_comment_submit(gcli_ctx *ctx, gcli_submit_comment_opts opts)
 {
-	sn_sv const message = gcli_comment_get_message(&opts);
+	sn_sv const message = gcli_comment_get_message(ctx, &opts);
 	opts.message = gcli_json_escape(message);
 	int rc = 0;
 
@@ -161,7 +125,7 @@ gcli_comment_submit(gcli_submit_comment_opts opts)
 			errx(1, "Aborted by user");
 	}
 
-	rc = gcli_forge()->perform_submit_comment(opts, NULL);
+	rc = gcli_forge(ctx)->perform_submit_comment(ctx, opts, NULL);
 
 	free(message.data);
 	free(opts.message.data);

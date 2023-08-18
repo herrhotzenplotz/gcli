@@ -50,8 +50,10 @@ barf(char const *message, char const *where)
 }
 
 long
-get_int_(json_stream *const input, char const *where)
+get_int_(gcli_ctx *ctx, json_stream *const input, char const *where)
 {
+	(void) ctx;
+
 	if (json_next(input) != JSON_NUMBER)
 		barf("unexpected non-integer field", where);
 
@@ -59,8 +61,10 @@ get_int_(json_stream *const input, char const *where)
 }
 
 double
-get_double_(json_stream *const input, char const *where)
+get_double_(gcli_ctx *ctx, json_stream *const input, char const *where)
 {
+	(void) ctx;
+
 	enum json_type type = json_next(input);
 
 	/* This is dumb but it fixes a couple of weirdnesses of the API */
@@ -74,8 +78,10 @@ get_double_(json_stream *const input, char const *where)
 }
 
 char *
-get_string_(json_stream *const input, char const *where)
+get_string_(gcli_ctx *ctx, json_stream *const input, char const *where)
 {
+	(void) ctx;
+
 	enum json_type const type = json_next(input);
 	if (type == JSON_NULL)
 		return strdup("<empty>");
@@ -93,8 +99,10 @@ get_string_(json_stream *const input, char const *where)
 }
 
 bool
-get_bool_(json_stream *const input, char const *where)
+get_bool_(gcli_ctx *ctx,json_stream *const input, char const *where)
 {
+	(void) ctx;
+
 	enum json_type value_type = json_next(input);
 	if (value_type == JSON_TRUE)
 		return true;
@@ -108,12 +116,12 @@ get_bool_(json_stream *const input, char const *where)
 }
 
 char *
-get_user_(json_stream *const input, char const *where)
+get_user_(gcli_ctx *ctx, json_stream *const input, char const *where)
 {
 	if (json_next(input) != JSON_OBJECT)
 		barf("user field is not an object", where);
 
-	char const *expected_key = gcli_forge()->user_object_key;
+	char const *expected_key = gcli_forge(ctx)->user_object_key;
 
 	char *result = NULL;
 	while (json_next(input) == JSON_STRING) {
@@ -178,8 +186,10 @@ gcli_json_escape(sn_sv const it)
 }
 
 sn_sv
-get_sv_(json_stream *const input, char const *where)
+get_sv_(gcli_ctx *ctx, json_stream *const input, char const *where)
 {
+	(void) ctx;
+
 	enum json_type type = json_next(input);
 	if (type == JSON_NULL)
 		return SV_NULL;
@@ -194,7 +204,7 @@ get_sv_(json_stream *const input, char const *where)
 }
 
 void
-gcli_print_html_url(gcli_fetch_buffer const buffer)
+gcli_print_html_url(gcli_ctx *ctx, gcli_fetch_buffer const buffer)
 {
 	json_stream stream = {0};
 
@@ -202,14 +212,14 @@ gcli_print_html_url(gcli_fetch_buffer const buffer)
 	json_set_streaming(&stream, true);
 
 	enum json_type next = json_next(&stream);
-	char const *expected_key = gcli_forge()->html_url_key;
+	char const *expected_key = gcli_forge(ctx)->html_url_key;
 
 	while ((next = json_next(&stream)) == JSON_STRING) {
 		size_t len;
 
 		char const *key = json_get_string(&stream, &len);
 		if (strncmp(key, expected_key, len) == 0) {
-			char *url = get_string(&stream);
+			char *url = get_string(ctx, &stream);
 			puts(url);
 			free(url);
 		} else {
@@ -306,11 +316,11 @@ gcli_json_advance(json_stream *const stream, char const *fmt, ...)
 }
 
 long
-get_parse_int_(json_stream *const input, char const *function)
+get_parse_int_(gcli_ctx *ctx, json_stream *const input, char const *function)
 {
 	long  result = 0;
 	char *endptr = NULL;
-	char *string = get_string(input);
+	char *string = get_string(ctx, input);
 
 	result = strtol(string, &endptr, 10);
 	if (endptr != string + strlen(string))
@@ -321,10 +331,10 @@ get_parse_int_(json_stream *const input, char const *function)
 }
 
 uint32_t
-get_github_style_colour(json_stream *const input)
+get_github_style_colour(gcli_ctx *ctx, json_stream *const input)
 {
-	char *colour_str = get_string(input);
-	char *endptr    = NULL;
+	char *colour_str = get_string(ctx, input);
+	char *endptr = NULL;
 
 	unsigned long colour = strtoul(colour_str, &endptr, 16);
 	if (endptr != colour_str + strlen(colour_str))
@@ -337,11 +347,11 @@ get_github_style_colour(json_stream *const input)
 }
 
 uint32_t
-get_gitlab_style_colour(json_stream *const input)
+get_gitlab_style_colour(gcli_ctx *ctx, json_stream *const input)
 {
-	char *colour  = get_string(input);
+	char *colour = get_string(ctx, input);
 	char *endptr = NULL;
-	long  code   = 0;
+	long code = 0;
 
 	code = strtol(colour + 1, &endptr, 16);
 	if (endptr != (colour + 1 + strlen(colour + 1)))
@@ -353,10 +363,10 @@ get_gitlab_style_colour(json_stream *const input)
 }
 
 sn_sv
-get_gitea_visibility(json_stream *const input)
+get_gitea_visibility(gcli_ctx *ctx, json_stream *const input)
 {
 	char *v = NULL;
-	if (get_bool(input))
+	if (get_bool(ctx, input))
 		v = strdup("private");
 	else
 		v = strdup("public");
@@ -364,17 +374,19 @@ get_gitea_visibility(json_stream *const input)
 }
 
 bool
-get_gitlab_can_be_merged(json_stream *const input)
+get_gitlab_can_be_merged(gcli_ctx *ctx, json_stream *const input)
 {
-	sn_sv tmp = get_sv(input);
+	sn_sv tmp = get_sv(ctx, input);
 	bool result = sn_sv_eq_to(tmp, "can_be_merged");
 	free(tmp.data);
 	return result;
 }
 
 int
-get_github_is_pr(json_stream *input)
+get_github_is_pr(gcli_ctx *ctx, json_stream *input)
 {
+	(void) ctx;
+
 	enum json_type next = json_peek(input);
 
 	if (next == JSON_NULL)

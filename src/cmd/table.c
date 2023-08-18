@@ -27,9 +27,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/table.h>
+#include <gcli/cmd/colour.h>
+#include <gcli/cmd/table.h>
 
-#include <gcli/colour.h>
+#include <gcli/gcli.h>
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -348,6 +349,8 @@ struct gcli_dict {
 	size_t entries_size;
 
 	size_t max_key_len;
+
+	gcli_ctx *ctx;
 };
 
 /* Create a new long list printer and return a handle to it */

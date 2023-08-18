@@ -34,10 +34,12 @@
 #include <config.h>
 #endif
 
+#include <gcli/gcli.h>
+
 #include <sn/sn.h>
 
-char *github_get_apibase(void);
-char *github_get_authheader(void);
-sn_sv github_get_account(void);
+char *github_get_apibase(gcli_ctx *ctx);
+char *github_get_authheader(gcli_ctx *ctx);
+sn_sv github_get_account(gcli_ctx *ctx);
 
 #endif /* GITHUB_CONFIG_H */

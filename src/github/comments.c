@@ -37,7 +37,7 @@
 #include <templates/github/comments.h>
 
 int
-github_perform_submit_comment(gcli_submit_comment_opts opts,
+github_perform_submit_comment(gcli_ctx *ctx, gcli_submit_comment_opts opts,
                               gcli_fetch_buffer *out)
 {
 	int rc = 0;
@@ -49,10 +49,10 @@ github_perform_submit_comment(gcli_submit_comment_opts opts,
 		SV_ARGS(opts.message));
 	char *url         = sn_asprintf(
 		"%s/repos/%s/%s/issues/%d/comments",
-		gcli_get_apibase(),
+		gcli_get_apibase(ctx),
 		e_owner, e_repo, opts.target_id);
 
-	rc = gcli_fetch_with_method("POST", url, post_fields, NULL, out);
+	rc = gcli_fetch_with_method(ctx, "POST", url, post_fields, NULL, out);
 
 	free(post_fields);
 	free(e_owner);
@@ -63,13 +63,13 @@ github_perform_submit_comment(gcli_submit_comment_opts opts,
 }
 
 int
-github_get_comments(char const *owner, char const *repo,
+github_get_comments(gcli_ctx *ctx, char const *owner, char const *repo,
                     int const issue, gcli_comment_list *const out)
 {
 	char *e_owner = NULL;
 	char *e_repo = NULL;
 	char *url = NULL;
-	gcli_fetch_list_ctx ctx = {
+	gcli_fetch_list_ctx fl = {
 		.listp = &out->comments,
 		.sizep = &out->comments_size,
 		.parse = (parsefn)parse_github_comments,
@@ -80,10 +80,10 @@ github_get_comments(char const *owner, char const *repo,
 	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/repos/%s/%s/issues/%d/comments",
-	                  gcli_get_apibase(),
+	                  gcli_get_apibase(ctx),
 	                  e_owner, e_repo, issue);
 	free(e_owner);
 	free(e_repo);
 
-	return gcli_fetch_list(url, &ctx);
+	return gcli_fetch_list(ctx, url, &fl);
 }

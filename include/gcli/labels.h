@@ -38,6 +38,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <gcli/gcli.h>
+
 typedef struct gcli_label gcli_label;
 typedef struct gcli_label_list gcli_label_list;
 
@@ -53,24 +55,17 @@ struct gcli_label_list {
 	size_t labels_size;
 };
 
-int gcli_get_labels(char const *owner,
-                    char const *reponame,
-                    int max,
-                    gcli_label_list *out);
+int gcli_get_labels(gcli_ctx *ctx, char const *owner, char const *reponame,
+                    int max, gcli_label_list *out);
 
 void gcli_free_label(gcli_label *label);
 
 void gcli_free_labels(gcli_label_list *labels);
 
-void gcli_print_labels(gcli_label_list const *list,
-                       int max);
-
-int gcli_create_label(char const *owner,
-                      char const *repo,
+int gcli_create_label(gcli_ctx *ctx, char const *owner, char const *repo,
                       gcli_label *label);
 
-int gcli_delete_label(char const *owner,
-                      char const *repo,
+int gcli_delete_label(gcli_ctx *ctx, char const *owner, char const *repo,
                       char const *label);
 
 #endif /* LABELS_H */

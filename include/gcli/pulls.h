@@ -40,12 +40,13 @@
 #include <sn/sn.h>
 #include <gcli/gcli.h>
 
-typedef struct gcli_pull                gcli_pull;
-typedef struct gcli_pull_fetch_details  gcli_pull_fetch_details;
+typedef struct gcli_pull gcli_pull;
+typedef struct gcli_pull_fetch_details gcli_pull_fetch_details;
 typedef struct gcli_submit_pull_options gcli_submit_pull_options;
-typedef struct gcli_commit              gcli_commit;
-typedef struct gcli_commit_list         gcli_commit_list;
-typedef struct gcli_pull_list           gcli_pull_list;
+typedef struct gcli_commit gcli_commit;
+typedef struct gcli_commit_list gcli_commit_list;
+typedef struct gcli_pull_list gcli_pull_list;
+typedef struct gcli_pull_checks_list gcli_pull_checks_list;
 
 struct gcli_pull_list {
 	gcli_pull *pulls;
@@ -53,29 +54,29 @@ struct gcli_pull_list {
 };
 
 struct gcli_pull {
-	char   *author;
-	char   *state;
-	char   *title;
-	char   *body;
-	char   *created_at;
-	char   *commits_link;
-	char   *head_label;
-	char   *base_label;
-	char   *head_sha;
-	char   *milestone;
-	int     id;
-	int     number;
-	int     comments;
-	int     additions;
-	int     deletions;
-	int     commits;
-	int     changed_files;
-	int     head_pipeline_id;   /* This is GitLab specific */
-	sn_sv  *labels;
-	size_t  labels_size;
-	bool    merged;
-	bool    mergeable;
-	bool    draft;
+	char *author;
+	char *state;
+	char *title;
+	char *body;
+	char *created_at;
+	char *commits_link;
+	char *head_label;
+	char *base_label;
+	char *head_sha;
+	char *milestone;
+	int id;
+	int number;
+	int comments;
+	int additions;
+	int deletions;
+	int commits;
+	int changed_files;
+	int head_pipeline_id;       /* This is GitLab specific */
+	sn_sv *labels;
+	size_t labels_size;
+	bool merged;
+	bool mergeable;
+	bool draft;
 };
 
 struct gcli_commit {
@@ -89,16 +90,16 @@ struct gcli_commit_list {
 
 /* Options to submit to the gh api for creating a PR */
 struct gcli_submit_pull_options {
-	char const  *owner;
-	char const  *repo;
-	sn_sv        from;
-	sn_sv        to;
-	sn_sv        title;
-	sn_sv        body;
+	char const *owner;
+	char const *repo;
+	sn_sv from;
+	sn_sv to;
+	sn_sv title;
+	sn_sv body;
 	char const **labels;
-	size_t       labels_size;
-	int          draft;
-	bool         always_yes;
+	size_t labels_size;
+	int draft;
+	bool always_yes;
 };
 
 struct gcli_pull_fetch_details {
@@ -106,79 +107,72 @@ struct gcli_pull_fetch_details {
 	char const *author;
 };
 
-int gcli_get_pulls(char const *owner,
-                   char const *reponame,
-                   gcli_pull_fetch_details const *details,
-                   int max,
+/** Generic list of checks ran on a pull request
+ *
+ * NOTE: KEEP THIS ORDER! WE DEPEND ON THE ABI HERE.
+ *
+ * For github the type of checks is gitlab_check*
+ * For gitlab the type of checks is gitlab_pipeline*
+ *
+ * You can cast this type to the list type of either one of them. */
+struct gcli_pull_checks_list {
+	void *checks;
+	size_t checks_size;
+	int forge_type;
+};
+
+int gcli_get_pulls(gcli_ctx *ctx, char const *owner, char const *reponame,
+                   gcli_pull_fetch_details const *details, int max,
                    gcli_pull_list *out);
 
 void gcli_pull_free(gcli_pull *it);
 
 void gcli_pulls_free(gcli_pull_list *list);
 
-void gcli_print_pulls_table(enum gcli_output_flags flags,
-                            gcli_pull_list const *list,
-                            int max);
+void gcli_pull_get_diff(gcli_ctx *ctx, FILE *fout, char const *owner,
+                        char const *repo, int pr_number);
 
-void gcli_print_pull_diff(FILE *stream,
-                          char const *owner,
-                          char const *reponame,
-                          int pr_number);
+int gcli_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
+                         int pr_number, gcli_pull_checks_list *out);
 
-int gcli_pull_checks(char const *owner,
-                     char const *repo,
-                     int pr_number);
+void gcli_pull_checks_free(gcli_pull_checks_list *list);
 
-void gcli_pull_commits(char const *owner,
-                       char const *repo,
-                       int pr_number);
+int gcli_pull_get_commits(gcli_ctx *ctx, char const *owner, char const *repo,
+                          int pr_number, gcli_commit_list *out);
 
-int gcli_get_pull(char const *owner, char const *repo,
+void gcli_commits_free(gcli_commit_list *list);
+
+int gcli_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
                   int pr_number, gcli_pull *out);
 
-int gcli_pull_submit(gcli_submit_pull_options);
-
-void gcli_pull_print_status(gcli_pull const *it);
-
-void gcli_pull_print_op(gcli_pull *summary);
+int gcli_pull_submit(gcli_ctx *ctx, gcli_submit_pull_options);
 
 enum gcli_merge_flags {
 	GCLI_PULL_MERGE_SQUASH = 0x1, /* squash commits when merging */
 	GCLI_PULL_MERGE_DELETEHEAD = 0x2, /* delete the source branch after merging */
 };
 
-int gcli_pull_merge(char const *owner,
-                    char const *reponame,
-                    int pr_number,
-                    enum gcli_merge_flags flags);
+int gcli_pull_merge(gcli_ctx *ctx, char const *owner, char const *reponame,
+                    int pr_number, enum gcli_merge_flags flags);
 
-int gcli_pull_close(char const *owner,
-                    char const *reponame,
+int gcli_pull_close(gcli_ctx *ctx, char const *owner, char const *reponame,
                     int pr_number);
 
-int gcli_pull_reopen(char const *owner,
-                     char const *reponame,
+int gcli_pull_reopen(gcli_ctx *ctx, char const *owner, char const *reponame,
                      int pr_number);
 
-int gcli_pull_add_labels(char const *owner,
-                         char const *repo,
-                         int pr_number,
-                         char const *const labels[],
+int gcli_pull_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+                         int pr_number, char const *const labels[],
                          size_t labels_size);
 
-int gcli_pull_remove_labels(char const *owner,
-                            char const *repo,
-                            int pr_number,
-                            char const *const labels[],
+int gcli_pull_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+                            int pr_number, char const *const labels[],
                             size_t labels_size);
 
-int gcli_pull_set_milestone(char const *owner,
-                            char const *repo,
-                            int pr_number,
-                            int milestone_id);
+int gcli_pull_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
+                            int pr_number, int milestone_id);
 
-int gcli_pull_clear_milestone(char const *owner,
-                              char const *repo,
+int gcli_pull_clear_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
                               int pr_number);
 
 #endif /* PULLS_H */

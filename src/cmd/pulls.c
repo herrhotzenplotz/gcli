@@ -257,6 +257,76 @@ gcli_pull_checks(char const *owner, char const *repo, int pr_number)
 	}
 }
 
+/**
+ * Get a copy of the first line of the passed string.
+ */
+static char *
+cut_newline(char const *const _it)
+{
+	char *it = strdup(_it);
+	char *foo = it;
+	while (*foo) {
+		if (*foo == '\n') {
+			*foo = 0;
+			break;
+		}
+		foo += 1;
+	}
+
+	return it;
+}
+
+void
+gcli_print_commits(gcli_commit_list const *const list)
+{
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "SHA",     .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_COLOUREXPL },
+		{ .name = "AUTHOR",  .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_BOLD },
+		{ .name = "EMAIL",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "DATE",    .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "MESSAGE", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+	};
+
+	if (list->commits_size == 0) {
+		puts("No commits");
+		return;
+	}
+
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
+		errx(1, "error: could not initialize table");
+
+	for (size_t i = 0; i < list->commits_size; ++i) {
+		char *message = cut_newline(list->commits[i].message);
+		gcli_tbl_add_row(table, GCLI_COLOR_YELLOW, list->commits[i].sha,
+		                 list->commits[i].author,
+		                 list->commits[i].email,
+		                 list->commits[i].date,
+		                 message);
+		free(message);          /* message is copied by the function above */
+	}
+
+	gcli_tbl_end(table);
+}
+
+int
+gcli_pull_commits(char const *owner, char const *repo,
+                  int const pr_number)
+{
+	gcli_commit_list commits = {0};
+	int rc = 0;
+
+	rc = gcli_pull_get_commits(g_clictx, owner, repo, pr_number, &commits);
+	if (rc < 0)
+		return rc;
+
+	gcli_print_commits(&commits);
+	gcli_commits_free(&commits);
+
+	return rc;
+}
+
 static sn_sv
 pr_try_derive_head(void)
 {
@@ -563,7 +633,8 @@ handle_pull_actions(int argc, char *argv[],
 
 			/* Commits */
 			puts("\nCOMMITS");
-			gcli_pull_commits(g_clictx, owner, repo, pr);
+			if (gcli_pull_commits(owner, repo, pr) < 0)
+				errx(1, "error: failed to fetch pull request checks");
 
 			/* Checks */
 			puts("\nCHECKS");
@@ -589,7 +660,7 @@ handle_pull_actions(int argc, char *argv[],
 		} else if (strcmp(action, "commits") == 0) {
 
 			/* Does not require the summary */
-			gcli_pull_commits(g_clictx, owner, repo, pr);
+			gcli_pull_commits(owner, repo, pr);
 
 		} else if (strcmp(action, "diff") == 0) {
 			gcli_print_pull_diff(stdout, owner, repo, pr);

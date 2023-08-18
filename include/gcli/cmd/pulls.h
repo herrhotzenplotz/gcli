@@ -48,6 +48,8 @@ void gcli_pull_print_op(gcli_pull const *pull);
 
 int gcli_pull_checks(char const *owner, char const *repo, int pr_number);
 
+void gcli_print_commits(gcli_commit_list const *const list);
+
 int subcommand_pulls(int argc, char *argv[]);
 
 #endif /* GCLI_CMD_PULLS_H */

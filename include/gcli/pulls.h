@@ -137,8 +137,10 @@ int gcli_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
 
 void gcli_pull_checks_free(gcli_pull_checks_list *list);
 
-void gcli_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
-                       int pr_number);
+int gcli_pull_get_commits(gcli_ctx *ctx, char const *owner, char const *repo,
+                          int pr_number, gcli_commit_list *out);
+
+void gcli_commits_free(gcli_commit_list *list);
 
 int gcli_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
                   int pr_number, gcli_pull *out);

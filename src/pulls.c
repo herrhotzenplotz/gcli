@@ -68,69 +68,14 @@ gcli_pull_get_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
 	gcli_forge(ctx)->print_pull_diff(ctx, stream, owner, reponame, pr_number);
 }
 
-static int
-gcli_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
+int
+gcli_pull_get_commits(gcli_ctx *ctx, char const *owner, char const *repo,
                       int const pr_number, gcli_commit_list *const out)
 {
 	return gcli_forge(ctx)->get_pull_commits(ctx, owner, repo, pr_number, out);
 }
 
-/**
- * Get a copy of the first line of the passed string.
- */
-static char *
-cut_newline(char const *const _it)
-{
-	char *it = strdup(_it);
-	char *foo = it;
-	while (*foo) {
-		if (*foo == '\n') {
-			*foo = 0;
-			break;
-		}
-		foo += 1;
-	}
-
-	return it;
-}
-
-static void
-gcli_print_commits_table(gcli_ctx *ctx, gcli_commit_list const *const list)
-{
-	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
-		{ .name = "SHA",     .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_COLOUREXPL },
-		{ .name = "AUTHOR",  .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_BOLD },
-		{ .name = "EMAIL",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "DATE",    .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "MESSAGE", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-	};
-
-	(void) ctx;
-
-	if (list->commits_size == 0) {
-		puts("No commits");
-		return;
-	}
-
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
-	if (!table)
-		errx(1, "error: could not initialize table");
-
-	for (size_t i = 0; i < list->commits_size; ++i) {
-		char *message = cut_newline(list->commits[i].message);
-		gcli_tbl_add_row(table, GCLI_COLOR_YELLOW, list->commits[i].sha,
-		                 list->commits[i].author,
-		                 list->commits[i].email,
-		                 list->commits[i].date,
-		                 message);
-		free(message);          /* message is copied by the function above */
-	}
-
-	gcli_tbl_end(table);
-}
-
-static void
+void
 gcli_commits_free(gcli_commit_list *list)
 {
 	for (size_t i = 0; i < list->commits_size; ++i) {
@@ -145,19 +90,6 @@ gcli_commits_free(gcli_commit_list *list)
 
 	list->commits = NULL;
 	list->commits_size = 0;
-}
-
-void
-gcli_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
-                  int const pr_number)
-{
-	gcli_commit_list commits = {0};
-
-	if (gcli_get_pull_commits(ctx, owner, repo, pr_number, &commits) < 0)
-		errx(1, "error: failed to fetch commits of the pull request");
-
-	gcli_print_commits_table(ctx, &commits);
-	gcli_commits_free(&commits);
 }
 
 void

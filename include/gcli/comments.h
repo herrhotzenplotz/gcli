@@ -66,12 +66,13 @@ struct gcli_submit_comment_opts {
 };
 
 void gcli_comment_list_free(gcli_comment_list *list);
-void gcli_print_comment_list(gcli_ctx *, gcli_comment_list const *list);
-void gcli_issue_comments(gcli_ctx *ctx,
-                         char const *owner, char const *repo,
-                         int issue);
-void gcli_pull_comments(gcli_ctx *ctx, char const *owner, char const *repo,
-                        int issue);
+
+int gcli_get_issue_comments(gcli_ctx *ctx, char const *owner, char const *repo,
+                            int issue, gcli_comment_list *out);
+
+int gcli_get_pull_comments(gcli_ctx *ctx, char const *owner, char const *repo,
+                           int issue, gcli_comment_list *out);
+
 int gcli_comment_submit(gcli_ctx *ctx, gcli_submit_comment_opts opts);
 
 #endif /* COMMENTS_H */

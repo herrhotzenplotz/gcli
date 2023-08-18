@@ -56,20 +56,6 @@ gcli_comment_list_free(gcli_comment_list *list)
 	list->comments_size = 0;
 }
 
-void
-gcli_print_comment_list(gcli_ctx *ctx, gcli_comment_list const *const list)
-{
-	(void) ctx;
-	for (size_t i = 0; i < list->comments_size; ++i) {
-		printf("AUTHOR : %s%s%s\n"
-		       "DATE   : %s\n",
-		       gcli_setbold(), list->comments[i].author, gcli_resetbold(),
-		       list->comments[i].date);
-		pretty_print(list->comments[i].body, 9, 80, stdout);
-		putchar('\n');
-	}
-}
-
 int
 gcli_get_issue_comments(gcli_ctx *ctx, char const *owner, char const *repo,
                         int const issue, gcli_comment_list *out)
@@ -77,37 +63,11 @@ gcli_get_issue_comments(gcli_ctx *ctx, char const *owner, char const *repo,
 	return gcli_forge(ctx)->get_issue_comments(ctx, owner, repo, issue, out);
 }
 
-void
-gcli_issue_comments(gcli_ctx *ctx, char const *owner,
-                    char const *repo, int const issue)
-{
-	gcli_comment_list list = {0};
-
-	if (gcli_get_issue_comments(ctx, owner, repo, issue, &list) < 0)
-		errx(1, "error: failed to fetch comments");
-
-	gcli_print_comment_list(ctx, &list);
-	gcli_comment_list_free(&list);
-}
-
 int
 gcli_get_pull_comments(gcli_ctx *ctx, char const *owner, char const *repo,
                        int const pull, gcli_comment_list *out)
 {
 	return gcli_forge(ctx)->get_pull_comments(ctx, owner, repo, pull, out);
-}
-
-void
-gcli_pull_comments(gcli_ctx *ctx, char const *owner, char const *repo,
-                   int const issue)
-{
-	gcli_comment_list list = {0};
-
-	if (gcli_get_pull_comments(ctx, owner, repo, issue, &list) < 0)
-		errx(1, "error: failed to fetch pull request comments");
-
-	gcli_print_comment_list(ctx, &list);
-	gcli_comment_list_free(&list);
 }
 
 static void

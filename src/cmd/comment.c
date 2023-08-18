@@ -30,6 +30,9 @@
 #include <config.h>
 
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/colour.h>
+#include <gcli/cmd/comment.h>
+
 #include <gcli/comments.h>
 
 #ifdef HAVE_GETOPT_H
@@ -48,6 +51,51 @@ usage(void)
 	fprintf(stderr, "  -y              Do not ask for confirmation\n");
 	version();
 	copyright();
+}
+
+int
+gcli_issue_comments(char const *owner, char const *repo, int const issue)
+{
+	gcli_comment_list list = {0};
+	int rc = 0;
+
+	rc = gcli_get_issue_comments(g_clictx, owner, repo, issue, &list);
+	if (rc < 0)
+		return rc;
+
+	gcli_print_comment_list(&list);
+	gcli_comment_list_free(&list);
+
+	return rc;
+}
+
+int
+gcli_pull_comments(char const *owner, char const *repo, int const pull)
+{
+	gcli_comment_list list = {0};
+	int rc = 0;
+
+	rc = gcli_get_pull_comments(g_clictx, owner, repo, pull, &list);
+	if (rc < 0)
+		return rc;
+
+	gcli_print_comment_list(&list);
+	gcli_comment_list_free(&list);
+
+	return rc;
+}
+
+void
+gcli_print_comment_list(gcli_comment_list const *const list)
+{
+	for (size_t i = 0; i < list->comments_size; ++i) {
+		printf("AUTHOR : %s%s%s\n"
+		       "DATE   : %s\n",
+		       gcli_setbold(), list->comments[i].author, gcli_resetbold(),
+		       list->comments[i].date);
+		pretty_print(list->comments[i].body, 9, 80, stdout);
+		putchar('\n');
+	}
 }
 
 int

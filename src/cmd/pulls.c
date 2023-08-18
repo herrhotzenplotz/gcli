@@ -32,6 +32,7 @@
 #include <gcli/cmd/ci.h>
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/colour.h>
+#include <gcli/cmd/comment.h>
 #include <gcli/cmd/pipelines.h>
 #include <gcli/cmd/pulls.h>
 #include <gcli/cmd/table.h>
@@ -668,7 +669,9 @@ handle_pull_actions(int argc, char *argv[],
 
 		} else if (strcmp(action, "comments") == 0 ||
 		           strcmp(action, "notes") == 0) {
-			gcli_pull_comments(g_clictx, owner, repo, pr);
+			if (gcli_pull_comments(owner, repo, pr) < 0)
+				errx(1, "error: failed to fetch pull comments: %s",
+				     gcli_get_error(g_clictx));
 
 		} else if (strcmp(action, "ci") == 0) {
 			if (gcli_pull_checks(owner, repo, pr) < 0)

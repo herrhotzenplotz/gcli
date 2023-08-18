@@ -30,6 +30,7 @@
 #include <config.h>
 
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/comment.h>
 #include <gcli/cmd/table.h>
 
 #include <gcli/comments.h>
@@ -505,7 +506,9 @@ handle_issues_actions(int argc, char *argv[],
 		} else if (strcmp("comments", operation) == 0 ||
 		           strcmp("notes", operation) == 0) {
 			/* Doesn't require fetching the issue data */
-			gcli_issue_comments(g_clictx, owner, repo, issue_id);
+			if (gcli_issue_comments(owner, repo, issue_id) < 0)
+				errx(1, "error: failed to fetch issue comments: %s",
+				     gcli_get_error(g_clictx));
 
 		} else if (strcmp("op", operation) == 0) {
 			/* Make sure we have fetched the issue data */

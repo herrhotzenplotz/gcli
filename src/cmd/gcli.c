@@ -51,6 +51,7 @@
 #include <gcli/cmd/pulls.h>
 #include <gcli/cmd/releases.h>
 #include <gcli/cmd/repos.h>
+#include <gcli/cmd/snippets.h>
 
 #include <gcli/config.h>
 

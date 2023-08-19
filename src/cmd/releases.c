@@ -32,8 +32,8 @@
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/releases.h>
 #include <gcli/cmd/table.h>
+#include <gcli/cmd/editor.h>
 
-#include <gcli/editor.h>
 #include <gcli/releases.h>
 
 #ifdef HAVE_GETOPT_H

@@ -27,8 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EDITOR_H
-#define EDITOR_H
+#ifndef GCLI_CMD_EDITOR_H
+#define GCLI_CMD_EDITOR_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -43,4 +43,4 @@ sn_sv gcli_editor_get_user_message(
 	void (*initializer)(gcli_ctx *, FILE *, void *),
 	void *user_data);
 
-#endif /* EDITOR_H */
+#endif /* GCLI_CMD_EDITOR_H */

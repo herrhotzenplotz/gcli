@@ -31,6 +31,7 @@
 
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/comment.h>
+#include <gcli/cmd/editor.h>
 #include <gcli/cmd/table.h>
 
 #include <gcli/comments.h>
@@ -185,12 +186,63 @@ gcli_issue_print_op(gcli_issue const *const it)
 		pretty_print(it->body.data, 4, 80, stdout);
 }
 
+static void
+issue_init_user_file(gcli_ctx *ctx, FILE *stream, void *_opts)
+{
+	(void) ctx;
+	gcli_submit_issue_options *opts = _opts;
+	fprintf(
+		stream,
+		"! ISSUE TITLE : "SV_FMT"\n"
+		"! Enter issue description above.\n"
+		"! All lines starting with '!' will be discarded.\n",
+		SV_ARGS(opts->title));
+}
+
+static sn_sv
+gcli_issue_get_user_message(gcli_submit_issue_options *opts)
+{
+	return gcli_editor_get_user_message(g_clictx, issue_init_user_file, opts);
+}
+
+static int
+create_issue(gcli_submit_issue_options opts, int always_yes)
+{
+	int rc;
+
+	opts.body = gcli_issue_get_user_message(&opts);
+
+	printf("The following issue will be created:\n"
+	       "\n"
+	       "TITLE   : "SV_FMT"\n"
+	       "OWNER   : %s\n"
+	       "REPO    : %s\n"
+	       "MESSAGE :\n"SV_FMT"\n",
+	       SV_ARGS(opts.title),
+	       opts.owner, opts.repo,
+	       SV_ARGS(opts.body));
+
+	putchar('\n');
+
+	if (!always_yes) {
+		if (!sn_yesno("Do you want to continue?"))
+			errx(1, "Submission aborted.");
+	}
+
+	rc = gcli_issue_submit(g_clictx, opts);
+
+	free(opts.body.data);
+	free(opts.body.data);
+
+	return rc;
+}
+
 static int
 subcommand_issue_create(int argc, char *argv[])
 {
-	/* we'll use getopt_long here to parse the arguments */
-	int                       ch;
-	gcli_submit_issue_options opts   = {0};
+	int ch;
+	gcli_submit_issue_options opts = {0};
+	int always_yes = 0;
 
 	const struct option options[] = {
 		{ .name    = "owner",
@@ -217,7 +269,7 @@ subcommand_issue_create(int argc, char *argv[])
 			opts.repo = optarg;
 			break;
 		case 'y':
-			opts.always_yes = true;
+			always_yes = 1;
 			break;
 		default:
 			usage();
@@ -238,7 +290,7 @@ subcommand_issue_create(int argc, char *argv[])
 
 	opts.title = SV(argv[0]);
 
-	if (gcli_issue_submit(g_clictx, opts) < 0)
+	if (create_issue(opts, always_yes) < 0)
 		errx(1, "failed to submit issue");
 
 	return EXIT_SUCCESS;

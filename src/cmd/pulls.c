@@ -33,6 +33,7 @@
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/colour.h>
 #include <gcli/cmd/comment.h>
+#include <gcli/cmd/editor.h>
 #include <gcli/cmd/pipelines.h>
 #include <gcli/cmd/pulls.h>
 #include <gcli/cmd/table.h>
@@ -329,6 +330,53 @@ gcli_pull_commits(char const *owner, char const *repo,
 	return rc;
 }
 
+static void
+pull_init_user_file(gcli_ctx *ctx, FILE *stream, void *_opts)
+{
+	gcli_submit_pull_options *opts = _opts;
+
+	(void) ctx;
+	fprintf(
+		stream,
+		"! PR TITLE : "SV_FMT"\n"
+		"! Enter PR comments above.\n"
+		"! All lines starting with '!' will be discarded.\n",
+		SV_ARGS(opts->title));
+}
+
+static sn_sv
+gcli_pull_get_user_message(gcli_submit_pull_options *opts)
+{
+	return gcli_editor_get_user_message(g_clictx, pull_init_user_file, opts);
+}
+
+static int
+create_pull(gcli_submit_pull_options opts, int always_yes)
+{
+	opts.body = gcli_pull_get_user_message(&opts);
+
+	fprintf(stdout,
+	        "The following PR will be created:\n"
+	        "\n"
+	        "TITLE   : "SV_FMT"\n"
+	        "BASE    : "SV_FMT"\n"
+	        "HEAD    : "SV_FMT"\n"
+	        "IN      : %s/%s\n"
+	        "MESSAGE :\n"SV_FMT"\n",
+	        SV_ARGS(opts.title),SV_ARGS(opts.to),
+	        SV_ARGS(opts.from),
+	        opts.owner, opts.repo,
+	        SV_ARGS(opts.body));
+
+	fputc('\n', stdout);
+
+	if (!always_yes)
+		if (!sn_yesno("Do you want to continue?"))
+			errx(1, "PR aborted.");
+
+	return gcli_pull_submit(g_clictx, opts);
+}
+
 static sn_sv
 pr_try_derive_head(void)
 {
@@ -353,8 +401,9 @@ static int
 subcommand_pull_create(int argc, char *argv[])
 {
 	/* we'll use getopt_long here to parse the arguments */
-	int                       ch;
+	int ch;
 	gcli_submit_pull_options opts   = {0};
+	int always_yes = 0;
 
 	const struct option options[] = {
 		{ .name = "from",
@@ -407,7 +456,7 @@ subcommand_pull_create(int argc, char *argv[])
 			opts.labels[opts.labels_size++] = optarg;
 			break;
 		case 'y':
-			opts.always_yes = true;
+			always_yes = 1;
 			break;
 		default:
 			usage();
@@ -438,7 +487,7 @@ subcommand_pull_create(int argc, char *argv[])
 
 	opts.title = SV(argv[0]);
 
-	if (gcli_pull_submit(g_clictx, opts) < 0)
+	if (create_pull(opts, always_yes) < 0)
 		errx(1, "error: failed to submit pull request");
 
 	free(opts.labels);

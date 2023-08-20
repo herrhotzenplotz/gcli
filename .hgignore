@@ -3,15 +3,7 @@ build/*
 Makefile.in
 aclocal.m4
 ar-lib
-autom4te.cache/output.0
-autom4te.cache/output.1
-autom4te.cache/output.2
-autom4te.cache/output.3
-autom4te.cache/requests
-autom4te.cache/traces.0
-autom4te.cache/traces.1
-autom4te.cache/traces.2
-autom4te.cache/traces.3
+autom4te.cache/
 compile
 config.guess
 config.h.in
@@ -31,3 +23,4 @@ ylwrap
 *~
 docs/tutorial/*.html
 TAGS
+build-*/

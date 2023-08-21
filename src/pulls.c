@@ -30,7 +30,6 @@
 #include <gcli/cmd/colour.h>
 #include <gcli/cmd/table.h>
 #include <gcli/config.h>
-#include <gcli/editor.h>
 #include <gcli/forges.h>
 #include <gcli/github/checks.h>
 #include <gcli/github/pulls.h>
@@ -139,50 +138,9 @@ gcli_pull_checks_free(gcli_pull_checks_list *list)
 	}
 }
 
-static void
-pull_init_user_file(gcli_ctx *ctx, FILE *stream, void *_opts)
-{
-	gcli_submit_pull_options *opts = _opts;
-
-	(void) ctx;
-	fprintf(
-		stream,
-		"! PR TITLE : "SV_FMT"\n"
-		"! Enter PR comments above.\n"
-		"! All lines starting with '!' will be discarded.\n",
-		SV_ARGS(opts->title));
-}
-
-static sn_sv
-gcli_pull_get_user_message(gcli_ctx *ctx, gcli_submit_pull_options *opts)
-{
-	return gcli_editor_get_user_message(ctx, pull_init_user_file, opts);
-}
-
 int
 gcli_pull_submit(gcli_ctx *ctx, gcli_submit_pull_options opts)
 {
-	opts.body = gcli_pull_get_user_message(ctx, &opts);
-
-	fprintf(stdout,
-	        "The following PR will be created:\n"
-	        "\n"
-	        "TITLE   : "SV_FMT"\n"
-	        "BASE    : "SV_FMT"\n"
-	        "HEAD    : "SV_FMT"\n"
-	        "IN      : %s/%s\n"
-	        "MESSAGE :\n"SV_FMT"\n",
-	        SV_ARGS(opts.title),SV_ARGS(opts.to),
-	        SV_ARGS(opts.from),
-	        opts.owner, opts.repo,
-	        SV_ARGS(opts.body));
-
-	fputc('\n', stdout);
-
-	if (!opts.always_yes)
-		if (!sn_yesno("Do you want to continue?"))
-			errx(1, "PR aborted.");
-
 	return gcli_forge(ctx)->perform_submit_pull(ctx, opts);
 }
 

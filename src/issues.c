@@ -27,7 +27,6 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/editor.h>
 #include <gcli/forges.h>
 #include <gcli/github/issues.h>
 #include <gcli/issues.h>
@@ -92,57 +91,17 @@ gcli_issue_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
 	return gcli_forge(ctx)->issue_reopen(ctx, owner, repo, issue_number);
 }
 
-static void
-issue_init_user_file(gcli_ctx *ctx, FILE *stream, void *_opts)
-{
-	(void) ctx;
-	gcli_submit_issue_options *opts = _opts;
-	fprintf(
-		stream,
-		"! ISSUE TITLE : "SV_FMT"\n"
-		"! Enter issue description above.\n"
-		"! All lines starting with '!' will be discarded.\n",
-		SV_ARGS(opts->title));
-}
-
-static sn_sv
-gcli_issue_get_user_message(gcli_ctx *ctx, gcli_submit_issue_options *opts)
-{
-	return gcli_editor_get_user_message(ctx, issue_init_user_file, opts);
-}
-
 int
 gcli_issue_submit(gcli_ctx *ctx, gcli_submit_issue_options opts)
 {
 	gcli_fetch_buffer json_buffer = {0};
 	int rc = 0;
 
-	opts.body = gcli_issue_get_user_message(ctx, &opts);
-
-	printf("The following issue will be created:\n"
-	       "\n"
-	       "TITLE   : "SV_FMT"\n"
-	       "OWNER   : %s\n"
-	       "REPO    : %s\n"
-	       "MESSAGE :\n"SV_FMT"\n",
-	       SV_ARGS(opts.title),
-	       opts.owner, opts.repo,
-	       SV_ARGS(opts.body));
-
-	putchar('\n');
-
-	if (!opts.always_yes) {
-		if (!sn_yesno("Do you want to continue?"))
-			errx(1, "Submission aborted.");
-	}
-
 	rc = gcli_forge(ctx)->perform_submit_issue(ctx, opts, &json_buffer);
 
 	if (rc == 0)
 		gcli_print_html_url(ctx, json_buffer);
 
-	free(opts.body.data);
-	free(opts.body.data);
 	free(json_buffer.data);
 
 	return rc;

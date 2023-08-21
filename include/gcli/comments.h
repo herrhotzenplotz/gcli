@@ -62,7 +62,6 @@ struct gcli_submit_comment_opts {
 	char const *owner, *repo;
 	int target_id;
 	sn_sv message;
-	bool always_yes;
 };
 
 void gcli_comment_list_free(gcli_comment_list *list);

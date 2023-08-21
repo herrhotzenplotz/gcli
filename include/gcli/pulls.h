@@ -99,7 +99,6 @@ struct gcli_submit_pull_options {
 	char const **labels;
 	size_t labels_size;
 	int draft;
-	bool always_yes;
 };
 
 struct gcli_pull_fetch_details {

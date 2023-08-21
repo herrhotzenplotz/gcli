@@ -57,15 +57,13 @@ dist_man_MANS = \
 	docs/gcli.1
 
 gcli_SOURCES = \
+	include/gcli/cmd/ci.h src/cmd/ci.c \
 	include/gcli/cmd/cmd.h src/cmd/cmd.c \
 	include/gcli/cmd/colour.h src/cmd/colour.c \
-	include/gcli/cmd/table.h src/cmd/table.c \
-	src/cmd/api.c \
-	include/gcli/cmd/ci.h src/cmd/ci.c \
 	include/gcli/cmd/comment.h src/cmd/comment.c \
 	include/gcli/cmd/config.h src/cmd/config.c \
+	include/gcli/cmd/editor.h src/cmd/editor.c \
 	include/gcli/cmd/forks.h src/cmd/forks.c \
-	src/cmd/gcli.c \
 	include/gcli/cmd/gists.h src/cmd/gists.c \
 	include/gcli/cmd/issues.h src/cmd/issues.c \
 	include/gcli/cmd/labels.h src/cmd/labels.c \
@@ -75,7 +73,10 @@ gcli_SOURCES = \
 	include/gcli/cmd/releases.h src/cmd/releases.c \
 	include/gcli/cmd/repos.h src/cmd/repos.c \
 	include/gcli/cmd/snippets.h src/cmd/snippets.c \
-	include/gcli/cmd/status.h src/cmd/status.c
+	include/gcli/cmd/status.h src/cmd/status.c \
+	include/gcli/cmd/table.h src/cmd/table.c \
+	src/cmd/api.c \
+	src/cmd/gcli.c
 
 libsn_la_SOURCES = \
 	thirdparty/sn/sn.c \
@@ -112,16 +113,14 @@ TEMPLATES = \
 	templates/gitlab/snippets.t \
 	templates/gitea/milestones.t
 
-include_HEADERS = \
-	include/gcli/gcli.h include/gcli/comments.h \
-	include/gcli/config.h include/gcli/curl.h \
-	include/gcli/editor.h include/gcli/forks.h \
-	include/gcli/gitconfig.h include/gcli/issues.h \
-	include/gcli/labels.h include/gcli/milestones.h \
-	include/gcli/pulls.h include/gcli/releases.h \
-	include/gcli/repos.h include/gcli/review.h \
-	include/gcli/gitlab/snippets.h include/gcli/status.h \
-	include/gcli/sshkeys.h
+include_HEADERS = include/gcli/gcli.h include/gcli/comments.h	\
+	include/gcli/config.h include/gcli/curl.h		\
+	include/gcli/forks.h include/gcli/gitconfig.h		\
+	include/gcli/issues.h include/gcli/labels.h		\
+	include/gcli/milestones.h include/gcli/pulls.h		\
+	include/gcli/releases.h include/gcli/repos.h		\
+	include/gcli/review.h include/gcli/gitlab/snippets.h	\
+	include/gcli/status.h include/gcli/sshkeys.h
 
 libgcli_la_SOURCES = \
 	include/gcli/ctx.h src/ctx.c \
@@ -129,7 +128,6 @@ libgcli_la_SOURCES = \
 	src/comments.c include/gcli/comments.h \
 	src/config.c include/gcli/config.h \
 	src/curl.c include/gcli/curl.h \
-	src/editor.c include/gcli/editor.h \
 	src/forges.c include/gcli/forges.h \
 	src/forks.c include/gcli/forks.h \
 	src/gitconfig.c include/gcli/gitconfig.h \

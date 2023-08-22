@@ -39,8 +39,8 @@
 void gcli_print_pulls(enum gcli_output_flags flags, gcli_pull_list const *list,
                       int max);
 
-void gcli_print_pull_diff(FILE *stream, char const *owner, char const *reponame,
-                          int pr_number);
+int gcli_print_pull_diff(FILE *stream, char const *owner, char const *reponame,
+                         int pr_number);
 
 void gcli_print_pull(gcli_pull const *pull);
 

@@ -152,11 +152,11 @@ gcli_print_pulls(enum gcli_output_flags const flags,
 	gcli_tbl_end(table);
 }
 
-void
+int
 gcli_print_pull_diff(FILE *stream, char const *owner, char const *reponame,
                      int pr_number)
 {
-	gcli_pull_get_diff(g_clictx, stream, owner, reponame, pr_number);
+	return gcli_pull_get_diff(g_clictx, stream, owner, reponame, pr_number);
 }
 
 void
@@ -714,7 +714,9 @@ handle_pull_actions(int argc, char *argv[],
 			gcli_pull_commits(owner, repo, pr);
 
 		} else if (strcmp(action, "diff") == 0) {
-			gcli_print_pull_diff(stdout, owner, repo, pr);
+			if (gcli_print_pull_diff(stdout, owner, repo, pr) < 0)
+				errx(1, "error: failed to fetch diff: %s",
+				     gcli_get_error(g_clictx));
 
 		} else if (strcmp(action, "comments") == 0 ||
 		           strcmp(action, "notes") == 0) {

@@ -128,8 +128,8 @@ void gcli_pull_free(gcli_pull *it);
 
 void gcli_pulls_free(gcli_pull_list *list);
 
-void gcli_pull_get_diff(gcli_ctx *ctx, FILE *fout, char const *owner,
-                        char const *repo, int pr_number);
+int gcli_pull_get_diff(gcli_ctx *ctx, FILE *fout, char const *owner,
+                       char const *repo, int pr_number);
 
 int gcli_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
                          int pr_number, gcli_pull_checks_list *out);

@@ -43,8 +43,6 @@ gcli_init(gcli_ctx **ctx)
 	if (gcli_config_init_ctx(*ctx) < 0)
 		return (*ctx)->last_error; /* TODO: cleanup */
 
-	(*ctx)->last_error = "imagine having useful error messages in the year 2023";
-
 	return NULL;
 }
 
@@ -62,5 +60,8 @@ gcli_destroy(gcli_ctx **ctx)
 char const *
 gcli_get_error(gcli_ctx *ctx)
 {
-	return ctx->last_error;
+	if (ctx->last_error)
+		return ctx->last_error;
+	else
+		return "No error";
 }

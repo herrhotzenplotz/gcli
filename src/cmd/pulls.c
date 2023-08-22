@@ -488,7 +488,8 @@ subcommand_pull_create(int argc, char *argv[])
 	opts.title = SV(argv[0]);
 
 	if (create_pull(opts, always_yes) < 0)
-		errx(1, "error: failed to submit pull request");
+		errx(1, "error: failed to submit pull request: %s",
+		     gcli_get_error(g_clictx));
 
 	free(opts.labels);
 

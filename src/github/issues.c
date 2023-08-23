@@ -308,9 +308,10 @@ github_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 	char *e_label = NULL;
 	int rc = 0;
 
-	if (labels_size != 1)
-		errx(1, "error: GitHub only supports removing labels from "
-		     "issues one by one.");
+	if (labels_size != 1) {
+		return gcli_error(ctx, "GitHub only supports removing labels from "
+		                  "issues one by one.");
+	}
 
 	e_label = gcli_urlencode(labels[0]);
 

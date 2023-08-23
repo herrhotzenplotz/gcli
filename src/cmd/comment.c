@@ -243,7 +243,7 @@ subcommand_comment(int argc, char *argv[])
 		always_yes);
 
 	if (rc < 0)
-		errx(1, "error: failed to submit comment");
+		errx(1, "error: failed to submit comment: %s", gcli_get_error(g_clictx));
 
 	return EXIT_SUCCESS;
 }

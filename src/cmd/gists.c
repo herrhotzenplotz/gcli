@@ -223,16 +223,15 @@ subcommand_gist_get(int argc, char *argv[])
 		}
 	}
 
-	errx(1, "gists get: %s: no such file in gist with id %s",
-	     file_name, gist_id);
+	errx(1, "gists get: %s: no such file in gist with id %s", file_name, gist_id);
 
 file_found:
 
 	if (isatty(STDOUT_FILENO) && (file->size >= 4 * 1024 * 1024))
-		errx(1, "File is bigger than 4 MiB, refusing to print to stdout.");
+		errx(1, "error: File is bigger than 4 MiB, refusing to print to stdout.");
 
 	if (gcli_curl(g_clictx, stdout, file->url.data, file->type.data) < 0)
-		errx(1, "error: failed to fetch gist");
+		errx(1, "error: failed to fetch gist: %s", gcli_get_error(g_clictx));
 
 	return EXIT_SUCCESS;
 }
@@ -284,7 +283,7 @@ subcommand_gist_create(int argc, char *argv[])
 
 	if (file) {
 		if ((opts.file = fopen(file, "r")) == NULL)
-			err(1, "gists create: cannot open file");
+			err(1, "error: gists create: cannot open file");
 	} else {
 		opts.file = stdin;
 	}
@@ -293,7 +292,7 @@ subcommand_gist_create(int argc, char *argv[])
 		opts.gist_description = "gcli paste";
 
 	if (gcli_create_gist(g_clictx, opts) < 0)
-		errx(1, "error: failed to create gist");
+		errx(1, "error: failed to create gist: %s", gcli_get_error(g_clictx));
 
 	return EXIT_SUCCESS;
 }
@@ -419,7 +418,7 @@ subcommand_gists(int argc, char *argv[])
 	argv += optind;
 
 	if (gcli_get_gists(g_clictx, user, count, &gists) < 0)
-		errx(1, "error: failed to get gists");
+		errx(1, "error: failed to get gists: %s", gcli_get_error(g_clictx));
 
 	gcli_print_gists(flags, &gists, count);
 	gcli_gists_free(&gists);

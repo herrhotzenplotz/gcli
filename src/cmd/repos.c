@@ -178,7 +178,7 @@ subcommand_repos_create(int argc, char *argv[])
 	}
 
 	if (gcli_repo_create(g_clictx, &create_options, &repo) < 0)
-		errx(1, "error: failed to create repository");
+		errx(1, "error: failed to create repository: %s", gcli_get_error(g_clictx));
 
 	gcli_repo_print(&repo);
 	gcli_repo_free(&repo);
@@ -275,7 +275,7 @@ subcommand_repos(int argc, char *argv[])
 			rc = gcli_get_repos(g_clictx, owner, n, &repos);
 
 		if (rc < 0)
-			errx(1, "error: failed to fetch repos");
+			errx(1, "error: failed to fetch repos: %s", gcli_get_error(g_clictx));
 
 		gcli_print_repos(flags, &repos, n);
 		gcli_repos_free(&repos);

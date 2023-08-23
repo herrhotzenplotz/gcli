@@ -58,13 +58,12 @@ github_pulls_filter_author(gcli_pull **listp, size_t *sizep, char const *const a
 	for (size_t i = *sizep; i > 0; --i) {
 		gcli_pull *pulls = *listp;
 
-		if (strcmp(author, pulls[i-1].author) == 0)
-			continue;
+		if (author && strcmp(author, pulls[i-1].author)) {
+			gcli_pull_free(&pulls[i - 1]);
 
-		gcli_pull_free(&pulls[i - 1]);
-
-		memmove(&pulls[i - 1], &pulls[i], sizeof(*pulls) * (*sizep - i));
-		*listp = realloc(pulls, sizeof(*pulls) * (--(*sizep)));
+			memmove(&pulls[i - 1], &pulls[i], sizeof(*pulls) * (*sizep - i));
+			*listp = realloc(pulls, sizeof(*pulls) * (--(*sizep)));
+		}
 	}
 }
 

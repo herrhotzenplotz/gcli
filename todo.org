@@ -125,8 +125,8 @@
 * Big refactor for libraryfication
 ** TODO Fix test suite
    - [ ] Add support for a testing gcli context
-** TODO Check errx calls if they print "error: "
-** TODO Check for calls to errx in submit routines
+** DONE Check errx calls if they print "error: "
+** DONE Check for calls to errx in submit routines
 ** TODO [[file:src/github/review.c::github_review_get_reviews(char const *owner)][github_review_get_reviews]] is garbage
 ** TODO Clean up the generic comments code
 ** DONE Move printing routines to cmd code
@@ -135,5 +135,5 @@
    - [X] Put it into the context
    - [ ] Clean up handle on exit
 ** TODO Return errors from parsers
-** TODO [[file:src/releases.c::gcli_release_push_asset(gcli_new_release *const release,][push_asset]] should not call errx but return an error code
+** DONE [[file:src/releases.c::gcli_release_push_asset(gcli_new_release *const release,][push_asset]] should not call errx but return an error code
 ** DONE Make [[file:src/pulls.c::gcli_pull_get_diff(gcli_ctx *ctx, FILE *stream, char const *owner,][getting a pull diff]] return an error code

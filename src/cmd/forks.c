@@ -170,8 +170,14 @@ subcommand_forks_create(int argc, char *argv[])
 			return EXIT_SUCCESS;
 	}
 
-	if (!in)
-		in = sn_sv_to_cstr(gcli_config_get_account(g_clictx));
+	if (!in) {
+		sn_sv act;
+		if (gcli_config_get_account(g_clictx, &act) < 0) {
+			errx(1, "error: could not fetch account: %s",
+			     gcli_get_error(g_clictx));
+		}
+		in = sn_sv_to_cstr(act);
+	}
 
 	gcli_gitconfig_add_fork_remote(in, repo);
 

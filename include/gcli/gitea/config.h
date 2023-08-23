@@ -40,6 +40,6 @@
 
 char *gitea_get_apibase(gcli_ctx *ctx);
 char *gitea_get_authheader(gcli_ctx *ctx);
-sn_sv gitea_get_account(gcli_ctx *ctx);
+int gitea_get_account(gcli_ctx *ctx, sn_sv *out);
 
 #endif /* GITEA_CONFIG_H */

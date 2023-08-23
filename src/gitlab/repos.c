@@ -121,19 +121,17 @@ gitlab_get_own_repos(gcli_ctx *ctx, int const max, gcli_repo_list *const out)
 {
 	char *_account = NULL;
 	sn_sv account = {0};
-	int n;
+	int rc = 0;
 
-	account = gitlab_get_account(ctx);
-	if (!account.length)
-		errx(1, "error: gitlab.account is not set");
+	rc = gitlab_get_account(ctx, &account);
+	if (rc < 0)
+		return rc;
 
 	_account = sn_sv_to_cstr(account);
-
-	n = gitlab_get_repos(ctx, _account, max, out);
-
+	rc = gitlab_get_repos(ctx, _account, max, out);
 	free(_account);
 
-	return n;
+	return rc;
 }
 
 int

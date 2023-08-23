@@ -383,16 +383,19 @@ pr_try_derive_head(void)
 	sn_sv account = {0};
 	sn_sv branch  = {0};
 
-	if (!(account = gcli_config_get_account(g_clictx)).length)
+	if (gcli_config_get_account(g_clictx, &account) < 0) {
 		errx(1,
 		     "error: Cannot derive PR head. Please specify --from or set the\n"
-		     "       account in the users gcli config file.");
+		     "       account in the users gcli config file.\n"
+		     "note:  %s",
+		     gcli_get_error(g_clictx));
+	}
 
 	if (!(branch = gcli_gitconfig_get_current_branch()).length)
 		errx(1,
 		     "error: Cannot derive PR head. Please specify --from or, if you\n"
 		     "       are in »detached HEAD« state, checkout the branch you \n"
-		     "       want to pull request.");
+		     "       want to pull request.\n");
 
 	return sn_sv_fmt(SV_FMT":"SV_FMT, SV_ARGS(account), SV_ARGS(branch));
 }

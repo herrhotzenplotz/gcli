@@ -199,7 +199,8 @@ subcommand_milestone_create(int argc, char *argv[])
 
 	/* actually create the milestone */
 	if (gcli_create_milestone(g_clictx, &args) < 0)
-		errx(1, "error: could not create milestone");
+		errx(1, "error: could not create milestone: %s",
+		     gcli_get_error(g_clictx));
 
 	return 0;
 }
@@ -278,7 +279,8 @@ subcommand_milestones(int argc, char *argv[])
 
 		rc = gcli_get_milestones(g_clictx, owner, repo, max, &list);
 		if (rc < 0)
-			errx(1, "error: cannot get list of milestones");
+			errx(1, "error: cannot get list of milestones: %s",
+			     gcli_get_error(g_clictx));
 
 		gcli_print_milestones(&list, max);
 
@@ -304,7 +306,8 @@ ensure_milestone(char const *const owner,
 
 	rc = gcli_get_milestone(g_clictx, owner, repo, milestone_id, milestone);
 	if (rc < 0)
-		errx(1, "error: could not get milestone %d", milestone_id);
+		errx(1, "error: could not get milestone %d: %s", milestone_id,
+		     gcli_get_error(g_clictx));
 
 	*fetched_milestone = 1;
 }
@@ -345,7 +348,8 @@ handle_milestone_actions(int argc, char *argv[],
 			                               &issues);
 
 			if (rc < 0)
-				errx(1, "error: failed to fetch issues");
+				errx(1, "error: failed to fetch issues: %s",
+				     gcli_get_error(g_clictx));
 
 			printf("\nISSUES:\n");
 			gcli_print_issues(0, &issues, -1);
@@ -359,7 +363,8 @@ handle_milestone_actions(int argc, char *argv[],
 			rc = gcli_milestone_get_issues(g_clictx, owner, repo, milestone_id,
 			                               &issues);
 			if (rc < 0)
-				errx(1, "error: failed to fetch issues");
+				errx(1, "error: failed to fetch issues: %s",
+				     gcli_get_error(g_clictx));
 
 			/* Print them as a table */
 			gcli_print_issues(0, &issues, -1);
@@ -379,7 +384,8 @@ handle_milestone_actions(int argc, char *argv[],
 
 			/* Delete the milestone */
 			if (gcli_delete_milestone(g_clictx, owner, repo, milestone_id) < 0)
-				errx(1, "error: could not delete milestone");
+				errx(1, "error: could not delete milestone: %s",
+				     gcli_get_error(g_clictx));
 
 		} else if (strcmp(action, "set-duedate") == 0) {
 
@@ -396,7 +402,8 @@ handle_milestone_actions(int argc, char *argv[],
 			rc = gcli_milestone_set_duedate(g_clictx, owner, repo, milestone_id,
 			                                new_date);
 			if (rc < 0)
-				errx(1, "error: could not update milestone due date");
+				errx(1, "error: could not update milestone due date: %s",
+				     gcli_get_error(g_clictx));;
 
 		} else {
 

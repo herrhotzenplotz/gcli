@@ -286,7 +286,8 @@ subcommand_releases_create(int argc, char *argv[])
 				.name  = optarg,
 				.label = "unused",
 			};
-			gcli_release_push_asset(&release, asset);
+			if (gcli_release_push_asset(g_clictx, &release, asset) < 0)
+				errx(1, "failed to add asset: %s", gcli_get_error(g_clictx));
 		} break;
 		case 'y': {
 			always_yes = true;

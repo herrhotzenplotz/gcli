@@ -94,8 +94,8 @@ void gcli_free_releases(gcli_release_list *);
 
 int gcli_create_release(gcli_ctx *ctx, gcli_new_release const *);
 
-void gcli_release_push_asset(gcli_new_release *,
-                             gcli_release_asset_upload);
+int gcli_release_push_asset(gcli_ctx *, gcli_new_release *,
+                            gcli_release_asset_upload);
 
 int gcli_delete_release(gcli_ctx *ctx, char const *owner, char const *repo,
                         char const *id);

@@ -73,14 +73,16 @@ gcli_create_release(gcli_ctx *ctx, gcli_new_release const *release)
 	return gcli_forge(ctx)->create_release(ctx, release);
 }
 
-void
-gcli_release_push_asset(gcli_new_release *const release,
+int
+gcli_release_push_asset(gcli_ctx *ctx, gcli_new_release *const release,
                         gcli_release_asset_upload const asset)
 {
 	if (release->assets_size == GCLI_RELEASE_MAX_ASSETS)
-		errx(1, "Too many assets");
+		return gcli_error(ctx, "too many assets");
 
 	release->assets[release->assets_size++] = asset;
+
+	return 0;
 }
 
 int

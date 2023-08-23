@@ -95,9 +95,6 @@ github_get_pulls(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	if (details->author)
-		warnx("author is ignored by the GitHub routines");
-
 	url = sn_asprintf(
 		"%s/repos/%s/%s/pulls?state=%s",
 		gcli_get_apibase(ctx),

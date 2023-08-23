@@ -185,9 +185,9 @@ github_delete_milestone(gcli_ctx *ctx, char const *const owner,
 	return rc;
 }
 
-static void
-normalize_date_to_iso8601(char const *const input,
-                          char *output, size_t const output_size)
+static int
+normalize_date_to_iso8601(gcli_ctx *ctx, char const *const input, char *output,
+                          size_t const output_size)
 {
 	struct tm tm_buf = {0};
 	struct tm *utm_buf;
@@ -199,7 +199,7 @@ normalize_date_to_iso8601(char const *const input,
 	/* Parse input time */
 	endptr = strptime(input, "%Y-%m-%d", &tm_buf);
 	if (endptr == NULL || *endptr != '\0')
-		errx(1, "error: date »%s« is invalid: want YYYY-MM-DD", input);
+		return gcli_error(ctx, "date »%s« is invalid: want YYYY-MM-DD", input);
 
 	/* Convert to UTC: Really, we should be using the _r versions of
 	 * these functions for thread-safety but since gcli doesn't do
@@ -211,6 +211,8 @@ normalize_date_to_iso8601(char const *const input,
 
 	/* Format the output string - now in UTC */
 	strftime(output, output_size, "%Y-%m-%dT%H:%M:%SZ", utm_buf);
+
+	return 0;
 }
 
 int
@@ -221,14 +223,16 @@ github_milestone_set_duedate(gcli_ctx *ctx, char const *const owner,
 	char *url, *e_owner, *e_repo, *payload, norm_date[21] = {0};
 	int rc = 0;
 
+	rc = normalize_date_to_iso8601(ctx, date, norm_date, sizeof norm_date);
+	if (rc < 0)
+		return rc;
+
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/repos/%s/%s/milestones/%d",
 	                  gcli_get_apibase(ctx),
 	                  e_owner, e_repo, milestone);
-
-	normalize_date_to_iso8601(date, norm_date, sizeof norm_date);
 
 	payload = sn_asprintf("{ \"due_on\": \"%s\"}", norm_date);
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);

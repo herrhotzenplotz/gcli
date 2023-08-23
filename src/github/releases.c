@@ -81,15 +81,17 @@ github_parse_single_release(gcli_ctx *ctx, gcli_fetch_buffer buffer,
 	json_close(&stream);
 }
 
-static char *
-github_get_upload_url(gcli_release *const it)
+static int
+github_get_upload_url(gcli_ctx *ctx, gcli_release *const it, char **out)
 {
 	char *delim = strchr(it->upload_url.data, '{');
 	if (delim == NULL)
-		errx(1, "GitHub API returned an invalid upload url");
+		return gcli_error(ctx, "GitHub API returned an invalid upload url");
 
 	size_t len = delim - it->upload_url.data;
-	return sn_strndup(it->upload_url.data, len);
+	*out = sn_strndup(it->upload_url.data, len);
+
+	return 0;
 }
 
 static int
@@ -183,7 +185,9 @@ github_create_release(gcli_ctx *ctx, gcli_new_release const *release)
 
 	printf("INFO : Release at "SV_FMT"\n", SV_ARGS(response.html_url));
 
-	upload_url = github_get_upload_url(&response);
+    rc = github_get_upload_url(ctx, &response, &upload_url);
+	if (rc < 0)
+		goto out;
 
 	for (size_t i = 0; i < release->assets_size; ++i) {
 		printf("INFO : Uploading asset %s...\n", release->assets[i].path);

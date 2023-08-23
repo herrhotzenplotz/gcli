@@ -34,6 +34,11 @@
 #include <config.h>
 #endif
 
+#include <gcli/github/gists.h>
+
 int subcommand_gists(int argc, char *argv[]);
+
+void gcli_print_gists(enum gcli_output_flags flags, gcli_gist_list const *list,
+                      int max);
 
 #endif /* GCLI_CMD_GISTS_H */

@@ -28,6 +28,7 @@
  */
 
 #include <gcli/curl.h>
+#include <gcli/date_time.h>
 #include <gcli/gitlab/config.h>
 #include <gcli/gitlab/issues.h>
 #include <gcli/gitlab/merge_requests.h>
@@ -179,35 +180,6 @@ gitlab_delete_milestone(gcli_ctx *ctx, char const *const owner,
 	return rc;
 }
 
-/* TODO: merge this with the github code */
-static void
-normalize_date_to_gitlab_format(char const *const input, char *output,
-                                size_t const output_size)
-{
-	struct tm tm_buf = {0};
-	struct tm *utm_buf;
-	char *endptr;
-	time_t utctime;
-
-	assert(output_size == 9);
-
-	/* Parse input time */
-	endptr = strptime(input, "%Y-%m-%d", &tm_buf);
-	if (endptr == NULL || *endptr != '\0')
-		errx(1, "error: date »%s« is invalid: want YYYY-MM-DD", input);
-
-	/* Convert to UTC: Really, we should be using the _r versions of
-	 * these functions for thread-safety but since gcli doesn't do
-	 * multithreading (except for inside libcurl) we do not need to be
-	 * worried about the storage behind the pointer returned by gmtime
-	 * to be altered by another thread. */
-	utctime = mktime(&tm_buf);
-	utm_buf = gmtime(&utctime);
-
-	/* Format the output string - now in UTC */
-	strftime(output, output_size, "%Y%m%d", utm_buf);
-}
-
 int
 gitlab_milestone_set_duedate(gcli_ctx *ctx, char const *const owner,
                              char const *const repo, int const milestone,
@@ -216,7 +188,10 @@ gitlab_milestone_set_duedate(gcli_ctx *ctx, char const *const owner,
 	char *url, *e_owner, *e_repo, norm_date[9] = {0};
 	int rc = 0;
 
-	normalize_date_to_gitlab_format(date, norm_date, sizeof norm_date);
+	rc = gcli_normalize_date(ctx, DATEFMT_GITLAB, date, norm_date,
+	                         sizeof norm_date);
+	if (rc < 0)
+		return rc;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);

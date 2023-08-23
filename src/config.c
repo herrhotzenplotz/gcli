@@ -643,12 +643,12 @@ gcli_config_get_authheader(gcli_ctx *ctx)
 	return gcli_forge(ctx)->get_authheader(ctx);
 }
 
-sn_sv
-gcli_config_get_account(gcli_ctx *ctx)
+int
+gcli_config_get_account(gcli_ctx *ctx, sn_sv *out)
 {
 	ensure_config(ctx);
 
-	return gcli_forge(ctx)->get_account(ctx);
+	return gcli_forge(ctx)->get_account(ctx, out);
 }
 
 sn_sv

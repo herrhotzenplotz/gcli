@@ -27,29 +27,21 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GCLI_CMD_PULLS_H
-#define GCLI_CMD_PULLS_H
+#ifndef GCLI_DATE_TIME_H
+#define GCLI_DATE_TIME_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#include <gcli/pulls.h>
+#include <gcli/gcli.h>
 
-void gcli_print_pulls(enum gcli_output_flags flags, gcli_pull_list const *list,
-                      int max);
+enum {
+	DATEFMT_ISO8601,
+	DATEFMT_GITLAB,
+};
 
-int gcli_print_pull_diff(FILE *stream, char const *owner, char const *reponame,
-                         int pr_number);
+int gcli_normalize_date(gcli_ctx *ctx, int fmt, char const *const input,
+                        char *output, size_t const output_size);
 
-void gcli_print_pull(gcli_pull const *pull);
-
-void gcli_pull_print_op(gcli_pull const *pull);
-
-int gcli_pull_checks(char const *owner, char const *repo, int pr_number);
-
-void gcli_print_commits(gcli_commit_list const *const list);
-
-int subcommand_pulls(int argc, char *argv[]);
-
-#endif /* GCLI_CMD_PULLS_H */
+#endif /* GCLI_DATE_TIME_H */

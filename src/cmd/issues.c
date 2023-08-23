@@ -291,7 +291,7 @@ subcommand_issue_create(int argc, char *argv[])
 	opts.title = SV(argv[0]);
 
 	if (create_issue(opts, always_yes) < 0)
-		errx(1, "failed to submit issue");
+		errx(1, "error: failed to submit issue: %s", gcli_get_error(g_clictx));
 
 	return EXIT_SUCCESS;
 }
@@ -405,7 +405,7 @@ subcommand_issues(int argc, char *argv[])
 	/* No issue number was given, so list all open issues */
 	if (issue_id < 0) {
 		if (gcli_get_issues(g_clictx, owner, repo, &details, n, &list) < 0)
-			errx(1, "error: could not get issues");
+			errx(1, "error: could not get issues: %s", gcli_get_error(g_clictx));
 
 		gcli_print_issues(flags, &list, n);
 
@@ -433,7 +433,8 @@ ensure_issue(char const *const owner, char const *const repo,
 		return;
 
 	if (gcli_get_issue(g_clictx, owner, repo, issue_id, issue) < 0)
-		errx(1, "error: failed to retrieve issue data");
+		errx(1, "error: failed to retrieve issue data: %s",
+		     gcli_get_error(g_clictx));
 
 	*have_fetched_issue = 1;
 }
@@ -464,16 +465,20 @@ handle_issue_labels_action(int *argc, char ***argv,
 		rc = gcli_issue_add_labels(g_clictx, owner, repo, issue_id,
 		                           add_labels, add_labels_size);
 
-		if (rc < 0)
-			errx(1, "failed to add labels");
+		if (rc < 0) {
+			errx(1, "error: failed to add labels: %s",
+			     gcli_get_error(g_clictx));
+		}
 	}
 
 	if (remove_labels_size) {
 		rc = gcli_issue_remove_labels(g_clictx, owner, repo, issue_id,
 		                              remove_labels, remove_labels_size);
 
-		if (rc < 0)
-			errx(1, "failed to remove labels");
+		if (rc < 0) {
+			errx(1, "error: failed to remove labels: %s",
+			     gcli_get_error(g_clictx));
+		}
 	}
 
 	free(add_labels);
@@ -506,8 +511,10 @@ handle_issue_milestone_action(int *argc, char ***argv,
 	 * clear the milestone */
 	if (strcmp(milestone_str, "-d") == 0) {
 		rc = gcli_issue_clear_milestone(g_clictx, owner, repo, issue_id);
-		if (rc < 0)
-			errx(1, "error: could not clear milestone of issue #%d", issue_id);
+		if (rc < 0) {
+			errx(1, "error: could not clear milestone of issue #%d: %s",
+			     issue_id, gcli_get_error(g_clictx));
+		}
 		return;
 	}
 
@@ -523,7 +530,8 @@ handle_issue_milestone_action(int *argc, char ***argv,
 
 	/* Pass it to the dispatch */
 	if (gcli_issue_set_milestone(g_clictx, owner, repo, issue_id, milestone) < 0)
-		errx(1, "error: could not assign milestone");
+		errx(1, "error: could not assign milestone: %s",
+		     gcli_get_error(g_clictx));
 }
 
 static inline int
@@ -577,18 +585,21 @@ handle_issues_actions(int argc, char *argv[],
 		} else if (strcmp("close", operation) == 0) {
 
 			if (gcli_issue_close(g_clictx, owner, repo, issue_id) < 0)
-				errx(1, "failed to close issue");
+				errx(1, "error: failed to close issue: %s",
+				     gcli_get_error(g_clictx));
 
 		} else if (strcmp("reopen", operation) == 0) {
 
 			if (gcli_issue_reopen(g_clictx, owner, repo, issue_id) < 0)
-				errx(1, "failed to reopen issue");
+				errx(1, "error: failed to reopen issue: %s",
+				     gcli_get_error(g_clictx));
 
 		} else if (strcmp("assign", operation) == 0) {
 
 			char const *assignee = shift(&argc, &argv);
 			if (gcli_issue_assign(g_clictx, owner, repo, issue_id, assignee) < 0)
-				errx(1, "failed to assign issue");
+				errx(1, "error: failed to assign issue: %s",
+				     gcli_get_error(g_clictx));
 
 		} else if (strcmp("labels", operation) == 0) {
 

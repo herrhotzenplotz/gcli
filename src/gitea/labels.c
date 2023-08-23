@@ -72,12 +72,11 @@ gitea_delete_label(gcli_ctx *ctx, char const *owner, char const *repo,
 		}
 	}
 
+	gcli_free_labels(&list);
+
 	/* did we find a label? */
-	if (id < 0) {
-		/* TODO: Save error message
-		 *  errx(1, "error: label '%s' does not exist", label); */
-		return -1;
-	}
+	if (id < 0)
+		return gcli_error(ctx, "label '%s' does not exist", label);
 
 	/* DELETE /repos/{owner}/{repo}/labels/{} */
 	url = sn_asprintf("%s/repos/%s/%s/labels/%d",
@@ -86,7 +85,6 @@ gitea_delete_label(gcli_ctx *ctx, char const *owner, char const *repo,
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	gcli_free_labels(&list);
 	free(url);
 
 	return rc;

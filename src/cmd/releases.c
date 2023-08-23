@@ -286,7 +286,8 @@ subcommand_releases_create(int argc, char *argv[])
 				.name  = optarg,
 				.label = "unused",
 			};
-			gcli_release_push_asset(&release, asset);
+			if (gcli_release_push_asset(g_clictx, &release, asset) < 0)
+				errx(1, "failed to add asset: %s", gcli_get_error(g_clictx));
 		} break;
 		case 'y': {
 			always_yes = true;
@@ -316,7 +317,7 @@ subcommand_releases_create(int argc, char *argv[])
 			errx(1, "Aborted by user");
 
 	if (gcli_create_release(g_clictx, &release) < 0)
-		errx(1, "failed to create release");
+		errx(1, "failed to create release: %s", gcli_get_error(g_clictx));
 
 	return EXIT_SUCCESS;
 }
@@ -379,7 +380,7 @@ subcommand_releases_delete(int argc, char *argv[])
 			errx(1, "Aborted by user");
 
 	if (gcli_delete_release(g_clictx, owner, repo, argv[0]) < 0)
-		errx(1, "failed to delete the release");
+		errx(1, "failed to delete the release: %s", gcli_get_error(g_clictx));
 
 	return EXIT_SUCCESS;
 }
@@ -479,7 +480,7 @@ subcommand_releases(int argc, char *argv[])
 	check_owner_and_repo(&owner, &repo);
 
 	if (gcli_get_releases(g_clictx, owner, repo, count, &releases) < 0)
-		errx(1, "error: could not get releases");
+		errx(1, "error: could not get releases: %s", gcli_get_error(g_clictx));
 
 	gcli_releases_print(flags, &releases, count);
 

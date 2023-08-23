@@ -312,6 +312,9 @@ gitlab_perform_submit_mr(gcli_ctx *ctx, gcli_submit_pull_options opts)
 	target_branch = opts.to;
 	source_branch = opts.from;
 	source_owner = sn_sv_chop_until(&source_branch, ':');
+	if (source_branch.length == 0)
+		return gcli_error(ctx, "bad merge request source: expected 'owner:branch'");
+
 	source_branch.length -= 1;
 	source_branch.data += 1;
 

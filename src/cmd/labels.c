@@ -203,10 +203,8 @@ subcommand_labels_create(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	if (gcli_create_label(g_clictx, owner, repo, &label) < 0) {
-		fprintf(stderr, "error: could not create label\n");
-		return EXIT_FAILURE;
-	}
+	if (gcli_create_label(g_clictx, owner, repo, &label) < 0)
+		errx(1, "error: failed to create label: %s", gcli_get_error(g_clictx));
 
 	/* only if we are not quieted */
 	if (!sn_quiet())
@@ -286,7 +284,8 @@ subcommand_labels(int argc, char *argv[])
 	check_owner_and_repo(&owner, &repo);
 
 	if (gcli_get_labels(g_clictx, owner, repo, count, &labels) < 0)
-		errx(1, "error: could not fetch list of labels");
+		errx(1, "error: could not fetch list of labels: %s",
+		     gcli_get_error(g_clictx));
 
 	gcli_labels_print(&labels, count);
 

@@ -31,6 +31,7 @@
 
 #include <gcli/config.h>
 #include <gcli/curl.h>
+#include <gcli/date_time.h>
 #include <gcli/github/issues.h>
 #include <gcli/json_util.h>
 
@@ -185,34 +186,6 @@ github_delete_milestone(gcli_ctx *ctx, char const *const owner,
 	return rc;
 }
 
-static void
-normalize_date_to_iso8601(char const *const input,
-                          char *output, size_t const output_size)
-{
-	struct tm tm_buf = {0};
-	struct tm *utm_buf;
-	char *endptr;
-	time_t utctime;
-
-	assert(output_size == 21);
-
-	/* Parse input time */
-	endptr = strptime(input, "%Y-%m-%d", &tm_buf);
-	if (endptr == NULL || *endptr != '\0')
-		errx(1, "error: date »%s« is invalid: want YYYY-MM-DD", input);
-
-	/* Convert to UTC: Really, we should be using the _r versions of
-	 * these functions for thread-safety but since gcli doesn't do
-	 * multithreading (except for inside libcurl) we do not need to be
-	 * worried about the storage behind the pointer returned by gmtime
-	 * to be altered by another thread. */
-	utctime = mktime(&tm_buf);
-	utm_buf = gmtime(&utctime);
-
-	/* Format the output string - now in UTC */
-	strftime(output, output_size, "%Y-%m-%dT%H:%M:%SZ", utm_buf);
-}
-
 int
 github_milestone_set_duedate(gcli_ctx *ctx, char const *const owner,
                              char const *const repo, int const milestone,
@@ -221,14 +194,17 @@ github_milestone_set_duedate(gcli_ctx *ctx, char const *const owner,
 	char *url, *e_owner, *e_repo, *payload, norm_date[21] = {0};
 	int rc = 0;
 
+	rc = gcli_normalize_date(ctx, DATEFMT_ISO8601, date, norm_date,
+	                         sizeof norm_date);
+	if (rc < 0)
+		return rc;
+
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/repos/%s/%s/milestones/%d",
 	                  gcli_get_apibase(ctx),
 	                  e_owner, e_repo, milestone);
-
-	normalize_date_to_iso8601(date, norm_date, sizeof norm_date);
 
 	payload = sn_asprintf("{ \"due_on\": \"%s\"}", norm_date);
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);

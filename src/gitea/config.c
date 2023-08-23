@@ -88,15 +88,18 @@ gitea_get_authheader(gcli_ctx *ctx)
 	return sn_asprintf("Authorization: token "SV_FMT, SV_ARGS(token));
 }
 
-sn_sv
-gitea_get_account(gcli_ctx *ctx)
+int
+gitea_get_account(gcli_ctx *ctx, sn_sv *out)
 {
 	sn_sv const section = gitea_default_account_name(ctx);
 	if (sn_sv_null(section))
-		return SV_NULL;
+		return gcli_error(ctx, "no default gitea account");
 
 	sn_sv const account = gcli_config_find_by_key(ctx, section, "account");;
 	if (!account.length)
-		errx(1, "Missing Gitea account name");
-	return account;
+		return gcli_error(ctx, "missing account name for default gitea account");
+
+	*out = account;
+
+	return 0;
 }

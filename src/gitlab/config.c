@@ -85,15 +85,18 @@ gitlab_get_authheader(gcli_ctx *ctx)
 	return sn_asprintf("PRIVATE-TOKEN: "SV_FMT, SV_ARGS(token));
 }
 
-sn_sv
-gitlab_get_account(gcli_ctx *ctx)
+int
+gitlab_get_account(gcli_ctx *ctx, sn_sv *out)
 {
 	sn_sv const section = gitlab_default_account_name(ctx);
 	if (sn_sv_null(section))
-		return SV_NULL;
+		return gcli_error(ctx, "no default gitlab account");
 
-	sn_sv const account = gcli_config_find_by_key(ctx, section, "account");;
+	sn_sv const account = gcli_config_find_by_key(ctx, section, "account");
 	if (sn_sv_null(account))
-		errx(1, "Missing GitLab account name");
-	return account;
+		return gcli_error(ctx, "missing account name in default gitlab account");
+
+	*out = account;
+
+	return 0;
 }

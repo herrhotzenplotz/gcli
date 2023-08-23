@@ -474,7 +474,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Get the user account name */
-	sn_sv (*get_account)(gcli_ctx *ctx);
+	int (*get_account)(gcli_ctx *ctx, sn_sv *out);
 
 	/**
 	 * Get list of SSH keys */

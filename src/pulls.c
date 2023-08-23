@@ -60,11 +60,11 @@ gcli_get_pulls(gcli_ctx *ctx, char const *owner, char const *repo,
 	return gcli_forge(ctx)->get_pulls(ctx, owner, repo, details, max, out);
 }
 
-void
+int
 gcli_pull_get_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
                    char const *reponame, int const pr_number)
 {
-	gcli_forge(ctx)->print_pull_diff(ctx, stream, owner, reponame, pr_number);
+	return gcli_forge(ctx)->print_pull_diff(ctx, stream, owner, reponame, pr_number);
 }
 
 int

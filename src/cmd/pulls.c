@@ -152,11 +152,11 @@ gcli_print_pulls(enum gcli_output_flags const flags,
 	gcli_tbl_end(table);
 }
 
-void
+int
 gcli_print_pull_diff(FILE *stream, char const *owner, char const *reponame,
                      int pr_number)
 {
-	gcli_pull_get_diff(g_clictx, stream, owner, reponame, pr_number);
+	return gcli_pull_get_diff(g_clictx, stream, owner, reponame, pr_number);
 }
 
 void
@@ -383,16 +383,19 @@ pr_try_derive_head(void)
 	sn_sv account = {0};
 	sn_sv branch  = {0};
 
-	if (!(account = gcli_config_get_account(g_clictx)).length)
+	if (gcli_config_get_account(g_clictx, &account) < 0) {
 		errx(1,
 		     "error: Cannot derive PR head. Please specify --from or set the\n"
-		     "       account in the users gcli config file.");
+		     "       account in the users gcli config file.\n"
+		     "note:  %s",
+		     gcli_get_error(g_clictx));
+	}
 
 	if (!(branch = gcli_gitconfig_get_current_branch()).length)
 		errx(1,
 		     "error: Cannot derive PR head. Please specify --from or, if you\n"
 		     "       are in »detached HEAD« state, checkout the branch you \n"
-		     "       want to pull request.");
+		     "       want to pull request.\n");
 
 	return sn_sv_fmt(SV_FMT":"SV_FMT, SV_ARGS(account), SV_ARGS(branch));
 }
@@ -488,7 +491,8 @@ subcommand_pull_create(int argc, char *argv[])
 	opts.title = SV(argv[0]);
 
 	if (create_pull(opts, always_yes) < 0)
-		errx(1, "error: failed to submit pull request");
+		errx(1, "error: failed to submit pull request: %s",
+		     gcli_get_error(g_clictx));
 
 	free(opts.labels);
 
@@ -605,7 +609,8 @@ subcommand_pulls(int argc, char *argv[])
 	 * open PRs and exit */
 	if (pr < 0) {
 		if (gcli_get_pulls(g_clictx, owner, repo, &details, n, &pulls) < 0)
-			errx(1, "error: could not fetch pull requests");
+			errx(1, "error: could not fetch pull requests: %s",
+			     gcli_get_error(g_clictx));
 
 		gcli_print_pulls(flags, &pulls, n);
 		gcli_pulls_free(&pulls);
@@ -633,7 +638,8 @@ ensure_pull(char const *owner, char const *repo, int pr,
 		return;
 
 	if (gcli_get_pull(g_clictx, owner, repo, pr, pull) < 0)
-		errx(1, "error: failed to fetch pull request data");
+		errx(1, "error: failed to fetch pull request data: %s",
+		     gcli_get_error(g_clictx));
 
 	*fetched_pull = 1;
 }
@@ -685,12 +691,14 @@ handle_pull_actions(int argc, char *argv[],
 			/* Commits */
 			puts("\nCOMMITS");
 			if (gcli_pull_commits(owner, repo, pr) < 0)
-				errx(1, "error: failed to fetch pull request checks");
+				errx(1, "error: failed to fetch pull request checks: %s",
+				     gcli_get_error(g_clictx));
 
 			/* Checks */
 			puts("\nCHECKS");
 			if (gcli_pull_checks(owner, repo, pr) < 0)
-				errx(1, "error: failed to fetch pull request checks");
+				errx(1, "error: failed to fetch pull request checks: %s",
+				     gcli_get_error(g_clictx));
 
 		} else if (strcmp(action, "op") == 0) {
 
@@ -714,7 +722,9 @@ handle_pull_actions(int argc, char *argv[],
 			gcli_pull_commits(owner, repo, pr);
 
 		} else if (strcmp(action, "diff") == 0) {
-			gcli_print_pull_diff(stdout, owner, repo, pr);
+			if (gcli_print_pull_diff(stdout, owner, repo, pr) < 0)
+				errx(1, "error: failed to fetch diff: %s",
+				     gcli_get_error(g_clictx));
 
 		} else if (strcmp(action, "comments") == 0 ||
 		           strcmp(action, "notes") == 0) {
@@ -724,7 +734,8 @@ handle_pull_actions(int argc, char *argv[],
 
 		} else if (strcmp(action, "ci") == 0) {
 			if (gcli_pull_checks(owner, repo, pr) < 0)
-				errx(1, "error: failed to fetch pull request checks");
+				errx(1, "error: failed to fetch pull request checks: %s",
+				     gcli_get_error(g_clictx));
 
 		} else if (strcmp(action, "merge") == 0) {
 			enum gcli_merge_flags flags = GCLI_PULL_MERGE_DELETEHEAD;
@@ -749,22 +760,26 @@ handle_pull_actions(int argc, char *argv[],
 			}
 
 			if (gcli_pull_merge(g_clictx, owner, repo, pr, flags) < 0)
-				errx(1, "error: failed to merge pull request");
+				errx(1, "error: failed to merge pull request: %s",
+				     gcli_get_error(g_clictx));
 
 		} else if (strcmp(action, "close") == 0) {
 			if (gcli_pull_close(g_clictx, owner, repo, pr) < 0)
-				errx(1, "error: failed to close pull request");
+				errx(1, "error: failed to close pull request: %s",
+				     gcli_get_error(g_clictx));
 
 		} else if (strcmp(action, "reopen") == 0) {
 			if (gcli_pull_reopen(g_clictx, owner, repo, pr) < 0)
-				errx(1, "error: failed to reopen pull request");
+				errx(1, "error: failed to reopen pull request: %s",
+				     gcli_get_error(g_clictx));
 
 		} else if (strcmp(action, "reviews") == 0) {
 			/* list reviews */
 			gcli_pr_review_list reviews = {0};
 
 			if (gcli_review_get_reviews(g_clictx, owner, repo, pr, &reviews) < 0)
-				errx(1, "error: failed to fetch reviews");
+				errx(1, "error: failed to fetch reviews: %s",
+				     gcli_get_error(g_clictx));
 
 			gcli_review_print_review_table(g_clictx, &reviews);
 			gcli_review_reviews_free(&reviews);
@@ -792,7 +807,8 @@ handle_pull_actions(int argc, char *argv[],
 					g_clictx, owner, repo, pr, add_labels,
 					add_labels_size);
 				if (rc < 0)
-					errx(1, "failed to add labels");
+					errx(1, "error: failed to add labels: %s",
+					     gcli_get_error(g_clictx));
 			}
 			if (remove_labels_size) {
 				rc = gcli_pull_remove_labels(
@@ -800,7 +816,8 @@ handle_pull_actions(int argc, char *argv[],
 					remove_labels_size);
 
 				if (rc < 0)
-					errx(1, "failed to remove labels");
+					errx(1, "error: failed to remove labels: %s",
+					     gcli_get_error(g_clictx));
 			}
 
 			free(add_labels);
@@ -811,7 +828,8 @@ handle_pull_actions(int argc, char *argv[],
 
 			if (strcmp(arg, "-d") == 0) {
 				if (gcli_pull_clear_milestone(g_clictx, owner, repo, pr) < 0)
-					errx(1, "failed to clear milestone");
+					errx(1, "error: failed to clear milestone: %s",
+					     gcli_get_error(g_clictx));
 
 			} else {
 				int milestone_id = 0;
@@ -827,7 +845,8 @@ handle_pull_actions(int argc, char *argv[],
 				rc = gcli_pull_set_milestone(g_clictx, owner, repo, pr,
 				                             milestone_id);
 				if (rc < 0)
-					errx(1, "error: failed to set milestone");
+					errx(1, "error: failed to set milestone: %s",
+					     gcli_get_error(g_clictx));
 			}
 		} else {
 			/* At this point we found an unknown action / stray

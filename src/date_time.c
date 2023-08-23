@@ -27,29 +27,51 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GCLI_CMD_PULLS_H
-#define GCLI_CMD_PULLS_H
+#include <gcli/date_time.h>
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include <gcli/gcli.h>
 
-#include <gcli/pulls.h>
+#include <assert.h>
+#include <time.h>
 
-void gcli_print_pulls(enum gcli_output_flags flags, gcli_pull_list const *list,
-                      int max);
+int
+gcli_normalize_date(gcli_ctx *ctx, int fmt, char const *const input,
+                    char *output, size_t const output_size)
+{
+	struct tm tm_buf = {0};
+	struct tm *utm_buf;
+	char *endptr;
+	time_t utctime;
+	char const *sfmt;
 
-int gcli_print_pull_diff(FILE *stream, char const *owner, char const *reponame,
-                         int pr_number);
+	switch (fmt) {
+	case DATEFMT_ISO8601:
+		sfmt = "%Y-%m-%dT%H:%M:%SZ";
+		assert(output_size == 21);
+		break;
+	case DATEFMT_GITLAB:
+		sfmt = "%Y%m%d";
+		assert(output_size == 9);
+		break;
+	default:
+		return gcli_error(ctx, "bad date format");
+	}
 
-void gcli_print_pull(gcli_pull const *pull);
+	/* Parse input time */
+	endptr = strptime(input, "%Y-%m-%d", &tm_buf);
+	if (endptr == NULL || *endptr != '\0')
+		return gcli_error(ctx, "date »%s« is invalid: want YYYY-MM-DD", input);
 
-void gcli_pull_print_op(gcli_pull const *pull);
+	/* Convert to UTC: Really, we should be using the _r versions of
+	 * these functions for thread-safety but since gcli doesn't do
+	 * multithreading (except for inside libcurl) we do not need to be
+	 * worried about the storage behind the pointer returned by gmtime
+	 * to be altered by another thread. */
+	utctime = mktime(&tm_buf);
+	utm_buf = gmtime(&utctime);
 
-int gcli_pull_checks(char const *owner, char const *repo, int pr_number);
+	/* Format the output string - now in UTC */
+	strftime(output, output_size, sfmt, utm_buf);
 
-void gcli_print_commits(gcli_commit_list const *const list);
-
-int subcommand_pulls(int argc, char *argv[]);
-
-#endif /* GCLI_CMD_PULLS_H */
+	return 0;
+}

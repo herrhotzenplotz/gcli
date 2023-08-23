@@ -82,15 +82,18 @@ github_get_authheader(gcli_ctx *ctx)
 	return sn_asprintf("Authorization: token "SV_FMT, SV_ARGS(token));
 }
 
-sn_sv
-github_get_account(gcli_ctx *ctx)
+int
+github_get_account(gcli_ctx *ctx, sn_sv *out)
 {
 	sn_sv const section = github_default_account_name(ctx);
 	if (sn_sv_null(section))
-		return SV_NULL;
+		return gcli_error(ctx, "no default github account");
 
-	sn_sv const account = gcli_config_find_by_key(ctx, section, "account");;
+	sn_sv const account = gcli_config_find_by_key(ctx, section, "account");
 	if (!account.length)
-		errx(1, "Missing Github account name");
-	return account;
+		return gcli_error(ctx, "Missing Github account name");
+
+	*out = account;
+
+	return 0;
 }

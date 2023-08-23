@@ -140,7 +140,8 @@ subcommand_status(int argc, char *argv[])
 		}
 
 		if (gcli_notification_mark_as_read(g_clictx, argv[0]) < 0)
-			errx(1, "failed to mark the notification as read");
+			errx(1, "error: failed to mark the notification as read: %s",
+			     gcli_get_error(g_clictx));
 	}
 
 	return EXIT_SUCCESS;

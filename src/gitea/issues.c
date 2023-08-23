@@ -148,6 +148,15 @@ get_id_of_label(char const *label_name,
 	return NULL;
 }
 
+static void
+free_id_list(char *list[], size_t const list_size)
+{
+	for (size_t i = 0; i < list_size; ++i) {
+		free(list[i]);
+	}
+	free(list);
+}
+
 static char **
 label_names_to_ids(gcli_ctx *ctx, char const *owner, char const *repo,
                    char const *const names[], size_t const names_size)
@@ -161,25 +170,21 @@ label_names_to_ids(gcli_ctx *ctx, char const *owner, char const *repo,
 	for (size_t i = 0; i < names_size; ++i) {
 		char *const label_id = get_id_of_label(names[i], &list);
 
-		if (!label_id)
-			errx(1, "error: no such label '%s'", names[i]);
+		if (!label_id) {
+			free_id_list(ids, ids_size);
+			ids = NULL;
+			gcli_error(ctx, "no such label '%s'", names[i]);
+			goto out;
+		}
 
 		ids = realloc(ids, sizeof(*ids) * (ids_size +1));
 		ids[ids_size++] = label_id;
 	}
 
+out:
 	gcli_free_labels(&list);
 
 	return ids;
-}
-
-static void
-free_id_list(char *list[], size_t const list_size)
-{
-	for (size_t i = 0; i < list_size; ++i) {
-		free(list[i]);
-	}
-	free(list);
 }
 
 int
@@ -194,6 +199,8 @@ gitea_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 
 	/* First, convert to ids */
 	char **ids = label_names_to_ids(ctx, owner, repo, labels, labels_size);
+	if (!ids)
+		return -1;
 
 	/* Construct json payload */
 
@@ -224,6 +231,8 @@ gitea_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 	 * delete labels from an issue in bulk. So, just iterate over the
 	 * given labels and delete them one after another. */
 	char **ids = label_names_to_ids(ctx, owner, repo, labels, labels_size);
+	if (!ids)
+		return -1;
 
 	for (size_t i = 0; i < labels_size; ++i) {
 		char *url = NULL;

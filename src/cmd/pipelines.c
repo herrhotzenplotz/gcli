@@ -231,11 +231,11 @@ gitlab_job_retry_cb(char const *owner, char const *repo, long const jid)
 int
 subcommand_pipelines(int argc, char *argv[])
 {
-	int         ch    = 0;
+	int ch = 0;
 	char const *owner = NULL, *repo = NULL;
-	int         count = 30;
-	long        pid   = -1;     /* pipeline id                           */
-	long        jid   = -1;     /* job id. these are mutually exclusive. */
+	int count = 30;
+	long pid = -1;              /* pipeline id                           */
+	long jid = -1;              /* job id. these are mutually exclusive. */
 
 	/* Parse options */
 	const struct option options[] = {
@@ -257,13 +257,13 @@ subcommand_pipelines(int argc, char *argv[])
 			break;
 		case 'n': {
 			char *endptr = NULL;
-			count        = strtol(optarg, &endptr, 10);
+			count = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "ci: cannot parse argument to -n");
 		} break;
 		case 'p': {
 			char *endptr = NULL;
-			pid          = strtol(optarg, &endptr, 10);
+			pid = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "ci: cannot parse argument to -p");
 			if (pid < 0) {
@@ -272,7 +272,7 @@ subcommand_pipelines(int argc, char *argv[])
 		} break;
 		case 'j': {
 			char *endptr = NULL;
-			jid          = strtol(optarg, &endptr, 10);
+			jid = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "ci: cannot parse argument to -j");
 			if (jid < 0) {
@@ -372,7 +372,8 @@ next_action:
 				argv += 2;
 			}
 			if (gitlab_job_download_artifacts(g_clictx, owner, repo, jid, outfile) < 0)
-				errx(1, "error: failed to download file");
+				errx(1, "error: failed to download file: %s",
+				     gcli_get_error(g_clictx));
 			goto next_action;
 		}
 

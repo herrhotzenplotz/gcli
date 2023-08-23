@@ -47,7 +47,7 @@ sn_sv gcli_config_find_by_key(gcli_ctx *ctx,
 
 char *gcli_config_get_editor(gcli_ctx *ctx);
 char *gcli_config_get_authheader(gcli_ctx *ctx);
-sn_sv gcli_config_get_account(gcli_ctx *ctx);
+int gcli_config_get_account(gcli_ctx *ctx, sn_sv *out);
 sn_sv gcli_config_get_upstream(gcli_ctx *ctx);
 sn_sv gcli_config_get_base(gcli_ctx *ctx);
 gcli_forge_type gcli_config_get_forge_type(gcli_ctx *ctx);

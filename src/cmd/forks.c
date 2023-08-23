@@ -163,15 +163,21 @@ subcommand_forks_create(int argc, char *argv[])
 	check_owner_and_repo(&owner, &repo);
 
 	if (gcli_fork_create(g_clictx, owner, repo, in) < 0)
-		errx(1, "error: failed to fork repository");
+		errx(1, "error: failed to fork repository: %s", gcli_get_error(g_clictx));
 
 	if (!always_yes) {
 		if (!sn_yesno("Do you want to add a remote for the fork?"))
 			return EXIT_SUCCESS;
 	}
 
-	if (!in)
-		in = sn_sv_to_cstr(gcli_config_get_account(g_clictx));
+	if (!in) {
+		sn_sv act;
+		if (gcli_config_get_account(g_clictx, &act) < 0) {
+			errx(1, "error: could not fetch account: %s",
+			     gcli_get_error(g_clictx));
+		}
+		in = sn_sv_to_cstr(act);
+	}
 
 	gcli_gitconfig_add_fork_remote(in, repo);
 
@@ -256,8 +262,7 @@ subcommand_forks(int argc, char *argv[])
 
 	if (argc == 0) {
 		if (gcli_get_forks(g_clictx, owner, repo, count, &forks) < 0)
-			errx(1, "error: could not get forks: %s",
-			     gcli_get_error(g_clictx));
+			errx(1, "error: could not get forks: %s", gcli_get_error(g_clictx));
 
 		gcli_print_forks(flags, &forks, count);
 		gcli_forks_free(&forks);

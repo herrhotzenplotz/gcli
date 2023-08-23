@@ -79,12 +79,9 @@ int gcli_get_gists(gcli_ctx *ctx, char const *user, int max,
 
 gcli_gist *gcli_get_gist(gcli_ctx *ctx, char const *gist_id);
 
-void gcli_print_gists(gcli_ctx *ctx, enum gcli_output_flags flags,
-                      gcli_gist_list const *list, int max);
-
 int gcli_create_gist(gcli_ctx *ctx, gcli_new_gist);
 
-int gcli_delete_gist(gcli_ctx *ctx, char const *gist_id, bool always_yes);
+int gcli_delete_gist(gcli_ctx *ctx, char const *gist_id);
 
 void gcli_gists_free(gcli_gist_list *list);
 

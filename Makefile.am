@@ -125,6 +125,7 @@ include_HEADERS = include/gcli/gcli.h include/gcli/comments.h	\
 libgcli_la_SOURCES = \
 	include/gcli/ctx.h src/ctx.c \
 	include/gcli/gcli.h src/gcli.c \
+	include/gcli/date_time.h src/date_time.c \
 	src/comments.c include/gcli/comments.h \
 	src/config.c include/gcli/config.h \
 	src/curl.c include/gcli/curl.h \

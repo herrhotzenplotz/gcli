@@ -75,16 +75,16 @@ struct gcli_release_asset_upload {
 
 #define GCLI_RELEASE_MAX_ASSETS 16
 struct gcli_new_release {
-	char const                *owner;
-	char const                *repo;
-	char const                *tag;
-	char const                *name;
-	sn_sv                      body;
-	char const                *commitish;
-	bool                       draft;
-	bool                       prerelease;
-	gcli_release_asset_upload  assets[GCLI_RELEASE_MAX_ASSETS];
-	size_t                     assets_size;
+	char const *owner;
+	char const *repo;
+	char const *tag;
+	char const *name;
+	sn_sv body;
+	char const *commitish;
+	bool draft;
+	bool prerelease;
+	gcli_release_asset_upload assets[GCLI_RELEASE_MAX_ASSETS];
+	size_t assets_size;
 };
 
 int gcli_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,

@@ -93,24 +93,17 @@ gcli_curl_check_api_error(gcli_ctx *ctx, CURLcode code, char const *url,
 	long status_code = 0;
 
 	if (code != CURLE_OK) {
-		fprintf(stderr,
-		        "error: request to %s failed\n"
-		        "     : curl error: %s",
-		        url,
-		        curl_easy_strerror(code));
-
-		return -1;
+		return gcli_error(ctx, "request to %s failed: curl error: %s",
+		                  url, curl_easy_strerror(code));
 	}
 
 	curl_easy_getinfo(ctx->curl, CURLINFO_RESPONSE_CODE, &status_code);
 
 	if (status_code >= 300L) {
-		fprintf(stderr,
-		        "error: request to %s failed with code %ld\n"
-		        "     : API error: %s",
-		        url, status_code,
-		        gcli_forge(ctx)->get_api_error_string(ctx, result));
-		return -1;
+		return gcli_error(ctx,
+		                  "request to %s failed with code %ld: API error: %s",
+		                  url, status_code,
+		                  gcli_forge(ctx)->get_api_error_string(ctx, result));
 	}
 
 	return 0;

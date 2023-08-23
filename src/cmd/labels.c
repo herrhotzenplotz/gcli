@@ -286,7 +286,8 @@ subcommand_labels(int argc, char *argv[])
 	check_owner_and_repo(&owner, &repo);
 
 	if (gcli_get_labels(g_clictx, owner, repo, count, &labels) < 0)
-		errx(1, "error: could not fetch list of labels");
+		errx(1, "error: could not fetch list of labels: %s",
+		     gcli_get_error(g_clictx));
 
 	gcli_labels_print(&labels, count);
 

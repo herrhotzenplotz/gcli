@@ -30,27 +30,23 @@
 #include <gcli/github/api.h>
 #include <gcli/json_util.h>
 
+#include <templates/github/api.h>
+
 #include <pdjson/pdjson.h>
 
 char const *
-github_api_error_string(gcli_ctx *ctx, gcli_fetch_buffer *const it)
+github_api_error_string(gcli_ctx *ctx, gcli_fetch_buffer *const buf)
 {
-	struct json_stream stream = {0};
-	enum json_type     next   = JSON_NULL;
+	json_stream stream = {0};
+	int rc;
+	char *msg;
 
-	if (!it->length)
-		return NULL;
+	json_open_buffer(&stream, buf->data, buf->length);
+	rc = parse_github_get_error(ctx, &stream, &msg);
+	json_close(&stream);
 
-	json_open_buffer(&stream, it->data, it->length);
-	json_set_streaming(&stream, true);
-
-	while ((next = json_next(&stream)) != JSON_OBJECT_END) {
-		char *key = get_string(ctx, &stream);
-		if (strcmp(key, "message") == 0)
-			return get_string(ctx, &stream);
-
-		free(key);
-	}
-
-	return "<No message key in error response object>";
+	if (rc < 0)
+		return strdup("no message: failed to parser error response");
+	else
+		return msg;
 }

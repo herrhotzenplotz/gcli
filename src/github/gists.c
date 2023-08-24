@@ -41,7 +41,7 @@
 #include <templates/github/gists.h>
 
 /* /!\ Before changing this, see comment in gists.h /!\ */
-void
+int
 parse_github_gist_files_idiot_hack(gcli_ctx *ctx, json_stream *stream,
                                    gcli_gist *const gist)
 {
@@ -53,16 +53,19 @@ parse_github_gist_files_idiot_hack(gcli_ctx *ctx, json_stream *stream,
 	gist->files_size = 0;
 
 	if ((next = json_next(stream)) != JSON_OBJECT)
-		errx(1, "Expected Gist Files Object");
+		return gcli_error(ctx, "expected Gist Files Object");
 
 	while ((next = json_next(stream)) == JSON_STRING) {
 		gist->files = realloc(gist->files, sizeof(*gist->files) * (gist->files_size + 1));
 		gcli_gist_file *it = &gist->files[gist->files_size++];
-		parse_github_gist_file(ctx, stream, it);
+		if (parse_github_gist_file(ctx, stream, it) < 0)
+			return -1;
 	}
 
 	if (next != JSON_OBJECT_END)
-		errx(1, "Unclosed Gist Files Object");
+		return gcli_error(ctx, "unclosed Gist Files Object");
+
+	return 0;
 }
 
 int

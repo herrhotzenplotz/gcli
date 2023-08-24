@@ -46,10 +46,10 @@ typedef struct gcli_comment_list gcli_comment_list;
 typedef struct gcli_submit_comment_opts gcli_submit_comment_opts;
 
 struct gcli_comment {
-	char const *author;         /* Login name of the comment author */
-	char const *date;           /* Creation date of the comment     */
+	char *author;               /* Login name of the comment author */
+	char *date;                 /* Creation date of the comment     */
 	int id;                     /* id of the comment                */
-	char const *body;           /* Raw text of the comment          */
+	char *body;                 /* Raw text of the comment          */
 };
 
 struct gcli_comment_list {

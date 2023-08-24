@@ -44,7 +44,7 @@ struct gcli_fork {
 	sn_sv full_name;
 	sn_sv owner;
 	sn_sv date;
-	int   forks;
+	int forks;
 };
 
 struct gcli_fork_list {

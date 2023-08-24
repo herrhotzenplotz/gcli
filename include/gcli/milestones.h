@@ -34,6 +34,7 @@
 #include <config.h>
 #endif
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include <gcli/issues.h>
@@ -52,7 +53,7 @@ struct gcli_milestone {
 	char *description;
 	char *updated_at;
 	char *due_date;
-	int expired;
+	bool expired;
 
 	/* Github and Gitea Specific */
 	int open_issues;

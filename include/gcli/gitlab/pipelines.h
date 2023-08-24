@@ -42,7 +42,7 @@ typedef struct gitlab_job           gitlab_job;
 typedef struct gitlab_job_list      gitlab_job_list;
 
 struct gitlab_pipeline {
-	long  id;
+	long id;
 	char *status;
 	char *created_at;
 	char *updated_at;

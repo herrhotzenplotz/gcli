@@ -65,7 +65,8 @@ fetch_all(char *_url)
 		gcli_fetch_buffer buffer = {0};
 
 		if (gcli_fetch(g_clictx, url, &next_url, &buffer) < 0)
-			errx(1, "error: failed to fetch data");
+			errx(1, "error: failed to fetch data: %s",
+			     gcli_get_error(g_clictx));
 
 		fwrite(buffer.data, buffer.length, 1, stdout);
 
@@ -119,7 +120,8 @@ subcommand_api(int argc, char *argv[])
 	if (do_all)
 		fetch_all(url);
 	else if (gcli_curl(g_clictx, stdout, url, "application/json") < 0)
-		errx(1, "error: failed to fetch data");
+		errx(1, "error: failed to fetch data: %s",
+		     gcli_get_error(g_clictx));
 
 	free(url);
 

@@ -427,13 +427,6 @@ struct gcli_forge_descriptor {
 		gcli_repo_list *out);
 
 	/**
-	 * Get a list of your own repos */
-	int (*get_own_repos)(
-		gcli_ctx *ctx,
-		int max,
-		gcli_repo_list *out);
-
-	/**
 	 * Create the given repo */
 	int (*repo_create)(
 		gcli_ctx *ctx,
@@ -470,11 +463,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Get an the http authentication header for use by curl */
-	char *(*get_authheader)(gcli_ctx *ctx);
-
-	/**
-	 * Get the user account name */
-	int (*get_account)(gcli_ctx *ctx, sn_sv *out);
+	char *(*make_authheader)(gcli_ctx *ctx, char const *token);
 
 	/**
 	 * Get list of SSH keys */

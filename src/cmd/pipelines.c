@@ -30,11 +30,11 @@
 #include <config.h>
 
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/colour.h>
 #include <gcli/cmd/pipelines.h>
 #include <gcli/cmd/table.h>
 
-#include <gcli/config.h>
 #include <gcli/forges.h>
 
 #include <gcli/gitlab/pipelines.h>

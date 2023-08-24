@@ -30,7 +30,7 @@
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/colour.h>
 
-#include <gcli/config.h>
+#include <gcli/cmd/cmdconfig.h>
 
 #include <stdlib.h>
 

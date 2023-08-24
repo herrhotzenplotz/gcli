@@ -30,7 +30,6 @@
 #include <gcli/gitea/releases.h>
 #include <gcli/github/releases.h>
 
-#include <gcli/config.h>
 #include <gcli/curl.h>
 #include <gcli/json_util.h>
 

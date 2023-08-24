@@ -58,6 +58,7 @@ dist_man_MANS = \
 
 gcli_SOURCES = \
 	include/gcli/cmd/ci.h src/cmd/ci.c \
+	include/gcli/cmd/cmdconfig.h src/cmd/cmdconfig.c \
 	include/gcli/cmd/cmd.h src/cmd/cmd.c \
 	include/gcli/cmd/colour.h src/cmd/colour.c \
 	include/gcli/cmd/comment.h src/cmd/comment.c \
@@ -65,6 +66,7 @@ gcli_SOURCES = \
 	include/gcli/cmd/editor.h src/cmd/editor.c \
 	include/gcli/cmd/forks.h src/cmd/forks.c \
 	include/gcli/cmd/gists.h src/cmd/gists.c \
+	include/gcli/cmd/gitconfig.h src/cmd/gitconfig.c \
 	include/gcli/cmd/issues.h src/cmd/issues.c \
 	include/gcli/cmd/labels.h src/cmd/labels.c \
 	include/gcli/cmd/milestones.h src/cmd/milestones.c \
@@ -116,8 +118,7 @@ TEMPLATES = \
 	templates/gitea/milestones.t
 
 include_HEADERS = include/gcli/gcli.h include/gcli/comments.h	\
-	include/gcli/config.h include/gcli/curl.h		\
-	include/gcli/forks.h include/gcli/gitconfig.h		\
+	include/gcli/curl.h include/gcli/forks.h		\
 	include/gcli/issues.h include/gcli/labels.h		\
 	include/gcli/milestones.h include/gcli/pulls.h		\
 	include/gcli/releases.h include/gcli/repos.h		\
@@ -129,11 +130,9 @@ libgcli_la_SOURCES = \
 	include/gcli/gcli.h src/gcli.c \
 	include/gcli/date_time.h src/date_time.c \
 	src/comments.c include/gcli/comments.h \
-	src/config.c include/gcli/config.h \
 	src/curl.c include/gcli/curl.h \
 	src/forges.c include/gcli/forges.h \
 	src/forks.c include/gcli/forks.h \
-	src/gitconfig.c include/gcli/gitconfig.h \
 	src/issues.c include/gcli/issues.h \
 	src/json_util.c include/gcli/json_util.h \
 	src/labels.c include/gcli/labels.h \

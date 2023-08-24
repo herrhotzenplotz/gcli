@@ -34,14 +34,16 @@
 #include <string.h>
 
 char const *
-gcli_init(gcli_ctx **ctx)
+gcli_init(gcli_ctx **ctx, gcli_forge_type (*get_forge_type)(gcli_ctx *),
+          char *(*get_token)(gcli_ctx *), char *(*get_apibase)(gcli_ctx *))
 {
 	*ctx = calloc(sizeof (struct gcli_ctx), 1);
 	if (!(*ctx))
 		return strerror(errno);
 
-	if (gcli_config_init_ctx(*ctx) < 0)
-		return (*ctx)->last_error; /* TODO: cleanup */
+	(*ctx)->get_forge_type = get_forge_type;
+	(*ctx)->get_token = get_token;
+	(*ctx)->get_apibase = get_apibase;
 
 	return NULL;
 }

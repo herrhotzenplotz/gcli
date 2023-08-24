@@ -124,6 +124,12 @@
 
 * Big refactor for libraryfication
 ** TODO Fix test suite
+   - [ ] Move config stuff to cmd and have callbacks that given the
+     context give you the account details etc.
+
+     This would allow you to create a mock context that returns only
+     values that make sense in test contexts.
+
    - [ ] Add support for a testing gcli context
 ** DONE Check errx calls if they print "error: "
 ** DONE Check for calls to errx in submit routines

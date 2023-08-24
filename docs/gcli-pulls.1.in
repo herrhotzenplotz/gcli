@@ -150,8 +150,6 @@ Clear a set milestone on the pull request.
 Alias for the
 .Cm comments
 action that prints a list of comments associated with the PR.
-.It Cm reviews
-Print reviews including comments under them.
 .It Cm labels Op Ar options
 The following options can be specified more than once:
 .Bl -tag -width indent

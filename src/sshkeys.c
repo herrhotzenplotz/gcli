@@ -31,7 +31,6 @@
 #include <config.h>
 #endif
 
-#include <gcli/config.h>
 #include <gcli/forges.h>
 #include <gcli/sshkeys.h>
 #include <gcli/cmd/table.h>

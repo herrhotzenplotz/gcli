@@ -31,7 +31,6 @@
 #include <gcli/cmd/editor.h>
 
 #include <gcli/comments.h>
-#include <gcli/config.h>
 #include <gcli/forges.h>
 #include <gcli/github/comments.h>
 #include <gcli/json_util.h>

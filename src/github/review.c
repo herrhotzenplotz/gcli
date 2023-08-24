@@ -28,7 +28,6 @@
  */
 
 #include <gcli/github/review.h>
-#include <gcli/config.h>
 #include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>

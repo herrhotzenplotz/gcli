@@ -27,7 +27,6 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/config.h>
 #include <gcli/curl.h>
 #include <gcli/github/config.h>
 #include <gcli/github/issues.h>

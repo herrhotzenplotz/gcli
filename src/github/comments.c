@@ -27,7 +27,6 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/config.h>
 #include <gcli/github/comments.h>
 #include <gcli/github/config.h>
 #include <gcli/json_util.h>

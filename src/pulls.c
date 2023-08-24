@@ -27,9 +27,6 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/cmd/colour.h>
-#include <gcli/cmd/table.h>
-#include <gcli/config.h>
 #include <gcli/forges.h>
 #include <gcli/github/checks.h>
 #include <gcli/github/pulls.h>

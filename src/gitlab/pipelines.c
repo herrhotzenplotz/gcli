@@ -63,8 +63,8 @@ gitlab_get_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
 {
 	char *url = NULL;
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/pipelines",
-	                  gitlab_get_apibase(ctx), owner, repo);
+	url = sn_asprintf("%s/projects/%s%%2F%s/pipelines", gcli_get_apibase(ctx),
+	                  owner, repo);
 
 	return fetch_pipelines(ctx, url, max, list);
 }
@@ -76,7 +76,7 @@ gitlab_get_mr_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
 	char *url = NULL;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%d/pipelines",
-	                  gitlab_get_apibase(ctx), owner, repo, mr_id);
+	                  gcli_get_apibase(ctx), owner, repo, mr_id);
 
 	/* fetch everything */
 	return fetch_pipelines(ctx, url, -1, list);
@@ -113,7 +113,7 @@ gitlab_get_pipeline_jobs(gcli_ctx *ctx, char const *owner, char const *repo,
 	};
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/pipelines/%ld/jobs",
-	                  gitlab_get_apibase(ctx), owner, repo, pipeline);
+	                  gcli_get_apibase(ctx), owner, repo, pipeline);
 
 	return gcli_fetch_list(ctx, url, &fl);
 }
@@ -152,7 +152,7 @@ gitlab_job_get_log(gcli_ctx *ctx, char const *owner, char const *repo,
 	int rc = 0;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld/trace",
-	                  gitlab_get_apibase(ctx), owner, repo, job_id);
+	                  gcli_get_apibase(ctx), owner, repo, job_id);
 
 	rc = gcli_curl(ctx, stream, url, NULL);
 
@@ -169,8 +169,8 @@ gitlab_get_job(gcli_ctx *ctx, char const *owner, char const *repo,
 	char *url = NULL;
 	int rc = 0;
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld",
-	                  gitlab_get_apibase(ctx), owner, repo, jid);
+	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld", gcli_get_apibase(ctx),
+	                  owner, repo, jid);
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc == 0) {
@@ -196,7 +196,7 @@ gitlab_job_cancel(gcli_ctx *ctx, char const *owner, char const *repo,
 	int rc = 0;
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld/cancel",
-	                  gitlab_get_apibase(ctx), owner, repo, jid);
+	                  gcli_get_apibase(ctx), owner, repo, jid);
 	rc = gcli_fetch_with_method(ctx, "POST", url, NULL, NULL, NULL);
 
 	free(url);
@@ -211,8 +211,8 @@ gitlab_job_retry(gcli_ctx *ctx, char const *owner, char const *repo,
 	int rc = 0;
 	char *url = NULL;
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld/retry",
-	                  gitlab_get_apibase(ctx), owner, repo, jid);
+	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld/retry", gcli_get_apibase(ctx),
+	                  owner, repo, jid);
 	rc = gcli_fetch_with_method(ctx, "POST", url, NULL, NULL, NULL);
 
 	free(url);
@@ -238,8 +238,7 @@ gitlab_job_download_artifacts(gcli_ctx *ctx, char const *owner,
 	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%ld/artifacts",
-	                  gitlab_get_apibase(ctx),
-	                  e_owner, e_repo, jid);
+	                  gcli_get_apibase(ctx), e_owner, e_repo, jid);
 
 	rc = gcli_curl(ctx, f, url, "application/zip");
 

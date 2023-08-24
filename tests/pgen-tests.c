@@ -1,6 +1,10 @@
+#define GCLI_IN_LIBRARY 1
+
 #include <templates/github/issues.h>
 #include <templates/github/pulls.h>
 #include <templates/github/labels.h>
+
+#include <gcli/ctx.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,13 +13,14 @@
 static void
 issues(struct json_stream *stream)
 {
-	struct json_stream str   = {0};
-	gcli_issue         issue = {0};
+	struct json_stream str = {0};
+	gcli_issue issue = {0};
+	gcli_ctx ctx = {0};
 
 	(void) stream;
 
 	json_open_stream(&str, stdin);
-	parse_github_issue(&str, &issue);
+	parse_github_issue(&ctx, &str, &issue);
 
 	printf("title\t"SV_FMT"\n", SV_ARGS(issue.title));
 	printf("number\t%d\n", issue.number);
@@ -31,7 +36,7 @@ pulls(struct json_stream *stream)
 {
 	gcli_pull pull = {0};
 
-	parse_github_pull(stream, &pull);
+	parse_github_pull(NULL, stream, &pull);
 
 	printf("title\t%s\n", pull.title);
 	printf("state\t%s\n", pull.state);
@@ -46,7 +51,7 @@ labels(struct json_stream *stream)
 {
 	gcli_label label = {0};
 
-	parse_github_label(stream, &label);
+	parse_github_label(NULL, stream, &label);
 
 	printf("id\t%ld\n", label.id);
 	printf("name\t%s\n", label.name);

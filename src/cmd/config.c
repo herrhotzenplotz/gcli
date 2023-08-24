@@ -32,10 +32,10 @@
 #endif
 
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/config.h>
 #include <gcli/cmd/table.h>
 
-#include <gcli/config.h>
 #include <gcli/sshkeys.h>
 
 #include <errno.h>

@@ -30,12 +30,12 @@
 #include <config.h>
 
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/colour.h>
 #include <gcli/cmd/comment.h>
 #include <gcli/cmd/editor.h>
 
 #include <gcli/comments.h>
-#include <gcli/config.h>
 #include <gcli/json_util.h>
 
 #ifdef HAVE_GETOPT_H

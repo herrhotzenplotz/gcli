@@ -221,22 +221,6 @@ gitlab_job_retry(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_mr_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
-                    int const mr_id)
-{
-	gitlab_pipeline_list list = {0};
-	int rc = 0;
-
-	rc = gitlab_get_mr_pipelines(ctx, owner, repo, mr_id, &list);
-	if (rc == 0)
-		gitlab_print_pipelines(&list);
-
-	gitlab_free_pipelines(&list);
-
-	return rc;
-}
-
-int
 gitlab_job_download_artifacts(gcli_ctx *ctx, char const *owner,
                               char const *repo, long const jid,
                               char const *const outfile)

@@ -37,6 +37,8 @@
 void gitlab_print_pipelines(gitlab_pipeline_list const *const list);
 int gitlab_pipelines(char const *owner, char const *repo, int const count);
 
+int gitlab_mr_pipelines(char const *owner, char const *repo, int const mr_id);
+
 int gitlab_pipeline_jobs(char const *owner, char const *repo, long pipeline,
                          int count);
 void gitlab_print_jobs(gitlab_job_list const *const list);

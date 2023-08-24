@@ -219,7 +219,8 @@ gitlab_user_id(gcli_ctx *ctx, char const *user_name)
 	struct json_stream stream = {0};
 	char *url = NULL;
 	char *e_username;
-	int uid = -1;
+	long uid = -1;
+	int rc;
 
 	e_username = gcli_urlencode(user_name);
 
@@ -231,10 +232,12 @@ gitlab_user_id(gcli_ctx *ctx, char const *user_name)
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		json_set_streaming(&stream, 1);
 
-		gcli_json_advance(&stream, "[{s", "id");
-		uid = get_int(ctx, &stream);
+		uid = rc = gcli_json_advance(ctx, &stream, "[{s", "id");
 
-		json_close(&stream);
+		if (rc == 0) {
+			rc = get_long(ctx, &stream, &uid);
+			json_close(&stream);
+		}
 	}
 
 	free(e_username);

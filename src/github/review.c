@@ -33,80 +33,118 @@
 
 #include <pdjson/pdjson.h>
 
-static void
+static int
 github_parse_review_comment(gcli_ctx *ctx, json_stream *input,
                             gcli_pr_review_comment *it)
 {
 	if (json_next(input) != JSON_OBJECT)
-		errx(1, "Expected review comment object");
+		return gcli_error(ctx, "%s: expected review comment object",
+		                  __func__);
 
 	enum json_type key_type;
 	while ((key_type = json_next(input)) == JSON_STRING) {
-		size_t      len = 0;
+		size_t len = 0;
 		char const *key = json_get_string(input, &len);
 
-		if (strncmp("bodyText", key, len) == 0)
-			it->body = get_string(ctx, input);
-		else if (strncmp("id", key, len) == 0)
-			it->id = get_string(ctx, input);
-		else if (strncmp("createdAt", key, len) == 0)
-			it->date = get_string(ctx, input);
-		else if (strncmp("author", key, len) == 0)
-			it->author = get_user(ctx, input);
-		else if (strncmp("diffHunk", key, len) == 0)
-			it->diff = get_string(ctx, input);
-		else if (strncmp("path", key, len) == 0)
-			it->path = get_string(ctx, input);
-		else if (strncmp("originalPosition", key, len) == 0)
-			it->original_position = get_int(ctx, input);
-		else
+		if (strncmp("bodyText", key, len) == 0) {
+			if (get_string(ctx, input, &it->body) < 0)
+				return -1;
+
+		} else if (strncmp("id", key, len) == 0) {
+			if (get_string(ctx, input, &it->id) < 0)
+				return -1;
+
+		} else if (strncmp("createdAt", key, len) == 0) {
+			if (get_string(ctx, input, &it->date) < 0)
+				return -1;
+
+		} else if (strncmp("author", key, len) == 0) {
+			if (get_user(ctx, input, &it->author) < 0)
+				return -1;
+
+		} else if (strncmp("diffHunk", key, len) == 0) {
+			if (get_string(ctx, input, &it->diff) < 0)
+				return -1;
+
+		} else if (strncmp("path", key, len) == 0) {
+			if (get_string(ctx, input, &it->path) < 0)
+				return -1;
+
+		} else if (strncmp("originalPosition", key, len) == 0) {
+			if (get_int(ctx, input, &it->original_position) < 0)
+				return -1;
+
+		} else {
 			SKIP_OBJECT_VALUE(input);
+		}
 	}
+
+	return 0;
 }
 
-static void
+static int
 github_parse_review_comments(gcli_ctx *ctx, json_stream *input,
                              gcli_pr_review *it)
 {
-	gcli_json_advance(input, "{s[", "nodes");
+	if (gcli_json_advance(ctx, input, "{s[", "nodes") < 0)
+		return -1;
+
 	while (json_peek(input) == JSON_OBJECT) {
 		it->comments = realloc(
 			it->comments,
 			sizeof(*it->comments) * (it->comments_size + 1));
 		gcli_pr_review_comment *comment = &it->comments[it->comments_size++];
 		*comment = (gcli_pr_review_comment) {0};
-		github_parse_review_comment(ctx, input, comment);
+
+		if (github_parse_review_comment(ctx, input, comment) < 0)
+			return -1;
 	}
-	gcli_json_advance(input, "]}");
+
+	if (gcli_json_advance(ctx, input, "]}") < 0)
+		return -1;
+
+	return 0;
 }
 
-static void
+static int
 github_parse_review_header(gcli_ctx *ctx, json_stream *input,
                            gcli_pr_review *it)
 {
 	if (json_next(input) != JSON_OBJECT)
-		errx(1, "Expected review object");
+		return gcli_error(ctx, "%s: expected an object", __func__);
 
 	enum json_type key_type;
 	while ((key_type = json_next(input)) == JSON_STRING) {
 		size_t      len = 0;
 		char const *key = json_get_string(input, &len);
 
-		if (strncmp("bodyText", key, len) == 0)
-			it->body = get_string(ctx, input);
-		else if (strncmp("state", key, len) == 0)
-			it->state = get_string(ctx, input);
-		else if (strncmp("id", key, len) == 0)
-			it->id = get_string(ctx, input);
-		else if (strncmp("createdAt", key, len) == 0)
-			it->date = get_string(ctx, input);
-		else if (strncmp("author", key, len) == 0)
-			it->author = get_user(ctx, input);
-		else if (strncmp("comments", key, len) == 0)
-			github_parse_review_comments(ctx, input, it);
-		else
+		if (strncmp("bodyText", key, len) == 0) {
+			if (get_string(ctx, input, &it->body) < 0)
+				return -1;
+
+		} else if (strncmp("state", key, len) == 0) {
+			if (get_string(ctx, input, &it->state) < 0)
+				return -1;
+
+		} else if (strncmp("id", key, len) == 0) {
+			if (get_string(ctx, input, &it->id) < 0)
+				return -1;
+
+		} else if (strncmp("createdAt", key, len) == 0) {
+			if (get_string(ctx, input, &it->date) < 0)
+				return -1;
+		} else if (strncmp("author", key, len) == 0) {
+			if (get_user(ctx, input, &it->author) < 0)
+				return -1;
+		} else if (strncmp("comments", key, len) == 0) {
+			if (github_parse_review_comments(ctx, input, it) < 0)
+				return -1;
+		} else {
 			SKIP_OBJECT_VALUE(input);
+		}
 	}
+
+	return 0;
 }
 
 static char const *get_reviews_fmt =
@@ -168,18 +206,22 @@ github_review_get_reviews(gcli_ctx *ctx, char const *owner, char const *repo,
 	free(post_data);
 
 	if (rc < 0)
-		return rc;
+		goto error_fetch;
 
 	json_open_buffer(&stream, buffer.data, buffer.length);
 	json_set_streaming(&stream, true);
 
-	gcli_json_advance(
-		&stream, "{s{s{s{s{s",
-		"data", "repository", "pullRequest", "reviews", "nodes");
+	rc = gcli_json_advance(ctx, &stream, "{s{s{s{s{s",
+	                       "data", "repository", "pullRequest",
+	                       "reviews", "nodes");
+	if (rc < 0)
+		goto error_json;
 
 	next = json_next(&stream);
-	if (next != JSON_ARRAY)
-		errx(1, "error: expected json array for review list");
+	if (next != JSON_ARRAY) {
+		rc = gcli_error(ctx, "expected json array for review list");
+		goto error_json;
+	}
 
 	while ((next = json_peek(&stream)) == JSON_OBJECT) {
 		out->reviews = realloc(out->reviews,
@@ -188,18 +230,25 @@ github_review_get_reviews(gcli_ctx *ctx, char const *owner, char const *repo,
 
 		*it = (gcli_pr_review) {0};
 
-		github_parse_review_header(ctx, &stream, it);
+		rc = github_parse_review_header(ctx, &stream, it);
+		if (rc < 0)
+			goto error_json;
 
 		out->reviews_size++;
 	}
 
-	if (json_next(&stream) != JSON_ARRAY_END)
-		errx(1, "error: expected end of json array");
+	if (json_next(&stream) != JSON_ARRAY_END) {
+		rc = gcli_error(ctx, "expected end of json array");
+		goto error_json;
+	}
 
-	gcli_json_advance(&stream, "}}}}}");
+	rc = gcli_json_advance(ctx, &stream, "}}}}}");
+
+error_json:
 
 	json_close(&stream);
+error_fetch:
 	free(buffer.data);
 
-	return 0;
+	return rc;
 }

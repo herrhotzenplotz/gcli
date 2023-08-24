@@ -87,6 +87,7 @@ libpdjson_la_SOURCES = \
 	thirdparty/pdjson/pdjson.h
 
 TEMPLATES = \
+	templates/github/api.t \
 	templates/github/checks.t \
 	templates/github/comments.t \
 	templates/github/forks.t \
@@ -98,6 +99,7 @@ TEMPLATES = \
 	templates/github/repos.t \
 	templates/github/status.t \
 	templates/github/milestones.t \
+	templates/gitlab/api.t \
 	templates/gitlab/comments.t \
 	templates/gitlab/forks.t \
 	templates/gitlab/issues.t \
@@ -199,7 +201,8 @@ EXTRA_DIST = \
 	README.md \
 	HACKING.md \
 	autogen.sh \
-	m4/.gitkeep
+	m4/.gitkeep \
+	docs/pgen.org
 
 ###########################################
 # Tests

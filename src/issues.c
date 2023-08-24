@@ -98,10 +98,6 @@ gcli_issue_submit(gcli_ctx *ctx, gcli_submit_issue_options opts)
 	int rc = 0;
 
 	rc = gcli_forge(ctx)->perform_submit_issue(ctx, opts, &json_buffer);
-
-	if (rc == 0)
-		gcli_print_html_url(ctx, json_buffer);
-
 	free(json_buffer.data);
 
 	return rc;

@@ -6,7 +6,7 @@ object of gcli_gist_file with
 	("filename" => filename as sv,
 	 "language" => language as sv,
 	 "raw_url"  => url as sv,
-	 "size"     => size as int,
+	 "size"     => size as size_t,
 	 "type"     => type as sv);
 
 parser github_gist is

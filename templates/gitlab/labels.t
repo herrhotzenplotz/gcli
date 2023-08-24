@@ -5,6 +5,6 @@ object of gcli_label with
 	("name"        => name as string,
 	 "description" => description as string,
 	 "color"       => colour as gitlab_style_colour,
-	 "id"          => id as int);
+	 "id"          => id as long);
 
 parser gitlab_labels is array of gcli_label use parse_gitlab_label;

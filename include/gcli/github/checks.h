@@ -47,7 +47,7 @@ struct gcli_github_check {
 	char *conclusion;
 	char *started_at;
 	char *completed_at;
-	long  id;
+	int id;
 };
 
 struct github_check_list {

@@ -215,51 +215,6 @@ get_sv_(gcli_ctx *ctx, json_stream *const input, sn_sv *out, char const *where)
 	return 0;
 }
 
-void
-gcli_print_html_url(gcli_ctx *ctx, gcli_fetch_buffer const buffer)
-{
-	json_stream stream = {0};
-
-	json_open_buffer(&stream, buffer.data, buffer.length);
-	json_set_streaming(&stream, true);
-
-	enum json_type next = json_next(&stream);
-	char const *expected_key = gcli_forge(ctx)->html_url_key;
-
-	while ((next = json_next(&stream)) == JSON_STRING) {
-		size_t len;
-
-		char const *key = json_get_string(&stream, &len);
-		if (strncmp(key, expected_key, len) == 0) {
-			char *url;
-			if (get_string(ctx, &stream, &url) < 0)
-				abort();
-
-			puts(url);
-			free(url);
-		} else {
-			enum json_type value_type = json_next(&stream);
-
-			switch (value_type) {
-			case JSON_ARRAY:
-				json_skip_until(&stream, JSON_ARRAY_END);
-				break;
-			case JSON_OBJECT:
-				json_skip_until(&stream, JSON_OBJECT_END);
-				break;
-			default:
-				break;
-			}
-		}
-	}
-
-	if (next != JSON_OBJECT_END)
-		abort();
-
-	json_close(&stream);
-}
-
-
 int
 get_label_(gcli_ctx *ctx, json_stream *const input, char const **out,
            char const *where)

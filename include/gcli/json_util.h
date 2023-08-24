@@ -75,7 +75,6 @@ int get_int_to_sv_(gcli_ctx *ctx, json_stream *input, sn_sv *out,
                    char const *function);
 sn_sv gcli_json_escape(sn_sv);
 #define     gcli_json_escape_cstr(x) (gcli_json_escape(SV((char *)(x))).data)
-void        gcli_print_html_url(gcli_ctx *, gcli_fetch_buffer);
 int gcli_json_advance(gcli_ctx *ctx, json_stream *input, char const *fmt, ...);
 
 static inline int

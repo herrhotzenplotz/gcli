@@ -158,10 +158,6 @@ gitlab_mr_merge(gcli_ctx *ctx, char const *owner, char const *repo,
 
 	rc = gcli_fetch_with_method(ctx, "PUT", url, data, NULL, &buffer);
 
-	/* if verbose or normal noise level, print the url */
-	if (rc == 0 && !sn_quiet())
-		gcli_print_html_url(ctx, buffer);
-
 	free(buffer.data);
 	free(url);
 	free(e_owner);

@@ -139,4 +139,4 @@
 ** DONE Make [[file:src/pulls.c::gcli_pull_get_diff(gcli_ctx *ctx, FILE *stream, char const *owner,][getting a pull diff]] return an error code
 ** TODO Add a real changelog file
 ** TODO include [[file:docs/pgen.org][docs/pgen.org]] in the distribution tarball
-** TODO remove gcli_print_html_url
+** DONE remove gcli_print_html_url

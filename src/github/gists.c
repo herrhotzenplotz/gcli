@@ -88,12 +88,11 @@ gcli_get_gists(gcli_ctx *ctx, char const *user, int const max,
 	return gcli_fetch_list(ctx, url, &fl);
 }
 
-gcli_gist *
-gcli_get_gist(gcli_ctx *ctx, char const *gist_id)
+int
+gcli_get_gist(gcli_ctx *ctx, char const *gist_id, gcli_gist *out)
 {
 	char *url = NULL;
 	gcli_fetch_buffer buffer = {0};
-	gcli_gist *it = NULL;
 	int rc = 0;
 
 	url = sn_asprintf("%s/gists/%s", github_get_apibase(ctx), gist_id);
@@ -105,8 +104,7 @@ gcli_get_gist(gcli_ctx *ctx, char const *gist_id)
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		json_set_streaming(&stream, 1);
 
-		it = calloc(sizeof(gcli_gist), 1);
-		parse_github_gist(ctx, &stream, it);
+		parse_github_gist(ctx, &stream, out);
 
 		json_close(&stream);
 	}
@@ -114,7 +112,7 @@ gcli_get_gist(gcli_ctx *ctx, char const *gist_id)
 	free(buffer.data);
 	free(url);
 
-	return it;
+	return rc;
 }
 
 #define READ_SZ 4096
@@ -207,25 +205,32 @@ gcli_delete_gist(gcli_ctx *ctx, char const *gist_id)
 }
 
 void
+gcli_gist_free(gcli_gist *g)
+{
+	free(g->id.data);
+	free(g->owner.data);
+	free(g->url.data);
+	free(g->date.data);
+	free(g->git_pull_url.data);
+	free(g->description.data);
+
+	for (size_t j = 0; j < g->files_size; ++j) {
+		free(g->files[j].filename.data);
+		free(g->files[j].language.data);
+		free(g->files[j].url.data);
+		free(g->files[j].type.data);
+	}
+
+	free(g->files);
+
+	memset(g, 0, sizeof(*g));
+}
+
+void
 gcli_gists_free(gcli_gist_list *const list)
 {
-	for (size_t i = 0; i < list->gists_size; ++i) {
-		free(list->gists[i].id.data);
-		free(list->gists[i].owner.data);
-		free(list->gists[i].url.data);
-		free(list->gists[i].date.data);
-		free(list->gists[i].git_pull_url.data);
-		free(list->gists[i].description.data);
-
-		for (size_t j = 0; j < list->gists[i].files_size; ++j) {
-			free(list->gists[i].files[j].filename.data);
-			free(list->gists[i].files[j].language.data);
-			free(list->gists[i].files[j].url.data);
-			free(list->gists[i].files[j].type.data);
-		}
-
-		free(list->gists[i].files);
-	}
+	for (size_t i = 0; i < list->gists_size; ++i)
+		gcli_gist_free(&list->gists[i]);
 
 	free(list->gists);
 

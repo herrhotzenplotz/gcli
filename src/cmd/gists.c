@@ -211,27 +211,30 @@ subcommand_gist_get(int argc, char *argv[])
 
 	char const *gist_id = shift(&argc, &argv);
 	char const *file_name = shift(&argc, &argv);
-	gcli_gist *gist = NULL;
+	gcli_gist gist = {0};
 	gcli_gist_file *file = NULL;
 
-	gist = gcli_get_gist(g_clictx, gist_id);
+	if (gcli_get_gist(g_clictx, gist_id, &gist) < 0)
+		errx(1, "error: failed to get gist: %s", gcli_get_error(g_clictx));
 
-	for (size_t f = 0; f < gist->files_size; ++f) {
-		if (sn_sv_eq_to(gist->files[f].filename, file_name)) {
-			file = &gist->files[f];
-			goto file_found;
+	for (size_t f = 0; f < gist.files_size; ++f) {
+		if (sn_sv_eq_to(gist.files[f].filename, file_name)) {
+			file = &gist.files[f];
+			break;
 		}
 	}
 
-	errx(1, "gists get: %s: no such file in gist with id %s", file_name, gist_id);
-
-file_found:
+	if (!file)
+		errx(1, "error: gists get: %s: no such file in gist with id %s",
+		     file_name, gist_id);
 
 	if (isatty(STDOUT_FILENO) && (file->size >= 4 * 1024 * 1024))
 		errx(1, "error: File is bigger than 4 MiB, refusing to print to stdout.");
 
 	if (gcli_curl(g_clictx, stdout, file->url.data, file->type.data) < 0)
 		errx(1, "error: failed to fetch gist: %s", gcli_get_error(g_clictx));
+
+	gcli_gist_free(&gist);
 
 	return EXIT_SUCCESS;
 }

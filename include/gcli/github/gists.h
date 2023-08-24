@@ -77,13 +77,14 @@ struct gcli_new_gist {
 int gcli_get_gists(gcli_ctx *ctx, char const *user, int max,
                    gcli_gist_list *list);
 
-gcli_gist *gcli_get_gist(gcli_ctx *ctx, char const *gist_id);
+int gcli_get_gist(gcli_ctx *ctx, char const *gist_id, gcli_gist *out);
 
 int gcli_create_gist(gcli_ctx *ctx, gcli_new_gist);
 
 int gcli_delete_gist(gcli_ctx *ctx, char const *gist_id);
 
 void gcli_gists_free(gcli_gist_list *list);
+void gcli_gist_free(gcli_gist *g);
 
 /**
  * NOTE(Nico): Because of idiots designing a web API, we get a list of

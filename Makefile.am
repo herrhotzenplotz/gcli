@@ -201,7 +201,8 @@ EXTRA_DIST = \
 	README.md \
 	HACKING.md \
 	autogen.sh \
-	m4/.gitkeep
+	m4/.gitkeep \
+	docs/pgen.org
 
 ###########################################
 # Tests

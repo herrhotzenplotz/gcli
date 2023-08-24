@@ -138,5 +138,5 @@
 ** DONE [[file:src/releases.c::gcli_release_push_asset(gcli_new_release *const release,][push_asset]] should not call errx but return an error code
 ** DONE Make [[file:src/pulls.c::gcli_pull_get_diff(gcli_ctx *ctx, FILE *stream, char const *owner,][getting a pull diff]] return an error code
 ** TODO Add a real changelog file
-** TODO include [[file:docs/pgen.org][docs/pgen.org]] in the distribution tarball
+** DONE include [[file:docs/pgen.org][docs/pgen.org]] in the distribution tarball
 ** DONE remove gcli_print_html_url

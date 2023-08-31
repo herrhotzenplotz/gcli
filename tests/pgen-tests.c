@@ -1,26 +1,32 @@
-#define GCLI_IN_LIBRARY 1
-
 #include <templates/github/issues.h>
 #include <templates/github/pulls.h>
 #include <templates/github/labels.h>
 
 #include <gcli/ctx.h>
 
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
 
+static gcli_forge_type
+get_github_forge_type(gcli_ctx *ctx)
+{
+	(void) ctx;
+	return GCLI_FORGE_GITHUB;
+}
+
 static void
 issues(struct json_stream *stream)
 {
-	struct json_stream str = {0};
 	gcli_issue issue = {0};
-	gcli_ctx ctx = {0};
+	gcli_ctx *ctx;
 
-	(void) stream;
-
-	json_open_stream(&str, stdin);
-	parse_github_issue(&ctx, &str, &issue);
+	assert(gcli_init(&ctx, get_github_forge_type, NULL, NULL) == NULL);
+	parse_github_issue(ctx, stream, &issue);
 
 	printf("title\t"SV_FMT"\n", SV_ARGS(issue.title));
 	printf("number\t%d\n", issue.number);
@@ -35,8 +41,10 @@ static void
 pulls(struct json_stream *stream)
 {
 	gcli_pull pull = {0};
+	gcli_ctx *ctx;
 
-	parse_github_pull(NULL, stream, &pull);
+	assert(gcli_init(&ctx, get_github_forge_type, NULL, NULL) == NULL);
+	parse_github_pull(ctx, stream, &pull);
 
 	printf("title\t%s\n", pull.title);
 	printf("state\t%s\n", pull.state);
@@ -50,8 +58,10 @@ static void
 labels(struct json_stream *stream)
 {
 	gcli_label label = {0};
+	gcli_ctx *ctx;
 
-	parse_github_label(NULL, stream, &label);
+	assert(gcli_init(&ctx, get_github_forge_type, NULL, NULL) == NULL);
+	parse_github_label(ctx, stream, &label);
 
 	printf("id\t%ld\n", label.id);
 	printf("name\t%s\n", label.name);
@@ -67,6 +77,7 @@ main(int argc, char *argv[])
 	(void) argc;
 
 	json_open_stream(&str, stdin);
+	json_set_streaming(&str, 1);
 
 	if (strcmp(argv[1], "issues") == 0)
 		issues(&str);

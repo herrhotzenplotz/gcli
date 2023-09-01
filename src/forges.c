@@ -29,7 +29,6 @@
 
 #include <stdlib.h>
 
-#include <gcli/config.h>
 #include <gcli/forges.h>
 
 #include <gcli/github/api.h>
@@ -125,7 +124,6 @@ github_forge_descriptor =
 	.create_label              = github_create_label,
 	.delete_label              = github_delete_label,
 	.get_repos                 = github_get_repos,
-	.get_own_repos             = github_get_own_repos,
 	.get_reviews               = github_review_get_reviews,
 	.repo_create               = github_repo_create,
 	.repo_delete               = github_repo_delete,
@@ -136,8 +134,7 @@ github_forge_descriptor =
 
 	.get_notifications         = github_get_notifications,
 	.notification_mark_as_read = github_notification_mark_as_read,
-	.get_authheader            = github_get_authheader,
-	.get_account               = github_get_account,
+	.make_authheader           = github_make_authheader,
 	.get_api_error_string      = github_api_error_string,
 	.user_object_key           = "login",
 	.html_url_key              = "html_url",
@@ -191,14 +188,12 @@ gitlab_forge_descriptor =
 	.create_label              = gitlab_create_label,
 	.delete_label              = gitlab_delete_label,
 	.get_repos                 = gitlab_get_repos,
-	.get_own_repos             = gitlab_get_own_repos,
 	.get_reviews               = gitlab_review_get_reviews,
 	.repo_create               = gitlab_repo_create,
 	.repo_delete               = gitlab_repo_delete,
 	.get_notifications         = gitlab_get_notifications,
 	.notification_mark_as_read = gitlab_notification_mark_as_read,
-	.get_authheader            = gitlab_get_authheader,
-	.get_account               = gitlab_get_account,
+	.make_authheader           = gitlab_make_authheader,
 	.get_sshkeys               = gitlab_get_sshkeys,
 	.add_sshkey                = gitlab_add_sshkey,
 	.delete_sshkey             = gitlab_delete_sshkey,
@@ -257,7 +252,6 @@ gitea_forge_descriptor =
 	.pull_add_labels           = gitea_issue_add_labels,
 	.pull_remove_labels        = gitea_issue_remove_labels,
 	.get_repos                 = gitea_get_repos,
-	.get_own_repos             = gitea_get_own_repos,
 	.repo_create               = gitea_repo_create,
 	.repo_delete               = gitea_repo_delete,
 
@@ -265,8 +259,7 @@ gitea_forge_descriptor =
 	.add_sshkey                = gitea_add_sshkey,
 	.delete_sshkey             = gitea_delete_sshkey,
 
-	.get_authheader            = gitea_get_authheader,
-	.get_account               = gitea_get_account,
+	.make_authheader           = gitea_make_authheader,
 	.get_api_error_string      = github_api_error_string,    /* hack! */
 	.user_object_key           = "username",
 	.html_url_key              = "web_url",
@@ -281,7 +274,7 @@ gitea_forge_descriptor =
 gcli_forge_descriptor const *
 gcli_forge(gcli_ctx *ctx)
 {
-	switch (gcli_config_get_forge_type(ctx)) {
+	switch (ctx->get_forge_type(ctx)) {
 	case GCLI_FORGE_GITHUB:
 		return &github_forge_descriptor;
 	case GCLI_FORGE_GITLAB:

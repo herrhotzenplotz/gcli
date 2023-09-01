@@ -38,8 +38,6 @@
 
 #include <sn/sn.h>
 
-char *github_get_apibase(gcli_ctx *ctx);
-char *github_get_authheader(gcli_ctx *ctx);
-int github_get_account(gcli_ctx *ctx, sn_sv *out);
+char *github_make_authheader(gcli_ctx *ctx, char const *token);
 
 #endif /* GITHUB_CONFIG_H */

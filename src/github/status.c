@@ -29,7 +29,6 @@
 
 #include <gcli/curl.h>
 #include <gcli/github/status.h>
-#include <gcli/config.h>
 #include <gcli/json_util.h>
 
 #include <sn/sn.h>

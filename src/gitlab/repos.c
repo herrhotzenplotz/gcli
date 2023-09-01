@@ -51,10 +51,8 @@ gitlab_get_repo(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf(
-		"%s/projects/%s%%2F%s",
-		gitlab_get_apibase(ctx),
-	    e_owner, e_repo);
+	url = sn_asprintf("%s/projects/%s%%2F%s", gcli_get_apibase(ctx),
+	                  e_owner, e_repo);
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 
@@ -105,31 +103,13 @@ gitlab_get_repos(gcli_ctx *ctx, char const *owner, int const max,
 	};
 
 	e_owner = gcli_urlencode(owner);
-	url = sn_asprintf("%s/users/%s/projects", gitlab_get_apibase(ctx), e_owner);
+	url = sn_asprintf("%s/users/%s/projects", gcli_get_apibase(ctx), e_owner);
 	free(e_owner);
 
 	rc = gcli_fetch_list(ctx, url, &fl);
 
 	if (rc == 0)
 		gitlab_repos_fixup_missing_visibility(list);
-
-	return rc;
-}
-
-int
-gitlab_get_own_repos(gcli_ctx *ctx, int const max, gcli_repo_list *const out)
-{
-	char *_account = NULL;
-	sn_sv account = {0};
-	int rc = 0;
-
-	rc = gitlab_get_account(ctx, &account);
-	if (rc < 0)
-		return rc;
-
-	_account = sn_sv_to_cstr(account);
-	rc = gitlab_get_repos(ctx, _account, max, out);
-	free(_account);
 
 	return rc;
 }
@@ -145,8 +125,7 @@ gitlab_repo_delete(gcli_ctx *ctx, char const *owner, char const *repo)
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/projects/%s%%2F%s",
-	                  gitlab_get_apibase(ctx),
+	url = sn_asprintf("%s/projects/%s%%2F%s", gcli_get_apibase(ctx),
 	                  e_owner, e_repo);
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
@@ -168,7 +147,7 @@ gitlab_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *options,
 	int rc;
 
 	/* Request preparation */
-	url = sn_asprintf("%s/projects", gitlab_get_apibase(ctx));
+	url = sn_asprintf("%s/projects", gcli_get_apibase(ctx));
 	/* TODO: escape the repo name and the description */
 	data = sn_asprintf("{\"name\": \""SV_FMT"\","
 	                   " \"description\": \""SV_FMT"\","

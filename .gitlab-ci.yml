@@ -12,7 +12,7 @@ alpine-amd64:
     - linux
   image: alpine:3.17
   script:
-    - apk add libcurl gcc autoconf automake libtool make pkgconf musl-dev curl-dev flex bison xz gzip bzip2 libbsd-dev
+    - apk add libcurl gcc autoconf automake libtool make pkgconf musl-dev curl-dev flex bison xz gzip bzip2 libbsd-dev kyua atf-dev
     - ./autogen.sh
     - ./configure CFLAGS='-std=c99 -pedantic -Wall -Wextra -Werror' CPPFLAGS='-D_XOPEN_SOURCE=600' || (cat config.log && exit 42)
     - make
@@ -50,7 +50,7 @@ debian-amd64:
   image: debian:bullseye
   script:
     - apt-get update
-    - apt-get install -y --no-install-recommends build-essential libcurl4-openssl-dev pkgconf autotools-dev bison flex make autoconf automake libtool libbsd-dev
+    - apt-get install -y --no-install-recommends build-essential libcurl4-openssl-dev pkgconf autotools-dev bison flex make autoconf automake libtool libbsd-dev libatf-dev kyua
     - ./autogen.sh
     - ./configure CFLAGS='-std=c99 -pedantic -Wall -Wextra -Werror -Wno-misleading-indentation' CPPFLAGS='-D_XOPEN_SOURCE=600' || (cat config.log && exit 42)
     - make

@@ -30,6 +30,7 @@
 #include <config.h>
 
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/repos.h>
 #include <gcli/cmd/table.h>
 
@@ -270,10 +271,9 @@ subcommand_repos(int argc, char *argv[])
 		}
 
 		if (!owner)
-			rc = gcli_get_own_repos(g_clictx, n, &repos);
-		else
-			rc = gcli_get_repos(g_clictx, owner, n, &repos);
+			owner = gcli_config_get_account_name(g_clictx);
 
+		rc = gcli_get_repos(g_clictx, owner, n, &repos);
 		if (rc < 0)
 			errx(1, "error: failed to fetch repos: %s", gcli_get_error(g_clictx));
 

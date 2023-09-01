@@ -8,6 +8,7 @@ AM_CPPFLAGS += -I$(srcdir)
 AM_CPPFLAGS += -DYY_NO_INPUT
 AM_CPPFLAGS += -DYY_NO_UNPUT
 AM_CPPFLAGS += -D_XOPEN_SOURCE=600
+AM_CFLAGS = -Wno-gnu-zero-variadic-macro-arguments
 
 noinst_PROGRAMS = pgen$(EXEEXT)
 pgen_SOURCES = \
@@ -58,6 +59,7 @@ dist_man_MANS = \
 
 gcli_SOURCES = \
 	include/gcli/cmd/ci.h src/cmd/ci.c \
+	include/gcli/cmd/cmdconfig.h src/cmd/cmdconfig.c \
 	include/gcli/cmd/cmd.h src/cmd/cmd.c \
 	include/gcli/cmd/colour.h src/cmd/colour.c \
 	include/gcli/cmd/comment.h src/cmd/comment.c \
@@ -65,6 +67,7 @@ gcli_SOURCES = \
 	include/gcli/cmd/editor.h src/cmd/editor.c \
 	include/gcli/cmd/forks.h src/cmd/forks.c \
 	include/gcli/cmd/gists.h src/cmd/gists.c \
+	include/gcli/cmd/gitconfig.h src/cmd/gitconfig.c \
 	include/gcli/cmd/issues.h src/cmd/issues.c \
 	include/gcli/cmd/labels.h src/cmd/labels.c \
 	include/gcli/cmd/milestones.h src/cmd/milestones.c \
@@ -116,8 +119,7 @@ TEMPLATES = \
 	templates/gitea/milestones.t
 
 include_HEADERS = include/gcli/gcli.h include/gcli/comments.h	\
-	include/gcli/config.h include/gcli/curl.h		\
-	include/gcli/forks.h include/gcli/gitconfig.h		\
+	include/gcli/curl.h include/gcli/forks.h		\
 	include/gcli/issues.h include/gcli/labels.h		\
 	include/gcli/milestones.h include/gcli/pulls.h		\
 	include/gcli/releases.h include/gcli/repos.h		\
@@ -129,11 +131,9 @@ libgcli_la_SOURCES = \
 	include/gcli/gcli.h src/gcli.c \
 	include/gcli/date_time.h src/date_time.c \
 	src/comments.c include/gcli/comments.h \
-	src/config.c include/gcli/config.h \
 	src/curl.c include/gcli/curl.h \
 	src/forges.c include/gcli/forges.h \
 	src/forks.c include/gcli/forks.h \
-	src/gitconfig.c include/gcli/gitconfig.h \
 	src/issues.c include/gcli/issues.h \
 	src/json_util.c include/gcli/json_util.h \
 	src/labels.c include/gcli/labels.h \
@@ -206,40 +206,31 @@ EXTRA_DIST = \
 
 ###########################################
 # Tests
+if HAVE_TESTS
 check_PROGRAMS = \
 	tests/json-escape$(EXEEXT) \
-	tests/pgen-tests$(EXEEXT) \
+	tests/github-parse-tests$(EXEEXT) \
 	tests/url-encode$(EXEEXT) \
 	tests/pretty_print_test$(EXEEXT)
 
-SHELL_TESTS = \
-	tests/01_pgen_simple_object.sh \
-	tests/02_pgen_error_no_entries.sh \
-	tests/03_pgen_error_trailing_comma.sh \
-	tests/04_pgen_simple_issue.sh \
-	tests/05_pgen_simple_pull.sh \
-	tests/06_pgen_simple_label.sh \
-	tests/07_pretty_print.sh
+check: $(check_PROGRAMS) tests/Kyuafile libgcli.la libsn.la libpdjson.la do_test
 
-EXTRA_DIST += \
-	${SHELL_TESTS} \
-	tests/setup.sh \
-	tests/samples/pgen_simple_object.dump \
-	tests/samples/github_simple_issue.json tests/samples/parse_simple_issue.dump \
-	tests/samples/github_simple_pull.json tests/samples/parse_simple_pull.dump \
-	tests/samples/github_simple_label.json tests/samples/parse_simple_label.dump \
-	tests/samples/pretty.dump
-
-TESTS = \
-	tests/json-escape \
-	tests/url-encode \
-	${SHELL_TESTS}
+do_test:
+	kyua test -k tests/Kyuafile
 
 tests_json_escape_LDADD = \
-	libgcli.la libpdjson.la libsn.la
-tests_pgen_tests_LDADD = \
-	libgcli.la libpdjson.la libsn.la
+	libgcli.la libpdjson.la libsn.la \
+	$(LIBATFC_LDFLAGS)
+
+tests_github_parse_tests_LDADD = \
+	libgcli.la libpdjson.la libsn.la \
+	$(LIBATFC_LDFLAGS)
+
 tests_url_encode_LDADD = \
-	libgcli.la libpdjson.la libsn.la
+	libgcli.la libpdjson.la libsn.la \
+	$(LIBATFC_LDFLAGS)
+
 tests_pretty_print_test_LDADD = \
-	libsn.la
+	libsn.la \
+	$(LIBATFC_LDFLAGS)
+endif

@@ -59,8 +59,8 @@ gitlab_get_milestones(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/milestones",
-	                  gitlab_get_apibase(ctx), e_owner, e_repo);
+	url = sn_asprintf("%s/projects/%s%%2F%s/milestones", gcli_get_apibase(ctx),
+	                  e_owner, e_repo);
 
 	free(e_owner);
 	free(e_repo);
@@ -80,8 +80,8 @@ gitlab_get_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/milestones/%d",
-	                  gitlab_get_apibase(ctx), e_owner, e_repo, milestone);
+	url = sn_asprintf("%s/projects/%s%%2F%s/milestones/%d", gcli_get_apibase(ctx),
+	                  e_owner, e_repo, milestone);
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc == 0) {
@@ -109,7 +109,7 @@ gitlab_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
 	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/milestones/%d/issues",
-	                  gitlab_get_apibase(ctx), e_owner, e_repo, milestone);
+	                  gcli_get_apibase(ctx), e_owner, e_repo, milestone);
 
 	free(e_repo);
 	free(e_owner);
@@ -128,8 +128,8 @@ gitlab_create_milestone(gcli_ctx *ctx,
 	e_owner = gcli_urlencode(args->owner);
 	e_repo = gcli_urlencode(args->repo);
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/milestones",
-	                  gitlab_get_apibase(ctx), e_owner, e_repo);
+	url = sn_asprintf("%s/projects/%s%%2F%s/milestones", gcli_get_apibase(ctx),
+	                  e_owner, e_repo);
 
 	/* Escape and prepare the description if needed */
 	if (args->description) {
@@ -168,8 +168,8 @@ gitlab_delete_milestone(gcli_ctx *ctx, char const *const owner,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/milestones/%d",
-	                  gitlab_get_apibase(ctx), e_owner, e_repo, milestone);
+	url = sn_asprintf("%s/projects/%s%%2F%s/milestones/%d", gcli_get_apibase(ctx),
+	                  e_owner, e_repo, milestone);
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
@@ -197,7 +197,7 @@ gitlab_milestone_set_duedate(gcli_ctx *ctx, char const *const owner,
 	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/milestones/%d?due_date=%s",
-	                  gitlab_get_apibase(ctx), e_owner, e_repo, milestone,
+	                  gcli_get_apibase(ctx), e_owner, e_repo, milestone,
 	                  norm_date);
 
 	rc = gcli_fetch_with_method(ctx, "PUT", url, "", NULL, NULL);

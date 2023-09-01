@@ -29,7 +29,6 @@
 
 #include <gcli/github/milestones.h>
 
-#include <gcli/config.h>
 #include <gcli/curl.h>
 #include <gcli/date_time.h>
 #include <gcli/github/issues.h>

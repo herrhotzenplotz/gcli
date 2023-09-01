@@ -40,6 +40,7 @@
 
 #include <gcli/cmd/ci.h>
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/comment.h>
 #include <gcli/cmd/config.h>
 #include <gcli/cmd/forks.h>
@@ -53,8 +54,6 @@
 #include <gcli/cmd/repos.h>
 #include <gcli/cmd/snippets.h>
 #include <gcli/cmd/status.h>
-
-#include <gcli/config.h>
 
 static void usage(void);
 
@@ -159,9 +158,13 @@ main(int argc, char *argv[])
 {
 	char const *errmsg;
 
-	errmsg = gcli_init(&g_clictx);
+	errmsg = gcli_init(&g_clictx, gcli_config_get_forge_type,
+	                   gcli_config_get_token, gcli_config_get_apibase);
 	if (errmsg)
 		errx(1, "error: %s", errmsg);
+
+	if (gcli_config_init_ctx(g_clictx) < 0)
+		errx(1, "error: failed to init context: %s", gcli_get_error(g_clictx));
 
 	/* Parse first arguments */
 	if (gcli_config_parse_args(g_clictx, &argc, &argv)) {

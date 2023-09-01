@@ -79,8 +79,7 @@ gitea_delete_label(gcli_ctx *ctx, char const *owner, char const *repo,
 		return gcli_error(ctx, "label '%s' does not exist", label);
 
 	/* DELETE /repos/{owner}/{repo}/labels/{} */
-	url = sn_asprintf("%s/repos/%s/%s/labels/%d",
-	                  gitea_get_apibase(ctx),
+	url = sn_asprintf("%s/repos/%s/%s/labels/%d", gcli_get_apibase(ctx),
 	                  owner, repo, id);
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);

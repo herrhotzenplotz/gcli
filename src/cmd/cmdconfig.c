@@ -29,12 +29,13 @@
 
 #include <config.h>
 
-#include <gcli/config.h>
+#include <gcli/cmd/cmdconfig.h>
+#include <gcli/cmd/gitconfig.h>
+
+#include <gcli/forges.h>
+#include <gcli/gitea/config.h>
 #include <gcli/github/config.h>
 #include <gcli/gitlab/config.h>
-#include <gcli/gitea/config.h>
-#include <gcli/gitconfig.h>
-#include <gcli/forges.h>
 
 #include <assert.h>
 #include <ctype.h>
@@ -88,12 +89,32 @@ struct gcli_dotgcli {
 	bool   has_been_found;
 };
 
+struct cmd_ctx {
+	struct gcli_config config;
+	struct gcli_dotgcli local_config;
+};
+
+static inline struct gcli_dotgcli *
+ctx_dotgcli(struct gcli_ctx *ctx)
+{
+	struct cmd_ctx *cctx = gcli_get_userdata(ctx);
+	return &cctx->local_config;
+}
+
+static inline struct gcli_config *
+ctx_config(struct gcli_ctx *ctx)
+{
+	struct cmd_ctx *cctx = gcli_get_userdata(ctx);
+	return &cctx->config;
+}
+
 static bool
 should_init_dotgcli(gcli_ctx *ctx)
 {
-	return !ctx->dotgcli->has_been_searched_for ||
-		(ctx->dotgcli->has_been_searched_for &&
-		 !ctx->dotgcli->has_been_found);
+	struct gcli_dotgcli *dgcli = ctx_dotgcli(ctx);
+
+	return !dgcli->has_been_searched_for ||
+		(dgcli->has_been_searched_for && !dgcli->has_been_found);
 }
 
 static char const *
@@ -176,25 +197,27 @@ init_local_config(gcli_ctx *ctx)
 	}
 
 	char const *path = find_dotgcli();
+	struct gcli_dotgcli *dgcli = ctx_dotgcli(ctx);
+
 	if (!path) {
-		ctx->dotgcli->has_been_searched_for = true;
-		ctx->dotgcli->has_been_found = false;
+		dgcli->has_been_searched_for = true;
+		dgcli->has_been_found = false;
 		return;
 	}
 
-	ctx->dotgcli->has_been_searched_for = true;
-	ctx->dotgcli->has_been_found = true;
+	dgcli->has_been_searched_for = true;
+	dgcli->has_been_found = true;
 
-	int len = sn_mmap_file(path, &ctx->dotgcli->mmap_pointer);
+	int len = sn_mmap_file(path, &dgcli->mmap_pointer);
 	if (len < 0)
 		err(1, "Unable to open config file");
 
-	ctx->dotgcli->buffer = sn_sv_from_parts(ctx->dotgcli->mmap_pointer, len);
-	ctx->dotgcli->buffer = sn_sv_trim_front(ctx->dotgcli->buffer);
+	dgcli->buffer = sn_sv_from_parts(dgcli->mmap_pointer, len);
+	dgcli->buffer = sn_sv_trim_front(dgcli->buffer);
 
 	int curr_line = 1;
-	while (ctx->dotgcli->buffer.length > 0) {
-		sn_sv line = sn_sv_chop_until(&ctx->dotgcli->buffer, '\n');
+	while (dgcli->buffer.length > 0) {
+		sn_sv line = sn_sv_chop_until(&dgcli->buffer, '\n');
 
 		line = sn_sv_trim(line);
 
@@ -204,7 +227,7 @@ init_local_config(gcli_ctx *ctx)
 
 		// Comments
 		if (line.data[0] == '#') {
-			ctx->dotgcli->buffer = sn_sv_trim_front(ctx->dotgcli->buffer);
+			dgcli->buffer = sn_sv_trim_front(dgcli->buffer);
 			curr_line++;
 			continue;
 		}
@@ -222,12 +245,12 @@ init_local_config(gcli_ctx *ctx)
 		sn_sv value = sn_sv_trim(line);
 
 		struct gcli_config_entry *entry = calloc(sizeof(*entry), 1);
-		TAILQ_INSERT_TAIL(&ctx->dotgcli->entries, entry, next);
+		TAILQ_INSERT_TAIL(&dgcli->entries, entry, next);
 
 	    entry->key = key;
 	    entry->value = value;
 
-		ctx->dotgcli->buffer = sn_sv_trim_front(ctx->dotgcli->buffer);
+		dgcli->buffer = sn_sv_trim_front(dgcli->buffer);
 		curr_line++;
 	}
 
@@ -366,15 +389,15 @@ parse_config_file(struct gcli_config *cfg,
  * Try to load up the local config file if it exists. If we succeed,
  * return 0. Otherwise return -1.
  */
-static int
+static struct gcli_config *
 ensure_config(gcli_ctx *ctx)
 {
-	struct gcli_config *cfg = ctx->config;
+	struct gcli_config *cfg = ctx_config(ctx);
 	char *file_path = NULL;
 	struct config_parser parser = {0};
 
 	if (cfg->inited)
-		return 0;
+		return cfg;
 
 	cfg->inited = true;
 
@@ -383,7 +406,7 @@ ensure_config(gcli_ctx *ctx)
 		file_path = getenv("HOME");
 		if (!file_path) {
 			warnx("Neither XDG_CONFIG_PATH nor HOME set in env");
-			return -1;
+			return cfg;
 		}
 
 		/*
@@ -395,7 +418,7 @@ ensure_config(gcli_ctx *ctx)
 
 	if (access(file_path, R_OK) < 0) {
 		warn("Cannot access config file at %s", file_path);
-		return -1;
+		return cfg;
 	}
 
 	int len = sn_mmap_file(file_path, &cfg->mmap_pointer);
@@ -413,7 +436,7 @@ ensure_config(gcli_ctx *ctx)
 
 	free((void *)file_path);
 
-	return 0;
+	return cfg;
 }
 
 /** Check input for a value that indicates yes/true */
@@ -464,16 +487,16 @@ readenv(struct gcli_config *cfg)
 int
 gcli_config_init_ctx(struct gcli_ctx *ctx)
 {
-	ctx->dotgcli = calloc(sizeof(*ctx->dotgcli), 1);
-	ctx->config = calloc(sizeof(*ctx->config), 1);
+	struct cmd_ctx *cctx = calloc(sizeof(*cctx), 1);
+	gcli_set_userdata(ctx, cctx);
 
-	ctx->config->sections =
+	cctx->config.sections =
 		(struct gcli_config_sections)
-		TAILQ_HEAD_INITIALIZER(ctx->config->sections);
+		TAILQ_HEAD_INITIALIZER(cctx->config.sections);
 
-	ctx->dotgcli->entries =
+	cctx->local_config.entries =
 		(struct gcli_config_entries)
-		TAILQ_HEAD_INITIALIZER(ctx->dotgcli->entries);
+		TAILQ_HEAD_INITIALIZER(cctx->local_config.entries);
 
 	return 0;
 }
@@ -485,6 +508,8 @@ gcli_config_parse_args(gcli_ctx *ctx, int *argc, char ***argv)
 	 * itself. It is the first ever getopt call we do to parse any
 	 * arguments. Only global options that do not alter subcommand
 	 * specific behaviour should be accepted here. */
+
+	struct gcli_config *cfg = ctx_config(ctx);
 
 	int ch;
 	const struct option options[] = {
@@ -498,7 +523,7 @@ gcli_config_parse_args(gcli_ctx *ctx, int *argc, char ***argv)
 		  .val     = 'r' },
 		{ .name    = "colours",
 		  .has_arg = no_argument,
-		  .flag    = &ctx->config->colours_disabled,
+		  .flag    = &cfg->colours_disabled,
 		  .val     = 0 },
 		{ .name    = "type",
 		  .has_arg = required_argument,
@@ -520,21 +545,21 @@ gcli_config_parse_args(gcli_ctx *ctx, int *argc, char ***argv)
 
 	/* Before we parse options, invalidate the override type so it
 	 * doesn't get confused later */
-	ctx->config->override_forgetype = -1;
+	cfg->override_forgetype = -1;
 
 	/* Start off by pre-populating the config structure */
-	readenv(ctx->config);
+	readenv(cfg);
 
 	while ((ch = getopt_long(*argc, *argv, "+a:r:cqvt:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'a': {
-			ctx->config->override_default_account = optarg;
+			cfg->override_default_account = optarg;
 		} break;
 		case 'r': {
-			ctx->config->override_remote = optarg;
+			cfg->override_remote = optarg;
 		} break;
 		case 'c': {
-			ctx->config->force_colours = 1;
+			cfg->force_colours = 1;
 		} break;
 		case 'q': {
 			sn_setverbosity(VERBOSITY_QUIET);
@@ -544,11 +569,11 @@ gcli_config_parse_args(gcli_ctx *ctx, int *argc, char ***argv)
 		} break;
 		case 't': {
 			if (strcmp(optarg, "github") == 0) {
-				ctx->config->override_forgetype = GCLI_FORGE_GITHUB;
+				cfg->override_forgetype = GCLI_FORGE_GITHUB;
 			} else if (strcmp(optarg, "gitlab") == 0) {
-				ctx->config->override_forgetype = GCLI_FORGE_GITLAB;
+				cfg->override_forgetype = GCLI_FORGE_GITLAB;
 			} else if (strcmp(optarg, "gitea") == 0) {
-				ctx->config->override_forgetype = GCLI_FORGE_GITEA;
+				cfg->override_forgetype = GCLI_FORGE_GITEA;
 			} else {
 				fprintf(stderr, "error: unknown forge type '%s'. "
 				        "Have either github, gitlab or gitea.\n", optarg);
@@ -573,35 +598,34 @@ gcli_config_parse_args(gcli_ctx *ctx, int *argc, char ***argv)
 	 * working without it. */
 	optind = 0;
 
-	ctx->config->inited = false;
+	cfg->inited = false;
 
 	return EXIT_SUCCESS;
 }
 
 static struct gcli_config_section const *
-find_section(struct gcli_config *cfg, sn_sv name)
+find_section(struct gcli_config *cfg, char const *name)
 {
 	struct gcli_config_section *section;
 
 	TAILQ_FOREACH(section, &cfg->sections, next) {
-		if (sn_sv_eq(section->title, name))
+		if (sn_sv_eq_to(section->title, name))
 			return section;
 	}
 	return NULL;
 }
 
 sn_sv
-gcli_config_find_by_key(gcli_ctx *ctx, sn_sv const section_name, char const *key)
+gcli_config_find_by_key(gcli_ctx *ctx, char const *section_name, char const *key)
 {
 	struct gcli_config_entry *entry;
-
-	ensure_config(ctx);
+	struct gcli_config *cfg = ensure_config(ctx);
 
 	struct gcli_config_section const *const section =
-		find_section(ctx->config, section_name);
+		find_section(cfg, section_name);
 
 	if (!section) {
-		warnx("no config section with name '"SV_FMT"'", SV_ARGS(section_name));
+		warnx("no config section with name '%s'", section_name);
 		return SV_NULL;
 	}
 
@@ -616,7 +640,7 @@ gcli_config_find_by_key(gcli_ctx *ctx, sn_sv const section_name, char const *key
 static sn_sv
 gcli_local_config_find_by_key(gcli_ctx *ctx, char const *const key)
 {
-	struct gcli_dotgcli *lcfg = ctx->dotgcli;
+	struct gcli_dotgcli *lcfg = ctx_dotgcli(ctx);
 	struct gcli_config_entry *entry;
 
 	TAILQ_FOREACH(entry, &lcfg->entries, next) {
@@ -632,23 +656,98 @@ gcli_config_get_editor(gcli_ctx *ctx)
 {
 	ensure_config(ctx);
 
-	return sn_sv_to_cstr(gcli_config_find_by_key(ctx, SV("defaults"), "editor"));
+	return sn_sv_to_cstr(gcli_config_find_by_key(ctx, "defaults", "editor"));
+}
+
+static char const *const
+default_account_entry_names[] = {
+	[GCLI_FORGE_GITHUB] = "github-default-account",
+	[GCLI_FORGE_GITLAB] = "gitlab-default-account",
+	[GCLI_FORGE_GITEA]  = "gitea-default-account", };
+
+static char const *
+get_default_account(gcli_ctx *ctx, gcli_forge_type ftype)
+{
+	char const *const defaultname = default_account_entry_names[ftype];
+	sn_sv act = gcli_config_find_by_key(ctx, "defaults", defaultname);
+
+	if (!act.length)
+		return NULL;
+
+	return sn_sv_to_cstr(act);
+}
+
+static char const *
+gcli_config_get_account(gcli_ctx *ctx)
+{
+	struct gcli_config *cfg = ctx_config(ctx);
+	gcli_forge_type ftype = gcli_config_get_forge_type(ctx);
+	char const *account;
+
+	if (cfg->override_default_account) {
+		account = cfg->override_default_account;
+	} else {
+		account = get_default_account(ctx, ftype);
+	}
+
+	return account;
+}
+
+static char const *const default_urls[] = {
+	[GCLI_FORGE_GITHUB] = "https://api.github.com",
+	[GCLI_FORGE_GITLAB] = "https://gitlab.com/api/v4",
+	[GCLI_FORGE_GITEA]  = "https://codeberg.org/api/v1",
+};
+
+char *
+gcli_config_get_apibase(gcli_ctx *ctx)
+{
+	char const *acct = gcli_config_get_account(ctx);
+	char *url = NULL;
+
+	if (acct) {
+		sn_sv url_sv = gcli_config_find_by_key(ctx, acct, "apibase");
+		if (url_sv.length)
+			url = sn_sv_to_cstr(url_sv);
+	}
+
+	if (!url)
+		url = strdup(default_urls[gcli_config_get_forge_type(ctx)]);
+
+	return url;
 }
 
 char *
-gcli_config_get_authheader(gcli_ctx *ctx)
+gcli_config_get_account_name(gcli_ctx *ctx)
 {
-	ensure_config(ctx);
+	char const *account = gcli_config_get_account(ctx);
+	sn_sv actname = gcli_config_find_by_key(
+		ctx, account, "account");
 
-	return gcli_forge(ctx)->get_authheader(ctx);
+	return sn_sv_to_cstr(actname);
 }
 
-int
-gcli_config_get_account(gcli_ctx *ctx, sn_sv *out)
+static char *
+get_account_token(gcli_ctx *ctx)
+{
+	char const *account;
+	sn_sv token;
+
+	account = gcli_config_get_account(ctx);
+	if (!account)
+		return NULL;
+
+	token = gcli_config_find_by_key(ctx, account, "token");
+
+	return sn_sv_to_cstr(token);
+}
+
+char *
+gcli_config_get_token(gcli_ctx *ctx)
 {
 	ensure_config(ctx);
 
-	return gcli_forge(ctx)->get_account(ctx, out);
+	return get_account_token(ctx);
 }
 
 sn_sv
@@ -700,10 +799,13 @@ gcli_config_get_base(gcli_ctx *ctx)
 sn_sv
 gcli_config_get_override_default_account(gcli_ctx *ctx)
 {
-	init_local_config(ctx);
+	struct gcli_config *cfg;
 
-	if (ctx->config->override_default_account)
-		return SV((char *)ctx->config->override_default_account);
+	init_local_config(ctx);
+	cfg = ctx_config(ctx);
+
+	if (cfg->override_default_account)
+		return SV((char *)cfg->override_default_account);
 	else
 		return SV_NULL;
 }
@@ -711,17 +813,19 @@ gcli_config_get_override_default_account(gcli_ctx *ctx)
 static gcli_forge_type
 gcli_config_get_forge_type_internal(gcli_ctx *ctx)
 {
+	struct gcli_config *cfg = ctx_config(ctx);
+
 	/* Hard override */
-	if (ctx->config->override_forgetype >= 0)
-		return ctx->config->override_forgetype;
+	if (cfg->override_forgetype >= 0)
+		return cfg->override_forgetype;
 
 	ensure_config(ctx);
 	init_local_config(ctx);
 
 	sn_sv entry = {0};
 
-	if (ctx->config->override_default_account) {
-		sn_sv const section = SV((char *)ctx->config->override_default_account);
+	if (cfg->override_default_account) {
+	    char const *section = cfg->override_default_account;
 		entry = gcli_config_find_by_key(ctx, section, "forge-type");
 		if (sn_sv_null(entry))
 			errx(1,
@@ -743,7 +847,7 @@ gcli_config_get_forge_type_internal(gcli_ctx *ctx)
 	}
 
 	/* As a last resort, try to infer from the git remote */
-	int const type = gcli_gitconfig_get_forgetype(ctx, ctx->config->override_remote);
+	int const type = gcli_gitconfig_get_forgetype(ctx, cfg->override_remote);
 	if (type < 0)
 		errx(1, "error: cannot infer forge type. "
 		     "use -t <forge-type> to overrride manually.");
@@ -779,12 +883,13 @@ gcli_config_get_repo(gcli_ctx *ctx, char const **const owner,
                      char const **const repo)
 {
 	sn_sv upstream = {0};
+	struct gcli_config *cfg;
 
-	ensure_config(ctx);
+	cfg = ensure_config(ctx);
 
-	if (ctx->config->override_remote) {
+	if (cfg->override_remote) {
 		int const forge = gcli_gitconfig_repo_by_remote(
-			ctx->config->override_remote, owner, repo);
+			cfg->override_remote, owner, repo);
 
 		if (forge >= 0) {
 			if ((int)(gcli_config_get_forge_type(ctx)) != forge)
@@ -813,37 +918,25 @@ int
 gcli_config_have_colours(gcli_ctx *ctx)
 {
 	static int tested_tty = 0;
+	struct gcli_config *cfg;
 
-	if (ctx->config->force_colours)
+	cfg = ctx_config(ctx);
+
+	if (cfg->force_colours)
 		return 1;
 
-	if (ctx->config->colours_disabled)
+	if (cfg->colours_disabled)
 		return 0;
 
 	if (tested_tty)
-		return !ctx->config->colours_disabled;
+		return !cfg->colours_disabled;
 
 	if (isatty(STDOUT_FILENO))
-		ctx->config->colours_disabled = false;
+		cfg->colours_disabled = false;
 	else
-		ctx->config->colours_disabled = true;
+		cfg->colours_disabled = true;
 
 	tested_tty = 1;
 
-	return !ctx->config->colours_disabled;
-}
-
-char const *
-gcli_get_apibase(gcli_ctx *ctx)
-{
-	switch (gcli_config_get_forge_type(ctx)) {
-	case GCLI_FORGE_GITHUB:
-		return github_get_apibase(ctx);
-	case GCLI_FORGE_GITEA:
-		return gitea_get_apibase(ctx);
-	case GCLI_FORGE_GITLAB:
-		return gitlab_get_apibase(ctx);
-	default:
-		assert(0 && "Not reached");
-	}
+	return !cfg->colours_disabled;
 }

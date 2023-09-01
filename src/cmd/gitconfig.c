@@ -27,9 +27,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/config.h>
+#include <gcli/cmd/cmdconfig.h>
+#include <gcli/cmd/gitconfig.h>
+
 #include <gcli/gcli.h>
-#include <gcli/gitconfig.h>
 #include <sn/sn.h>
 
 #include <dirent.h>

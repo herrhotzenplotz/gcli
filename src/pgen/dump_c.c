@@ -145,8 +145,7 @@ objparser_dump_c(struct objparser *p)
 	fprintf(outfile, "\tenum json_type key_type;\n");
 	fprintf(outfile, "\tconst char *key;\n\n");
 	fprintf(outfile, "\tif (json_next(stream) == JSON_NULL)\n");
-	fprintf(outfile, "\t\treturn gcli_error(ctx, "
-	        "\"expected a JSON object in parse_%s\");\n\n", p->name);
+	fprintf(outfile, "\t\treturn 0;\n"); /* not ideal */
 
 	switch (p->kind) {
 	case OBJPARSER_ENTRIES: objparser_dump_entries(p); break;

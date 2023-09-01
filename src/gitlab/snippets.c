@@ -71,7 +71,7 @@ gcli_snippets_get(gcli_ctx *ctx, int const max, gcli_snippet_list *const out)
 	};
 
 	*out = (gcli_snippet_list) {0};
-	url = sn_asprintf("%s/snippets", gitlab_get_apibase(ctx));
+	url = sn_asprintf("%s/snippets", gcli_get_apibase(ctx));
 
 	return gcli_fetch_list(ctx, url, &fl);
 }
@@ -82,7 +82,7 @@ gcli_snippet_delete(gcli_ctx *ctx, char const *snippet_id)
 	int rc = 0;
 	char *url;
 
-	url = sn_asprintf("%s/snippets/%s", gitlab_get_apibase(ctx), snippet_id);
+	url = sn_asprintf("%s/snippets/%s", gcli_get_apibase(ctx), snippet_id);
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
 	free(url);
@@ -95,7 +95,7 @@ gcli_snippet_get(gcli_ctx *ctx, char const *snippet_id, FILE *stream)
 {
 	int rc = 0;
 	char *url = sn_asprintf("%s/snippets/%s/raw",
-	                        gitlab_get_apibase(ctx),
+	                        gcli_get_apibase(ctx),
 	                        snippet_id);
 	rc = gcli_curl(ctx, stream, url, NULL);
 	free(url);

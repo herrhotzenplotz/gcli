@@ -29,7 +29,6 @@
 
 #include <gcli/cmd/colour.h>
 #include <gcli/cmd/table.h>
-#include <gcli/config.h>
 #include <gcli/curl.h>
 #include <gcli/github/gists.h>
 #include <gcli/json_util.h>
@@ -81,12 +80,9 @@ gcli_get_gists(gcli_ctx *ctx, char const *user, int const max,
 	};
 
 	if (user)
-		url = sn_asprintf(
-			"%s/users/%s/gists",
-			github_get_apibase(ctx),
-			user);
+		url = sn_asprintf("%s/users/%s/gists", gcli_get_apibase(ctx), user);
 	else
-		url = sn_asprintf("%s/gists", github_get_apibase(ctx));
+		url = sn_asprintf("%s/gists", gcli_get_apibase(ctx));
 
 	return gcli_fetch_list(ctx, url, &fl);
 }
@@ -98,7 +94,7 @@ gcli_get_gist(gcli_ctx *ctx, char const *gist_id, gcli_gist *out)
 	gcli_fetch_buffer buffer = {0};
 	int rc = 0;
 
-	url = sn_asprintf("%s/gists/%s", github_get_apibase(ctx), gist_id);
+	url = sn_asprintf("%s/gists/%s", gcli_get_apibase(ctx), gist_id);
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 
 	if (rc == 0) {
@@ -169,7 +165,7 @@ gcli_create_gist(gcli_ctx *ctx, gcli_new_gist opts)
 	 */
 
 	/* TODO: Escape gist_description and file_name */
-	url = sn_asprintf("%s/gists", github_get_apibase(ctx));
+	url = sn_asprintf("%s/gists", gcli_get_apibase(ctx));
 	post_data = sn_asprintf(
 		"{\"description\":\"%s\",\"public\":true,\"files\":"
 		"{\"%s\": {\"content\":\""SV_FMT"\"}}}",
@@ -194,10 +190,7 @@ gcli_delete_gist(gcli_ctx *ctx, char const *gist_id)
 	gcli_fetch_buffer buffer = {0};
 	int rc = 0;
 
-	url = sn_asprintf(
-		"%s/gists/%s",
-		github_get_apibase(ctx),
-		gist_id);
+	url = sn_asprintf("%s/gists/%s", gcli_get_apibase(ctx), gist_id);
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, &buffer);
 

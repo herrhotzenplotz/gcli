@@ -50,7 +50,7 @@ gitlab_get_notifications(gcli_ctx *ctx, int const max,
 		.max = max,
 	};
 
-	url = sn_asprintf("%s/todos", gitlab_get_apibase(ctx));
+	url = sn_asprintf("%s/todos", gcli_get_apibase(ctx));
 
 	return gcli_fetch_list(ctx, url, &fl);
 }
@@ -61,7 +61,7 @@ gitlab_notification_mark_as_read(gcli_ctx *ctx, char const *id)
 	char *url = NULL;
 	int rc = 0;
 
-	url = sn_asprintf("%s/todos/%s/mark_as_done", gitlab_get_apibase(ctx), id);
+	url = sn_asprintf("%s/todos/%s/mark_as_done", gcli_get_apibase(ctx), id);
 	rc = gcli_fetch_with_method(ctx, "POST", url, NULL, NULL, NULL);
 
 	free(url);

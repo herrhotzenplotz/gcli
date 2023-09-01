@@ -56,10 +56,8 @@ gitlab_get_forks(gcli_ctx *ctx, char const *owner, char const *repo,
 
 	*list = (gcli_fork_list) {0};
 
-	url = sn_asprintf(
-		"%s/projects/%s%%2F%s/forks",
-		gitlab_get_apibase(ctx),
-		e_owner, e_repo);
+	url = sn_asprintf("%s/projects/%s%%2F%s/forks", gcli_get_apibase(ctx),
+	                  e_owner, e_repo);
 
 	free(e_owner);
 	free(e_repo);
@@ -81,8 +79,7 @@ gitlab_fork_create(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/fork",
-	                  gitlab_get_apibase(ctx),
+	url = sn_asprintf("%s/projects/%s%%2F%s/fork", gcli_get_apibase(ctx),
 	                  e_owner, e_repo);
 	if (_in) {
 		in = gcli_json_escape(SV((char *)_in));

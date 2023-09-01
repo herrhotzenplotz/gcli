@@ -31,20 +31,19 @@
 
 #include <gcli/cmd/ci.h>
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/colour.h>
 #include <gcli/cmd/comment.h>
 #include <gcli/cmd/editor.h>
+#include <gcli/cmd/gitconfig.h>
 #include <gcli/cmd/pipelines.h>
 #include <gcli/cmd/pulls.h>
 #include <gcli/cmd/table.h>
 
 #include <gcli/comments.h>
-#include <gcli/config.h>
 #include <gcli/forges.h>
-#include <gcli/gitconfig.h>
 #include <gcli/gitlab/pipelines.h>
 #include <gcli/pulls.h>
-#include <gcli/review.h>
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -90,7 +89,7 @@ usage(void)
 	fprintf(stderr, "                     add <name>\n");
 	fprintf(stderr, "                     remove <name>\n");
 	fprintf(stderr, "  diff            Display changes as diff\n");
-	fprintf(stderr, "  reviews         Display reviews\n");
+
 	fprintf(stderr, "\n");
 	version();
 	copyright();
@@ -380,10 +379,10 @@ create_pull(gcli_submit_pull_options opts, int always_yes)
 static sn_sv
 pr_try_derive_head(void)
 {
-	sn_sv account = {0};
+	char const *account;
 	sn_sv branch  = {0};
 
-	if (gcli_config_get_account(g_clictx, &account) < 0) {
+	if ((account = gcli_config_get_account_name(g_clictx)) == NULL) {
 		errx(1,
 		     "error: Cannot derive PR head. Please specify --from or set the\n"
 		     "       account in the users gcli config file.\n"
@@ -397,7 +396,7 @@ pr_try_derive_head(void)
 		     "       are in »detached HEAD« state, checkout the branch you \n"
 		     "       want to pull request.\n");
 
-	return sn_sv_fmt(SV_FMT":"SV_FMT, SV_ARGS(account), SV_ARGS(branch));
+	return sn_sv_fmt("%s:"SV_FMT, account, SV_ARGS(branch));
 }
 
 static int
@@ -772,17 +771,6 @@ handle_pull_actions(int argc, char *argv[],
 			if (gcli_pull_reopen(g_clictx, owner, repo, pr) < 0)
 				errx(1, "error: failed to reopen pull request: %s",
 				     gcli_get_error(g_clictx));
-
-		} else if (strcmp(action, "reviews") == 0) {
-			/* list reviews */
-			gcli_pr_review_list reviews = {0};
-
-			if (gcli_review_get_reviews(g_clictx, owner, repo, pr, &reviews) < 0)
-				errx(1, "error: failed to fetch reviews: %s",
-				     gcli_get_error(g_clictx));
-
-			gcli_review_print_review_table(g_clictx, &reviews);
-			gcli_review_reviews_free(&reviews);
 
 		} else if (strcmp("labels", action) == 0) {
 			const char **add_labels = NULL;

@@ -49,8 +49,8 @@ gitlab_get_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 
 	*out = (gcli_label_list) {0};
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/labels",
-	                  gitlab_get_apibase(ctx), owner, repo);
+	url = sn_asprintf("%s/projects/%s%%2F%s/labels", gcli_get_apibase(ctx),
+	                  owner, repo);
 
 	return gcli_fetch_list(ctx, url, &fl);
 }
@@ -68,8 +68,7 @@ gitlab_create_label(gcli_ctx *ctx, char const *owner, char const *repo,
 	struct json_stream stream = {0};
 	int rc = 0;
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/labels",
-	                  gitlab_get_apibase(ctx),
+	url = sn_asprintf("%s/projects/%s%%2F%s/labels", gcli_get_apibase(ctx),
 	                  owner, repo);
 
 	lname_escaped = gcli_json_escape(SV(label->name));
@@ -111,8 +110,7 @@ gitlab_delete_label(gcli_ctx *ctx, char const *owner, char const *repo,
 	int rc;
 
 	e_label = gcli_urlencode(label);
-	url = sn_asprintf("%s/projects/%s%%2F%s/labels/%s",
-	                  gitlab_get_apibase(ctx),
+	url = sn_asprintf("%s/projects/%s%%2F%s/labels/%s", gcli_get_apibase(ctx),
 	                  owner, repo, e_label);
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);

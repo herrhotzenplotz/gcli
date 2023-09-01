@@ -27,9 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/editor.h>
-
-#include <gcli/config.h>
 
 #include <sn/sn.h>
 

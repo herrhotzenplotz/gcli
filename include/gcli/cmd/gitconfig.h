@@ -27,8 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GITCONFIG_H
-#define GITCONFIG_H
+#ifndef GCLI_CMD_GITCONFIG_H
+#define GCLI_CMD_GITCONFIG_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -56,4 +56,4 @@ int gcli_gitconfig_repo_by_remote(char const *remote_name,
                                   char const **owner,
                                   char const **repo);
 
-#endif /* GITCONFIG_H */
+#endif /* GCLI_CMD_GITCONFIG_H */

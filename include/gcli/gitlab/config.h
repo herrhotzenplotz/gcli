@@ -38,8 +38,6 @@
 
 #include <gcli/gcli.h>
 
-char *gitlab_get_apibase(gcli_ctx *ctx);
-char *gitlab_get_authheader(gcli_ctx *ctx);
-int gitlab_get_account(gcli_ctx *ctx, sn_sv *out);
+char *gitlab_make_authheader(gcli_ctx *ctx, char const *token);
 
 #endif /* GITLAB_CONFIG_H */

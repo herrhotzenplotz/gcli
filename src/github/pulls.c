@@ -27,9 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/config.h>
 #include <gcli/curl.h>
-#include <gcli/gitconfig.h>
 #include <gcli/github/checks.h>
 #include <gcli/github/config.h>
 #include <gcli/github/issues.h>
@@ -150,9 +148,8 @@ github_pull_delete_head_branch(gcli_ctx *ctx, char const *owner,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/git/refs/heads/%s",
-	                  github_get_apibase(ctx), e_owner, e_repo,
-	                  head_branch);
+	url = sn_asprintf("%s/repos/%s/%s/git/refs/heads/%s", gcli_get_apibase(ctx),
+	                  e_owner, e_repo, head_branch);
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 

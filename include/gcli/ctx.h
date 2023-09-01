@@ -36,17 +36,20 @@
  * data */
 struct gcli_ctx {
 	CURL *curl;
-	struct gcli_config *config;
-	struct gcli_dotgcli *dotgcli;
+	void *usrdata;
 
 	char *last_error;
+
+	/* ?? freed internally? */
+	char *(*get_token)(struct gcli_ctx *);
+	gcli_forge_type (*get_forge_type)(struct gcli_ctx *ctx);
+	char *(*get_apibase)(struct gcli_ctx *);
 };
 
 /* Error routine */
 int gcli_error(struct gcli_ctx *ctx, char const *const fmt, ...);
 
-/* Functions that are strictly called from the init / deinit routines
- * and not exposed to the public interface */
-int gcli_config_init_ctx(struct gcli_ctx *);
+char *gcli_get_apibase(struct gcli_ctx *ctx);
+char *gcli_get_authheader(struct gcli_ctx *ctx);
 
 #endif /* GCLI_CTX_H */

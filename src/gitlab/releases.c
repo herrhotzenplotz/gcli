@@ -79,10 +79,8 @@ gitlab_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf(
-		"%s/projects/%s%%2F%s/releases",
-		gitlab_get_apibase(ctx),
-		e_owner, e_repo);
+	url = sn_asprintf("%s/projects/%s%%2F%s/releases", gcli_get_apibase(ctx),
+	                  e_owner, e_repo);
 
 	free(e_owner);
 	free(e_repo);
@@ -98,23 +96,22 @@ gitlab_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
 int
 gitlab_create_release(gcli_ctx *ctx, gcli_new_release const *release)
 {
-	char  *url            = NULL;
-	char  *upload_url     = NULL;
-	char  *post_data      = NULL;
-	char  *name_json      = NULL;
-	char  *e_owner        = NULL;
-	char  *e_repo         = NULL;
-	char  *commitish_json = NULL;
-	sn_sv  escaped_body   = {0};
-	int    rc             = 0;
+	char *url = NULL;
+	char *upload_url = NULL;
+	char *post_data = NULL;
+	char *name_json = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	char *commitish_json = NULL;
+	sn_sv escaped_body = {0};
+	int rc = 0;
 
 	e_owner = gcli_urlencode(release->owner);
 	e_repo  = gcli_urlencode(release->repo);
 
 	/* https://docs.github.com/en/rest/reference/repos#create-a-release */
-	url = sn_asprintf(
-		"%s/projects/%s%%2F%s/releases",
-		gitlab_get_apibase(ctx), e_owner, e_repo);
+	url = sn_asprintf("%s/projects/%s%%2F%s/releases", gcli_get_apibase(ctx),
+	                  e_owner, e_repo);
 
 	escaped_body = gcli_json_escape(release->body);
 
@@ -175,10 +172,8 @@ gitlab_delete_release(gcli_ctx *ctx, char const *owner, char const *repo, char c
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf(
-		"%s/projects/%s%%2F%s/releases/%s",
-		gitlab_get_apibase(ctx),
-		e_owner, e_repo, id);
+	url = sn_asprintf("%s/projects/%s%%2F%s/releases/%s", gcli_get_apibase(ctx),
+	                  e_owner, e_repo, id);
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 

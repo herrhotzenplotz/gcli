@@ -84,7 +84,8 @@ Tested Operating Systems so far:
 - Solaris 10 and 11, sparc64
 - SunOS 5.11 i86pc (OmniOS)
 - Devuan GNU/Linux Chimaera x86_64
-- Debian GNU/Linux 5.18.11 ppc64
+- Debian GNU/Linux ppc64, ppc64le
+- Gentoo Linux sparc64, ia64
 - Fedora 34 x86_64
 - Haiku x86_64
 - Minix 3.4.0 (GENERIC) i386

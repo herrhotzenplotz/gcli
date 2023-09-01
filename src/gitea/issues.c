@@ -73,11 +73,8 @@ gitea_issue_patch_state(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf(
-		"%s/repos/%s/%s/issues/%d",
-		gitea_get_apibase(ctx),
-		e_owner, e_repo,
-		issue_number);
+	url = sn_asprintf("%s/repos/%s/%s/issues/%d", gcli_get_apibase(ctx),
+	                  e_owner, e_repo, issue_number);
 	data = sn_asprintf("{ \"state\": \"%s\"}", state);
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, data, NULL, NULL);
@@ -122,9 +119,8 @@ gitea_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf(
-		"%s/repos/%s/%s/issues/%d",
-		gitea_get_apibase(ctx), e_owner, e_repo, issue_number);
+	url = sn_asprintf("%s/repos/%s/%s/issues/%d", gcli_get_apibase(ctx),
+	                  e_owner, e_repo, issue_number);
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, post_fields, NULL, NULL);
 
@@ -208,8 +204,8 @@ gitea_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 	list = sn_join_with((char const **)ids, labels_size, ",");
 	data = sn_asprintf("{ \"labels\": [%s] }", list);
 
-	url = sn_asprintf("%s/repos/%s/%s/issues/%d/labels",
-	                  gitea_get_apibase(ctx), owner, repo, issue);
+	url = sn_asprintf("%s/repos/%s/%s/issues/%d/labels", gcli_get_apibase(ctx),
+	                  owner, repo, issue);
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, data, NULL, NULL);
 
@@ -238,7 +234,7 @@ gitea_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 		char *url = NULL;
 
 		url = sn_asprintf("%s/repos/%s/%s/issues/%d/labels/%s",
-		                  gitea_get_apibase(ctx), owner, repo, issue, ids[i]);
+		                  gcli_get_apibase(ctx), owner, repo, issue, ids[i]);
 		rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
 		free(url);

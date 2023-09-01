@@ -27,8 +27,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef GCLI_CMD_CMDCONFIG_H
+#define GCLI_CMD_CMDCONFIG_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -38,16 +38,15 @@
 #include <gcli/gcli.h>
 
 int gcli_config_parse_args(gcli_ctx *ctx, int *argc, char ***argv);
-
+int gcli_config_init_ctx(gcli_ctx *ctx);
 void gcli_config_get_upstream_parts(gcli_ctx *ctx, sn_sv *owner, sn_sv *repo);
-
-sn_sv gcli_config_find_by_key(gcli_ctx *ctx,
-                              sn_sv const section_name,
+char *gcli_config_get_apibase(gcli_ctx *);
+sn_sv gcli_config_find_by_key(gcli_ctx *ctx, char const *section_name,
                               char const *key);
 
 char *gcli_config_get_editor(gcli_ctx *ctx);
-char *gcli_config_get_authheader(gcli_ctx *ctx);
-int gcli_config_get_account(gcli_ctx *ctx, sn_sv *out);
+char *gcli_config_get_token(gcli_ctx *ctx);
+char *gcli_config_get_account_name(gcli_ctx *ctx);
 sn_sv gcli_config_get_upstream(gcli_ctx *ctx);
 sn_sv gcli_config_get_base(gcli_ctx *ctx);
 gcli_forge_type gcli_config_get_forge_type(gcli_ctx *ctx);
@@ -55,6 +54,5 @@ sn_sv gcli_config_get_override_default_account(gcli_ctx *ctx);
 bool gcli_config_pr_inhibit_delete_source_branch(gcli_ctx *ctx);
 void gcli_config_get_repo(gcli_ctx *ctx, char const **, char const **);
 int gcli_config_have_colours(gcli_ctx *ctx);
-char const *gcli_get_apibase(gcli_ctx *ctx);
 
-#endif /* CONFIG_H */
+#endif /* GCLI_CMD_CMDCONFIG_H */

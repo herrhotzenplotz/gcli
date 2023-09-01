@@ -36,11 +36,12 @@
 #include <stdlib.h>
 
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/cmdconfig.h>
+#include <gcli/cmd/config.h>
 #include <gcli/cmd/forks.h>
+#include <gcli/cmd/gitconfig.h>
 #include <gcli/cmd/table.h>
 
-#include <gcli/config.h>
-#include <gcli/gitconfig.h>
 #include <gcli/forks.h>
 
 static void
@@ -171,12 +172,10 @@ subcommand_forks_create(int argc, char *argv[])
 	}
 
 	if (!in) {
-		sn_sv act;
-		if (gcli_config_get_account(g_clictx, &act) < 0) {
+		if ((in = gcli_config_get_account_name(g_clictx)) == NULL) {
 			errx(1, "error: could not fetch account: %s",
 			     gcli_get_error(g_clictx));
 		}
-		in = sn_sv_to_cstr(act);
 	}
 
 	gcli_gitconfig_add_fork_remote(in, repo);

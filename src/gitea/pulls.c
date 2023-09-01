@@ -27,7 +27,6 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/config.h>
 #include <gcli/gitea/pulls.h>
 #include <gcli/github/pulls.h>
 #include <gcli/github/issues.h>

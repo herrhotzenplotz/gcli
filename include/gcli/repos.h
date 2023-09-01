@@ -65,8 +65,6 @@ struct gcli_repo_create_options {
 int gcli_get_repos(gcli_ctx *ctx, char const *owner, int max,
                    gcli_repo_list *list);
 
-int gcli_get_own_repos(gcli_ctx *ctx, int max, gcli_repo_list *list);
-
 void gcli_repos_free(gcli_repo_list *list);
 void gcli_repo_free(gcli_repo *it);
 

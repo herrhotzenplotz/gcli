@@ -59,7 +59,7 @@ gitlab_perform_submit_comment(gcli_ctx *ctx, gcli_submit_comment_opts opts,
 		SV_ARGS(opts.message));
 	char *url = sn_asprintf(
 		"%s/projects/%s%%2F%s/%s/%d/notes",
-		gitlab_get_apibase(ctx),
+		gcli_get_apibase(ctx),
 		e_owner, e_repo, type, opts.target_id);
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, post_fields, NULL, out);
@@ -88,7 +88,7 @@ gitlab_get_mr_comments(gcli_ctx *ctx, char const *owner, char const *repo,
 
 	char *url = sn_asprintf(
 		"%s/projects/%s%%2F%s/merge_requests/%d/notes",
-		gitlab_get_apibase(ctx),
+		gcli_get_apibase(ctx),
 		e_owner, e_repo, mr);
 
 	free(e_owner);
@@ -113,7 +113,7 @@ gitlab_get_issue_comments(gcli_ctx *ctx, char const *owner, char const *repo,
 
 	char *url = sn_asprintf(
 		"%s/projects/%s%%2F%s/issues/%d/notes",
-		gitlab_get_apibase(ctx),
+		gcli_get_apibase(ctx),
 		e_owner, e_repo, issue);
 	free(e_owner);
 	free(e_repo);

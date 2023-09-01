@@ -32,7 +32,7 @@
 #endif
 
 #include <gcli/cmd/cmd.h>
-#include <gcli/config.h>
+#include <gcli/cmd/cmdconfig.h>
 #include <gcli/repos.h>
 
 #include <stdlib.h>

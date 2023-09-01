@@ -31,7 +31,6 @@
 
 #include <gcli/cmd/colour.h>
 #include <gcli/cmd/table.h>
-#include <gcli/config.h>
 #include <gcli/curl.h>
 #include <gcli/github/checks.h>
 #include <gcli/github/checks.h>

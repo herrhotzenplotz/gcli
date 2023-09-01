@@ -30,7 +30,6 @@
 #include <gcli/gitea/milestones.h>
 
 #include <gcli/curl.h>
-#include <gcli/config.h>
 
 #include <gcli/github/issues.h>
 #include <gcli/github/milestones.h>

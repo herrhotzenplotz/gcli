@@ -32,7 +32,6 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <gcli/gitlab/sshkeys.h>
-#include <gcli/config.h>
 #include <gcli/curl.h>
 #include <gcli/json_util.h>
 

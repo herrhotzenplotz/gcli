@@ -31,7 +31,6 @@
 #include <ctype.h>
 #include <string.h>
 
-#include <gcli/config.h>
 #include <gcli/curl.h>
 #include <gcli/forges.h>
 #include <gcli/json_util.h>
@@ -204,7 +203,7 @@ gcli_curl(gcli_ctx *ctx, FILE *stream, char const *url, char const *content_type
 	if (content_type)
 		headers = curl_slist_append(headers, content_type);
 
-	auth_header = gcli_config_get_authheader(ctx);
+	auth_header = gcli_get_authheader(ctx);
 	headers = curl_slist_append(headers, auth_header);
 
 	curl_easy_setopt(ctx->curl, CURLOPT_URL, url);
@@ -332,7 +331,7 @@ gcli_fetch_with_method(
 	if ((rc = gcli_curl_ensure(ctx)) < 0)
 		return rc;
 
-	char *auth_header = gcli_config_get_authheader(ctx);
+	char *auth_header = gcli_get_authheader(ctx);
 
 	if (sn_verbose())
 		fprintf(stderr, "info: cURL request %s %s...\n", method, url);
@@ -420,7 +419,7 @@ gcli_post_upload(gcli_ctx *ctx, char const *url, char const *content_type,
 	if ((rc = gcli_curl_ensure(ctx)) < 0)
 		return rc;
 
-	auth_header = gcli_config_get_authheader(ctx);
+	auth_header = gcli_get_authheader(ctx);
 	contenttype_header = sn_asprintf("Content-Type: %s",
 	                                 content_type);
 	contentsize_header = sn_asprintf("Content-Length: %zu",
@@ -480,7 +479,7 @@ gcli_curl_gitea_upload_attachment(gcli_ctx *ctx, char const *url,
 	if ((rc = gcli_curl_ensure(ctx)) < 0)
 		return rc;
 
-	auth_header = gcli_config_get_authheader(ctx);
+	auth_header = gcli_get_authheader(ctx);
 
 	if (sn_verbose())
 		fprintf(stderr, "info: cURL upload POST %s...\n", url);
@@ -604,7 +603,7 @@ gcli_fetch_list(gcli_ctx *ctx, char *url, gcli_fetch_list_ctx *fl)
 			struct json_stream stream = {0};
 
 			json_open_buffer(&stream, buffer.data, buffer.length);
-			fl->parse(ctx, &stream, fl->listp, fl->sizep);
+			rc = fl->parse(ctx, &stream, fl->listp, fl->sizep);
 			if (fl->filter)
 				fl->filter(fl->listp, fl->sizep, fl->userdata);
 

@@ -30,10 +30,11 @@
 #include <config.h>
 
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/colour.h>
+#include <gcli/cmd/pipelines.h>
 #include <gcli/cmd/table.h>
 
-#include <gcli/config.h>
 #include <gcli/forges.h>
 
 #include <gcli/gitlab/pipelines.h>
@@ -66,6 +67,21 @@ usage(void)
 	fprintf(stderr, "\n");
 	version();
 	copyright();
+}
+
+int
+gitlab_mr_pipelines(char const *owner, char const *repo, int const mr_id)
+{
+	gitlab_pipeline_list list = {0};
+	int rc = 0;
+
+	rc = gitlab_get_mr_pipelines(g_clictx, owner, repo, mr_id, &list);
+	if (rc == 0)
+		gitlab_print_pipelines(&list);
+
+	gitlab_free_pipelines(&list);
+
+	return rc;
 }
 
 void

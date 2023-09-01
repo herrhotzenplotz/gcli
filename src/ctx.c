@@ -27,6 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <gcli/forges.h>
 #include <gcli/gcli.h>
 
 #include <stdarg.h>
@@ -56,4 +57,36 @@ gcli_error(struct gcli_ctx *ctx, char const *const fmt, ...)
 	ctx->last_error = buf;
 
 	return -1;
+}
+
+void *
+gcli_get_userdata(struct gcli_ctx const *ctx)
+{
+	return ctx->usrdata;
+}
+
+void
+gcli_set_userdata(struct gcli_ctx *ctx, void *usrdata)
+{
+	ctx->usrdata = usrdata;
+}
+
+char *
+gcli_get_apibase(struct gcli_ctx *ctx)
+{
+	return ctx->get_apibase(ctx);
+}
+
+char *
+gcli_get_authheader(struct gcli_ctx *ctx)
+{
+	char *hdr = NULL;
+	char *token = ctx->get_token(ctx);
+
+	if (token) {
+		hdr = gcli_forge(ctx)->make_authheader(ctx, token);
+		free(token);
+	}
+
+	return hdr;
 }

@@ -29,10 +29,10 @@
 
 #include <config.h>
 
-#include <gcli/config.h>
 #include <gcli/labels.h>
 
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/colour.h>
 #include <gcli/cmd/table.h>
 

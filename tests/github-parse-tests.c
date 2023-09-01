@@ -125,10 +125,10 @@ ATF_TC_BODY(simple_github_label, tc)
 
 	ATF_REQUIRE(parse_github_label(ctx, &stream, &label) == 0);
 
-	ATF_CHECK(label.id == 208045946);
+	ATF_CHECK(label.id == 3431203676);
 	ATF_CHECK_STREQ(label.name, "bug");
 	ATF_CHECK_STREQ(label.description, "Something isn't working");
-	ATF_CHECK(label.colour == 0xf2951300);
+	ATF_CHECK(label.colour == 0xd73a4a00);
 }
 
 ATF_TP_ADD_TCS(tp)

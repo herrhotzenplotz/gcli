@@ -1,9 +1,9 @@
 {
-	"id": 208045946,
-	"node_id": "MDU6TGFiZWwyMDgwNDU5NDY=",
-	"url": "https://api.github.com/repos/octocat/Hello-World/labels/bug",
-	"name": "bug",
-	"description": "Something isn't working",
-	"color": "f29513",
-	"default": true
+  "id": 3431203676,
+  "node_id": "LA_kwDOGLyhHc7MhANc",
+  "url": "https://api.github.com/repos/herrhotzenplotz/gcli/labels/bug",
+  "name": "bug",
+  "color": "d73a4a",
+  "default": true,
+  "description": "Something isn't working"
 }

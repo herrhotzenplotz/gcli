@@ -1,4 +1,5 @@
 #include <templates/gitlab/issues.h>
+#include <templates/gitlab/labels.h>
 #include <templates/gitlab/merge_requests.h>
 
 #include <err.h>
@@ -101,9 +102,27 @@ ATF_TC_BODY(gitlab_simple_issue, tc)
 	ATF_CHECK(sn_sv_null(issue.milestone));
 }
 
+ATF_TC_WITHOUT_HEAD(gitlab_simple_label);
+ATF_TC_BODY(gitlab_simple_label, tc)
+{
+	json_stream stream = {0};
+	gcli_ctx *ctx = test_context();
+	FILE *f = open_sample("gitlab_simple_label.json");
+	gcli_label label = {0};
+
+	json_open_stream(&stream, f);
+	ATF_REQUIRE(parse_gitlab_label(ctx, &stream, &label) == 0);
+
+	ATF_CHECK(label.id == 24376073);
+	ATF_CHECK_STREQ(label.name, "bug");
+	ATF_CHECK_STREQ(label.description, "Something isn't working as expected");
+	ATF_CHECK(label.colour == 0xD73A4A00);
+}
+
 ATF_TP_ADD_TCS(tp)
 {
 	ATF_TP_ADD_TC(tp, gitlab_simple_merge_request);
 	ATF_TP_ADD_TC(tp, gitlab_simple_issue);
+	ATF_TP_ADD_TC(tp, gitlab_simple_label);
 	return atf_no_error();
 }

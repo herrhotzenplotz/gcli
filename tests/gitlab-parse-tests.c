@@ -1,3 +1,4 @@
+#include <templates/gitlab/issues.h>
 #include <templates/gitlab/merge_requests.h>
 
 #include <err.h>
@@ -73,8 +74,36 @@ ATF_TC_BODY(gitlab_simple_merge_request, tc)
 	ATF_CHECK(pull.draft == false);
 }
 
+ATF_TC_WITHOUT_HEAD(gitlab_simple_issue);
+ATF_TC_BODY(gitlab_simple_issue, tc)
+{
+	json_stream stream = {0};
+	gcli_ctx *ctx = test_context();
+	FILE *f = open_sample("gitlab_simple_issue.json");
+	gcli_issue issue = {0};
+
+	json_open_stream(&stream, f);
+	ATF_REQUIRE(parse_gitlab_issue(ctx, &stream, &issue) == 0);
+
+	ATF_CHECK(issue.number == 193);
+	ATF_CHECK(sn_sv_eq_to(issue.title, "Make notifications API use a list struct containing both the ptr and size"));
+	ATF_CHECK(sn_sv_eq_to(issue.created_at, "2023-08-13T18:43:05.766Z"));
+	ATF_CHECK(sn_sv_eq_to(issue.author, "herrhotzenplotz"));
+	ATF_CHECK(sn_sv_eq_to(issue.state, "closed"));
+	ATF_CHECK(issue.comments == 2);
+	ATF_CHECK(issue.locked == false);
+	ATF_CHECK(sn_sv_eq_to(issue.body, "That would make some of the code much cleaner"));
+	ATF_CHECK(issue.labels_size == 1);
+	ATF_CHECK(sn_sv_eq_to(issue.labels[0], "good-first-issue"));
+	ATF_CHECK(issue.assignees == NULL);
+	ATF_CHECK(issue.assignees_size == 0);
+	ATF_CHECK(issue.is_pr == 0);
+	ATF_CHECK(sn_sv_null(issue.milestone));
+}
+
 ATF_TP_ADD_TCS(tp)
 {
 	ATF_TP_ADD_TC(tp, gitlab_simple_merge_request);
+	ATF_TP_ADD_TC(tp, gitlab_simple_issue);
 	return atf_no_error();
 }

@@ -210,6 +210,7 @@ if HAVE_TESTS
 check_PROGRAMS = \
 	tests/json-escape$(EXEEXT) \
 	tests/github-parse-tests$(EXEEXT) \
+	tests/gitlab-parse-tests$(EXEEXT) \
 	tests/url-encode$(EXEEXT) \
 	tests/pretty_print_test$(EXEEXT)
 
@@ -223,6 +224,10 @@ tests_json_escape_LDADD = \
 	$(LIBATFC_LDFLAGS)
 
 tests_github_parse_tests_LDADD = \
+	libgcli.la libpdjson.la libsn.la \
+	$(LIBATFC_LDFLAGS)
+
+tests_gitlab_parse_tests_LDADD = \
 	libgcli.la libpdjson.la libsn.la \
 	$(LIBATFC_LDFLAGS)
 

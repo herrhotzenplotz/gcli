@@ -35,5 +35,5 @@ char *
 gitea_make_authheader(gcli_ctx *ctx, char const *token)
 {
 	(void) ctx;
-	return sn_asprintf("Authorization: %s", token);
+	return sn_asprintf("Authorization: token %s", token);
 }

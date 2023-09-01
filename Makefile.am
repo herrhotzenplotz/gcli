@@ -118,12 +118,13 @@ TEMPLATES = \
 	templates/gitlab/snippets.t \
 	templates/gitea/milestones.t
 
-include_HEADERS = include/gcli/gcli.h include/gcli/comments.h	\
-	include/gcli/curl.h include/gcli/forks.h		\
-	include/gcli/issues.h include/gcli/labels.h		\
-	include/gcli/milestones.h include/gcli/pulls.h		\
-	include/gcli/releases.h include/gcli/repos.h		\
-	include/gcli/review.h include/gcli/gitlab/snippets.h	\
+headerdir = $(prefix)
+nobase_header_HEADERS = include/gcli/gcli.h include/gcli/comments.h	\
+	include/gcli/curl.h include/gcli/forks.h			\
+	include/gcli/issues.h include/gcli/labels.h			\
+	include/gcli/milestones.h include/gcli/pulls.h			\
+	include/gcli/releases.h include/gcli/repos.h			\
+	include/gcli/review.h include/gcli/gitlab/snippets.h		\
 	include/gcli/status.h include/gcli/sshkeys.h
 
 libgcli_la_SOURCES = \
@@ -210,6 +211,7 @@ if HAVE_TESTS
 check_PROGRAMS = \
 	tests/json-escape$(EXEEXT) \
 	tests/github-parse-tests$(EXEEXT) \
+	tests/gitlab-parse-tests$(EXEEXT) \
 	tests/url-encode$(EXEEXT) \
 	tests/pretty_print_test$(EXEEXT)
 
@@ -226,6 +228,10 @@ tests_github_parse_tests_LDADD = \
 	libgcli.la libpdjson.la libsn.la \
 	$(LIBATFC_LDFLAGS)
 
+tests_gitlab_parse_tests_LDADD = \
+	libgcli.la libpdjson.la libsn.la \
+	$(LIBATFC_LDFLAGS)
+
 tests_url_encode_LDADD = \
 	libgcli.la libpdjson.la libsn.la \
 	$(LIBATFC_LDFLAGS)
@@ -233,4 +239,12 @@ tests_url_encode_LDADD = \
 tests_pretty_print_test_LDADD = \
 	libsn.la \
 	$(LIBATFC_LDFLAGS)
+
+EXTRA_DIST += tests/samples/github_simple_issue.json	\
+	tests/samples/github_simple_label.json		\
+	tests/samples/github_simple_pull.json		\
+	tests/samples/gitlab_simple_issue.json		\
+	tests/samples/gitlab_simple_label.json		\
+	tests/samples/gitlab_simple_merge_request.json
+
 endif

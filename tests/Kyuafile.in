@@ -12,6 +12,11 @@ atf_test_program{
 }
 
 atf_test_program{
+        name = 'gitlab-parse-tests',
+        required_files = '@TESTSRCDIR@/samples/gitlab_simple_merge_request.json'
+}
+
+atf_test_program{
         name = 'url-encode'
 }
 

@@ -1,0 +1,5 @@
+syntax(2)
+
+test_suite('gcli')
+
+atf_test_program{name='json-escape'}

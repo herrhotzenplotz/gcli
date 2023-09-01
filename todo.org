@@ -123,14 +123,14 @@
 	+ https://api.github.com/repos/zorchenhimer/MovieNight/pulls/156/reviews/611653998/comments
 
 * Big refactor for libraryfication
-** TODO Fix test suite
-   - [ ] Move config stuff to cmd and have callbacks that given the
+** DONE Fix test suite
+   - [X] Move config stuff to cmd and have callbacks that given the
      context give you the account details etc.
 
      This would allow you to create a mock context that returns only
      values that make sense in test contexts.
 
-   - [ ] Add support for a testing gcli context
+   - [X] Add support for a testing gcli context
 ** DONE Check errx calls if they print "error: "
 ** DONE Check for calls to errx in submit routines
 ** TODO [[file:src/github/review.c::github_review_get_reviews(char const *owner)][github_review_get_reviews]] is garbage
@@ -146,3 +146,33 @@
 ** TODO Add a real changelog file
 ** DONE include [[file:docs/pgen.org][docs/pgen.org]] in the distribution tarball
 ** DONE remove gcli_print_html_url
+** TODO Test suite
+*** TODO Github [23%]
+   - [ ] Checks
+   - [ ] Comments
+   - [ ] Forks
+   - [ ] Gists
+   - [ ] Milestones
+   - [ ] Releases
+   - [ ] Repos
+   - [ ] Reviews
+   - [ ] SSH keys
+   - [ ] Status
+   - [X] Issues
+   - [X] Labels
+   - [X] Pulls
+*** TODO Gitlab [25%]
+   - [ ] Comments
+   - [ ] Forks
+   - [ ] Milestones
+   - [ ] Pipelines
+   - [ ] Releases
+   - [ ] Repos
+   - [ ] Reviews
+   - [ ] SSH Keys
+   - [ ] Snippets
+   - [ ] Status
+   - [X] Issues
+   - [X] Labels
+   - [X] Merge Requests
+*** TODO Gitea

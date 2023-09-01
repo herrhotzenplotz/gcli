@@ -44,15 +44,22 @@ Packages that are work-in-progress:
 
 Required dependencies:
 - libcurl
-- pkg-config
 - yacc (System V yacc, Berkeley Yacc or Bison should suffice)
 - lex (flex is preferred)
 - C99 Compiler and linker
 - make
 
+Optional dependencies:
+- pkg-config
+
 If you are building from Git you will also need:
+- m4
 - autoconf
 - automake
+
+The test suite requires:
+- [Kyua](https://github.com/jmmv/kyua)
+- [ATF](https://github.com/jmmv/atf)
 
 ### Compile
 In order to perform a build, do:

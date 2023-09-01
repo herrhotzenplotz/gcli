@@ -99,6 +99,9 @@ to cram it into the LDFLAGS.
 
 ## Tests
 
+The test suite depends on [Kyua](https://github.com/jmmv/kyua) and
+[libatf-c](https://github.com/jmmv/atf).
+
 Before submitting patches please make sure that your changes pass the
 test suite:
 

@@ -116,6 +116,10 @@ AC_CONFIG_FILES([Makefile
 
 dnl Technically only needed if tests are enabled but this doesn't
 dnl hurt.
+TESTSRCDIR="$(realpath ${srcdir}/tests)"
+AC_SUBST([TESTSRCDIR])
+AC_DEFINE_UNQUOTED([TESTSRCDIR], ["$TESTSRCDIR"], [Directory to the test sources])
+
 AC_CONFIG_FILES([tests/Kyuafile])
 
 AC_OUTPUT

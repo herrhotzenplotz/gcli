@@ -8,6 +8,7 @@ AM_CPPFLAGS += -I$(srcdir)
 AM_CPPFLAGS += -DYY_NO_INPUT
 AM_CPPFLAGS += -DYY_NO_UNPUT
 AM_CPPFLAGS += -D_XOPEN_SOURCE=600
+AM_CFLAGS = -Wno-gnu-zero-variadic-macro-arguments
 
 noinst_PROGRAMS = pgen$(EXEEXT)
 pgen_SOURCES = \
@@ -208,20 +209,20 @@ EXTRA_DIST = \
 if HAVE_TESTS
 check_PROGRAMS = \
 	tests/json-escape$(EXEEXT) \
-	tests/pgen-tests$(EXEEXT) \
+	tests/github-parse-tests$(EXEEXT) \
 	tests/url-encode$(EXEEXT) \
 	tests/pretty_print_test$(EXEEXT)
 
-check: $(check_PROGRAMS) tests/Kyuafile libgcli.la gcli libsn.la libpdjson.la do_test
+check: $(check_PROGRAMS) tests/Kyuafile libgcli.la libsn.la libpdjson.la do_test
 
 do_test:
-	(cd tests; kyua test)
+	kyua test -k tests/Kyuafile
 
 tests_json_escape_LDADD = \
 	libgcli.la libpdjson.la libsn.la \
 	$(LIBATFC_LDFLAGS)
 
-tests_pgen_tests_LDADD = \
+tests_github_parse_tests_LDADD = \
 	libgcli.la libpdjson.la libsn.la \
 	$(LIBATFC_LDFLAGS)
 

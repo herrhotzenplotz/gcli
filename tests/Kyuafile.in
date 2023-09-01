@@ -2,4 +2,11 @@ syntax(2)
 
 test_suite('gcli')
 
-atf_test_program{name='json-escape'}
+atf_test_program{
+        name='json-escape'
+}
+
+atf_test_program{
+        name = 'github-parse-tests',
+        required_files = '@TESTSRCDIR@/samples/github_simple_issue.json @TESTSRCDIR@/samples/github_simple_pull.json  @TESTSRCDIR@/samples/github_simple_label.json'
+}

@@ -14,3 +14,7 @@ atf_test_program{
 atf_test_program{
         name = 'url-encode'
 }
+
+atf_test_program{
+        name = 'pretty_print_test'
+}

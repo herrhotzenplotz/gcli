@@ -118,12 +118,13 @@ TEMPLATES = \
 	templates/gitlab/snippets.t \
 	templates/gitea/milestones.t
 
-include_HEADERS = include/gcli/gcli.h include/gcli/comments.h	\
-	include/gcli/curl.h include/gcli/forks.h		\
-	include/gcli/issues.h include/gcli/labels.h		\
-	include/gcli/milestones.h include/gcli/pulls.h		\
-	include/gcli/releases.h include/gcli/repos.h		\
-	include/gcli/review.h include/gcli/gitlab/snippets.h	\
+headerdir = $(prefix)
+nobase_header_HEADERS = include/gcli/gcli.h include/gcli/comments.h	\
+	include/gcli/curl.h include/gcli/forks.h			\
+	include/gcli/issues.h include/gcli/labels.h			\
+	include/gcli/milestones.h include/gcli/pulls.h			\
+	include/gcli/releases.h include/gcli/repos.h			\
+	include/gcli/review.h include/gcli/gitlab/snippets.h		\
 	include/gcli/status.h include/gcli/sshkeys.h
 
 libgcli_la_SOURCES = \

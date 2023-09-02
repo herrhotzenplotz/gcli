@@ -149,7 +149,7 @@
 ** TODO Test suite
 *** TODO Github [53%]
    - [ ] Checks
-   - [ ] Comments
+   - [X] Comments
    - [X] Forks
    - [ ] Gists
    - [X] Milestones
@@ -177,3 +177,4 @@
    - [X] Merge Requests
 *** TODO Gitea
 ** TODO add an ATF macro for comparing string views
+** TODO Think about making IDs =unsigned long=

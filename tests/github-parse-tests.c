@@ -1,3 +1,4 @@
+#include <templates/github/comments.h>
 #include <templates/github/forks.h>
 #include <templates/github/issues.h>
 #include <templates/github/labels.h>
@@ -227,6 +228,25 @@ ATF_TC_BODY(simple_github_fork, tc)
 	ATF_CHECK(fork.forks == 0);
 }
 
+ATF_TC_WITHOUT_HEAD(simple_github_comment);
+ATF_TC_BODY(simple_github_comment, tc)
+{
+	gcli_comment comment = {0};
+	FILE *f;
+	json_stream stream;
+	gcli_ctx *ctx = test_context();
+
+	ATF_REQUIRE(f = open_sample("github_simple_comment.json"));
+	json_open_stream(&stream, f);
+
+	ATF_REQUIRE(parse_github_comment(ctx, &stream, &comment) == 0);
+
+	ATF_CHECK(comment.id == 1424392601);
+	ATF_CHECK_STREQ(comment.author, "herrhotzenplotz");
+	ATF_CHECK_STREQ(comment.date, "2023-02-09T15:37:54Z");
+	ATF_CHECK_STREQ(comment.body, "Hey,\n\nthe current trunk on Github might be a little outdated. I pushed the staging branch for version 1.0.0 from Gitlab to Github (cleanup-1.0). Could you try again with that branch and see if it still faults at the same place? If it does, please provide a full backtrace and if possible check with valgrind.\n");
+}
+
 ATF_TP_ADD_TCS(tp)
 {
 	ATF_TP_ADD_TC(tp, simple_github_issue);
@@ -236,6 +256,7 @@ ATF_TP_ADD_TCS(tp)
 	ATF_TP_ADD_TC(tp, simple_github_release);
 	ATF_TP_ADD_TC(tp, simple_github_repo);
 	ATF_TP_ADD_TC(tp, simple_github_fork);
+	ATF_TP_ADD_TC(tp, simple_github_comment);
 
 	return atf_no_error();
 }

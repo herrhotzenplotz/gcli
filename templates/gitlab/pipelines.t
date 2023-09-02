@@ -29,7 +29,8 @@ object of gitlab_job with
 	 "finished_at" => finished_at as string,
 	 "runner"      => use parse_gitlab_job_runner,
 	 "duration"    => duration as double,
-	 "id"          => id as long);
+	 "id"          => id as long,
+	 "coverage"    => coverage as double);
 
 parser gitlab_jobs is
 array of gitlab_job use parse_gitlab_job;

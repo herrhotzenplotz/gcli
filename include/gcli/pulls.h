@@ -71,7 +71,8 @@ struct gcli_pull {
 	int deletions;
 	int commits;
 	int changed_files;
-	int head_pipeline_id;       /* This is GitLab specific */
+	int head_pipeline_id;       /* GitLab specific */
+	char *coverage;             /* Gitlab Specific */
 	sn_sv *labels;
 	size_t labels_size;
 	bool merged;

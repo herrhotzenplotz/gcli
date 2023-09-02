@@ -3,6 +3,7 @@
 #include <templates/github/milestones.h>
 #include <templates/github/pulls.h>
 #include <templates/github/releases.h>
+#include <templates/github/repos.h>
 
 #include <err.h>
 #include <string.h>
@@ -184,6 +185,28 @@ ATF_TC_BODY(simple_github_release, tc)
 	ATF_CHECK(release.prerelease == false);
 }
 
+ATF_TC_WITHOUT_HEAD(simple_github_repo);
+ATF_TC_BODY(simple_github_repo, tc)
+{
+	gcli_repo repo = {0};
+	FILE *f;
+	json_stream stream;
+	gcli_ctx *ctx = test_context();
+
+	ATF_REQUIRE(f = open_sample("github_simple_repo.json"));
+	json_open_stream(&stream, f);
+
+	ATF_REQUIRE(parse_github_repo(ctx, &stream, &repo) == 0);
+
+	ATF_CHECK(repo.id == 415015197);
+	ATF_CHECK(sn_sv_eq_to(repo.full_name, "herrhotzenplotz/gcli"));
+	ATF_CHECK(sn_sv_eq_to(repo.name, "gcli"));
+	ATF_CHECK(sn_sv_eq_to(repo.owner, "herrhotzenplotz"));
+	ATF_CHECK(sn_sv_eq_to(repo.date, "2021-10-08T14:20:15Z"));
+	ATF_CHECK(sn_sv_eq_to(repo.visibility, "public"));
+	ATF_CHECK(repo.is_fork == false);
+}
+
 ATF_TP_ADD_TCS(tp)
 {
 	ATF_TP_ADD_TC(tp, simple_github_issue);
@@ -191,6 +214,7 @@ ATF_TP_ADD_TCS(tp)
 	ATF_TP_ADD_TC(tp, simple_github_label);
 	ATF_TP_ADD_TC(tp, simple_github_milestone);
 	ATF_TP_ADD_TC(tp, simple_github_release);
+	ATF_TP_ADD_TC(tp, simple_github_repo);
 
 	return atf_no_error();
 }

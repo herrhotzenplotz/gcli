@@ -1,6 +1,7 @@
 #include <templates/github/issues.h>
-#include <templates/github/pulls.h>
 #include <templates/github/labels.h>
+#include <templates/github/milestones.h>
+#include <templates/github/pulls.h>
 
 #include <err.h>
 #include <string.h>
@@ -131,11 +132,37 @@ ATF_TC_BODY(simple_github_label, tc)
 	ATF_CHECK(label.colour == 0xd73a4a00);
 }
 
+ATF_TC_WITHOUT_HEAD(simple_github_milestone);
+ATF_TC_BODY(simple_github_milestone, tc)
+{
+	gcli_milestone milestone = {0};
+	FILE *f;
+	json_stream stream;
+	gcli_ctx *ctx = test_context();
+
+	ATF_REQUIRE(f = open_sample("github_simple_milestone.json"));
+	json_open_stream(&stream, f);
+
+	ATF_REQUIRE(parse_github_milestone(ctx, &stream, &milestone) == 0);
+
+	ATF_CHECK(milestone.id == 1);
+	ATF_CHECK_STREQ(milestone.title, "Gitlab support");
+	ATF_CHECK_STREQ(milestone.state, "open");
+	ATF_CHECK_STREQ(milestone.created_at, "2021-12-14T07:02:05Z");
+	ATF_CHECK_STREQ(milestone.description, "");
+	ATF_CHECK_STREQ(milestone.updated_at, "2021-12-19T14:49:43Z");
+	ATF_CHECK(milestone.due_date == NULL);
+	ATF_CHECK(milestone.expired == false);
+	ATF_CHECK(milestone.open_issues == 0);
+	ATF_CHECK(milestone.closed_issues == 8);
+}
+
 ATF_TP_ADD_TCS(tp)
 {
 	ATF_TP_ADD_TC(tp, simple_github_issue);
 	ATF_TP_ADD_TC(tp, simple_github_pull);
 	ATF_TP_ADD_TC(tp, simple_github_label);
+	ATF_TP_ADD_TC(tp, simple_github_milestone);
 
 	return atf_no_error();
 }

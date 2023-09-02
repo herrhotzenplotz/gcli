@@ -147,10 +147,10 @@
 ** DONE include [[file:docs/pgen.org][docs/pgen.org]] in the distribution tarball
 ** DONE remove gcli_print_html_url
 ** TODO Test suite
-*** TODO Github [46%]
+*** TODO Github [53%]
    - [ ] Checks
    - [ ] Comments
-   - [ ] Forks
+   - [X] Forks
    - [ ] Gists
    - [X] Milestones
    - [X] Releases

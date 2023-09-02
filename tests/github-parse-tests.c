@@ -1,3 +1,4 @@
+#include <templates/github/forks.h>
 #include <templates/github/issues.h>
 #include <templates/github/labels.h>
 #include <templates/github/milestones.h>
@@ -207,6 +208,25 @@ ATF_TC_BODY(simple_github_repo, tc)
 	ATF_CHECK(repo.is_fork == false);
 }
 
+ATF_TC_WITHOUT_HEAD(simple_github_fork);
+ATF_TC_BODY(simple_github_fork, tc)
+{
+	gcli_fork fork = {0};
+	FILE *f;
+	json_stream stream;
+	gcli_ctx *ctx = test_context();
+
+	ATF_REQUIRE(f = open_sample("github_simple_fork.json"));
+	json_open_stream(&stream, f);
+
+	ATF_REQUIRE(parse_github_fork(ctx, &stream, &fork) == 0);
+
+	ATF_CHECK(sn_sv_eq_to(fork.full_name, "gjnoonan/quick-lint-js"));
+	ATF_CHECK(sn_sv_eq_to(fork.owner, "gjnoonan"));
+	ATF_CHECK(sn_sv_eq_to(fork.date, "2023-05-11T05:37:41Z"));
+	ATF_CHECK(fork.forks == 0);
+}
+
 ATF_TP_ADD_TCS(tp)
 {
 	ATF_TP_ADD_TC(tp, simple_github_issue);
@@ -215,6 +235,7 @@ ATF_TP_ADD_TCS(tp)
 	ATF_TP_ADD_TC(tp, simple_github_milestone);
 	ATF_TP_ADD_TC(tp, simple_github_release);
 	ATF_TP_ADD_TC(tp, simple_github_repo);
+	ATF_TP_ADD_TC(tp, simple_github_fork);
 
 	return atf_no_error();
 }

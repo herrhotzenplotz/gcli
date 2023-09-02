@@ -1,6 +1,7 @@
 #include <templates/gitlab/issues.h>
 #include <templates/gitlab/labels.h>
 #include <templates/gitlab/merge_requests.h>
+#include <templates/gitlab/releases.h>
 
 #include <err.h>
 #include <string.h>
@@ -119,10 +120,61 @@ ATF_TC_BODY(gitlab_simple_label, tc)
 	ATF_CHECK(label.colour == 0xD73A4A00);
 }
 
+ATF_TC_WITHOUT_HEAD(gitlab_simple_release);
+ATF_TC_BODY(gitlab_simple_release, tc)
+{
+	json_stream stream = {0};
+	gcli_ctx *ctx = test_context();
+	FILE *f = open_sample("gitlab_simple_release.json");
+	gcli_release release = {0};
+
+	json_open_stream(&stream, f);
+	ATF_REQUIRE(parse_gitlab_release(ctx, &stream, &release) == 0);
+
+	/* NOTE(Nico): this silly hack is needed as the fixup is only
+	 * applied internally when you fetch the release list using the
+	 * public library API. */
+	gitlab_fixup_release_assets(ctx, &release);
+
+	/* NOTE(Nico): on gitlab this is the tag name */
+	ATF_CHECK(sn_sv_eq_to(release.id, "1.2.0"));
+	ATF_CHECK(release.assets_size == 4);
+	{
+		ATF_CHECK_STREQ(release.assets[0].name, "gcli-1.2.0.zip");
+		ATF_CHECK_STREQ(release.assets[0].url,
+		                "https://gitlab.com/herrhotzenplotz/gcli/-/archive/1.2.0/gcli-1.2.0.zip");
+	}
+	{
+		ATF_CHECK_STREQ(release.assets[1].name, "gcli-1.2.0.tar.gz");
+		ATF_CHECK_STREQ(release.assets[1].url,
+		                "https://gitlab.com/herrhotzenplotz/gcli/-/archive/1.2.0/gcli-1.2.0.tar.gz");
+	}
+	{
+		ATF_CHECK_STREQ(release.assets[2].name, "gcli-1.2.0.tar.bz2");
+		ATF_CHECK_STREQ(release.assets[2].url,
+		                "https://gitlab.com/herrhotzenplotz/gcli/-/archive/1.2.0/gcli-1.2.0.tar.bz2");
+	}
+	{
+		ATF_CHECK_STREQ(release.assets[3].name, "gcli-1.2.0.tar");
+		ATF_CHECK_STREQ(release.assets[3].url,
+		                "https://gitlab.com/herrhotzenplotz/gcli/-/archive/1.2.0/gcli-1.2.0.tar");
+	}
+
+	ATF_CHECK(sn_sv_eq_to(release.name, "1.2.0"));
+	ATF_CHECK(sn_sv_eq_to(release.body, "# Version 1.2.0\n\nThis is version 1.2.0 of gcli.\n\n## Notes\n\nPlease test and report bugs.\n\nYou can download autotoolized tarballs at: https://herrhotzenplotz.de/gcli/releases/gcli-1.2.0/\n\n## Bug Fixes\n\n- Fix compile error when providing --with-libcurl without any arguments\n- Fix memory leaks in string processing functions\n- Fix missing nul termination in read-file function\n- Fix segmentation fault when clearing the milestone of a PR on Gitea\n- Fix missing documentation for milestone action in issues and pulls\n- Set the 'merged' flag properly when showing Gitlab merge requests\n\n## New features\n\n- Add a config subcommand for managing ssh keys (see gcli-config(1))\n- Show number of comments/notes in list of issues and PRs\n- Add support for milestone management in pull requests\n"));
+	ATF_CHECK(sn_sv_eq_to(release.author, "herrhotzenplotz"));
+	ATF_CHECK(sn_sv_eq_to(release.date, "2023-08-11T07:56:06.371Z"));
+	ATF_CHECK(sn_sv_null(release.upload_url));
+	ATF_CHECK(release.draft == false);
+	ATF_CHECK(release.prerelease == false);
+}
+
 ATF_TP_ADD_TCS(tp)
 {
-	ATF_TP_ADD_TC(tp, gitlab_simple_merge_request);
 	ATF_TP_ADD_TC(tp, gitlab_simple_issue);
 	ATF_TP_ADD_TC(tp, gitlab_simple_label);
+	ATF_TP_ADD_TC(tp, gitlab_simple_merge_request);
+	ATF_TP_ADD_TC(tp, gitlab_simple_release);
+
 	return atf_no_error();
 }

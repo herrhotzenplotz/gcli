@@ -6,7 +6,8 @@ object of gcli_pull with
 
 parser gitlab_mr_head_pipeline is
 object of gcli_pull with
-	("id" => head_pipeline_id as int);
+	("id"       => head_pipeline_id as int,
+	 "coverage" => coverage as string);
 
 parser gitlab_mr is
 object of gcli_pull with

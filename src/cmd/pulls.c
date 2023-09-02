@@ -202,6 +202,9 @@ gcli_pull_print(gcli_pull const *const it)
 	if ((quirks & GCLI_PRS_QUIRK_DRAFT) == 0)
 		gcli_dict_add_string(dict, "DRAFT", 0, 0, sn_bool_yesno(it->draft));
 
+	if ((quirks & GCLI_PRS_QUIRK_COVERAGE) == 0 && it->coverage)
+		gcli_dict_add_string(dict, "COVERAGE", 0, 0, it->coverage);
+
 	if (it->labels_size) {
 		gcli_dict_add_sv_list(dict, "LABELS", it->labels, it->labels_size);
 	} else {

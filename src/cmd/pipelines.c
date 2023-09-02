@@ -203,6 +203,7 @@ gitlab_print_job_status(gitlab_job const *const job)
 	gcli_dict_add_string(printer, "STARTED", 0, 0, job->started_at);
 	gcli_dict_add_string(printer, "FINISHED", 0, 0, job->finished_at);
 	gcli_dict_add(printer,        "DURATION", 0, 0, "%-.2lfs", job->duration);
+	gcli_dict_add(printer,        "COVERAGE", 0, 0, "%.1lf%%", job->coverage);
 	gcli_dict_add_string(printer, "RUNNER NAME", 0, 0, job->runner_name);
 	gcli_dict_add_string(printer, "RUNNER DESCR", 0, 0, job->runner_description);
 

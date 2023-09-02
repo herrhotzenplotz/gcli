@@ -241,6 +241,7 @@ tests_pretty_print_test_LDADD = \
 	$(LIBATFC_LDFLAGS)
 
 EXTRA_DIST += tests/samples/github_simple_comment.json	\
+	tests/samples/github_simple_check.json          \
 	tests/samples/github_simple_fork.json		\
 	tests/samples/github_simple_label.json		\
 	tests/samples/github_simple_milestone.json	\

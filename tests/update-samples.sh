@@ -16,6 +16,7 @@ gcli -t github api /repos/herrhotzenplotz/gcli/releases/116031718 > samples/gith
 gcli -t github api /repos/herrhotzenplotz/gcli > samples/github_simple_repo.json
 gcli -t github api /repos/quick-lint/quick-lint-js/forks | jq '.[] | select(.id == 639263592)' > samples/github_simple_fork.json
 gcli -t github api /repos/herrhotzenplotz/gcli/issues/comments/1424392601 > samples/github_simple_comment.json
+gcli -t github api /repos/quick-lint/quick-lint-js/commits/03a8af3dab144ea38910c1efdcce03fb708f3179/check-runs | jq '.check_runs | .[] | select(.id == 16437184455)' > samples/github_simple_check.json
 
 gcli -t gitlab api /projects/herrhotzenplotz%2Fgcli/merge_requests/216 > samples/gitlab_simple_merge_request.json
 gcli -t gitlab api /projects/herrhotzenplotz%2Fgcli/issues/193 > samples/gitlab_simple_issue.json

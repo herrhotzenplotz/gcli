@@ -1,3 +1,4 @@
+#include <templates/github/checks.h>
 #include <templates/github/comments.h>
 #include <templates/github/forks.h>
 #include <templates/github/issues.h>
@@ -247,6 +248,27 @@ ATF_TC_BODY(simple_github_comment, tc)
 	ATF_CHECK_STREQ(comment.body, "Hey,\n\nthe current trunk on Github might be a little outdated. I pushed the staging branch for version 1.0.0 from Gitlab to Github (cleanup-1.0). Could you try again with that branch and see if it still faults at the same place? If it does, please provide a full backtrace and if possible check with valgrind.\n");
 }
 
+ATF_TC_WITHOUT_HEAD(simple_github_check);
+ATF_TC_BODY(simple_github_check, tc)
+{
+    gcli_github_check check = {0};
+	FILE *f;
+	json_stream stream;
+	gcli_ctx *ctx = test_context();
+
+	ATF_REQUIRE(f = open_sample("github_simple_check.json"));
+	json_open_stream(&stream, f);
+
+	ATF_REQUIRE(parse_github_check(ctx, &stream, &check) == 0);
+
+	ATF_CHECK_STREQ(check.name, "test Windows x86");
+	ATF_CHECK_STREQ(check.status, "completed");
+	ATF_CHECK_STREQ(check.conclusion, "success");
+	ATF_CHECK_STREQ(check.started_at, "2023-09-02T06:27:37Z");
+	ATF_CHECK_STREQ(check.completed_at, "2023-09-02T06:29:11Z");
+	ATF_CHECK(check.id == 16437184455);
+}
+
 ATF_TP_ADD_TCS(tp)
 {
 	ATF_TP_ADD_TC(tp, simple_github_issue);
@@ -257,6 +279,7 @@ ATF_TP_ADD_TCS(tp)
 	ATF_TP_ADD_TC(tp, simple_github_repo);
 	ATF_TP_ADD_TC(tp, simple_github_fork);
 	ATF_TP_ADD_TC(tp, simple_github_comment);
+	ATF_TP_ADD_TC(tp, simple_github_check);
 
 	return atf_no_error();
 }

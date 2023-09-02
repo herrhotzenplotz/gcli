@@ -12,5 +12,5 @@ gcli -t github api /repos/herrhotzenplotz/gcli/labels/bug > samples/github_simpl
 gcli -t github api /repos/herrhotzenplotz/gcli/pulls/113 > samples/github_simple_pull.json
 
 gcli -t gitlab api /projects/herrhotzenplotz%2Fgcli/merge_requests/216 > samples/gitlab_simple_merge_request.json
-gcli -t gitlab api /projects/herrhotzenplotz%2Fgcli/issues/152 > tests/samples/gitlab_simple_issue.json
-gcli -t gitlab api /projects/herrhotzenplotz%2Fgcli/labels/24376073 > tests/samples/gitlab_simple_label.json
+gcli -t gitlab api /projects/herrhotzenplotz%2Fgcli/issues/193 > samples/gitlab_simple_issue.json
+gcli -t gitlab api /projects/herrhotzenplotz%2Fgcli/labels/24376073 > samples/gitlab_simple_label.json

@@ -240,11 +240,17 @@ tests_pretty_print_test_LDADD = \
 	libsn.la \
 	$(LIBATFC_LDFLAGS)
 
-EXTRA_DIST += tests/samples/github_simple_issue.json	\
+EXTRA_DIST += tests/samples/github_simple_comment.json	\
+	tests/samples/github_simple_check.json          \
+	tests/samples/github_simple_fork.json		\
 	tests/samples/github_simple_label.json		\
+	tests/samples/github_simple_milestone.json	\
 	tests/samples/github_simple_pull.json		\
+	tests/samples/github_simple_release.json	\
+	tests/samples/github_simple_repo.json		\
 	tests/samples/gitlab_simple_issue.json		\
 	tests/samples/gitlab_simple_label.json		\
-	tests/samples/gitlab_simple_merge_request.json
+	tests/samples/gitlab_simple_merge_request.json	\
+	tests/samples/github_simple_issue.json
 
 endif

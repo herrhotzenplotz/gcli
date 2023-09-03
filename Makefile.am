@@ -256,6 +256,7 @@ EXTRA_DIST += tests/samples/github_simple_comment.json	\
 	tests/samples/gitlab_simple_milestone.json	\
 	tests/samples/gitlab_simple_pipeline.json	\
 	tests/samples/gitlab_simple_release.json	\
+	tests/samples/gitlab_simple_repo.json		\
 	tests/samples/github_simple_check.json
 
 endif

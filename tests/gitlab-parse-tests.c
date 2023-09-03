@@ -5,6 +5,7 @@
 #include <templates/gitlab/milestones.h>
 #include <templates/gitlab/pipelines.h>
 #include <templates/gitlab/releases.h>
+#include <templates/gitlab/repos.h>
 
 #include <err.h>
 #include <string.h>
@@ -234,6 +235,26 @@ ATF_TC_BODY(gitlab_simple_pipeline, tc)
 	ATF_CHECK_STREQ(pipeline.source, "merge_request_event");
 }
 
+ATF_TC_WITHOUT_HEAD(gitlab_simple_repo);
+ATF_TC_BODY(gitlab_simple_repo, tc)
+{
+	json_stream stream = {0};
+	gcli_ctx *ctx = test_context();
+	FILE *f = open_sample("gitlab_simple_repo.json");
+	gcli_repo repo = {0};
+
+	json_open_stream(&stream, f);
+	ATF_REQUIRE(parse_gitlab_repo(ctx, &stream, &repo) == 0);
+
+	ATF_CHECK(repo.id == 34707535);
+	ATF_CHECK(sn_sv_eq_to(repo.full_name, "herrhotzenplotz/gcli"));
+	ATF_CHECK(sn_sv_eq_to(repo.name, "gcli"));
+	ATF_CHECK(sn_sv_eq_to(repo.owner, "herrhotzenplotz"));
+	ATF_CHECK(sn_sv_eq_to(repo.date, "2022-03-22T16:57:59.891Z"));
+	ATF_CHECK(sn_sv_eq_to(repo.visibility, "public"));
+	ATF_CHECK(repo.is_fork == false);
+}
+
 ATF_TP_ADD_TCS(tp)
 {
 	ATF_TP_ADD_TC(tp, gitlab_simple_fork);
@@ -243,6 +264,7 @@ ATF_TP_ADD_TCS(tp)
 	ATF_TP_ADD_TC(tp, gitlab_simple_milestone);
 	ATF_TP_ADD_TC(tp, gitlab_simple_pipeline);
 	ATF_TP_ADD_TC(tp, gitlab_simple_release);
+	ATF_TP_ADD_TC(tp, gitlab_simple_repo);
 
 	return atf_no_error();
 }

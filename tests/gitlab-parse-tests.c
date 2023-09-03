@@ -3,6 +3,7 @@
 #include <templates/gitlab/labels.h>
 #include <templates/gitlab/merge_requests.h>
 #include <templates/gitlab/milestones.h>
+#include <templates/gitlab/pipelines.h>
 #include <templates/gitlab/releases.h>
 
 #include <err.h>
@@ -213,6 +214,26 @@ ATF_TC_BODY(gitlab_simple_milestone, tc)
 	 * github/gitea-specific */
 }
 
+ATF_TC_WITHOUT_HEAD(gitlab_simple_pipeline);
+ATF_TC_BODY(gitlab_simple_pipeline, tc)
+{
+	json_stream stream = {0};
+	gcli_ctx *ctx = test_context();
+	FILE *f = open_sample("gitlab_simple_pipeline.json");
+	gitlab_pipeline pipeline = {0};
+
+	json_open_stream(&stream, f);
+	ATF_REQUIRE(parse_gitlab_pipeline(ctx, &stream, &pipeline) == 0);
+
+	ATF_CHECK(pipeline.id == 989897020);
+	ATF_CHECK_STREQ(pipeline.status, "failed");
+	ATF_CHECK_STREQ(pipeline.created_at, "2023-09-02T14:30:20.925Z");
+	ATF_CHECK_STREQ(pipeline.updated_at, "2023-09-02T14:31:40.328Z");
+	ATF_CHECK_STREQ(pipeline.ref, "refs/merge-requests/219/head");
+	ATF_CHECK_STREQ(pipeline.sha, "742affb88a297a6b34201ad61c8b5b72ec6eb679");
+	ATF_CHECK_STREQ(pipeline.source, "merge_request_event");
+}
+
 ATF_TP_ADD_TCS(tp)
 {
 	ATF_TP_ADD_TC(tp, gitlab_simple_fork);
@@ -220,6 +241,7 @@ ATF_TP_ADD_TCS(tp)
 	ATF_TP_ADD_TC(tp, gitlab_simple_label);
 	ATF_TP_ADD_TC(tp, gitlab_simple_merge_request);
 	ATF_TP_ADD_TC(tp, gitlab_simple_milestone);
+	ATF_TP_ADD_TC(tp, gitlab_simple_pipeline);
 	ATF_TP_ADD_TC(tp, gitlab_simple_release);
 
 	return atf_no_error();

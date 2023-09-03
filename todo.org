@@ -161,11 +161,11 @@
    - [X] Issues
    - [X] Labels
    - [X] Pulls
-*** TODO Gitlab [46%]
+*** TODO Gitlab [53%]
    - [ ] Comments
    - [X] Forks
    - [X] Milestones
-   - [ ] Pipelines
+   - [X] Pipelines
    - [X] Releases
    - [ ] Repos
    - [ ] Reviews

@@ -41,7 +41,7 @@
 #include <templates/gitlab/snippets.h>
 
 void
-gcli_snippets_free(gcli_snippet_list *const list)
+gcli_snippets_free(gcli_gitlab_snippet_list *const list)
 {
 	for (size_t i = 0; i < list->snippets_size; ++i) {
 		free(list->snippets[i].title);
@@ -59,7 +59,7 @@ gcli_snippets_free(gcli_snippet_list *const list)
 }
 
 int
-gcli_snippets_get(gcli_ctx *ctx, int const max, gcli_snippet_list *const out)
+gcli_snippets_get(gcli_ctx *ctx, int const max, gcli_gitlab_snippet_list *const out)
 {
 	char *url = NULL;
 
@@ -70,7 +70,7 @@ gcli_snippets_get(gcli_ctx *ctx, int const max, gcli_snippet_list *const out)
 		.parse = (parsefn)(parse_gitlab_snippets),
 	};
 
-	*out = (gcli_snippet_list) {0};
+	*out = (gcli_gitlab_snippet_list) {0};
 	url = sn_asprintf("%s/snippets", gcli_get_apibase(ctx));
 
 	return gcli_fetch_list(ctx, url, &fl);

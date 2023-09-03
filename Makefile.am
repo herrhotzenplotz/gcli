@@ -241,7 +241,9 @@ tests_pretty_print_test_LDADD = \
 	$(LIBATFC_LDFLAGS)
 
 EXTRA_DIST += tests/samples/github_simple_check.json	\
+	tests/samples/github_simple_comment.json	\
 	tests/samples/github_simple_fork.json		\
+	tests/samples/github_simple_issue.json		\
 	tests/samples/github_simple_issue.json		\
 	tests/samples/github_simple_label.json		\
 	tests/samples/github_simple_milestone.json	\
@@ -252,7 +254,7 @@ EXTRA_DIST += tests/samples/github_simple_check.json	\
 	tests/samples/gitlab_simple_fork.json		\
 	tests/samples/gitlab_simple_label.json		\
 	tests/samples/gitlab_simple_merge_request.json	\
-	tests/samples/gitlab_simple_release.json	\
-	tests/samples/github_simple_comment.json
+	tests/samples/gitlab_simple_milestone.json	\
+	tests/samples/gitlab_simple_release.json
 
 endif

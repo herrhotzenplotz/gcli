@@ -23,3 +23,4 @@ gcli -t gitlab api /projects/herrhotzenplotz%2Fgcli/labels/24376073 > samples/gi
 gcli -t gitlab api /projects/herrhotzenplotz%2Fgcli/merge_requests/216 > samples/gitlab_simple_merge_request.json
 gcli -t gitlab api /projects/herrhotzenplotz%2Fgcli/releases/1.2.0 > samples/gitlab_simple_release.json
 gcli -t gitlab api /projects/herrhotzenplotz%2Fgcli/forks | jq '.[] | select(.id == 39885442)' > samples/gitlab_simple_fork.json
+gcli -t gitlab api /projects/herrhotzenplotz%2Fgcli/milestones/2975318 > samples/gitlab_simple_milestone.json

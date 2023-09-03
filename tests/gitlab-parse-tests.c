@@ -2,6 +2,7 @@
 #include <templates/gitlab/issues.h>
 #include <templates/gitlab/labels.h>
 #include <templates/gitlab/merge_requests.h>
+#include <templates/gitlab/milestones.h>
 #include <templates/gitlab/releases.h>
 
 #include <err.h>
@@ -187,13 +188,39 @@ ATF_TC_BODY(gitlab_simple_fork, tc)
 	ATF_CHECK(fork.forks == 0);
 }
 
+ATF_TC_WITHOUT_HEAD(gitlab_simple_milestone);
+ATF_TC_BODY(gitlab_simple_milestone, tc)
+{
+	json_stream stream = {0};
+	gcli_ctx *ctx = test_context();
+	FILE *f = open_sample("gitlab_simple_milestone.json");
+	gcli_milestone milestone = {0};
+
+	json_open_stream(&stream, f);
+	ATF_REQUIRE(parse_gitlab_milestone(ctx, &stream, &milestone) == 0);
+
+	ATF_CHECK(milestone.id == 2975318);
+	ATF_CHECK_STREQ(milestone.title, "Version 2");
+	ATF_CHECK_STREQ(milestone.state, "active");
+	ATF_CHECK_STREQ(milestone.description,
+	                "Things that need to be done for version 2");
+	ATF_CHECK_STREQ(milestone.created_at, "2023-02-05T19:08:20.379Z");
+	ATF_CHECK_STREQ(milestone.due_date, "<empty>");
+	ATF_CHECK_STREQ(milestone.updated_at, "2023-02-05T19:08:20.379Z");
+	ATF_CHECK(milestone.expired == false);
+
+	/* Ignore open issues and closed issues as they are
+	 * github/gitea-specific */
+}
+
 ATF_TP_ADD_TCS(tp)
 {
+	ATF_TP_ADD_TC(tp, gitlab_simple_fork);
 	ATF_TP_ADD_TC(tp, gitlab_simple_issue);
 	ATF_TP_ADD_TC(tp, gitlab_simple_label);
 	ATF_TP_ADD_TC(tp, gitlab_simple_merge_request);
+	ATF_TP_ADD_TC(tp, gitlab_simple_milestone);
 	ATF_TP_ADD_TC(tp, gitlab_simple_release);
-	ATF_TP_ADD_TC(tp, gitlab_simple_fork);
 
 	return atf_no_error();
 }

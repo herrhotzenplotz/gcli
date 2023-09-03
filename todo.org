@@ -161,10 +161,10 @@
    - [X] Issues
    - [X] Labels
    - [X] Pulls
-*** TODO Gitlab [30%]
+*** TODO Gitlab [46%]
    - [ ] Comments
    - [X] Forks
-   - [ ] Milestones
+   - [X] Milestones
    - [ ] Pipelines
    - [X] Releases
    - [ ] Repos

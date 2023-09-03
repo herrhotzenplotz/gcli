@@ -1,3 +1,4 @@
+#include <templates/gitlab/forks.h>
 #include <templates/gitlab/issues.h>
 #include <templates/gitlab/labels.h>
 #include <templates/gitlab/merge_requests.h>
@@ -169,12 +170,30 @@ ATF_TC_BODY(gitlab_simple_release, tc)
 	ATF_CHECK(release.prerelease == false);
 }
 
+ATF_TC_WITHOUT_HEAD(gitlab_simple_fork);
+ATF_TC_BODY(gitlab_simple_fork, tc)
+{
+	json_stream stream = {0};
+	gcli_ctx *ctx = test_context();
+	FILE *f = open_sample("gitlab_simple_fork.json");
+	gcli_fork fork = {0};
+
+	json_open_stream(&stream, f);
+	ATF_REQUIRE(parse_gitlab_fork(ctx, &stream, &fork) == 0);
+
+	ATF_CHECK(sn_sv_eq_to(fork.full_name, "gjnoonan/gcli"));
+	ATF_CHECK(sn_sv_eq_to(fork.owner, "gjnoonan"));
+	ATF_CHECK(sn_sv_eq_to(fork.date, "2022-10-02T13:54:20.517Z"));
+	ATF_CHECK(fork.forks == 0);
+}
+
 ATF_TP_ADD_TCS(tp)
 {
 	ATF_TP_ADD_TC(tp, gitlab_simple_issue);
 	ATF_TP_ADD_TC(tp, gitlab_simple_label);
 	ATF_TP_ADD_TC(tp, gitlab_simple_merge_request);
 	ATF_TP_ADD_TC(tp, gitlab_simple_release);
+	ATF_TP_ADD_TC(tp, gitlab_simple_fork);
 
 	return atf_no_error();
 }

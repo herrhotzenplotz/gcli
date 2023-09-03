@@ -249,6 +249,7 @@ EXTRA_DIST += tests/samples/github_simple_check.json	\
 	tests/samples/github_simple_release.json	\
 	tests/samples/github_simple_repo.json		\
 	tests/samples/gitlab_simple_issue.json		\
+	tests/samples/gitlab_simple_fork.json		\
 	tests/samples/gitlab_simple_label.json		\
 	tests/samples/gitlab_simple_merge_request.json	\
 	tests/samples/gitlab_simple_release.json	\

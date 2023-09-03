@@ -6,6 +6,7 @@
 #include <templates/gitlab/pipelines.h>
 #include <templates/gitlab/releases.h>
 #include <templates/gitlab/repos.h>
+#include <templates/gitlab/snippets.h>
 
 #include <err.h>
 #include <string.h>
@@ -255,6 +256,26 @@ ATF_TC_BODY(gitlab_simple_repo, tc)
 	ATF_CHECK(repo.is_fork == false);
 }
 
+ATF_TC_WITHOUT_HEAD(gitlab_simple_snippet);
+ATF_TC_BODY(gitlab_simple_snippet, tc)
+{
+	json_stream stream = {0};
+	gcli_ctx *ctx = test_context();
+	FILE *f = open_sample("gitlab_simple_snippet.json");
+	gcli_gitlab_snippet snippet = {0};
+
+	json_open_stream(&stream, f);
+	ATF_REQUIRE(parse_gitlab_snippet(ctx, &stream, &snippet) == 0);
+
+	ATF_CHECK(snippet.id == 2141655);
+	ATF_CHECK_STREQ(snippet.title, "darcy-weisbach SPARC64");
+	ATF_CHECK_STREQ(snippet.filename, "darcy-weisbach SPARC64");
+	ATF_CHECK_STREQ(snippet.date, "2021-06-28T15:47:36.214Z");
+	ATF_CHECK_STREQ(snippet.author, "herrhotzenplotz");
+	ATF_CHECK_STREQ(snippet.visibility, "public");
+	ATF_CHECK_STREQ(snippet.raw_url, "https://gitlab.com/-/snippets/2141655/raw");
+}
+
 ATF_TP_ADD_TCS(tp)
 {
 	ATF_TP_ADD_TC(tp, gitlab_simple_fork);
@@ -265,6 +286,7 @@ ATF_TP_ADD_TCS(tp)
 	ATF_TP_ADD_TC(tp, gitlab_simple_pipeline);
 	ATF_TP_ADD_TC(tp, gitlab_simple_release);
 	ATF_TP_ADD_TC(tp, gitlab_simple_repo);
+	ATF_TP_ADD_TC(tp, gitlab_simple_snippet);
 
 	return atf_no_error();
 }

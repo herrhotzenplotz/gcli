@@ -170,7 +170,7 @@
    - [X] Repos
    - [ ] Reviews
    - [ ] SSH Keys
-   - [ ] Snippets
+   - [X] Snippets
    - [ ] Status
    - [X] Issues
    - [X] Labels

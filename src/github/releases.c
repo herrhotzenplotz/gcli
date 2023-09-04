@@ -182,8 +182,6 @@ github_create_release(gcli_ctx *ctx, gcli_new_release const *release)
 
 	github_parse_single_release(ctx, buffer, &response);
 
-	printf("INFO : Release at "SV_FMT"\n", SV_ARGS(response.html_url));
-
     rc = github_get_upload_url(ctx, &response, &upload_url);
 	if (rc < 0)
 		goto out;

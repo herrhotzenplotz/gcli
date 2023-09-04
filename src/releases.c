@@ -51,7 +51,6 @@ gcli_free_releases(gcli_release_list *const list)
 		free(list->releases[i].author.data);
 		free(list->releases[i].date.data);
 		free(list->releases[i].upload_url.data);
-		free(list->releases[i].html_url.data);
 
 		for (size_t j = 0; j < list->releases[i].assets_size; ++j) {
 			free(list->releases[i].assets[j].name);

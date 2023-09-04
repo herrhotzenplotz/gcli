@@ -209,7 +209,6 @@ ATF_TC_BODY(simple_github_release, tc)
 	ATF_CHECK_SV_EQTO(release.author, "herrhotzenplotz");
 	ATF_CHECK_SV_EQTO(release.date, "2023-08-11T07:42:37Z");
 	ATF_CHECK_SV_EQTO(release.upload_url, "https://uploads.github.com/repos/herrhotzenplotz/gcli/releases/116031718/assets{?name,label}");
-	ATF_CHECK_SV_EQTO(release.html_url, "https://github.com/herrhotzenplotz/gcli/releases/tag/1.2.0");
 	ATF_CHECK(release.draft == false);
 	ATF_CHECK(release.prerelease == false);
 }

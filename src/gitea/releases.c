@@ -128,8 +128,6 @@ gitea_create_release(gcli_ctx *ctx, gcli_new_release const *release)
 
 	gitea_parse_release(ctx, &buffer, &response);
 
-	printf("INFO : Release at "SV_FMT"\n", SV_ARGS(response.html_url));
-
 	upload_url = sn_asprintf("%s/repos/%s/%s/releases/"SV_FMT"/assets",
 	                         gcli_get_apibase(ctx), e_owner, e_repo,
 	                         SV_ARGS(response.id));

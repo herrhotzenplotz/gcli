@@ -492,11 +492,6 @@ struct gcli_forge_descriptor {
 	 * A key in the user json object sent by the API that represents
 	 * the user name */
 	char const *user_object_key;
-
-	/**
-	 * A key in responses by the API that represents the URL for the
-	 * object being operated on */
-	char const *html_url_key;
 };
 
 gcli_forge_descriptor const *gcli_forge(gcli_ctx *ctx);

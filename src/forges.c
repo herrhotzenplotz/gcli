@@ -137,7 +137,6 @@ github_forge_descriptor =
 	.make_authheader           = github_make_authheader,
 	.get_api_error_string      = github_api_error_string,
 	.user_object_key           = "login",
-	.html_url_key              = "html_url",
 	.pull_summary_quirks       = GCLI_PRS_QUIRK_COVERAGE,
 	.milestone_quirks          = GCLI_MILESTONE_QUIRKS_EXPIRED
 	                           | GCLI_MILESTONE_QUIRKS_DUEDATE
@@ -199,7 +198,6 @@ gitlab_forge_descriptor =
 	.delete_sshkey             = gitlab_delete_sshkey,
 	.get_api_error_string      = gitlab_api_error_string,
 	.user_object_key           = "username",
-	.html_url_key              = "web_url",
 	.pull_summary_quirks       = GCLI_PRS_QUIRK_ADDDEL
 	                           | GCLI_PRS_QUIRK_COMMITS
 	                           | GCLI_PRS_QUIRK_CHANGES
@@ -262,7 +260,6 @@ gitea_forge_descriptor =
 	.make_authheader           = gitea_make_authheader,
 	.get_api_error_string      = github_api_error_string,    /* hack! */
 	.user_object_key           = "username",
-	.html_url_key              = "web_url",
 	.pull_summary_quirks       = GCLI_PRS_QUIRK_COMMITS
 	                           | GCLI_PRS_QUIRK_ADDDEL
 	                           | GCLI_PRS_QUIRK_DRAFT

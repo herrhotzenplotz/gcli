@@ -57,7 +57,6 @@ struct gcli_release {
 	sn_sv               author;
 	sn_sv               date;
 	sn_sv               upload_url;
-	sn_sv               html_url;
 	bool                draft;
 	bool                prerelease;
 };

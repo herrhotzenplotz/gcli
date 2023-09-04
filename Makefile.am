@@ -215,6 +215,9 @@ check_PROGRAMS = \
 	tests/url-encode$(EXEEXT) \
 	tests/pretty_print_test$(EXEEXT)
 
+$(check_PROGRAMS): tests/gcli_tests.h
+
+EXTRA_DIST += tests/gcli_tests.h
 check: $(check_PROGRAMS) tests/Kyuafile libgcli.la libsn.la libpdjson.la do_test
 
 do_test:

@@ -1,3 +1,32 @@
+/*
+ * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided
+ * with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include <templates/github/checks.h>
 #include <templates/github/comments.h>
 #include <templates/github/forks.h>
@@ -13,9 +42,7 @@
 
 #include <gcli/ctx.h>
 
-#include <atf-c.h>
-
-#include <config.h>
+#include "gcli_tests.h"
 
 static gcli_forge_type
 get_github_forge_type(gcli_ctx *ctx)
@@ -58,19 +85,18 @@ ATF_TC_BODY(simple_github_issue, tc)
 	ATF_REQUIRE(parse_github_issue(ctx, &stream, &issue) == 0);
 
 	ATF_CHECK(issue.number = 115);
-	ATF_CHECK(sn_sv_eq_to(issue.title, "consider removing FILE *out from printing functions"));
-	ATF_CHECK(sn_sv_eq_to(issue.created_at, "2022-03-22T16:06:10Z"));
-	ATF_CHECK(sn_sv_eq_to(issue.author, "herrhotzenplotz"));
-	ATF_CHECK(sn_sv_eq_to(issue.state, "closed"));
+	ATF_CHECK_SV_EQTO(issue.title, "consider removing FILE *out from printing functions");
+	ATF_CHECK_SV_EQTO(issue.created_at, "2022-03-22T16:06:10Z");
+	ATF_CHECK_SV_EQTO(issue.author, "herrhotzenplotz");
+	ATF_CHECK_SV_EQTO(issue.state, "closed");
 	ATF_CHECK(issue.comments == 0);
 	ATF_CHECK(issue.locked == false);
 
-	ATF_CHECK(sn_sv_eq_to(
-		          issue.body,
+	ATF_CHECK_SV_EQTO(issue.body,
 		          "We use these functions with ghcli only anyways. In "
 		          "the GUI stuff we use the datastructures returned by "
 		          "the api directly. And If we output, it is stdout "
-		          "everywhere.\n"));
+		          "everywhere.\n");
 
 	ATF_CHECK(issue.labels_size == 0);
 	ATF_CHECK(issue.labels == NULL);
@@ -175,15 +201,15 @@ ATF_TC_BODY(simple_github_release, tc)
 
 	ATF_REQUIRE(parse_github_release(ctx, &stream, &release) == 0);
 
-	ATF_CHECK(sn_sv_eq_to(release.id, "116031718"));
+	ATF_CHECK_SV_EQTO(release.id, "116031718");
 	ATF_CHECK(release.assets_size == 0);
 	ATF_CHECK(release.assets == NULL);
-	ATF_CHECK(sn_sv_eq_to(release.name, "1.2.0"));
-	ATF_CHECK(sn_sv_eq_to(release.body, "# Version 1.2.0\n\nThis is version 1.2.0 of gcli.\n\n## Notes\n\nPlease test and report bugs.\n\nYou can download autotoolized tarballs at: https://herrhotzenplotz.de/gcli/releases/gcli-1.2.0/\n\n## Bug Fixes\n\n- Fix compile error when providing --with-libcurl without any arguments\n- Fix memory leaks in string processing functions\n- Fix missing nul termination in read-file function\n- Fix segmentation fault when clearing the milestone of a PR on Gitea\n- Fix missing documentation for milestone action in issues and pulls\n- Set the 'merged' flag properly when showing Gitlab merge requests\n\n## New features\n\n- Add a config subcommand for managing ssh keys (see gcli-config(1))\n- Show number of comments/notes in list of issues and PRs\n- Add support for milestone management in pull requests\n"));
-	ATF_CHECK(sn_sv_eq_to(release.author, "herrhotzenplotz"));
-	ATF_CHECK(sn_sv_eq_to(release.date, "2023-08-11T07:42:37Z"));
-	ATF_CHECK(sn_sv_eq_to(release.upload_url, "https://uploads.github.com/repos/herrhotzenplotz/gcli/releases/116031718/assets{?name,label}"));
-	ATF_CHECK(sn_sv_eq_to(release.html_url, "https://github.com/herrhotzenplotz/gcli/releases/tag/1.2.0"));
+	ATF_CHECK_SV_EQTO(release.name, "1.2.0");
+	ATF_CHECK_SV_EQTO(release.body, "# Version 1.2.0\n\nThis is version 1.2.0 of gcli.\n\n## Notes\n\nPlease test and report bugs.\n\nYou can download autotoolized tarballs at: https://herrhotzenplotz.de/gcli/releases/gcli-1.2.0/\n\n## Bug Fixes\n\n- Fix compile error when providing --with-libcurl without any arguments\n- Fix memory leaks in string processing functions\n- Fix missing nul termination in read-file function\n- Fix segmentation fault when clearing the milestone of a PR on Gitea\n- Fix missing documentation for milestone action in issues and pulls\n- Set the 'merged' flag properly when showing Gitlab merge requests\n\n## New features\n\n- Add a config subcommand for managing ssh keys (see gcli-config(1))\n- Show number of comments/notes in list of issues and PRs\n- Add support for milestone management in pull requests\n");
+	ATF_CHECK_SV_EQTO(release.author, "herrhotzenplotz");
+	ATF_CHECK_SV_EQTO(release.date, "2023-08-11T07:42:37Z");
+	ATF_CHECK_SV_EQTO(release.upload_url, "https://uploads.github.com/repos/herrhotzenplotz/gcli/releases/116031718/assets{?name,label}");
+	ATF_CHECK_SV_EQTO(release.html_url, "https://github.com/herrhotzenplotz/gcli/releases/tag/1.2.0");
 	ATF_CHECK(release.draft == false);
 	ATF_CHECK(release.prerelease == false);
 }
@@ -202,11 +228,11 @@ ATF_TC_BODY(simple_github_repo, tc)
 	ATF_REQUIRE(parse_github_repo(ctx, &stream, &repo) == 0);
 
 	ATF_CHECK(repo.id == 415015197);
-	ATF_CHECK(sn_sv_eq_to(repo.full_name, "herrhotzenplotz/gcli"));
-	ATF_CHECK(sn_sv_eq_to(repo.name, "gcli"));
-	ATF_CHECK(sn_sv_eq_to(repo.owner, "herrhotzenplotz"));
-	ATF_CHECK(sn_sv_eq_to(repo.date, "2021-10-08T14:20:15Z"));
-	ATF_CHECK(sn_sv_eq_to(repo.visibility, "public"));
+	ATF_CHECK_SV_EQTO(repo.full_name, "herrhotzenplotz/gcli");
+	ATF_CHECK_SV_EQTO(repo.name, "gcli");
+	ATF_CHECK_SV_EQTO(repo.owner, "herrhotzenplotz");
+	ATF_CHECK_SV_EQTO(repo.date, "2021-10-08T14:20:15Z");
+	ATF_CHECK_SV_EQTO(repo.visibility, "public");
 	ATF_CHECK(repo.is_fork == false);
 }
 
@@ -223,9 +249,9 @@ ATF_TC_BODY(simple_github_fork, tc)
 
 	ATF_REQUIRE(parse_github_fork(ctx, &stream, &fork) == 0);
 
-	ATF_CHECK(sn_sv_eq_to(fork.full_name, "gjnoonan/quick-lint-js"));
-	ATF_CHECK(sn_sv_eq_to(fork.owner, "gjnoonan"));
-	ATF_CHECK(sn_sv_eq_to(fork.date, "2023-05-11T05:37:41Z"));
+	ATF_CHECK_SV_EQTO(fork.full_name, "gjnoonan/quick-lint-js");
+	ATF_CHECK_SV_EQTO(fork.owner, "gjnoonan");
+	ATF_CHECK_SV_EQTO(fork.date, "2023-05-11T05:37:41Z");
 	ATF_CHECK(fork.forks == 0);
 }
 

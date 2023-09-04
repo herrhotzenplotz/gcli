@@ -215,6 +215,9 @@ check_PROGRAMS = \
 	tests/url-encode$(EXEEXT) \
 	tests/pretty_print_test$(EXEEXT)
 
+$(check_PROGRAMS): tests/gcli_tests.h
+
+EXTRA_DIST += tests/gcli_tests.h
 check: $(check_PROGRAMS) tests/Kyuafile libgcli.la libsn.la libpdjson.la do_test
 
 do_test:
@@ -241,16 +244,23 @@ tests_pretty_print_test_LDADD = \
 	$(LIBATFC_LDFLAGS)
 
 EXTRA_DIST += tests/samples/github_simple_comment.json	\
-	tests/samples/github_simple_check.json          \
 	tests/samples/github_simple_fork.json		\
+	tests/samples/github_simple_issue.json		\
+	tests/samples/github_simple_issue.json		\
 	tests/samples/github_simple_label.json		\
 	tests/samples/github_simple_milestone.json	\
 	tests/samples/github_simple_pull.json		\
 	tests/samples/github_simple_release.json	\
 	tests/samples/github_simple_repo.json		\
 	tests/samples/gitlab_simple_issue.json		\
+	tests/samples/gitlab_simple_fork.json		\
 	tests/samples/gitlab_simple_label.json		\
 	tests/samples/gitlab_simple_merge_request.json	\
-	tests/samples/github_simple_issue.json
+	tests/samples/gitlab_simple_milestone.json	\
+	tests/samples/gitlab_simple_pipeline.json	\
+	tests/samples/gitlab_simple_release.json	\
+	tests/samples/gitlab_simple_repo.json		\
+	tests/samples/gitlab_simple_snippet.json	\
+	tests/samples/github_simple_check.json
 
 endif

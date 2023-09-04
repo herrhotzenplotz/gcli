@@ -161,16 +161,16 @@
    - [X] Issues
    - [X] Labels
    - [X] Pulls
-*** TODO Gitlab [25%]
+*** TODO Gitlab [61%]
    - [ ] Comments
-   - [ ] Forks
-   - [ ] Milestones
-   - [ ] Pipelines
-   - [ ] Releases
-   - [ ] Repos
+   - [X] Forks
+   - [X] Milestones
+   - [X] Pipelines
+   - [X] Releases
+   - [X] Repos
    - [ ] Reviews
    - [ ] SSH Keys
-   - [ ] Snippets
+   - [X] Snippets
    - [ ] Status
    - [X] Issues
    - [X] Labels
@@ -178,3 +178,5 @@
 *** TODO Gitea
 ** TODO add an ATF macro for comparing string views
 ** TODO Think about making IDs =unsigned long=
+** TODO get rid of html_url everywhere
+** TODO Check the =Kyuafile.in= for requirements on test input

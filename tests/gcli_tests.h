@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,39 +27,18 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GITLAB_SNIPPETS_H
-#define GITLAB_SNIPPETS_H
+#ifndef GCLI_TESTS_H
+#define GCLI_TESTS_H
 
-#ifdef HAVE_CONFIG_H
+#if defined(HAVE_CONFIG_H)
 #include <config.h>
-#endif
+#endif /* HAVE_CONFIG_H */
 
-#include <gcli/gcli.h>
+#include <atf-c.h>
 
-typedef struct gcli_gitlab_snippet gcli_gitlab_snippet;
-typedef struct gcli_gitlab_snippet_list gcli_gitlab_snippet_list;
+/* Helper for making assertions on my custom string views. These
+ * should get removed at some point */
+#define ATF_CHECK_SV_EQTO(view, str) \
+	ATF_CHECK(sn_sv_eq_to((view), str))
 
-struct gcli_gitlab_snippet {
-	int   id;
-	char *title;
-	char *filename;
-	char *date;
-	char *author;
-	char *visibility;
-	char *raw_url;
-};
-
-struct gcli_gitlab_snippet_list {
-	gcli_gitlab_snippet *snippets;
-	size_t snippets_size;
-};
-
-void gcli_snippets_free(gcli_gitlab_snippet_list *list);
-
-int gcli_snippets_get(gcli_ctx *ctx, int max, gcli_gitlab_snippet_list *out);
-
-int gcli_snippet_delete(gcli_ctx *ctx, char const *snippet_id);
-
-int gcli_snippet_get(gcli_ctx *ctx, char const *snippet_id, FILE *stream);
-
-#endif /* GITLAB_SNIPPETS_H */
+#endif /* GCLI_TESTS_H */

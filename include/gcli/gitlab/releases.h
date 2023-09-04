@@ -44,4 +44,6 @@ int gitlab_create_release(gcli_ctx *ctx, gcli_new_release const *release);
 int gitlab_delete_release(gcli_ctx *ctx, char const *owner, char const *repo,
                           char const *id);
 
+void gitlab_fixup_release_assets(gcli_ctx *ctx, gcli_release *const release);
+
 #endif /* GITLAB_RELEASES_H */

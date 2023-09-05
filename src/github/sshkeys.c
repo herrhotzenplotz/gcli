@@ -47,7 +47,7 @@ github_add_sshkey(gcli_ctx *ctx, char const *const title,
 }
 
 int
-github_delete_sshkey(gcli_ctx *ctx, int id)
+github_delete_sshkey(gcli_ctx *ctx, gcli_id const id)
 {
 	return gitlab_delete_sshkey(ctx, id);
 }

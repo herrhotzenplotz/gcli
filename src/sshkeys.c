@@ -74,7 +74,7 @@ gcli_sshkeys_add_key(gcli_ctx *ctx, char const *title,
 }
 
 int
-gcli_sshkeys_delete_key(gcli_ctx *ctx, int id)
+gcli_sshkeys_delete_key(gcli_ctx *ctx, gcli_id const id)
 {
 	return gcli_forge(ctx)->delete_sshkey(ctx, id);
 }

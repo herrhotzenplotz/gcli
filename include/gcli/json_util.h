@@ -43,6 +43,7 @@
 #include <stdint.h>
 
 #define get_int(ctx, input, out)           get_int_(ctx, input, out, __func__)
+#define get_id(ctx, input, out)            get_id_(ctx, input, out, __func__)
 #define get_long(ctx, input, out)          get_long_(ctx, input, out, __func__)
 #define get_size_t(ctx, input, out)        get_size_t_(ctx, input, out, __func__)
 #define get_double(ctx, input, out)        get_double_(ctx, input, out, __func__)
@@ -57,6 +58,7 @@
 #define get_int_to_string(ctx, input, out) get_int_to_string_(ctx, input, out, __func__)
 
 int get_int_(gcli_ctx *ctx, json_stream *input, int *out, char const *function);
+int get_id_(gcli_ctx *ctx, json_stream *input, gcli_id *out, char const *function);
 int get_long_(gcli_ctx *ctx, json_stream *input, long *out, char const *function);
 int get_size_t_(gcli_ctx *ctx, json_stream *input, size_t *out, char const *function);
 int get_double_(gcli_ctx *ctx, json_stream *input, double *out, char const *function);

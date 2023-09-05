@@ -71,11 +71,11 @@ gitlab_get_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gitlab_get_mr_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
-                        int const mr_id, gitlab_pipeline_list *const list)
+                        gcli_id const mr_id, gitlab_pipeline_list *const list)
 {
 	char *url = NULL;
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%d/pipelines",
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu/pipelines",
 	                  gcli_get_apibase(ctx), owner, repo, mr_id);
 
 	/* fetch everything */
@@ -101,7 +101,7 @@ gitlab_free_pipelines(gitlab_pipeline_list *const list)
 
 int
 gitlab_get_pipeline_jobs(gcli_ctx *ctx, char const *owner, char const *repo,
-                         long const pipeline, int const max,
+                         gcli_id const pipeline, int const max,
                          gitlab_job_list *const out)
 {
 	char *url = NULL;
@@ -146,7 +146,7 @@ gitlab_free_jobs(gitlab_job_list *list)
 
 int
 gitlab_job_get_log(gcli_ctx *ctx, char const *owner, char const *repo,
-                   long const job_id, FILE *stream)
+                   gcli_id const job_id, FILE *stream)
 {
 	char *url = NULL;
 	int rc = 0;
@@ -163,7 +163,7 @@ gitlab_job_get_log(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gitlab_get_job(gcli_ctx *ctx, char const *owner, char const *repo,
-               long const jid, gitlab_job *const out)
+               gcli_id const jid, gitlab_job *const out)
 {
 	gcli_fetch_buffer buffer = {0};
 	char *url = NULL;
@@ -190,7 +190,7 @@ gitlab_get_job(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gitlab_job_cancel(gcli_ctx *ctx, char const *owner, char const *repo,
-                  long const jid)
+                  gcli_id const jid)
 {
 	char *url = NULL;
 	int rc = 0;
@@ -206,7 +206,7 @@ gitlab_job_cancel(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gitlab_job_retry(gcli_ctx *ctx, char const *owner, char const *repo,
-                 long const jid)
+                 gcli_id const jid)
 {
 	int rc = 0;
 	char *url = NULL;
@@ -222,7 +222,7 @@ gitlab_job_retry(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gitlab_job_download_artifacts(gcli_ctx *ctx, char const *owner,
-                              char const *repo, long const jid,
+                              char const *repo, gcli_id const jid,
                               char const *const outfile)
 {
 	char *url;

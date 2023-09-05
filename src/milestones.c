@@ -40,7 +40,7 @@ gcli_get_milestones(gcli_ctx *ctx, char const *const owner,
 
 int
 gcli_get_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                   int const milestone, gcli_milestone *const out)
+                   gcli_id const milestone, gcli_milestone *const out)
 {
 	return gcli_forge(ctx)->get_milestone(ctx, owner, repo, milestone, out);
 }
@@ -54,7 +54,7 @@ gcli_create_milestone(gcli_ctx *ctx,
 
 int
 gcli_delete_milestone(gcli_ctx *ctx, char const *const owner,
-                      char const *const repo, int const milestone)
+                      char const *const repo, gcli_id const milestone)
 {
 	return gcli_forge(ctx)->delete_milestone(ctx, owner, repo, milestone);
 }
@@ -90,7 +90,7 @@ gcli_free_milestones(gcli_milestone_list *const it)
 
 int
 gcli_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
-                          char const *const repo, int const milestone,
+                          char const *const repo, gcli_id const milestone,
                           gcli_issue_list *const out)
 {
 	return gcli_forge(ctx)->get_milestone_issues(
@@ -99,7 +99,7 @@ gcli_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
 
 int
 gcli_milestone_set_duedate(gcli_ctx *ctx, char const *const owner,
-                           char const *const repo, int const milestone,
+                           char const *const repo, gcli_id const milestone,
                            char const *const date)
 {
 	return gcli_forge(ctx)->milestone_set_duedate(

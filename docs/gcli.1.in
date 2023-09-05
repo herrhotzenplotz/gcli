@@ -249,23 +249,23 @@ to manually specify all the options like
 .El
 .Sh EXAMPLES
 List recently opened issues in the current upstream repository:
-.Bd -literal -width indent
+.Bd -literal -offset indent
 $ gcli issues
 .Ed
 .Pp
 Merge upstream PR #22:
-.Bd -literal -width indent
+.Bd -literal -offset indent
 $ gcli pulls -p 22 merge
 .Ed
 .Pp
 Get a summary and comments of upstream PR #22:
-.Bd -literal -width indent
+.Bd -literal -offset indent
 $ gcli pulls -p 22 summary comments
 .Ed
 .Pp
 Establish a connection to github and print the last 10 pull requests
 in contour-terminal/contour regardless of their state.
-.Bd -literal -width indent
+.Bd -literal -offset indent
 $ gcli -t github pulls -o contour-terminal -r contour -a -n10
 .Ed
 .Pp
@@ -318,7 +318,7 @@ Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
 or on Github.
 .Pp
 You may also report an issue like so:
-.Bd -literal -width indent
+.Bd -literal -offset indent
 $ gcli -a some-gitlab-account \\
         issues create \\
         -o herrhotzenplotz -r gcli \\

@@ -3,7 +3,7 @@ include "gcli/gitea/repos.h";
 
 parser github_repo is
 object of gcli_repo with
-	("id"         => id as int,
+	("id"         => id as id,
 	 "full_name"  => full_name as sv,
 	 "name"       => name as sv,
 	 "owner"      => owner as user_sv,

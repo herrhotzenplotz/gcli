@@ -37,7 +37,7 @@
 #include <gcli/review.h>
 
 int gitlab_review_get_reviews(gcli_ctx *cxt, char const *owner,
-                              char const *repo, int pr,
+                              char const *repo, gcli_id mr_number,
                               gcli_pr_review_list *out);
 
 #endif /* GITLAB_REVIEW_H */

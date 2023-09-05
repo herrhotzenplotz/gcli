@@ -70,7 +70,7 @@ github_get_milestones(gcli_ctx *ctx, char const *const owner,
 
 int
 github_get_milestone(gcli_ctx *ctx, char const *const owner,
-                     char const *const repo, int const milestone,
+                     char const *const repo, gcli_id const milestone,
                      gcli_milestone *const out)
 {
 	char *url, *e_owner, *e_repo;
@@ -80,7 +80,7 @@ github_get_milestone(gcli_ctx *ctx, char const *const owner,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/milestones/%d",
+	url = sn_asprintf("%s/repos/%s/%s/milestones/%lu",
 	                  gcli_get_apibase(ctx), e_owner, e_repo, milestone);
 
 	free(e_repo);
@@ -103,7 +103,7 @@ github_get_milestone(gcli_ctx *ctx, char const *const owner,
 
 int
 github_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
-                            char const *const repo, int const milestone,
+                            char const *const repo, gcli_id const milestone,
                             gcli_issue_list *const out)
 {
 	char *url, *e_owner, *e_repo;
@@ -111,7 +111,7 @@ github_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/issues?milestone=%d&state=all",
+	url = sn_asprintf("%s/repos/%s/%s/issues?milestone=%lu&state=all",
 	                  gcli_get_apibase(ctx), e_owner, e_repo, milestone);
 
 	free(e_repo);
@@ -163,7 +163,7 @@ github_create_milestone(gcli_ctx *ctx,
 
 int
 github_delete_milestone(gcli_ctx *ctx, char const *const owner,
-                        char const *const repo, int const milestone)
+                        char const *const repo, gcli_id const milestone)
 {
 	char *url, *e_owner, *e_repo;
 	int rc = 0;
@@ -171,7 +171,7 @@ github_delete_milestone(gcli_ctx *ctx, char const *const owner,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/milestones/%d",
+	url = sn_asprintf("%s/repos/%s/%s/milestones/%lu",
 	                  gcli_get_apibase(ctx),
 	                  e_owner, e_repo,
 	                  milestone);
@@ -187,7 +187,7 @@ github_delete_milestone(gcli_ctx *ctx, char const *const owner,
 
 int
 github_milestone_set_duedate(gcli_ctx *ctx, char const *const owner,
-                             char const *const repo, int const milestone,
+                             char const *const repo, gcli_id const milestone,
                              char const *const date)
 {
 	char *url, *e_owner, *e_repo, *payload, norm_date[21] = {0};
@@ -201,7 +201,7 @@ github_milestone_set_duedate(gcli_ctx *ctx, char const *const owner,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/milestones/%d",
+	url = sn_asprintf("%s/repos/%s/%s/milestones/%lu",
 	                  gcli_get_apibase(ctx),
 	                  e_owner, e_repo, milestone);
 

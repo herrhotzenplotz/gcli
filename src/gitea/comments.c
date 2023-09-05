@@ -32,7 +32,7 @@
 
 int
 gitea_get_comments(gcli_ctx *ctx, char const *owner, char const *repo,
-                   int const issue, gcli_comment_list *const out)
+                   gcli_id const issue, gcli_comment_list *const out)
 {
 	return github_get_comments(ctx, owner, repo, issue, out);
 }

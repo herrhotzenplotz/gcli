@@ -67,7 +67,7 @@ gitea_get_milestones(gcli_ctx *ctx, char const *const owner,
 
 int
 gitea_get_milestone(gcli_ctx *ctx, char const *const owner,
-                    char const *const repo, int const milestone,
+                    char const *const repo, gcli_id const milestone,
                     gcli_milestone *const out)
 {
 	char *url, *e_owner, *e_repo;
@@ -77,7 +77,7 @@ gitea_get_milestone(gcli_ctx *ctx, char const *const owner,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/milestones/%d", gcli_get_apibase(ctx),
+	url = sn_asprintf("%s/repos/%s/%s/milestones/%lu", gcli_get_apibase(ctx),
 	                  e_owner, e_repo, milestone);
 
 	free(e_owner);
@@ -108,7 +108,7 @@ gitea_create_milestone(gcli_ctx *ctx,
 
 int
 gitea_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
-                           char const *const repo, int const milestone,
+                           char const *const repo, gcli_id const milestone,
                            gcli_issue_list *const out)
 {
 	char *url, *e_owner, *e_repo;
@@ -116,7 +116,7 @@ gitea_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/issues?state=all&milestones=%d",
+	url = sn_asprintf("%s/repos/%s/%s/issues?state=all&milestones=%lu",
 	                  gcli_get_apibase(ctx), e_owner, e_repo, milestone);
 
 	free(e_repo);
@@ -127,14 +127,14 @@ gitea_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
 
 int
 gitea_delete_milestone(gcli_ctx *ctx, char const *const owner,
-                       char const *const repo, int const milestone)
+                       char const *const repo, gcli_id const milestone)
 {
 	return github_delete_milestone(ctx, owner, repo, milestone);
 }
 
 int
 gitea_milestone_set_duedate(gcli_ctx *ctx, char const *const owner,
-                            char const *const repo, int const milestone,
+                            char const *const repo, gcli_id const milestone,
                             char const *const date)
 {
 	return github_milestone_set_duedate(ctx, owner, repo, milestone, date);

@@ -43,17 +43,17 @@ int gitlab_create_milestone(gcli_ctx *ctx,
                             struct gcli_milestone_create_args const *args);
 
 int gitlab_delete_milestone(gcli_ctx *ctx, char const *owner,
-                            char const *repo, int milestone);
+                            char const *repo, gcli_id milestone);
 
 int gitlab_get_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                         int milestone, gcli_milestone *out);
+                         gcli_id milestone, gcli_milestone *out);
 
 int gitlab_milestone_get_issues(gcli_ctx *ctx, char const *owner,
-                                char const *repo, int milestone,
+                                char const *repo, gcli_id milestone,
                                 gcli_issue_list *out);
 
 int gitlab_milestone_set_duedate(gcli_ctx *ctx, char const *owner,
-                                 char const *repo, int milestone,
+                                 char const *repo, gcli_id milestone,
                                  char const *date);
 
 #endif /* GCLI_GITLAB_MILESTONES_H */

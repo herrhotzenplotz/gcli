@@ -45,7 +45,7 @@ typedef enum gcli_forge_type {
 	GCLI_FORGE_GITEA,
 } gcli_forge_type;
 
-typedef unsigned int gcli_id;
+typedef unsigned long gcli_id;
 
 #ifdef IN_LIBGCLI
 #include <gcli/ctx.h>

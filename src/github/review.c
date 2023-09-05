@@ -181,7 +181,7 @@ static char const *get_reviews_fmt =
 
 int
 github_review_get_reviews(gcli_ctx *ctx, char const *owner, char const *repo,
-                          int const pr, gcli_pr_review_list *const out)
+                          gcli_id const pr, gcli_pr_review_list *const out)
 {
 	gcli_fetch_buffer buffer = {0};
 	char *url = NULL;

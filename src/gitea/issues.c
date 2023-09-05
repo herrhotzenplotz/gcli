@@ -47,7 +47,7 @@ gitea_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gitea_get_issue_summary(gcli_ctx *ctx, char const *owner, char const *repo,
-                        int const issue_number, gcli_issue *const out)
+                        gcli_id const issue_number, gcli_issue *const out)
 {
 	return github_get_issue_summary(ctx, owner, repo, issue_number, out);
 }
@@ -89,21 +89,21 @@ gitea_issue_patch_state(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gitea_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
-                  int const issue_number)
+                  gcli_id const issue_number)
 {
 	return gitea_issue_patch_state(ctx, owner, repo, issue_number, "closed");
 }
 
 int
 gitea_issue_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
-                   int const issue_number)
+                   gcli_id const issue_number)
 {
 	return gitea_issue_patch_state(ctx, owner, repo, issue_number, "open");
 }
 
 int
 gitea_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
-                   int const issue_number, char const *const assignee)
+                   gcli_id const issue_number, char const *const assignee)
 {
 	sn_sv escaped_assignee = SV_NULL;
 	char *post_fields = NULL;
@@ -119,7 +119,7 @@ gitea_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/issues/%d", gcli_get_apibase(ctx),
+	url = sn_asprintf("%s/repos/%s/%s/issues/%lu", gcli_get_apibase(ctx),
 	                  e_owner, e_repo, issue_number);
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, post_fields, NULL, NULL);
@@ -140,7 +140,7 @@ get_id_of_label(char const *label_name,
 {
 	for (size_t i = 0; i < list->labels_size; ++i)
 		if (strcmp(list->labels[i].name, label_name) == 0)
-			return sn_asprintf("%ul", list->labels[i].id);
+			return sn_asprintf("%lu", list->labels[i].id);
 	return NULL;
 }
 
@@ -185,7 +185,7 @@ out:
 
 int
 gitea_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                       int const issue, char const *const labels[],
+                       gcli_id const issue, char const *const labels[],
                        size_t const labels_size)
 {
 	char *list = NULL;
@@ -204,7 +204,7 @@ gitea_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 	list = sn_join_with((char const **)ids, labels_size, ",");
 	data = sn_asprintf("{ \"labels\": [%s] }", list);
 
-	url = sn_asprintf("%s/repos/%s/%s/issues/%d/labels", gcli_get_apibase(ctx),
+	url = sn_asprintf("%s/repos/%s/%s/issues/%lu/labels", gcli_get_apibase(ctx),
 	                  owner, repo, issue);
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, data, NULL, NULL);
@@ -219,7 +219,7 @@ gitea_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gitea_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                          int const issue, char const *const labels[],
+                          gcli_id const issue, char const *const labels[],
                           size_t const labels_size)
 {
 	int rc = 0;
@@ -233,7 +233,7 @@ gitea_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 	for (size_t i = 0; i < labels_size; ++i) {
 		char *url = NULL;
 
-		url = sn_asprintf("%s/repos/%s/%s/issues/%d/labels/%s",
+		url = sn_asprintf("%s/repos/%s/%s/issues/%lu/labels/%s",
 		                  gcli_get_apibase(ctx), owner, repo, issue, ids[i]);
 		rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
@@ -250,15 +250,15 @@ gitea_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gitea_issue_set_milestone(gcli_ctx *ctx, char const *const owner,
-                          char const *const repo, int const issue,
-                          int const milestone)
+                          char const *const repo, gcli_id const issue,
+                          gcli_id const milestone)
 {
 	return github_issue_set_milestone(ctx, owner, repo, issue, milestone);
 }
 
 int
 gitea_issue_clear_milestone(gcli_ctx *ctx, char const *owner,
-                            char const *repo, int issue)
+                            char const *repo, gcli_id issue)
 {
 	return github_issue_set_milestone(ctx, owner, repo, issue, 0);
 }

@@ -106,7 +106,7 @@ github_get_pulls(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 github_print_pull_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
-                       char const *repo, int const pr_number)
+                       char const *repo, gcli_id const pr_number)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -117,7 +117,7 @@ github_print_pull_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
 	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%d",
+		"%s/repos/%s/%s/pulls/%lu",
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, pr_number);
 	rc = gcli_curl(ctx, stream, url, "Accept: application/vnd.github.v3.diff");
@@ -133,7 +133,7 @@ github_print_pull_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
  * calls */
 static int
 github_pull_delete_head_branch(gcli_ctx *ctx, char const *owner,
-                               char const *repo, int const pr_number)
+                               char const *repo, gcli_id const pr_number)
 {
 	gcli_pull pull = {0};
 	char *url, *e_owner, *e_repo;
@@ -163,7 +163,7 @@ github_pull_delete_head_branch(gcli_ctx *ctx, char const *owner,
 
 int
 github_pull_merge(gcli_ctx *ctx, char const *owner, char const *repo,
-                  int const pr_number, enum gcli_merge_flags const flags)
+                  gcli_id const pr_number, enum gcli_merge_flags const flags)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -177,7 +177,7 @@ github_pull_merge(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%d/merge?merge_method=%s",
+		"%s/repos/%s/%s/pulls/%lu/merge?merge_method=%s",
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, pr_number,
 		squash ? "squash" : "merge");
@@ -196,7 +196,7 @@ github_pull_merge(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 github_pull_close(gcli_ctx *ctx, char const *owner, char const *repo,
-                  int const pr_number)
+                  gcli_id const pr_number)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -208,7 +208,7 @@ github_pull_close(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%d",
+		"%s/repos/%s/%s/pulls/%lu",
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, pr_number);
 	data = sn_asprintf("{ \"state\": \"closed\"}");
@@ -225,7 +225,7 @@ github_pull_close(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 github_pull_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
-                   int const pr_number)
+                   gcli_id const pr_number)
 {
 	char *url = NULL;
 	char *data = NULL;
@@ -237,7 +237,7 @@ github_pull_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_repo = gcli_urlencode(repo);
 
 	url  = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%d",
+		"%s/repos/%s/%s/pulls/%lu",
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, pr_number);
 	data = sn_asprintf("{ \"state\": \"open\"}");
@@ -307,7 +307,7 @@ github_perform_submit_pull(gcli_ctx *ctx, gcli_submit_pull_options opts)
 
 int
 github_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
-                        int const pr_number, gcli_commit_list *const out)
+                        gcli_id const pr_number, gcli_commit_list *const out)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -324,7 +324,7 @@ github_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%d/commits",
+		"%s/repos/%s/%s/pulls/%lu/commits",
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, pr_number);
 
@@ -336,7 +336,7 @@ github_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 github_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
-                int const pr_number, gcli_pull *const out)
+                gcli_id const pr_number, gcli_pull *const out)
 {
 	int rc = 0;
 	gcli_fetch_buffer json_buffer = {0};
@@ -348,7 +348,7 @@ github_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%d",
+		"%s/repos/%s/%s/pulls/%lu",
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, pr_number);
 	free(e_owner);
@@ -371,12 +371,12 @@ github_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 github_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
-                       int const pr_number, gcli_pull_checks_list *out)
+                       gcli_id const pr_number, gcli_pull_checks_list *out)
 {
 	char refname[64] = {0};
 
 	/* This is kind of a hack, but it works! */
-	snprintf(refname, sizeof refname, "refs%%2Fpull%%2F%d%%2Fhead", pr_number);
+	snprintf(refname, sizeof refname, "refs%%2Fpull%%2F%lu%%2Fhead", pr_number);
 
 	return github_get_checks(ctx, owner, repo, refname, -1,
 	                         (github_check_list *)out);

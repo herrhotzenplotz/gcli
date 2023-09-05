@@ -41,32 +41,32 @@ int gitea_get_issues(gcli_ctx *ctx, char const *owner, char const *reponame,
                      gcli_issue_list *out);
 
 int gitea_get_issue_summary(gcli_ctx *ctx, char const *owner, char const *repo,
-                            int issue, gcli_issue *out);
+                            gcli_id issue_number, gcli_issue *out);
 
 int gitea_submit_issue(gcli_ctx *ctx, gcli_submit_issue_options opts,
                        gcli_fetch_buffer *out);
 
 int gitea_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
-                      int issue_number);
+                      gcli_id issue_number);
 
 int gitea_issue_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
-                       int issue_number);
+                       gcli_id issue_number);
 
 int gitea_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
-                       int issue_number, char const *assignee);
+                       gcli_id issue_number, char const *assignee);
 
 int gitea_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                           int issue, char const *const labels[],
+                           gcli_id issue_number, char const *const labels[],
                            size_t labels_size);
 
 int gitea_issue_remove_labels(gcli_ctx *ctx, char const *owner,
-                              char const *repo, int issue,
+                              char const *repo, gcli_id issue,
                               char const *const labels[], size_t labels_size);
 
 int gitea_issue_set_milestone(gcli_ctx *ctx, char const *owner,
-                              char const *repo, int issue, int milestone);
+                              char const *repo, gcli_id issue, gcli_id milestone);
 
 int gitea_issue_clear_milestone(gcli_ctx *ctx, char const *owner,
-                                char const *repo, int issue);
+                                char const *repo, gcli_id issue);
 
 #endif /* GITEA_ISSUES_H */

@@ -63,7 +63,7 @@ github_perform_submit_comment(gcli_ctx *ctx, gcli_submit_comment_opts opts,
 
 int
 github_get_comments(gcli_ctx *ctx, char const *owner, char const *repo,
-                    int const issue, gcli_comment_list *const out)
+                    gcli_id const issue, gcli_comment_list *const out)
 {
 	char *e_owner = NULL;
 	char *e_repo = NULL;
@@ -78,7 +78,7 @@ github_get_comments(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/issues/%d/comments",
+	url = sn_asprintf("%s/repos/%s/%s/issues/%lu/comments",
 	                  gcli_get_apibase(ctx),
 	                  e_owner, e_repo, issue);
 	free(e_owner);

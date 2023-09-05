@@ -140,7 +140,7 @@ get_id_of_label(char const *label_name,
 {
 	for (size_t i = 0; i < list->labels_size; ++i)
 		if (strcmp(list->labels[i].name, label_name) == 0)
-			return sn_asprintf("%ld", list->labels[i].id);
+			return sn_asprintf("%ul", list->labels[i].id);
 	return NULL;
 }
 

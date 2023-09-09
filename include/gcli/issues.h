@@ -76,7 +76,8 @@ struct gcli_issue_list {
 
 struct gcli_issue_fetch_details {
 	bool all;                   /* disregard the issue state */
-	char const *author;         /* A username who issued */
+	char const *author;         /* filter issues by this author*/
+	char const *label;          /* filter by the given label */
 };
 
 int gcli_get_issues(gcli_ctx *ctx, char const *owner, char const *reponame,

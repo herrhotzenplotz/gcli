@@ -88,6 +88,7 @@ github_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
 	char *e_owner = NULL;
 	char *e_repo = NULL;
 	char *e_author = NULL;
+	char *e_label = NULL;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -98,14 +99,22 @@ github_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
 		free(tmp);
 	}
 
+	if (details->label) {
+		char *tmp = gcli_urlencode(details->label);
+		e_author = sn_asprintf("&labels=%s", tmp);
+		free(tmp);
+	}
+
 	url = sn_asprintf(
-		"%s/repos/%s/%s/issues?state=%s%s",
+		"%s/repos/%s/%s/issues?state=%s%s%s",
 		gcli_get_apibase(ctx),
 		e_owner, e_repo,
 		details->all ? "all" : "open",
-		e_author ? e_author : "");
+		e_author ? e_author : "",
+		e_label ? e_label : "");
 
 	free(e_author);
+	free(e_label);
 	free(e_owner);
 	free(e_repo);
 

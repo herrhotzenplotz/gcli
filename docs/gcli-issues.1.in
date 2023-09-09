@@ -10,6 +10,7 @@
 .Op Fl a
 .Op Fl s
 .Op Fl A Ar author
+.Op Fl L Ar label
 .Op Fl o Ar owner Fl r Ar repo
 .Nm
 .Fl i Ar issue
@@ -46,6 +47,8 @@ well. Cannot be combined with actions. This does not affect the
 option.
 .It Fl A , Fl -author Ar user
 Only list issues authored by the given user.
+.It Fl L , Fl -label Ar label
+Filter issues by the given label. This option may only be specfied once.
 .It Fl n , -count Ar n
 Fetch at least
 .Ar n
@@ -137,6 +140,12 @@ and
 to the issue with id 420:
 .Bd -literal -offset indent
 $ gcli issues -i420 labels add foo add bar
+.Ed
+.Pp
+List issues with the label
+.Dq bug :
+.Bd -literal -offset indent
+$ gcli issues -L bug
 .Ed
 .Sh SEE ALSO
 .Xr git 1 ,

@@ -44,10 +44,10 @@ typedef struct gcli_label gcli_label;
 typedef struct gcli_label_list gcli_label_list;
 
 struct gcli_label {
-	long      id;
-	char     *name;
-	char     *description;
-	uint32_t  colour;
+	gcli_id id;
+	char *name;
+	char *description;
+	uint32_t colour;
 };
 
 struct gcli_label_list {

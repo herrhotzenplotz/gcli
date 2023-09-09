@@ -2,7 +2,7 @@ include "gcli/milestones.h";
 
 parser gitea_milestone is
 object of gcli_milestone with
-       ("id" => id as int,
+       ("id" => id as id,
         "title" => title as string,
 	"created_at" => created_at as string,
 	"description" => description as string,

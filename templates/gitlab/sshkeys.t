@@ -3,7 +3,7 @@ include "gcli/sshkeys.h";
 parser gitlab_sshkey is
 object of gcli_sshkey with
 	("title" => title as string,
-	 "id" => id as int,
+	 "id" => id as id,
 	 "key" => key as string,
 	 "created_at" => created_at as string);
 

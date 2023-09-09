@@ -48,6 +48,17 @@ get_int_(gcli_ctx *ctx, json_stream *const input, int *out, char const *where)
 }
 
 int
+get_id_(gcli_ctx *ctx, json_stream *const input, gcli_id *out, char const *where)
+{
+	if (json_next(input) != JSON_NUMBER)
+		return gcli_error(ctx, "unexpected non-integer ID field in %s", where);
+
+	*out = json_get_number(input);
+
+	return 0;
+}
+
+int
 get_long_(gcli_ctx *ctx, json_stream *const input, long *out, char const *where)
 {
 	if (json_next(input) != JSON_NUMBER)

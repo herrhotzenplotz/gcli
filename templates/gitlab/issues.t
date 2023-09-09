@@ -12,7 +12,7 @@ object of gcli_issue with
 	 "state"             => state as sv,
 	 "description"       => body as sv,
 	 "created_at"        => created_at as sv,
-	 "iid"               => number as int,
+	 "iid"               => number as id,
 	 "user_notes_count"  => comments as int,
 	 "author"            => author as user_sv,
 	 "discussion_locked" => locked as bool,

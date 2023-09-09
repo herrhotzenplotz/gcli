@@ -41,14 +41,14 @@ gitea_get_pulls(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gitea_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
-               int const pr_number, gcli_pull *const out)
+               gcli_id const pr_number, gcli_pull *const out)
 {
 	return github_get_pull(ctx, owner, repo, pr_number, out);
 }
 
 int
 gitea_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
-                       int const pr_number, gcli_commit_list *const out)
+                       gcli_id const pr_number, gcli_commit_list *const out)
 {
 	return github_get_pull_commits(ctx, owner, repo, pr_number, out);
 }
@@ -63,7 +63,7 @@ gitea_pull_submit(gcli_ctx *ctx, gcli_submit_pull_options opts)
 
 int
 gitea_pull_merge(gcli_ctx *ctx, char const *owner, char const *repo,
-                 int const pr_number, enum gcli_merge_flags const flags)
+                 gcli_id const pr_number, enum gcli_merge_flags const flags)
 {
 	int rc = 0;
 	char *url = NULL;
@@ -75,7 +75,7 @@ gitea_pull_merge(gcli_ctx *ctx, char const *owner, char const *repo,
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
-	url = sn_asprintf("%s/repos/%s/%s/pulls/%d/merge",
+	url = sn_asprintf("%s/repos/%s/%s/pulls/%lu/merge",
 	                  gcli_get_apibase(ctx), e_owner, e_repo, pr_number);
 	data = sn_asprintf("{ \"Do\": \"%s\", \"delete_branch_after_merge\": %s }",
 	                   squash ? "squash" : "merge",
@@ -123,21 +123,21 @@ gitea_pulls_patch_state(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gitea_pull_close(gcli_ctx *ctx, char const *owner, char const *repo,
-                 int const pr_number)
+                 gcli_id const pr_number)
 {
 	return gitea_pulls_patch_state(ctx, owner, repo, pr_number, "closed");
 }
 
 int
 gitea_pull_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
-                  int const pr_number)
+                  gcli_id const pr_number)
 {
 	return gitea_pulls_patch_state(ctx, owner, repo, pr_number, "open");
 }
 
 int
 gitea_print_pr_diff(gcli_ctx *ctx, FILE *const stream, char const *owner,
-                    char const *repo, int const pr_number)
+                    char const *repo, gcli_id const pr_number)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -148,7 +148,7 @@ gitea_print_pr_diff(gcli_ctx *ctx, FILE *const stream, char const *owner,
 	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%d.patch",
+		"%s/repos/%s/%s/pulls/%lu.patch",
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, pr_number);
 
@@ -163,7 +163,7 @@ gitea_print_pr_diff(gcli_ctx *ctx, FILE *const stream, char const *owner,
 
 int
 gitea_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
-                      int const pr_number, gcli_pull_checks_list *out)
+                      gcli_id const pr_number, gcli_pull_checks_list *out)
 {
 	(void) ctx;
 	(void) owner;
@@ -176,7 +176,7 @@ gitea_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gitea_pull_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                         int pr_number, int milestone_id)
+                         gcli_id pr_number, gcli_id milestone_id)
 {
 	return github_issue_set_milestone(ctx, owner, repo, pr_number,
 	                                  milestone_id);
@@ -184,7 +184,7 @@ gitea_pull_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gitea_pull_clear_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                           int pr_number)
+                           gcli_id pr_number)
 {
 	/* NOTE: The github routine for clearing issues sets the milestone
 	 * to null (not the integer zero). However this does not work in

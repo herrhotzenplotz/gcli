@@ -42,13 +42,13 @@ typedef struct gcli_repo_list gcli_repo_list;
 typedef struct gcli_repo_create_options gcli_repo_create_options;
 
 struct gcli_repo {
-	int   id;
+	gcli_id id;
 	sn_sv full_name;
 	sn_sv name;
 	sn_sv owner;
 	sn_sv date;
 	sn_sv visibility;
-	bool  is_fork;
+	bool is_fork;
 };
 
 struct gcli_repo_list {
@@ -59,7 +59,7 @@ struct gcli_repo_list {
 struct gcli_repo_create_options {
 	sn_sv name;
 	sn_sv description;
-	bool  private;
+	bool private;
 };
 
 int gcli_get_repos(gcli_ctx *ctx, char const *owner, int max,

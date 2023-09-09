@@ -41,7 +41,7 @@
 
 int
 gitlab_review_get_reviews(gcli_ctx *ctx, char const *owner, char const *repo,
-                          int const pr, gcli_pr_review_list *const out)
+                          gcli_id const pr, gcli_pr_review_list *const out)
 {
 	char *url = NULL;
 
@@ -52,7 +52,7 @@ gitlab_review_get_reviews(gcli_ctx *ctx, char const *owner, char const *repo,
 		.parse = (parsefn)(parse_gitlab_reviews),
 	};
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%d/notes?sort=asc",
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu/notes?sort=asc",
 	                  gcli_get_apibase(ctx), owner, repo, pr);
 
 	return gcli_fetch_list(ctx, url, &fl);

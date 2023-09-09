@@ -59,14 +59,14 @@ gcli_get_pulls(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gcli_pull_get_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
-                   char const *reponame, int const pr_number)
+                   char const *reponame, gcli_id const pr_number)
 {
 	return gcli_forge(ctx)->print_pull_diff(ctx, stream, owner, reponame, pr_number);
 }
 
 int
 gcli_pull_get_commits(gcli_ctx *ctx, char const *owner, char const *repo,
-                      int const pr_number, gcli_commit_list *const out)
+                      gcli_id const pr_number, gcli_commit_list *const out)
 {
 	return gcli_forge(ctx)->get_pull_commits(ctx, owner, repo, pr_number, out);
 }
@@ -108,14 +108,14 @@ gcli_pull_free(gcli_pull *const it)
 
 int
 gcli_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
-              int const pr_number, gcli_pull *const out)
+              gcli_id const pr_number, gcli_pull *const out)
 {
 	return gcli_forge(ctx)->get_pull(ctx, owner, repo, pr_number, out);
 }
 
 int
 gcli_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
-                     int const pr_number, gcli_pull_checks_list *out)
+                     gcli_id const pr_number, gcli_pull_checks_list *out)
 {
 	return gcli_forge(ctx)->get_pull_checks(ctx, owner, repo, pr_number, out);
 }
@@ -143,28 +143,28 @@ gcli_pull_submit(gcli_ctx *ctx, gcli_submit_pull_options opts)
 
 int
 gcli_pull_merge(gcli_ctx *ctx, char const *owner, char const *reponame,
-                int const pr_number, enum gcli_merge_flags flags)
+                gcli_id const pr_number, enum gcli_merge_flags flags)
 {
 	return gcli_forge(ctx)->pull_merge(ctx, owner, reponame, pr_number, flags);
 }
 
 int
 gcli_pull_close(gcli_ctx *ctx, char const *owner, char const *reponame,
-                int const pr_number)
+                gcli_id const pr_number)
 {
 	return gcli_forge(ctx)->pull_close(ctx, owner, reponame, pr_number);
 }
 
 int
 gcli_pull_reopen(gcli_ctx *ctx, char const *owner, char const *reponame,
-                 int const pr_number)
+                 gcli_id const pr_number)
 {
 	return gcli_forge(ctx)->pull_reopen(ctx, owner, reponame, pr_number);
 }
 
 int
 gcli_pull_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                     int const pr_number, char const *const labels[],
+                     gcli_id const pr_number, char const *const labels[],
                      size_t const labels_size)
 {
 	return gcli_forge(ctx)->pull_add_labels(
@@ -173,7 +173,7 @@ gcli_pull_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gcli_pull_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                        int const pr_number, char const *const labels[],
+                        gcli_id const pr_number, char const *const labels[],
                         size_t const labels_size)
 {
 	return gcli_forge(ctx)->pull_remove_labels(
@@ -182,7 +182,7 @@ gcli_pull_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gcli_pull_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                        int pr_number, int milestone_id)
+                        gcli_id const pr_number, int milestone_id)
 {
 	return gcli_forge(ctx)->pull_set_milestone(
 		ctx, owner, repo, pr_number, milestone_id);
@@ -190,7 +190,7 @@ gcli_pull_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gcli_pull_clear_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                          int pr_number)
+                          gcli_id const pr_number)
 {
 	return gcli_forge(ctx)->pull_clear_milestone(ctx, owner, repo, pr_number);
 }

@@ -42,32 +42,32 @@ int gitea_get_pulls(gcli_ctx *ctx, char const *owner, char const *reponame,
                     gcli_pull_list *out);
 
 int gitea_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
-                   int pr_number, gcli_pull *out);
+                   gcli_id pr_number, gcli_pull *out);
 
 int gitea_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
-                           int pr_number, gcli_commit_list *out);
+                           gcli_id pr_number, gcli_commit_list *out);
 
 int gitea_pull_submit(gcli_ctx *ctx, gcli_submit_pull_options opts);
 
 int gitea_pull_merge(gcli_ctx *ctx, char const *owner, char const *reponame,
-                     int pr_number, enum gcli_merge_flags flags);
+                     gcli_id pr_number, enum gcli_merge_flags flags);
 
 int gitea_pull_close(gcli_ctx *ctx, char const *owner, char const *repo,
-                     int pr_number);
+                     gcli_id pr_number);
 
 int gitea_pull_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
-                      int pr_number);
+                      gcli_id pr_number);
 
 int gitea_print_pr_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
-                        char const *repo, int pr_number);
+                        char const *repo, gcli_id pr_number);
 
 int gitea_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
-                          int pr_number, gcli_pull_checks_list *out);
+                          gcli_id pr_number, gcli_pull_checks_list *out);
 
 int gitea_pull_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                             int pr_number, int milestone_id);
+                             gcli_id pr_number, gcli_id milestone_id);
 
 int gitea_pull_clear_milestone(gcli_ctx *ctx, char const *owner,
-                               char const *repo, int pr_number);
+                               char const *repo, gcli_id pr_number);
 
 #endif /* GITEA_PULLS_H */

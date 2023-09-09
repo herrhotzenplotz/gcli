@@ -64,8 +64,8 @@ struct gcli_pull {
 	char *base_label;
 	char *head_sha;
 	char *milestone;
-	int id;
-	int number;
+	gcli_id id;
+	gcli_id number;
 	int comments;
 	int additions;
 	int deletions;
@@ -130,20 +130,20 @@ void gcli_pull_free(gcli_pull *it);
 void gcli_pulls_free(gcli_pull_list *list);
 
 int gcli_pull_get_diff(gcli_ctx *ctx, FILE *fout, char const *owner,
-                       char const *repo, int pr_number);
+                       char const *repo, gcli_id pr_number);
 
 int gcli_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
-                         int pr_number, gcli_pull_checks_list *out);
+                         gcli_id pr_number, gcli_pull_checks_list *out);
 
 void gcli_pull_checks_free(gcli_pull_checks_list *list);
 
 int gcli_pull_get_commits(gcli_ctx *ctx, char const *owner, char const *repo,
-                          int pr_number, gcli_commit_list *out);
+                          gcli_id pr_number, gcli_commit_list *out);
 
 void gcli_commits_free(gcli_commit_list *list);
 
 int gcli_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
-                  int pr_number, gcli_pull *out);
+                  gcli_id pr_number, gcli_pull *out);
 
 int gcli_pull_submit(gcli_ctx *ctx, gcli_submit_pull_options);
 
@@ -153,26 +153,26 @@ enum gcli_merge_flags {
 };
 
 int gcli_pull_merge(gcli_ctx *ctx, char const *owner, char const *reponame,
-                    int pr_number, enum gcli_merge_flags flags);
+                    gcli_id pr_number, enum gcli_merge_flags flags);
 
 int gcli_pull_close(gcli_ctx *ctx, char const *owner, char const *reponame,
-                    int pr_number);
+                    gcli_id pr_number);
 
 int gcli_pull_reopen(gcli_ctx *ctx, char const *owner, char const *reponame,
-                     int pr_number);
+                     gcli_id pr_number);
 
 int gcli_pull_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                         int pr_number, char const *const labels[],
+                         gcli_id pr_number, char const *const labels[],
                          size_t labels_size);
 
 int gcli_pull_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                            int pr_number, char const *const labels[],
+                            gcli_id pr_number, char const *const labels[],
                             size_t labels_size);
 
 int gcli_pull_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                            int pr_number, int milestone_id);
+                            gcli_id pr_number, int milestone_id);
 
 int gcli_pull_clear_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                              int pr_number);
+                              gcli_id pr_number);
 
 #endif /* PULLS_H */

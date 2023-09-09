@@ -8,6 +8,7 @@
 .Nm
 .Op Fl a
 .Op Fl A Ar author
+.Op Fl L Ar label
 .Op Fl s
 .Op Fl n Ar n
 .Op Fl o Ar owner Fl r Ar repo
@@ -53,6 +54,10 @@ amount of time because
 .Nm
 needs to iterate all the fetched data and filter out the requested
 information.
+.It Fl L , -label Ar label
+Filter pull requests by the given label. See the notes about the
+.Fl A
+option above - the same reasoning applies to this option.
 .It Fl a
 List all PRs, including closed and merged ones. Cannot be combined
 with actions. This does not affect the
@@ -191,6 +196,13 @@ $ git checkout 42-review
 $ <make etc>
 $ git checkout trunk
 $ git merge --no-ff 42-review
+.Ed
+.Pp
+List pull requests that have the
+.Dq bug
+label:
+.Bd -literal -offset indent
+$ gcli pulls -L bug
 .Ed
 .Pp
 .Sh SEE ALSO

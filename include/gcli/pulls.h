@@ -105,6 +105,7 @@ struct gcli_submit_pull_options {
 struct gcli_pull_fetch_details {
 	bool all;
 	char const *author;
+	char const *label;
 };
 
 /** Generic list of checks ran on a pull request

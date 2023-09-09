@@ -37,9 +37,6 @@
 #include <gcli/curl.h>
 #include <gcli/pulls.h>
 
-int github_fetch_pulls(gcli_ctx *ctx, char *url, char const *filter_author,
-                       int max, gcli_pull_list *list);
-
 int github_get_pulls(gcli_ctx *ctx, char const *owner, char const *reponame,
                      gcli_pull_fetch_details const *details, int max,
                      gcli_pull_list *out);

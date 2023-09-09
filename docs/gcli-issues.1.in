@@ -9,7 +9,7 @@
 .Op Fl n Ar n
 .Op Fl a
 .Op Fl s
-.Op Fl -author Ar user
+.Op Fl A Ar author
 .Op Fl o Ar owner Fl r Ar repo
 .Nm
 .Fl i Ar issue
@@ -44,7 +44,7 @@ List issues disregarding their state. This will list closed issues as
 well. Cannot be combined with actions. This does not affect the
 .Fl n
 option.
-.It Fl -author Ar user
+.It Fl A , Fl -author Ar user
 Only list issues authored by the given user.
 .It Fl n , -count Ar n
 Fetch at least

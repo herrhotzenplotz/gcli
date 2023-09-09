@@ -98,6 +98,7 @@ AC_DEFINE_UNQUOTED([HOSTOS], ["$host"], [Define to the triplet of the host opera
 
 dnl Generate and substitute various files
 AC_CONFIG_FILES([Makefile
+                 libgcli.pc
                  docs/gcli-api.1
                  docs/gcli-comment.1
                  docs/gcli-config.1

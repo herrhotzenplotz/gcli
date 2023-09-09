@@ -127,6 +127,9 @@ nobase_header_HEADERS = include/gcli/gcli.h include/gcli/comments.h	\
 	include/gcli/review.h include/gcli/gitlab/snippets.h		\
 	include/gcli/status.h include/gcli/sshkeys.h
 
+pkgconfdir = $(libdir)/pkgconfig
+pkgconf_DATA = libgcli.pc
+
 libgcli_la_SOURCES = \
 	include/gcli/ctx.h src/ctx.c \
 	include/gcli/gcli.h src/gcli.c \

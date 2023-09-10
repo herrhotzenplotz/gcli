@@ -101,7 +101,7 @@ github_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
 
 	if (details->label) {
 		char *tmp = gcli_urlencode(details->label);
-		e_author = sn_asprintf("&labels=%s", tmp);
+		e_label = sn_asprintf("&labels=%s", tmp);
 		free(tmp);
 	}
 

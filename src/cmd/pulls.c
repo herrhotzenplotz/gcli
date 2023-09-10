@@ -57,13 +57,15 @@ usage(void)
 {
 	fprintf(stderr, "usage: gcli pulls create [-o owner -r repo] [-f from]\n");
 	fprintf(stderr, "                         [-t to] [-d] [-l label] pull-request-title\n");
-	fprintf(stderr, "       gcli pulls [-o owner -r repo] [-a] [-A author ][-n number] [-s]\n");
+	fprintf(stderr, "       gcli pulls [-o owner -r repo] [-a] [-A author] [-n number]\n");
+	fprintf(stderr, "                  [-L label] [-s]\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] -i pull-id actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
 	fprintf(stderr, "  -o owner        The repository owner\n");
 	fprintf(stderr, "  -r repo         The repository name\n");
 	fprintf(stderr, "  -a              Fetch everything including closed and merged PRs\n");
 	fprintf(stderr, "  -A author       Filter pull requests by the given author\n");
+	fprintf(stderr, "  -L label        Filter pull requests by the given label\n");
 	fprintf(stderr, "  -d              Mark newly created PR as a draft\n");
 	fprintf(stderr, "  -f owner:branch Specify the owner and branch of the fork that is the head of a PR.\n");
 	fprintf(stderr, "  -l label        Add the given label when creating the PR\n");
@@ -535,6 +537,10 @@ subcommand_pulls(int argc, char *argv[])
 		  .has_arg = no_argument,
 		  .flag    = NULL,
 		  .val     = 'A' },
+		{ .name    = "label",
+		  .has_arg = no_argument,
+		  .flag    = NULL,
+		  .val     = 'L' },
 		{ .name    = "sorted",
 		  .has_arg = no_argument,
 		  .flag    = NULL,
@@ -559,7 +565,7 @@ subcommand_pulls(int argc, char *argv[])
 	};
 
 	/* Parse commandline options */
-	while ((ch = getopt_long(argc, argv, "+n:o:r:i:asA:", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "+n:o:r:i:asA:L:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
 			owner = optarg;
@@ -591,6 +597,9 @@ subcommand_pulls(int argc, char *argv[])
 		} break;
 		case 'A': {
 			details.author = optarg;
+		} break;
+		case 'L': {
+			details.label = optarg;
 		} break;
 		case 's': {
 			flags |= OUTPUT_SORTED;

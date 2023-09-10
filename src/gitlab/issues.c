@@ -60,6 +60,7 @@ gitlab_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
 	char *e_owner = NULL;
 	char *e_repo = NULL;
 	char *e_author = NULL;
+	char *e_labels = NULL;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -72,11 +73,20 @@ gitlab_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
 		free(tmp);
 	}
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/issues%s%s", gcli_get_apibase(ctx),
+	if (details->label) {
+		char *tmp = gcli_urlencode(details->label);
+		int const should_do_qmark = details->all && !details->author;
+
+		e_labels = sn_asprintf("%clabels=%s", should_do_qmark ? '?' : '&', tmp);
+		free(tmp);
+	}
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/issues%s%s%s", gcli_get_apibase(ctx),
 	                  e_owner, e_repo, details->all ? "" : "?state=opened",
-	                  e_author ? e_author : "");
+	                  e_author ? e_author : "", e_labels ? e_labels : "");
 
 	free(e_author);
+	free(e_labels);
 	free(e_owner);
 	free(e_repo);
 

@@ -22,7 +22,9 @@ pgen_SOURCES = \
 lib_LTLIBRARIES = libgcli.la
 noinst_LTLIBRARIES = libsn.la libpdjson.la
 
-.NOTPARALLEL: pgen$(EXEEXT) $(builddir)/src/pgen/parser.c $(builddir)/src/pgen/parser.h $(builddir)/src/pgen/lexer.c
+# For testing puproses I'll reenable parallel builds. If it breaks again, uncomment.
+# .NOTPARALLEL: pgen$(EXEEXT) $(builddir)/src/pgen/parser.c $(builddir)/src/pgen/parser.h $(builddir)/src/pgen/lexer.c
+src/pgen/lexer.c: src/pgen/parser.h
 
 libgcli_la_DEPENDENCIES = pgen$(EXEEXT) libpdjson.la libsn.la
 
@@ -202,7 +204,7 @@ CLEANFILES = $(BUILT_SOURCES)
 
 EXTRA_DIST = \
 	LICENSE \
-	README.md \
+	README.md  \
 	HACKING.md \
 	autogen.sh \
 	m4/.gitkeep \
@@ -221,27 +223,37 @@ check_PROGRAMS = \
 $(check_PROGRAMS): tests/gcli_tests.h
 
 EXTRA_DIST += tests/gcli_tests.h
-check: $(check_PROGRAMS) tests/Kyuafile libgcli.la libsn.la libpdjson.la do_test
+check: do_test
 
-do_test:
+do_test: $(check_PROGRAMS) tests/Kyuafile
 	kyua test -k tests/Kyuafile
 
+tests_json_escape_SOURCES = \
+	tests/json-escape.c
 tests_json_escape_LDADD = \
 	libgcli.la libpdjson.la libsn.la \
 	$(LIBATFC_LDFLAGS)
 
+tests_github_parse_tests_SOURCES = \
+	tests/github-parse-tests.c
 tests_github_parse_tests_LDADD = \
 	libgcli.la libpdjson.la libsn.la \
 	$(LIBATFC_LDFLAGS)
 
+tests_gitlab_parse_tests_SOURCES = \
+	tests/gitlab-parse-tests.c
 tests_gitlab_parse_tests_LDADD = \
 	libgcli.la libpdjson.la libsn.la \
 	$(LIBATFC_LDFLAGS)
 
+tests_url_encode_SOURCES = \
+	tests/url-encode.c
 tests_url_encode_LDADD = \
 	libgcli.la libpdjson.la libsn.la \
 	$(LIBATFC_LDFLAGS)
 
+tests_pretty_print_test_SOURCES = \
+	tests/pretty_print_test.c
 tests_pretty_print_test_LDADD = \
 	libsn.la \
 	$(LIBATFC_LDFLAGS)

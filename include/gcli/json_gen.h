@@ -53,6 +53,7 @@ struct gcli_jsongen {
 
 	bool await_object_value;  /* when in an object scope set to true if
 	                           * we expect a value and not a key */
+	bool first_elem;          /* first element in object/array */
 };
 
 int gcli_jsongen_init(gcli_jsongen *gen);
@@ -61,5 +62,7 @@ char *gcli_jsongen_to_string(gcli_jsongen *gen);
 
 int gcli_jsongen_begin_object(gcli_jsongen *gen);
 int gcli_jsongen_end_object(gcli_jsongen *gen);
+int gcli_jsongen_begin_array(gcli_jsongen *gen);
+int gcli_jsongen_end_array(gcli_jsongen *gen);
 
 #endif /* GCLI_JSON_GEN_H */

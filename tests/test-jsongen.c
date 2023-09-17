@@ -45,8 +45,27 @@ ATF_TC_BODY(empty_object, tc)
 	gcli_jsongen_free(&gen);
 }
 
+ATF_TC_WITHOUT_HEAD(array_with_two_empty_objects);
+ATF_TC_BODY(array_with_two_empty_objects, tc)
+{
+	gcli_jsongen gen = {0};
+
+	ATF_REQUIRE(gcli_jsongen_init(&gen) == 0);
+	ATF_REQUIRE(gcli_jsongen_begin_array(&gen) == 0);
+	for (int i = 0; i < 2; ++i) {
+		ATF_REQUIRE(gcli_jsongen_begin_object(&gen) == 0);
+		ATF_REQUIRE(gcli_jsongen_end_object(&gen) == 0);
+	}
+	ATF_REQUIRE(gcli_jsongen_end_array(&gen) == 0);
+
+	ATF_CHECK_STREQ(gcli_jsongen_to_string(&gen), "[{}, {}]");
+
+	gcli_jsongen_free(&gen);
+}
+
 ATF_TP_ADD_TCS(tp)
 {
 	ATF_TP_ADD_TC(tp, empty_object);
+	ATF_TP_ADD_TC(tp, array_with_two_empty_objects);
 	return atf_no_error();
 }

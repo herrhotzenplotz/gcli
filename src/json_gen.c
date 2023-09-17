@@ -53,6 +53,8 @@ gcli_jsongen_init(gcli_jsongen *gen)
 
 	grow_buffer(gen);
 
+	gen->first_elem = true;
+
 	return 0;
 }
 
@@ -120,8 +122,10 @@ append_str(gcli_jsongen *gen, char const *str)
 static void
 put_comma_if_needed(gcli_jsongen *gen)
 {
-	if (is_array_or_object_scope(gen))
+	if (!gen->first_elem && is_array_or_object_scope(gen))
 		append_str(gen, ", ");
+
+	gen->first_elem = false;
 }
 
 static bool
@@ -145,8 +149,9 @@ gcli_jsongen_begin_object(gcli_jsongen *gen)
 	if (push_scope(gen, GCLI_JSONGEN_OBJECT) < 0)
 		return -1;
 
-	fit(gen, 1);
-	gen->buffer[gen->buffer_size++] = '{';
+	append_str(gen, "{");
+
+	gen->first_elem = true;
 
 	return 0;
 }
@@ -157,8 +162,41 @@ gcli_jsongen_end_object(gcli_jsongen *gen)
 	if (pop_scope(gen) != GCLI_JSONGEN_OBJECT)
 		return -1;
 
-	fit(gen, 1);
-	gen->buffer[gen->buffer_size++] = '}';
+	append_str(gen, "}");
+
+	gen->first_elem = false;
+
+	return 0;
+}
+
+int
+gcli_jsongen_begin_array(gcli_jsongen *gen)
+{
+	/* Cannot put a json array into a json object key */
+	if (is_object_scope(gen) && !gen->await_object_value)
+		return -1;
+
+	put_comma_if_needed(gen);
+
+	if (push_scope(gen, GCLI_JSONGEN_ARRAY) < 0)
+		return -1;
+
+	append_str(gen, "[");
+
+	gen->first_elem = true;
+
+	return 0;
+}
+
+int
+gcli_jsongen_end_array(gcli_jsongen *gen)
+{
+	if (pop_scope(gen) != GCLI_JSONGEN_ARRAY)
+		return -1;
+
+	append_str(gen, "]");
+
+	gen->first_elem = false;
 
 	return 0;
 }

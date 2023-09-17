@@ -29,9 +29,20 @@
 
 #include <atf-c.h>
 
+#include <gcli/json_gen.h>
+
 ATF_TC_WITHOUT_HEAD(empty_object);
 ATF_TC_BODY(empty_object, tc)
 {
+	gcli_jsongen gen = {0};
+
+	ATF_REQUIRE(gcli_jsongen_init(&gen) == 0);
+	ATF_REQUIRE(gcli_jsongen_begin_object(&gen) == 0);
+	ATF_REQUIRE(gcli_jsongen_end_object(&gen) == 0);
+
+	ATF_CHECK_STREQ(gcli_jsongen_to_string(&gen), "{}");
+
+	gcli_jsongen_free(&gen);
 }
 
 ATF_TP_ADD_TCS(tp)

@@ -141,6 +141,7 @@ libgcli_la_SOURCES = \
 	src/forges.c include/gcli/forges.h \
 	src/forks.c include/gcli/forks.h \
 	src/issues.c include/gcli/issues.h \
+	src/json_gen.c include/gcli/json_gen.h \
 	src/json_util.c include/gcli/json_util.h \
 	src/labels.c include/gcli/labels.h \
 	src/milestones.c include/gcli/milestones.h \

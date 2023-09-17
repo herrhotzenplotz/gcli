@@ -34,9 +34,12 @@
 #include <config.h>
 #endif
 
+#include <stdbool.h>
+#include <stddef.h>
+
 enum {
-	GCLI_JSONGEN_ARRAY,
-	GCLI_JSONGEN_OBJECT,
+	GCLI_JSONGEN_ARRAY = 1,
+	GCLI_JSONGEN_OBJECT = 2,
 };
 
 typedef struct gcli_jsongen gcli_jsongen;
@@ -47,9 +50,16 @@ struct gcli_jsongen {
 
 	int scopes[32];           /* scope stack */
 	size_t scopes_size;       /* scope stack pointer */
+
+	bool await_object_value;  /* when in an object scope set to true if
+	                           * we expect a value and not a key */
 };
 
 int gcli_jsongen_init(gcli_jsongen *gen);
 void gcli_jsongen_free(gcli_jsongen *gen);
+char *gcli_jsongen_to_string(gcli_jsongen *gen);
+
+int gcli_jsongen_begin_object(gcli_jsongen *gen);
+int gcli_jsongen_end_object(gcli_jsongen *gen);
 
 #endif /* GCLI_JSON_GEN_H */

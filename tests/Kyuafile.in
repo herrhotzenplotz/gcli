@@ -23,3 +23,7 @@ atf_test_program{
 atf_test_program{
         name = 'pretty_print_test'
 }
+
+atf_test_program{
+        name = 'test-jsongen'
+}

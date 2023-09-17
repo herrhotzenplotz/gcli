@@ -218,7 +218,8 @@ check_PROGRAMS = \
 	tests/github-parse-tests$(EXEEXT) \
 	tests/gitlab-parse-tests$(EXEEXT) \
 	tests/url-encode$(EXEEXT) \
-	tests/pretty_print_test$(EXEEXT)
+	tests/pretty_print_test$(EXEEXT) \
+	tests/test-jsongen$(EXEEXT)
 
 $(check_PROGRAMS): tests/gcli_tests.h
 
@@ -256,6 +257,12 @@ tests_pretty_print_test_SOURCES = \
 	tests/pretty_print_test.c
 tests_pretty_print_test_LDADD = \
 	libsn.la \
+	$(LIBATFC_LDFLAGS)
+
+tests_test_jsongen_SOURCES = \
+	tests/test-jsongen.c
+tests_test_jsongen_LDADD = \
+	libgcli.la \
 	$(LIBATFC_LDFLAGS)
 
 EXTRA_DIST += tests/samples/github_simple_comment.json	\

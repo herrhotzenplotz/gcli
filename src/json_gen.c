@@ -104,7 +104,7 @@ pop_scope(gcli_jsongen *gen)
 	return gen->scopes[--gen->scopes_size];
 }
 
-static int
+static bool
 is_array_or_object_scope(gcli_jsongen *gen)
 {
 	return !!gen->scopes_size;

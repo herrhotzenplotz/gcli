@@ -29,8 +29,12 @@
 
 #include <gcli/json_gen.h>
 
+#include <gcli/json_util.h>
+
 #include <config.h>
 
+#include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -122,7 +126,7 @@ append_str(gcli_jsongen *gen, char const *str)
 static void
 put_comma_if_needed(gcli_jsongen *gen)
 {
-	if (!gen->first_elem && is_array_or_object_scope(gen))
+	if (!gen->await_object_value && !gen->first_elem && is_array_or_object_scope(gen))
 		append_str(gen, ", ");
 
 	gen->first_elem = false;
@@ -196,6 +200,60 @@ gcli_jsongen_end_array(gcli_jsongen *gen)
 
 	append_str(gen, "]");
 
+	gen->first_elem = false;
+
+	return 0;
+}
+
+static void
+append_vstrf(gcli_jsongen *gen, char const *const fmt, va_list vp)
+{
+	va_list vp_copy;
+	size_t len;
+
+	va_copy(vp_copy, vp);
+	len = vsnprintf(NULL, 0, fmt, vp_copy);
+
+	fit(gen, len + 1);
+	vsnprintf(gen->buffer + gen->buffer_size, len + 1, fmt, vp);
+
+	gen->buffer_size += len;
+}
+
+static void
+append_strf(gcli_jsongen *gen, char const *const fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	append_vstrf(gen, fmt, ap);
+	va_end(ap);
+}
+
+int
+gcli_jsongen_objmember(gcli_jsongen *gen, char const *const key)
+{
+	if (!is_object_scope(gen))
+		return -1;
+
+	put_comma_if_needed(gen);
+	char const *const e_key = gcli_json_escape_cstr(key);
+
+	append_strf(gen, "\"%s\": ", e_key);
+
+	gen->first_elem = false;
+	gen->await_object_value = true;
+
+	return 0;
+}
+
+int
+gcli_jsongen_number(gcli_jsongen *gen, long long const number)
+{
+	put_comma_if_needed(gen);
+	append_strf(gen, "%lld", number);
+
+	gen->await_object_value = false;
 	gen->first_elem = false;
 
 	return 0;

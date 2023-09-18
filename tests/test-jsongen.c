@@ -77,11 +77,29 @@ ATF_TC_BODY(empty_array, tc)
 	gcli_jsongen_free(&gen);
 }
 
+ATF_TC_WITHOUT_HEAD(object_with_number);
+ATF_TC_BODY(object_with_number, tc)
+{
+	gcli_jsongen gen = {0};
+
+	ATF_REQUIRE(gcli_jsongen_init(&gen) == 0);
+	ATF_REQUIRE(gcli_jsongen_begin_object(&gen) == 0);
+	ATF_REQUIRE(gcli_jsongen_objmember(&gen, "number") == 0);
+	ATF_REQUIRE(gcli_jsongen_number(&gen, 420) == 0);
+	ATF_REQUIRE(gcli_jsongen_end_object(&gen) == 0);
+
+	ATF_CHECK_STREQ(gcli_jsongen_to_string(&gen),
+	                "{\"number\": 420}");
+
+	gcli_jsongen_free(&gen);
+}
+
 ATF_TP_ADD_TCS(tp)
 {
 	ATF_TP_ADD_TC(tp, empty_object);
 	ATF_TP_ADD_TC(tp, array_with_two_empty_objects);
 	ATF_TP_ADD_TC(tp, empty_array);
+	ATF_TP_ADD_TC(tp, object_with_number);
 
 	return atf_no_error();
 }

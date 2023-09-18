@@ -159,6 +159,26 @@ ATF_TC_BODY(object_with_mixed_values, tc)
 	gcli_jsongen_free(&gen);
 }
 
+ATF_TC_WITHOUT_HEAD(object_with_two_keys_and_values_that_are_string);
+ATF_TC_BODY(object_with_two_keys_and_values_that_are_string, tc)
+{
+	gcli_jsongen gen = {0};
+
+	ATF_REQUIRE(gcli_jsongen_init(&gen) == 0);
+	ATF_REQUIRE(gcli_jsongen_begin_object(&gen) == 0);
+		ATF_REQUIRE(gcli_jsongen_objmember(&gen, "key1") == 0);
+		ATF_REQUIRE(gcli_jsongen_string(&gen, "value1") == 0);
+
+		ATF_REQUIRE(gcli_jsongen_objmember(&gen, "key2") == 0);
+		ATF_REQUIRE(gcli_jsongen_string(&gen, "value2") == 0);
+	ATF_REQUIRE(gcli_jsongen_end_object(&gen) == 0);
+
+	ATF_CHECK_STREQ(gcli_jsongen_to_string(&gen),
+	                "{\"key1\": \"value1\", \"key2\": \"value2\"}");
+
+	gcli_jsongen_free(&gen);
+}
+
 ATF_TP_ADD_TCS(tp)
 {
 	ATF_TP_ADD_TC(tp, empty_object);
@@ -168,6 +188,7 @@ ATF_TP_ADD_TCS(tp)
 	ATF_TP_ADD_TC(tp, object_nested);
 	ATF_TP_ADD_TC(tp, object_with_strings);
 	ATF_TP_ADD_TC(tp, object_with_mixed_values);
+	ATF_TP_ADD_TC(tp, object_with_two_keys_and_values_that_are_string);
 
 	return atf_no_error();
 }

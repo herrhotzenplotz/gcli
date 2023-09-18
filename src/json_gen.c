@@ -168,6 +168,7 @@ gcli_jsongen_end_object(gcli_jsongen *gen)
 
 	append_str(gen, "}");
 
+	gen->await_object_value = false;
 	gen->first_elem = false;
 
 	return 0;
@@ -200,6 +201,7 @@ gcli_jsongen_end_array(gcli_jsongen *gen)
 
 	append_str(gen, "]");
 
+	gen->await_object_value = false;
 	gen->first_elem = false;
 
 	return 0;
@@ -268,6 +270,9 @@ gcli_jsongen_string(gcli_jsongen *gen, char const *value)
 	char *const e_value = gcli_json_escape_cstr(value);
 
 	append_strf(gen, "\"%s\"", e_value);
+
+	gen->await_object_value = false;
+	gen->first_elem = false;
 
 	free(e_value);
 

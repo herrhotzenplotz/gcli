@@ -94,12 +94,36 @@ ATF_TC_BODY(object_with_number, tc)
 	gcli_jsongen_free(&gen);
 }
 
+ATF_TC_WITHOUT_HEAD(object_nested);
+ATF_TC_BODY(object_nested, tc)
+{
+	gcli_jsongen gen = {0};
+
+	ATF_REQUIRE(gcli_jsongen_init(&gen) == 0);
+	ATF_REQUIRE(gcli_jsongen_begin_object(&gen) == 0);
+	ATF_REQUIRE(gcli_jsongen_objmember(&gen, "hiernenarray") == 0);
+	ATF_REQUIRE(gcli_jsongen_begin_array(&gen) == 0);
+	ATF_REQUIRE(gcli_jsongen_number(&gen, 69) == 0);
+	ATF_REQUIRE(gcli_jsongen_number(&gen, 420) == 0);
+	ATF_REQUIRE(gcli_jsongen_end_array(&gen) == 0);
+	ATF_REQUIRE(gcli_jsongen_objmember(&gen, "empty_object") == 0);
+	ATF_REQUIRE(gcli_jsongen_begin_object(&gen) == 0);
+	ATF_REQUIRE(gcli_jsongen_end_object(&gen) == 0);
+	ATF_REQUIRE(gcli_jsongen_end_object(&gen) == 0);
+
+	ATF_CHECK_STREQ(gcli_jsongen_to_string(&gen),
+	                "{\"hiernenarray\": [69, 420], \"empty_object\": {}}");
+
+	gcli_jsongen_free(&gen);
+}
+
 ATF_TP_ADD_TCS(tp)
 {
 	ATF_TP_ADD_TC(tp, empty_object);
 	ATF_TP_ADD_TC(tp, array_with_two_empty_objects);
 	ATF_TP_ADD_TC(tp, empty_array);
 	ATF_TP_ADD_TC(tp, object_with_number);
+	ATF_TP_ADD_TC(tp, object_nested);
 
 	return atf_no_error();
 }

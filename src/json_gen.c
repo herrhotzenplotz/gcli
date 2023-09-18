@@ -237,12 +237,14 @@ gcli_jsongen_objmember(gcli_jsongen *gen, char const *const key)
 		return -1;
 
 	put_comma_if_needed(gen);
-	char const *const e_key = gcli_json_escape_cstr(key);
+	char *const e_key = gcli_json_escape_cstr(key);
 
 	append_strf(gen, "\"%s\": ", e_key);
 
 	gen->first_elem = false;
 	gen->await_object_value = true;
+
+	free(e_key);
 
 	return 0;
 }
@@ -255,6 +257,19 @@ gcli_jsongen_number(gcli_jsongen *gen, long long const number)
 
 	gen->await_object_value = false;
 	gen->first_elem = false;
+
+	return 0;
+}
+
+int
+gcli_jsongen_string(gcli_jsongen *gen, char const *value)
+{
+	put_comma_if_needed(gen);
+	char *const e_value = gcli_json_escape_cstr(value);
+
+	append_strf(gen, "\"%s\"", e_value);
+
+	free(e_value);
 
 	return 0;
 }

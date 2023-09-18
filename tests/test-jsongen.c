@@ -117,6 +117,24 @@ ATF_TC_BODY(object_nested, tc)
 	gcli_jsongen_free(&gen);
 }
 
+
+ATF_TC_WITHOUT_HEAD(object_with_strings);
+ATF_TC_BODY(object_with_strings, tc)
+{
+	gcli_jsongen gen = {0};
+
+	ATF_REQUIRE(gcli_jsongen_init(&gen) == 0);
+	ATF_REQUIRE(gcli_jsongen_begin_object(&gen) == 0);
+	ATF_REQUIRE(gcli_jsongen_objmember(&gen, "key") == 0);
+	ATF_REQUIRE(gcli_jsongen_string(&gen, "value") == 0);
+	ATF_REQUIRE(gcli_jsongen_end_object(&gen) == 0);
+
+	ATF_CHECK_STREQ(gcli_jsongen_to_string(&gen),
+	                "{\"key\": \"value\"}");
+
+	gcli_jsongen_free(&gen);
+}
+
 ATF_TP_ADD_TCS(tp)
 {
 	ATF_TP_ADD_TC(tp, empty_object);
@@ -124,6 +142,7 @@ ATF_TP_ADD_TCS(tp)
 	ATF_TP_ADD_TC(tp, empty_array);
 	ATF_TP_ADD_TC(tp, object_with_number);
 	ATF_TP_ADD_TC(tp, object_nested);
+	ATF_TP_ADD_TC(tp, object_with_strings);
 
 	return atf_no_error();
 }

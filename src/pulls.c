@@ -205,3 +205,10 @@ gcli_pull_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
 	return gcli_forge(ctx)->pull_add_reviewer(
 		ctx, owner, repo, pr_number, username);
 }
+
+int
+gcli_pull_get_patch(gcli_ctx *ctx, FILE *out, char const *owner, char const *repo,
+                    gcli_id pull_id)
+{
+	return gcli_forge(ctx)->pull_get_patch(ctx, out, owner, repo, pull_id);
+}

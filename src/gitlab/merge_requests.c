@@ -124,20 +124,139 @@ gitlab_get_mrs(gcli_ctx *ctx, char const *owner, char const *repo,
 	return gitlab_fetch_mrs(ctx, url, max, list);
 }
 
+static void
+gitlab_free_diff(gitlab_diff *diff)
+{
+	free(diff->diff);
+	free(diff->old_path);
+	free(diff->new_path);
+	free(diff->a_mode);
+	free(diff->b_mode);
+
+	memset(diff, 0, sizeof(*diff));
+}
+
+static void
+gitlab_free_diffs(gitlab_diff_list *list)
+{
+	for (size_t i = 0; i < list->diffs_size; ++i) {
+		gitlab_free_diff(&list->diffs[i]);
+	}
+
+	free(list->diffs);
+	list->diffs = NULL;
+	list->diffs_size = 0;
+}
+
+static int
+gitlab_make_commit_patch(gcli_ctx *ctx, FILE *stream,
+                         char const *const e_owner, char const *const e_repo,
+                         char const *const prev_commit_sha,
+                         gcli_commit const *const commit)
+{
+	char *url;
+	int rc;
+	gitlab_diff_list list = {0};
+
+	gcli_fetch_list_ctx fl = {
+		.listp = &list.diffs,
+		.sizep = &list.diffs_size,
+		.max = -1,
+		.parse = (parsefn)(parse_gitlab_diffs),
+	};
+
+	/* /projects/:id/repository/commits/:sha/diff */
+	url = sn_asprintf("%s/projects/%s%%2F%s/repository/commits/%s/diff",
+	                  gcli_get_apibase(ctx), e_owner, e_repo, commit->sha);
+
+	rc = gcli_fetch_list(ctx, url, &fl);
+	if (rc < 0)
+		goto err_fetch_diffs;
+
+	fprintf(stream, "From %s Mon Sep 17 00:00:00 2001\n", commit->long_sha);
+	fprintf(stream, "From: %s <%s>\n", commit->author, commit->email);
+	fprintf(stream, "Date: %s\n", commit->date);
+	fprintf(stream, "Subject: %s\n\n", commit->message);
+
+	for (size_t i = 0; i < list.diffs_size; ++i) {
+		gitlab_diff const *d = &list.diffs[i];
+		fprintf(stream,
+		        "diff --git a/%s b/%s\n"
+		        "index %s..%s %s\n"
+		        "--- a/%s\n"
+		        "+++ b/%s\n"
+		        "%s",
+		        d->old_path, d->new_path,
+		        prev_commit_sha, commit->sha, d->b_mode,
+		        d->old_path, d->new_path,
+		        d->diff);
+	}
+
+	fprintf(stream, "--\n2.42.2\n\n");
+
+	gitlab_free_diffs(&list);
+
+err_fetch_diffs:
+
+	return rc;
+}
+
+int
+gitlab_print_pr_patch(gcli_ctx *ctx, FILE *stream, char const *owner,
+                      char const *reponame, gcli_id mr_number)
+{
+	int rc = 0;
+	char *e_owner, *e_repo;
+	gcli_pull pull = {0};
+	gcli_commit_list commits = {0};
+	char const *prev_commit_sha;
+	char *base_sha_short;
+
+	rc = gitlab_get_pull(ctx, owner, reponame, mr_number, &pull);
+	if (rc < 0)
+		goto err_get_pull;
+
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(reponame);
+
+	rc = gitlab_get_pull_commits(ctx, owner, reponame, mr_number, &commits);
+	if (rc < 0)
+		goto err_get_commit_list;
+
+	base_sha_short = sn_strndup(pull.base_sha, 8);
+	prev_commit_sha = base_sha_short;
+	for (size_t i = 0; i < commits.commits_size; ++i) {
+		rc = gitlab_make_commit_patch(ctx, stream, e_owner, e_repo,
+		                              prev_commit_sha,
+		                              &commits.commits[i]);
+		if (rc < 0)
+			goto err_make_commit_patch;
+
+		prev_commit_sha = commits.commits[i].sha;
+	}
+
+err_make_commit_patch:
+	free(base_sha_short);
+	gcli_commits_free(&commits);
+
+err_get_commit_list:
+	free(e_owner);
+	free(e_repo);
+
+err_get_pull:
+	return rc;
+}
+
 int
 gitlab_print_pr_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
-                     char const *repo, gcli_id const pr_number)
+                     char const *reponame, gcli_id mr_number)
 {
-	(void)ctx;
-	(void)owner;
-	(void)repo;
-	(void)pr_number;
+	(void) stream;
+	(void) owner;
+	(void) reponame;
+	(void) mr_number;
 
-	fprintf(stream,
-	        "note : Getting the diff of a Merge Request is not "
-	        "supported on GitLab. Blame the Gitlab people.\n");
-
-	return -1;
+	return gcli_error(ctx, "not yet implemented");
 }
 
 int

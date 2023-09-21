@@ -171,7 +171,6 @@ gcli_curl_test_success(gcli_ctx *ctx, char const *url)
 	curl_easy_setopt(ctx->curl, CURLOPT_BUFFERSIZE, 102400L);
 	curl_easy_setopt(ctx->curl, CURLOPT_NOPROGRESS, 1L);
 	curl_easy_setopt(ctx->curl, CURLOPT_MAXREDIRS, 50L);
-	curl_easy_setopt(ctx->curl, CURLOPT_FTP_SKIP_PASV_IP, 1L);
 	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, "curl/7.78.0");
 #if defined(CURL_HTTP_VERSION_2TLS)
 	curl_easy_setopt(

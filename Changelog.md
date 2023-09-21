@@ -3,7 +3,7 @@
 This changelog does not follow semantic versioning.
 
 
-## UNRELEASED
+## 2.0.0 (2023-Sep-21)
 
 ### Added
 

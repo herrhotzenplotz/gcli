@@ -29,9 +29,14 @@
 
 #include <config.h>
 
-#include <gcli/cmd.h>
-#include <gcli/config.h>
+#include <gcli/cmd/cmd.h>
+#include <gcli/cmd/cmdconfig.h>
+#include <gcli/cmd/colour.h>
+#include <gcli/cmd/pipelines.h>
+#include <gcli/cmd/table.h>
+
 #include <gcli/forges.h>
+
 #include <gcli/gitlab/pipelines.h>
 
 #ifdef HAVE_GETOPT_H
@@ -65,13 +70,189 @@ usage(void)
 }
 
 int
+gitlab_mr_pipelines(char const *owner, char const *repo, int const mr_id)
+{
+	gitlab_pipeline_list list = {0};
+	int rc = 0;
+
+	rc = gitlab_get_mr_pipelines(g_clictx, owner, repo, mr_id, &list);
+	if (rc == 0)
+		gitlab_print_pipelines(&list);
+
+	gitlab_free_pipelines(&list);
+
+	return rc;
+}
+
+void
+gitlab_print_pipelines(gitlab_pipeline_list const *const list)
+{
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "ID",      .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "STATUS",  .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
+		{ .name = "CREATED", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "UPDATED", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "REF",     .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+	};
+
+	if (!list->pipelines_size) {
+		printf("No pipelines\n");
+		return;
+	}
+
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
+		errx(1, "error: could not init table");
+
+	for (size_t i = 0; i < list->pipelines_size; ++i) {
+		gcli_tbl_add_row(table,
+		                 (int)(list->pipelines[i].id),
+		                 list->pipelines[i].status,
+		                 list->pipelines[i].created_at,
+		                 list->pipelines[i].updated_at,
+		                 list->pipelines[i].ref);
+	}
+
+	gcli_tbl_end(table);
+}
+
+int
+gitlab_pipelines(char const *owner, char const *repo, int const count)
+{
+	gitlab_pipeline_list pipelines = {0};
+	int rc = 0;
+
+	rc = gitlab_get_pipelines(g_clictx, owner, repo, count, &pipelines);
+	if (rc < 0)
+		return rc;
+
+	gitlab_print_pipelines(&pipelines);
+	gitlab_free_pipelines(&pipelines);
+
+	return rc;
+}
+
+void
+gitlab_print_jobs(gitlab_job_list const *const list)
+{
+	gcli_tbl table;
+	gcli_tblcoldef cols[] = {
+		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_LONG,   .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "STATUS",     .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
+		{ .name = "STARTED",    .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "FINISHED",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "RUNNERDESC", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "REF",        .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+	};
+
+	if (!list->jobs_size) {
+		printf("No jobs\n");
+		return;
+	}
+
+	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!table)
+		errx(1, "error: could not initialize table");
+
+	for (size_t i = 0; i < list->jobs_size; ++i) {
+		gcli_tbl_add_row(table,
+		                 list->jobs[i].id,
+		                 list->jobs[i].name,
+		                 list->jobs[i].status,
+		                 list->jobs[i].started_at,
+		                 list->jobs[i].finished_at,
+		                 list->jobs[i].runner_description,
+		                 list->jobs[i].ref);
+	}
+
+	gcli_tbl_end(table);
+}
+
+int
+gitlab_pipeline_jobs(char const *owner, char const *repo,
+                     long const id, int const count)
+{
+	gitlab_job_list jobs = {0};
+	int rc = 0;
+
+	rc = gitlab_get_pipeline_jobs(g_clictx, owner, repo, id, count, &jobs);
+	if (rc < 0)
+		return rc;
+
+	gitlab_print_jobs(&jobs);
+	gitlab_free_jobs(&jobs);
+
+	return rc;
+}
+
+void
+gitlab_print_job_status(gitlab_job const *const job)
+{
+	gcli_dict printer;
+
+	printer = gcli_dict_begin();
+
+	gcli_dict_add(printer,        "ID", 0, 0, "%ld", job->id);
+	gcli_dict_add_string(printer, "STATUS", GCLI_TBLCOL_STATECOLOURED, 0, job->status);
+	gcli_dict_add_string(printer, "STAGE", 0, 0, job->stage);
+	gcli_dict_add_string(printer, "NAME", GCLI_TBLCOL_BOLD, 0, job->name);
+	gcli_dict_add_string(printer, "REF", GCLI_TBLCOL_COLOUREXPL, GCLI_COLOR_YELLOW, job->ref);
+	gcli_dict_add_string(printer, "CREATED", 0, 0, job->created_at);
+	gcli_dict_add_string(printer, "STARTED", 0, 0, job->started_at);
+	gcli_dict_add_string(printer, "FINISHED", 0, 0, job->finished_at);
+	gcli_dict_add(printer,        "DURATION", 0, 0, "%-.2lfs", job->duration);
+	gcli_dict_add(printer,        "COVERAGE", 0, 0, "%.1lf%%", job->coverage);
+	gcli_dict_add_string(printer, "RUNNER NAME", 0, 0, job->runner_name);
+	gcli_dict_add_string(printer, "RUNNER DESCR", 0, 0, job->runner_description);
+
+	gcli_dict_end(printer);
+}
+
+int
+gitlab_job_status(char const *owner, char const *repo, long const jid)
+{
+	gitlab_job job = {0};
+	int rc = 0;
+
+	rc = gitlab_get_job(g_clictx, owner, repo, jid, &job);
+	if (rc < 0)
+		return rc;
+
+	gitlab_print_job_status(&job);
+	gitlab_free_job(&job);
+
+	return rc;
+}
+
+/* Wrappers that pass in the context to the library functions */
+static int
+gitlab_job_log_cb(char const *owner, char const *repo, long const jid)
+{
+	return gitlab_job_get_log(g_clictx, owner, repo, jid, stdout);
+}
+
+static int
+gitlab_job_cancel_cb(char const *owner, char const *repo, long const jid)
+{
+	return gitlab_job_cancel(g_clictx, owner, repo, jid);
+}
+
+static int
+gitlab_job_retry_cb(char const *owner, char const *repo, long const jid)
+{
+	return gitlab_job_retry(g_clictx, owner, repo, jid);
+}
+
+int
 subcommand_pipelines(int argc, char *argv[])
 {
-	int         ch    = 0;
+	int ch = 0;
 	char const *owner = NULL, *repo = NULL;
-	int         count = 30;
-	long        pid   = -1;     /* pipeline id                           */
-	long        jid   = -1;     /* job id. these are mutually exclusive. */
+	int count = 30;
+	long pid = -1;              /* pipeline id                           */
+	long jid = -1;              /* job id. these are mutually exclusive. */
 
 	/* Parse options */
 	const struct option options[] = {
@@ -93,13 +274,13 @@ subcommand_pipelines(int argc, char *argv[])
 			break;
 		case 'n': {
 			char *endptr = NULL;
-			count        = strtol(optarg, &endptr, 10);
+			count = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "ci: cannot parse argument to -n");
 		} break;
 		case 'p': {
 			char *endptr = NULL;
-			pid          = strtol(optarg, &endptr, 10);
+			pid = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "ci: cannot parse argument to -p");
 			if (pid < 0) {
@@ -108,7 +289,7 @@ subcommand_pipelines(int argc, char *argv[])
 		} break;
 		case 'j': {
 			char *endptr = NULL;
-			jid          = strtol(optarg, &endptr, 10);
+			jid = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "ci: cannot parse argument to -j");
 			if (jid < 0) {
@@ -135,7 +316,7 @@ subcommand_pipelines(int argc, char *argv[])
 
 	/* Make sure we are actually talking about a gitlab remote because
 	 * we might be incorrectly inferring it */
-	if (gcli_config_get_forge_type() != GCLI_FORGE_GITLAB)
+	if (gcli_config_get_forge_type(g_clictx) != GCLI_FORGE_GITLAB)
 		errx(1, "error: The pipelines subcommand only works for GitLab. "
 		     "Use gcli -t gitlab ... to force a GitLab remote.");
 
@@ -149,7 +330,9 @@ subcommand_pipelines(int argc, char *argv[])
 			return EXIT_FAILURE;
 		}
 
-		gitlab_pipeline_jobs(owner, repo, pid, count);
+		if (gitlab_pipeline_jobs(owner, repo, pid, count) < 0)
+			errx(1, "error: failed to get pipeline jobs: %s",
+			     gcli_get_error(g_clictx));
 		return EXIT_SUCCESS;
 	}
 
@@ -163,7 +346,10 @@ subcommand_pipelines(int argc, char *argv[])
 			return EXIT_FAILURE;
 		}
 
-		gitlab_pipelines(owner, repo, count);
+		if (gitlab_pipelines(owner, repo, count) < 0)
+			errx(1, "error: failed to get pipelines: %s",
+			     gcli_get_error(g_clictx));
+
 		return EXIT_SUCCESS;
 	}
 
@@ -172,12 +358,12 @@ subcommand_pipelines(int argc, char *argv[])
 	/* Definition of the action list */
 	struct {
 		char const *name;                               /* Name on the cli */
-		void (*fn)(char const *, char const *, long);   /* Function to be invoked for this action */
+		int (*fn)(char const *, char const *, long);   /* Function to be invoked for this action */
 	} job_actions[] = {
-		{ .name = "log",    .fn = gitlab_job_get_log },
-		{ .name = "status", .fn = gitlab_job_status  },
-		{ .name = "cancel", .fn = gitlab_job_cancel  },
-		{ .name = "retry",  .fn = gitlab_job_retry   },
+		{ .name = "log",    .fn = gitlab_job_log_cb    },
+		{ .name = "status", .fn = gitlab_job_status    },
+		{ .name = "cancel", .fn = gitlab_job_cancel_cb },
+		{ .name = "retry",  .fn = gitlab_job_retry_cb  },
 	};
 
 	/* Check if the user missed out on supplying actions */
@@ -202,14 +388,17 @@ next_action:
 				argc -= 2;
 				argv += 2;
 			}
-			gitlab_job_download_artifacts(owner, repo, jid, outfile);
+			if (gitlab_job_download_artifacts(g_clictx, owner, repo, jid, outfile) < 0)
+				errx(1, "error: failed to download file: %s",
+				     gcli_get_error(g_clictx));
 			goto next_action;
 		}
 
 		/* Find the action and invoke it */
 		for (size_t i = 0; i < ARRAY_SIZE(job_actions); ++i) {
 			if (strcmp(action, job_actions[i].name) == 0) {
-				job_actions[i].fn(owner, repo, jid);
+				if (job_actions[i].fn(owner, repo, jid) < 0)
+					errx(1, "error: failed to perform action '%s'", action);
 				goto next_action;
 			}
 		}

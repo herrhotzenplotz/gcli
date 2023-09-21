@@ -39,8 +39,8 @@ object of gcli_pull with
 	 "state"         => state as string,
 	 "body"          => body as string,
 	 "created_at"    => created_at as string,
-	 "number"        => number as int,
-	 "id"            => id as int,
+	 "number"        => number as id,
+	 "id"            => id as id,
 	 "commits"       => commits as int,
 	 "labels"        => labels as array of github_label
 	                    use parse_github_label_text,

@@ -1,0 +1,12 @@
+# local kakrc for gcli
+
+# We build inside the build directory
+cd build
+
+set-option global ctagscmd "uctags -R --fields=+S"
+set-option global ctagspaths "../include ../src ../thirdparty"
+
+hook global BufSetOption filetype=c %{
+	add-highlighter buffer/ show-whitespaces -spc " "
+	smarttab
+}

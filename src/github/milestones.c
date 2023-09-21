@@ -29,8 +29,8 @@
 
 #include <gcli/github/milestones.h>
 
-#include <gcli/config.h>
 #include <gcli/curl.h>
+#include <gcli/date_time.h>
 #include <gcli/github/issues.h>
 #include <gcli/json_util.h>
 
@@ -43,73 +43,67 @@
 #include <time.h>
 
 int
-github_get_milestones(char const *const owner,
-                      char const *const repo,
-                      int const max,
+github_get_milestones(gcli_ctx *ctx, char const *const owner,
+                      char const *const repo, int const max,
                       gcli_milestone_list *const out)
 {
-	char *url, *next_url = NULL, *e_owner, *e_repo;
+	char *url, *e_owner, *e_repo;
+	gcli_fetch_list_ctx fl = {
+		.listp = &out->milestones,
+		.sizep = &out->milestones_size,
+		.parse = (parsefn)parse_github_milestones,
+		.max = max,
+	};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/repos/%s/%s/milestones",
-	                  gcli_get_apibase(),
+	                  gcli_get_apibase(ctx),
 	                  e_owner, e_repo);
 
-	do {
-		gcli_fetch_buffer buffer = {0};
-		json_stream stream = {0};
+	free(e_owner);
+	free(e_repo);
 
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
-
-		parse_github_milestones(&stream, &out->milestones, &out->milestones_size);
-
-		json_close(&stream);
-		free(url);
-		free(buffer.data);
-	} while ((url = next_url) && ((max < 0) || (out->milestones_size < (size_t)max)));
-
-	free(url);
-
-	return 0;
+	return gcli_fetch_list(ctx, url, &fl);
 }
 
 int
-github_get_milestone(char const *const owner,
-                     char const *const repo,
-                     int const milestone,
+github_get_milestone(gcli_ctx *ctx, char const *const owner,
+                     char const *const repo, gcli_id const milestone,
                      gcli_milestone *const out)
 {
 	char *url, *e_owner, *e_repo;
 	gcli_fetch_buffer buffer = {0};
-	json_stream stream = {0};
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/milestones/%d",
-	                  gcli_get_apibase(), e_owner, e_repo, milestone);
+	url = sn_asprintf("%s/repos/%s/%s/milestones/%lu",
+	                  gcli_get_apibase(ctx), e_owner, e_repo, milestone);
 
-	gcli_fetch(url, NULL, &buffer);
-	json_open_buffer(&stream, buffer.data, buffer.length);
-
-	parse_github_milestone(&stream, out);
-
-	json_close(&stream);
-	free(url);
-	free(buffer.data);
 	free(e_repo);
 	free(e_owner);
 
-	return 0;
+	rc = gcli_fetch(ctx, url, NULL, &buffer);
+	if (rc == 0) {
+		json_stream stream = {0};
+
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		parse_github_milestone(ctx, &stream, out);
+		json_close(&stream);
+	}
+
+	free(url);
+	free(buffer.data);
+
+	return rc;
 }
 
 int
-github_milestone_get_issues(char const *const owner,
-                            char const *const repo,
-                            int const milestone,
+github_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
+                            char const *const repo, gcli_id const milestone,
                             gcli_issue_list *const out)
 {
 	char *url, *e_owner, *e_repo;
@@ -117,21 +111,23 @@ github_milestone_get_issues(char const *const owner,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/issues?milestone=%d&state=all",
-	                  gcli_get_apibase(), e_owner, e_repo, milestone);
+	url = sn_asprintf("%s/repos/%s/%s/issues?milestone=%lu&state=all",
+	                  gcli_get_apibase(ctx), e_owner, e_repo, milestone);
 
 	free(e_repo);
 	free(e_owner);
 	/* URL is freed by github_fetch_issues */
 
-	return github_fetch_issues(url, -1, out);
+	return github_fetch_issues(ctx, url, -1, out);
 }
 
 int
-github_create_milestone(struct gcli_milestone_create_args const *args)
+github_create_milestone(gcli_ctx *ctx,
+                        struct gcli_milestone_create_args const *args)
 {
 	char *url, *e_owner, *e_repo;
 	char *json_body, *description;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(args->owner);
 	e_repo = gcli_urlencode(args->repo);
@@ -152,9 +148,9 @@ github_create_milestone(struct gcli_milestone_create_args const *args)
 		"}", args->title, description);
 
 	url = sn_asprintf("%s/repos/%s/%s/milestones",
-	                  gcli_get_apibase(), e_owner, e_repo);
+	                  gcli_get_apibase(ctx), e_owner, e_repo);
 
-	gcli_fetch_with_method("POST", url, json_body, NULL, NULL);
+	rc = gcli_fetch_with_method(ctx, "POST", url, json_body, NULL, NULL);
 
 	free(json_body);
 	free(description);
@@ -162,85 +158,60 @@ github_create_milestone(struct gcli_milestone_create_args const *args)
 	free(e_repo);
 	free(e_owner);
 
-	return 0;
+	return rc;
 }
 
 int
-github_delete_milestone(char const *const owner,
-                        char const *const repo,
-                        int const milestone)
+github_delete_milestone(gcli_ctx *ctx, char const *const owner,
+                        char const *const repo, gcli_id const milestone)
 {
 	char *url, *e_owner, *e_repo;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/milestones/%d",
-	                  gcli_get_apibase(),
+	url = sn_asprintf("%s/repos/%s/%s/milestones/%lu",
+	                  gcli_get_apibase(ctx),
 	                  e_owner, e_repo,
 	                  milestone);
 
-	gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
+	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
 	free(url);
 	free(e_repo);
 	free(e_owner);
 
-	return 0;
-}
-
-static void
-normalize_date_to_iso8601(char const *const input,
-                          char *output, size_t const output_size)
-{
-	struct tm tm_buf = {0};
-	struct tm *utm_buf;
-	char *endptr;
-	time_t utctime;
-
-	assert(output_size == 21);
-
-	/* Parse input time */
-	endptr = strptime(input, "%Y-%m-%d", &tm_buf);
-	if (endptr == NULL || *endptr != '\0')
-		errx(1, "error: date »%s« is invalid: want YYYY-MM-DD", input);
-
-	/* Convert to UTC: Really, we should be using the _r versions of
-	 * these functions for thread-safety but since gcli doesn't do
-	 * multithreading (except for inside libcurl) we do not need to be
-	 * worried about the storage behind the pointer returned by gmtime
-	 * to be altered by another thread. */
-	utctime = mktime(&tm_buf);
-	utm_buf = gmtime(&utctime);
-
-	/* Format the output string - now in UTC */
-	strftime(output, output_size, "%Y-%m-%dT%H:%M:%SZ", utm_buf);
+	return rc;
 }
 
 int
-github_milestone_set_duedate(char const *const owner,
-                             char const *const repo,
-                             int const milestone,
+github_milestone_set_duedate(gcli_ctx *ctx, char const *const owner,
+                             char const *const repo, gcli_id const milestone,
                              char const *const date)
 {
 	char *url, *e_owner, *e_repo, *payload, norm_date[21] = {0};
+	int rc = 0;
+
+	rc = gcli_normalize_date(ctx, DATEFMT_ISO8601, date, norm_date,
+	                         sizeof norm_date);
+	if (rc < 0)
+		return rc;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/milestones/%d",
-	                  gcli_get_apibase(),
+	url = sn_asprintf("%s/repos/%s/%s/milestones/%lu",
+	                  gcli_get_apibase(ctx),
 	                  e_owner, e_repo, milestone);
 
-	normalize_date_to_iso8601(date, norm_date, sizeof norm_date);
-
 	payload = sn_asprintf("{ \"due_on\": \"%s\"}", norm_date);
-	gcli_fetch_with_method("PATCH", url, payload, NULL, NULL);
+	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
 
 	free(payload);
 	free(url);
 	free(e_repo);
 	free(e_owner);
 
-	return 0;
+	return rc;
 }

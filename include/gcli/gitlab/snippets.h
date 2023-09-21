@@ -36,10 +36,10 @@
 
 #include <gcli/gcli.h>
 
-typedef struct gcli_snippet gcli_snippet;
-typedef struct gcli_snippet_list gcli_snippet_list;
+typedef struct gcli_gitlab_snippet gcli_gitlab_snippet;
+typedef struct gcli_gitlab_snippet_list gcli_gitlab_snippet_list;
 
-struct gcli_snippet {
+struct gcli_gitlab_snippet {
 	int   id;
 	char *title;
 	char *filename;
@@ -49,21 +49,17 @@ struct gcli_snippet {
 	char *raw_url;
 };
 
-struct gcli_snippet_list {
-	gcli_snippet *snippets;
+struct gcli_gitlab_snippet_list {
+	gcli_gitlab_snippet *snippets;
 	size_t snippets_size;
 };
 
-void gcli_snippets_free(gcli_snippet_list *list);
+void gcli_snippets_free(gcli_gitlab_snippet_list *list);
 
-int gcli_snippets_get(int max, gcli_snippet_list *out);
+int gcli_snippets_get(gcli_ctx *ctx, int max, gcli_gitlab_snippet_list *out);
 
-void gcli_snippets_print(enum gcli_output_flags flags,
-                         gcli_snippet_list const *list,
-                         int max);
+int gcli_snippet_delete(gcli_ctx *ctx, char const *snippet_id);
 
-void gcli_snippet_delete(char const *snippet_id);
-
-void gcli_snippet_get(char const *snippet_id);
+int gcli_snippet_get(gcli_ctx *ctx, char const *snippet_id, FILE *stream);
 
 #endif /* GITLAB_SNIPPETS_H */

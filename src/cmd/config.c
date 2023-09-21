@@ -31,8 +31,11 @@
 #include <config.h>
 #endif
 
-#include <gcli/cmd.h>
-#include <gcli/config.h>
+#include <gcli/cmd/cmd.h>
+#include <gcli/cmd/cmdconfig.h>
+#include <gcli/cmd/config.h>
+#include <gcli/cmd/table.h>
+
 #include <gcli/sshkeys.h>
 
 #include <errno.h>
@@ -55,12 +58,37 @@ usage(void)
 	copyright();
 }
 
+void
+gcli_sshkeys_print_keys(gcli_sshkey_list const *list)
+{
+	gcli_tbl *tbl;
+	gcli_tblcoldef cols[] = {
+		{ .name = "ID",      .type = GCLI_TBLCOLTYPE_INT,    .flags = 0 },
+		{ .name = "CREATED", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "TITLE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+	};
+
+	if (list->keys_size == 0) {
+		printf("No SSH keys\n");
+		return;
+	}
+
+	tbl = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+
+	for (size_t i = 0; i < list->keys_size; ++i) {
+		gcli_tbl_add_row(tbl, list->keys[i].id, list->keys[i].created_at,
+		                 list->keys[i].title);
+	}
+
+	gcli_tbl_end(tbl);
+}
+
 static int
 list_sshkeys(void)
 {
 	gcli_sshkey_list list = {0};
 
-	if (gcli_sshkeys_get_keys(&list) < 0) {
+	if (gcli_sshkeys_get_keys(g_clictx, &list) < 0) {
 		fprintf(stderr, "error: could not get list of SSH keys\n");
 		return EXIT_FAILURE;
 	}
@@ -116,7 +144,7 @@ add_sshkey(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	if (gcli_sshkeys_add_key(title, keypath, NULL) < 0)
+	if (gcli_sshkeys_add_key(g_clictx, title, keypath, NULL) < 0)
 		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;
@@ -145,7 +173,7 @@ delete_sshkey(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	if (gcli_sshkeys_delete_key(id) < 0)
+	if (gcli_sshkeys_delete_key(g_clictx, id) < 0)
 		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;

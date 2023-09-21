@@ -4,7 +4,7 @@ parser github_label_text is object of sn_sv select "name" as sv;
 
 parser github_label is
 object of gcli_label with
-	("id"          => id as int,
+	("id"          => id as id,
 	 "name"        => name as string,
 	 "description" => description as string,
 	 "color"       => colour as github_style_colour);

@@ -29,83 +29,56 @@
 
 #include <assert.h>
 
-#include <gcli/colour.h>
-#include <gcli/config.h>
+#include <gcli/cmd/colour.h>
+#include <gcli/cmd/table.h>
 #include <gcli/curl.h>
 #include <gcli/github/checks.h>
 #include <gcli/github/checks.h>
 #include <gcli/json_util.h>
-#include <gcli/table.h>
 
 #include <templates/github/checks.h>
 
 #include <pdjson/pdjson.h>
 
-void
-github_get_checks(char const *owner,
-                  char const *repo,
-                  char const *ref,
-                  int const max,
-                  gcli_github_checks *const out)
+int
+github_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
+                  char const *ref, int const max, github_check_list *const out)
 {
-	gcli_fetch_buffer  buffer   = {0};
-	char              *url      = NULL;
-	char              *next_url = NULL;
+	gcli_fetch_buffer buffer = {0};
+	char *url = NULL, *next_url = NULL;
+	int rc = 0;
 
 	assert(out);
 
 	url = sn_asprintf("%s/repos/%s/%s/commits/%s/check-runs",
-	                  gcli_get_apibase(),
+	                  gcli_get_apibase(ctx),
 	                  owner, repo, ref);
 
 	do {
-		struct json_stream stream = {0};
+		rc = gcli_fetch(ctx, url, &next_url, &buffer);
+		if (rc == 0) {
+			struct json_stream stream = {0};
 
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
+			json_open_buffer(&stream, buffer.data, buffer.length);
+			parse_github_checks(ctx, &stream, out);
+			json_close(&stream);
+		}
 
-		parse_github_checks(&stream, out);
-
-		json_close(&stream);
 		free(url);
 		free(buffer.data);
+
+		if (rc < 0)
+			break;
 	} while ((url = next_url) && ((int)(out->checks_size) < max || max < 0));
+
+	/* TODO: don't leak list on error */
+	free(next_url);
+
+	return rc;
 }
 
 void
-github_print_checks(gcli_github_checks const *const list)
-{
-	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
-		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_LONG,   .flags = GCLI_TBLCOL_JUSTIFYR },
-		{ .name = "STATUS",     .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "CONCLUSION", .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
-		{ .name = "STARTED",    .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "COMPLETED",  .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-	};
-
-
-	if (!list->checks_size) {
-		fprintf(stderr, "No checks\n");
-		return;
-	}
-
-	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
-	if (!table)
-		errx(1, "error: could not init table");
-
-	for (size_t i = 0; i < list->checks_size; ++i) {
-		gcli_tbl_add_row(table, list->checks[i].id, list->checks[i].status,
-		                 list->checks[i].conclusion, list->checks[i].started_at,
-		                 list->checks[i].completed_at, list->checks[i].name);
-	}
-
-	gcli_tbl_end(table);
-}
-
-void
-github_free_checks(gcli_github_checks *const list)
+github_free_checks(github_check_list *const list)
 {
 	for (size_t i = 0; i < list->checks_size; ++i) {
 		free(list->checks[i].name);
@@ -118,19 +91,4 @@ github_free_checks(gcli_github_checks *const list)
 	free(list->checks);
 	list->checks = NULL;
 	list->checks_size = 0;
-}
-
-int
-github_checks(char const *owner,
-              char const *repo,
-              char const *ref,
-              int const max)
-{
-	gcli_github_checks checks = {0};
-
-	github_get_checks(owner, repo, ref, max, &checks);
-	github_print_checks(&checks);
-	github_free_checks(&checks);
-
-	return 0;
 }

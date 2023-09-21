@@ -42,13 +42,13 @@ typedef struct gcli_repo_list gcli_repo_list;
 typedef struct gcli_repo_create_options gcli_repo_create_options;
 
 struct gcli_repo {
-	int   id;
+	gcli_id id;
 	sn_sv full_name;
 	sn_sv name;
 	sn_sv owner;
 	sn_sv date;
 	sn_sv visibility;
-	bool  is_fork;
+	bool is_fork;
 };
 
 struct gcli_repo_list {
@@ -59,24 +59,18 @@ struct gcli_repo_list {
 struct gcli_repo_create_options {
 	sn_sv name;
 	sn_sv description;
-	bool  private;
+	bool private;
 };
 
-int gcli_get_repos(char const *owner,
-                   int max,
+int gcli_get_repos(gcli_ctx *ctx, char const *owner, int max,
                    gcli_repo_list *list);
 
-int gcli_get_own_repos(int max,
-                       gcli_repo_list *list);
-
 void gcli_repos_free(gcli_repo_list *list);
+void gcli_repo_free(gcli_repo *it);
 
-void gcli_print_repos_table(enum gcli_output_flags flags,
-                            gcli_repo_list const *repos,
-                            int max);
+int gcli_repo_delete(gcli_ctx *ctx, char const *owner, char const *repo);
 
-void gcli_repo_delete(char const *owner, char const *repo);
-
-gcli_repo *gcli_repo_create(gcli_repo_create_options const *);
+int gcli_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *,
+                     gcli_repo *out);
 
 #endif /* REPOS_H */

@@ -45,4 +45,22 @@ typedef enum gcli_forge_type {
 	GCLI_FORGE_GITEA,
 } gcli_forge_type;
 
+typedef unsigned long gcli_id;
+
+#ifdef IN_LIBGCLI
+#include <gcli/ctx.h>
+#endif /* IN_LIBGCLI */
+
+typedef struct gcli_ctx gcli_ctx;
+
+char const *gcli_init(gcli_ctx **,
+                      gcli_forge_type (*get_forge_type)(gcli_ctx *),
+                      char *(*get_authheader)(gcli_ctx *),
+                      char *(*get_apibase)(gcli_ctx *));
+
+void *gcli_get_userdata(struct gcli_ctx const *);
+void gcli_set_userdata(struct gcli_ctx *, void *usrdata);
+void gcli_destroy(gcli_ctx **ctx);
+char const *gcli_get_error(gcli_ctx *ctx);
+
 #endif /* GCLI_H */

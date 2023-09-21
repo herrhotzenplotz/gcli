@@ -29,7 +29,11 @@
 
 #include <config.h>
 
-#include <gcli/cmd.h>
+#include <gcli/cmd/cmd.h>
+#include <gcli/cmd/issues.h>
+#include <gcli/cmd/table.h>
+
+#include <gcli/forges.h>
 #include <gcli/milestones.h>
 
 #ifdef HAVE_GETOPT_H
@@ -57,6 +61,75 @@ usage(void)
 	fprintf(stderr, "\n");
 	version();
 	copyright();
+}
+
+void
+gcli_print_milestones(gcli_milestone_list const *const list, int max)
+{
+	size_t n;
+	gcli_tbl tbl;
+	gcli_tblcoldef cols[] = {
+		{ .name = "ID",      .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "STATE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
+		{ .name = "CREATED", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "TITLE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+	};
+
+	if (!list->milestones_size) {
+		puts("No milestones");
+		return;
+	}
+
+	tbl = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
+	if (!tbl)
+		errx(1, "error: could not init table printer");
+
+	if (max < 0 || (size_t)(max) > list->milestones_size)
+		n = list->milestones_size;
+	else
+		n = max;
+
+	for (size_t i = 0; i < n; ++i) {
+		gcli_tbl_add_row(tbl,
+		                 list->milestones[i].id,
+		                 list->milestones[i].state,
+		                 list->milestones[i].created_at,
+		                 list->milestones[i].title);
+	}
+
+	gcli_tbl_end(tbl);
+}
+
+void
+gcli_print_milestone(gcli_milestone const *const milestone)
+{
+	gcli_dict dict;
+	uint32_t const quirks = gcli_forge(g_clictx)->milestone_quirks;
+
+	dict = gcli_dict_begin();
+	gcli_dict_add(dict,        "ID", 0, 0, "%d", milestone->id);
+	gcli_dict_add_string(dict, "TITLE", 0, 0, milestone->title);
+	gcli_dict_add_string(dict, "STATE", GCLI_TBLCOL_STATECOLOURED, 0, milestone->state);
+	gcli_dict_add_string(dict, "CREATED", 0, 0, milestone->created_at);
+	gcli_dict_add_string(dict, "UPDATED", 0, 0, milestone->created_at);
+
+	if ((quirks & GCLI_MILESTONE_QUIRKS_DUEDATE) == 0)
+		gcli_dict_add_string(dict, "DUE", 0, 0, milestone->due_date);
+
+	if ((quirks & GCLI_MILESTONE_QUIRKS_EXPIRED) == 0)
+		gcli_dict_add_string(dict, "EXPIRED", 0, 0, sn_bool_yesno(milestone->expired));
+
+	if ((quirks & GCLI_MILESTONE_QUIRKS_NISSUES) == 0) {
+		gcli_dict_add(dict, "OPEN ISSUES", 0, 0, "%d", milestone->open_issues);
+		gcli_dict_add(dict, "CLOSED ISSUES", 0, 0, "%d", milestone->closed_issues);
+	}
+
+	gcli_dict_end(dict);
+
+	if (milestone->description && strlen(milestone->description)) {
+		printf("\nDESCRIPTION:\n");
+		pretty_print(milestone->description, 4, 80, stdout);
+	}
 }
 
 static int handle_milestone_actions(int argc, char *argv[],
@@ -125,8 +198,9 @@ subcommand_milestone_create(int argc, char *argv[])
 		errx(1, "error: missing milestone title");
 
 	/* actually create the milestone */
-	if (gcli_create_milestone(&args) < 0)
-		errx(1, "error: could not create milestone");
+	if (gcli_create_milestone(g_clictx, &args) < 0)
+		errx(1, "error: could not create milestone: %s",
+		     gcli_get_error(g_clictx));
 
 	return 0;
 }
@@ -203,11 +277,13 @@ subcommand_milestones(int argc, char *argv[])
 	if (milestone_id < 0) {
 		gcli_milestone_list list = {0};
 
-		rc = gcli_get_milestones(owner, repo, max, &list);
+		rc = gcli_get_milestones(g_clictx, owner, repo, max, &list);
 		if (rc < 0)
-			errx(1, "error: cannot get list of milestones");
+			errx(1, "error: cannot get list of milestones: %s",
+			     gcli_get_error(g_clictx));
 
 		gcli_print_milestones(&list, max);
+
 		gcli_free_milestones(&list);
 
 		return 0;
@@ -228,9 +304,10 @@ ensure_milestone(char const *const owner,
 	if (*fetched_milestone)
 		return;
 
-	rc = gcli_get_milestone(owner, repo, milestone_id, milestone);
+	rc = gcli_get_milestone(g_clictx, owner, repo, milestone_id, milestone);
 	if (rc < 0)
-		errx(1, "error: could not get milestone %d", milestone_id);
+		errx(1, "error: could not get milestone %d: %s", milestone_id,
+		     gcli_get_error(g_clictx));
 
 	*fetched_milestone = 1;
 }
@@ -259,6 +336,7 @@ handle_milestone_actions(int argc, char *argv[],
 
 		/* Dispatch */
 		if (strcmp(action, "all") == 0) {
+			int rc = 0;
 
 			gcli_issue_list issues = {0};
 
@@ -266,20 +344,30 @@ handle_milestone_actions(int argc, char *argv[],
 			                 &fetched_milestone, &milestone);
 
 			gcli_print_milestone(&milestone);
+			rc = gcli_milestone_get_issues(g_clictx, owner, repo, milestone_id,
+			                               &issues);
+
+			if (rc < 0)
+				errx(1, "error: failed to fetch issues: %s",
+				     gcli_get_error(g_clictx));
+
 			printf("\nISSUES:\n");
-			gcli_milestone_get_issues(owner, repo, milestone_id, &issues);
-			gcli_print_issues_table(0, &issues, -1);
+			gcli_print_issues(0, &issues, -1);
 			gcli_issues_free(&issues);
 
 		} else if (strcmp(action, "issues") == 0) {
-
+			int rc = 0;
 			gcli_issue_list issues = {0};
 
 			/* Fetch list of issues associated with milestone */
-			gcli_milestone_get_issues(owner, repo, milestone_id, &issues);
+			rc = gcli_milestone_get_issues(g_clictx, owner, repo, milestone_id,
+			                               &issues);
+			if (rc < 0)
+				errx(1, "error: failed to fetch issues: %s",
+				     gcli_get_error(g_clictx));
 
 			/* Print them as a table */
-			gcli_print_issues_table(0, &issues, -1);
+			gcli_print_issues(0, &issues, -1);
 
 			/* Cleanup */
 			gcli_issues_free(&issues);
@@ -295,12 +383,14 @@ handle_milestone_actions(int argc, char *argv[],
 		} else if (strcmp(action, "delete") == 0) {
 
 			/* Delete the milestone */
-			if (gcli_delete_milestone(owner, repo, milestone_id) < 0)
-				errx(1, "error: could not delete milestone");
+			if (gcli_delete_milestone(g_clictx, owner, repo, milestone_id) < 0)
+				errx(1, "error: could not delete milestone: %s",
+				     gcli_get_error(g_clictx));
 
 		} else if (strcmp(action, "set-duedate") == 0) {
 
 			char *new_date = NULL;
+			int rc = 0;
 
 			/* grab the the date that the user provided */
 			if (!argc)
@@ -309,8 +399,11 @@ handle_milestone_actions(int argc, char *argv[],
 			new_date = shift(&argc, &argv);
 
 			/* Do it! */
-			if (gcli_milestone_set_duedate(owner, repo, milestone_id, new_date) < 0)
-				errx(1, "error: could not update milestone due date");
+			rc = gcli_milestone_set_duedate(g_clictx, owner, repo, milestone_id,
+			                                new_date);
+			if (rc < 0)
+				errx(1, "error: could not update milestone due date: %s",
+				     gcli_get_error(g_clictx));;
 
 		} else {
 

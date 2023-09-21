@@ -36,8 +36,8 @@
 
 #include <sn/sn.h>
 
-char *gitlab_get_apibase(void);
-char *gitlab_get_authheader(void);
-sn_sv gitlab_get_account(void);
+#include <gcli/gcli.h>
+
+char *gitlab_make_authheader(gcli_ctx *ctx, char const *token);
 
 #endif /* GITLAB_CONFIG_H */

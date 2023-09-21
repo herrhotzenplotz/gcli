@@ -33,16 +33,17 @@
 
 #include <templates/gitlab/comments.h>
 
-void
-gitlab_perform_submit_comment(gcli_submit_comment_opts opts,
+int
+gitlab_perform_submit_comment(gcli_ctx *ctx, gcli_submit_comment_opts opts,
                               gcli_fetch_buffer *const out)
 {
-	char const *type    = NULL;
-	char       *e_owner = NULL;
-	char       *e_repo  = NULL;
+	char const *type = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(opts.owner);
-	e_repo  = gcli_urlencode(opts.repo);
+	e_repo = gcli_urlencode(opts.repo);
 
 	switch (opts.target_type) {
 	case ISSUE_COMMENT:
@@ -56,86 +57,66 @@ gitlab_perform_submit_comment(gcli_submit_comment_opts opts,
 	char *post_fields = sn_asprintf(
 		"{ \"body\": \""SV_FMT"\" }",
 		SV_ARGS(opts.message));
-	char *url         = sn_asprintf(
+	char *url = sn_asprintf(
 		"%s/projects/%s%%2F%s/%s/%d/notes",
-		gitlab_get_apibase(),
+		gcli_get_apibase(ctx),
 		e_owner, e_repo, type, opts.target_id);
 
-	gcli_fetch_with_method("POST", url, post_fields, NULL, out);
+	rc = gcli_fetch_with_method(ctx, "POST", url, post_fields, NULL, out);
+
 	free(post_fields);
 	free(e_owner);
 	free(e_repo);
 	free(url);
-}
 
-static int
-gitlab_perform_get_comments(char const *_url, gcli_comment **const comments)
-{
-	size_t             count       = 0;
-	json_stream        stream      = {0};
-	gcli_fetch_buffer  json_buffer = {0};
-	char              *url         = (char *)_url;
-	char              *next_url    = NULL;
-
-	do {
-		gcli_fetch(url, &next_url, &json_buffer);
-		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-
-		parse_gitlab_comments(&stream, comments, &count);
-
-		json_close(&stream);
-		free(json_buffer.data);
-
-		if (url != _url)
-			free(url);
-
-	} while ((url = next_url));
-
-	return (int)(count);
+	return rc;
 }
 
 int
-gitlab_get_mr_comments(char const *owner,
-                       char const *repo,
-                       int const mr,
-                       gcli_comment **const out)
+gitlab_get_mr_comments(gcli_ctx *ctx, char const *owner, char const *repo,
+                       gcli_id const mr, gcli_comment_list *const out)
 {
 	char *e_owner = gcli_urlencode(owner);
-	char *e_repo  = gcli_urlencode(repo);
+	char *e_repo = gcli_urlencode(repo);
+
+	gcli_fetch_list_ctx fl = {
+			.listp = &out->comments,
+			.sizep = &out->comments_size,
+			.parse = (parsefn)parse_gitlab_comments,
+			.max = -1,
+	};
 
 	char *url = sn_asprintf(
-		"%s/projects/%s%%2F%s/merge_requests/%d/notes",
-		gitlab_get_apibase(),
+		"%s/projects/%s%%2F%s/merge_requests/%lu/notes",
+		gcli_get_apibase(ctx),
 		e_owner, e_repo, mr);
 
-	int n = gitlab_perform_get_comments(url, out);
-
-	free(url);
 	free(e_owner);
 	free(e_repo);
 
-	return n;
+	return gcli_fetch_list(ctx, url, &fl);
 }
 
 int
-gitlab_get_issue_comments(char const *owner,
-                          char const *repo,
-                          int const issue,
-                          gcli_comment **const out)
+gitlab_get_issue_comments(gcli_ctx *ctx, char const *owner, char const *repo,
+                          gcli_id const issue, gcli_comment_list *const out)
 {
 	char *e_owner = gcli_urlencode(owner);
-	char *e_repo  = gcli_urlencode(repo);
+	char *e_repo = gcli_urlencode(repo);
+
+	gcli_fetch_list_ctx fl = {
+		.listp = &out->comments,
+		.sizep = &out->comments_size,
+		.parse = (parsefn)parse_gitlab_comments,
+		.max = -1,
+	};
 
 	char *url = sn_asprintf(
-		"%s/projects/%s%%2F%s/issues/%d/notes",
-		gitlab_get_apibase(),
+		"%s/projects/%s%%2F%s/issues/%lu/notes",
+		gcli_get_apibase(ctx),
 		e_owner, e_repo, issue);
-
-	int n = gitlab_perform_get_comments(url, out);
-
-	free(url);
 	free(e_owner);
 	free(e_repo);
 
-	return n;
+	return gcli_fetch_list(ctx, url, &fl);
 }

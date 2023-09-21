@@ -29,7 +29,6 @@
 
 #include <stdlib.h>
 
-#include <gcli/config.h>
 #include <gcli/forges.h>
 
 #include <gcli/github/api.h>
@@ -96,27 +95,27 @@ github_forge_descriptor =
 	.delete_milestone          = github_delete_milestone,
 	.milestone_set_duedate     = github_milestone_set_duedate,
 	.get_milestone_issues      = github_milestone_get_issues,
-	.get_prs                   = github_get_pulls,
-	.print_pr_diff             = github_print_pull_diff,
-	.print_pr_checks           = github_pull_checks,
-	.pr_merge                  = github_pull_merge,
-	.pr_reopen                 = github_pull_reopen,
-	.pr_close                  = github_pull_close,
+	.get_pulls                 = github_get_pulls,
+	.print_pull_diff           = github_print_pull_diff,
+	.get_pull_checks           = github_pull_get_checks,
+	.pull_merge                = github_pull_merge,
+	.pull_reopen               = github_pull_reopen,
+	.pull_close                = github_pull_close,
 
 	/* HACK: Here we can use the same functions as with issues because
 	 * PRs are the same as issues on Github and the functions have the
 	 * same types/arguments */
-	.pr_add_labels             = github_issue_add_labels,
-	.pr_remove_labels          = github_issue_remove_labels,
+	.pull_add_labels           = github_issue_add_labels,
+	.pull_remove_labels        = github_issue_remove_labels,
 
-	.perform_submit_pr         = github_perform_submit_pull,
+	.perform_submit_pull       = github_perform_submit_pull,
 	.get_pull_commits          = github_get_pull_commits,
 	.get_pull                  = github_get_pull,
 
 	/* This works because the function signatures are the same and
 	 * GitHub treats pull requests as issues */
-	.pr_set_milestone          = github_issue_set_milestone,
-	.pr_clear_milestone        = github_issue_clear_milestone,
+	.pull_set_milestone        = github_issue_set_milestone,
+	.pull_clear_milestone      = github_issue_clear_milestone,
 
 	.get_releases              = github_get_releases,
 	.create_release            = github_create_release,
@@ -125,7 +124,6 @@ github_forge_descriptor =
 	.create_label              = github_create_label,
 	.delete_label              = github_delete_label,
 	.get_repos                 = github_get_repos,
-	.get_own_repos             = github_get_own_repos,
 	.get_reviews               = github_review_get_reviews,
 	.repo_create               = github_repo_create,
 	.repo_delete               = github_repo_delete,
@@ -136,12 +134,10 @@ github_forge_descriptor =
 
 	.get_notifications         = github_get_notifications,
 	.notification_mark_as_read = github_notification_mark_as_read,
-	.get_authheader            = github_get_authheader,
-	.get_account               = github_get_account,
+	.make_authheader           = github_make_authheader,
 	.get_api_error_string      = github_api_error_string,
 	.user_object_key           = "login",
-	.html_url_key              = "html_url",
-	.pull_summary_quirks       = 0,
+	.pull_summary_quirks       = GCLI_PRS_QUIRK_COVERAGE,
 	.milestone_quirks          = GCLI_MILESTONE_QUIRKS_EXPIRED
 	                           | GCLI_MILESTONE_QUIRKS_DUEDATE
 	                           | GCLI_MILESTONE_QUIRKS_PULLS,
@@ -171,19 +167,19 @@ gitlab_forge_descriptor =
 	.get_milestone_issues      = gitlab_milestone_get_issues,
 	.issue_set_milestone       = gitlab_issue_set_milestone,
 	.issue_clear_milestone     = gitlab_issue_clear_milestone,
-	.get_prs                   = gitlab_get_mrs,
-	.print_pr_diff             = gitlab_print_pr_diff,
-	.print_pr_checks           = gitlab_mr_pipelines,
-	.pr_merge                  = gitlab_mr_merge,
-	.pr_reopen                 = gitlab_mr_reopen,
-	.pr_close                  = gitlab_mr_close,
-	.perform_submit_pr         = gitlab_perform_submit_mr,
+	.get_pulls                 = gitlab_get_mrs,
+	.print_pull_diff           = gitlab_print_pr_diff,
+	.get_pull_checks           = (gcli_get_pull_checks_cb)gitlab_get_mr_pipelines,
+	.pull_merge                = gitlab_mr_merge,
+	.pull_reopen               = gitlab_mr_reopen,
+	.pull_close                = gitlab_mr_close,
+	.perform_submit_pull       = gitlab_perform_submit_mr,
 	.get_pull_commits          = gitlab_get_pull_commits,
 	.get_pull                  = gitlab_get_pull,
-	.pr_add_labels             = gitlab_mr_add_labels,
-	.pr_remove_labels          = gitlab_mr_remove_labels,
-	.pr_set_milestone          = gitlab_mr_set_milestone,
-	.pr_clear_milestone        = gitlab_mr_clear_milestone,
+	.pull_add_labels           = gitlab_mr_add_labels,
+	.pull_remove_labels        = gitlab_mr_remove_labels,
+	.pull_set_milestone        = gitlab_mr_set_milestone,
+	.pull_clear_milestone      = gitlab_mr_clear_milestone,
 	.get_releases              = gitlab_get_releases,
 	.create_release            = gitlab_create_release,
 	.delete_release            = gitlab_delete_release,
@@ -191,20 +187,17 @@ gitlab_forge_descriptor =
 	.create_label              = gitlab_create_label,
 	.delete_label              = gitlab_delete_label,
 	.get_repos                 = gitlab_get_repos,
-	.get_own_repos             = gitlab_get_own_repos,
 	.get_reviews               = gitlab_review_get_reviews,
 	.repo_create               = gitlab_repo_create,
 	.repo_delete               = gitlab_repo_delete,
 	.get_notifications         = gitlab_get_notifications,
 	.notification_mark_as_read = gitlab_notification_mark_as_read,
-	.get_authheader            = gitlab_get_authheader,
-	.get_account               = gitlab_get_account,
+	.make_authheader           = gitlab_make_authheader,
 	.get_sshkeys               = gitlab_get_sshkeys,
 	.add_sshkey                = gitlab_add_sshkey,
 	.delete_sshkey             = gitlab_delete_sshkey,
 	.get_api_error_string      = gitlab_api_error_string,
 	.user_object_key           = "username",
-	.html_url_key              = "web_url",
 	.pull_summary_quirks       = GCLI_PRS_QUIRK_ADDDEL
 	                           | GCLI_PRS_QUIRK_COMMITS
 	                           | GCLI_PRS_QUIRK_CHANGES
@@ -236,28 +229,27 @@ gitea_forge_descriptor =
 	.get_labels                = gitea_get_labels,
 	.create_label              = gitea_create_label,
 	.delete_label              = gitea_delete_label,
-	.get_prs                   = gitea_get_pulls,
-	.print_pr_checks           = gitea_pull_checks, /* stub */
-	.pr_merge                  = gitea_pull_merge,
-	.pr_reopen                 = gitea_pull_reopen,
-	.pr_close                  = gitea_pull_close,
+	.get_pulls                 = gitea_get_pulls,
+	.get_pull_checks           = gitea_pull_get_checks, /* stub, will always return an error */
+	.pull_merge                = gitea_pull_merge,
+	.pull_reopen               = gitea_pull_reopen,
+	.pull_close                = gitea_pull_close,
 	.get_pull_comments         = gitea_get_comments,
 	.get_pull                  = gitea_get_pull,
 	.get_pull_commits          = gitea_get_pull_commits,
-	.pr_set_milestone          = gitea_pull_set_milestone,
-	.pr_clear_milestone        = gitea_pull_clear_milestone,
+	.pull_set_milestone        = gitea_pull_set_milestone,
+	.pull_clear_milestone      = gitea_pull_clear_milestone,
 	.get_releases              = gitea_get_releases,
 	.create_release            = gitea_create_release,
 	.delete_release            = gitea_delete_release,
-	.perform_submit_pr         = gitea_pull_submit,
-	.print_pr_diff             = gitea_print_pr_diff,
+	.perform_submit_pull       = gitea_pull_submit,
+	.print_pull_diff           = gitea_print_pr_diff,
 	.get_forks                 = gitea_get_forks,
 
 	/* Same procedure as with Github (see comment up there) */
-	.pr_add_labels             = gitea_issue_add_labels,
-	.pr_remove_labels          = gitea_issue_remove_labels,
+	.pull_add_labels           = gitea_issue_add_labels,
+	.pull_remove_labels        = gitea_issue_remove_labels,
 	.get_repos                 = gitea_get_repos,
-	.get_own_repos             = gitea_get_own_repos,
 	.repo_create               = gitea_repo_create,
 	.repo_delete               = gitea_repo_delete,
 
@@ -265,23 +257,22 @@ gitea_forge_descriptor =
 	.add_sshkey                = gitea_add_sshkey,
 	.delete_sshkey             = gitea_delete_sshkey,
 
-	.get_authheader            = gitea_get_authheader,
-	.get_account               = gitea_get_account,
+	.make_authheader           = gitea_make_authheader,
 	.get_api_error_string      = github_api_error_string,    /* hack! */
 	.user_object_key           = "username",
-	.html_url_key              = "web_url",
 	.pull_summary_quirks       = GCLI_PRS_QUIRK_COMMITS
 	                           | GCLI_PRS_QUIRK_ADDDEL
 	                           | GCLI_PRS_QUIRK_DRAFT
-	                           | GCLI_PRS_QUIRK_CHANGES,
+	                           | GCLI_PRS_QUIRK_CHANGES
+	                           | GCLI_PRS_QUIRK_COVERAGE,
 	.milestone_quirks          = GCLI_MILESTONE_QUIRKS_EXPIRED
 	                           | GCLI_MILESTONE_QUIRKS_PULLS,
 };
 
 gcli_forge_descriptor const *
-gcli_forge(void)
+gcli_forge(gcli_ctx *ctx)
 {
-	switch (gcli_config_get_forge_type()) {
+	switch (ctx->get_forge_type(ctx)) {
 	case GCLI_FORGE_GITHUB:
 		return &github_forge_descriptor;
 	case GCLI_FORGE_GITLAB:

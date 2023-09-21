@@ -32,7 +32,6 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <gcli/gitlab/sshkeys.h>
-#include <gcli/config.h>
 #include <gcli/curl.h>
 #include <gcli/json_util.h>
 
@@ -42,39 +41,32 @@
 #include <templates/gitlab/sshkeys.h>
 
 int
-gitlab_get_sshkeys(gcli_sshkey_list *list)
+gitlab_get_sshkeys(gcli_ctx *ctx, gcli_sshkey_list *list)
 {
-	char *url, *next_url = NULL;
+	char *url;
+	gcli_fetch_list_ctx fl = {
+		.listp = &list->keys,
+		.sizep = &list->keys_size,
+		.max = -1,
+		.parse = (parsefn)(parse_gitlab_sshkeys),
+	};
 
 	*list = (gcli_sshkey_list) {0};
-	url = sn_asprintf("%s/user/keys", gcli_get_apibase());
+	url = sn_asprintf("%s/user/keys", gcli_get_apibase(ctx));
 
-	do {
-		gcli_fetch_buffer buf = {0};
-		json_stream str;
-
-		gcli_fetch(url, &next_url, &buf);
-		json_open_buffer(&str, buf.data, buf.length);
-		parse_gitlab_sshkeys(&str, &list->keys, &list->keys_size);
-
-		json_close(&str);
-		free(buf.data);
-		free(url);
-	} while ((url = next_url));
-
-	return 0;
+	return gcli_fetch_list(ctx, url, &fl);
 }
 
 int
-gitlab_add_sshkey(char const *const title,
-                  char const *const pubkey,
-                  gcli_sshkey *const out)
+gitlab_add_sshkey(gcli_ctx *ctx, char const *const title,
+                  char const *const pubkey, gcli_sshkey *const out)
 {
 	char *url, *payload;
 	char *e_title, *e_key;
 	gcli_fetch_buffer buf = {0};
+	int rc = 0;
 
-	url = sn_asprintf("%s/user/keys", gcli_get_apibase());
+	url = sn_asprintf("%s/user/keys", gcli_get_apibase(ctx));
 
 	/* Prepare payload */
 	e_title = gcli_json_escape_cstr(title);
@@ -85,29 +77,30 @@ gitlab_add_sshkey(char const *const title,
 	free(e_title);
 	free(e_key);
 
-	gcli_fetch_with_method("POST", url, payload, NULL, &buf);
-	if (out) {
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, &buf);
+	if (rc == 0 && out) {
 		json_stream str;
 
 		json_open_buffer(&str, buf.data, buf.length);
-		parse_gitlab_sshkey(&str, out);
+		parse_gitlab_sshkey(ctx, &str, out);
 		json_close(&str);
 	}
 
 	free(buf.data);
 
-	return 0;
+	return rc;
 }
 
 int
-gitlab_delete_sshkey(int id)
+gitlab_delete_sshkey(gcli_ctx *ctx, gcli_id id)
 {
 	char *url;
+	int rc = 0;
 
-	url = sn_asprintf("%s/user/keys/%d", gcli_get_apibase(), id);
-	gcli_fetch_with_method("DELETE", url, NULL, NULL, NULL);
+	url = sn_asprintf("%s/user/keys/%lu", gcli_get_apibase(ctx), id);
+	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
 	free(url);
 
-	return 0;
+	return rc;
 }

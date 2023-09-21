@@ -31,39 +31,14 @@
 #include <config.h>
 #endif
 
-#include <gcli/config.h>
 #include <gcli/forges.h>
 #include <gcli/sshkeys.h>
-#include <gcli/table.h>
+#include <gcli/cmd/table.h>
 
 int
-gcli_sshkeys_get_keys(gcli_sshkey_list *out)
+gcli_sshkeys_get_keys(gcli_ctx *ctx, gcli_sshkey_list *out)
 {
-	return gcli_forge()->get_sshkeys(out);
-}
-
-void
-gcli_sshkeys_print_keys(gcli_sshkey_list const *list)
-{
-	gcli_tbl *tbl;
-	gcli_tblcoldef cols[] = {
-		{ .name = "ID",      .type = GCLI_TBLCOLTYPE_INT,    .flags = 0 },
-		{ .name = "CREATED", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-		{ .name = "TITLE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
-	};
-
-	if (list->keys_size == 0) {
-		printf("No SSH keys\n");
-		return;
-	}
-
-	tbl = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
-
-	for (size_t i = 0; i < list->keys_size; ++i) {
-		gcli_tbl_add_row(tbl, list->keys[i].id, list->keys[i].created_at, list->keys[i].title);
-	}
-
-	gcli_tbl_end(tbl);
+	return gcli_forge(ctx)->get_sshkeys(ctx, out);
 }
 
 void
@@ -82,9 +57,8 @@ gcli_sshkeys_free_keys(gcli_sshkey_list *list)
 }
 
 int
-gcli_sshkeys_add_key(char const *title,
-                     char const *public_key_path,
-                     gcli_sshkey *out)
+gcli_sshkeys_add_key(gcli_ctx *ctx, char const *title,
+                     char const *public_key_path, gcli_sshkey *out)
 {
 	int rc;
 	char *buffer;
@@ -93,14 +67,14 @@ gcli_sshkeys_add_key(char const *title,
 	if (rc < 0)
 		return rc;
 
-	rc = gcli_forge()->add_sshkey(title, buffer, out);
+	rc = gcli_forge(ctx)->add_sshkey(ctx, title, buffer, out);
 	free(buffer);
 
 	return rc;
 }
 
 int
-gcli_sshkeys_delete_key(int id)
+gcli_sshkeys_delete_key(gcli_ctx *ctx, gcli_id const id)
 {
-	return gcli_forge()->delete_sshkey(id);
+	return gcli_forge(ctx)->delete_sshkey(ctx, id);
 }

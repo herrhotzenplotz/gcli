@@ -34,21 +34,20 @@
 #include <gcli/gitlab/sshkeys.h>
 
 int
-github_get_sshkeys(gcli_sshkey_list *out)
+github_get_sshkeys(gcli_ctx *ctx, gcli_sshkey_list *out)
 {
-	return gitlab_get_sshkeys(out);
+	return gitlab_get_sshkeys(ctx, out);
 }
 
 int
-github_add_sshkey(char const *const title,
-                  char const *const pubkey,
-                  gcli_sshkey *out)
+github_add_sshkey(gcli_ctx *ctx, char const *const title,
+                  char const *const pubkey, gcli_sshkey *out)
 {
-	return gitlab_add_sshkey(title, pubkey, out);
+	return gitlab_add_sshkey(ctx, title, pubkey, out);
 }
 
 int
-github_delete_sshkey(int id)
+github_delete_sshkey(gcli_ctx *ctx, gcli_id const id)
 {
-	return gitlab_delete_sshkey(id);
+	return gitlab_delete_sshkey(ctx, id);
 }

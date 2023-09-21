@@ -121,4 +121,62 @@
 	+ https://api.github.com/repos/zorchenhimer/MovieNight/pulls/156/reviews/611653998
   - A review comment has got a diff hunk and a body attached to it.
 	+ https://api.github.com/repos/zorchenhimer/MovieNight/pulls/156/reviews/611653998/comments
-https://open.spotify.com/track/spotify:tracks:5Xc7TIjrQ74V8B2qq4uCwS
+
+* Big refactor for libraryfication
+** DONE Fix test suite
+   - [X] Move config stuff to cmd and have callbacks that given the
+     context give you the account details etc.
+
+     This would allow you to create a mock context that returns only
+     values that make sense in test contexts.
+
+   - [X] Add support for a testing gcli context
+** DONE Check errx calls if they print "error: "
+** DONE Check for calls to errx in submit routines
+** TODO [[file:src/github/review.c::github_review_get_reviews(char const *owner)][github_review_get_reviews]] is garbage
+** TODO Clean up the generic comments code
+** DONE Move printing routines to cmd code
+** DONE Build a shared library
+** TODO Remove global curl handle
+   - [X] Put it into the context
+   - [ ] Clean up handle on exit
+** DONE Return errors from parsers
+** DONE [[file:src/releases.c::gcli_release_push_asset(gcli_new_release *const release,][push_asset]] should not call errx but return an error code
+** DONE Make [[file:src/pulls.c::gcli_pull_get_diff(gcli_ctx *ctx, FILE *stream, char const *owner,][getting a pull diff]] return an error code
+** TODO Add a real changelog file
+** DONE include [[file:docs/pgen.org][docs/pgen.org]] in the distribution tarball
+** DONE remove gcli_print_html_url
+** TODO Test suite
+*** TODO Github [53%]
+   - [ ] Checks
+   - [X] Comments
+   - [X] Forks
+   - [ ] Gists
+   - [X] Milestones
+   - [X] Releases
+   - [X] Repos
+   - [ ] Reviews
+   - [ ] SSH keys
+   - [ ] Status
+   - [X] Issues
+   - [X] Labels
+   - [X] Pulls
+*** TODO Gitlab [61%]
+   - [ ] Comments
+   - [X] Forks
+   - [X] Milestones
+   - [X] Pipelines
+   - [X] Releases
+   - [X] Repos
+   - [ ] Reviews
+   - [ ] SSH Keys
+   - [X] Snippets
+   - [ ] Status
+   - [X] Issues
+   - [X] Labels
+   - [X] Merge Requests
+*** TODO Gitea
+** TODO add an ATF macro for comparing string views
+** TODO Think about making IDs =unsigned long=
+** TODO get rid of html_url everywhere
+** TODO Check the =Kyuafile.in= for requirements on test input

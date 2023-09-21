@@ -36,13 +36,10 @@
 
 #include <gcli/forks.h>
 
-int gitlab_get_forks(char const *owner,
-                     char const *repo,
-                     int max,
-                     gcli_fork_list *out);
+int gitlab_get_forks(gcli_ctx *ctx, char const *owner, char const *repo,
+                     int max, gcli_fork_list *out);
 
-void gitlab_fork_create(char const *owner,
-                        char const *repo,
-                        char const *_in);
+int gitlab_fork_create(gcli_ctx *ctx, char const *owner, char const *repo,
+                       char const *_in);
 
 #endif /* GITLAB_FORKS_H */

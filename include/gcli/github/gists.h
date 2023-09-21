@@ -45,10 +45,10 @@ typedef struct gcli_gist_file gcli_gist_file;
 typedef struct gcli_new_gist  gcli_new_gist;
 
 struct gcli_gist_file {
-	sn_sv  filename;
-	sn_sv  language;
-	sn_sv  url;
-	sn_sv  type;
+	sn_sv filename;
+	sn_sv language;
+	sn_sv url;
+	sn_sv type;
 	size_t size;
 };
 
@@ -58,38 +58,33 @@ struct gcli_gist_list {
 };
 
 struct gcli_gist {
-	sn_sv           id;
-	sn_sv           owner;
-	sn_sv           url;
-	sn_sv           date;
-	sn_sv           git_pull_url;
-	sn_sv           description;
+	sn_sv id;
+	sn_sv owner;
+	sn_sv url;
+	sn_sv date;
+	sn_sv git_pull_url;
+	sn_sv description;
 	gcli_gist_file *files;
-	size_t          files_size;
+	size_t files_size;
 };
 
 struct gcli_new_gist {
-	FILE       *file;
+	FILE *file;
 	char const *file_name;
 	char const *gist_description;
 };
 
-int gcli_get_gists(char const *user,
-                   int max,
+int gcli_get_gists(gcli_ctx *ctx, char const *user, int max,
                    gcli_gist_list *list);
 
-gcli_gist *gcli_get_gist(char const *gist_id);
+int gcli_get_gist(gcli_ctx *ctx, char const *gist_id, gcli_gist *out);
 
-void gcli_print_gists(enum gcli_output_flags flags,
-                      gcli_gist_list const *list,
-                      int max);
+int gcli_create_gist(gcli_ctx *ctx, gcli_new_gist);
 
-void gcli_create_gist(gcli_new_gist);
-
-void gcli_delete_gist(char const *gist_id,
-                      bool always_yes);
+int gcli_delete_gist(gcli_ctx *ctx, char const *gist_id);
 
 void gcli_gists_free(gcli_gist_list *list);
+void gcli_gist_free(gcli_gist *g);
 
 /**
  * NOTE(Nico): Because of idiots designing a web API, we get a list of
@@ -97,6 +92,7 @@ void gcli_gists_free(gcli_gist_list *list);
  * file names. The objects describing the files obviously contain the
  * file name again. Whatever...here's a hack. Blame GitHub.
  */
-void parse_github_gist_files_idiot_hack(json_stream *stream, gcli_gist *gist);
+int parse_github_gist_files_idiot_hack(gcli_ctx *ctx, json_stream *stream,
+                                       gcli_gist *gist);
 
 #endif /* GCLI_GITHUB_GISTS_H */

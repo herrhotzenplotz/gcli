@@ -44,15 +44,22 @@ Packages that are work-in-progress:
 
 Required dependencies:
 - libcurl
-- pkg-config
 - yacc (System V yacc, Berkeley Yacc or Bison should suffice)
 - lex (flex is preferred)
 - C99 Compiler and linker
 - make
 
+Optional dependencies:
+- pkg-config
+
 If you are building from Git you will also need:
+- m4
 - autoconf
 - automake
+
+The test suite requires:
+- [Kyua](https://github.com/jmmv/kyua)
+- [ATF](https://github.com/jmmv/atf)
 
 ### Compile
 In order to perform a build, do:
@@ -84,7 +91,8 @@ Tested Operating Systems so far:
 - Solaris 10 and 11, sparc64
 - SunOS 5.11 i86pc (OmniOS)
 - Devuan GNU/Linux Chimaera x86_64
-- Debian GNU/Linux 5.18.11 ppc64
+- Debian GNU/Linux ppc64, ppc64le
+- Gentoo Linux sparc64, ia64
 - Fedora 34 x86_64
 - Haiku x86_64
 - Minix 3.4.0 (GENERIC) i386

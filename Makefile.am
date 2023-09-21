@@ -8,6 +8,7 @@ AM_CPPFLAGS += -I$(srcdir)
 AM_CPPFLAGS += -DYY_NO_INPUT
 AM_CPPFLAGS += -DYY_NO_UNPUT
 AM_CPPFLAGS += -D_XOPEN_SOURCE=600
+AM_CFLAGS = -Wno-gnu-zero-variadic-macro-arguments
 
 noinst_PROGRAMS = pgen$(EXEEXT)
 pgen_SOURCES = \
@@ -18,11 +19,14 @@ pgen_SOURCES = \
 	src/pgen/parser.y \
 	src/pgen/lexer.l
 
-noinst_LTLIBRARIES = libgcli.la libsn.la libpdjson.la
+lib_LTLIBRARIES = libgcli.la
+noinst_LTLIBRARIES = libsn.la libpdjson.la
 
-.NOTPARALLEL: pgen$(EXEEXT) $(builddir)/src/pgen/parser.c $(builddir)/src/pgen/parser.h $(builddir)/src/pgen/lexer.c
+# For testing puproses I'll reenable parallel builds. If it breaks again, uncomment.
+# .NOTPARALLEL: pgen$(EXEEXT) $(builddir)/src/pgen/parser.c $(builddir)/src/pgen/parser.h $(builddir)/src/pgen/lexer.c
+src/pgen/lexer.c: src/pgen/parser.h
 
-libgcli_la_DEPENDENCIES = pgen$(EXEEXT)
+libgcli_la_DEPENDENCIES = pgen$(EXEEXT) libpdjson.la libsn.la
 
 $(BUILT_SOURCES): pgen$(EXEEXT)
 
@@ -34,7 +38,9 @@ SUFFIXES = .t
 	$(AM_V_GEN)./pgen -tc -o $@ $<
 
 bin_PROGRAMS = gcli$(EXEEXT)
-gcli_LDADD = libgcli.la libpdjson.la libsn.la
+gcli_LDADD = libgcli.la
+
+libgcli_la_LIBADD = libpdjson.la libsn.la
 
 dist_man_MANS = \
 	docs/gcli-api.1 \
@@ -54,25 +60,28 @@ dist_man_MANS = \
 	docs/gcli.1
 
 gcli_SOURCES = \
-	include/gcli/cmd.h \
-	src/cmd.c \
+	include/gcli/cmd/ci.h src/cmd/ci.c \
+	include/gcli/cmd/cmdconfig.h src/cmd/cmdconfig.c \
+	include/gcli/cmd/cmd.h src/cmd/cmd.c \
+	include/gcli/cmd/colour.h src/cmd/colour.c \
+	include/gcli/cmd/comment.h src/cmd/comment.c \
+	include/gcli/cmd/config.h src/cmd/config.c \
+	include/gcli/cmd/editor.h src/cmd/editor.c \
+	include/gcli/cmd/forks.h src/cmd/forks.c \
+	include/gcli/cmd/gists.h src/cmd/gists.c \
+	include/gcli/cmd/gitconfig.h src/cmd/gitconfig.c \
+	include/gcli/cmd/issues.h src/cmd/issues.c \
+	include/gcli/cmd/labels.h src/cmd/labels.c \
+	include/gcli/cmd/milestones.h src/cmd/milestones.c \
+	include/gcli/cmd/pipelines.h src/cmd/pipelines.c \
+	include/gcli/cmd/pulls.h src/cmd/pulls.c \
+	include/gcli/cmd/releases.h src/cmd/releases.c \
+	include/gcli/cmd/repos.h src/cmd/repos.c \
+	include/gcli/cmd/snippets.h src/cmd/snippets.c \
+	include/gcli/cmd/status.h src/cmd/status.c \
+	include/gcli/cmd/table.h src/cmd/table.c \
 	src/cmd/api.c \
-	src/cmd/ci.c \
-	src/cmd/comment.c \
-	src/cmd/config.c \
-	src/cmd/forks.c \
-	src/cmd/gists.c \
-	src/cmd/issues.c \
-	src/cmd/labels.c \
-	src/cmd/milestones.c \
-	src/cmd/pipelines.c \
-	src/cmd/pulls.c \
-	src/cmd/releases.c \
-	src/cmd/repos.c \
-	src/cmd/snippets.c \
-	src/cmd/status.c \
-	include/gcli/gcli.h \
-	src/gcli.c
+	src/cmd/gcli.c
 
 libsn_la_SOURCES = \
 	thirdparty/sn/sn.c \
@@ -83,6 +92,7 @@ libpdjson_la_SOURCES = \
 	thirdparty/pdjson/pdjson.h
 
 TEMPLATES = \
+	templates/github/api.t \
 	templates/github/checks.t \
 	templates/github/comments.t \
 	templates/github/forks.t \
@@ -94,6 +104,7 @@ TEMPLATES = \
 	templates/github/repos.t \
 	templates/github/status.t \
 	templates/github/milestones.t \
+	templates/gitlab/api.t \
 	templates/gitlab/comments.t \
 	templates/gitlab/forks.t \
 	templates/gitlab/issues.t \
@@ -109,15 +120,26 @@ TEMPLATES = \
 	templates/gitlab/snippets.t \
 	templates/gitea/milestones.t
 
+headerdir = $(prefix)
+nobase_header_HEADERS = include/gcli/gcli.h include/gcli/comments.h	\
+	include/gcli/curl.h include/gcli/forks.h			\
+	include/gcli/issues.h include/gcli/labels.h			\
+	include/gcli/milestones.h include/gcli/pulls.h			\
+	include/gcli/releases.h include/gcli/repos.h			\
+	include/gcli/review.h include/gcli/gitlab/snippets.h		\
+	include/gcli/status.h include/gcli/sshkeys.h
+
+pkgconfdir = $(libdir)/pkgconfig
+pkgconf_DATA = libgcli.pc
+
 libgcli_la_SOURCES = \
-	src/colour.c include/gcli/colour.h \
+	include/gcli/ctx.h src/ctx.c \
+	include/gcli/gcli.h src/gcli.c \
+	include/gcli/date_time.h src/date_time.c \
 	src/comments.c include/gcli/comments.h \
-	src/config.c include/gcli/config.h \
 	src/curl.c include/gcli/curl.h \
-	src/editor.c include/gcli/editor.h \
 	src/forges.c include/gcli/forges.h \
 	src/forks.c include/gcli/forks.h \
-	src/gitconfig.c include/gcli/gitconfig.h \
 	src/issues.c include/gcli/issues.h \
 	src/json_util.c include/gcli/json_util.h \
 	src/labels.c include/gcli/labels.h \
@@ -129,7 +151,6 @@ libgcli_la_SOURCES = \
 	src/gitlab/snippets.c include/gcli/gitlab/snippets.h \
 	src/status.c include/gcli/status.h \
 	src/sshkeys.c include/gcli/sshkeys.h \
-	src/table.c include/gcli/table.h \
 	src/gitlab/api.c include/gcli/gitlab/api.h \
 	src/gitlab/comments.c include/gcli/gitlab/comments.h \
 	src/gitlab/config.c include/gcli/gitlab/config.h \
@@ -171,6 +192,10 @@ libgcli_la_SOURCES = \
 	src/gitea/milestones.c include/gcli/gitea/milestones.h \
 	$(TEMPLATES)
 
+libgcli_la_CPPFLAGS = \
+	$(AM_CPPFLAGS) \
+	-DIN_LIBGCLI=1
+
 BUILT_SOURCES = \
 	$(TEMPLATES:.t=.c) \
 	$(TEMPLATES:.t=.h)
@@ -179,47 +204,78 @@ CLEANFILES = $(BUILT_SOURCES)
 
 EXTRA_DIST = \
 	LICENSE \
-	README.md \
+	README.md  \
 	HACKING.md \
 	autogen.sh \
-	m4/.gitkeep
+	m4/.gitkeep \
+	docs/pgen.org
 
 ###########################################
 # Tests
+if HAVE_TESTS
 check_PROGRAMS = \
 	tests/json-escape$(EXEEXT) \
-	tests/pgen-tests$(EXEEXT) \
+	tests/github-parse-tests$(EXEEXT) \
+	tests/gitlab-parse-tests$(EXEEXT) \
 	tests/url-encode$(EXEEXT) \
 	tests/pretty_print_test$(EXEEXT)
 
-SHELL_TESTS = \
-	tests/01_pgen_simple_object.sh \
-	tests/02_pgen_error_no_entries.sh \
-	tests/03_pgen_error_trailing_comma.sh \
-	tests/04_pgen_simple_issue.sh \
-	tests/05_pgen_simple_pull.sh \
-	tests/06_pgen_simple_label.sh \
-	tests/07_pretty_print.sh
+$(check_PROGRAMS): tests/gcli_tests.h
 
-EXTRA_DIST += \
-	${SHELL_TESTS} \
-	tests/setup.sh \
-	tests/samples/pgen_simple_object.dump \
-	tests/samples/github_simple_issue.json tests/samples/parse_simple_issue.dump \
-	tests/samples/github_simple_pull.json tests/samples/parse_simple_pull.dump \
-	tests/samples/github_simple_label.json tests/samples/parse_simple_label.dump \
-	tests/samples/pretty.dump
+EXTRA_DIST += tests/gcli_tests.h
+check: do_test
 
-TESTS = \
-	tests/json-escape \
-	tests/url-encode \
-	${SHELL_TESTS}
+do_test: $(check_PROGRAMS) tests/Kyuafile
+	kyua test -k tests/Kyuafile
 
+tests_json_escape_SOURCES = \
+	tests/json-escape.c
 tests_json_escape_LDADD = \
-	libgcli.la libpdjson.la libsn.la
-tests_pgen_tests_LDADD = \
-	libgcli.la libpdjson.la libsn.la
+	libgcli.la libpdjson.la libsn.la \
+	$(LIBATFC_LDFLAGS)
+
+tests_github_parse_tests_SOURCES = \
+	tests/github-parse-tests.c
+tests_github_parse_tests_LDADD = \
+	libgcli.la libpdjson.la libsn.la \
+	$(LIBATFC_LDFLAGS)
+
+tests_gitlab_parse_tests_SOURCES = \
+	tests/gitlab-parse-tests.c
+tests_gitlab_parse_tests_LDADD = \
+	libgcli.la libpdjson.la libsn.la \
+	$(LIBATFC_LDFLAGS)
+
+tests_url_encode_SOURCES = \
+	tests/url-encode.c
 tests_url_encode_LDADD = \
-	libgcli.la libpdjson.la libsn.la
+	libgcli.la libpdjson.la libsn.la \
+	$(LIBATFC_LDFLAGS)
+
+tests_pretty_print_test_SOURCES = \
+	tests/pretty_print_test.c
 tests_pretty_print_test_LDADD = \
-	libsn.la
+	libsn.la \
+	$(LIBATFC_LDFLAGS)
+
+EXTRA_DIST += tests/samples/github_simple_comment.json	\
+	tests/samples/github_simple_fork.json		\
+	tests/samples/github_simple_issue.json		\
+	tests/samples/github_simple_issue.json		\
+	tests/samples/github_simple_label.json		\
+	tests/samples/github_simple_milestone.json	\
+	tests/samples/github_simple_pull.json		\
+	tests/samples/github_simple_release.json	\
+	tests/samples/github_simple_repo.json		\
+	tests/samples/gitlab_simple_issue.json		\
+	tests/samples/gitlab_simple_fork.json		\
+	tests/samples/gitlab_simple_label.json		\
+	tests/samples/gitlab_simple_merge_request.json	\
+	tests/samples/gitlab_simple_milestone.json	\
+	tests/samples/gitlab_simple_pipeline.json	\
+	tests/samples/gitlab_simple_release.json	\
+	tests/samples/gitlab_simple_repo.json		\
+	tests/samples/gitlab_simple_snippet.json	\
+	tests/samples/github_simple_check.json
+
+endif

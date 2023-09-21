@@ -3,7 +3,7 @@ include "gcli/milestones.h";
 parser gitlab_milestone is
 object of gcli_milestone with
 	("title" => title as string,
-	 "id" => id as int,
+	 "id" => id as id,
 	 "state" => state as string,
 	 "created_at" => created_at as string,
 	 "description" => description as string,

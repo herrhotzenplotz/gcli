@@ -8,7 +8,7 @@ object of gcli_repo with
 	 "created_at"          => date as sv,
 	 "visibility"          => visibility as sv,
 	 "fork"                => is_fork as bool,
-	 "id"                  => id as int);
+	 "id"                  => id as id);
 
 parser gitlab_repos is
 array of gcli_repo use parse_gitlab_repo;

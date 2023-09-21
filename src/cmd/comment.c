@@ -29,8 +29,14 @@
 
 #include <config.h>
 
-#include <gcli/cmd.h>
+#include <gcli/cmd/cmd.h>
+#include <gcli/cmd/cmdconfig.h>
+#include <gcli/cmd/colour.h>
+#include <gcli/cmd/comment.h>
+#include <gcli/cmd/editor.h>
+
 #include <gcli/comments.h>
+#include <gcli/json_util.h>
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -50,13 +56,121 @@ usage(void)
 	copyright();
 }
 
+static void
+comment_init(gcli_ctx *ctx, FILE *f, void *_data)
+{
+	gcli_submit_comment_opts *info = _data;
+	const char *target_type = NULL;
+
+	switch (info->target_type) {
+	case ISSUE_COMMENT:
+		target_type = "issue";
+		break;
+	case PR_COMMENT: {
+		switch (gcli_config_get_forge_type(ctx)) {
+		case GCLI_FORGE_GITEA:
+		case GCLI_FORGE_GITHUB:
+			target_type = "Pull Request";
+			break;
+		case GCLI_FORGE_GITLAB:
+			target_type = "Merge Request";
+			break;
+		}
+	} break;
+	}
+
+	fprintf(
+		f,
+		"! Enter your comment above, save and exit.\n"
+		"! All lines with a leading '!' are discarded and will not\n"
+		"! appear in your comment.\n"
+		"! COMMENT IN : %s/%s %s #%d\n",
+		info->owner, info->repo, target_type, info->target_id);
+}
+
+static sn_sv
+gcli_comment_get_message(gcli_submit_comment_opts *info)
+{
+	return gcli_editor_get_user_message(g_clictx, comment_init, info);
+}
+
+static int
+comment_submit(gcli_submit_comment_opts opts, int always_yes)
+{
+	sn_sv const message = gcli_comment_get_message(&opts);
+	opts.message = gcli_json_escape(message);
+	int rc = 0;
+
+	fprintf(
+		stdout,
+		"You will be commenting the following in %s/%s #%d:\n"SV_FMT"\n",
+		opts.owner, opts.repo, opts.target_id, SV_ARGS(message));
+
+	if (!always_yes) {
+		if (!sn_yesno("Is this okay?"))
+			errx(1, "Aborted by user");
+	}
+
+	rc = gcli_comment_submit(g_clictx, opts);
+
+	free(message.data);
+	free(opts.message.data);
+
+	return rc;
+}
+
+int
+gcli_issue_comments(char const *owner, char const *repo, int const issue)
+{
+	gcli_comment_list list = {0};
+	int rc = 0;
+
+	rc = gcli_get_issue_comments(g_clictx, owner, repo, issue, &list);
+	if (rc < 0)
+		return rc;
+
+	gcli_print_comment_list(&list);
+	gcli_comment_list_free(&list);
+
+	return rc;
+}
+
+int
+gcli_pull_comments(char const *owner, char const *repo, int const pull)
+{
+	gcli_comment_list list = {0};
+	int rc = 0;
+
+	rc = gcli_get_pull_comments(g_clictx, owner, repo, pull, &list);
+	if (rc < 0)
+		return rc;
+
+	gcli_print_comment_list(&list);
+	gcli_comment_list_free(&list);
+
+	return rc;
+}
+
+void
+gcli_print_comment_list(gcli_comment_list const *const list)
+{
+	for (size_t i = 0; i < list->comments_size; ++i) {
+		printf("AUTHOR : %s%s%s\n"
+		       "DATE   : %s\n",
+		       gcli_setbold(), list->comments[i].author, gcli_resetbold(),
+		       list->comments[i].date);
+		pretty_print(list->comments[i].body, 9, 80, stdout);
+		putchar('\n');
+	}
+}
+
 int
 subcommand_comment(int argc, char *argv[])
 {
-	int                       ch, target_id = -1;
-	char const               *repo = NULL, *owner = NULL;
-	bool                      always_yes = false;
-	enum comment_target_type  target_type;
+	int ch, target_id = -1, rc = 0;
+	char const *repo = NULL, *owner = NULL;
+	bool always_yes = false;
+	enum comment_target_type target_type;
 
 	struct option const options[] = {
 		{ .name    = "yes",
@@ -121,12 +235,15 @@ subcommand_comment(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	gcli_comment_submit((gcli_submit_comment_opts) {
-			.owner       = owner,
-			.repo        = repo,
+	rc = comment_submit((gcli_submit_comment_opts) {
+			.owner = owner,
+			.repo = repo,
 			.target_type = target_type,
-			.target_id   = target_id,
-			.always_yes  = always_yes });
+			.target_id = target_id },
+		always_yes);
+
+	if (rc < 0)
+		errx(1, "error: failed to submit comment: %s", gcli_get_error(g_clictx));
 
 	return EXIT_SUCCESS;
 }

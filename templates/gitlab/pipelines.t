@@ -8,7 +8,7 @@ object of gitlab_pipeline with
 	 "ref"        => ref as string,
 	 "sha"        => sha as string,
 	 "source"     => source as string,
-	 "id"         => id as int);
+	 "id"         => id as id);
 
 parser gitlab_pipelines is
 array of gitlab_pipeline use parse_gitlab_pipeline;
@@ -29,7 +29,8 @@ object of gitlab_job with
 	 "finished_at" => finished_at as string,
 	 "runner"      => use parse_gitlab_job_runner,
 	 "duration"    => duration as double,
-	 "id"          => id as int);
+	 "id"          => id as id,
+	 "coverage"    => coverage as double);
 
 parser gitlab_jobs is
 array of gitlab_job use parse_gitlab_job;

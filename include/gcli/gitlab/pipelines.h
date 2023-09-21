@@ -34,12 +34,15 @@
 #include <config.h>
 #endif
 
+#include <gcli/pulls.h>
+
 typedef struct gitlab_pipeline      gitlab_pipeline;
 typedef struct gitlab_pipeline_list gitlab_pipeline_list;
 typedef struct gitlab_job           gitlab_job;
+typedef struct gitlab_job_list      gitlab_job_list;
 
 struct gitlab_pipeline {
-	long  id;
+	gcli_id id;
 	char *status;
 	char *created_at;
 	char *updated_at;
@@ -54,72 +57,54 @@ struct gitlab_pipeline_list {
 };
 
 struct gitlab_job {
-	long    id;
-	char   *status;
-	char   *stage;
-	char   *name;
-	char   *ref;
-	char   *created_at;
-	char   *started_at;
-	char   *finished_at;
-	double  duration;
-	char   *runner_name;
-	char   *runner_description;
+	gcli_id id;
+	char *status;
+	char *stage;
+	char *name;
+	char *ref;
+	char *created_at;
+	char *started_at;
+	char *finished_at;
+	double duration;
+	char *runner_name;
+	char *runner_description;
+	double coverage;
 };
 
-int gitlab_get_pipelines(char const *owner,
-                         char const *repo,
-                         int max,
-                         gitlab_pipeline_list *out);
+struct gitlab_job_list {
+	gitlab_job *jobs;
+	size_t jobs_size;
+};
 
-void gitlab_print_pipelines(gitlab_pipeline_list const *list);
+int gitlab_get_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
+                         int max, gitlab_pipeline_list *out);
 
 void gitlab_free_pipelines(gitlab_pipeline_list *list);
 
-void gitlab_pipelines(char const *owner,
-                      char const *repo,
-                      int count);
+int gitlab_get_pipeline_jobs(gcli_ctx *ctx, char const *owner, char const *repo,
+                             gcli_id pipeline, int count, gitlab_job_list *out);
 
-void gitlab_pipeline_jobs(char const *owner,
-                          char const *repo,
-                          long pipeline,
-                          int count);
+void gitlab_free_jobs(gitlab_job_list *jobs);
+void gitlab_free_job(gitlab_job *job);
 
-int gitlab_get_pipeline_jobs(char const *owner,
-                             char const *repo,
-                             long pipeline,
-                             int count,
-                             gitlab_job **jobs);
 
-void gitlab_print_jobs(gitlab_job const *jobs,
-                       int jobs_size);
+int gitlab_job_get_log(gcli_ctx *ctx, char const *owner, char const *repo,
+                       gcli_id job_id, FILE *stream);
 
-void gitlab_free_jobs(gitlab_job *jobs,
-                      int jobs_size);
+int gitlab_job_cancel(gcli_ctx *ctx, char const *owner, char const *repo,
+                      gcli_id job_id);
 
-void gitlab_job_get_log(char const *owner,
-                        char const *repo,
-                        long job_id);
+int gitlab_job_retry(gcli_ctx *ctx, char const *owner, char const *repo,
+                     gcli_id job_id);
 
-void gitlab_job_status(char const *owner,
-                       char const *repo,
-                       long job_id);
+int gitlab_job_download_artifacts(gcli_ctx *ctx, char const *owner,
+                                  char const *repo, gcli_id jid,
+                                  char const *outfile);
 
-void gitlab_job_cancel(char const *owner,
-                       char const *repo,
-                       long job_id);
+int gitlab_get_mr_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
+                            gcli_id mr_id, gitlab_pipeline_list *list);
 
-void gitlab_job_retry(char const *owner,
-                      char const *repo,
-                      long job_id);
-
-int gitlab_mr_pipelines(char const *owner,
-                        char const *repo,
-                        int mr_id);
-
-void gitlab_job_download_artifacts(char const *owner,
-                                   char const *repo,
-                                   long jid,
-                                   char const *outfile);
+int gitlab_get_job(gcli_ctx *ctx, char const *owner, char const *repo,
+                   gcli_id const jid, gitlab_job *const out);
 
 #endif /* GITLAB_PIPELINES_H */

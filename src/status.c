@@ -30,65 +30,32 @@
 #include <gcli/status.h>
 #include <gcli/forges.h>
 
-void
-gcli_status(int const count)
+int
+gcli_get_notifications(gcli_ctx *ctx, int const max,
+                       gcli_notification_list *const out)
 {
-	gcli_notification *notifications      = NULL;
-	size_t             notifications_size = 0;
+	return gcli_forge(ctx)->get_notifications(ctx, max, out);
+}
 
-	notifications_size = gcli_get_notifications(&notifications, count);
-
-	if (count < 0) {
-		gcli_print_notifications(notifications, notifications_size);
-	} else {
-		gcli_print_notifications(
-			notifications,
-			count < (int)notifications_size
-			? (size_t)count : notifications_size);
+void
+gcli_free_notifications(gcli_notification_list *list)
+{
+	for (size_t i = 0; i < list->notifications_size; ++i) {
+		free(list->notifications[i].id);
+		free(list->notifications[i].title);
+		free(list->notifications[i].reason);
+		free(list->notifications[i].date);
+		free(list->notifications[i].type);
+		free(list->notifications[i].repository);
 	}
 
-	gcli_free_notifications(notifications, notifications_size);
+	free(list->notifications);
+	list->notifications = NULL;
+	list->notifications_size = 0;
 }
 
-size_t
-gcli_get_notifications(gcli_notification **const out, int const count)
+int
+gcli_notification_mark_as_read(gcli_ctx *ctx, char const *id)
 {
-	return gcli_forge()->get_notifications(out, count);
-}
-
-void
-gcli_free_notifications(gcli_notification *notifications,
-                        size_t const notifications_size)
-{
-	for (size_t i = 0; i < notifications_size; ++i) {
-		free(notifications[i].id);
-		free(notifications[i].title);
-		free(notifications[i].reason);
-		free(notifications[i].date);
-		free(notifications[i].type);
-		free(notifications[i].repository);
-	}
-
-	free(notifications);
-}
-
-void
-gcli_print_notifications(gcli_notification const *const notifications,
-                         size_t const notifications_size)
-{
-	for (size_t i = 0; i < notifications_size; ++i) {
-		printf("%s - %s - %s - %s - %s\n",
-		       notifications[i].id, notifications[i].repository,
-		       notifications[i].type, notifications[i].date,
-		       notifications[i].reason);
-
-		pretty_print(notifications[i].title, 4, 80, stdout);
-		putchar('\n');
-	}
-}
-
-void
-gcli_notification_mark_as_read(char const *id)
-{
-	gcli_forge()->notification_mark_as_read(id);
+	return gcli_forge(ctx)->notification_mark_as_read(ctx, id);
 }

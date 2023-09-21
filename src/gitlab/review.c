@@ -39,35 +39,21 @@
 
 #include <templates/gitlab/review.h>
 
-size_t
-gitlab_review_get_reviews(char const *owner,
-                          char const *repo,
-                          int const pr,
-                          gcli_pr_review **const out)
+int
+gitlab_review_get_reviews(gcli_ctx *ctx, char const *owner, char const *repo,
+                          gcli_id const pr, gcli_pr_review_list *const out)
 {
-	gcli_fetch_buffer  buffer   = {0};
-	json_stream        stream   = {0};
-	char              *url      = NULL;
-	char              *next_url = NULL;
-	size_t             size     = 0;
+	char *url = NULL;
 
-	url = sn_asprintf(
-		"%s/projects/%s%%2F%s/merge_requests/%d/notes?sort=asc",
-		gitlab_get_apibase(), owner, repo, pr);
+	gcli_fetch_list_ctx fl = {
+		.listp = &out->reviews,
+		.sizep = &out->reviews_size,
+		.max = -1,
+		.parse = (parsefn)(parse_gitlab_reviews),
+	};
 
-	do {
-		gcli_fetch(url, &next_url, &buffer);
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu/notes?sort=asc",
+	                  gcli_get_apibase(ctx), owner, repo, pr);
 
-		json_open_buffer(&stream, buffer.data, buffer.length);
-
-		parse_gitlab_reviews(&stream, out, &size);
-
-		json_close(&stream);
-		free(url);
-		free(buffer.data);
-	} while ((url = next_url)); /* I hope this doesn't cause any issues */
-
-	free(next_url);
-
-	return size;
+	return gcli_fetch_list(ctx, url, &fl);
 }

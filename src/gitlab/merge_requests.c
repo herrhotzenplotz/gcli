@@ -48,80 +48,75 @@ gitlab_mrs_fixup(gcli_pull_list *const list)
 }
 
 int
-gitlab_fetch_mrs(char *url, int const max, gcli_pull_list *const list)
+gitlab_fetch_mrs(gcli_ctx *ctx, char *url, int const max,
+                 gcli_pull_list *const list)
 {
-	json_stream        stream      = {0};
-	gcli_fetch_buffer  json_buffer = {0};
-	char              *next_url    = NULL;
+	int rc = 0;
 
-	do {
-		gcli_fetch(url, &next_url, &json_buffer);
-		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-		parse_gitlab_mrs(&stream, &list->pulls, &list->pulls_size);
+	gcli_fetch_list_ctx fl = {
+		.listp = &list->pulls,
+		.sizep = &list->pulls_size,
+		.max = max,
+		.parse = (parsefn)(parse_gitlab_mrs),
+	};
 
-		free(json_buffer.data);
-		free(url);
-		json_close(&stream);
-	} while ((url = next_url) && (max == -1 || (int)list->pulls_size < max));
+	rc = gcli_fetch_list(ctx, url, &fl);
 
-	free(url);
+	/* TODO: don't leak the list on error */
+	if (rc == 0)
+		gitlab_mrs_fixup(list);
 
-	gitlab_mrs_fixup(list);
-
-	return 0;
+	return rc;
 }
 
 int
-gitlab_get_mrs(char const *owner,
-               char const *repo,
-               gcli_pull_fetch_details const *const details,
-               int const max,
+gitlab_get_mrs(gcli_ctx *ctx, char const *owner, char const *repo,
+               gcli_pull_fetch_details const *const details, int const max,
                gcli_pull_list *const list)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
 	char *e_repo = NULL;
 	char *e_author = NULL;
+	char *e_label = NULL;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
 	if (details->author) {
 		char *tmp = gcli_urlencode(details->author);
-		e_author = sn_asprintf("?author_username=%s", tmp);
+		bool const need_qmark = details->all;
+		e_author = sn_asprintf("%cauthor_username=%s", need_qmark ? '?' : '&', tmp);
 		free(tmp);
 	}
 
-	/* Note that Gitlab gives you all merge requests inclduing merged
-	 * and closed ones by default. If we want only open merge
-	 * requests, we have to be very explicit about it and give it the
-	 * state=open flag for this purpose.
-	 *
-	 * The below ternary stuff may look like magic, however it is just
-	 * to make sure we insert the right character into the param
-	 * list. Again, note that this behaviour differs quite
-	 * substantially from Github's. */
-	url = sn_asprintf(
-		"%s/projects/%s%%2F%s/merge_requests%s%s%s",
-		gitlab_get_apibase(),
-		e_owner, e_repo,
-		e_author ? e_author : "",
-		e_author ? (details->all ? "" : "&") : (details->all ? "" : "?"),
-		details->all ? "" : "state=opened");
+	if (details->label) {
+		char *tmp = gcli_urlencode(details->label);
+		bool const need_qmark = details->all && !details->author;
+		e_label = sn_asprintf("%clabels=%s", need_qmark ? '?' : '&', tmp);
+		free(tmp);
+	}
 
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests%s%s%s",
+	                  gcli_get_apibase(ctx),
+	                  e_owner, e_repo,
+	                  details->all ? "" : "?state=opened",
+	                  e_author ? e_author : "",
+	                  e_label ? e_label : "");
+
+	free(e_label);
 	free(e_author);
 	free(e_owner);
 	free(e_repo);
 
-	return gitlab_fetch_mrs(url, max, list);
+	return gitlab_fetch_mrs(ctx, url, max, list);
 }
 
-void
-gitlab_print_pr_diff(FILE *stream,
-                     char const *owner,
-                     char const *repo,
-                     int const pr_number)
+int
+gitlab_print_pr_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
+                     char const *repo, gcli_id const pr_number)
 {
+	(void)ctx;
 	(void)owner;
 	(void)repo;
 	(void)pr_number;
@@ -129,13 +124,13 @@ gitlab_print_pr_diff(FILE *stream,
 	fprintf(stream,
 	        "note : Getting the diff of a Merge Request is not "
 	        "supported on GitLab. Blame the Gitlab people.\n");
+
+	return -1;
 }
 
-void
-gitlab_mr_merge(char const *owner,
-                char const *repo,
-                int const mr_number,
-                enum gcli_merge_flags const flags)
+int
+gitlab_mr_merge(gcli_ctx *ctx, char const *owner, char const *repo,
+                gcli_id const mr_number, enum gcli_merge_flags const flags)
 {
 	gcli_fetch_buffer  buffer  = {0};
 	char *url = NULL;
@@ -144,189 +139,181 @@ gitlab_mr_merge(char const *owner,
 	char const *data = "{}";
 	bool const squash = flags & GCLI_PULL_MERGE_SQUASH;
 	bool const delete_source = flags & GCLI_PULL_MERGE_DELETEHEAD;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
 	/* PUT /projects/:id/merge_requests/:merge_request_iid/merge */
-	url = sn_asprintf(
-		"%s/projects/%s%%2F%s/merge_requests/%d/merge"
-		"?squash=%s"
-		"&should_remove_source_branch=%s",
-		gitlab_get_apibase(),
-		e_owner, e_repo, mr_number,
-		squash ? "true" : "false",
-		delete_source ? "true" : "false");
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu/merge"
+	                  "?squash=%s"
+	                  "&should_remove_source_branch=%s",
+	                  gcli_get_apibase(ctx),
+	                  e_owner, e_repo, mr_number,
+	                  squash ? "true" : "false",
+	                  delete_source ? "true" : "false");
 
-	gcli_fetch_with_method("PUT", url, data, NULL, &buffer);
-
-	/* if verbose or normal noise level, print the url */
-	if (!sn_quiet())
-		gcli_print_html_url(buffer);
+	rc = gcli_fetch_with_method(ctx, "PUT", url, data, NULL, &buffer);
 
 	free(buffer.data);
 	free(url);
 	free(e_owner);
 	free(e_repo);
+
+	return rc;
 }
 
-void
-gitlab_get_pull(char const *owner,
-                char const *repo,
-                int const pr_number,
-                gcli_pull *const out)
+int
+gitlab_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
+                gcli_id const pr_number, gcli_pull *const out)
 {
-	json_stream        stream      = {0};
-	gcli_fetch_buffer  json_buffer = {0};
-	char              *url         = NULL;
-	char              *e_owner     = NULL;
-	char              *e_repo      = NULL;
+	gcli_fetch_buffer json_buffer = {0};
+	char *url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
 	/* GET /projects/:id/merge_requests/:merge_request_iid */
-	url = sn_asprintf(
-		"%s/projects/%s%%2F%s/merge_requests/%d",
-		gitlab_get_apibase(),
-		e_owner, e_repo, pr_number);
-	gcli_fetch(url, NULL, &json_buffer);
-
-	json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-
-	parse_gitlab_mr(&stream, out);
-
-	json_close(&stream);
-	free(url);
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu",
+	                  gcli_get_apibase(ctx),
+	                  e_owner, e_repo, pr_number);
 	free(e_owner);
 	free(e_repo);
+
+	rc = gcli_fetch(ctx, url, NULL, &json_buffer);
+	if (rc == 0) {
+		json_stream stream = {0};
+		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+		parse_gitlab_mr(ctx, &stream, out);
+		json_close(&stream);
+	}
+
+	free(url);
 	free(json_buffer.data);
+
+	return rc;
 }
 
 int
-gitlab_get_pull_commits(char const *owner,
-                        char const *repo,
-                        int const pr_number,
-                        gcli_commit **const out)
+gitlab_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
+                        gcli_id const pr_number, gcli_commit_list *const out)
 {
-	char              *url         = NULL;
-	char              *next_url    = NULL;
-	char              *e_owner     = NULL;
-	char              *e_repo      = NULL;
-	size_t             count       = 0;
-	json_stream        stream      = {0};
-	gcli_fetch_buffer  json_buffer = {0};
+	char *url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+
+	gcli_fetch_list_ctx fl = {
+		.listp = &out->commits,
+		.sizep = &out->commits_size,
+		.max = -1,
+		.parse = (parsefn)(parse_gitlab_commits),
+	};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
 	/* GET /projects/:id/merge_requests/:merge_request_iid/commits */
-	url = sn_asprintf(
-		"%s/projects/%s%%2F%s/merge_requests/%d/commits",
-		gitlab_get_apibase(),
-		e_owner, e_repo, pr_number);
-
-	do {
-		gcli_fetch(url, &next_url, &json_buffer);
-		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-
-		parse_gitlab_commits(&stream, out, &count);
-
-		json_close(&stream);
-		free(url);
-		free(json_buffer.data);
-	} while ((url = next_url));
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu/commits",
+	                  gcli_get_apibase(ctx), e_owner, e_repo, pr_number);
 
 	free(e_owner);
 	free(e_repo);
 
-	return (int)(count);
+	return gcli_fetch_list(ctx, url, &fl);
 }
 
-void
-gitlab_mr_close(char const *owner, char const *repo, int const pr_number)
+int
+gitlab_mr_close(gcli_ctx *ctx, char const *owner, char const *repo,
+                gcli_id const pr_number)
 {
-	gcli_fetch_buffer  json_buffer = {0};
-	char              *url         = NULL;
-	char              *data        = NULL;
-	char              *e_owner     = NULL;
-	char              *e_repo      = NULL;
+	char *url = NULL;
+	char *data = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url  = sn_asprintf(
-		"%s/projects/%s%%2F%s/merge_requests/%d",
-		gitlab_get_apibase(),
-		e_owner, e_repo, pr_number);
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu",
+	                  gcli_get_apibase(ctx), e_owner, e_repo, pr_number);
 	data = sn_asprintf("{ \"state_event\": \"close\"}");
 
-	gcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
+	rc = gcli_fetch_with_method(ctx, "PUT", url, data, NULL, NULL);
 
-	free(json_buffer.data);
 	free(url);
 	free(e_owner);
 	free(e_repo);
 	free(data);
+
+	return rc;
 }
 
-void
-gitlab_mr_reopen(char const *owner, char const *repo, int const pr_number)
+int
+gitlab_mr_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
+                 gcli_id const pr_number)
 {
-	gcli_fetch_buffer  json_buffer = {0};
-	char              *url         = NULL;
-	char              *data        = NULL;
-	char              *e_owner     = NULL;
-	char              *e_repo      = NULL;
+	char *url = NULL;
+	char *data = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url  = sn_asprintf(
-		"%s/projects/%s%%2F%s/merge_requests/%d",
-		gitlab_get_apibase(),
-		e_owner, e_repo, pr_number);
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu",
+	                  gcli_get_apibase(ctx), e_owner, e_repo, pr_number);
 	data = sn_asprintf("{ \"state_event\": \"reopen\"}");
 
-	gcli_fetch_with_method("PUT", url, data, NULL, &json_buffer);
+	rc = gcli_fetch_with_method(ctx, "PUT", url, data, NULL, NULL);
 
-	free(json_buffer.data);
 	free(e_owner);
 	free(e_repo);
 	free(url);
 	free(data);
+
+	return rc;
 }
 
-void
-gitlab_perform_submit_mr(gcli_submit_pull_options opts)
+int
+gitlab_perform_submit_mr(gcli_ctx *ctx, gcli_submit_pull_options opts)
 {
 	/* Note: this doesn't really allow merging into repos with
 	 * different names. We need to figure out a way to make this
 	 * better for both github and gitlab. */
-	gcli_repo          target        = {0};
-	sn_sv              target_branch = {0};
-	sn_sv              source_owner  = {0};
-	sn_sv              source_branch = {0};
-	char              *labels        = NULL;
-	gcli_fetch_buffer  buffer        = {0};
+	gcli_repo target = {0};
+	sn_sv target_branch = {0};
+	sn_sv source_owner = {0};
+	sn_sv source_branch = {0};
+	char *labels = NULL;
+	int rc = 0;
 
 	/* json escaped variants */
 	sn_sv e_source_branch, e_target_branch, e_title, e_body;
 
-	target_branch         = opts.to;
-	source_branch         = opts.from;
-	source_owner          = sn_sv_chop_until(&source_branch, ':');
+	target_branch = opts.to;
+	source_branch = opts.from;
+	source_owner = sn_sv_chop_until(&source_branch, ':');
+	if (source_branch.length == 0)
+		return gcli_error(ctx, "bad merge request source: expected 'owner:branch'");
+
 	source_branch.length -= 1;
-	source_branch.data   += 1;
+	source_branch.data += 1;
 
 	/* Figure out the project id */
-	gitlab_get_repo(opts.owner, opts.repo, &target);
+	rc = gitlab_get_repo(ctx, opts.owner, opts.repo, &target);
+	if (rc < 0)
+		return rc;
 
 	/* escape things in the post payload */
 	e_source_branch = gcli_json_escape(source_branch);
 	e_target_branch = gcli_json_escape(target_branch);
-	e_title         = gcli_json_escape(opts.title);
-	e_body          = gcli_json_escape(opts.body);
+	e_title = gcli_json_escape(opts.title);
+	e_body = gcli_json_escape(opts.body);
 
 	/* Prepare the label list if needed */
 	if (opts.labels_size) {
@@ -345,7 +332,7 @@ gitlab_perform_submit_mr(gcli_submit_pull_options opts)
 	char *post_fields = sn_asprintf(
 		"{\"source_branch\":\""SV_FMT"\",\"target_branch\":\""SV_FMT"\", "
 		"\"title\": \""SV_FMT"\", \"description\": \""SV_FMT"\", "
-		"\"target_project_id\": %d %s }",
+		"\"target_project_id\": %lu %s }",
 		SV_ARGS(e_source_branch),
 		SV_ARGS(e_target_branch),
 		SV_ARGS(e_title),
@@ -358,16 +345,14 @@ gitlab_perform_submit_mr(gcli_submit_pull_options opts)
 	char *e_owner = gcli_urlencode_sv(source_owner).data;
 	char *e_repo = gcli_urlencode(opts.repo);
 
-	char *url = sn_asprintf(
-		"%s/projects/%s%%2F%s/merge_requests",
-		gitlab_get_apibase(),
+	char *url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests",
+	                        gcli_get_apibase(ctx),
 	    e_owner, e_repo);
 
 	/* perform request */
-	gcli_fetch_with_method("POST", url, post_fields, NULL, &buffer);
+	rc = gcli_fetch_with_method(ctx, "POST", url, post_fields, NULL, NULL);
 
 	/* cleanup */
-	free(buffer.data);
 	free(e_source_branch.data);
 	free(e_target_branch.data);
 	free(e_title.data);
@@ -377,93 +362,89 @@ gitlab_perform_submit_mr(gcli_submit_pull_options opts)
 	free(labels);
 	free(post_fields);
 	free(url);
+
+	return rc;
 }
 
-void
-gitlab_mr_add_labels(char const *owner,
-                     char const *repo,
-                     int const mr,
-                     char const *const labels[],
+int
+gitlab_mr_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+                     gcli_id const mr, char const *const labels[],
                      size_t const labels_size)
 {
-	char              *url    = NULL;
-	char              *data   = NULL;
-	char              *list   = NULL;
-	gcli_fetch_buffer  buffer = {0};
+	char *url  = NULL;
+	char *data = NULL;
+	char *list = NULL;
+	int   rc   = 0;
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%d",
-	                  gitlab_get_apibase(), owner, repo, mr);
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu",
+	                  gcli_get_apibase(ctx), owner, repo, mr);
 
 	list = sn_join_with(labels, labels_size, ",");
 	data = sn_asprintf("{ \"add_labels\": \"%s\"}", list);
 
-	gcli_fetch_with_method("PUT", url, data, NULL, &buffer);
+	rc = gcli_fetch_with_method(ctx, "PUT", url, data, NULL, NULL);
 
 	free(url);
 	free(data);
 	free(list);
-	free(buffer.data);
+
+	return rc;
 }
 
-void
-gitlab_mr_remove_labels(char const *owner,
-                        char const *repo,
-                        int const mr,
-                        char const *const labels[],
+int
+gitlab_mr_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+                        gcli_id const mr, char const *const labels[],
                         size_t const labels_size)
 {
-	char              *url    = NULL;
-	char              *data   = NULL;
-	char              *list   = NULL;
-	gcli_fetch_buffer  buffer = {0};
+	char *url = NULL;
+	char *data = NULL;
+	char *list = NULL;
+	int rc = 0;
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%d",
-	                  gitlab_get_apibase(), owner, repo, mr);
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu",
+	                  gcli_get_apibase(ctx), owner, repo, mr);
 
 	list = sn_join_with(labels, labels_size, ",");
 	data = sn_asprintf("{ \"remove_labels\": \"%s\"}", list);
 
-	gcli_fetch_with_method("PUT", url, data, NULL, &buffer);
+	rc = gcli_fetch_with_method(ctx, "PUT", url, data, NULL, NULL);
 
 	free(url);
 	free(data);
 	free(list);
-	free(buffer.data);
+
+	return rc;
 }
 
 int
-gitlab_mr_set_milestone(char const *owner,
-                        char const *repo,
-                        int mr,
-                        int milestone_id)
+gitlab_mr_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
+                        gcli_id mr, gcli_id milestone_id)
 {
-	char *url  = NULL;
+	char *url = NULL;
 	char *data = NULL;
+	int rc = 0;
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%d",
-	                  gitlab_get_apibase(), owner, repo, mr);
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu",
+	                  gcli_get_apibase(ctx), owner, repo, mr);
 
-	data = sn_asprintf("{ \"milestone_id\": \"%d\"}", milestone_id);
+	data = sn_asprintf("{ \"milestone_id\": \"%lu\"}", milestone_id);
 
-	gcli_fetch_with_method("PUT", url, data, NULL, NULL);
+	rc = gcli_fetch_with_method(ctx, "PUT", url, data, NULL, NULL);
 
 	free(url);
 	free(data);
 
-	return 0;
+	return rc;
 }
 
 int
-gitlab_mr_clear_milestone(char const *owner,
-                          char const *repo,
-                          int mr)
+gitlab_mr_clear_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
+                          gcli_id const mr)
 {
 	/* GitLab's REST API docs state:
 	 *
 	 * The global ID of a milestone to assign the merge request
 	 * to. Set to 0 or provide an empty value to unassign a
 	 * milestone. */
-	gitlab_mr_set_milestone(owner, repo, mr, 0);
-
-	return 0;
+	return gitlab_mr_set_milestone(ctx, owner, repo, mr, 0);
 }

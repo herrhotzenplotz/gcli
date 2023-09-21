@@ -36,15 +36,14 @@
 
 #include <gcli/releases.h>
 
-int gitlab_get_releases(char const *owner,
-                        char const *repo,
-                        int max,
-                        gcli_release_list *list);
+int gitlab_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
+                        int max, gcli_release_list *list);
 
-void gitlab_create_release(gcli_new_release const *release);
+int gitlab_create_release(gcli_ctx *ctx, gcli_new_release const *release);
 
-void gitlab_delete_release(char const *owner,
-                           char const *repo,
-                           char const *id);
+int gitlab_delete_release(gcli_ctx *ctx, char const *owner, char const *repo,
+                          char const *id);
+
+void gitlab_fixup_release_assets(gcli_ctx *ctx, gcli_release *const release);
 
 #endif /* GITLAB_RELEASES_H */

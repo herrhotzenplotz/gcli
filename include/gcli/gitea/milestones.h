@@ -32,30 +32,26 @@
 
 #include <gcli/milestones.h>
 
-int gitea_get_milestones(char const *const owner,
-                         char const *const repo,
-                         int max,
+int gitea_get_milestones(gcli_ctx *ctx, char const *const owner,
+                         char const *const repo, int max,
                          gcli_milestone_list *out);
 
-int gitea_get_milestone(char const *const owner,
-                        char const *const repo,
-                        int milestone,
+int gitea_get_milestone(gcli_ctx *ctx, char const *const owner,
+                        char const *const repo, gcli_id milestone,
                         gcli_milestone *out);
 
-int gitea_create_milestone(struct gcli_milestone_create_args const *args);
+int gitea_create_milestone(gcli_ctx *ctx,
+                           struct gcli_milestone_create_args const *args);
 
-int gitea_delete_milestone(char const *owner,
-                           char const *repo,
-                           int milestone);
+int gitea_delete_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
+                           gcli_id milestone);
 
-int gitea_milestone_set_duedate(char const *owner,
-                                char const *repo,
-                                int milestone,
+int gitea_milestone_set_duedate(gcli_ctx *ctx, char const *owner,
+                                char const *repo, gcli_id milestone,
                                 char const *date);
 
-int gitea_milestone_get_issues(char const *owner,
-                               char const *repo,
-                               int milestone,
+int gitea_milestone_get_issues(gcli_ctx *ctx, char const *owner,
+                               char const *repo, gcli_id milestone,
                                gcli_issue_list *out);
 
 #endif /* GCLI_GITEA_MILESTONES_H */

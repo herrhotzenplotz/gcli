@@ -39,88 +39,81 @@
 #include <string.h>
 
 static void
-fixup_asset_name(gcli_release_asset *const asset)
+fixup_asset_name(gcli_ctx *ctx, gcli_release_asset *const asset)
 {
-	if (!asset->name) {
-		asset->name = gcli_urldecode(strrchr(asset->url, '/') + 1);
-	}
+	if (!asset->name)
+		asset->name = gcli_urldecode(ctx, strrchr(asset->url, '/') + 1);
+}
+
+void
+gitlab_fixup_release_assets(gcli_ctx *ctx, gcli_release *const release)
+{
+	for (size_t i = 0; i < release->assets_size; ++i)
+		fixup_asset_name(ctx, &release->assets[i]);
 }
 
 static void
-fixup_release_asset_names(gcli_release_list *list)
+fixup_release_asset_names(gcli_ctx *ctx, gcli_release_list *list)
 {
 	/* Iterate over releases */
-	for (size_t j = 0; j < list->releases_size; ++j) {
-		/* iterate over releases */
-		for (size_t i = 0; i < list->releases[j].assets_size; ++i) {
-			fixup_asset_name(&list->releases[j].assets[i]);
-		}
-	}
+	for (size_t i = 0; i < list->releases_size; ++i)
+		gitlab_fixup_release_assets(ctx, &list->releases[i]);
 }
 
 int
-gitlab_get_releases(char const *owner,
-                    char const *repo,
-                    int const max,
-                    gcli_release_list *const list)
+gitlab_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
+                    int const max, gcli_release_list *const list)
 {
-	char              *url      = NULL;
-	char              *next_url = NULL;
-	char              *e_owner  = NULL;
-	char              *e_repo   = NULL;
-	gcli_fetch_buffer  buffer   = {0};
-	json_stream        stream   = {0};
+	char *url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	int rc = 0;
 
+	gcli_fetch_list_ctx fl = {
+		.listp = &list->releases,
+		.sizep = &list->releases_size,
+		.max = max,
+		.parse = (parsefn)(parse_gitlab_releases),
+	};
 
 	*list = (gcli_release_list) {0};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf(
-		"%s/projects/%s%%2F%s/releases",
-		gitlab_get_apibase(),
-		e_owner, e_repo);
-
-	do {
-		gcli_fetch(url, &next_url, &buffer);
-		json_open_buffer(&stream, buffer.data, buffer.length);
-
-		parse_gitlab_releases(&stream, &list->releases, &list->releases_size);
-
-		free(url);
-		free(buffer.data);
-	} while ((url = next_url) && (max == -1 || (int)list->releases_size < max));
+	url = sn_asprintf("%s/projects/%s%%2F%s/releases", gcli_get_apibase(ctx),
+	                  e_owner, e_repo);
 
 	free(e_owner);
 	free(e_repo);
-	free(next_url);
 
-	fixup_release_asset_names(list);
+	rc = gcli_fetch_list(ctx, url, &fl);
 
-	return 0;
+	if (rc == 0)
+		fixup_release_asset_names(ctx, list);
+
+	return rc;
 }
 
-void
-gitlab_create_release(gcli_new_release const *release)
+int
+gitlab_create_release(gcli_ctx *ctx, gcli_new_release const *release)
 {
-	char              *url            = NULL;
-	char              *upload_url     = NULL;
-	char              *post_data      = NULL;
-	char              *name_json      = NULL;
-	char              *e_owner        = NULL;
-	char              *e_repo         = NULL;
-	char              *commitish_json = NULL;
-	sn_sv              escaped_body   = {0};
-	gcli_fetch_buffer  buffer         = {0};
+	char *url = NULL;
+	char *upload_url = NULL;
+	char *post_data = NULL;
+	char *name_json = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	char *commitish_json = NULL;
+	sn_sv escaped_body = {0};
+	int rc = 0;
 
 	e_owner = gcli_urlencode(release->owner);
 	e_repo  = gcli_urlencode(release->repo);
 
 	/* https://docs.github.com/en/rest/reference/repos#create-a-release */
-	url = sn_asprintf(
-		"%s/projects/%s%%2F%s/releases",
-		gitlab_get_apibase(), e_owner, e_repo);
+	url = sn_asprintf("%s/projects/%s%%2F%s/releases", gcli_get_apibase(ctx),
+	                  e_owner, e_repo);
 
 	escaped_body = gcli_json_escape(release->body);
 
@@ -153,13 +146,12 @@ gitlab_create_release(gcli_new_release const *release)
 		commitish_json ? commitish_json : "",
 		name_json ? name_json : "");
 
-	gcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
+	rc = gcli_fetch_with_method(ctx, "POST", url, post_data, NULL, NULL);
 
 	if (release->assets_size)
 		warnx("GitLab release asset uploads are not yet supported");
 
 	free(upload_url);
-	free(buffer.data);
 	free(url);
 	free(post_data);
 	free(escaped_body.data);
@@ -167,28 +159,29 @@ gitlab_create_release(gcli_new_release const *release)
 	free(commitish_json);
 	free(e_owner);
 	free(e_repo);
+
+	return rc;
 }
 
-void
-gitlab_delete_release(char const *owner, char const *repo, char const *id)
+int
+gitlab_delete_release(gcli_ctx *ctx, char const *owner, char const *repo, char const *id)
 {
-	char              *url     = NULL;
-	char              *e_owner = NULL;
-	char              *e_repo  = NULL;
-	gcli_fetch_buffer  buffer  = {0};
+	char *url     = NULL;
+	char *e_owner = NULL;
+	char *e_repo  = NULL;
+	int   rc      = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf(
-		"%s/projects/%s%%2F%s/releases/%s",
-		gitlab_get_apibase(),
-		e_owner, e_repo, id);
+	url = sn_asprintf("%s/projects/%s%%2F%s/releases/%s", gcli_get_apibase(ctx),
+	                  e_owner, e_repo, id);
 
-	gcli_fetch_with_method("DELETE", url, NULL, NULL, &buffer);
+	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
 	free(url);
 	free(e_owner);
 	free(e_repo);
-	free(buffer.data);
+
+	return rc;
 }

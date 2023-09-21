@@ -36,8 +36,10 @@
 
 #include <stddef.h>
 
+#include <gcli/gcli.h>
+
 struct gcli_sshkey {
-	int id;
+	gcli_id id;
 	char *title;
 	char *key;
 	char *created_at;
@@ -51,12 +53,10 @@ struct gcli_sshkey_list {
 typedef struct gcli_sshkey gcli_sshkey;
 typedef struct gcli_sshkey_list gcli_sshkey_list;
 
-int gcli_sshkeys_get_keys(gcli_sshkey_list *out);
-int gcli_sshkeys_add_key(char const *title,
-                         char const *public_key_path,
-                         gcli_sshkey *out);
-int gcli_sshkeys_delete_key(int id);
-void gcli_sshkeys_print_keys(gcli_sshkey_list const *list);
+int gcli_sshkeys_get_keys(gcli_ctx *ctx, gcli_sshkey_list *out);
+int gcli_sshkeys_add_key(gcli_ctx *ctx, char const *title,
+                         char const *public_key_path, gcli_sshkey *out);
+int gcli_sshkeys_delete_key(gcli_ctx *ctx, gcli_id id);
 void gcli_sshkeys_free_keys(gcli_sshkey_list *list);
 
 #endif /* GCLI_SSHKEYS_H */

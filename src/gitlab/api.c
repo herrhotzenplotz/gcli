@@ -30,35 +30,23 @@
 #include <gcli/gitlab/api.h>
 #include <gcli/json_util.h>
 
+#include <templates/gitlab/api.h>
+
 #include <pdjson/pdjson.h>
 
 char const *
-gitlab_api_error_string(gcli_fetch_buffer *const it)
+gitlab_api_error_string(gcli_ctx *ctx, gcli_fetch_buffer *const buf)
 {
-	struct json_stream stream = {0};
-	enum json_type     next   = JSON_NULL;
+	char *msg;
+	int rc;
+	json_stream stream = {0};
 
-	if (!it->length)
-		return NULL;
+	json_open_buffer(&stream, buf->data, buf->length);
+	rc = parse_gitlab_get_error(ctx, &stream, &msg);
+	json_close(&stream);
 
-	json_open_buffer(&stream, it->data, it->length);
-	json_set_streaming(&stream, true);
-
-	while ((next = json_next(&stream)) != JSON_OBJECT_END) {
-		char *key = get_string(&stream);
-		if (strcmp(key, "message") == 0) {
-			if ((next = json_peek(&stream)) == JSON_STRING)
-				return get_string(&stream);
-			else if ((next = json_next(&stream)) == JSON_ARRAY)
-				return get_string(&stream);
-			else if (next == JSON_ARRAY_END)
-				;
-			else
-				errx(1, "error retrieving error message from GitLab "
-				     "API response");
-		}
-		free(key);
-	}
-
-	return "<No message key in error response object>";
+	if (rc < 0)
+		return strdup("no error message: failed to parse error response");
+	else
+		return msg;
 }

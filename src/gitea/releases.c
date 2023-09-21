@@ -30,60 +30,63 @@
 #include <gcli/gitea/releases.h>
 #include <gcli/github/releases.h>
 
-#include <gcli/config.h>
 #include <gcli/curl.h>
 #include <gcli/json_util.h>
 
 #include <templates/github/releases.h>
 
 int
-gitea_get_releases(char const *owner, char const *repo,
+gitea_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
                    int const max, gcli_release_list *const list)
 {
-	return github_get_releases(owner, repo, max, list);
+	return github_get_releases(ctx, owner, repo, max, list);
 }
 
 static void
-gitea_parse_release(gcli_fetch_buffer const *const buffer,
+gitea_parse_release(gcli_ctx *ctx, gcli_fetch_buffer const *const buffer,
                     gcli_release *const out)
 {
 	json_stream stream = {0};
 	json_open_buffer(&stream, buffer->data, buffer->length);
-	parse_github_release(&stream, out);
+	parse_github_release(ctx, &stream, out);
 	json_close(&stream);
 }
 
-static void
-gitea_upload_release_asset(char *const url,
+static int
+gitea_upload_release_asset(gcli_ctx *ctx, char *const url,
                            gcli_release_asset_upload const asset)
 {
-	char              *e_assetname = NULL;
-	char              *request     = NULL;
-	gcli_fetch_buffer  buffer      = {0};
+	char *e_assetname = NULL;
+	char *request = NULL;
+	gcli_fetch_buffer buffer = {0};
+	int rc = 0;
 
 	e_assetname = gcli_urlencode(asset.name);
 	request = sn_asprintf("%s?name=%s", url, e_assetname);
 
-	gcli_curl_gitea_upload_attachment(request, asset.path, &buffer);
+	rc = gcli_curl_gitea_upload_attachment(ctx, request, asset.path, &buffer);
 
 	free(request);
 	free(e_assetname);
 	free(buffer.data);
+
+	return rc;
 }
 
-void
-gitea_create_release(gcli_new_release const *release)
+int
+gitea_create_release(gcli_ctx *ctx, gcli_new_release const *release)
 {
-	char              *commitish_json = NULL;
-	char              *e_owner        = NULL;
-	char              *e_repo         = NULL;
-	char              *name_json      = NULL;
-	char              *post_data      = NULL;
-	char              *upload_url     = NULL;
-	char              *url            = NULL;
-	gcli_fetch_buffer  buffer         = {0};
-	gcli_release       response       = {0};
-	sn_sv              escaped_body   = {0};
+	char *commitish_json = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	char *name_json = NULL;
+	char *post_data = NULL;
+	char *upload_url = NULL;
+	char *url = NULL;
+	gcli_fetch_buffer buffer = {0};
+	gcli_release response = {0};
+	sn_sv escaped_body = {0};
+	int rc = 0;
 
 	e_owner = gcli_urlencode(release->owner);
 	e_repo  = gcli_urlencode(release->repo);
@@ -91,7 +94,7 @@ gitea_create_release(gcli_new_release const *release)
 	/* https://docs.github.com/en/rest/reference/repos#create-a-release */
 	url = sn_asprintf(
 		"%s/repos/%s/%s/releases",
-		gcli_get_apibase(), e_owner, e_repo);
+		gcli_get_apibase(ctx), e_owner, e_repo);
 
 	escaped_body = gcli_json_escape(release->body);
 
@@ -119,20 +122,25 @@ gitea_create_release(gcli_new_release const *release)
 		commitish_json ? commitish_json : "",
 		name_json ? name_json : "");
 
-	gcli_fetch_with_method("POST", url, post_data, NULL, &buffer);
-	gitea_parse_release(&buffer, &response);
+	rc = gcli_fetch_with_method(ctx, "POST", url, post_data, NULL, &buffer);
+	if (rc < 0)
+		goto out;
 
-	printf("INFO : Release at "SV_FMT"\n", SV_ARGS(response.html_url));
+	gitea_parse_release(ctx, &buffer, &response);
 
 	upload_url = sn_asprintf("%s/repos/%s/%s/releases/"SV_FMT"/assets",
-	                         gcli_get_apibase(), e_owner, e_repo,
+	                         gcli_get_apibase(ctx), e_owner, e_repo,
 	                         SV_ARGS(response.id));
 
 	for (size_t i = 0; i < release->assets_size; ++i) {
 		printf("INFO : Uploading asset %s...\n", release->assets[i].path);
-		gitea_upload_release_asset(upload_url, release->assets[i]);
+		rc = gitea_upload_release_asset(ctx, upload_url, release->assets[i]);
+
+		if (rc < 0)
+			break;
 	}
 
+out:
 	free(upload_url);
 	free(buffer.data);
 	free(url);
@@ -142,10 +150,13 @@ gitea_create_release(gcli_new_release const *release)
 	free(e_repo);
 	free(name_json);
 	free(commitish_json);
+
+	return rc;
 }
 
-void
-gitea_delete_release(char const *owner, char const *repo, char const *id)
+int
+gitea_delete_release(gcli_ctx *ctx, char const *owner, char const *repo,
+                     char const *id)
 {
-	github_delete_release(owner, repo, id);
+	return github_delete_release(ctx, owner, repo, id);
 }

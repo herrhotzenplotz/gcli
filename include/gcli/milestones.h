@@ -34,6 +34,7 @@
 #include <config.h>
 #endif
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include <gcli/issues.h>
@@ -43,7 +44,7 @@ typedef struct gcli_milestone gcli_milestone;
 typedef struct gcli_milestone_list gcli_milestone_list;
 
 struct gcli_milestone {
-	int id;
+	gcli_id id;
 	char *title;
 	char *state;
 	char *created_at;
@@ -52,7 +53,7 @@ struct gcli_milestone {
 	char *description;
 	char *updated_at;
 	char *due_date;
-	int expired;
+	bool expired;
 
 	/* Github and Gitea Specific */
 	int open_issues;
@@ -74,38 +75,27 @@ struct gcli_milestone_create_args {
 	char const *repo;
 };
 
-int gcli_get_milestones(char const *owner,
-                        char const *repo,
-                        int max,
-                        gcli_milestone_list *out);
+int gcli_get_milestones(gcli_ctx *ctx, char const *owner, char const *repo,
+                        int max, gcli_milestone_list *out);
 
-int gcli_get_milestone(char const *owner,
-                       char const *repo,
-                       int max,
-                       gcli_milestone *out);
+int gcli_get_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
+                       gcli_id milestone, gcli_milestone *out);
 
-int gcli_create_milestone(struct gcli_milestone_create_args const *args);
+int gcli_create_milestone(gcli_ctx *ctx,
+                          struct gcli_milestone_create_args const *args);
 
-int gcli_delete_milestone(char const *owner,
-                          char const *repo,
-                          int milestone);
-
-void gcli_print_milestones(gcli_milestone_list const *it,
-                           int max);
-
-void gcli_print_milestone(gcli_milestone const *it);
+int gcli_delete_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
+                          gcli_id milestone);
 
 void gcli_free_milestone(gcli_milestone *it);
 void gcli_free_milestones(gcli_milestone_list *it);
 
-int gcli_milestone_get_issues(char const *owner,
-                              char const *repo,
-                              int milestone,
+int gcli_milestone_get_issues(gcli_ctx *ctx, char const *owner,
+                              char const *repo, gcli_id milestone,
                               gcli_issue_list *out);
 
-int gcli_milestone_set_duedate(char const *owner,
-                               char const *repo,
-                               int milestone,
+int gcli_milestone_set_duedate(gcli_ctx *ctx, char const *owner,
+                               char const *repo, gcli_id milestone,
                                char const *date);
 
 #endif /* GCLI_MILESTONES_H */

@@ -2,7 +2,7 @@ include "gcli/milestones.h";
 
 parser github_milestone is
 object of gcli_milestone with
-	("number" => id as int,
+	("number" => id as id,
 	 "title" => title as string,
 	 "created_at" => created_at as string,
 	 "state" => state as string,

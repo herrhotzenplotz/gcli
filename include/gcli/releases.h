@@ -57,7 +57,6 @@ struct gcli_release {
 	sn_sv               author;
 	sn_sv               date;
 	sn_sv               upload_url;
-	sn_sv               html_url;
 	bool                draft;
 	bool                prerelease;
 };
@@ -75,36 +74,29 @@ struct gcli_release_asset_upload {
 
 #define GCLI_RELEASE_MAX_ASSETS 16
 struct gcli_new_release {
-	char const                *owner;
-	char const                *repo;
-	char const                *tag;
-	char const                *name;
-	sn_sv                      body;
-	char const                *commitish;
-	bool                       draft;
-	bool                       prerelease;
-	gcli_release_asset_upload  assets[GCLI_RELEASE_MAX_ASSETS];
-	size_t                     assets_size;
+	char const *owner;
+	char const *repo;
+	char const *tag;
+	char const *name;
+	sn_sv body;
+	char const *commitish;
+	bool draft;
+	bool prerelease;
+	gcli_release_asset_upload assets[GCLI_RELEASE_MAX_ASSETS];
+	size_t assets_size;
 };
 
-int gcli_get_releases(char const *owner,
-                      char const *repo,
-                      int max,
-                      gcli_release_list *list);
-
-void gcli_print_releases(enum gcli_output_flags flags,
-                         gcli_release_list const *list,
-                         int max);
+int gcli_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
+                      int max, gcli_release_list *list);
 
 void gcli_free_releases(gcli_release_list *);
 
-void gcli_create_release(gcli_new_release const *);
+int gcli_create_release(gcli_ctx *ctx, gcli_new_release const *);
 
-void gcli_release_push_asset(gcli_new_release *,
-                             gcli_release_asset_upload);
+int gcli_release_push_asset(gcli_ctx *, gcli_new_release *,
+                            gcli_release_asset_upload);
 
-void gcli_delete_release(char const *owner,
-                         char const *repo,
-                         char const *id);
+int gcli_delete_release(gcli_ctx *ctx, char const *owner, char const *repo,
+                        char const *id);
 
 #endif /* RELEASES_H */

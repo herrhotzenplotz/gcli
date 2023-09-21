@@ -2,7 +2,7 @@ include "gcli/json_util.h";
 include "gcli/gitlab/snippets.h";
 
 parser gitlab_snippet is
-object of gcli_snippet with
+object of gcli_gitlab_snippet with
 	("title"      => title as string,
 	 "id"         => id as int,
 	 "raw_url"    => raw_url as string,
@@ -12,4 +12,4 @@ object of gcli_snippet with
 	 "visibility" => visibility as string);
 
 parser gitlab_snippets is
-array of gcli_snippet use parse_gitlab_snippet;
+array of gcli_gitlab_snippet use parse_gitlab_snippet;

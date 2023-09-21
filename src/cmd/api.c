@@ -31,8 +31,10 @@
 #include <config.h>
 #endif
 
-#include <gcli/cmd.h>
-#include <gcli/config.h>
+#include <gcli/cmd/cmd.h>
+#include <gcli/cmd/cmdconfig.h>
+
+#include <gcli/ctx.h>
 #include <gcli/curl.h>
 
 #include <stdio.h>
@@ -64,7 +66,9 @@ fetch_all(char *_url)
 	do {
 		gcli_fetch_buffer buffer = {0};
 
-		gcli_fetch(url, &next_url, &buffer);
+		if (gcli_fetch(g_clictx, url, &next_url, &buffer) < 0)
+			errx(1, "error: failed to fetch data: %s",
+			     gcli_get_error(g_clictx));
 
 		fwrite(buffer.data, buffer.length, 1, stdout);
 
@@ -111,14 +115,15 @@ subcommand_api(int argc, char *argv[])
 	}
 
 	if (path[0] == '/')
-		url = sn_asprintf("%s%s", gcli_get_apibase(), path);
+		url = sn_asprintf("%s%s", gcli_get_apibase(g_clictx), path);
 	else
-		url = sn_asprintf("%s/%s", gcli_get_apibase(), path);
+		url = sn_asprintf("%s/%s", gcli_get_apibase(g_clictx), path);
 
 	if (do_all)
 		fetch_all(url);
-	else
-		gcli_curl(stdout, url, "application/json");
+	else if (gcli_curl(g_clictx, stdout, url, "application/json") < 0)
+		errx(1, "error: failed to fetch data: %s",
+		     gcli_get_error(g_clictx));
 
 	free(url);
 

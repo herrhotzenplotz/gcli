@@ -202,9 +202,16 @@ The code generator is fully documented in [pgen.org](docs/pgen.org).
 
 # User Frontend Features
 
-[src/gcli.c](src/gcli.c) is the entry point for the user-facing
-tool. In this file you can find the dispatch table for all
-subcommands.
+The gcli command line tool links against libgcli. Through a context
+structure it passes information like the forge type and user
+credentials into the library.
+
+All code for the command line frontend tool is found in the
+[src/cmd/](src/cmd/) directory.
+
+[src/cmd/gcli.c](src/cmd/gcli.c) is the entry point for the command
+line tool. In this file you can find the dispatch table for all
+subcommands of gcli.
 
 ## Subcommands
 
@@ -220,7 +227,10 @@ to `getopt_long` so it needs to reset some internal state.
 Output is usually formatted as a dictionary or a table. For these
 cases gcli provides a few convenience functions and data structures.
 
-The relevant header is [gcli/table.h](include/gcli/table.h).
+The relevant header is [gcli/cmd/table.h](include/gcli/cmd/table.h).
+
+Do not use these functions in the library code. It's only supposed
+to be used from the command line tool.
 
 ### Tables
 

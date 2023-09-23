@@ -28,6 +28,13 @@ AC_PROG_LEX(noyywrap)
 
 PKG_PROG_PKG_CONFIG
 
+dnl Use ccache if found
+CCACHE=""
+AC_CHECK_PROG([CCACHE], [ccache], [ccache])
+if ! test -z "${CCACHE}"; then
+	CC="${CCACHE} ${CC}"
+fi
+
 dnl Go looking for libcurl
 OPT_LIBCURL=check
 AC_ARG_WITH([libcurl],

@@ -15,8 +15,8 @@ alpine-amd64:
     - apk add libcurl gcc autoconf automake libtool make pkgconf musl-dev curl-dev flex bison xz gzip bzip2 libbsd-dev kyua atf-dev
     - ./autogen.sh
     - ./configure CFLAGS='-std=c99 -pedantic -Wall -Wextra -Werror' CPPFLAGS='-D_XOPEN_SOURCE=600' --disable-silent-rules || (cat config.log && exit 42)
-    - make
-    - make distcheck
+    - make -j
+    - make -j distcheck
 
 freebsd-arm64:
   stage: testing
@@ -26,8 +26,8 @@ freebsd-arm64:
   script:
     - ./autogen.sh
     - ./configure LEX=flex YACC=byacc CFLAGS='-std=c99 -pedantic -Wall -Wextra -Wno-misleading-indentation -Werror' CPPFLAGS='-D_XOPEN_SOURCE=600' --disable-silent-rules || (cat config.log && exit 42)
-    - make
-    - make distcheck
+    - make -j 4
+    - make -j 4 distcheck
 
 dist:
   stage: dist
@@ -53,5 +53,5 @@ debian-amd64:
     - apt-get install -y --no-install-recommends build-essential libcurl4-openssl-dev pkgconf autotools-dev bison flex make autoconf automake libtool libbsd-dev libatf-dev kyua
     - ./autogen.sh
     - ./configure CFLAGS='-std=c99 -pedantic -Wall -Wextra -Werror -Wno-misleading-indentation' CPPFLAGS='-D_XOPEN_SOURCE=600' --disable-silent-rules || (cat config.log && exit 42)
-    - make
-    - make distcheck
+    - make -j
+    - make -j distcheck

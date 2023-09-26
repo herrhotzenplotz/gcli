@@ -60,6 +60,7 @@ char const *gcli_init(gcli_ctx **,
 
 void *gcli_get_userdata(struct gcli_ctx const *);
 void gcli_set_userdata(struct gcli_ctx *, void *usrdata);
+void gcli_set_progress_func(struct gcli_ctx *, void (*pfunc)(void));
 void gcli_destroy(gcli_ctx **ctx);
 char const *gcli_get_error(gcli_ctx *ctx);
 

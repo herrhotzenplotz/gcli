@@ -137,6 +137,22 @@ gcli_fetch(gcli_ctx *ctx, char const *url, char **const pagination_next,
 	return gcli_fetch_with_method(ctx, "GET", url, NULL, pagination_next, out);
 }
 
+static int
+gcli_report_progress(void *_ctx, double dltotal, double dlnow,
+                     double ultotal, double ulnow)
+{
+	gcli_ctx *ctx = _ctx;
+
+	(void) dltotal;
+	(void) dlnow;
+	(void) ultotal;
+	(void) ulnow;
+
+	ctx->report_progress();
+
+	return 0;
+}
+
 /* Check the given url for a successful query */
 int
 gcli_curl_test_success(gcli_ctx *ctx, char const *url)
@@ -165,6 +181,13 @@ gcli_curl_test_success(gcli_ctx *ctx, char const *url)
 	curl_easy_setopt(ctx->curl, CURLOPT_WRITEFUNCTION, fetch_write_callback);
 	curl_easy_setopt(ctx->curl, CURLOPT_FAILONERROR, 0L);
 	curl_easy_setopt(ctx->curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+	if (ctx->report_progress) {
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFOFUNCTION,
+		                 gcli_report_progress);
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFODATA, ctx);
+		curl_easy_setopt(ctx->curl, CURLOPT_NOPROGRESS, 0L);
+	}
 
 	ret = curl_easy_perform(ctx->curl);
 
@@ -222,6 +245,13 @@ gcli_curl(gcli_ctx *ctx, FILE *stream, char const *url, char const *content_type
 	curl_easy_setopt(ctx->curl, CURLOPT_WRITEFUNCTION, fetch_write_callback);
 	curl_easy_setopt(ctx->curl, CURLOPT_FAILONERROR, 0L);
 	curl_easy_setopt(ctx->curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+	if (ctx->report_progress) {
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFOFUNCTION,
+		                 gcli_report_progress);
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFODATA, ctx);
+		curl_easy_setopt(ctx->curl, CURLOPT_NOPROGRESS, 0L);
+	}
 
 	ret = curl_easy_perform(ctx->curl);
 	rc = gcli_curl_check_api_error(ctx, ret, url, &buffer);
@@ -372,6 +402,13 @@ gcli_fetch_with_method(
 	curl_easy_setopt(ctx->curl, CURLOPT_HEADERDATA, &link_header);
 	curl_easy_setopt(ctx->curl, CURLOPT_FOLLOWLOCATION, 1L);
 
+	if (ctx->report_progress) {
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFOFUNCTION,
+		                 gcli_report_progress);
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFODATA, ctx);
+		curl_easy_setopt(ctx->curl, CURLOPT_NOPROGRESS, 0L);
+	}
+
 	ret = curl_easy_perform(ctx->curl);
 	rc = gcli_curl_check_api_error(ctx, ret, url, buf);
 
@@ -446,6 +483,13 @@ gcli_post_upload(gcli_ctx *ctx, char const *url, char const *content_type,
 	curl_easy_setopt(ctx->curl, CURLOPT_WRITEDATA, out);
 	curl_easy_setopt(ctx->curl, CURLOPT_WRITEFUNCTION, fetch_write_callback);
 
+	if (ctx->report_progress) {
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFOFUNCTION,
+		                 gcli_report_progress);
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFODATA, ctx);
+		curl_easy_setopt(ctx->curl, CURLOPT_NOPROGRESS, 0L);
+	}
+
 	ret = curl_easy_perform(ctx->curl);
 	rc = gcli_curl_check_api_error(ctx, ret, url, out);
 
@@ -510,6 +554,13 @@ gcli_curl_gitea_upload_attachment(gcli_ctx *ctx, char const *url,
 	curl_easy_setopt(ctx->curl, CURLOPT_HTTPHEADER, headers);
 	curl_easy_setopt(ctx->curl, CURLOPT_WRITEDATA, out);
 	curl_easy_setopt(ctx->curl, CURLOPT_WRITEFUNCTION, fetch_write_callback);
+
+	if (ctx->report_progress) {
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFOFUNCTION,
+		                 gcli_report_progress);
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFODATA, ctx);
+		curl_easy_setopt(ctx->curl, CURLOPT_NOPROGRESS, 0L);
+	}
 
 	ret = curl_easy_perform(ctx->curl);
 	rc = gcli_curl_check_api_error(ctx, ret, url, out);

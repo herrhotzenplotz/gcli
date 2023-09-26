@@ -153,6 +153,27 @@ usage(void)
 /** The CMD global gcli context */
 gcli_ctx *g_clictx = NULL;
 
+static void
+gcli_progress_func(void)
+{
+	char spinner[] = "|/-\\";
+	static size_t const spinner_elems = sizeof(spinner) / sizeof(*spinner);
+	static int spinner_idx = 0;
+	static int have_checked_stderr = 0, stderr_is_tty = 1;
+
+	/* Check if stderr is a tty */
+	if (!have_checked_stderr) {
+		stderr_is_tty = isatty(STDERR_FILENO);
+		have_checked_stderr = 1;
+	}
+
+	if (!stderr_is_tty)
+		return;
+
+	fprintf(stderr, "Wait... %c\r", spinner[spinner_idx]);
+	spinner_idx = (spinner_idx + 1) % (spinner_elems - 1);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -165,6 +186,8 @@ main(int argc, char *argv[])
 
 	if (gcli_config_init_ctx(g_clictx) < 0)
 		errx(1, "error: failed to init context: %s", gcli_get_error(g_clictx));
+
+	gcli_set_progress_func(g_clictx, gcli_progress_func);
 
 	/* Parse first arguments */
 	if (gcli_config_parse_args(g_clictx, &argc, &argv)) {

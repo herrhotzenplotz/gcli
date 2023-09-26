@@ -44,6 +44,8 @@ struct gcli_ctx {
 	char *(*get_token)(struct gcli_ctx *);
 	gcli_forge_type (*get_forge_type)(struct gcli_ctx *ctx);
 	char *(*get_apibase)(struct gcli_ctx *);
+
+	void (*report_progress)(void);
 };
 
 /* Error routine */

@@ -154,7 +154,7 @@ usage(void)
 gcli_ctx *g_clictx = NULL;
 
 static void
-gcli_progress_func(void)
+gcli_progress_func(bool const done)
 {
 	char spinner[] = "|/-\\";
 	static size_t const spinner_elems = sizeof(spinner) / sizeof(*spinner);
@@ -170,8 +170,13 @@ gcli_progress_func(void)
 	if (!stderr_is_tty)
 		return;
 
-	fprintf(stderr, "Wait... %c\r", spinner[spinner_idx]);
-	spinner_idx = (spinner_idx + 1) % (spinner_elems - 1);
+	/* Clear out the line when done */
+	if (done) {
+		fprintf(stderr, "          \r");
+	} else {
+		fprintf(stderr, "Wait... %c\r", spinner[spinner_idx]);
+		spinner_idx = (spinner_idx + 1) % (spinner_elems - 1);
+	}
 }
 
 int

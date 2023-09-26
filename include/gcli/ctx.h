@@ -30,6 +30,8 @@
 #ifndef GCLI_CTX_H
 #define GCLI_CTX_H
 
+#include <stdbool.h>
+
 #include <curl/curl.h>
 
 /* Strictly internal structure containing the gcli library context
@@ -45,7 +47,7 @@ struct gcli_ctx {
 	gcli_forge_type (*get_forge_type)(struct gcli_ctx *ctx);
 	char *(*get_apibase)(struct gcli_ctx *);
 
-	void (*report_progress)(void);
+	void (*report_progress)(bool done);
 };
 
 /* Error routine */

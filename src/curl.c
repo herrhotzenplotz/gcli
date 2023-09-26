@@ -148,7 +148,8 @@ gcli_report_progress(void *_ctx, double dltotal, double dlnow,
 	(void) ultotal;
 	(void) ulnow;
 
-	ctx->report_progress();
+	/* not done */
+	ctx->report_progress(false);
 
 	return 0;
 }
@@ -199,6 +200,9 @@ gcli_curl_test_success(gcli_ctx *ctx, char const *url)
 		if (status_code >= 300L)
 			is_success = false;
 	}
+
+	if (ctx->report_progress)
+		ctx->report_progress(true);
 
 	free(buffer.data);
 
@@ -255,6 +259,9 @@ gcli_curl(gcli_ctx *ctx, FILE *stream, char const *url, char const *content_type
 
 	ret = curl_easy_perform(ctx->curl);
 	rc = gcli_curl_check_api_error(ctx, ret, url, &buffer);
+
+	if (ctx->report_progress)
+		ctx->report_progress(true);
 
 	if (rc == 0)
 		fwrite(buffer.data, 1, buffer.length, stream);
@@ -412,6 +419,9 @@ gcli_fetch_with_method(
 	ret = curl_easy_perform(ctx->curl);
 	rc = gcli_curl_check_api_error(ctx, ret, url, buf);
 
+	if (ctx->report_progress)
+		ctx->report_progress(true);
+
 	/* only parse these headers and continue if there was no error */
 	if (rc == 0) {
 		if (link_header && pagination_next)
@@ -493,6 +503,9 @@ gcli_post_upload(gcli_ctx *ctx, char const *url, char const *content_type,
 	ret = curl_easy_perform(ctx->curl);
 	rc = gcli_curl_check_api_error(ctx, ret, url, out);
 
+	if (ctx->report_progress)
+		ctx->report_progress(true);
+
 	curl_slist_free_all(headers);
 	headers = NULL;
 
@@ -564,6 +577,9 @@ gcli_curl_gitea_upload_attachment(gcli_ctx *ctx, char const *url,
 
 	ret = curl_easy_perform(ctx->curl);
 	rc = gcli_curl_check_api_error(ctx, ret, url, out);
+
+	if (ctx->report_progress)
+		ctx->report_progress(true);
 
 	/* Cleanup */
 	curl_slist_free_all(headers);

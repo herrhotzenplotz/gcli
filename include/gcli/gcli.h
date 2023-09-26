@@ -34,6 +34,8 @@
 #include <config.h>
 #endif
 
+#include <stdbool.h>
+
 enum gcli_output_flags {
 	OUTPUT_SORTED = (1 << 0),
 	OUTPUT_LONG   = (1 << 1),
@@ -60,6 +62,7 @@ char const *gcli_init(gcli_ctx **,
 
 void *gcli_get_userdata(struct gcli_ctx const *);
 void gcli_set_userdata(struct gcli_ctx *, void *usrdata);
+void gcli_set_progress_func(struct gcli_ctx *, void (*pfunc)(bool done));
 void gcli_destroy(gcli_ctx **ctx);
 char const *gcli_get_error(gcli_ctx *ctx);
 

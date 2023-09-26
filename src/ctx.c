@@ -71,6 +71,13 @@ gcli_set_userdata(struct gcli_ctx *ctx, void *usrdata)
 	ctx->usrdata = usrdata;
 }
 
+void
+gcli_set_progress_func(struct gcli_ctx *ctx,
+                       void (*pfunc)(bool done))
+{
+	ctx->report_progress = pfunc;
+}
+
 char *
 gcli_get_apibase(struct gcli_ctx *ctx)
 {

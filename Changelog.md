@@ -7,6 +7,8 @@ This changelog does not follow semantic versioning.
 
 ### Added
 
+- Added a little spinner to indicate network activity
+
 ### Fixed
 
 ### Changed

@@ -86,7 +86,7 @@ struct gcli_pull {
 };
 
 struct gcli_commit {
-	char *sha, *message, *date, *author, *email;
+	char *sha, *long_sha, *message, *date, *author, *email;
 };
 
 struct gcli_commit_list {

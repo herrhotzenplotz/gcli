@@ -76,6 +76,7 @@ gcli_commits_free(gcli_commit_list *list)
 {
 	for (size_t i = 0; i < list->commits_size; ++i) {
 		free(list->commits[i].sha);
+		free(list->commits[i].long_sha);
 		free(list->commits[i].message);
 		free(list->commits[i].date);
 		free(list->commits[i].author);

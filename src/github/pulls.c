@@ -331,6 +331,15 @@ github_perform_submit_pull(gcli_ctx *ctx, gcli_submit_pull_options opts)
 	return rc;
 }
 
+static void
+filter_commit_short_sha(gcli_commit **listp, size_t *sizep, void *_data)
+{
+	(void) _data;
+
+	for (size_t i = 0; i < *sizep; ++i)
+		(*listp)[i].sha = sn_strndup((*listp)[i].long_sha, 8);
+}
+
 int
 github_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
                         gcli_id const pr_number, gcli_commit_list *const out)
@@ -344,6 +353,7 @@ github_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
 		.sizep = &out->commits_size,
 		.max = -1,
 		.parse = (parsefn)(parse_github_commits),
+		.filter = (filterfn)(filter_commit_short_sha),
 	};
 
 	e_owner = gcli_urlencode(owner);

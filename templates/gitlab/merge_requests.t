@@ -36,6 +36,7 @@ parser gitlab_mrs is array of gcli_pull use parse_gitlab_mr;
 parser gitlab_commit is
 object of gcli_commit with
 	("short_id"     => sha as string,
+	 "id"           => long_sha as string,
 	 "title"        => message as string,
 	 "created_at"   => date as string,
 	 "author_name"  => author as string,

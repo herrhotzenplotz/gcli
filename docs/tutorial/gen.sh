@@ -12,7 +12,11 @@ set -eu
 
 header() {
 	TITLE="${1}"
-	sed "s/{{TITLE_PLACEHOLDER}}/${title}/g" top.html
+	PREVURL="${2-}"
+	NEXTURL="${3-}"
+	sed -e "s/{{TITLE_PLACEHOLDER}}/${TITLE}/g" \
+	    -e "s/{{PREVURL}}/${PREVURL}/g" \
+	    -e "s/{{NEXURL}}/${NEXTURL}/g" top.html
 }
 
 footer() {
@@ -66,7 +70,7 @@ genpage() {
 	NEXTDOC="$5"
 	NEXTTITLE="$6"
 
-	header "${PAGETITLE}"
+	header "${PAGETITLE}" "${PREVDOC}" "${NEXTDOC}"
 
 	pagination "${PREVDOC}" "${PREVTITLE}" "${NEXTDOC}" "${NEXTTITLE}"
 	echo "<hr />"

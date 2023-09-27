@@ -47,7 +47,7 @@ genpage() {
 
     echo "<p><a href=\"index.html\">⇐ Back to table of contents</a></p>"
     echo "<hr />"
-    cmark -t html < ${PAGEMDFILE}
+    cmark -t html < "${PAGEMDFILE}"
     echo "<br />"
     echo "<hr />"
     echo "<p><a href=\"index.html\">⇐ Back to table of contents</a></p>"

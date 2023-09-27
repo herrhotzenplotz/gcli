@@ -13,7 +13,6 @@ set -eu
 header() {
     title="${1}"
     sed "s/{{TITLE_PLACEHOLDER}}/${title}/g" top.html
-    cat middle.html
 }
 
 footer() {

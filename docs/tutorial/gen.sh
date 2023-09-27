@@ -57,9 +57,7 @@ genpage() {
 
 genindex > index.html
 
-while read record; do
-    title="$(echo ${record} | awk '{print $2}')"
-    htmldoc="$(echo ${record} | awk '{print $1}')"
+while IFS="$(printf '\t')" read -r htmldoc title; do
     mddoc="${htmldoc%.html}.md"
 
     genpage "${title}" "${mddoc}" > "${htmldoc}"

@@ -11,8 +11,8 @@ set -eu
 #
 
 header() {
-    cat top.html
-    printf "<title>%s</title>\n" "${1}"
+    title="${1}"
+    sed "s/{{TITLE_PLACEHOLDER}}/${title}/g" top.html
     cat middle.html
 }
 
@@ -21,7 +21,7 @@ footer() {
 }
 
 genindex() {
-    header "GCLI Tutorial"
+    header "Index"
 
     cat <<EOF
     <h1>A GCLI Tutorial</h1>
@@ -44,7 +44,7 @@ genpage() {
     PAGETITLE="${1}"
     PAGEMDFILE="${2}"
 
-    header "GCLI Tutorial | ${PAGETITLE}"
+    header "${PAGETITLE}"
 
     echo "<p><a href=\"index.html\">⇐ Back to table of contents</a></p>"
     echo "<hr />"

@@ -9,6 +9,10 @@ set -eu
 #
 #  You will need cmark for this to work.
 #
+if ! command -v cmark >/dev/null 2>&1; then
+    echo "cmark is required but it's not installed. Exiting." >&2
+    exit 1
+fi
 
 header() {
 	TITLE="${1}"

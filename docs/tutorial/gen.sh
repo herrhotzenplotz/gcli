@@ -1,4 +1,8 @@
 #!/bin/sh
+# Set the following options:
+# -e: Exit immediately if any command exits with a non-zero status (error).
+# -u: Treat unset variables as errors, causing the script to exit.
+set -eu
 
 #
 # Static Site generator for the tutorial.

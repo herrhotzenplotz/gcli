@@ -67,5 +67,6 @@ int gcli_jsongen_end_array(gcli_jsongen *gen);
 int gcli_jsongen_objmember(gcli_jsongen *gen, char const *key);
 int gcli_jsongen_number(gcli_jsongen *gen, long long num);
 int gcli_jsongen_string(gcli_jsongen *gen, char const *value);
+int gcli_jsongen_null(gcli_jsongen *gen);
 
 #endif /* GCLI_JSON_GEN_H */

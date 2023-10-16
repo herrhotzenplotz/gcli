@@ -278,3 +278,15 @@ gcli_jsongen_string(gcli_jsongen *gen, char const *value)
 
 	return 0;
 }
+
+int
+gcli_jsongen_null(gcli_jsongen *gen)
+{
+	put_comma_if_needed(gen);
+	append_str(gen, "null");
+
+	gen->await_object_value = false;
+	gen->first_elem = false;
+
+	return 0;
+}

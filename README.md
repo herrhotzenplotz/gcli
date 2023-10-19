@@ -99,7 +99,7 @@ Tested Operating Systems so far:
 - OpenBSD 7.0 GENERIC amd64
 - Alpine Linux 3.16 x86_64
 - Darwin 22.2.0 arm64
-- Windows 10 (mingw32-w64)
+- Windows 10 (MSYS2 mingw32-w64)
 - NetBSD 9.3 amd64, sparc64 and VAX
 
 ## Support

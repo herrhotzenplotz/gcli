@@ -8,6 +8,7 @@ This changelog does not follow semantic versioning.
 ### Added
 
 - Added a little spinner to indicate network activity
+- Added Windows 10 MSYS2 to list of confirmed-to-work platforms
 
 ### Fixed
 

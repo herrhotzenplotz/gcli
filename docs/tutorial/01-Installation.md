@@ -12,6 +12,14 @@ following command:
 Other operating systems currently require manual compilation and
 installation.
 
+### Windows NT Notes
+
+It is entirely possible to build gcli on Windows using
+[MSYS2](https://msys2.org). Please follow their instructions on
+how to set up a development environment.
+
+### Generic build instructions
+
 For this purpose go to
 [https://herrhotzenplotz.de/gcli/releases](https://herrhotzenplotz.de/gcli/releases)
 and choose the latest release. Then download one of the tarballs.
@@ -39,6 +47,10 @@ e.g. on Debian systems:
 
     # apt install libcurl4-openssl-dev pkgconf build-essential
 
+or on MSYS2:
+
+    $ pacman -S libcurl-devel pkgconf
+
 Extract the tarball:
 
     $ tar xf gcli-1.1.0.tar.xz
@@ -46,26 +58,16 @@ Extract the tarball:
 
 Configure, build and install gcli:
 
-    $ ./configure --prefix=${HOME}/.local
+    $ ./configure
     ...
     $ make
     ...
     $ make install
 
-Now put the gcli executable into your PATH variable to allow the shell
-to easily find it:
-
-    $ PATH=${PATH}:${HOME}/.local/bin
-    $ export PATH
-
-You can put the above commands into your shell initialisation file, e.g.:
-
-    $ echo 'PATH=${PATH}:${HOME}/.local/bin; export PATH' >> ~/.shrc
-
 Check that the shell finds gcli:
 
     $ which gcli
-    /usr/home/nico/.local/bin/gcli
+    /usr/local/bin/gcli
     $
     $ gcli version
     gcli 1.1.0 (amd64-unknown-freebsd13.2)
@@ -75,9 +77,9 @@ Check that the shell finds gcli:
     Copyright 2021, 2022, 2023 Nico Sonack <nsonack@herrhotzenplotz.de> and contributors.
     $
 
-Furthermore I recommend setting the `MANPATH` variable so that you can
-easily read the installed manual pages:
+### Advanced Windows Environment Setup
 
-    $ MANPATH=:${HOME}/.local/share/man; export MANPATH
-
-You can also put this into your shell initialisation file.
+In case you want to use the installed gcli from outside MSYS2 (e.g.
+in cmd.exe) you may wish to update the `Path` environment variable
+and add the `C:\msys2\usr\bin` directory to it. Make sure you have
+the library paths set up correctly.

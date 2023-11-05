@@ -12,6 +12,8 @@ This changelog does not follow semantic versioning.
 
 ### Fixed
 
+- Fixed incorrect internal help message of the `repos` subcommand.
+
 ### Changed
 
 ### Removed

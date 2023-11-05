@@ -46,7 +46,8 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: gcli repos create -r repo [-d description] [-p]\n");
-	fprintf(stderr, "       gcli repos [-o owner -r repo] [-n number] [-s] [-y] [delete]\n");
+	fprintf(stderr, "       gcli repos [-o owner -r repo] [-n number] [-s]\n");
+	fprintf(stderr, "       gcli repos [-o owner -r repo] [-y] actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
 	fprintf(stderr, "  -o owner        The repository owner\n");
 	fprintf(stderr, "  -r repo         The repository name\n");
@@ -54,6 +55,8 @@ usage(void)
 	fprintf(stderr, "  -p              Make the repo private\n");
 	fprintf(stderr, "  -s              Print (sort) in reverse order\n");
 	fprintf(stderr, "  -y              Do not ask for confirmation\n");
+	fprintf(stderr, "ACTIONS:\n");
+	fprintf(stderr, "  delete [-y]     Delete this repository\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();

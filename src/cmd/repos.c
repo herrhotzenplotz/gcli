@@ -230,7 +230,7 @@ subcommand_repos(int argc, char *argv[])
 		{0},
 	};
 
-	while ((ch = getopt_long(argc, argv, "n:o:r:ys", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "+n:o:r:ys", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
 			owner = optarg;

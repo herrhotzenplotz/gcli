@@ -193,12 +193,12 @@ subcommand_repos_create(int argc, char *argv[])
 int
 subcommand_repos(int argc, char *argv[])
 {
-	int                     ch, n = 30;
-	char const             *owner      = NULL;
-	char const             *repo       = NULL;
-	gcli_repo_list          repos      = {0};
-	bool                    always_yes = false;
-	enum gcli_output_flags  flags      = 0;
+	int ch, n = 30;
+	char const *owner = NULL;
+	char const *repo = NULL;
+	gcli_repo_list repos = {0};
+	bool always_yes = false;
+	enum gcli_output_flags flags = 0;
 
 	/* detect whether we wanna create a repo */
 	if (argc > 1 && (strcmp(argv[1], "create") == 0)) {

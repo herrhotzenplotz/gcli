@@ -15,7 +15,6 @@
 .Op Fl d Ar description
 .Op Fl p
 .Nm
-.Op Fl y
 .Op Fl o Ar owner Fl r Ar repo
 .Ar actions...
 .Sh DESCRIPTION
@@ -44,7 +43,9 @@ combination with
 .Fl o
 unless you are creating a repository.
 .It Fl y , -yes
-Do not ask for confirmation. Assume yes.
+Do not ask for confirmation. Assume yes. Applies only to the
+.Cm delete
+action.
 .It Fl n , -count Ar n
 Fetch at least
 .Ar n
@@ -63,23 +64,10 @@ Create a private repo.
 .Sh ACTIONS
 .Ar actions...
 may be one or more of the following:
-.Bl -tag -width indent
-.It Cm delete
+.Bl -tag -width "delete [-y]"
+.It Cm delete Op Fl y
 Delete the repository. You will be asked for confirmation unless you set
 .Fl y .
-.Pp
-The following flags can be specified:
-.Bl -tag -width indent
-.It Fl r , -repo
-See
-.Sx OPTIONS
-.It Fl o , -owner
-See
-.Sx OPTIONS
-.It Fl y , -yes
-Do not ask for confirmation before deleting the repository. See
-.Sx OPTIONS .
-.El
 .El
 .Sh EXAMPLES
 List your own repos:

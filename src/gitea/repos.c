@@ -30,6 +30,10 @@
 #include <gcli/gitea/repos.h>
 #include <gcli/github/repos.h>
 
+#include <gcli/curl.h>
+
+#include <assert.h>
+
 int
 gitea_get_repos(gcli_ctx *ctx, char const *owner, int const max,
                 gcli_repo_list *const list)
@@ -54,4 +58,44 @@ int
 gitea_repo_delete(gcli_ctx *ctx, char const *owner, char const *repo)
 {
 	return github_repo_delete(ctx, owner, repo);
+}
+
+/* Unlike Github and Gitlab, Gitea only supports private or non-private
+ * (thus public) repositories. Separate implementation required. */
+int
+gitea_repo_set_visibility(gcli_ctx *ctx, char const *const owner,
+                          char const *const repo, gcli_repo_visibility vis)
+{
+	char *url;
+	char *e_owner, *e_repo;
+	bool is_private;
+	char *payload;
+	int rc;
+
+	switch (vis) {
+	case GCLI_REPO_VISIBILITY_PRIVATE:
+		is_private = true;
+		break;
+	case GCLI_REPO_VISIBILITY_PUBLIC:
+		is_private = false;
+		break;
+	default:
+		assert(false && "Invalid visibility");
+		return gcli_error(ctx, "bad or unsupported visibility level for Gitea");
+	}
+
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/repos/%s/%s", gcli_get_apibase(ctx), e_owner, e_repo);
+	payload = sn_asprintf("{ \"private\": %s }", is_private ? "true" : "false");
+
+	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
+
+	free(payload);
+	free(e_owner);
+	free(e_repo);
+	free(url);
+
+	return rc;
 }

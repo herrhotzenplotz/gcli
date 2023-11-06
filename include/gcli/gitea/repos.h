@@ -46,4 +46,8 @@ int gitea_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *options,
 
 int gitea_repo_delete(gcli_ctx *ctx, char const *owner, char const *repo);
 
+int gitea_repo_set_visibility(gcli_ctx *ctx, char const *const owner,
+                              char const *const repo,
+                              gcli_repo_visibility vis);
+
 #endif /* GITEA_REPOS_H */

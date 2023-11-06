@@ -442,6 +442,14 @@ struct gcli_forge_descriptor {
 		char const *repo);
 
 	/**
+	 * Change the visibility level of a repository */
+	int (*repo_set_visibility)(
+		gcli_ctx *ctx,
+		char const *owner,
+		char const *repo,
+		gcli_repo_visibility vis);
+
+	/**
 	 * Fetch MR/PR reviews including comments */
     int (*get_reviews)(
 	    gcli_ctx *ctx, char const *owner, char const *repo,

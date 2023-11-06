@@ -9,8 +9,12 @@ This changelog does not follow semantic versioning.
 
 - Added a little spinner to indicate network activity
 - Added Windows 10 MSYS2 to list of confirmed-to-work platforms
+- Added a new action `set-visibility` to the repos subcommand that
+  allows updating the visibility level of a repository.
 
 ### Fixed
+
+- Fixed incorrect internal help message of the `repos` subcommand.
 
 ### Changed
 

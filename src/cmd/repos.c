@@ -226,12 +226,49 @@ action_delete(char const *const owner, char const *const repo, int *argc,
 	return 0;
 }
 
-static int
-action_set_visibility(char const *const owner __unused, char const *const repo __unused,
-                      int *argc __unused, char ***argv __unused)
+static gcli_repo_visibility
+parse_visibility(char const *str)
 {
-	fprintf(stderr, "error: not yet implented\n");
-	return 1;
+	if (strcmp(str, "public") == 0)
+		return GCLI_REPO_VISIBILITY_PUBLIC;
+	else if (strcmp(str, "private") == 0)
+		return GCLI_REPO_VISIBILITY_PRIVATE;
+	else
+		return -1;
+}
+
+/* Change the visibility level of a repository (e.g. public, private
+ * etc) */
+static int
+action_set_visibility(char const *const owner, char const *const repo,
+                      int *argc , char ***argv)
+{
+	char const *visblty_str;
+	gcli_repo_visibility visblty;
+	int rc;
+
+	if (*argc < 2) {
+		fprintf(stderr, "error: missing visibility level\n");
+		return 1;
+	}
+
+	visblty_str = (*argv)[1];
+	*argv += 2;
+	*argc -= 2;
+
+	visblty = parse_visibility(visblty_str);
+	if (visblty < 0) {
+		fprintf(stderr, "error: bad visibility level »%s«\n", visblty_str);
+		return 1;
+	}
+
+	if ((rc = gcli_repo_set_visibility(g_clictx, owner, repo, visblty)) < 0) {
+		fprintf(stderr, "error: failed to set visibility: %s\n",
+		        gcli_get_error(g_clictx));
+		return 1;
+	}
+
+	return 0;
 }
 
 struct action {

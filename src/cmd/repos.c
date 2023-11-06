@@ -271,7 +271,7 @@ action_set_visibility(char const *const owner, char const *const repo,
 	return 0;
 }
 
-struct action {
+static struct action {
 	char const *const name;
 	int (*fn)(char const *const owner, char const *const repo, int *argc,
 	          char ***argv);
@@ -280,7 +280,7 @@ struct action {
 	{ .name = "set-visibility", .fn = action_set_visibility },
 };
 
-size_t const actions_size = ARRAY_SIZE(actions);
+static size_t const actions_size = ARRAY_SIZE(actions);
 
 static struct action const *
 find_action(char const *const name)

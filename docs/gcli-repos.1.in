@@ -64,10 +64,20 @@ Create a private repo.
 .Sh ACTIONS
 .Ar actions...
 may be one or more of the following:
-.Bl -tag -width "delete [-y]"
+.Bl -tag -width "set-visibility level"
 .It Cm delete Op Fl y
 Delete the repository. You will be asked for confirmation unless you set
 .Fl y .
+.It Cm set-visiblity Ar level
+Change the visibility level of the repository.
+.Ar level
+may be one of:
+.Bl -tag -width "private"
+.It private
+Make the repository private.
+.It public
+Make the repository public.
+.El
 .El
 .Sh EXAMPLES
 List your own repos:

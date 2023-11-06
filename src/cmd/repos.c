@@ -49,14 +49,17 @@ usage(void)
 	fprintf(stderr, "       gcli repos [-o owner -r repo] [-n number] [-s]\n");
 	fprintf(stderr, "       gcli repos [-o owner -r repo] actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
-	fprintf(stderr, "  -o owner        The repository owner\n");
-	fprintf(stderr, "  -r repo         The repository name\n");
-	fprintf(stderr, "  -n number       Number of repos to fetch (-1 = everything)\n");
-	fprintf(stderr, "  -p              Make the repo private\n");
-	fprintf(stderr, "  -s              Print (sort) in reverse order\n");
+	fprintf(stderr, "  -o owner                The repository owner\n");
+	fprintf(stderr, "  -r repo                 The repository name\n");
+	fprintf(stderr, "  -n number               Number of repos to fetch (-1 = everything)\n");
+	fprintf(stderr, "  -p                      Make the repo private\n");
+	fprintf(stderr, "  -s                      Print (sort) in reverse order\n");
 	fprintf(stderr, "ACTIONS:\n");
-	fprintf(stderr, "  delete [-y]     Delete this repository:\n");
-	fprintf(stderr, "                    -y    Do not ask for confirmation\n");
+	fprintf(stderr, "  delete [-y]             Delete this repository:\n");
+	fprintf(stderr, "                            -y    Do not ask for confirmation\n");
+	fprintf(stderr, "  set-visibility <level>  Mark the reposity as public or private. Level may be one of:\n");
+	fprintf(stderr, "                            - public\n");
+	fprintf(stderr, "                            - private\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
@@ -223,12 +226,21 @@ action_delete(char const *const owner, char const *const repo, int *argc,
 	return 0;
 }
 
+static int
+action_set_visibility(char const *const owner __unused, char const *const repo __unused,
+                      int *argc __unused, char ***argv __unused)
+{
+	fprintf(stderr, "error: not yet implented\n");
+	return 1;
+}
+
 struct action {
 	char const *const name;
 	int (*fn)(char const *const owner, char const *const repo, int *argc,
 	          char ***argv);
 } const actions[] = {
-	{ .name = "delete", .fn = action_delete },
+	{ .name = "delete",         .fn = action_delete },
+	{ .name = "set-visibility", .fn = action_set_visibility },
 };
 
 size_t const actions_size = ARRAY_SIZE(actions);

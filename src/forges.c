@@ -190,6 +190,7 @@ gitlab_forge_descriptor =
 	.get_reviews               = gitlab_review_get_reviews,
 	.repo_create               = gitlab_repo_create,
 	.repo_delete               = gitlab_repo_delete,
+	.repo_set_visibility       = gitlab_repo_set_visibility,
 	.get_notifications         = gitlab_get_notifications,
 	.notification_mark_as_read = gitlab_notification_mark_as_read,
 	.make_authheader           = gitlab_make_authheader,

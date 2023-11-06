@@ -124,6 +124,7 @@ github_forge_descriptor =
 	.create_label              = github_create_label,
 	.delete_label              = github_delete_label,
 	.get_repos                 = github_get_repos,
+	.repo_set_visibility       = github_repo_set_visibility,
 	.get_reviews               = github_review_get_reviews,
 	.repo_create               = github_repo_create,
 	.repo_delete               = github_repo_delete,

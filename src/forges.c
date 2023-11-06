@@ -254,6 +254,7 @@ gitea_forge_descriptor =
 	.get_repos                 = gitea_get_repos,
 	.repo_create               = gitea_repo_create,
 	.repo_delete               = gitea_repo_delete,
+	.repo_set_visibility       = gitea_repo_set_visibility,
 
 	.get_sshkeys               = gitea_get_sshkeys,
 	.add_sshkey                = gitea_add_sshkey,

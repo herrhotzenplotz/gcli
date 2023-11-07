@@ -36,6 +36,12 @@
 
 #include <gcli/pulls.h>
 
+typedef struct gitlab_reviewer_list gitlab_reviewer_list;
+struct gitlab_reviewer_list {
+	gcli_id *reviewers;
+	size_t reviewers_size;
+};
+
 int gitlab_fetch_mrs(gcli_ctx *ctx, char *url, int max,
                      gcli_pull_list *list);
 
@@ -78,5 +84,8 @@ int gitlab_mr_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int gitlab_mr_clear_milestone(gcli_ctx *ctx, char const *owner,
                               char const *repo, gcli_id mr_number);
+
+int gitlab_mr_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
+                           gcli_id mr_number, char const *username);
 
 #endif /* GITLAB_MERGE_REQUESTS_H */

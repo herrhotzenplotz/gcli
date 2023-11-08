@@ -179,10 +179,83 @@ gcli_progress_func(bool const done)
 	}
 }
 
+/* Abbreviated form matching:
+ *
+ *  - we presort the subcommands array alphabetised
+ *  - then we can simply match by prefix */
+static int
+subcommand_compare(void const *s1, void const *s2)
+{
+	struct subcommand const *sc1 = s1;
+	struct subcommand const *sc2 = s2;
+
+	return strcmp(sc1->cmd_name, sc2->cmd_name);
+}
+
+static void
+presort_subcommands(void)
+{
+	qsort(subcommands, ARRAY_SIZE(subcommands), sizeof(*subcommands),
+	      subcommand_compare);
+}
+
+static void
+ensure_unique_match(size_t const idx, char const *const name,
+                    size_t const name_len)
+{
+	/* Last match is always unique */
+	if (idx + 1 == ARRAY_SIZE(subcommands))
+		return;
+
+	for (size_t i = idx + 1; i < ARRAY_SIZE(subcommands); ++i) {
+		if (strncmp(name, subcommands[i].cmd_name, name_len))
+			return; /* doesn't match. meaning this one is unique. */
+		else
+			break; /* we found a duplicate prefix. */
+	}
+
+	fprintf(stderr, "error: %s: subcommand is ambiguous. could be one of:\n", name);
+	/* List until either the end or until we don't match any more prefixes */
+	for (size_t i = idx; i < ARRAY_SIZE(subcommands); ++i) {
+		if (strncmp(name, subcommands[i].cmd_name, name_len))
+			break;
+
+		fprintf(stderr, "  - %-13.13s  %s\n", subcommands[i].cmd_name,
+		        subcommands[i].docstring);
+	}
+
+	fprintf(stderr, "\n");
+	version();
+	exit(EXIT_FAILURE);
+}
+
+static struct subcommand const *
+find_subcommand(char const *const name)
+{
+	size_t const name_len = strlen(name);
+
+	for (size_t i = 0; i < ARRAY_SIZE(subcommands); ++i) {
+		if (strncmp(subcommands[i].cmd_name, name, name_len) == 0) {
+			/* At least the prefix matches. Check that it is a unique match. */
+			ensure_unique_match(i, name, name_len);
+
+			return subcommands + i;
+		}
+	}
+
+	/* no match */
+	fprintf(stderr, "error: %s: no such subcommand\n", name);
+	usage();
+	exit(EXIT_FAILURE);
+}
+
 int
 main(int argc, char *argv[])
 {
 	char const *errmsg;
+
+	/* Sorts the subcommands array alphabatically */
+	presort_subcommands();
 
 	errmsg = gcli_init(&g_clictx, gcli_config_get_forge_type,
 	                   gcli_config_get_token, gcli_config_get_apibase);
@@ -207,15 +280,5 @@ main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	/* Find and invoke the subcommand handler */
-	for (size_t i = 0; i < ARRAY_SIZE(subcommands); ++i) {
-		if (strcmp(subcommands[i].cmd_name, argv[0]) == 0)
-			return subcommands[i].fn(argc, argv);
-	}
-
-	/* No subcommand matched */
-	fprintf(stderr, "error: unknown subcommand %s\n", argv[0]);
-	usage();
-
-	return EXIT_FAILURE;
+	return find_subcommand(argv[0])->fn(argc, argv);
 }

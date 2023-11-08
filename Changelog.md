@@ -18,6 +18,9 @@ This changelog does not follow semantic versioning.
 
 ### Changed
 
+- Subcommands can now be abbreviated by providing an unambiguous
+  prefix that matches the subcommand.
+
 ### Removed
 
 

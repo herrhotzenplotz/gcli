@@ -28,6 +28,7 @@
  */
 
 #include <gcli/curl.h>
+#include <gcli/gitlab/api.h>
 #include <gcli/gitlab/config.h>
 #include <gcli/gitlab/issues.h>
 #include <gcli/json_util.h>
@@ -206,41 +207,6 @@ gitlab_perform_submit_issue(gcli_ctx *ctx, gcli_submit_issue_options opts,
 	free(url);
 
 	return rc;
-}
-
-static int
-gitlab_user_id(gcli_ctx *ctx, char const *user_name)
-{
-	gcli_fetch_buffer buffer = {0};
-	struct json_stream stream = {0};
-	char *url = NULL;
-	char *e_username;
-	long uid = -1;
-	int rc;
-
-	e_username = gcli_urlencode(user_name);
-
-	url = sn_asprintf("%s/users?username=%s", gcli_get_apibase(ctx),
-	                  e_username);
-
-	uid = gcli_fetch(ctx, url, NULL, &buffer);
-	if (uid == 0) {
-		json_open_buffer(&stream, buffer.data, buffer.length);
-		json_set_streaming(&stream, 1);
-
-		uid = rc = gcli_json_advance(ctx, &stream, "[{s", "id");
-
-		if (rc == 0) {
-			rc = get_long(ctx, &stream, &uid);
-			json_close(&stream);
-		}
-	}
-
-	free(e_username);
-	free(url);
-	free(buffer.data);
-
-	return uid;
 }
 
 int

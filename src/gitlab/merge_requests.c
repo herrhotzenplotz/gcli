@@ -28,10 +28,12 @@
  */
 
 #include <gcli/curl.h>
+#include <gcli/gitlab/api.h>
 #include <gcli/gitlab/config.h>
 #include <gcli/gitlab/repos.h>
 #include <gcli/gitlab/merge_requests.h>
 #include <gcli/json_util.h>
+#include <gcli/json_gen.h>
 
 #include <templates/gitlab/merge_requests.h>
 
@@ -447,4 +449,102 @@ gitlab_mr_clear_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
 	 * to. Set to 0 or provide an empty value to unassign a
 	 * milestone. */
 	return gitlab_mr_set_milestone(ctx, owner, repo, mr, 0);
+}
+
+/* Helper function to fetch the list of user ids that are reviewers
+ * of a merge requests. */
+static int
+gitlab_mr_get_reviewers(gcli_ctx *ctx, char const *e_owner, char const *e_repo,
+                        gcli_id const mr, gitlab_reviewer_list *const out)
+{
+	char *url;
+	int rc;
+	gcli_fetch_buffer json_buffer = {0};
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu",
+	                  gcli_get_apibase(ctx), e_owner, e_repo, mr);
+
+	rc = gcli_fetch(ctx, url, NULL, &json_buffer);
+	if (rc == 0) {
+		json_stream stream = {0};
+		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
+		parse_gitlab_reviewers(ctx, &stream, out);
+		json_close(&stream);
+	}
+
+	free(url);
+	free(json_buffer.data);
+
+	return rc;
+}
+
+static void
+gitlab_reviewer_list_free(gitlab_reviewer_list *const list)
+{
+	free(list->reviewers);
+	list->reviewers = NULL;
+	list->reviewers_size = 0;
+}
+
+int
+gitlab_mr_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
+                       gcli_id mr_number, char const *username)
+{
+	char *url, *e_owner, *e_repo, *payload;
+	int uid, rc = 0;
+	gitlab_reviewer_list list = {0};
+	gcli_jsongen gen = {0};
+
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	/* Fetch list of already existing reviewers */
+	rc = gitlab_mr_get_reviewers(ctx, e_owner, e_repo, mr_number, &list);
+	if (rc < 0)
+		goto bail_get_reviewers;
+
+	/* Resolve user id from user name */
+	uid = gitlab_user_id(ctx, username);
+	if (uid < 0)
+		goto bail_resolve_user_id;
+
+	/* Start generating payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "reviewer_ids");
+
+		gcli_jsongen_begin_array(&gen);
+		{
+			for (size_t i = 0; i < list.reviewers_size; ++i)
+				gcli_jsongen_number(&gen, list.reviewers[i]);
+
+			/* Push new user id into list of user ids */
+			gcli_jsongen_number(&gen, uid);
+		}
+		gcli_jsongen_end_array(&gen);
+	}
+	gcli_jsongen_end_object(&gen);
+
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* generate URL */
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu",
+	                  gcli_get_apibase(ctx), e_owner, e_repo, mr_number);
+
+	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
+
+	free(url);
+	free(payload);
+
+bail_resolve_user_id:
+	gitlab_reviewer_list_free(&list);
+
+bail_get_reviewers:
+	free(e_owner);
+	free(e_repo);
+
+	return rc;
 }

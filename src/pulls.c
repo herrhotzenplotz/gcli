@@ -194,3 +194,11 @@ gcli_pull_clear_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
 {
 	return gcli_forge(ctx)->pull_clear_milestone(ctx, owner, repo, pr_number);
 }
+
+int
+gcli_pull_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
+                       gcli_id pr_number, char const *username)
+{
+	return gcli_forge(ctx)->pull_add_reviewer(
+		ctx, owner, repo, pr_number, username);
+}

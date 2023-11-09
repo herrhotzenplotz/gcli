@@ -39,3 +39,9 @@ object of gcli_commit with
 	 "author_email" => email as string);
 
 parser gitlab_commits is array of gcli_commit use parse_gitlab_commit;
+
+parser gitlab_reviewer_id is object of gcli_id select "id" as id;
+
+parser gitlab_reviewers is
+object of gitlab_reviewer_list with
+	("reviewers" => reviewers as array of gcli_id use parse_gitlab_reviewer_id);

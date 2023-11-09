@@ -33,6 +33,7 @@
 #include <gcli/github/issues.h>
 #include <gcli/github/pulls.h>
 #include <gcli/json_util.h>
+#include <gcli/json_gen.h>
 
 #include <pdjson/pdjson.h>
 
@@ -410,4 +411,46 @@ github_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
 
 	return github_get_checks(ctx, owner, repo, refname, -1,
 	                         (github_check_list *)out);
+}
+
+int
+github_pull_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
+                         gcli_id pr_number, char const *username)
+{
+	int rc = 0;
+	char *url, *payload, *e_owner, *e_repo;
+	gcli_jsongen gen = {0};
+
+	/* URL-encode repo and owner */
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	/* /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers */
+	url = sn_asprintf("%s/repos/%s/%s/pulls/%lu/requested_reviewers",
+	                  gcli_get_apibase(ctx), e_owner, e_repo, pr_number);
+
+	/* Generate payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "reviewers");
+		gcli_jsongen_begin_array(&gen);
+		gcli_jsongen_string(&gen, username);
+		gcli_jsongen_end_array(&gen);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* Perform request */
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
+
+	/* Cleanup */
+	free(payload);
+	free(url);
+	free(e_repo);
+	free(e_owner);
+
+	return rc;
 }

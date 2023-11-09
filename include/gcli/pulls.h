@@ -176,4 +176,7 @@ int gcli_pull_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
 int gcli_pull_clear_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
                               gcli_id pr_number);
 
+int gcli_pull_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
+                           gcli_id pr_number, char const *username);
+
 #endif /* PULLS_H */

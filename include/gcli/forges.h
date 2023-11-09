@@ -370,6 +370,15 @@ struct gcli_forge_descriptor {
 		gcli_id pull);
 
 	/**
+     * Request review of a given pull request by a user */
+	int (*pull_add_reviewer)(
+		gcli_ctx *ctx,
+		char const *owner,
+		char const *repo,
+		gcli_id pull,
+		char const *username);
+
+	/**
 	 * Get a list of releases in the given repo */
 	int (*get_releases)(
 		gcli_ctx *ctx,

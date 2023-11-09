@@ -107,6 +107,7 @@ github_forge_descriptor =
 	 * same types/arguments */
 	.pull_add_labels           = github_issue_add_labels,
 	.pull_remove_labels        = github_issue_remove_labels,
+	.pull_add_reviewer         = github_pull_add_reviewer,
 
 	.perform_submit_pull       = github_perform_submit_pull,
 	.get_pull_commits          = github_get_pull_commits,
@@ -181,6 +182,7 @@ gitlab_forge_descriptor =
 	.pull_remove_labels        = gitlab_mr_remove_labels,
 	.pull_set_milestone        = gitlab_mr_set_milestone,
 	.pull_clear_milestone      = gitlab_mr_clear_milestone,
+	.pull_add_reviewer         = gitlab_mr_add_reviewer,
 	.get_releases              = gitlab_get_releases,
 	.create_release            = gitlab_create_release,
 	.delete_release            = gitlab_delete_release,
@@ -241,6 +243,7 @@ gitea_forge_descriptor =
 	.get_pull_commits          = gitea_get_pull_commits,
 	.pull_set_milestone        = gitea_pull_set_milestone,
 	.pull_clear_milestone      = gitea_pull_clear_milestone,
+	.pull_add_reviewer         = gitea_pull_add_reviewer,
 	.get_releases              = gitea_get_releases,
 	.create_release            = gitea_create_release,
 	.delete_release            = gitea_delete_release,

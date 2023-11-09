@@ -75,22 +75,23 @@ usage(void)
 	fprintf(stderr, "  -t branch       Specify target branch of the PR\n");
 	fprintf(stderr, "  -y              Do not ask for confirmation.\n");
 	fprintf(stderr, "ACTIONS:\n");
-	fprintf(stderr, "  all             Display status, commits, op and checks of the PR\n");
-	fprintf(stderr, "  op              Display original post\n");
-	fprintf(stderr, "  status          Display PR metadata\n");
-	fprintf(stderr, "  comments        Display comments\n");
-	fprintf(stderr, "  notes           Alias for notes\n");
-	fprintf(stderr, "  commits         Display commits of the PR\n");
-	fprintf(stderr, "  ci              Display CI/Pipeline status information about the PR\n");
-	fprintf(stderr, "  merge [-s] [-D] Merge the PR (-s = squash commits, -d = inhibit deleting source branch)\n");
-	fprintf(stderr, "  milestone <id>  Assign this PR to a milestone\n");
-	fprintf(stderr, "  milestone -d    Clear associated milestones from the PR\n");
-	fprintf(stderr, "  close           Close the PR\n");
-	fprintf(stderr, "  reopen          Reopen a closed PR\n");
-	fprintf(stderr, "  labels ...      Add or remove labels:\n");
-	fprintf(stderr, "                     add <name>\n");
-	fprintf(stderr, "                     remove <name>\n");
-	fprintf(stderr, "  diff            Display changes as diff\n");
+	fprintf(stderr, "  all                    Display status, commits, op and checks of the PR\n");
+	fprintf(stderr, "  op                     Display original post\n");
+	fprintf(stderr, "  status                 Display PR metadata\n");
+	fprintf(stderr, "  comments               Display comments\n");
+	fprintf(stderr, "  notes                  Alias for notes\n");
+	fprintf(stderr, "  commits                Display commits of the PR\n");
+	fprintf(stderr, "  ci                     Display CI/Pipeline status information about the PR\n");
+	fprintf(stderr, "  merge [-s] [-D]        Merge the PR (-s = squash commits, -d = inhibit deleting source branch)\n");
+	fprintf(stderr, "  milestone <id>         Assign this PR to a milestone\n");
+	fprintf(stderr, "  milestone -d           Clear associated milestones from the PR\n");
+	fprintf(stderr, "  close                  Close the PR\n");
+	fprintf(stderr, "  reopen                 Reopen a closed PR\n");
+	fprintf(stderr, "  labels ...             Add or remove labels:\n");
+	fprintf(stderr, "                            add <name>\n");
+	fprintf(stderr, "                            remove <name>\n");
+	fprintf(stderr, "  diff                   Display changes as diff\n");
+	fprintf(stderr, "  request-review <user>  Add <user> as a reviewer of the PR\n");
 
 	fprintf(stderr, "\n");
 	version();
@@ -880,23 +881,44 @@ action_milestone(struct action_ctx *const ctx)
 	}
 }
 
+static void
+action_request_review(struct action_ctx *const ctx)
+{
+	int rc;
+
+	if (ctx->argc < 2) {
+		fprintf(stderr, "error: missing user name for reviewer\n");
+		usage();
+		exit(EXIT_FAILURE);
+	}
+
+	rc = gcli_pull_add_reviewer(g_clictx, ctx->owner, ctx->repo, ctx->pr,
+	                            ctx->argv[1]);
+	if (rc < 0)
+		errx(1, "error: failed to request review: %s", gcli_get_error(g_clictx));
+
+	ctx->argc -= 1;
+	ctx->argv += 1;
+}
+
 static struct action {
 	char const *name;
 	void (*fn)(struct action_ctx *ctx);
 } const actions[] = {
-	{ .name = "all",       .fn = action_all       },
-	{ .name = "op",        .fn = action_op        },
-	{ .name = "status",    .fn = action_status    },
-	{ .name = "commits",   .fn = action_commits   },
-	{ .name = "diff",      .fn = action_diff      },
-	{ .name = "notes",     .fn = action_comments  },
-	{ .name = "comments",  .fn = action_comments  },
-	{ .name = "ci",        .fn = action_ci        },
-	{ .name = "merge",     .fn = action_merge     },
-	{ .name = "close",     .fn = action_close     },
-	{ .name = "reopen",    .fn = action_reopen    },
-	{ .name = "labels",    .fn = action_labels    },
-	{ .name = "milestone", .fn = action_milestone },
+	{ .name = "all",            .fn = action_all            },
+	{ .name = "op",             .fn = action_op             },
+	{ .name = "status",         .fn = action_status         },
+	{ .name = "commits",        .fn = action_commits        },
+	{ .name = "diff",           .fn = action_diff           },
+	{ .name = "notes",          .fn = action_comments       },
+	{ .name = "comments",       .fn = action_comments       },
+	{ .name = "ci",             .fn = action_ci             },
+	{ .name = "merge",          .fn = action_merge          },
+	{ .name = "close",          .fn = action_close          },
+	{ .name = "reopen",         .fn = action_reopen         },
+	{ .name = "labels",         .fn = action_labels         },
+	{ .name = "milestone",      .fn = action_milestone      },
+	{ .name = "request-review", .fn = action_request_review },
 };
 
 static size_t const actions_size = ARRAY_SIZE(actions);

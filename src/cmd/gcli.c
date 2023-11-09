@@ -291,7 +291,26 @@ add_subcommand_alias(char const *alias_name, char const *alias_for)
 static void
 install_aliases(void)
 {
+	struct gcli_config_entries const *entries;
+	struct gcli_config_entry const *entry;
+
 	add_subcommand_alias("pr", "pulls");
+
+	/* Search for aliases in the user config file */
+	entries = gcli_config_get_section_entries(g_clictx, "aliases");
+	if (!entries)
+		return;
+
+	TAILQ_FOREACH(entry, entries, next) {
+		char *alias_name, *alias_for;
+
+		alias_name = sn_sv_to_cstr(entry->key);
+		alias_for = sn_sv_to_cstr(entry->value);
+
+		add_subcommand_alias(alias_name, alias_for);
+
+		free(alias_for);
+	}
 }
 
 static void

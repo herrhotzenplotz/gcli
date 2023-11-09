@@ -66,4 +66,7 @@ int github_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
 
 sn_sv github_pull_try_derive_head(void);
 
+int github_pull_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
+                             gcli_id pr_number, char const *username);
+
 #endif /* GITHUB_PULLS_H */

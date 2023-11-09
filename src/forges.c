@@ -107,6 +107,7 @@ github_forge_descriptor =
 	 * same types/arguments */
 	.pull_add_labels           = github_issue_add_labels,
 	.pull_remove_labels        = github_issue_remove_labels,
+	.pull_add_reviewer         = github_pull_add_reviewer,
 
 	.perform_submit_pull       = github_perform_submit_pull,
 	.get_pull_commits          = github_get_pull_commits,

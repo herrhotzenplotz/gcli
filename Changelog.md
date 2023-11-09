@@ -11,6 +11,8 @@ This changelog does not follow semantic versioning.
 - Added Windows 10 MSYS2 to list of confirmed-to-work platforms
 - Added a new action `set-visibility` to the repos subcommand that
   allows updating the visibility level of a repository.
+- Add a new action `request-review` to the pulls subcommand that
+  allows requesting a review of a pull request from a given user.
 
 ### Fixed
 

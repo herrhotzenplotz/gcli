@@ -6,6 +6,8 @@ cd build
 set-option global ctagscmd "uctags -R --fields=+S"
 set-option global ctagspaths "../include ../src ../thirdparty"
 
+set-option global makecmd "cpuset -l6-11 make -j8"
+
 hook global BufSetOption filetype=c %{
 	add-highlighter buffer/ show-whitespaces -spc " "
 	smarttab

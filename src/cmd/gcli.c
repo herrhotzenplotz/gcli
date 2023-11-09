@@ -253,6 +253,33 @@ find_subcommand(char const *const name)
 }
 
 static void
+add_subcommand_alias(char const *alias_name, char const *alias_for)
+{
+	char *docstring;
+	struct subcommand const *old_sc;
+	struct subcommand *new_sc;
+
+	old_sc = find_subcommand(alias_for);
+	/* TODO: check result once find_subcommand MAY return null */
+
+	docstring = sn_asprintf("Alias for %s", alias_for);
+	subcommands = realloc(subcommands, (subcommands_size + 1) * sizeof(*subcommands));
+
+	/* Copy in data */
+	new_sc = &subcommands[subcommands_size++];
+
+	new_sc->cmd_name = alias_name;
+	new_sc->fn = old_sc->fn;
+	new_sc->docstring = docstring;
+}
+
+static void
+install_aliases(void)
+{
+	add_subcommand_alias("pr", "pulls");
+}
+
+static void
 setup_subcommand_table(void)
 {
 	subcommands = calloc(sizeof(*subcommands), ARRAY_SIZE(default_subcommands));
@@ -277,6 +304,9 @@ main(int argc, char *argv[])
 
 	/* Initial setup */
 	setup_subcommand_table();
+
+	/* Install subcommand aliases into subcommand table */
+	install_aliases();
 
 	/* Sorts the subcommands array alphabatically */
 	presort_subcommands();

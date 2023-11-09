@@ -479,7 +479,8 @@ subcommand_pull_create(int argc, char *argv[])
 		opts.from = pr_try_derive_head();
 
 	if (!opts.to.length) {
-		if (!(opts.to = gcli_config_get_base(g_clictx)).length)
+		opts.to = gcli_config_get_base(g_clictx);
+		if (opts.to.length == 0)
 			errx(1,
 			     "error: PR base is missing. Please either specify "
 			     "--to branch-name or set pr.base in .gcli.");

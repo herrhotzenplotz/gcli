@@ -17,6 +17,8 @@ This changelog does not follow semantic versioning.
 ### Fixed
 
 - Fixed incorrect internal help message of the `repos` subcommand.
+- Worked around ICE with xlC 16 on ppc64le Debian Linux, gcli now
+  compiles using xlC and works too.
 
 ### Changed
 

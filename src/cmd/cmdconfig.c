@@ -46,17 +46,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#ifdef HAVE_SYS_QUEUE_H
-#include <sys/queue.h>
-#endif /* HAVE_SYS_QUEUE_H */
-
-struct gcli_config_entry {
-	TAILQ_ENTRY(gcli_config_entry) next;
-	sn_sv key;
-	sn_sv value;
-};
-
-TAILQ_HEAD(gcli_config_entries, gcli_config_entry);
 struct gcli_config_section {
 	TAILQ_ENTRY(gcli_config_section) next;
 
@@ -65,7 +54,6 @@ struct gcli_config_section {
 	sn_sv title;
 };
 
-#define CONFIG_MAX_SECTIONS 16
 struct gcli_config {
 	TAILQ_HEAD(gcli_config_sections, gcli_config_section) sections;
 
@@ -613,6 +601,21 @@ find_section(struct gcli_config *cfg, char const *name)
 			return section;
 	}
 	return NULL;
+}
+
+struct gcli_config_entries const *
+gcli_config_get_section_entries(gcli_ctx *ctx, char const *section_name)
+{
+	struct gcli_config_section const *s;
+	struct gcli_config *cfg;
+
+	cfg = ensure_config(ctx);
+	s = find_section(cfg, section_name);
+
+	if (s == NULL)
+		return NULL;
+	else
+		return &s->entries;
 }
 
 sn_sv

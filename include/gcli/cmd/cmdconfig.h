@@ -37,6 +37,18 @@
 #include <sn/sn.h>
 #include <gcli/gcli.h>
 
+#ifdef HAVE_SYS_QUEUE_H
+#include <sys/queue.h>
+#endif /* HAVE_SYS_QUEUE_H */
+
+struct gcli_config_entry {
+	TAILQ_ENTRY(gcli_config_entry) next;
+	sn_sv key;
+	sn_sv value;
+};
+
+TAILQ_HEAD(gcli_config_entries, gcli_config_entry);
+
 int gcli_config_parse_args(gcli_ctx *ctx, int *argc, char ***argv);
 int gcli_config_init_ctx(gcli_ctx *ctx);
 void gcli_config_get_upstream_parts(gcli_ctx *ctx, sn_sv *owner, sn_sv *repo);
@@ -54,5 +66,7 @@ sn_sv gcli_config_get_override_default_account(gcli_ctx *ctx);
 bool gcli_config_pr_inhibit_delete_source_branch(gcli_ctx *ctx);
 void gcli_config_get_repo(gcli_ctx *ctx, char const **, char const **);
 int gcli_config_have_colours(gcli_ctx *ctx);
+struct gcli_config_entries const *gcli_config_get_section_entries(
+	gcli_ctx *ctx, char const *section_name);
 
 #endif /* GCLI_CMD_CMDCONFIG_H */

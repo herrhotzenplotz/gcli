@@ -202,17 +202,16 @@ presort_subcommands(void)
 	      subcommand_compare);
 }
 
-static void
-ensure_unique_match(size_t const idx, char const *const name,
-                    size_t const name_len)
+static bool
+is_unique_match(size_t const idx, char const *const name, size_t const name_len)
 {
 	/* Last match is always unique */
 	if (idx + 1 == subcommands_size)
-		return;
+		return true;
 
 	for (size_t i = idx + 1; i < subcommands_size; ++i) {
 		if (strncmp(name, subcommands[i].cmd_name, name_len))
-			return; /* doesn't match. meaning this one is unique. */
+			return true; /* doesn't match. meaning this one is unique. */
 		else
 			break; /* we found a duplicate prefix. */
 	}
@@ -228,19 +227,29 @@ ensure_unique_match(size_t const idx, char const *const name,
 	}
 
 	fprintf(stderr, "\n");
-	version();
-	exit(EXIT_FAILURE);
+
+	return false;
 }
 
+enum {
+	LOOKUP_NOSUCHCMD = 1,
+	LOOKUP_AMBIGUOUS,
+};
+
 static struct subcommand const *
-find_subcommand(char const *const name)
+find_subcommand(char const *const name, int *error)
 {
 	size_t const name_len = strlen(name);
 
 	for (size_t i = 0; i < subcommands_size; ++i) {
 		if (strncmp(subcommands[i].cmd_name, name, name_len) == 0) {
 			/* At least the prefix matches. Check that it is a unique match. */
-			ensure_unique_match(i, name, name_len);
+			if (!is_unique_match(i, name, name_len)) {
+				if (error)
+					*error = LOOKUP_AMBIGUOUS;
+
+				return NULL;
+			}
 
 			return subcommands + i;
 		}
@@ -248,8 +257,10 @@ find_subcommand(char const *const name)
 
 	/* no match */
 	fprintf(stderr, "error: %s: no such subcommand\n", name);
-	usage();
-	exit(EXIT_FAILURE);
+	if (error)
+		*error = LOOKUP_NOSUCHCMD;
+
+	return NULL;
 }
 
 static void
@@ -259,8 +270,12 @@ add_subcommand_alias(char const *alias_name, char const *alias_for)
 	struct subcommand const *old_sc;
 	struct subcommand *new_sc;
 
-	old_sc = find_subcommand(alias_for);
-	/* TODO: check result once find_subcommand MAY return null */
+	old_sc = find_subcommand(alias_for, NULL);
+	if (old_sc == NULL) {
+		fprintf(stderr, "note: this error occured while defining the alias »%s«\n",
+		        alias_name);
+		exit(EXIT_FAILURE);
+	}
 
 	docstring = sn_asprintf("Alias for %s", alias_for);
 	subcommands = realloc(subcommands, (subcommands_size + 1) * sizeof(*subcommands));
@@ -291,6 +306,8 @@ int
 main(int argc, char *argv[])
 {
 	char const *errmsg;
+	struct subcommand const *sc;
+	int error_reason;
 
 	errmsg = gcli_init(&g_clictx, gcli_config_get_forge_type,
 	                   gcli_config_get_token, gcli_config_get_apibase);
@@ -324,5 +341,16 @@ main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	return find_subcommand(argv[0])->fn(argc, argv);
+	/* Search for the subcommand */
+	sc = find_subcommand(argv[0], &error_reason);
+	if (sc == NULL) {
+		if (error_reason == LOOKUP_AMBIGUOUS)
+			version();
+		else
+			usage();
+
+		return EXIT_FAILURE;
+	}
+
+	return sc->fn(argc, argv);
 }

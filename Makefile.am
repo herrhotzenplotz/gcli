@@ -141,6 +141,7 @@ libgcli_la_SOURCES = \
 	src/forges.c include/gcli/forges.h \
 	src/forks.c include/gcli/forks.h \
 	src/issues.c include/gcli/issues.h \
+	src/json_gen.c include/gcli/json_gen.h \
 	src/json_util.c include/gcli/json_util.h \
 	src/labels.c include/gcli/labels.h \
 	src/milestones.c include/gcli/milestones.h \
@@ -218,7 +219,8 @@ check_PROGRAMS = \
 	tests/github-parse-tests$(EXEEXT) \
 	tests/gitlab-parse-tests$(EXEEXT) \
 	tests/url-encode$(EXEEXT) \
-	tests/pretty_print_test$(EXEEXT)
+	tests/pretty_print_test$(EXEEXT) \
+	tests/test-jsongen$(EXEEXT)
 
 $(check_PROGRAMS): tests/gcli_tests.h
 
@@ -256,6 +258,12 @@ tests_pretty_print_test_SOURCES = \
 	tests/pretty_print_test.c
 tests_pretty_print_test_LDADD = \
 	libsn.la \
+	$(LIBATFC_LDFLAGS)
+
+tests_test_jsongen_SOURCES = \
+	tests/test-jsongen.c
+tests_test_jsongen_LDADD = \
+	libgcli.la \
 	$(LIBATFC_LDFLAGS)
 
 EXTRA_DIST += tests/samples/github_simple_comment.json	\

@@ -243,6 +243,7 @@ gitea_forge_descriptor =
 	.get_pull_commits          = gitea_get_pull_commits,
 	.pull_set_milestone        = gitea_pull_set_milestone,
 	.pull_clear_milestone      = gitea_pull_clear_milestone,
+	.pull_add_reviewer         = gitea_pull_add_reviewer,
 	.get_releases              = gitea_get_releases,
 	.create_release            = gitea_create_release,
 	.delete_release            = gitea_delete_release,

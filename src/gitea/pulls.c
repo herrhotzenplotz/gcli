@@ -192,3 +192,10 @@ gitea_pull_clear_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
 	 * the integer value zero. */
 	return github_issue_set_milestone(ctx, owner, repo, pr_number, 0);
 }
+
+int
+gitea_pull_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
+                        gcli_id pr_number, char const *username)
+{
+	return github_pull_add_reviewer(ctx, owner, repo, pr_number, username);
+}

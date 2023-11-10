@@ -46,6 +46,14 @@ gcli_issue_free(gcli_issue *const it)
 		free(it->labels[i].data);
 
 	free(it->labels);
+	it->labels = NULL;
+
+	for (size_t i = 0; i < it->assignees_size; ++i)
+		free(it->assignees[i].data);
+
+	free(it->assignees);
+	it->assignees = NULL;
+
 	free(it->milestone.data);
 }
 

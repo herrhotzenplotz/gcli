@@ -45,6 +45,8 @@ gcli_init(gcli_ctx **ctx, gcli_forge_type (*get_forge_type)(gcli_ctx *),
 	(*ctx)->get_token = get_token;
 	(*ctx)->get_apibase = get_apibase;
 
+	(*ctx)->apibase = NULL;
+
 	return NULL;
 }
 
@@ -52,6 +54,8 @@ void
 gcli_destroy(gcli_ctx **ctx)
 {
 	if (ctx && *ctx) {
+		free((*ctx)->apibase);
+
 		free(*ctx);
 		*ctx = NULL;
 

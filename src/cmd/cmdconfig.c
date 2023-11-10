@@ -665,7 +665,7 @@ default_account_entry_names[] = {
 	[GCLI_FORGE_GITLAB] = "gitlab-default-account",
 	[GCLI_FORGE_GITEA]  = "gitea-default-account", };
 
-static char const *
+static char *
 get_default_account(gcli_ctx *ctx, gcli_forge_type ftype)
 {
 	char const *const defaultname = default_account_entry_names[ftype];
@@ -677,15 +677,15 @@ get_default_account(gcli_ctx *ctx, gcli_forge_type ftype)
 	return sn_sv_to_cstr(act);
 }
 
-static char const *
+static char *
 gcli_config_get_account(gcli_ctx *ctx)
 {
 	struct gcli_config *cfg = ctx_config(ctx);
 	gcli_forge_type ftype = gcli_config_get_forge_type(ctx);
-	char const *account;
+	char *account;
 
 	if (cfg->override_default_account) {
-		account = cfg->override_default_account;
+		account = strdup(cfg->override_default_account);
 	} else {
 		account = get_default_account(ctx, ftype);
 	}
@@ -702,7 +702,7 @@ static char const *const default_urls[] = {
 char *
 gcli_config_get_apibase(gcli_ctx *ctx)
 {
-	char const *acct = gcli_config_get_account(ctx);
+	char *acct = gcli_config_get_account(ctx);
 	char *url = NULL;
 
 	if (acct) {
@@ -714,15 +714,20 @@ gcli_config_get_apibase(gcli_ctx *ctx)
 	if (!url)
 		url = strdup(default_urls[gcli_config_get_forge_type(ctx)]);
 
+
+	free(acct);
+
 	return url;
 }
 
 char *
 gcli_config_get_account_name(gcli_ctx *ctx)
 {
-	char const *account = gcli_config_get_account(ctx);
+	char *account = gcli_config_get_account(ctx);
 	sn_sv actname = gcli_config_find_by_key(
 		ctx, account, "account");
+
+	free(account);
 
 	return sn_sv_to_cstr(actname);
 }
@@ -730,7 +735,7 @@ gcli_config_get_account_name(gcli_ctx *ctx)
 static char *
 get_account_token(gcli_ctx *ctx)
 {
-	char const *account;
+	char *account;
 	sn_sv token;
 
 	account = gcli_config_get_account(ctx);
@@ -738,6 +743,8 @@ get_account_token(gcli_ctx *ctx)
 		return NULL;
 
 	token = gcli_config_find_by_key(ctx, account, "token");
+
+	free(account);
 
 	return sn_sv_to_cstr(token);
 }

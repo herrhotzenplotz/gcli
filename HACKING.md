@@ -200,6 +200,19 @@ features available in the code generator.
 
 The code generator is fully documented in [pgen.org](docs/pgen.org).
 
+## Generating JSON
+
+We not only need to parse JSON often, we also need to generate it
+on the fly when submitting data to forge APIs.
+
+For this the `gcli_jsongen_` family of functions exist. Since these
+have been introduced quite late in the project their use is not
+particularly wide-spread. However this may change in the future.
+
+To use these, take a look at the header
+[include/gcli/json_gen.h](include/gcli/json_gen.h) and also the use
+in [src/gitlab/merge_requests.c](src/gitlab/merge_requests.c).
+
 # User Frontend Features
 
 The gcli command line tool links against libgcli. Through a context
@@ -244,7 +257,7 @@ gcli_tblcoldef cols[] = {
 ```
 
 For a complete definition look at the header or uses of that interface
-in e.g. [src/issues.c](src/issues.c).
+in e.g. [src/cmd/issues.c](src/cmd/issues.c).
 
 You can then start adding rows to your table:
 

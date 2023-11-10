@@ -102,6 +102,12 @@ Tested Operating Systems so far:
 - Windows 10 (MSYS2 mingw32-w64)
 - NetBSD 9.3 amd64, sparc64 and VAX
 
+Tested Compilers so far:
+- LLVM Clang (various versions)
+- GCC (various versions)
+- Oracle DeveloperStudio 12.6
+- IBM XL C/C++ V16.1.1 (Community Edition)
+
 ## Support
 
 Please refer to the manual pages that come with gcli. You may want to

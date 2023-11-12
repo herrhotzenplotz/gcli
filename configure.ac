@@ -83,8 +83,9 @@ AS_IF([test "x$HAVE_ATFC" = "xyes"],
        HAVE_ATFC=yes])
 
 AC_CHECK_PROG([KYUA], [kyua], [kyua])
+AC_CHECK_PROGS([REALPATH], [realpath grealpath], [])
 HAVE_TESTS=0
-AS_IF([test -z "$KYUA" || test "x$HAVE_ATFC" = xno],
+AS_IF([test -z "$KYUA" || test "x$HAVE_ATFC" = xno || test -z "$REALPATH"],
       [HAVE_TESTS=no],
       [HAVE_TESTS=yes])
 AC_SUBST([HAVE_TESTS])
@@ -124,9 +125,11 @@ AC_CONFIG_FILES([Makefile
 
 dnl Technically only needed if tests are enabled but this doesn't
 dnl hurt.
-TESTSRCDIR="$(realpath ${srcdir}/tests)"
-AC_SUBST([TESTSRCDIR])
-AC_DEFINE_UNQUOTED([TESTSRCDIR], ["$TESTSRCDIR"], [Directory to the test sources])
+if test "x$HAVE_TESTS" = "xyes"; then
+	TESTSRCDIR="$($REALPATH ${srcdir}/tests)"
+	AC_SUBST([TESTSRCDIR])
+	AC_DEFINE_UNQUOTED([TESTSRCDIR], ["$TESTSRCDIR"], [Directory to the test sources])
+fi
 
 AC_CONFIG_FILES([tests/Kyuafile])
 

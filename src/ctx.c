@@ -81,7 +81,10 @@ gcli_set_progress_func(struct gcli_ctx *ctx,
 char *
 gcli_get_apibase(struct gcli_ctx *ctx)
 {
-	return ctx->get_apibase(ctx);
+	if (!ctx->apibase)
+		ctx->apibase = ctx->get_apibase(ctx);
+
+	return ctx->apibase;
 }
 
 char *

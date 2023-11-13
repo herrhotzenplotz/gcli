@@ -96,9 +96,12 @@ gcli_pull_free(gcli_pull *const it)
 	free(it->title);
 	free(it->body);
 	free(it->created_at);
+	free(it->commits_link);
 	free(it->head_label);
 	free(it->base_label);
 	free(it->head_sha);
+	free(it->milestone);
+	free(it->coverage);
 
 	for (size_t i = 0; i < it->labels_size; ++i)
 		free(it->labels[i].data);

@@ -105,7 +105,7 @@ gcli_print_pulls(enum gcli_output_flags const flags,
 	int n;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
-		{ .name = "NUMBER",  .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "NUMBER",  .type = GCLI_TBLCOLTYPE_ID,     .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "STATE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
 		{ .name = "MERGED",  .type = GCLI_TBLCOLTYPE_BOOL,   .flags = 0 },
 		{ .name = "CREATOR", .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_BOLD },
@@ -166,11 +166,11 @@ gcli_pull_print(gcli_pull const *const it)
 {
 	gcli_dict dict;
 	gcli_forge_descriptor const *const forge = gcli_forge(g_clictx);
-    int const quirks = forge->pull_summary_quirks;
+	int const quirks = forge->pull_summary_quirks;
 
 	dict = gcli_dict_begin();
 
-	gcli_dict_add(dict,        "NUMBER", 0, 0, "%d", it->number);
+	gcli_dict_add(dict,        "NUMBER", 0, 0, "%"PRIid, it->number);
 	gcli_dict_add_string(dict, "TITLE", 0, 0, it->title);
 	gcli_dict_add_string(dict, "HEAD", 0, 0, it->head_label);
 	gcli_dict_add_string(dict, "BASE", 0, 0, it->base_label);

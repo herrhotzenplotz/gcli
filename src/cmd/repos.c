@@ -121,7 +121,7 @@ gcli_repo_print(gcli_repo const *it)
 	gcli_dict dict;
 
 	dict = gcli_dict_begin();
-	gcli_dict_add(dict, "ID",         0, 0, "%d", it->id);
+	gcli_dict_add(dict, "ID",         0, 0, "%"PRIid, it->id);
 	gcli_dict_add(dict, "FULL NAME",  0, 0, SV_FMT, SV_ARGS(it->full_name));
 	gcli_dict_add(dict, "NAME",       0, 0, SV_FMT, SV_ARGS(it->name));
 	gcli_dict_add(dict, "OWNER",      0, 0, SV_FMT, SV_ARGS(it->owner));

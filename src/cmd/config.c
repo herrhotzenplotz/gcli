@@ -63,7 +63,7 @@ gcli_sshkeys_print_keys(gcli_sshkey_list const *list)
 {
 	gcli_tbl *tbl;
 	gcli_tblcoldef cols[] = {
-		{ .name = "ID",      .type = GCLI_TBLCOLTYPE_INT,    .flags = 0 },
+		{ .name = "ID",      .type = GCLI_TBLCOLTYPE_ID,     .flags = 0 },
 		{ .name = "CREATED", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 		{ .name = "TITLE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};

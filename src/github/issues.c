@@ -135,11 +135,9 @@ github_get_issue_summary(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf(
-		"%s/repos/%s/%s/issues/%lu",
-		gcli_get_apibase(ctx),
-		e_owner, e_repo,
-		issue_number);
+	url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid,
+	                  gcli_get_apibase(ctx), e_owner, e_repo,
+	                  issue_number);
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 
@@ -172,7 +170,7 @@ github_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf(
-		"%s/repos/%s/%s/issues/%lu",
+		"%s/repos/%s/%s/issues/%"PRIid,
 		gcli_get_apibase(ctx),
 		e_owner, e_repo,
 		issue_number);
@@ -202,7 +200,7 @@ github_issue_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
-		"%s/repos/%s/%s/issues/%lu",
+		"%s/repos/%s/%s/issues/%"PRIid,
 		gcli_get_apibase(ctx),
 		e_owner, e_repo,
 		issue_number);
@@ -266,7 +264,7 @@ github_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf(
-		"%s/repos/%s/%s/issues/%lu/assignees",
+		"%s/repos/%s/%s/issues/%"PRIid"/assignees",
 		gcli_get_apibase(ctx), e_owner, e_repo, issue_number);
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, post_fields, NULL, NULL);
@@ -292,7 +290,7 @@ github_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 
 	assert(labels_size > 0);
 
-	url = sn_asprintf("%s/repos/%s/%s/issues/%lu/labels",
+	url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid"/labels",
 	                  gcli_get_apibase(ctx), owner, repo, issue);
 
 	list = sn_join_with(labels, labels_size, "\",\"");
@@ -323,7 +321,7 @@ github_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 
 	e_label = gcli_urlencode(labels[0]);
 
-	url = sn_asprintf("%s/repos/%s/%s/issues/%lu/labels/%s",
+	url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid"/labels/%s",
 	                  gcli_get_apibase(ctx), owner, repo, issue, e_label);
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
@@ -345,11 +343,11 @@ github_issue_set_milestone(gcli_ctx *ctx, char const *const owner,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/issues/%lu",
+	url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid,
 	                  gcli_get_apibase(ctx),
 	                  e_owner, e_repo, issue);
 
-	body = sn_asprintf("{ \"milestone\": %lu }", milestone);
+	body = sn_asprintf("{ \"milestone\": %"PRIid" }", milestone);
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, body, NULL, NULL);
 
@@ -371,7 +369,7 @@ github_issue_clear_milestone(gcli_ctx *ctx, char const *const owner,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/issues/%lu",
+	url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid,
 	                  gcli_get_apibase(ctx),
 	                  e_owner, e_repo, issue);
 

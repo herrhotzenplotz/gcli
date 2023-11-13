@@ -148,7 +148,7 @@ github_print_pull_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
 	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%lu",
+		"%s/repos/%s/%s/pulls/%"PRIid,
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, pr_number);
 	rc = gcli_curl(ctx, stream, url, "Accept: application/vnd.github.v3.diff");
@@ -208,7 +208,7 @@ github_pull_merge(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%lu/merge?merge_method=%s",
+		"%s/repos/%s/%s/pulls/%"PRIid"/merge?merge_method=%s",
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, pr_number,
 		squash ? "squash" : "merge");
@@ -239,7 +239,7 @@ github_pull_close(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%lu",
+		"%s/repos/%s/%s/pulls/%"PRIid,
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, pr_number);
 	data = sn_asprintf("{ \"state\": \"closed\"}");
@@ -268,7 +268,7 @@ github_pull_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_repo = gcli_urlencode(repo);
 
 	url  = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%lu",
+		"%s/repos/%s/%s/pulls/%"PRIid,
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, pr_number);
 	data = sn_asprintf("{ \"state\": \"open\"}");
@@ -355,7 +355,7 @@ github_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%lu/commits",
+		"%s/repos/%s/%s/pulls/%"PRIid"/commits",
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, pr_number);
 
@@ -379,7 +379,7 @@ github_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%lu",
+		"%s/repos/%s/%s/pulls/%"PRIid,
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, pr_number);
 	free(e_owner);
@@ -406,8 +406,9 @@ github_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
 {
 	char refname[64] = {0};
 
-	/* This is kind of a hack, but it works! */
-	snprintf(refname, sizeof refname, "refs%%2Fpull%%2F%lu%%2Fhead", pr_number);
+	/* This is kind of a hack, but it works!
+	 * Yes, even a few months later I agree that this is a hack. */
+	snprintf(refname, sizeof refname, "refs%%2Fpull%%2F%"PRIid"%%2Fhead", pr_number);
 
 	return github_get_checks(ctx, owner, repo, refname, -1,
 	                         (github_check_list *)out);
@@ -426,7 +427,7 @@ github_pull_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_repo = gcli_urlencode(repo);
 
 	/* /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers */
-	url = sn_asprintf("%s/repos/%s/%s/pulls/%lu/requested_reviewers",
+	url = sn_asprintf("%s/repos/%s/%s/pulls/%"PRIid"/requested_reviewers",
 	                  gcli_get_apibase(ctx), e_owner, e_repo, pr_number);
 
 	/* Generate payload */

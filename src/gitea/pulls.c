@@ -75,7 +75,7 @@ gitea_pull_merge(gcli_ctx *ctx, char const *owner, char const *repo,
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
-	url = sn_asprintf("%s/repos/%s/%s/pulls/%lu/merge",
+	url = sn_asprintf("%s/repos/%s/%s/pulls/%"PRIid"/merge",
 	                  gcli_get_apibase(ctx), e_owner, e_repo, pr_number);
 	data = sn_asprintf("{ \"Do\": \"%s\", \"delete_branch_after_merge\": %s }",
 	                   squash ? "squash" : "merge",
@@ -148,7 +148,7 @@ gitea_print_pr_diff(gcli_ctx *ctx, FILE *const stream, char const *owner,
 	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%lu.patch",
+		"%s/repos/%s/%s/pulls/%"PRIid".patch",
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, pr_number);
 

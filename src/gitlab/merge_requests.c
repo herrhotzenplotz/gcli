@@ -147,7 +147,7 @@ gitlab_mr_merge(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_repo  = gcli_urlencode(repo);
 
 	/* PUT /projects/:id/merge_requests/:merge_request_iid/merge */
-	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu/merge"
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid"/merge"
 	                  "?squash=%s"
 	                  "&should_remove_source_branch=%s",
 	                  gcli_get_apibase(ctx),
@@ -179,7 +179,7 @@ gitlab_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_repo  = gcli_urlencode(repo);
 
 	/* GET /projects/:id/merge_requests/:merge_request_iid */
-	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu",
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid,
 	                  gcli_get_apibase(ctx),
 	                  e_owner, e_repo, pr_number);
 	free(e_owner);
@@ -218,7 +218,7 @@ gitlab_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_repo  = gcli_urlencode(repo);
 
 	/* GET /projects/:id/merge_requests/:merge_request_iid/commits */
-	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu/commits",
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid"/commits",
 	                  gcli_get_apibase(ctx), e_owner, e_repo, pr_number);
 
 	free(e_owner);
@@ -240,7 +240,7 @@ gitlab_mr_close(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu",
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid,
 	                  gcli_get_apibase(ctx), e_owner, e_repo, pr_number);
 	data = sn_asprintf("{ \"state_event\": \"close\"}");
 
@@ -267,7 +267,7 @@ gitlab_mr_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu",
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid,
 	                  gcli_get_apibase(ctx), e_owner, e_repo, pr_number);
 	data = sn_asprintf("{ \"state_event\": \"reopen\"}");
 
@@ -334,7 +334,7 @@ gitlab_perform_submit_mr(gcli_ctx *ctx, gcli_submit_pull_options opts)
 	char *post_fields = sn_asprintf(
 		"{\"source_branch\":\""SV_FMT"\",\"target_branch\":\""SV_FMT"\", "
 		"\"title\": \""SV_FMT"\", \"description\": \""SV_FMT"\", "
-		"\"target_project_id\": %lu %s }",
+		"\"target_project_id\": %"PRIid" %s }",
 		SV_ARGS(e_source_branch),
 		SV_ARGS(e_target_branch),
 		SV_ARGS(e_title),
@@ -378,7 +378,7 @@ gitlab_mr_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 	char *list = NULL;
 	int   rc   = 0;
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu",
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid,
 	                  gcli_get_apibase(ctx), owner, repo, mr);
 
 	list = sn_join_with(labels, labels_size, ",");
@@ -403,7 +403,7 @@ gitlab_mr_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 	char *list = NULL;
 	int rc = 0;
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu",
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid,
 	                  gcli_get_apibase(ctx), owner, repo, mr);
 
 	list = sn_join_with(labels, labels_size, ",");
@@ -426,10 +426,10 @@ gitlab_mr_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
 	char *data = NULL;
 	int rc = 0;
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu",
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid,
 	                  gcli_get_apibase(ctx), owner, repo, mr);
 
-	data = sn_asprintf("{ \"milestone_id\": \"%lu\"}", milestone_id);
+	data = sn_asprintf("{ \"milestone_id\": \"%"PRIid"\"}", milestone_id);
 
 	rc = gcli_fetch_with_method(ctx, "PUT", url, data, NULL, NULL);
 
@@ -461,7 +461,7 @@ gitlab_mr_get_reviewers(gcli_ctx *ctx, char const *e_owner, char const *e_repo,
 	int rc;
 	gcli_fetch_buffer json_buffer = {0};
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu",
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid,
 	                  gcli_get_apibase(ctx), e_owner, e_repo, mr);
 
 	rc = gcli_fetch(ctx, url, NULL, &json_buffer);
@@ -531,7 +531,7 @@ gitlab_mr_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
 	gcli_jsongen_free(&gen);
 
 	/* generate URL */
-	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%lu",
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid,
 	                  gcli_get_apibase(ctx), e_owner, e_repo, mr_number);
 
 	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);

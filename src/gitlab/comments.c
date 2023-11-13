@@ -87,7 +87,7 @@ gitlab_get_mr_comments(gcli_ctx *ctx, char const *owner, char const *repo,
 	};
 
 	char *url = sn_asprintf(
-		"%s/projects/%s%%2F%s/merge_requests/%lu/notes",
+		"%s/projects/%s%%2F%s/merge_requests/%"PRIid"/notes",
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, mr);
 
@@ -112,7 +112,7 @@ gitlab_get_issue_comments(gcli_ctx *ctx, char const *owner, char const *repo,
 	};
 
 	char *url = sn_asprintf(
-		"%s/projects/%s%%2F%s/issues/%lu/notes",
+		"%s/projects/%s%%2F%s/issues/%"PRIid"/notes",
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, issue);
 	free(e_owner);

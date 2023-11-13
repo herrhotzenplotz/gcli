@@ -19,6 +19,10 @@ This changelog does not follow semantic versioning.
 - Fixed incorrect internal help message of the `repos` subcommand.
 - Worked around ICE with xlC 16 on ppc64le Debian Linux, gcli now
   compiles using xlC and works too.
+- Fixed various memory leaks. This was not a real issue as these
+  leaks were minor and gcli is not a long-running application where
+  thease leaks would have had any serious impact on the memory
+  footprint.
 
 ### Changed
 

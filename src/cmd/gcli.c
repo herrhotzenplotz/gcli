@@ -70,10 +70,10 @@ subcommand_version(int argc, char *argv[])
 }
 
 static struct subcommand {
-	char const *const cmd_name;
-	char const *const docstring;
+	char const *cmd_name;
+	char const *docstring;
 	int (*fn)(int, char **);
-} subcommands[] = {
+} default_subcommands[] = {
 	{ .cmd_name = "ci",
 	  .fn = subcommand_ci,
 	  .docstring = "Github CI status info" },
@@ -124,6 +124,9 @@ static struct subcommand {
 	  .docstring = "Print version" },
 };
 
+static struct subcommand *subcommands = NULL;
+static size_t subcommands_size = 0;
+
 static void
 usage(void)
 {
@@ -139,7 +142,7 @@ usage(void)
 	fprintf(stderr, "  -q             Be quiet. (Not implemented yet)\n\n");
 	fprintf(stderr, "  -v             Be verbose.\n\n");
 	fprintf(stderr, "SUBCOMMANDS:\n");
-	for (size_t i = 0; i < ARRAY_SIZE(subcommands); ++i) {
+	for (size_t i = 0; i < subcommands_size; ++i) {
 		fprintf(stderr,
 		        "  %-13.13s  %s\n",
 		        subcommands[i].cmd_name,
@@ -195,28 +198,27 @@ subcommand_compare(void const *s1, void const *s2)
 static void
 presort_subcommands(void)
 {
-	qsort(subcommands, ARRAY_SIZE(subcommands), sizeof(*subcommands),
+	qsort(subcommands, subcommands_size, sizeof(*subcommands),
 	      subcommand_compare);
 }
 
-static void
-ensure_unique_match(size_t const idx, char const *const name,
-                    size_t const name_len)
+static bool
+is_unique_match(size_t const idx, char const *const name, size_t const name_len)
 {
 	/* Last match is always unique */
-	if (idx + 1 == ARRAY_SIZE(subcommands))
-		return;
+	if (idx + 1 == subcommands_size)
+		return true;
 
-	for (size_t i = idx + 1; i < ARRAY_SIZE(subcommands); ++i) {
+	for (size_t i = idx + 1; i < subcommands_size; ++i) {
 		if (strncmp(name, subcommands[i].cmd_name, name_len))
-			return; /* doesn't match. meaning this one is unique. */
+			return true; /* doesn't match. meaning this one is unique. */
 		else
 			break; /* we found a duplicate prefix. */
 	}
 
 	fprintf(stderr, "error: %s: subcommand is ambiguous. could be one of:\n", name);
 	/* List until either the end or until we don't match any more prefixes */
-	for (size_t i = idx; i < ARRAY_SIZE(subcommands); ++i) {
+	for (size_t i = idx; i < subcommands_size; ++i) {
 		if (strncmp(name, subcommands[i].cmd_name, name_len))
 			break;
 
@@ -225,19 +227,29 @@ ensure_unique_match(size_t const idx, char const *const name,
 	}
 
 	fprintf(stderr, "\n");
-	version();
-	exit(EXIT_FAILURE);
+
+	return false;
 }
 
+enum {
+	LOOKUP_NOSUCHCMD = 1,
+	LOOKUP_AMBIGUOUS,
+};
+
 static struct subcommand const *
-find_subcommand(char const *const name)
+find_subcommand(char const *const name, int *error)
 {
 	size_t const name_len = strlen(name);
 
-	for (size_t i = 0; i < ARRAY_SIZE(subcommands); ++i) {
+	for (size_t i = 0; i < subcommands_size; ++i) {
 		if (strncmp(subcommands[i].cmd_name, name, name_len) == 0) {
 			/* At least the prefix matches. Check that it is a unique match. */
-			ensure_unique_match(i, name, name_len);
+			if (!is_unique_match(i, name, name_len)) {
+				if (error)
+					*error = LOOKUP_AMBIGUOUS;
+
+				return NULL;
+			}
 
 			return subcommands + i;
 		}
@@ -245,17 +257,76 @@ find_subcommand(char const *const name)
 
 	/* no match */
 	fprintf(stderr, "error: %s: no such subcommand\n", name);
-	usage();
-	exit(EXIT_FAILURE);
+	if (error)
+		*error = LOOKUP_NOSUCHCMD;
+
+	return NULL;
+}
+
+static void
+add_subcommand_alias(char const *alias_name, char const *alias_for)
+{
+	char *docstring;
+	struct subcommand const *old_sc;
+	struct subcommand *new_sc;
+
+	old_sc = find_subcommand(alias_for, NULL);
+	if (old_sc == NULL) {
+		fprintf(stderr, "note: this error occured while defining the alias »%s«\n",
+		        alias_name);
+		exit(EXIT_FAILURE);
+	}
+
+	docstring = sn_asprintf("Alias for %s", alias_for);
+	subcommands = realloc(subcommands, (subcommands_size + 1) * sizeof(*subcommands));
+
+	/* Copy in data */
+	new_sc = &subcommands[subcommands_size++];
+
+	new_sc->cmd_name = alias_name;
+	new_sc->fn = old_sc->fn;
+	new_sc->docstring = docstring;
+}
+
+static void
+install_aliases(void)
+{
+	struct gcli_config_entries const *entries;
+	struct gcli_config_entry const *entry;
+
+	add_subcommand_alias("pr", "pulls");
+
+	/* Search for aliases in the user config file */
+	entries = gcli_config_get_section_entries(g_clictx, "aliases");
+	if (!entries)
+		return;
+
+	TAILQ_FOREACH(entry, entries, next) {
+		char *alias_name, *alias_for;
+
+		alias_name = sn_sv_to_cstr(entry->key);
+		alias_for = sn_sv_to_cstr(entry->value);
+
+		add_subcommand_alias(alias_name, alias_for);
+
+		free(alias_for);
+	}
+}
+
+static void
+setup_subcommand_table(void)
+{
+	subcommands = calloc(sizeof(*subcommands), ARRAY_SIZE(default_subcommands));
+	memcpy(subcommands, default_subcommands, sizeof(default_subcommands));
+	subcommands_size = ARRAY_SIZE(default_subcommands);
 }
 
 int
 main(int argc, char *argv[])
 {
 	char const *errmsg;
-
-	/* Sorts the subcommands array alphabatically */
-	presort_subcommands();
+	struct subcommand const *sc;
+	int error_reason;
 
 	errmsg = gcli_init(&g_clictx, gcli_config_get_forge_type,
 	                   gcli_config_get_token, gcli_config_get_apibase);
@@ -266,6 +337,15 @@ main(int argc, char *argv[])
 		errx(1, "error: failed to init context: %s", gcli_get_error(g_clictx));
 
 	gcli_set_progress_func(g_clictx, gcli_progress_func);
+
+	/* Initial setup */
+	setup_subcommand_table();
+
+	/* Install subcommand aliases into subcommand table */
+	install_aliases();
+
+	/* Sorts the subcommands array alphabatically */
+	presort_subcommands();
 
 	/* Parse first arguments */
 	if (gcli_config_parse_args(g_clictx, &argc, &argv)) {
@@ -280,5 +360,16 @@ main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	return find_subcommand(argv[0])->fn(argc, argv);
+	/* Search for the subcommand */
+	sc = find_subcommand(argv[0], &error_reason);
+	if (sc == NULL) {
+		if (error_reason == LOOKUP_AMBIGUOUS)
+			version();
+		else
+			usage();
+
+		return EXIT_FAILURE;
+	}
+
+	return sc->fn(argc, argv);
 }

@@ -13,6 +13,10 @@ This changelog does not follow semantic versioning.
   allows updating the visibility level of a repository.
 - Add a new action `request-review` to the pulls subcommand that
   allows requesting a review of a pull request from a given user.
+- One can now define custom aliases in the alias section of the
+  config file. Aliases are very primitive as of now. This means they
+  are just different names for subcommands. Aliases may reference
+  other aliases.
 
 ### Fixed
 

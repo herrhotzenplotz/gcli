@@ -455,7 +455,7 @@ gitlab_mr_clear_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
  * of a merge requests. */
 static int
 gitlab_mr_get_reviewers(gcli_ctx *ctx, char const *e_owner, char const *e_repo,
-                        gcli_id const mr, gitlab_reviewer_list *const out)
+                        gcli_id const mr, gitlab_reviewer_id_list *const out)
 {
 	char *url;
 	int rc;
@@ -468,7 +468,7 @@ gitlab_mr_get_reviewers(gcli_ctx *ctx, char const *e_owner, char const *e_repo,
 	if (rc == 0) {
 		json_stream stream = {0};
 		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
-		parse_gitlab_reviewers(ctx, &stream, out);
+		parse_gitlab_reviewer_ids(ctx, &stream, out);
 		json_close(&stream);
 	}
 
@@ -479,7 +479,7 @@ gitlab_mr_get_reviewers(gcli_ctx *ctx, char const *e_owner, char const *e_repo,
 }
 
 static void
-gitlab_reviewer_list_free(gitlab_reviewer_list *const list)
+gitlab_reviewer_list_free(gitlab_reviewer_id_list *const list)
 {
 	free(list->reviewers);
 	list->reviewers = NULL;
@@ -492,7 +492,7 @@ gitlab_mr_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
 {
 	char *url, *e_owner, *e_repo, *payload;
 	int uid, rc = 0;
-	gitlab_reviewer_list list = {0};
+	gitlab_reviewer_id_list list = {0};
 	gcli_jsongen gen = {0};
 
 	e_owner = gcli_urlencode(owner);

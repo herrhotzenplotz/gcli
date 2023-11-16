@@ -81,6 +81,7 @@ gitlab_get_mrs(gcli_ctx *ctx, char const *owner, char const *repo,
 	char *e_repo = NULL;
 	char *e_author = NULL;
 	char *e_label = NULL;
+	char *e_milestone = NULL;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -99,13 +100,22 @@ gitlab_get_mrs(gcli_ctx *ctx, char const *owner, char const *repo,
 		free(tmp);
 	}
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests%s%s%s",
+	if (details->milestone) {
+		char *tmp = gcli_urlencode(details->milestone);
+		bool const need_qmark = details->all && !details->author && !details->label;
+		e_milestone = sn_asprintf("%cmilestone=%s", need_qmark ? '?' : '&', tmp);
+		free(tmp);
+	}
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests%s%s%s%s",
 	                  gcli_get_apibase(ctx),
 	                  e_owner, e_repo,
 	                  details->all ? "" : "?state=opened",
 	                  e_author ? e_author : "",
-	                  e_label ? e_label : "");
+	                  e_label ? e_label : "",
+	                  e_milestone ? e_milestone : "");
 
+	free(e_milestone);
 	free(e_label);
 	free(e_author);
 	free(e_owner);

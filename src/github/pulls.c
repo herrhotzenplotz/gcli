@@ -68,7 +68,7 @@ pull_has_label(gcli_pull const *p, char const *const label)
 }
 
 static void
-github_pulls_filter_author(gcli_pull **listp, size_t *sizep, struct filter_params *p)
+github_pulls_filter(gcli_pull **listp, size_t *sizep, struct filter_params *p)
 {
 	for (size_t i = *sizep; i > 0; --i) {
 		gcli_pull *pulls = *listp;
@@ -103,7 +103,7 @@ github_fetch_pulls(gcli_ctx *ctx, char *url, char const *const filter_author,
 		.listp = &list->pulls,
 		.sizep = &list->pulls_size,
 		.parse = (parsefn)(parse_github_pulls),
-		.filter = (filterfn)(github_pulls_filter_author),
+		.filter = (filterfn)(github_pulls_filter),
 		.userdata = &params,
 		.max = max,
 	};

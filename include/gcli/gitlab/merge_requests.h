@@ -36,8 +36,8 @@
 
 #include <gcli/pulls.h>
 
-typedef struct gitlab_reviewer_list gitlab_reviewer_list;
-struct gitlab_reviewer_list {
+typedef struct gitlab_reviewer_id_list gitlab_reviewer_id_list;
+struct gitlab_reviewer_id_list {
 	gcli_id *reviewers;
 	size_t reviewers_size;
 };

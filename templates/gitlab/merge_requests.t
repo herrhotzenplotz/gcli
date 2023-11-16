@@ -9,6 +9,8 @@ object of gcli_pull with
 	("id"       => head_pipeline_id as int,
 	 "coverage" => coverage as string);
 
+parser gitlab_reviewer is object of char* select "username" as string;
+
 parser gitlab_mr is
 object of gcli_pull with
 	("title"            => title as string,
@@ -26,7 +28,8 @@ object of gcli_pull with
 	 "sha"              => head_sha as string,
 	 "target_branch"    => base_label as string,
 	 "milestone"        => use parse_gitlab_mr_milestone,
-	 "head_pipeline"    => use parse_gitlab_mr_head_pipeline);
+	 "head_pipeline"    => use parse_gitlab_mr_head_pipeline,
+	 "reviewers"        => reviewers as array of char* use parse_gitlab_reviewer);
 
 parser gitlab_mrs is array of gcli_pull use parse_gitlab_mr;
 
@@ -42,6 +45,6 @@ parser gitlab_commits is array of gcli_commit use parse_gitlab_commit;
 
 parser gitlab_reviewer_id is object of gcli_id select "id" as id;
 
-parser gitlab_reviewers is
-object of gitlab_reviewer_list with
+parser gitlab_reviewer_ids is
+object of gitlab_reviewer_id_list with
 	("reviewers" => reviewers as array of gcli_id use parse_gitlab_reviewer_id);

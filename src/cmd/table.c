@@ -463,6 +463,17 @@ gcli_dict_add_sv_list(gcli_dict dict,
 	return gcli_dict_add_row(dict, key, 0, 0, catted);
 }
 
+int
+gcli_dict_add_string_list(gcli_dict dict, char const *const key,
+                          char const *const *list, size_t const list_size)
+{
+	char *catted = sn_join_with(
+		(char const *const *)list, list_size, ", "); /* yolo */
+
+	/* Push the row into the state */
+	return gcli_dict_add_row(dict, key, 0, 0, catted);
+}
+
 static void
 gcli_dict_free(struct gcli_dict *list)
 {

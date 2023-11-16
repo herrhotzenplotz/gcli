@@ -73,8 +73,13 @@ struct gcli_pull {
 	int changed_files;
 	int head_pipeline_id;       /* GitLab specific */
 	char *coverage;             /* Gitlab Specific */
+
 	sn_sv *labels;
 	size_t labels_size;
+
+	char **reviewers;      /**< User names */
+	size_t reviewers_size; /**< Number of elements in the reviewers list */
+
 	bool merged;
 	bool mergeable;
 	bool draft;

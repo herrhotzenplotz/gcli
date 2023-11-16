@@ -102,6 +102,8 @@ int gcli_dict_add_string(gcli_dict list, char const *key, int flags,
 int gcli_dict_add_sv_list(gcli_dict dict, char const *key, sn_sv const *list,
                           size_t list_size);
 
+int gcli_dict_add_string_list(gcli_dict dict, char const *const key,
+                              char const *const *list, size_t const list_size);
 
 int gcli_dict_end(gcli_dict _list);
 

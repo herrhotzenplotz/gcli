@@ -52,11 +52,6 @@
  * the actual storage and instead just record the new size of the
  * allocation. */
 
-struct filter_params {
-	char const *author;
-	char const *label;
-};
-
 static bool
 pull_has_label(gcli_pull const *p, char const *const label)
 {
@@ -68,16 +63,17 @@ pull_has_label(gcli_pull const *p, char const *const label)
 }
 
 static void
-github_pulls_filter(gcli_pull **listp, size_t *sizep, struct filter_params *p)
+github_pulls_filter(gcli_pull **listp, size_t *sizep,
+                    gcli_pull_fetch_details const *details)
 {
 	for (size_t i = *sizep; i > 0; --i) {
 		gcli_pull *pulls = *listp;
 		bool should_remove = false;
 
-		if (p->author && strcmp(p->author, pulls[i-1].author))
+		if (details->author && strcmp(details->author, pulls[i-1].author))
 			should_remove = true;
 
-		if (p->label && !pull_has_label(&pulls[i-1], p->label))
+		if (details->label && !pull_has_label(&pulls[i-1], details->label))
 			should_remove = true;
 
 		if (should_remove) {
@@ -90,21 +86,16 @@ github_pulls_filter(gcli_pull **listp, size_t *sizep, struct filter_params *p)
 }
 
 static int
-github_fetch_pulls(gcli_ctx *ctx, char *url, char const *const filter_author,
-                   char const *const filter_label, int max,
+github_fetch_pulls(gcli_ctx *ctx, char *url,
+                   gcli_pull_fetch_details const *details, int max,
                    gcli_pull_list *const list)
 {
-	struct filter_params params = {
-		.author = filter_author,
-		.label = filter_label,
-	};
-
 	gcli_fetch_list_ctx fl = {
 		.listp = &list->pulls,
 		.sizep = &list->pulls_size,
 		.parse = (parsefn)(parse_github_pulls),
 		.filter = (filterfn)(github_pulls_filter),
-		.userdata = &params,
+		.userdata = details,
 		.max = max,
 	};
 
@@ -131,8 +122,7 @@ github_get_pulls(gcli_ctx *ctx, char const *owner, char const *repo,
 	free(e_owner);
 	free(e_repo);
 
-	return github_fetch_pulls(ctx, url, details->author, details->label,
-	                          max, list);
+	return github_fetch_pulls(ctx, url, details, max, list);
 }
 
 int

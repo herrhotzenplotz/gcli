@@ -68,18 +68,23 @@ github_pulls_filter(gcli_pull **listp, size_t *sizep,
 {
 	for (size_t i = *sizep; i > 0; --i) {
 		gcli_pull *pulls = *listp;
+		gcli_pull *pull = &pulls[i-1];
 		bool should_remove = false;
 
-		if (details->author && strcmp(details->author, pulls[i-1].author))
+		if (details->author && strcmp(details->author, pull->author))
 			should_remove = true;
 
-		if (details->label && !pull_has_label(&pulls[i-1], details->label))
+		if (details->label && !pull_has_label(pull, details->label))
+			should_remove = true;
+
+		if (details->milestone && pull->milestone &&
+		    strcmp(pull->milestone, details->milestone))
 			should_remove = true;
 
 		if (should_remove) {
-			gcli_pull_free(&pulls[i - 1]);
+			gcli_pull_free(pull);
 
-			memmove(&pulls[i - 1], &pulls[i], sizeof(*pulls) * (*sizep - i));
+			memmove(pull, &pulls[i], sizeof(*pulls) * (*sizep - i));
 			*listp = realloc(pulls, sizeof(*pulls) * (--(*sizep)));
 		}
 	}

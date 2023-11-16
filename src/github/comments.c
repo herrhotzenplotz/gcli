@@ -78,7 +78,7 @@ github_get_comments(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/issues/%lu/comments",
+	url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid"/comments",
 	                  gcli_get_apibase(ctx),
 	                  e_owner, e_repo, issue);
 	free(e_owner);

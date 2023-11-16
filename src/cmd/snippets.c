@@ -66,7 +66,7 @@ gcli_print_snippet(enum gcli_output_flags const flags,
 
 	dict = gcli_dict_begin();
 
-	gcli_dict_add(dict,        "ID",     0, 0, "%d", it->id);
+	gcli_dict_add(dict,        "ID",     0, 0, "%"PRIid, it->id);
 	gcli_dict_add_string(dict, "TITLE",  0, 0, it->title);
 	gcli_dict_add_string(dict, "AUTHOR", 0, 0, it->author);
 	gcli_dict_add_string(dict, "FILE",   0, 0, it->filename);
@@ -106,7 +106,7 @@ gcli_print_snippets_short(enum gcli_output_flags const flags,
 	int n;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
-		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_ID,     .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "DATE",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 		{ .name = "VISIBILITY", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 		{ .name = "AUTHOR",     .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },

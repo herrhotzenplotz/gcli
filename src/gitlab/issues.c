@@ -108,7 +108,7 @@ gitlab_get_issue_summary(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%lu", gcli_get_apibase(ctx),
+	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%"PRIid, gcli_get_apibase(ctx),
 	                  e_owner, e_repo, issue_number);
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
@@ -140,7 +140,7 @@ gitlab_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url  = sn_asprintf("%s/projects/%s%%2F%s/issues/%lu", gcli_get_apibase(ctx),
+	url  = sn_asprintf("%s/projects/%s%%2F%s/issues/%"PRIid, gcli_get_apibase(ctx),
 	                   e_owner, e_repo, issue_number);
 	data = sn_asprintf("{ \"state_event\": \"close\"}");
 
@@ -167,7 +167,7 @@ gitlab_issue_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%lu", gcli_get_apibase(ctx),
+	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%"PRIid, gcli_get_apibase(ctx),
 	                  e_owner, e_repo, issue_number);
 	data = sn_asprintf("{ \"state_event\": \"reopen\"}");
 
@@ -227,7 +227,7 @@ gitlab_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%lu", gcli_get_apibase(ctx),
+	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%"PRIid, gcli_get_apibase(ctx),
 	                  e_owner, e_repo, issue_number);
 	post_data = sn_asprintf("{ \"assignee_ids\": [ %d ] }", assignee_uid);
 	rc = gcli_fetch_with_method(ctx, "PUT", url, post_data, NULL, NULL);
@@ -250,7 +250,7 @@ gitlab_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 	char *list = NULL;
 	int rc = 0;
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%lu", gcli_get_apibase(ctx),
+	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%"PRIid, gcli_get_apibase(ctx),
 	                  owner, repo, issue);
 
 	list = sn_join_with(labels, labels_size, ",");
@@ -275,7 +275,7 @@ gitlab_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 	char *list = NULL;
 	int rc = 0;
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%lu", gcli_get_apibase(ctx),
+	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%"PRIid, gcli_get_apibase(ctx),
 	                  owner, repo, issue);
 
 	list = sn_join_with(labels, labels_size, ",");
@@ -300,7 +300,7 @@ gitlab_issue_set_milestone(gcli_ctx *ctx, char const *const owner,
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
-	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%lu?milestone_id=%lu",
+	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%"PRIid"?milestone_id=%"PRIid,
 	                  gcli_get_apibase(ctx), e_owner, e_repo, issue, milestone);
 
 	rc = gcli_fetch_with_method(ctx, "PUT", url, NULL, NULL, NULL);
@@ -333,7 +333,7 @@ gitlab_issue_clear_milestone(gcli_ctx *ctx, char const *const owner,
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
-	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%lu", gcli_get_apibase(ctx),
+	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%"PRIid, gcli_get_apibase(ctx),
 	                  e_owner, e_repo, issue);
 	payload = sn_asprintf("{ \"milestone_id\": null }");
 

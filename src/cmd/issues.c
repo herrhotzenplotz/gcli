@@ -86,7 +86,7 @@ gcli_print_issues(enum gcli_output_flags const flags,
 	int n, pruned = 0;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
-		{ .name = "NUMBER", .type = GCLI_TBLCOLTYPE_INT, .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "NUMBER", .type = GCLI_TBLCOLTYPE_ID,  .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "NOTES",  .type = GCLI_TBLCOLTYPE_INT, .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "STATE",  .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_STATECOLOURED },
 		{ .name = "TITLE",  .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
@@ -149,7 +149,7 @@ gcli_issue_print_summary(gcli_issue const *const it)
 
 	dict = gcli_dict_begin();
 
-	gcli_dict_add(dict, "NAME", 0, 0, "%d", it->number);
+	gcli_dict_add(dict, "NUMBER", 0, 0, "%"PRIid, it->number);
 	gcli_dict_add(dict, "TITLE", 0, 0, SV_FMT, SV_ARGS(it->title));
 	gcli_dict_add(dict, "CREATED", 0, 0, SV_FMT, SV_ARGS(it->created_at));
 	gcli_dict_add(dict, "AUTHOR",  GCLI_TBLCOL_BOLD, 0,

@@ -34,6 +34,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 
 #include <sn/sn.h>
@@ -141,6 +142,10 @@ tablerow_add_cell(struct gcli_tbl *const table,
 	switch (table->cols[col].type) {
 	case GCLI_TBLCOLTYPE_INT: {
 		row->cells[col].text = sn_asprintf("%d", va_arg(*vp, int));
+		cell_size = strlen(row->cells[col].text);
+	} break;
+	case GCLI_TBLCOLTYPE_ID: {
+		row->cells[col].text = sn_asprintf("%"PRIid, va_arg(*vp, uint64_t));
 		cell_size = strlen(row->cells[col].text);
 	} break;
 	case GCLI_TBLCOLTYPE_LONG: {

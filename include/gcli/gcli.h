@@ -34,7 +34,9 @@
 #include <config.h>
 #endif
 
+#include <inttypes.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 enum gcli_output_flags {
 	OUTPUT_SORTED = (1 << 0),
@@ -47,7 +49,9 @@ typedef enum gcli_forge_type {
 	GCLI_FORGE_GITEA,
 } gcli_forge_type;
 
-typedef unsigned long gcli_id;
+typedef uint64_t gcli_id;
+
+#define PRIid PRIu64
 
 #ifdef IN_LIBGCLI
 #include <gcli/ctx.h>

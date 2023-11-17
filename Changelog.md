@@ -17,6 +17,8 @@ This changelog does not follow semantic versioning.
   config file. Aliases are very primitive as of now. This means they
   are just different names for subcommands. Aliases may reference
   other aliases.
+- Add a new `-M` flag to the pulls subcommand to allow filtering
+  by milestones.
 
 ### Fixed
 

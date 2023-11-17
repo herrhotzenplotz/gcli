@@ -111,6 +111,7 @@ struct gcli_pull_fetch_details {
 	bool all;
 	char const *author;
 	char const *label;
+	char const *milestone;
 };
 
 /** Generic list of checks ran on a pull request

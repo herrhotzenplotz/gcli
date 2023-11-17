@@ -79,6 +79,23 @@ github_fetch_issues(gcli_ctx *ctx, char *url, int const max,
 	return gcli_fetch_list(ctx, url, &fl);
 }
 
+static int
+parse_github_milestone(gcli_ctx *ctx, char const *owner __unused,
+                       char const *repo __unused, char const *milestone,
+                       gcli_id *out)
+{
+	char *endptr = NULL;
+	size_t const m_len = strlen(milestone);
+
+	/* first try parsing as a milestone ID, if it isn't one,
+	 * go looking for a similarly named milestone */
+	*out = strtoull(milestone, &endptr, 10);
+	if (endptr == milestone + m_len)
+		return 0;
+
+	return gcli_error(ctx, "%s: sorry, only numeric milestone IDs supported at the moment", __func__);
+}
+
 int
 github_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
                   gcli_issue_fetch_details const *details, int const max,
@@ -89,9 +106,18 @@ github_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
 	char *e_repo = NULL;
 	char *e_author = NULL;
 	char *e_label = NULL;
+	char *e_milestone = NULL;
 
-	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
+	if (details->milestone) {
+		gcli_id milestone_id;
+		int rc;
+
+		rc = parse_github_milestone(ctx, owner, repo, details->milestone, &milestone_id);
+		if (rc < 0)
+			return rc;
+
+		e_milestone = sn_asprintf("&milestone=%"PRIid, milestone_id);
+	}
 
 	if (details->author) {
 		char *tmp = gcli_urlencode(details->author);
@@ -105,13 +131,18 @@ github_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
 		free(tmp);
 	}
 
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
+
+
 	url = sn_asprintf(
-		"%s/repos/%s/%s/issues?state=%s%s%s",
+		"%s/repos/%s/%s/issues?state=%s%s%s%s",
 		gcli_get_apibase(ctx),
 		e_owner, e_repo,
 		details->all ? "all" : "open",
 		e_author ? e_author : "",
-		e_label ? e_label : "");
+		e_label ? e_label : "",
+		e_milestone ? e_milestone : "");
 
 	free(e_author);
 	free(e_label);

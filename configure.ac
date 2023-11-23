@@ -26,6 +26,9 @@ AC_LANG([C])
 AC_PROG_YACC
 AC_PROG_LEX(noyywrap)
 
+dnl Produce a better error message if we don't have pkg-config's macros
+dnl Inspired by the way dpkg solves the problem
+m4_ifndef([PKG_PROG_PKG_CONFIG], [m4_fatal([pkgconf macros missing. do you have pkgconf installed?])])
 PKG_PROG_PKG_CONFIG
 
 dnl Use ccache if found

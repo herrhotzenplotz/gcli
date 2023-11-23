@@ -62,6 +62,7 @@ gitlab_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
 	char *e_repo = NULL;
 	char *e_author = NULL;
 	char *e_labels = NULL;
+	char *e_milestone = NULL;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -82,11 +83,24 @@ gitlab_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
 		free(tmp);
 	}
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/issues%s%s%s", gcli_get_apibase(ctx),
-	                  e_owner, e_repo, details->all ? "" : "?state=opened",
-	                  e_author ? e_author : "", e_labels ? e_labels : "");
+	if (details->milestone) {
+		char *tmp = gcli_urlencode(details->milestone);
+		int const should_do_qmark = details->all && !details->author &&
+		                            !details->label;
 
-	free(e_author);
+		e_milestone = sn_asprintf("%cmilestone=%s", should_do_qmark ? '?' : '&',
+		                          tmp);
+		free(tmp);
+	}
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/issues%s%s%s%s",
+	                  gcli_get_apibase(ctx),
+	                  e_owner, e_repo, details->all ? "" : "?state=opened",
+	                  e_author ? e_author : "", e_labels ? e_labels : "",
+	                  e_milestone ? e_milestone : "");
+
+ 	free(e_milestone);
+ 	free(e_author);
 	free(e_labels);
 	free(e_owner);
 	free(e_repo);

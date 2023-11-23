@@ -19,6 +19,8 @@ This changelog does not follow semantic versioning.
   other aliases.
 - Add a new `-M` flag to the pulls subcommand to allow filtering
   by milestones.
+- Add a new `patch` action to the pulls subcommand. This allows you
+  to print the entire patch series for the given pull request.
 
 ### Fixed
 

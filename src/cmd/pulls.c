@@ -156,7 +156,7 @@ gcli_print_pulls(enum gcli_output_flags const flags,
 }
 
 int
-gcli_print_pull_diff(FILE *stream, char const *owner, char const *reponame,
+gcli_pull_print_diff(FILE *stream, char const *owner, char const *reponame,
                      int pr_number)
 {
 	return gcli_pull_get_diff(g_clictx, stream, owner, reponame, pr_number);
@@ -742,7 +742,7 @@ action_commits(struct action_ctx *const ctx)
 static void
 action_diff(struct action_ctx *const ctx)
 {
-	if (gcli_print_pull_diff(stdout, ctx->owner, ctx->repo, ctx->pr) < 0)
+	if (gcli_pull_print_diff(stdout, ctx->owner, ctx->repo, ctx->pr) < 0)
 		errx(1, "error: failed to fetch diff: %s",
 		     gcli_get_error(g_clictx));
 }

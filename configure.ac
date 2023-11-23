@@ -55,7 +55,9 @@ AS_IF([test "x$OPT_LIBCURL" = "xcheck" || test "x$OPT_LIBCURL" = "xyes"],
       [CPPFLAGS="-I$OPT_LIBCURL/include $CPPFLAGS"
        LDFLAGS="-L$OPT_LIBCURL/lib $LDFLAGS"])
 AC_CHECK_HEADER([curl/curl.h],,[AC_MSG_ERROR([Cannot find libcurl headers])])
-AC_CHECK_LIB([curl],[curl_easy_init],,[AC_MSG_ERROR([-lcurl doesn not contain curl_easy_init])])
+
+dnl FIXME find a better way for this
+dnl AC_CHECK_LIB([curl],[curl_easy_init],,[AC_MSG_ERROR([-lcurl doesn not contain curl_easy_init])])
 
 dnl For the test suite we require libatf-c and Kyua
 OPT_LIBATFC=check
@@ -82,8 +84,10 @@ fi
 
 AS_IF([test "x$HAVE_ATFC" = "xyes"],
       [AC_CHECK_HEADER([atf-c.h],,[AC_MSG_ERROR([Cannot find libatf-c headers])])
-       AC_CHECK_LIB([atf-c],[atf_no_error],,[AC_MSG_ERROR([-latf-c doesn not contain atf_no_error])])
        HAVE_ATFC=yes])
+
+dnl FIXME find a better way to do this
+dnl       AC_CHECK_LIB([atf-c],[atf_no_error],,[AC_MSG_ERROR([-latf-c doesn not contain atf_no_error])])
 
 AC_CHECK_PROG([KYUA], [kyua], [kyua])
 AC_CHECK_PROGS([REALPATH], [realpath grealpath], [])

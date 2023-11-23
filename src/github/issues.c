@@ -30,6 +30,7 @@
 #include <gcli/curl.h>
 #include <gcli/github/config.h>
 #include <gcli/github/issues.h>
+#include <gcli/github/milestones.h>
 #include <gcli/json_util.h>
 #include <pdjson/pdjson.h>
 
@@ -80,6 +81,32 @@ github_fetch_issues(gcli_ctx *ctx, char *url, int const max,
 }
 
 static int
+get_milestone_id(gcli_ctx *ctx, char const *owner, char const *repo,
+                 char const *milestone_name, gcli_id *out)
+{
+	int rc = 0;
+	gcli_milestone_list list = {0};
+
+	rc = github_get_milestones(ctx, owner, repo, -1, &list);
+	if (rc < 0)
+		return rc;
+
+	rc = gcli_error(ctx, "%s: no such milestone", milestone_name);
+
+	for (size_t i = 0; i < list.milestones_size; ++i) {
+		if (strcmp(list.milestones[i].title, milestone_name) == 0) {
+			*out = list.milestones[i].id;
+			rc = 0;
+			break;
+		}
+	}
+
+	gcli_free_milestones(&list);
+
+	return rc;
+}
+
+static int
 parse_github_milestone(gcli_ctx *ctx, char const *owner __unused,
                        char const *repo __unused, char const *milestone,
                        gcli_id *out)
@@ -93,7 +120,7 @@ parse_github_milestone(gcli_ctx *ctx, char const *owner __unused,
 	if (endptr == milestone + m_len)
 		return 0;
 
-	return gcli_error(ctx, "%s: sorry, only numeric milestone IDs supported at the moment", __func__);
+	return get_milestone_id(ctx, owner, repo, milestone, out);
 }
 
 int
@@ -134,7 +161,6 @@ github_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-
 	url = sn_asprintf(
 		"%s/repos/%s/%s/issues?state=%s%s%s%s",
 		gcli_get_apibase(ctx),
@@ -144,6 +170,7 @@ github_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
 		e_label ? e_label : "",
 		e_milestone ? e_milestone : "");
 
+	free(e_milestone);
 	free(e_author);
 	free(e_label);
 	free(e_owner);

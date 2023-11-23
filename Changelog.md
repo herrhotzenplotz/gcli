@@ -17,8 +17,8 @@ This changelog does not follow semantic versioning.
   config file. Aliases are very primitive as of now. This means they
   are just different names for subcommands. Aliases may reference
   other aliases.
-- Add a new `-M` flag to the pulls subcommand to allow filtering
-  by milestones.
+- Add a new `-M` flag to both the pulls and the issues subcommand
+  to allow filtering by milestones.
 - Add a new `patch` action to the pulls subcommand. This allows you
   to print the entire patch series for the given pull request.
 

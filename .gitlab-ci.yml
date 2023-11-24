@@ -32,16 +32,19 @@ freebsd-arm64:
 dist:
   stage: dist
   tags:
-    - freebsd
-    - arm64
+    - linux
+  image: alpine:3.18
   script:
+    - apk add libcurl gcc autoconf automake libtool make pkgconf musl-dev curl-dev flex bison xz gzip bzip2 libbsd-dev kyua atf-dev cmark
     - ./autogen.sh
-    - ./configure
-    - make dist
+    - ./configure CFLAGS='-std=c99 -pedantic -Wall -Wextra -Werror' CPPFLAGS='-D_XOPEN_SOURCE=600' --disable-silent-rules || (cat config.log && exit 42)
+    - make -j dist
+    - cd docs/website && ./deploy.sh
   artifacts:
     name: "Dist Tarballs"
     paths:
       - gcli-*.tar.*
+      - docs/website/website_dist.tar.xz
 
 debian-amd64:
   stage: testing

@@ -266,6 +266,15 @@ struct gcli_forge_descriptor {
 		gcli_id pr_number);
 
 	/**
+         * Fetch the PR patch series into the file */
+         int (*pull_get_patch)(
+	         gcli_ctx *ctx,
+	         FILE *stream,
+	         char const *owner,
+	         char const *repo,
+	         gcli_id pull_id);
+
+	/**
 	 * Return a list of checks associated with the given pull.
 	 *
 	 * The type of the returned list depends on the forge type. See

@@ -171,6 +171,7 @@ gitlab_forge_descriptor =
 	.issue_clear_milestone     = gitlab_issue_clear_milestone,
 	.get_pulls                 = gitlab_get_mrs,
 	.print_pull_diff           = gitlab_print_pr_diff,
+	.pull_get_patch            = gitlab_print_pr_patch,
 	.get_pull_checks           = (gcli_get_pull_checks_cb)gitlab_get_mr_pipelines,
 	.pull_merge                = gitlab_mr_merge,
 	.pull_reopen               = gitlab_mr_reopen,

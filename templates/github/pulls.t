@@ -14,7 +14,7 @@ object of gcli_commit with
 
 parser github_commit is
 object of gcli_commit with
-	("sha"    => sha as string,
+	("sha"    => long_sha as string,
 	 "commit" => use parse_github_commit_commit_field);
 
 parser github_commits is array of gcli_commit

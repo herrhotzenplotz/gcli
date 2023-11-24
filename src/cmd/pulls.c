@@ -92,6 +92,7 @@ usage(void)
 	fprintf(stderr, "                            add <name>\n");
 	fprintf(stderr, "                            remove <name>\n");
 	fprintf(stderr, "  diff                   Display changes as diff\n");
+	fprintf(stderr, "  patch                  Display changes as patch series\n");
 	fprintf(stderr, "  request-review <user>  Add <user> as a reviewer of the PR\n");
 
 	fprintf(stderr, "\n");
@@ -156,10 +157,17 @@ gcli_print_pulls(enum gcli_output_flags const flags,
 }
 
 int
-gcli_print_pull_diff(FILE *stream, char const *owner, char const *reponame,
+gcli_pull_print_diff(FILE *stream, char const *owner, char const *reponame,
                      int pr_number)
 {
 	return gcli_pull_get_diff(g_clictx, stream, owner, reponame, pr_number);
+}
+
+int
+gcli_pull_print_patch(FILE *stream, char const *owner, char const *reponame,
+                      int pr_number)
+{
+	return gcli_pull_get_patch(g_clictx, stream, owner, reponame, pr_number);
 }
 
 void
@@ -742,8 +750,16 @@ action_commits(struct action_ctx *const ctx)
 static void
 action_diff(struct action_ctx *const ctx)
 {
-	if (gcli_print_pull_diff(stdout, ctx->owner, ctx->repo, ctx->pr) < 0)
+	if (gcli_pull_print_diff(stdout, ctx->owner, ctx->repo, ctx->pr) < 0)
 		errx(1, "error: failed to fetch diff: %s",
+		     gcli_get_error(g_clictx));
+}
+
+static void
+action_patch(struct action_ctx *const ctx)
+{
+	if (gcli_pull_print_patch(stdout, ctx->owner, ctx->repo, ctx->pr) < 0)
+		errx(1, "error: failed to fetch patch: %s",
 		     gcli_get_error(g_clictx));
 }
 
@@ -928,6 +944,7 @@ static struct action {
 	{ .name = "status",         .fn = action_status         },
 	{ .name = "commits",        .fn = action_commits        },
 	{ .name = "diff",           .fn = action_diff           },
+	{ .name = "patch",          .fn = action_patch          },
 	{ .name = "notes",          .fn = action_comments       },
 	{ .name = "comments",       .fn = action_comments       },
 	{ .name = "ci",             .fn = action_ci             },

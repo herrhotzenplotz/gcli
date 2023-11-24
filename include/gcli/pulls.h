@@ -63,6 +63,7 @@ struct gcli_pull {
 	char *head_label;
 	char *base_label;
 	char *head_sha;
+	char *base_sha;
 	char *milestone;
 	gcli_id id;
 	gcli_id number;
@@ -86,7 +87,7 @@ struct gcli_pull {
 };
 
 struct gcli_commit {
-	char *sha, *message, *date, *author, *email;
+	char *sha, *long_sha, *message, *date, *author, *email;
 };
 
 struct gcli_commit_list {
@@ -184,5 +185,8 @@ int gcli_pull_clear_milestone(gcli_ctx *ctx, char const *owner, char const *repo
 
 int gcli_pull_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
                            gcli_id pr_number, char const *username);
+
+int gcli_pull_get_patch(gcli_ctx *ctx, FILE *out, char const *owner,
+                        char const *repo, gcli_id pr_number);
 
 #endif /* PULLS_H */

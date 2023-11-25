@@ -36,10 +36,6 @@ There are official packages available:
 
 - [FreeBSD](https://freshports.org/devel/gcli)
 
-Packages that are work-in-progress:
-
-- [Debian and Devuan](https://herrhotzenplotz.de/gcli/pkg/Debian)
-
 ### Dependencies
 
 Required dependencies:

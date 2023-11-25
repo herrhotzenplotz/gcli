@@ -89,6 +89,7 @@ github_forge_descriptor =
 	.perform_submit_issue      = github_perform_submit_issue,
 	.issue_set_milestone       = github_issue_set_milestone,
 	.issue_clear_milestone     = github_issue_clear_milestone,
+	.issue_set_title           = github_issue_set_title,
 	.get_milestones            = github_get_milestones,
 	.get_milestone             = github_get_milestone,
 	.create_milestone          = github_create_milestone,

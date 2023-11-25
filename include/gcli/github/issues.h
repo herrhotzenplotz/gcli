@@ -73,4 +73,8 @@ int github_issue_set_milestone(gcli_ctx *ctx, char const *owner,
 int github_issue_clear_milestone(gcli_ctx *ctx, char const *owner,
                                  char const *repo, gcli_id issue);
 
+int github_issue_set_title(gcli_ctx *ctx, char const *const owner,
+                           char const *const repo, gcli_id const issue,
+                           char const *const new_title);
+
 #endif /* GCLI_ISSUES_H */

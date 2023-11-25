@@ -172,6 +172,12 @@ struct gcli_forge_descriptor {
 		gcli_fetch_buffer *out);
 
 	/**
+	 * Change the title of an issue */
+	int (*issue_set_title)(
+		gcli_ctx *ctx, char const *owner, char const *repo, gcli_id issue,
+		char const *new_title);
+
+	/**
 	 * Bitmask of exceptions/fields that the forge doesn't support */
 	enum {
 		GCLI_MILESTONE_QUIRKS_EXPIRED = 0x1,

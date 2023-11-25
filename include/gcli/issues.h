@@ -117,4 +117,7 @@ int gcli_issue_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
 int gcli_issue_clear_milestone(gcli_ctx *cxt, char const *owner,
                                char const *repo, gcli_id issue);
 
+int gcli_issue_set_title(gcli_ctx *ctx, char const *owner, char const *repo,
+                         gcli_id issue, char const *new_title);
+
 #endif /* ISSUES_H */

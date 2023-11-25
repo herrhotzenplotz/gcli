@@ -151,3 +151,10 @@ gcli_issue_clear_milestone(gcli_ctx *ctx, char const *const owner,
 {
 	return gcli_forge(ctx)->issue_clear_milestone(ctx, owner, repo, issue);
 }
+
+int
+gcli_issue_set_title(gcli_ctx *ctx, char const *owner, char const *repo,
+                     gcli_id issue, char const *new_title)
+{
+	return gcli_forge(ctx)->issue_set_title(ctx, owner, repo, issue, new_title);
+}

@@ -116,6 +116,9 @@ Clear associated milestone of the given issue.
 Alias for the
 .Cm comments
 action that prints the list of comments associated with the issue.
+.It Cm title Ar new-title
+Change the title of the issue to
+.Ar new-title .
 .El
 .Sh EXAMPLES
 Print a list of issues in the current project:

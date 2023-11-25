@@ -76,6 +76,7 @@ usage(void)
 	fprintf(stderr, "  milestone <id>     Assign this issue to the given milestone\n");
 	fprintf(stderr, "  milestone -d       Clear the assigned milestone of the given issue\n");
 	fprintf(stderr, "  notes              Alias for comments\n");
+	fprintf(stderr, "  title <new-title>  Change the title of the issue\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
@@ -627,6 +628,11 @@ handle_issues_actions(int argc, char *argv[],
 
 			handle_issue_milestone_action(
 				&argc, &argv, owner, repo, issue_id);
+
+		} else if (strcmp("title", operation) == 0) {
+
+			char const __unused *new_title = shift(&argc, &argv);
+			errx(1, "error: changing titles is not yet implemented");
 
 		} else {
 			fprintf(stderr, "error: unknown operation %s\n", operation);

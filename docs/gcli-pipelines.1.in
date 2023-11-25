@@ -63,7 +63,7 @@ Retry the job.
 .It Cm artifacts Op Fl o Ar outfile
 Download the artifacts archive as a zip to disk. The default output file is
 .Pa artifacts.zip
-but it can be overriden by using the
+but it can be overridden by using the
 .Fl o
 flag.
 .El

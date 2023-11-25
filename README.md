@@ -116,9 +116,13 @@ Github and Gitlab or ask on IRC.
 
 ## Bugs and contributions
 
-Please report bugs, issues and questions to nsonack@herrhotzenplotz.de
-or on [GitLab](https://gitlab.com/herrhotzenplotz/gcli). You can also
-submit patches this way using git-send-email.
+Please report bugs, issues and questions to
+[~herrhotzenplotz/gcli-discuss@lists.sr.ht](mailto:~herrhotzenplotz/gcli-discuss@lists.sr.ht)
+or on [GitLab](https://gitlab.com/herrhotzenplotz/gcli).
+
+You can also submit patches using git-send-email or Mercurial
+patchbomb to
+[~herrhotzenplotz/gcli-devel@lists.sr.ht](mailto:~herrhotzenplotz/gcli-devl@lists.sr.ht).
 
 ## License
 

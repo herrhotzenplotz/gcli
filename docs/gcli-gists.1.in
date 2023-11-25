@@ -55,7 +55,7 @@ Paste a new Gist. The following flags can be specified:
 .It Fl f , -file Pa file
 Read the content from the specified file instead of standard input.
 .It Fl d , -description Ar description
-The descrition of the Gist to be created.
+The description of the Gist to be created.
 .El
 .It Cm delete
 Delete a Gist. The following options can be specified:

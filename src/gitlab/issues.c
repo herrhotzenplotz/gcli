@@ -31,6 +31,7 @@
 #include <gcli/gitlab/api.h>
 #include <gcli/gitlab/config.h>
 #include <gcli/gitlab/issues.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
 #include <templates/gitlab/issues.h>
@@ -357,6 +358,43 @@ gitlab_issue_clear_milestone(gcli_ctx *ctx, char const *const owner,
 	free(url);
 	free(e_repo);
 	free(e_owner);
+
+	return rc;
+}
+
+int
+gitlab_issue_set_title(gcli_ctx *ctx, char const *owner, char const *repo,
+                       gcli_id issue, char const *const new_title)
+{
+	char *url, *e_owner, *e_repo, *payload;
+	gcli_jsongen gen = {0};
+	int rc;
+
+	/* Generate url */
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%"PRIid,
+	                  gcli_get_apibase(ctx), e_owner, e_repo, issue);
+	free(e_owner);
+	free(e_repo);
+
+	/* Generate payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "title");
+		gcli_jsongen_string(&gen, new_title);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
+
+	free(url);
+	free(payload);
 
 	return rc;
 }

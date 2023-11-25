@@ -73,4 +73,7 @@ int gitlab_issue_set_milestone(gcli_ctx *ctx, char const *owner,
 int gitlab_issue_clear_milestone(gcli_ctx *ctx, char const *owner,
                                  char const *repo, gcli_id issue);
 
+int gitlab_issue_set_title(gcli_ctx *ctx, char const *owner, char const *repo,
+                           gcli_id issue, char const *new_title);
+
 #endif /* GITLAB_ISSUES_H */

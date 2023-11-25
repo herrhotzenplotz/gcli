@@ -162,6 +162,7 @@ gitlab_forge_descriptor =
 	.issue_add_labels          = gitlab_issue_add_labels,
 	.issue_remove_labels       = gitlab_issue_remove_labels,
 	.perform_submit_issue      = gitlab_perform_submit_issue,
+	.issue_set_title           = gitlab_issue_set_title,
 	.get_milestones            = gitlab_get_milestones,
 	.get_milestone             = gitlab_get_milestone,
 	.create_milestone          = gitlab_create_milestone,

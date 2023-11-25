@@ -222,6 +222,7 @@ gitea_forge_descriptor =
 	.issue_assign              = gitea_issue_assign,
 	.issue_set_milestone       = gitea_issue_set_milestone,
 	.issue_clear_milestone     = gitea_issue_clear_milestone,
+	.issue_set_title           = gitea_issue_set_title,
 	.get_issue_comments        = gitea_get_comments,
 	.get_milestones            = gitea_get_milestones,
 	.get_milestone             = gitea_get_milestone,

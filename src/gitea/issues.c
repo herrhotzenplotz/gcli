@@ -262,3 +262,11 @@ gitea_issue_clear_milestone(gcli_ctx *ctx, char const *owner,
 {
 	return github_issue_set_milestone(ctx, owner, repo, issue, 0);
 }
+
+int
+gitea_issue_set_title(gcli_ctx *ctx, char const *const owner,
+                      char const *const repo, gcli_id const issue,
+                      char const *const new_title)
+{
+	return github_issue_set_title(ctx, owner, repo, issue, new_title);
+}

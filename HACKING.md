@@ -64,7 +64,7 @@ working on and debugging gcli.
 *Note*: The `--disable-shared` is required because if you build a
 shared version of libgcli, libtool will replace the gcli binary with a
 shell script that alters the dld search path to read the correct
-`libgcli.so`. Because of `build/gcli` now not being a an ELF
+`libgcli.so`. Because of `build/gcli` now not being an ELF
 executable but a shell script debuggers can't load gcli properly.
 
 #### Sanitized Builds
@@ -228,7 +228,7 @@ subcommands of gcli.
 
 ## Subcommands
 
-Subcommand implementations are found in seperate C files in the
+Subcommand implementations are found in separate C files in the
 `src/cmd` subdirectory.
 
 When parsing command line options please use `getopt_long`. Do not

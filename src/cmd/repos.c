@@ -372,6 +372,15 @@ subcommand_repos(int argc, char *argv[])
 		if (!owner)
 			owner = gcli_config_get_account_name(g_clictx);
 
+		/* whenever there is no default account we would be passing NULL to
+		 * gcli_get_repos. This is bad since that causes segfaults down the
+		 * line. (https://github.com/herrhotzenplotz/gcli/issues/118) */
+		if (!owner) {
+			fprintf(stderr, "error: no account specified or no default account"
+			        " configured. use -o to provide an explicit account name.\n");
+			return EXIT_FAILURE;
+		}
+
 		rc = gcli_get_repos(g_clictx, owner, n, &repos);
 		if (rc < 0)
 			errx(1, "error: failed to fetch repos: %s", gcli_get_error(g_clictx));

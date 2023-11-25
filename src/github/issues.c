@@ -107,9 +107,8 @@ get_milestone_id(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 static int
-parse_github_milestone(gcli_ctx *ctx, char const *owner __unused,
-                       char const *repo __unused, char const *milestone,
-                       gcli_id *out)
+parse_github_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
+                       char const *milestone, gcli_id *out)
 {
 	char *endptr = NULL;
 	size_t const m_len = strlen(milestone);

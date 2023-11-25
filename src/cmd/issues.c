@@ -631,8 +631,14 @@ handle_issues_actions(int argc, char *argv[],
 
 		} else if (strcmp("title", operation) == 0) {
 
-			char const __unused *new_title = shift(&argc, &argv);
-			errx(1, "error: changing titles is not yet implemented");
+			char const *new_title = shift(&argc, &argv);
+			int rc = gcli_issue_set_title(g_clictx, owner, repo, issue_id,
+			                              new_title);
+
+			if (rc < 0) {
+				errx(1, "error: failed to set new issue title: %s",
+				     gcli_get_error(g_clictx));
+			}
 
 		} else {
 			fprintf(stderr, "error: unknown operation %s\n", operation);

@@ -34,9 +34,9 @@ ID of the public key to delete.
 .It Cm ssh
 List SSH public keys for the current user.
 .It Cm ssh add
-Add a SSH public key for the current user.
+Add an SSH public key for the current user.
 .It Cm ssh delete
-Delete a SSH public key for the current user.
+Delete an SSH public key for the current user.
 .El
 .Sh EXAMPLES
 Print a list of registered SSH public keys:

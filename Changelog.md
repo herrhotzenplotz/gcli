@@ -31,6 +31,8 @@ This changelog does not follow semantic versioning.
   leaks were minor and gcli is not a long-running application where
   thease leaks would have had any serious impact on the memory
   footprint.
+- Spelling fixes in manual pages (submitted by Jakub Wilk
+  https://github.com/herrhotzenplotz/gcli/pull/121)
 
 ### Changed
 

@@ -68,7 +68,7 @@ may be one or more of the following:
 .It Cm delete Op Fl y
 Delete the repository. You will be asked for confirmation unless you set
 .Fl y .
-.It Cm set-visiblity Ar level
+.It Cm set-visibility Ar level
 Change the visibility level of the repository.
 .Ar level
 may be one of:

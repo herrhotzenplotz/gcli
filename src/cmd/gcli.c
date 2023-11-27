@@ -269,6 +269,7 @@ add_subcommand_alias(char const *alias_name, char const *alias_for)
 	char *docstring;
 	struct subcommand const *old_sc;
 	struct subcommand *new_sc;
+	int (*old_fn)(int, char **);
 
 	old_sc = find_subcommand(alias_for, NULL);
 	if (old_sc == NULL) {
@@ -277,6 +278,7 @@ add_subcommand_alias(char const *alias_name, char const *alias_for)
 		exit(EXIT_FAILURE);
 	}
 
+	old_fn = old_sc->fn;
 	docstring = sn_asprintf("Alias for %s", alias_for);
 	subcommands = realloc(subcommands, (subcommands_size + 1) * sizeof(*subcommands));
 
@@ -284,7 +286,7 @@ add_subcommand_alias(char const *alias_name, char const *alias_for)
 	new_sc = &subcommands[subcommands_size++];
 
 	new_sc->cmd_name = alias_name;
-	new_sc->fn = old_sc->fn;
+	new_sc->fn = old_fn;
 	new_sc->docstring = docstring;
 }
 

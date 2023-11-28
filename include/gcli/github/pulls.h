@@ -69,4 +69,7 @@ sn_sv github_pull_try_derive_head(void);
 int github_pull_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
                              gcli_id pr_number, char const *username);
 
+int github_pull_set_title(gcli_ctx *ctx, char const *owner, char const *repo,
+                          gcli_id pull, char const *new_title);
+
 #endif /* GITHUB_PULLS_H */

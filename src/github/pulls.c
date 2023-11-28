@@ -460,3 +460,42 @@ github_pull_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
 
 	return rc;
 }
+
+int
+github_pull_set_title(gcli_ctx *ctx, char const *owner, char const *repo,
+                      gcli_id pull, char const *new_title)
+{
+	char *url, *e_owner, *e_repo, *payload;
+	int rc;
+	gcli_jsongen gen = {0};
+
+	/* Generate the url */
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/repos/%s/%s/pulls/%"PRIid, gcli_get_apibase(ctx),
+	                  e_owner, e_repo, pull);
+	free(e_owner);
+	free(e_repo);
+
+	/* Generate the payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "title");
+		gcli_jsongen_string(&gen, new_title);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* perform request */
+	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
+
+	/* Cleanup */
+	free(payload);
+	free(url);
+
+	return rc;
+}

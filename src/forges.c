@@ -118,6 +118,7 @@ github_forge_descriptor =
 	 * GitHub treats pull requests as issues */
 	.pull_set_milestone        = github_issue_set_milestone,
 	.pull_clear_milestone      = github_issue_clear_milestone,
+	.pull_set_title            = github_pull_set_title,
 
 	.get_releases              = github_get_releases,
 	.create_release            = github_create_release,

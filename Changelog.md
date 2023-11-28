@@ -21,8 +21,8 @@ This changelog does not follow semantic versioning.
   to allow filtering by milestones.
 - Add a new `patch` action to the pulls subcommand. This allows you
   to print the entire patch series for the given pull request.
-- Add a new `title` action to the issues subcommand that allows
-  updating the title of an issue.
+- Add a new `title` action to both the issues and the pulls
+  subcommand that allows updating their titles.
 
 ### Fixed
 

@@ -406,6 +406,7 @@ ensure_config(gcli_ctx *ctx)
 
 	if (access(file_path, R_OK) < 0) {
 		warn("Cannot access config file at %s", file_path);
+		free(file_path);
 		return cfg;
 	}
 
@@ -422,7 +423,7 @@ ensure_config(gcli_ctx *ctx)
 
 	parse_config_file(cfg, &parser);
 
-	free((void *)file_path);
+	free(file_path);
 
 	return cfg;
 }

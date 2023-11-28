@@ -93,6 +93,7 @@ usage(void)
 	fprintf(stderr, "                            remove <name>\n");
 	fprintf(stderr, "  diff                   Display changes as diff\n");
 	fprintf(stderr, "  patch                  Display changes as patch series\n");
+	fprintf(stderr, "  title <new-title>      Change the title of the pull request\n");
 	fprintf(stderr, "  request-review <user>  Add <user> as a reviewer of the PR\n");
 
 	fprintf(stderr, "\n");
@@ -935,6 +936,21 @@ action_request_review(struct action_ctx *const ctx)
 	ctx->argv += 1;
 }
 
+static void
+action_title(struct action_ctx *const ctx)
+{
+	if (ctx->argc < 2) {
+		fprintf(stderr, "error: missing title\n");
+		usage();
+		exit(EXIT_FAILURE);
+	}
+
+	errx(1, "error: title action is not yet implemented");
+
+	ctx->argc -= 1;
+	ctx->argv += 1;
+}
+
 static struct action {
 	char const *name;
 	void (*fn)(struct action_ctx *ctx);
@@ -954,6 +970,7 @@ static struct action {
 	{ .name = "labels",         .fn = action_labels         },
 	{ .name = "milestone",      .fn = action_milestone      },
 	{ .name = "request-review", .fn = action_request_review },
+	{ .name = "title",          .fn = action_title          },
 };
 
 static size_t const actions_size = ARRAY_SIZE(actions);

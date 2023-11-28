@@ -677,3 +677,45 @@ bail_get_reviewers:
 
 	return rc;
 }
+
+int
+gitlab_mr_set_title(gcli_ctx *ctx, char const *const owner,
+                    char const *const repo, gcli_id const id,
+                    char const *const new_title)
+{
+	char *url, *e_owner, *e_repo, *payload;
+	gcli_jsongen gen = {0};
+	int rc = 0;
+
+	/* Generate url
+	 *
+	 * PUT /projects/:id/merge_requests/:merge_request_iid */
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid,
+	                  gcli_get_apibase(ctx), e_owner, e_repo, id);
+	free(e_owner);
+	free(e_repo);
+
+	/* Generate payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "title");
+		gcli_jsongen_string(&gen, new_title);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* perform request */
+	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
+
+	/* clean up */
+	free(url);
+	free(payload);
+
+	return rc;
+}

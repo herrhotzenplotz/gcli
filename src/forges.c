@@ -187,6 +187,7 @@ gitlab_forge_descriptor =
 	.pull_set_milestone        = gitlab_mr_set_milestone,
 	.pull_clear_milestone      = gitlab_mr_clear_milestone,
 	.pull_add_reviewer         = gitlab_mr_add_reviewer,
+	.pull_set_title            = gitlab_mr_set_title,
 	.get_releases              = gitlab_get_releases,
 	.create_release            = gitlab_create_release,
 	.delete_release            = gitlab_delete_release,

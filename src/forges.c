@@ -250,6 +250,7 @@ gitea_forge_descriptor =
 	.pull_set_milestone        = gitea_pull_set_milestone,
 	.pull_clear_milestone      = gitea_pull_clear_milestone,
 	.pull_add_reviewer         = gitea_pull_add_reviewer,
+	.pull_set_title            = gitea_pull_set_title,
 	.get_releases              = gitea_get_releases,
 	.create_release            = gitea_create_release,
 	.delete_release            = gitea_delete_release,

@@ -199,3 +199,11 @@ gitea_pull_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
 {
 	return github_pull_add_reviewer(ctx, owner, repo, pr_number, username);
 }
+
+int
+gitea_pull_set_title(gcli_ctx *ctx, char const *const owner,
+                     char const *const repo, gcli_id pull,
+                     char const *const title)
+{
+	return github_pull_set_title(ctx, owner, repo, pull, title);
+}

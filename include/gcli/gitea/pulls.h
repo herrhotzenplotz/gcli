@@ -73,4 +73,8 @@ int gitea_pull_clear_milestone(gcli_ctx *ctx, char const *owner,
 int gitea_pull_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
                             gcli_id pr_number, char const *username);
 
+int gitea_pull_set_title(gcli_ctx *ctx, char const *const owner,
+                         char const *const repo, gcli_id pull,
+                         char const *const title);
+
 #endif /* GITEA_PULLS_H */

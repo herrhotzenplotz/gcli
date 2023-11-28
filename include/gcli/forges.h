@@ -394,6 +394,15 @@ struct gcli_forge_descriptor {
 		char const *username);
 
 	/**
+	 * Change the title of a pull request */
+	int (*pull_set_title)(
+		gcli_ctx *ctx,
+		char const *owner,
+		char const *repo,
+		gcli_id pull,
+		char const *new_title);
+
+	/**
 	 * Get a list of releases in the given repo */
 	int (*get_releases)(
 		gcli_ctx *ctx,

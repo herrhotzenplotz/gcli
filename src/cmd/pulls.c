@@ -939,13 +939,20 @@ action_request_review(struct action_ctx *const ctx)
 static void
 action_title(struct action_ctx *const ctx)
 {
+	int rc = 0;
+
 	if (ctx->argc < 2) {
 		fprintf(stderr, "error: missing title\n");
 		usage();
 		exit(EXIT_FAILURE);
 	}
 
-	errx(1, "error: title action is not yet implemented");
+	rc = gcli_pull_set_title(g_clictx, ctx->owner, ctx->repo, ctx->pr,
+	                         ctx->argv[1]);
+	if (rc < 0) {
+		errx(1, "error: failed to update review title: %s",
+		     gcli_get_error(g_clictx));
+	}
 
 	ctx->argc -= 1;
 	ctx->argv += 1;

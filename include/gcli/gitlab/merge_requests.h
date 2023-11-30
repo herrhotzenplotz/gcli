@@ -111,4 +111,8 @@ int gitlab_mr_clear_milestone(gcli_ctx *ctx, char const *owner,
 int gitlab_mr_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
                            gcli_id mr_number, char const *username);
 
+int gitlab_mr_set_title(gcli_ctx *ctx, char const *const owner,
+                        char const *const repo, gcli_id const id,
+                        char const *const new_title);
+
 #endif /* GITLAB_MERGE_REQUESTS_H */

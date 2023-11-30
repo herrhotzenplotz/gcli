@@ -118,6 +118,7 @@ github_forge_descriptor =
 	 * GitHub treats pull requests as issues */
 	.pull_set_milestone        = github_issue_set_milestone,
 	.pull_clear_milestone      = github_issue_clear_milestone,
+	.pull_set_title            = github_pull_set_title,
 
 	.get_releases              = github_get_releases,
 	.create_release            = github_create_release,
@@ -186,6 +187,7 @@ gitlab_forge_descriptor =
 	.pull_set_milestone        = gitlab_mr_set_milestone,
 	.pull_clear_milestone      = gitlab_mr_clear_milestone,
 	.pull_add_reviewer         = gitlab_mr_add_reviewer,
+	.pull_set_title            = gitlab_mr_set_title,
 	.get_releases              = gitlab_get_releases,
 	.create_release            = gitlab_create_release,
 	.delete_release            = gitlab_delete_release,
@@ -248,6 +250,7 @@ gitea_forge_descriptor =
 	.pull_set_milestone        = gitea_pull_set_milestone,
 	.pull_clear_milestone      = gitea_pull_clear_milestone,
 	.pull_add_reviewer         = gitea_pull_add_reviewer,
+	.pull_set_title            = gitea_pull_set_title,
 	.get_releases              = gitea_get_releases,
 	.create_release            = gitea_create_release,
 	.delete_release            = gitea_delete_release,

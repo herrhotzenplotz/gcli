@@ -189,4 +189,7 @@ int gcli_pull_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
 int gcli_pull_get_patch(gcli_ctx *ctx, FILE *out, char const *owner,
                         char const *repo, gcli_id pr_number);
 
+int gcli_pull_set_title(gcli_ctx *ctx, char const *owner, char const *repo,
+                        gcli_id pull, char const *new_title);
+
 #endif /* PULLS_H */

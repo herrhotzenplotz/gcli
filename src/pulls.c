@@ -213,3 +213,11 @@ gcli_pull_get_patch(gcli_ctx *ctx, FILE *out, char const *owner, char const *rep
 {
 	return gcli_forge(ctx)->pull_get_patch(ctx, out, owner, repo, pull_id);
 }
+
+int
+gcli_pull_set_title(gcli_ctx *ctx, char const *const owner,
+                    char const *const repo, gcli_id const pull,
+                    char const *new_title)
+{
+	return gcli_forge(ctx)->pull_set_title(ctx, owner, repo, pull, new_title);
+}

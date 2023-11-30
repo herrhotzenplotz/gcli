@@ -168,6 +168,9 @@ Add the given label to the pull request.
 .It remove Ar label
 Remove the given label from the pull request.
 .El
+.It Cm title Ar new-title
+Change the title of the pull request to
+.Ar new-title .
 .El
 .Sh EXAMPLES
 Print a list of open PRs in the current project:
@@ -216,6 +219,16 @@ List pull requests that are associated with the milestone
 $ gcli pulls -M version420
 .Ed
 .Pp
+Change the title of pull request #42 on Github to
+.Dq "This is the new title" :
+.Bd -literal -offset indent
+$ gcli -t github pulls -i 42 title "This is the new title"
+.Ed
+.Pp
+Same command as above, but with abbreviated pulls subcommand:
+.Bd -literal -offset indent
+$ gcli -t github pu -i 42 title "This is the new title"
+.Ed
 .Sh SEE ALSO
 .Xr git 1 ,
 .Xr git-merge 1 ,

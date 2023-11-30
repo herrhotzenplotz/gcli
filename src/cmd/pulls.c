@@ -83,7 +83,7 @@ usage(void)
 	fprintf(stderr, "  notes                  Alias for notes\n");
 	fprintf(stderr, "  commits                Display commits of the PR\n");
 	fprintf(stderr, "  ci                     Display CI/Pipeline status information about the PR\n");
-	fprintf(stderr, "  merge [-s] [-D]        Merge the PR (-s = squash commits, -d = inhibit deleting source branch)\n");
+	fprintf(stderr, "  merge [-s] [-D]        Merge the PR (-s = squash commits, -D = inhibit deleting source branch)\n");
 	fprintf(stderr, "  milestone <id>         Assign this PR to a milestone\n");
 	fprintf(stderr, "  milestone -d           Clear associated milestones from the PR\n");
 	fprintf(stderr, "  close                  Close the PR\n");

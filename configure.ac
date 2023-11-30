@@ -2,7 +2,11 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([gcli],[2.1.0-devel],[nsonack@herrhotzenplotz.de],[gcli],[https://gitlab.com/herrhotzenplotz/gcli/])
+AC_INIT([gcli],
+        [2.1.0-devel],
+        [~herrhotzenplotz/gcli-discuss@lists.sr.ht],
+        [gcli],
+        [https://herrhotzenplotz.de/gcli])
 AM_INIT_AUTOMAKE([1.0 foreign subdir-objects dist-bzip2 dist-xz -Wall])
 
 dnl Release Date.

@@ -314,8 +314,13 @@ There is an undocumented
 subcommand available for GitHub CI services. The subcommand is
 undocumented as it is not well tested and likely subject to changes.
 .Pp
-Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
-or on Github.
+Please report bugs via E-Mail to
+.Mt @PACKAGE_BUGREPORT@ .
+.Pp
+Alternatively you can report them on any of the forges linked at
+.Lk @PACKAGE_URL@ .
+However, the preferred and quickest method is to use the mailing
+list.
 .Pp
 You may also report an issue like so:
 .Bd -literal -offset indent

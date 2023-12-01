@@ -301,7 +301,7 @@ ATF_TC_BODY(simple_github_comment, tc)
 	ATF_CHECK_STREQ(comment.body, "Hey,\n\nthe current trunk on Github might be a little outdated. I pushed the staging branch for version 1.0.0 from Gitlab to Github (cleanup-1.0). Could you try again with that branch and see if it still faults at the same place? If it does, please provide a full backtrace and if possible check with valgrind.\n");
 
 	json_close(&stream);
-	gcli_issue_comment_free(&comment);
+	gcli_comment_free(&comment);
 	gcli_destroy(&ctx);
 }
 

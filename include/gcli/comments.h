@@ -64,7 +64,9 @@ struct gcli_submit_comment_opts {
 	sn_sv message;
 };
 
-void gcli_comment_list_free(gcli_comment_list *list);
+void gcli_comments_free(gcli_comment_list *list);
+
+void gcli_comment_free(gcli_comment *const it);
 
 int gcli_get_issue_comments(gcli_ctx *ctx, char const *owner, char const *repo,
                             int issue, gcli_comment_list *out);
@@ -74,5 +76,4 @@ int gcli_get_pull_comments(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int gcli_comment_submit(gcli_ctx *ctx, gcli_submit_comment_opts opts);
 
-void gcli_issue_comment_free(gcli_comment *const it);
 #endif /* COMMENTS_H */

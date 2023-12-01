@@ -77,6 +77,10 @@ ATF_TC_BODY(gitlab_simple_merge_request, tc)
 	ATF_CHECK(pull.merged == false);
 	ATF_CHECK(pull.mergeable == true);
 	ATF_CHECK(pull.draft == false);
+
+	json_close(&stream);
+	gcli_pull_free(&pull);
+	gcli_destroy(&ctx);
 }
 
 ATF_TC_WITHOUT_HEAD(gitlab_simple_issue);
@@ -104,6 +108,10 @@ ATF_TC_BODY(gitlab_simple_issue, tc)
 	ATF_CHECK(issue.assignees_size == 0);
 	ATF_CHECK(issue.is_pr == 0);
 	ATF_CHECK(sn_sv_null(issue.milestone));
+
+	json_close(&stream);
+	gcli_issue_free(&issue);
+	gcli_destroy(&ctx);
 }
 
 ATF_TC_WITHOUT_HEAD(gitlab_simple_label);
@@ -121,6 +129,10 @@ ATF_TC_BODY(gitlab_simple_label, tc)
 	ATF_CHECK_STREQ(label.name, "bug");
 	ATF_CHECK_STREQ(label.description, "Something isn't working as expected");
 	ATF_CHECK(label.colour == 0xD73A4A00);
+
+	json_close(&stream);
+	gcli_free_label(&label);
+	gcli_destroy(&ctx);
 }
 
 ATF_TC_WITHOUT_HEAD(gitlab_simple_release);
@@ -170,6 +182,10 @@ ATF_TC_BODY(gitlab_simple_release, tc)
 	ATF_CHECK(sn_sv_null(release.upload_url));
 	ATF_CHECK(release.draft == false);
 	ATF_CHECK(release.prerelease == false);
+
+	json_close(&stream);
+	gcli_release_free(&release);
+	gcli_destroy(&ctx);
 }
 
 ATF_TC_WITHOUT_HEAD(gitlab_simple_fork);
@@ -187,6 +203,10 @@ ATF_TC_BODY(gitlab_simple_fork, tc)
 	ATF_CHECK_SV_EQTO(fork.owner, "gjnoonan");
 	ATF_CHECK_SV_EQTO(fork.date, "2022-10-02T13:54:20.517Z");
 	ATF_CHECK(fork.forks == 0);
+
+	json_close(&stream);
+	gcli_fork_free(&fork);
+	gcli_destroy(&ctx);
 }
 
 ATF_TC_WITHOUT_HEAD(gitlab_simple_milestone);
@@ -210,6 +230,10 @@ ATF_TC_BODY(gitlab_simple_milestone, tc)
 	ATF_CHECK_STREQ(milestone.updated_at, "2023-02-05T19:08:20.379Z");
 	ATF_CHECK(milestone.expired == false);
 
+	json_close(&stream);
+	gcli_free_milestone(&milestone);
+	gcli_destroy(&ctx);
+
 	/* Ignore open issues and closed issues as they are
 	 * github/gitea-specific */
 }
@@ -232,6 +256,10 @@ ATF_TC_BODY(gitlab_simple_pipeline, tc)
 	ATF_CHECK_STREQ(pipeline.ref, "refs/merge-requests/219/head");
 	ATF_CHECK_STREQ(pipeline.sha, "742affb88a297a6b34201ad61c8b5b72ec6eb679");
 	ATF_CHECK_STREQ(pipeline.source, "merge_request_event");
+
+	json_close(&stream);
+	gitlab_pipeline_free(&pipeline);
+	gcli_destroy(&ctx);
 }
 
 ATF_TC_WITHOUT_HEAD(gitlab_simple_repo);
@@ -252,6 +280,10 @@ ATF_TC_BODY(gitlab_simple_repo, tc)
 	ATF_CHECK_SV_EQTO(repo.date, "2022-03-22T16:57:59.891Z");
 	ATF_CHECK_SV_EQTO(repo.visibility, "public");
 	ATF_CHECK(repo.is_fork == false);
+
+	json_close(&stream);
+	gcli_repo_free(&repo);
+	gcli_destroy(&ctx);
 }
 
 ATF_TC_WITHOUT_HEAD(gitlab_simple_snippet);
@@ -272,6 +304,10 @@ ATF_TC_BODY(gitlab_simple_snippet, tc)
 	ATF_CHECK_STREQ(snippet.author, "herrhotzenplotz");
 	ATF_CHECK_STREQ(snippet.visibility, "public");
 	ATF_CHECK_STREQ(snippet.raw_url, "https://gitlab.com/-/snippets/2141655/raw");
+
+	json_close(&stream);
+	gcli_gitlab_snippet_free(&snippet);
+	gcli_destroy(&ctx);
 }
 
 ATF_TP_ADD_TCS(tp)

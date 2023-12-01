@@ -42,22 +42,28 @@ gcli_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 void
+gcli_release_free(gcli_release *release)
+{
+	free(release->id.data);
+	free(release->name.data);
+	free(release->body.data);
+	free(release->author.data);
+	free(release->date.data);
+	free(release->upload_url.data);
+
+	for (size_t i = 0; i < release->assets_size; ++i) {
+		free(release->assets[i].name);
+		free(release->assets[i].url);
+	}
+
+	free(release->assets);
+}
+
+void
 gcli_free_releases(gcli_release_list *const list)
 {
 	for (size_t i = 0; i < list->releases_size; ++i) {
-		free(list->releases[i].id.data);
-		free(list->releases[i].name.data);
-		free(list->releases[i].body.data);
-		free(list->releases[i].author.data);
-		free(list->releases[i].date.data);
-		free(list->releases[i].upload_url.data);
-
-		for (size_t j = 0; j < list->releases[i].assets_size; ++j) {
-			free(list->releases[i].assets[j].name);
-			free(list->releases[i].assets[j].url);
-		}
-
-		free(list->releases[i].assets);
+		gcli_release_free(&list->releases[i]);
 	}
 
 	free(list->releases);

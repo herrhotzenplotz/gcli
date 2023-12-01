@@ -83,15 +83,21 @@ gitlab_get_mr_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 void
+gitlab_pipeline_free(gitlab_pipeline *pipeline)
+{
+	free(pipeline->status);
+	free(pipeline->created_at);
+	free(pipeline->updated_at);
+	free(pipeline->ref);
+	free(pipeline->sha);
+	free(pipeline->source);
+}
+
+void
 gitlab_free_pipelines(gitlab_pipeline_list *const list)
 {
 	for (size_t i = 0; i < list->pipelines_size; ++i) {
-		free(list->pipelines[i].status);
-		free(list->pipelines[i].created_at);
-		free(list->pipelines[i].updated_at);
-		free(list->pipelines[i].ref);
-		free(list->pipelines[i].sha);
-		free(list->pipelines[i].source);
+		gitlab_pipeline_free(&list->pipelines[i]);
 	}
 	free(list->pipelines);
 

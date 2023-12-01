@@ -78,14 +78,20 @@ github_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 void
+gcli_github_check_free(gcli_github_check *check)
+{
+	free(check->name);
+	free(check->status);
+	free(check->conclusion);
+	free(check->started_at);
+	free(check->completed_at);
+}
+
+void
 github_free_checks(github_check_list *const list)
 {
 	for (size_t i = 0; i < list->checks_size; ++i) {
-		free(list->checks[i].name);
-		free(list->checks[i].status);
-		free(list->checks[i].conclusion);
-		free(list->checks[i].started_at);
-		free(list->checks[i].completed_at);
+		gcli_github_check_free(&list->checks[i]);
 	}
 
 	free(list->checks);

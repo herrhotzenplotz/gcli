@@ -36,7 +36,7 @@
 #include <gcli/json_util.h>
 #include <sn/sn.h>
 
-static void
+void
 gcli_issue_comment_free(gcli_comment *const it)
 {
 	free((void *)it->author);

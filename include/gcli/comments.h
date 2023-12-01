@@ -74,4 +74,5 @@ int gcli_get_pull_comments(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int gcli_comment_submit(gcli_ctx *ctx, gcli_submit_comment_opts opts);
 
+void gcli_issue_comment_free(gcli_comment *const it);
 #endif /* COMMENTS_H */

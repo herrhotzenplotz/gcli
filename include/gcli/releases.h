@@ -99,4 +99,6 @@ int gcli_release_push_asset(gcli_ctx *, gcli_new_release *,
 int gcli_delete_release(gcli_ctx *ctx, char const *owner, char const *repo,
                         char const *id);
 
+void gcli_release_free(gcli_release *release);
+
 #endif /* RELEASES_H */

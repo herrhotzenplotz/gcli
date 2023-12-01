@@ -101,6 +101,7 @@ gcli_pull_free(gcli_pull *const it)
 	free(it->head_label);
 	free(it->base_label);
 	free(it->head_sha);
+	free(it->base_sha);
 	free(it->milestone);
 	free(it->coverage);
 

@@ -61,4 +61,6 @@ int github_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
 
 void github_free_checks(github_check_list *checks);
 
+void gcli_github_check_free(gcli_github_check *check);
+
 #endif /* GITHUB_CHECKS_H */

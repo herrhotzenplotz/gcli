@@ -107,4 +107,5 @@ int gitlab_get_mr_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
 int gitlab_get_job(gcli_ctx *ctx, char const *owner, char const *repo,
                    gcli_id const jid, gitlab_job *const out);
 
+void gitlab_pipeline_free(gitlab_pipeline *pipeline);
 #endif /* GITLAB_PIPELINES_H */

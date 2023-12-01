@@ -106,6 +106,10 @@ ATF_TC_BODY(simple_github_issue, tc)
 
 	ATF_CHECK(issue.is_pr == 0);
 	ATF_CHECK(sn_sv_null(issue.milestone));
+
+	json_close(&stream);
+	gcli_issue_free(&issue);
+	gcli_destroy(&ctx);
 }
 
 ATF_TC_WITHOUT_HEAD(simple_github_pull);
@@ -142,6 +146,10 @@ ATF_TC_BODY(simple_github_pull, tc)
 	ATF_CHECK(pull.merged == true);
 	ATF_CHECK(pull.mergeable == false);
 	ATF_CHECK(pull.draft == false);
+
+	json_close(&stream);
+	gcli_pull_free(&pull);
+	gcli_destroy(&ctx);
 }
 
 ATF_TC_WITHOUT_HEAD(simple_github_label);
@@ -161,6 +169,10 @@ ATF_TC_BODY(simple_github_label, tc)
 	ATF_CHECK_STREQ(label.name, "bug");
 	ATF_CHECK_STREQ(label.description, "Something isn't working");
 	ATF_CHECK(label.colour == 0xd73a4a00);
+
+	json_close(&stream);
+	gcli_free_label(&label);
+	gcli_destroy(&ctx);
 }
 
 ATF_TC_WITHOUT_HEAD(simple_github_milestone);
@@ -186,6 +198,10 @@ ATF_TC_BODY(simple_github_milestone, tc)
 	ATF_CHECK(milestone.expired == false);
 	ATF_CHECK(milestone.open_issues == 0);
 	ATF_CHECK(milestone.closed_issues == 8);
+
+	json_close(&stream);
+	gcli_free_milestone(&milestone);
+	gcli_destroy(&ctx);
 }
 
 ATF_TC_WITHOUT_HEAD(simple_github_release);
@@ -211,6 +227,10 @@ ATF_TC_BODY(simple_github_release, tc)
 	ATF_CHECK_SV_EQTO(release.upload_url, "https://uploads.github.com/repos/herrhotzenplotz/gcli/releases/116031718/assets{?name,label}");
 	ATF_CHECK(release.draft == false);
 	ATF_CHECK(release.prerelease == false);
+
+	json_close(&stream);
+	gcli_release_free(&release);
+	gcli_destroy(&ctx);
 }
 
 ATF_TC_WITHOUT_HEAD(simple_github_repo);
@@ -233,6 +253,10 @@ ATF_TC_BODY(simple_github_repo, tc)
 	ATF_CHECK_SV_EQTO(repo.date, "2021-10-08T14:20:15Z");
 	ATF_CHECK_SV_EQTO(repo.visibility, "public");
 	ATF_CHECK(repo.is_fork == false);
+
+	json_close(&stream);
+	gcli_repo_free(&repo);
+	gcli_destroy(&ctx);
 }
 
 ATF_TC_WITHOUT_HEAD(simple_github_fork);
@@ -252,6 +276,10 @@ ATF_TC_BODY(simple_github_fork, tc)
 	ATF_CHECK_SV_EQTO(fork.owner, "gjnoonan");
 	ATF_CHECK_SV_EQTO(fork.date, "2023-05-11T05:37:41Z");
 	ATF_CHECK(fork.forks == 0);
+
+	json_close(&stream);
+	gcli_fork_free(&fork);
+	gcli_destroy(&ctx);
 }
 
 ATF_TC_WITHOUT_HEAD(simple_github_comment);
@@ -271,6 +299,10 @@ ATF_TC_BODY(simple_github_comment, tc)
 	ATF_CHECK_STREQ(comment.author, "herrhotzenplotz");
 	ATF_CHECK_STREQ(comment.date, "2023-02-09T15:37:54Z");
 	ATF_CHECK_STREQ(comment.body, "Hey,\n\nthe current trunk on Github might be a little outdated. I pushed the staging branch for version 1.0.0 from Gitlab to Github (cleanup-1.0). Could you try again with that branch and see if it still faults at the same place? If it does, please provide a full backtrace and if possible check with valgrind.\n");
+
+	json_close(&stream);
+	gcli_issue_comment_free(&comment);
+	gcli_destroy(&ctx);
 }
 
 ATF_TC_WITHOUT_HEAD(simple_github_check);
@@ -292,6 +324,10 @@ ATF_TC_BODY(simple_github_check, tc)
 	ATF_CHECK_STREQ(check.started_at, "2023-09-02T06:27:37Z");
 	ATF_CHECK_STREQ(check.completed_at, "2023-09-02T06:29:11Z");
 	ATF_CHECK(check.id == 16437184455);
+
+	json_close(&stream);
+	gcli_github_check_free(&check);
+	gcli_destroy(&ctx);
 }
 
 ATF_TP_ADD_TCS(tp)

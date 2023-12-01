@@ -31,6 +31,8 @@
 
 #include <gcli/json_gen.h>
 
+#include <stdlib.h>
+
 ATF_TC_WITHOUT_HEAD(empty_object);
 ATF_TC_BODY(empty_object, tc)
 {
@@ -40,7 +42,9 @@ ATF_TC_BODY(empty_object, tc)
 	ATF_REQUIRE(gcli_jsongen_begin_object(&gen) == 0);
 	ATF_REQUIRE(gcli_jsongen_end_object(&gen) == 0);
 
-	ATF_CHECK_STREQ(gcli_jsongen_to_string(&gen), "{}");
+	char *str = gcli_jsongen_to_string(&gen);
+	ATF_CHECK_STREQ(str, "{}");
+	free(str);
 
 	gcli_jsongen_free(&gen);
 }
@@ -58,7 +62,9 @@ ATF_TC_BODY(array_with_two_empty_objects, tc)
 	}
 	ATF_REQUIRE(gcli_jsongen_end_array(&gen) == 0);
 
-	ATF_CHECK_STREQ(gcli_jsongen_to_string(&gen), "[{}, {}]");
+	char *str = gcli_jsongen_to_string(&gen);
+	ATF_CHECK_STREQ(str, "[{}, {}]");
+	free(str);
 
 	gcli_jsongen_free(&gen);
 }
@@ -72,7 +78,9 @@ ATF_TC_BODY(empty_array, tc)
 	ATF_REQUIRE(gcli_jsongen_begin_array(&gen) == 0);
 	ATF_REQUIRE(gcli_jsongen_end_array(&gen) == 0);
 
-	ATF_CHECK_STREQ(gcli_jsongen_to_string(&gen), "[]");
+	char *str = gcli_jsongen_to_string(&gen);
+	ATF_CHECK_STREQ(str, "[]");
+	free(str);
 
 	gcli_jsongen_free(&gen);
 }
@@ -88,8 +96,9 @@ ATF_TC_BODY(object_with_number, tc)
 	ATF_REQUIRE(gcli_jsongen_number(&gen, 420) == 0);
 	ATF_REQUIRE(gcli_jsongen_end_object(&gen) == 0);
 
-	ATF_CHECK_STREQ(gcli_jsongen_to_string(&gen),
-	                "{\"number\": 420}");
+	char *str = gcli_jsongen_to_string(&gen);
+	ATF_CHECK_STREQ(str, "{\"number\": 420}");
+	free(str);
 
 	gcli_jsongen_free(&gen);
 }
@@ -111,8 +120,9 @@ ATF_TC_BODY(object_nested, tc)
 	ATF_REQUIRE(gcli_jsongen_end_object(&gen) == 0);
 	ATF_REQUIRE(gcli_jsongen_end_object(&gen) == 0);
 
-	ATF_CHECK_STREQ(gcli_jsongen_to_string(&gen),
-	                "{\"hiernenarray\": [69, 420], \"empty_object\": {}}");
+	char *str = gcli_jsongen_to_string(&gen);
+	ATF_CHECK_STREQ(str, "{\"hiernenarray\": [69, 420], \"empty_object\": {}}");
+	free(str);
 
 	gcli_jsongen_free(&gen);
 }
@@ -129,8 +139,9 @@ ATF_TC_BODY(object_with_strings, tc)
 	ATF_REQUIRE(gcli_jsongen_string(&gen, "value") == 0);
 	ATF_REQUIRE(gcli_jsongen_end_object(&gen) == 0);
 
-	ATF_CHECK_STREQ(gcli_jsongen_to_string(&gen),
-	                "{\"key\": \"value\"}");
+	char *str = gcli_jsongen_to_string(&gen);
+	ATF_CHECK_STREQ(str, "{\"key\": \"value\"}");
+	free(str);
 
 	gcli_jsongen_free(&gen);
 }
@@ -153,8 +164,9 @@ ATF_TC_BODY(object_with_mixed_values, tc)
 		ATF_REQUIRE(gcli_jsongen_end_array(&gen) == 0);
 	ATF_REQUIRE(gcli_jsongen_end_object(&gen) == 0);
 
-	ATF_CHECK_STREQ(gcli_jsongen_to_string(&gen),
-	                "{\"array\": [42, \"a string literal\", {}]}");
+	char *str = gcli_jsongen_to_string(&gen);
+	ATF_CHECK_STREQ(str, "{\"array\": [42, \"a string literal\", {}]}");
+	free(str);
 
 	gcli_jsongen_free(&gen);
 }
@@ -173,8 +185,9 @@ ATF_TC_BODY(object_with_two_keys_and_values_that_are_string, tc)
 		ATF_REQUIRE(gcli_jsongen_string(&gen, "value2") == 0);
 	ATF_REQUIRE(gcli_jsongen_end_object(&gen) == 0);
 
-	ATF_CHECK_STREQ(gcli_jsongen_to_string(&gen),
-	                "{\"key1\": \"value1\", \"key2\": \"value2\"}");
+	char *str = gcli_jsongen_to_string(&gen);
+	ATF_CHECK_STREQ(str, "{\"key1\": \"value1\", \"key2\": \"value2\"}");
+	free(str);
 
 	gcli_jsongen_free(&gen);
 }

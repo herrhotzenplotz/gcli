@@ -9,6 +9,7 @@ ATF_TC_BODY(newlines, tc)
 	sn_sv const escaped = gcli_json_escape(input);
 
 	ATF_CHECK(sn_sv_eq_to(escaped, "\\n\\r"));
+	free(escaped.data);
 }
 
 ATF_TC_WITHOUT_HEAD(tabs);
@@ -18,6 +19,7 @@ ATF_TC_BODY(tabs, tc)
 	sn_sv const escaped = gcli_json_escape(input);
 
 	ATF_CHECK(sn_sv_eq_to(escaped, "\\t\\t\\t"));
+	free(escaped.data);
 }
 
 ATF_TC_WITHOUT_HEAD(backslashes);
@@ -27,6 +29,7 @@ ATF_TC_BODY(backslashes, tc)
 	sn_sv const escaped = gcli_json_escape(input);
 
 	ATF_CHECK(sn_sv_eq_to(escaped, "\\\\"));
+	free(escaped.data);
 }
 
 ATF_TC_WITHOUT_HEAD(torture);
@@ -36,6 +39,7 @@ ATF_TC_BODY(torture, tc)
 	sn_sv const escaped = gcli_json_escape(input);
 
 	ATF_CHECK(sn_sv_eq_to(escaped, "\\n\\r\\n\\n\\n\\t{}"));
+	free(escaped.data);
 }
 
 ATF_TP_ADD_TCS(tp)

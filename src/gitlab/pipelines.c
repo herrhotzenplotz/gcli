@@ -94,7 +94,7 @@ gitlab_pipeline_free(gitlab_pipeline *pipeline)
 }
 
 void
-gitlab_free_pipelines(gitlab_pipeline_list *const list)
+gitlab_pipelines_free(gitlab_pipeline_list *const list)
 {
 	for (size_t i = 0; i < list->pipelines_size; ++i) {
 		gitlab_pipeline_free(&list->pipelines[i]);

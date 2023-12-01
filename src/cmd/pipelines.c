@@ -79,7 +79,7 @@ gitlab_mr_pipelines(char const *owner, char const *repo, int const mr_id)
 	if (rc == 0)
 		gitlab_print_pipelines(&list);
 
-	gitlab_free_pipelines(&list);
+	gitlab_pipelines_free(&list);
 
 	return rc;
 }
@@ -128,7 +128,7 @@ gitlab_pipelines(char const *owner, char const *repo, int const count)
 		return rc;
 
 	gitlab_print_pipelines(&pipelines);
-	gitlab_free_pipelines(&pipelines);
+	gitlab_pipelines_free(&pipelines);
 
 	return rc;
 }

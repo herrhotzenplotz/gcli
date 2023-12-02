@@ -136,7 +136,7 @@ gitea_pull_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitea_print_pr_diff(gcli_ctx *ctx, FILE *const stream, char const *owner,
+gitea_pull_get_diff(gcli_ctx *ctx, FILE *const stream, char const *owner,
                     char const *repo, gcli_id const pr_number)
 {
 	char *url = NULL;

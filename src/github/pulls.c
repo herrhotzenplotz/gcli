@@ -131,8 +131,8 @@ github_get_pulls(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-github_print_pull_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
-                       char const *repo, gcli_id const pr_number)
+github_pull_get_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
+                     char const *repo, gcli_id const pr_number)
 {
 	char *url = NULL;
 	char *e_owner = NULL;

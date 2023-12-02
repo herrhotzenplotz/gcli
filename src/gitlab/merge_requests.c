@@ -202,8 +202,8 @@ err_fetch_diffs:
 }
 
 int
-gitlab_print_pr_patch(gcli_ctx *ctx, FILE *stream, char const *owner,
-                      char const *reponame, gcli_id mr_number)
+gitlab_mr_get_patch(gcli_ctx *ctx, FILE *stream, char const *owner,
+                    char const *reponame, gcli_id mr_number)
 {
 	int rc = 0;
 	char *e_owner, *e_repo;
@@ -248,8 +248,8 @@ err_get_pull:
 }
 
 int
-gitlab_print_pr_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
-                     char const *reponame, gcli_id mr_number)
+gitlab_mr_get_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
+                   char const *reponame, gcli_id mr_number)
 {
 	(void) stream;
 	(void) owner;

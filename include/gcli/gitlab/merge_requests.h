@@ -71,11 +71,11 @@ int gitlab_get_mrs(gcli_ctx *ctx, char const *owner,
                    int max,
                    gcli_pull_list *out);
 
-int gitlab_print_pr_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
-                         char const *reponame, gcli_id mr_number);
+int gitlab_mr_get_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
+                       char const *reponame, gcli_id mr_number);
 
-int gitlab_print_pr_patch(gcli_ctx *ctx, FILE *stream, char const *owner,
-                          char const *reponame, gcli_id mr_number);
+int gitlab_mr_get_patch(gcli_ctx *ctx, FILE *stream, char const *owner,
+                        char const *reponame, gcli_id mr_number);
 
 int gitlab_mr_merge(gcli_ctx *ctx, char const *owner, char const *reponame,
                     gcli_id mr_number, enum gcli_merge_flags flags);

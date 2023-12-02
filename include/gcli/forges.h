@@ -262,8 +262,8 @@ struct gcli_forge_descriptor {
 		gcli_pull_list *out);
 
 	/**
-	 * Print a diff of the changes of a PR/MR to the stream */
-	int (*print_pull_diff)(
+	 * Fetch the PR diff into the file */
+	int (*pull_get_diff)(
 		gcli_ctx *ctx,
 		FILE *stream,
 		char const *owner,
@@ -271,13 +271,13 @@ struct gcli_forge_descriptor {
 		gcli_id pr_number);
 
 	/**
-         * Fetch the PR patch series into the file */
-         int (*pull_get_patch)(
-	         gcli_ctx *ctx,
-	         FILE *stream,
-	         char const *owner,
-	         char const *repo,
-	         gcli_id pull_id);
+	 * Fetch the PR patch series into the file */
+	int (*pull_get_patch)(
+		gcli_ctx *ctx,
+		FILE *stream,
+		char const *owner,
+		char const *repo,
+		gcli_id pull_id);
 
 	/**
 	 * Return a list of checks associated with the given pull.

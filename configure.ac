@@ -132,7 +132,8 @@ AC_CONFIG_FILES([Makefile
                  docs/gcli-repos.1
                  docs/gcli-snippets.1
                  docs/gcli-status.1
-                 docs/gcli.1])
+                 docs/gcli.1
+                 docs/gcli.5])
 
 dnl Technically only needed if tests are enabled but this doesn't
 dnl hurt.

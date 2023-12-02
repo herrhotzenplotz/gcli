@@ -57,7 +57,8 @@ dist_man_MANS = \
 	docs/gcli-repos.1 \
 	docs/gcli-snippets.1 \
 	docs/gcli-status.1 \
-	docs/gcli.1
+	docs/gcli.1 \
+	docs/gcli.5
 
 gcli_SOURCES = \
 	include/gcli/cmd/ci.h src/cmd/ci.c \

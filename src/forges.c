@@ -259,6 +259,7 @@ gitea_forge_descriptor =
 	.perform_submit_comment    = gitea_perform_submit_comment,
 
 	/* Forks */
+	.fork_create               = gitea_fork_create,
 	.get_forks                 = gitea_get_forks,
 
 	/* Issues */

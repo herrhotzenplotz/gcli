@@ -37,6 +37,7 @@ This changelog does not follow semantic versioning.
 - Spelling fixes in manual pages (submitted by Jakub Wilk
   https://github.com/herrhotzenplotz/gcli/pull/121)
 - Add existing implementation for forking on Gitea to gcli command
+- The `status` subcommand now works properly on Gitea.
 
 ### Changed
 

@@ -20,7 +20,8 @@ This changelog does not follow semantic versioning.
 - Add a new `-M` flag to both the pulls and the issues subcommand
   to allow filtering by milestones.
 - Add a new `patch` action to the pulls subcommand. This allows you
-  to print the entire patch series for the given pull request.
+  to print the entire patch series for the given pull request. Also,
+  add missing implementations for this feature for Github and Gitea.
 - Add a new `title` action to both the issues and the pulls
   subcommand that allows updating their titles.
 

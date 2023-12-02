@@ -27,8 +27,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/gitea/status.h>
 #include <gcli/curl.h>
+#include <gcli/gitea/status.h>
+#include <gcli/github/status.h>
 
 #include <sn/sn.h>
 
@@ -54,6 +55,5 @@ gitea_get_notifications(gcli_ctx *ctx, int const max,
 int
 gitea_notification_mark_as_read(gcli_ctx *ctx, char const *id)
 {
-	(void) id;
-	return gcli_error(ctx, "not implemented");
+	return github_notification_mark_as_read(ctx, id);
 }

@@ -61,6 +61,9 @@ int gitea_pull_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
 int gitea_pull_get_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
                         char const *repo, gcli_id pr_number);
 
+int gitea_pull_get_patch(gcli_ctx *ctx, FILE *stream, char const *owner,
+                         char const *repo, gcli_id pr_number);
+
 int gitea_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
                           gcli_id pr_number, gcli_pull_checks_list *out);
 

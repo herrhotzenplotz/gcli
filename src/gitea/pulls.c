@@ -136,6 +136,31 @@ gitea_pull_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
+gitea_pull_get_patch(gcli_ctx *ctx, FILE *const stream, char const *owner,
+                     char const *repo, gcli_id const pr_number)
+{
+	char *url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	int rc = 0;
+
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
+
+	url = sn_asprintf(
+		"%s/repos/%s/%s/pulls/%"PRIid".patch",
+		gcli_get_apibase(ctx),
+		e_owner, e_repo, pr_number);
+
+	rc = gcli_curl(ctx, stream, url, NULL);
+
+	free(e_owner);
+	free(e_repo);
+	free(url);
+
+	return rc;
+}
+int
 gitea_pull_get_diff(gcli_ctx *ctx, FILE *const stream, char const *owner,
                     char const *repo, gcli_id const pr_number)
 {

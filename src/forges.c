@@ -292,6 +292,7 @@ gitea_forge_descriptor =
 	.pull_clear_milestone      = gitea_pull_clear_milestone,
 	.pull_close                = gitea_pull_close,
 	.pull_get_diff             = gitea_pull_get_diff,
+	.pull_get_patch            = gitea_pull_get_patch,
 	.pull_merge                = gitea_pull_merge,
 	.pull_remove_labels        = gitea_issue_remove_labels,
 	.pull_reopen               = gitea_pull_reopen,

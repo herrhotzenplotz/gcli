@@ -71,11 +71,16 @@ void
 gcli_print_notifications(gcli_notification_list const *const list)
 {
 	for (size_t i = 0; i < list->notifications_size; ++i) {
-		printf("%s - %s - %s - %s - %s\n",
+		printf("%s - %s - %s - %s",
 		       list->notifications[i].id,
 		       list->notifications[i].repository,
-		       list->notifications[i].type, list->notifications[i].date,
-		       list->notifications[i].reason);
+		       list->notifications[i].type, list->notifications[i].date);
+
+		if (list->notifications[i].reason) {
+			printf(" - %s\n", list->notifications[i].reason);
+		} else {
+			printf("\n");
+		}
 
 		pretty_print(list->notifications[i].title, 4, 80, stdout);
 		putchar('\n');

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,41 +27,33 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/status.h>
-#include <gcli/forges.h>
+#include <gcli/gitea/status.h>
+#include <gcli/curl.h>
+
+#include <sn/sn.h>
+
+#include <templates/gitea/status.h>
 
 int
-gcli_get_notifications(gcli_ctx *ctx, int const max,
-                       gcli_notification_list *const out)
+gitea_get_notifications(gcli_ctx *ctx, int const max,
+                        gcli_notification_list *const out)
 {
-	return gcli_forge(ctx)->get_notifications(ctx, max, out);
-}
+	char *url = NULL;
 
-void
-gcli_free_notification(gcli_notification *const notification)
-{
-	free(notification->id);
-	free(notification->title);
-	free(notification->reason);
-	free(notification->date);
-	free(notification->type);
-	free(notification->repository);
-}
+	gcli_fetch_list_ctx fl = {
+		.listp = &out->notifications,
+		.sizep = &out->notifications_size,
+		.parse = (parsefn)(parse_gitea_notifications),
+		.max = max,
+	};
 
-void
-gcli_free_notifications(gcli_notification_list *list)
-{
-	for (size_t i = 0; i < list->notifications_size; ++i) {
-		gcli_free_notification(&list->notifications[i]);
-	}
-
-	free(list->notifications);
-	list->notifications = NULL;
-	list->notifications_size = 0;
+	url = sn_asprintf("%s/notifications", gcli_get_apibase(ctx));
+	return gcli_fetch_list(ctx, url, &fl);
 }
 
 int
-gcli_notification_mark_as_read(gcli_ctx *ctx, char const *id)
+gitea_notification_mark_as_read(gcli_ctx *ctx, char const *id)
 {
-	return gcli_forge(ctx)->notification_mark_as_read(ctx, id);
+	(void) id;
+	return gcli_error(ctx, "not implemented");
 }

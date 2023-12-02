@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,41 +27,14 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef GITEA_STATUS_H
+#define GITEA_STATUS_H
+
 #include <gcli/status.h>
-#include <gcli/forges.h>
 
-int
-gcli_get_notifications(gcli_ctx *ctx, int const max,
-                       gcli_notification_list *const out)
-{
-	return gcli_forge(ctx)->get_notifications(ctx, max, out);
-}
+int gitea_get_notifications(gcli_ctx *ctx, int max,
+                            gcli_notification_list *out);
 
-void
-gcli_free_notification(gcli_notification *const notification)
-{
-	free(notification->id);
-	free(notification->title);
-	free(notification->reason);
-	free(notification->date);
-	free(notification->type);
-	free(notification->repository);
-}
+int gitea_notification_mark_as_read(gcli_ctx *ctx, char const *id);
 
-void
-gcli_free_notifications(gcli_notification_list *list)
-{
-	for (size_t i = 0; i < list->notifications_size; ++i) {
-		gcli_free_notification(&list->notifications[i]);
-	}
-
-	free(list->notifications);
-	list->notifications = NULL;
-	list->notifications_size = 0;
-}
-
-int
-gcli_notification_mark_as_read(gcli_ctx *ctx, char const *id)
-{
-	return gcli_forge(ctx)->notification_mark_as_read(ctx, id);
-}
+#endif /* GITEA_STATUS_H */

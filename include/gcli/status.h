@@ -57,6 +57,7 @@ struct gcli_notification_list {
 
 int gcli_get_notifications(gcli_ctx *ctx, int count, gcli_notification_list *out);
 int gcli_notification_mark_as_read(gcli_ctx *ctx, char const *id);
+void gcli_free_notification(gcli_notification *);
 void gcli_free_notifications(gcli_notification_list *);
 
 #endif /* STATUS_H */

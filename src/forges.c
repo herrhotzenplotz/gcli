@@ -68,6 +68,7 @@
 #include <gcli/gitea/releases.h>
 #include <gcli/gitea/repos.h>
 #include <gcli/gitea/sshkeys.h>
+#include <gcli/gitea/status.h>
 
 static gcli_forge_descriptor const
 github_forge_descriptor =
@@ -323,6 +324,9 @@ gitea_forge_descriptor =
 	.get_sshkeys               = gitea_get_sshkeys,
 
 	/* Notifications */
+	.get_notifications         = gitea_get_notifications,
+	.notification_mark_as_read = gitea_notification_mark_as_read,
+
 	/* Internal stuff */
 	.make_authheader           = gitea_make_authheader,
 	.get_api_error_string      = github_api_error_string,    /* hack! */

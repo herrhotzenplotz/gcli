@@ -41,7 +41,6 @@
 #include <gcli/github/pulls.h>
 #include <gcli/github/releases.h>
 #include <gcli/github/repos.h>
-#include <gcli/github/review.h>
 #include <gcli/github/sshkeys.h>
 #include <gcli/github/status.h>
 
@@ -56,7 +55,6 @@
 #include <gcli/gitlab/pipelines.h>
 #include <gcli/gitlab/releases.h>
 #include <gcli/gitlab/repos.h>
-#include <gcli/gitlab/review.h>
 #include <gcli/gitlab/status.h>
 #include <gcli/gitlab/sshkeys.h>
 
@@ -137,7 +135,6 @@ github_forge_descriptor =
 
 	/* Repos */
 	.get_repos                 = github_get_repos,
-	.get_reviews               = github_review_get_reviews,
 	.repo_create               = github_repo_create,
 	.repo_delete               = github_repo_delete,
 	.repo_set_visibility       = github_repo_set_visibility,
@@ -226,7 +223,6 @@ gitlab_forge_descriptor =
 
 	/* Repos */
 	.get_repos                 = gitlab_get_repos,
-	.get_reviews               = gitlab_review_get_reviews,
 	.repo_create               = gitlab_repo_create,
 	.repo_delete               = gitlab_repo_delete,
 	.repo_set_visibility       = gitlab_repo_set_visibility,

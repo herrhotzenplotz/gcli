@@ -43,7 +43,6 @@
 #include <gcli/pulls.h>
 #include <gcli/releases.h>
 #include <gcli/repos.h>
-#include <gcli/review.h>
 #include <gcli/sshkeys.h>
 #include <gcli/status.h>
 
@@ -481,12 +480,6 @@ struct gcli_forge_descriptor {
 		char const *owner,
 		char const *repo,
 		gcli_repo_visibility vis);
-
-	/**
-	 * Fetch MR/PR reviews including comments */
-    int (*get_reviews)(
-	    gcli_ctx *ctx, char const *owner, char const *repo,
-		gcli_id pr, gcli_pr_review_list *out);
 
 	/**
 	 * Status summary for the account */

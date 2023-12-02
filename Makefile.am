@@ -114,7 +114,6 @@ TEMPLATES = \
 	templates/gitlab/pipelines.t \
 	templates/gitlab/releases.t \
 	templates/gitlab/repos.t \
-	templates/gitlab/review.t \
 	templates/gitlab/sshkeys.t \
 	templates/gitlab/status.t \
 	templates/gitlab/snippets.t \
@@ -125,8 +124,7 @@ nobase_header_HEADERS = include/gcli/gcli.h include/gcli/comments.h	\
 	include/gcli/curl.h include/gcli/forks.h			\
 	include/gcli/issues.h include/gcli/labels.h			\
 	include/gcli/milestones.h include/gcli/pulls.h			\
-	include/gcli/releases.h include/gcli/repos.h			\
-	include/gcli/review.h include/gcli/gitlab/snippets.h		\
+	include/gcli/repos.h include/gcli/gitlab/snippets.h		\
 	include/gcli/status.h include/gcli/sshkeys.h
 
 pkgconfdir = $(libdir)/pkgconfig
@@ -148,7 +146,6 @@ libgcli_la_SOURCES = \
 	src/pulls.c include/gcli/pulls.h \
 	src/releases.c include/gcli/releases.h \
 	src/repos.c include/gcli/repos.h \
-	src/review.c include/gcli/review.h \
 	src/gitlab/snippets.c include/gcli/gitlab/snippets.h \
 	src/status.c include/gcli/status.h \
 	src/sshkeys.c include/gcli/sshkeys.h \
@@ -163,7 +160,6 @@ libgcli_la_SOURCES = \
 	src/gitlab/pipelines.c include/gcli/gitlab/pipelines.h \
 	src/gitlab/releases.c include/gcli/gitlab/releases.h \
 	src/gitlab/repos.c include/gcli/gitlab/repos.h \
-	src/gitlab/review.c include/gcli/gitlab/review.h \
 	src/gitlab/status.c include/gcli/gitlab/status.h \
 	src/gitlab/sshkeys.c include/gcli/gitlab/sshkeys.h \
 	src/github/releases.c include/gcli/github/releases.h \
@@ -177,7 +173,6 @@ libgcli_la_SOURCES = \
 	src/github/labels.c include/gcli/github/labels.h \
 	src/github/milestones.c include/gcli/github/milestones.h \
 	src/github/issues.c include/gcli/github/issues.h \
-	src/github/review.c include/gcli/github/review.h \
 	src/github/checks.c include/gcli/github/checks.h \
 	src/github/gists.c include/gcli/github/gists.h \
 	src/github/sshkeys.c include/gcli/github/sshkeys.h \

@@ -111,6 +111,7 @@ github_forge_descriptor =
 	.pull_add_reviewer         = github_pull_add_reviewer,
 	.pull_close                = github_pull_close,
 	.pull_get_diff             = github_pull_get_diff,
+	.pull_get_patch            = github_pull_get_patch,
 	.pull_merge                = github_pull_merge,
 	.pull_reopen               = github_pull_reopen,
 	.pull_set_title            = github_pull_set_title,

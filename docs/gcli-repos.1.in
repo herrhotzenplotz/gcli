@@ -60,7 +60,6 @@ Set the description of a repo to be created.
 .It Fl p , -private
 Create a private repo.
 .El
-.El
 .Sh ACTIONS
 .Ar actions...
 may be one or more of the following:

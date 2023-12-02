@@ -114,6 +114,7 @@ not your own account.
 Do not ask for confirmation before deleting the repository. Assume
 yes.
 .El
+.El
 .Sh EXAMPLES
 Delete release with ID 54656866 in herrhotzenplotz/gcli-playground
 without asking for confirmation:

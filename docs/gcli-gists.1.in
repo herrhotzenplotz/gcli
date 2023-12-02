@@ -65,6 +65,7 @@ Do not ask for confirmation before deleting the Gist. Assume yes.
 .El
 .It Cm get
 Download a file from a Gist. There are no options to this subcommand.
+.El
 .Sh EXAMPLES
 List neutaaaaan's Gists:
 .Bd -literal -offset indent

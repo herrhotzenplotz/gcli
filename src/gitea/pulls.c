@@ -148,7 +148,7 @@ gitea_pull_get_diff(gcli_ctx *ctx, FILE *const stream, char const *owner,
 	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%"PRIid".patch",
+		"%s/repos/%s/%s/pulls/%"PRIid".diff",
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, pr_number);
 

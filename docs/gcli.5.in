@@ -120,6 +120,47 @@ be used as a default when other overrides are unspecified. For
 possible values see the equivalent definition in
 .Sx "User Configuration File" .
 .El
+.Sh EXAMPLES
+.Ss User Configuration File
+An example for the user configuration file consisting of both a
+Github and a Gitlab account:
+.Bd -literal
+defaults {
+	editor=/path/to/ganoooo/emacs
+	github-default-account=herrhotzenplotz-gh
+	gitlab-default-account=herrhotzenplotz-gitlab
+}
+
+herrhotzenplotz-gh {
+	account=herrhotzenplotz
+	token=foobar
+	apibase=https://api.github.com
+	forge-type=github
+}
+
+herrhotzenplotz-gl {
+	account=herrhotzenplotz
+	token=<valid gitlab api token>
+	apibase=https://gitlab.com/api/v4
+	forge-type=gitlab
+}
+.Ed
+.Pp
+Notice that this allows you to run gcli and force it to use a
+specific Gitlab account. E.g.:
+.Bd -literal
+$ gcli -a herrhotzenplotz-gl issues -a
+.Ed
+.Pp
+.Ss Repository-Local Configuration file
+The
+.Pa .gcli
+file for the gcli project itself looks like this:
+.Bd -literal
+pr.upstream=herrhotzenplotz/gcli
+pr.base=trunk
+pr.inhibit-delete-source-branch=yes
+.Ed
 .Sh SEE ALSO
 .Xr git 1 ,
 .Xr gcli 1

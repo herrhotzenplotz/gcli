@@ -86,7 +86,10 @@ ATF_TC_BODY(simple_bugzilla_issue, tc)
 	issue = &list.issues[0];
 
 	ATF_CHECK_EQ(issue->number, 1);
-	ATF_CHECK(sn_sv_eq_to(issue->title, "[aha] [scsi] Toshiba MK156FB scsi drive does not work with 2.0 kernel"));
+	ATF_CHECK_STREQ(issue->title, "[aha] [scsi] Toshiba MK156FB scsi drive does not work with 2.0 kernel");
+	ATF_CHECK_STREQ(issue->created_at, "1994-09-14T09:10:01Z");
+	ATF_CHECK_STREQ(issue->author, "Dave Evans");
+	ATF_CHECK_STREQ(issue->state, "Closed");
 
 	json_close(&stream);
 	gcli_destroy(&ctx);

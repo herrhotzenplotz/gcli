@@ -31,16 +31,39 @@
 
 #include <gcli/bugzilla/bugs.h>
 
+#include <templates/bugzilla/bugs.h>
+
+#include <gcli/curl.h>
+
 int
 bugzilla_get_bugs(gcli_ctx *ctx, char const *product, char const *component,
                   gcli_issue_fetch_details const *details, int const max,
                   gcli_issue_list *out)
 {
+	char *url;
+	gcli_fetch_buffer buffer = {0};
+	int rc = 0;
+
 	(void) product;
 	(void) component;
 	(void) details;
-	(void) max;
-	(void) out;
 
-	return gcli_error(ctx, "%s: not yet implemented", __func__);
+	/* TODO: handle the max = -1 case */
+	url = sn_asprintf("%s/rest/bug?limit=%d&%s&order=id%%20DESC",
+	                  gcli_get_apibase(ctx), max,
+	                  details->all ? "status=All" : "status=Open");
+	rc = gcli_fetch(ctx, url, NULL, &buffer);
+	if (rc == 0) {
+		json_stream stream = {0};
+
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		rc = parse_bugzilla_bugs(ctx, &stream, out);
+
+		json_close(&stream);
+	}
+
+	free(buffer.data);
+	free(url);
+
+	return rc;
 }

@@ -34,6 +34,8 @@
 #include <gcli/issues.h>
 #include <gcli/ctx.h>
 
+#include <templates/bugzilla/bugs.h>
+
 #include <pdjson/pdjson.h>
 
 #include "gcli_tests.h"
@@ -69,12 +71,22 @@ ATF_TC_WITHOUT_HEAD(simple_bugzilla_issue);
 ATF_TC_BODY(simple_bugzilla_issue, tc)
 {
 	gcli_issue_list list = {0};
+	gcli_issue const *issue;
 	FILE *f;
 	json_stream stream;
 	gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("bugzilla_simple_bug.json"));
 	json_open_stream(&stream, f);
+
+	ATF_REQUIRE(parse_bugzilla_bugs(ctx, &stream, &list) == 0);
+
+	ATF_REQUIRE_EQ(list.issues_size, 1);
+
+	issue = &list.issues[0];
+
+	ATF_CHECK_EQ(issue->number, 1);
+	ATF_CHECK(sn_sv_eq_to(issue->title, "[aha] [scsi] Toshiba MK156FB scsi drive does not work with 2.0 kernel"));
 
 	json_close(&stream);
 	gcli_destroy(&ctx);

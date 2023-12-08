@@ -38,4 +38,7 @@ int bugzilla_get_bugs(gcli_ctx *ctx, char const *product, char const *component,
                       gcli_issue_fetch_details const *details, int const max,
                       gcli_issue_list *out);
 
+int bugzilla_get_bug(gcli_ctx *ctx, char const *product, char const *component,
+                     gcli_id bug_id, gcli_issue *out);
+
 #endif /* GCLI_BUGZILLA_BUGS_H */

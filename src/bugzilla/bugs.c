@@ -84,3 +84,15 @@ bugzilla_get_bugs(gcli_ctx *ctx, char const *product, char const *component,
 
 	return rc;
 }
+
+int
+bugzilla_get_bug(gcli_ctx *ctx, char const *product, char const *component,
+                 gcli_id bug_id, gcli_issue *out)
+{
+	(void) product;
+	(void) component;
+	(void) bug_id;
+	(void) out;
+
+	return gcli_error(ctx, "%s: not yet implemented", __func__);
+}

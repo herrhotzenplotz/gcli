@@ -349,6 +349,7 @@ bugzilla_forge_descriptor =
 {
 	/* Issues */
 	.get_issues                = bugzilla_get_bugs,
+	.get_issue_summary         = bugzilla_get_bug,
 
 	.user_object_key           = "---dummy---",
 };

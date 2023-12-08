@@ -40,18 +40,35 @@ bugzilla_get_bugs(gcli_ctx *ctx, char const *product, char const *component,
                   gcli_issue_fetch_details const *details, int const max,
                   gcli_issue_list *out)
 {
-	char *url;
+	char *url, *e_product = NULL, *e_component = NULL;
 	gcli_fetch_buffer buffer = {0};
 	int rc = 0;
 
-	(void) product;
-	(void) component;
-	(void) details;
+	if (product) {
+		char *tmp = gcli_urlencode(product);
+		e_product = sn_asprintf("&product=%s", tmp);
+		free(tmp);
+	}
+
+	if (component) {
+		char *tmp = gcli_urlencode(component);
+		e_component = sn_asprintf("&component=%s", tmp);
+		free(tmp);
+	}
 
 	/* TODO: handle the max = -1 case */
-	url = sn_asprintf("%s/rest/bug?limit=%d&%s&order=id%%20DESC",
+	/* Note(Nico): Most of the options here are not very well
+	 * documented. Specifically the order= parameter I have figured out by
+	 * reading the code and trying things until it worked. */
+	url = sn_asprintf("%s/rest/bug?order=bug_id%%20DESC%%2C&limit=%d%s%s%s",
 	                  gcli_get_apibase(ctx), max,
-	                  details->all ? "status=All" : "status=Open");
+	                  details->all ? "&status=All" : "&status=Open&status=New",
+	                  e_product ? e_product : "",
+	                  e_component ? e_component : "");
+
+	free(e_product);
+	free(e_component);
+
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc == 0) {
 		json_stream stream = {0};

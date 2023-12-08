@@ -36,6 +36,32 @@
 
 #include <gcli/pulls.h>
 
+typedef struct gitlab_reviewer_id_list gitlab_reviewer_id_list;
+struct gitlab_reviewer_id_list {
+	gcli_id *reviewers;
+	size_t reviewers_size;
+};
+
+/* Structs used for internal patch generator. Gitlab does not provide
+ * an endpoint for doing this properly. */
+typedef struct gitlab_diff gitlab_diff;
+struct gitlab_diff {
+	char *diff;
+	char *old_path;
+	char *new_path;
+	char *a_mode;
+	char *b_mode;
+	bool new_file;
+	bool renamed_file;
+	bool deleted_file;
+};
+
+typedef struct gitlab_diff_list gitlab_diff_list;
+struct gitlab_diff_list {
+	gitlab_diff *diffs;
+	size_t diffs_size;
+};
+
 int gitlab_fetch_mrs(gcli_ctx *ctx, char *url, int max,
                      gcli_pull_list *list);
 
@@ -45,8 +71,11 @@ int gitlab_get_mrs(gcli_ctx *ctx, char const *owner,
                    int max,
                    gcli_pull_list *out);
 
-int gitlab_print_pr_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
-                         char const *reponame, gcli_id mr_number);
+int gitlab_mr_get_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
+                       char const *reponame, gcli_id mr_number);
+
+int gitlab_mr_get_patch(gcli_ctx *ctx, FILE *stream, char const *owner,
+                        char const *reponame, gcli_id mr_number);
 
 int gitlab_mr_merge(gcli_ctx *ctx, char const *owner, char const *reponame,
                     gcli_id mr_number, enum gcli_merge_flags flags);
@@ -78,5 +107,12 @@ int gitlab_mr_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int gitlab_mr_clear_milestone(gcli_ctx *ctx, char const *owner,
                               char const *repo, gcli_id mr_number);
+
+int gitlab_mr_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
+                           gcli_id mr_number, char const *username);
+
+int gitlab_mr_set_title(gcli_ctx *ctx, char const *const owner,
+                        char const *const repo, gcli_id const id,
+                        char const *const new_title);
 
 #endif /* GITLAB_MERGE_REQUESTS_H */

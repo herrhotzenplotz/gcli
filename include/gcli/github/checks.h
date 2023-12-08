@@ -47,7 +47,7 @@ struct gcli_github_check {
 	char *conclusion;
 	char *started_at;
 	char *completed_at;
-	long id;
+	gcli_id id;
 };
 
 struct github_check_list {
@@ -60,5 +60,7 @@ int github_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
                       github_check_list *checks);
 
 void github_free_checks(github_check_list *checks);
+
+void gcli_github_check_free(gcli_github_check *check);
 
 #endif /* GITHUB_CHECKS_H */

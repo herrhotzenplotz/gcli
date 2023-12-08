@@ -62,6 +62,11 @@ struct gcli_repo_create_options {
 	bool private;
 };
 
+typedef enum {
+	GCLI_REPO_VISIBILITY_PRIVATE = 1,
+	GCLI_REPO_VISIBILITY_PUBLIC,
+} gcli_repo_visibility;
+
 int gcli_get_repos(gcli_ctx *ctx, char const *owner, int max,
                    gcli_repo_list *list);
 
@@ -72,5 +77,8 @@ int gcli_repo_delete(gcli_ctx *ctx, char const *owner, char const *repo);
 
 int gcli_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *,
                      gcli_repo *out);
+
+int gcli_repo_set_visibility(gcli_ctx *ctx, char const *owner, char const *repo,
+                             gcli_repo_visibility visibility);
 
 #endif /* REPOS_H */

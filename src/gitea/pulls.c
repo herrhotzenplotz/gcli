@@ -75,7 +75,7 @@ gitea_pull_merge(gcli_ctx *ctx, char const *owner, char const *repo,
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
-	url = sn_asprintf("%s/repos/%s/%s/pulls/%lu/merge",
+	url = sn_asprintf("%s/repos/%s/%s/pulls/%"PRIid"/merge",
 	                  gcli_get_apibase(ctx), e_owner, e_repo, pr_number);
 	data = sn_asprintf("{ \"Do\": \"%s\", \"delete_branch_after_merge\": %s }",
 	                   squash ? "squash" : "merge",
@@ -136,7 +136,32 @@ gitea_pull_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitea_print_pr_diff(gcli_ctx *ctx, FILE *const stream, char const *owner,
+gitea_pull_get_patch(gcli_ctx *ctx, FILE *const stream, char const *owner,
+                     char const *repo, gcli_id const pr_number)
+{
+	char *url = NULL;
+	char *e_owner = NULL;
+	char *e_repo = NULL;
+	int rc = 0;
+
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
+
+	url = sn_asprintf(
+		"%s/repos/%s/%s/pulls/%"PRIid".patch",
+		gcli_get_apibase(ctx),
+		e_owner, e_repo, pr_number);
+
+	rc = gcli_curl(ctx, stream, url, NULL);
+
+	free(e_owner);
+	free(e_repo);
+	free(url);
+
+	return rc;
+}
+int
+gitea_pull_get_diff(gcli_ctx *ctx, FILE *const stream, char const *owner,
                     char const *repo, gcli_id const pr_number)
 {
 	char *url = NULL;
@@ -148,7 +173,7 @@ gitea_print_pr_diff(gcli_ctx *ctx, FILE *const stream, char const *owner,
 	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%lu.patch",
+		"%s/repos/%s/%s/pulls/%"PRIid".diff",
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, pr_number);
 
@@ -191,4 +216,19 @@ gitea_pull_clear_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
 	 * the case of Gitea which clear the milestone by setting it to
 	 * the integer value zero. */
 	return github_issue_set_milestone(ctx, owner, repo, pr_number, 0);
+}
+
+int
+gitea_pull_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
+                        gcli_id pr_number, char const *username)
+{
+	return github_pull_add_reviewer(ctx, owner, repo, pr_number, username);
+}
+
+int
+gitea_pull_set_title(gcli_ctx *ctx, char const *const owner,
+                     char const *const repo, gcli_id pull,
+                     char const *const title)
+{
+	return github_pull_set_title(ctx, owner, repo, pull, title);
 }

@@ -79,14 +79,14 @@ struct gitlab_job_list {
 int gitlab_get_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
                          int max, gitlab_pipeline_list *out);
 
-void gitlab_free_pipelines(gitlab_pipeline_list *list);
+void gitlab_pipeline_free(gitlab_pipeline *pipeline);
+void gitlab_pipelines_free(gitlab_pipeline_list *list);
 
 int gitlab_get_pipeline_jobs(gcli_ctx *ctx, char const *owner, char const *repo,
                              gcli_id pipeline, int count, gitlab_job_list *out);
 
 void gitlab_free_jobs(gitlab_job_list *jobs);
 void gitlab_free_job(gitlab_job *job);
-
 
 int gitlab_job_get_log(gcli_ctx *ctx, char const *owner, char const *repo,
                        gcli_id job_id, FILE *stream);

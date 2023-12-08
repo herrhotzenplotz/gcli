@@ -41,15 +41,21 @@
 #include <templates/gitlab/snippets.h>
 
 void
+gcli_gitlab_snippet_free(gcli_gitlab_snippet *snippet)
+{
+	free(snippet->title);
+	free(snippet->filename);
+	free(snippet->date);
+	free(snippet->author);
+	free(snippet->visibility);
+	free(snippet->raw_url);
+}
+
+void
 gcli_snippets_free(gcli_gitlab_snippet_list *const list)
 {
 	for (size_t i = 0; i < list->snippets_size; ++i) {
-		free(list->snippets[i].title);
-		free(list->snippets[i].filename);
-		free(list->snippets[i].date);
-		free(list->snippets[i].author);
-		free(list->snippets[i].visibility);
-		free(list->snippets[i].raw_url);
+		gcli_gitlab_snippet_free(&list->snippets[i]);
 	}
 
 	free(list->snippets);

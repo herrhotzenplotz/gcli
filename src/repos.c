@@ -77,3 +77,10 @@ gcli_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *options,
 {
 	return gcli_forge(ctx)->repo_create(ctx, options, out);
 }
+
+int
+gcli_repo_set_visibility(gcli_ctx *ctx, char const *const owner,
+                         char const *const repo, gcli_repo_visibility vis)
+{
+	return gcli_forge(ctx)->repo_set_visibility(ctx, owner, repo, vis);
+}

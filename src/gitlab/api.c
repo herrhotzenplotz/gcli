@@ -50,3 +50,38 @@ gitlab_api_error_string(gcli_ctx *ctx, gcli_fetch_buffer *const buf)
 	else
 		return msg;
 }
+
+int
+gitlab_user_id(gcli_ctx *ctx, char const *user_name)
+{
+	gcli_fetch_buffer buffer = {0};
+	struct json_stream stream = {0};
+	char *url = NULL;
+	char *e_username;
+	long uid = -1;
+	int rc;
+
+	e_username = gcli_urlencode(user_name);
+
+	url = sn_asprintf("%s/users?username=%s", gcli_get_apibase(ctx),
+	                  e_username);
+
+	uid = gcli_fetch(ctx, url, NULL, &buffer);
+	if (uid == 0) {
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		json_set_streaming(&stream, 1);
+
+		uid = rc = gcli_json_advance(ctx, &stream, "[{s", "id");
+
+		if (rc == 0) {
+			rc = get_long(ctx, &stream, &uid);
+			json_close(&stream);
+		}
+	}
+
+	free(e_username);
+	free(url);
+	free(buffer.data);
+
+	return uid;
+}

@@ -36,6 +36,8 @@
 
 #include <templates/gitlab/repos.h>
 
+#include <assert.h>
+
 int
 gitlab_get_repo(gcli_ctx *ctx, char const *owner, char const *repo,
                 gcli_repo *const out)
@@ -167,6 +169,46 @@ gitlab_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *options,
 
 	free(buffer.data);
 	free(data);
+	free(url);
+
+	return rc;
+}
+
+int
+gitlab_repo_set_visibility(gcli_ctx *ctx, char const *const owner,
+                           char const *const repo, gcli_repo_visibility vis)
+{
+	char *url;
+	char *e_owner, *e_repo;
+	char const *vis_str;
+	char *payload;
+	int rc;
+
+	switch (vis) {
+	case GCLI_REPO_VISIBILITY_PRIVATE:
+		vis_str = "private";
+		break;
+	case GCLI_REPO_VISIBILITY_PUBLIC:
+		vis_str = "public";
+		break;
+	default:
+		assert(false && "Invalid visibility");
+		return gcli_error(ctx, "bad visibility level");
+	}
+
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/projects/%s%%2F%s", gcli_get_apibase(ctx), e_owner,
+	                  e_repo);
+
+	payload = sn_asprintf("{ \"visibility\": \"%s\" }", vis_str);
+
+	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
+
+	free(payload);
+	free(e_owner);
+	free(e_repo);
 	free(url);
 
 	return rc;

@@ -3,7 +3,7 @@
 Simple and portable CLI tool for interacting with GitHub, GitLab and
 Gitea from the command line.
 
-![](docs/screenshot-03.png)
+![](docs/screenshot-04.png)
 
 ## Why?
 
@@ -35,10 +35,6 @@ consider using the link above.
 There are official packages available:
 
 - [FreeBSD](https://freshports.org/devel/gcli)
-
-Packages that are work-in-progress:
-
-- [Debian and Devuan](https://herrhotzenplotz.de/gcli/pkg/Debian)
 
 ### Dependencies
 
@@ -99,20 +95,33 @@ Tested Operating Systems so far:
 - OpenBSD 7.0 GENERIC amd64
 - Alpine Linux 3.16 x86_64
 - Darwin 22.2.0 arm64
-- Windows 10 (mingw32-w64)
+- Windows 10 (MSYS2 mingw32-w64)
 - NetBSD 9.3 amd64, sparc64 and VAX
+
+Tested Compilers so far:
+- LLVM Clang (various versions)
+- GCC (various versions)
+- Oracle DeveloperStudio 12.6
+- IBM XL C/C++ V16.1.1 (Community Edition)
 
 ## Support
 
-Please refer to the manual pages that come with gcli. You may want to
-start at `gcli(1)`. For further questions refer to the issues on
-Github and Gitlab or ask on IRC.
+Please refer to the manual pages that come with gcli. You may want
+to start at `gcli(1)`. For further questions refer to the issues
+on Github and Gitlab or ask on IRC at #gcli on
+[Libera.Chat](https://libera.chat/). Alternatively you may also use
+the mailing list at
+[https://lists.sr.ht/~herrhotzenplotz/gcli-discuss](https://lists.sr.ht/~herrhotzenplotz/gcli-discuss).
 
 ## Bugs and contributions
 
-Please report bugs, issues and questions to nsonack@herrhotzenplotz.de
-or on [GitLab](https://gitlab.com/herrhotzenplotz/gcli). You can also
-submit patches this way using git-send-email.
+Please report bugs, issues and questions to
+[~herrhotzenplotz/gcli-discuss@lists.sr.ht](mailto:~herrhotzenplotz/gcli-discuss@lists.sr.ht)
+or on [GitLab](https://gitlab.com/herrhotzenplotz/gcli).
+
+You can also submit patches using git-send-email or Mercurial
+patchbomb to
+[~herrhotzenplotz/gcli-devel@lists.sr.ht](mailto:~herrhotzenplotz/gcli-devl@lists.sr.ht).
 
 ## License
 

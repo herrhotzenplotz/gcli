@@ -48,7 +48,8 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: gcli issues create [-o owner -r repo] [-y] title...\n");
-	fprintf(stderr, "       gcli issues [-o owner -r repo] [-a] [-n number] [-A author] [-L label] [-s]\n");
+	fprintf(stderr, "       gcli issues [-o owner -r repo] [-a] [-n number] [-A author] [-L label]\n");
+	fprintf(stderr, "                   [-M milestone] [-s]\n");
 	fprintf(stderr, "       gcli issues [-o owner -r repo] -i issue actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
 	fprintf(stderr, "  -o owner           The repository owner\n");
@@ -56,6 +57,7 @@ usage(void)
 	fprintf(stderr, "  -y                 Do not ask for confirmation.\n");
 	fprintf(stderr, "  -A author          Only print issues by the given author\n");
 	fprintf(stderr, "  -L label           Filter issues by the given label\n");
+	fprintf(stderr, "  -M milestone       Filter issues by the given milestone\n");
 	fprintf(stderr, "  -a                 Fetch everything including closed issues \n");
 	fprintf(stderr, "  -s                 Print (sort) in reverse order\n");
 	fprintf(stderr, "  -n number          Number of issues to fetch (-1 = everything)\n");
@@ -74,6 +76,7 @@ usage(void)
 	fprintf(stderr, "  milestone <id>     Assign this issue to the given milestone\n");
 	fprintf(stderr, "  milestone -d       Clear the assigned milestone of the given issue\n");
 	fprintf(stderr, "  notes              Alias for comments\n");
+	fprintf(stderr, "  title <new-title>  Change the title of the issue\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
@@ -86,7 +89,7 @@ gcli_print_issues(enum gcli_output_flags const flags,
 	int n, pruned = 0;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
-		{ .name = "NUMBER", .type = GCLI_TBLCOLTYPE_INT, .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "NUMBER", .type = GCLI_TBLCOLTYPE_ID,  .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "NOTES",  .type = GCLI_TBLCOLTYPE_INT, .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "STATE",  .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_STATECOLOURED },
 		{ .name = "TITLE",  .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
@@ -149,7 +152,7 @@ gcli_issue_print_summary(gcli_issue const *const it)
 
 	dict = gcli_dict_begin();
 
-	gcli_dict_add(dict, "NAME", 0, 0, "%d", it->number);
+	gcli_dict_add(dict, "NUMBER", 0, 0, "%"PRIid, it->number);
 	gcli_dict_add(dict, "TITLE", 0, 0, SV_FMT, SV_ARGS(it->title));
 	gcli_dict_add(dict, "CREATED", 0, 0, SV_FMT, SV_ARGS(it->created_at));
 	gcli_dict_add(dict, "AUTHOR",  GCLI_TBLCOL_BOLD, 0,
@@ -353,11 +356,16 @@ subcommand_issues(int argc, char *argv[])
 		  .flag    = NULL,
 		  .val     = 'L',
 		},
+		{ .name    = "milestone",
+		  .has_arg = required_argument,
+		  .flag    = NULL,
+		  .val     = 'M',
+		},
 		{0},
 	};
 
 	/* parse options */
-	while ((ch = getopt_long(argc, argv, "+sn:o:r:i:aA:L:", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "+sn:o:r:i:aA:L:M:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
 			owner = optarg;
@@ -395,6 +403,9 @@ subcommand_issues(int argc, char *argv[])
 		} break;
 		case 'L': {
 			details.label = optarg;
+		} break;
+		case 'M': {
+			details.milestone = optarg;
 		} break;
 		case '?':
 		default:
@@ -617,6 +628,17 @@ handle_issues_actions(int argc, char *argv[],
 
 			handle_issue_milestone_action(
 				&argc, &argv, owner, repo, issue_id);
+
+		} else if (strcmp("title", operation) == 0) {
+
+			char const *new_title = shift(&argc, &argv);
+			int rc = gcli_issue_set_title(g_clictx, owner, repo, issue_id,
+			                              new_title);
+
+			if (rc < 0) {
+				errx(1, "error: failed to set new issue title: %s",
+				     gcli_get_error(g_clictx));
+			}
 
 		} else {
 			fprintf(stderr, "error: unknown operation %s\n", operation);

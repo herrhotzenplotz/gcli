@@ -47,7 +47,6 @@ to -1 will fetch all forks. Default: 30. Note that on repositories
 with many forks fetching all forks can take a considerable amount of
 time and may result in rate limiting by the respective API.
 .El
-.El
 .Sh ACTIONS
 .Ar actions...
 may be one or more of the following:
@@ -96,5 +95,10 @@ $ gcli forks -y delete
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
 and contributors.
 .Sh BUGS
-Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
-or on Github.
+Please report bugs via E-Mail to
+.Mt @PACKAGE_BUGREPORT@ .
+.Pp
+Alternatively you can report them on any of the forges linked at
+.Lk @PACKAGE_URL@ .
+However, the preferred and quickest method is to use the mailing
+list.

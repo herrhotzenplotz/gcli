@@ -41,12 +41,20 @@ gcli_issue_free(gcli_issue *const it)
 	free(it->author.data);
 	free(it->state.data);
 	free(it->body.data);
-	free(it->milestone.data);
 
 	for (size_t i = 0; i < it->labels_size; ++i)
 		free(it->labels[i].data);
 
 	free(it->labels);
+	it->labels = NULL;
+
+	for (size_t i = 0; i < it->assignees_size; ++i)
+		free(it->assignees[i].data);
+
+	free(it->assignees);
+	it->assignees = NULL;
+
+	free(it->milestone.data);
 }
 
 void
@@ -142,4 +150,11 @@ gcli_issue_clear_milestone(gcli_ctx *ctx, char const *const owner,
                            char const *const repo, gcli_id const issue)
 {
 	return gcli_forge(ctx)->issue_clear_milestone(ctx, owner, repo, issue);
+}
+
+int
+gcli_issue_set_title(gcli_ctx *ctx, char const *owner, char const *repo,
+                     gcli_id issue, char const *new_title)
+{
+	return gcli_forge(ctx)->issue_set_title(ctx, owner, repo, issue, new_title);
 }

@@ -3,6 +3,49 @@
 This changelog does not follow semantic versioning.
 
 
+## 2.1.0 (2023-Dec-08)
+
+### Added
+
+- Added a little spinner to indicate network activity
+- Added Windows 10 MSYS2 to list of confirmed-to-work platforms
+- Added a new action `set-visibility` to the repos subcommand that
+  allows updating the visibility level of a repository.
+- Added a new action `request-review` to the pulls subcommand that
+  allows requesting a review of a pull request from a given user.
+- One can now define custom aliases in the alias section of the
+  config file. Aliases are very primitive as of now. This means they
+  are just different names for subcommands. Aliases may reference
+  other aliases.
+- Added a new `-M` flag to both the pulls and the issues subcommand
+  to allow filtering by milestones.
+- Added a new `patch` action to the pulls subcommand. This allows
+  you to print the entire patch series for a given pull request.
+  Also added the missing implementations for this feature for Github
+  and Gitea.
+- Added a new `title` action to both the issues and the pulls
+  subcommand that allows updating their titles.
+
+### Fixed
+
+- Fixed incorrect internal help message of the `repos` subcommand.
+- Worked around ICE with xlC 16 on ppc64le Debian Linux, gcli now
+  compiles using xlC and works too.
+- Fixed various memory leaks.
+- Spelling fixes in manual pages (submitted by Jakub Wilk
+  https://github.com/herrhotzenplotz/gcli/pull/121)
+- Wired up alread existing implementation for forking on Gitea to
+  gcli command.
+- The `status` subcommand now works properly on Gitea.
+
+### Changed
+
+- Subcommands can now be abbreviated by providing an unambiguous
+  prefix that matches the subcommand.
+
+### Removed
+
+
 ## 2.0.0 (2023-Sep-21)
 
 ### Added

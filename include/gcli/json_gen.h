@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,57 +27,46 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef REVIEW_H
-#define REVIEW_H
+#ifndef GCLI_JSON_GEN_H
+#define GCLI_JSON_GEN_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#include <sn/sn.h>
+#include <stdbool.h>
+#include <stddef.h>
 
-#include <gcli/gcli.h>
-
-typedef struct gcli_pr_review         gcli_pr_review;
-typedef struct gcli_pr_review_list    gcli_pr_review_list;
-typedef struct gcli_pr_review_comment gcli_pr_review_comment;
-
-struct gcli_pr_review_comment {
-	char *id;
-	char *author;
-	char *date;
-	char *diff;
-	char *path;
-	char *body;
-	int   original_position;
+enum {
+	GCLI_JSONGEN_ARRAY = 1,
+	GCLI_JSONGEN_OBJECT = 2,
 };
 
-struct gcli_pr_review {
-	char                   *id;
-	char                   *author;
-	char                   *date;
-	char                   *state;
-	char                   *body;
-	gcli_pr_review_comment *comments;
-	size_t                  comments_size;
+typedef struct gcli_jsongen gcli_jsongen;
+struct gcli_jsongen {
+	char *buffer;
+	size_t buffer_size;
+	size_t buffer_capacity;
+
+	int scopes[32];           /* scope stack */
+	size_t scopes_size;       /* scope stack pointer */
+
+	bool await_object_value;  /* when in an object scope set to true if
+	                           * we expect a value and not a key */
+	bool first_elem;          /* first element in object/array */
 };
 
-struct gcli_pr_review_list {
-	gcli_pr_review *reviews;
-	size_t reviews_size;
-};
+int gcli_jsongen_init(gcli_jsongen *gen);
+void gcli_jsongen_free(gcli_jsongen *gen);
+char *gcli_jsongen_to_string(gcli_jsongen *gen);
 
-void gcli_review_reviews_free(gcli_pr_review_list *list);
+int gcli_jsongen_begin_object(gcli_jsongen *gen);
+int gcli_jsongen_end_object(gcli_jsongen *gen);
+int gcli_jsongen_begin_array(gcli_jsongen *gen);
+int gcli_jsongen_end_array(gcli_jsongen *gen);
+int gcli_jsongen_objmember(gcli_jsongen *gen, char const *key);
+int gcli_jsongen_number(gcli_jsongen *gen, long long num);
+int gcli_jsongen_string(gcli_jsongen *gen, char const *value);
+int gcli_jsongen_null(gcli_jsongen *gen);
 
-void gcli_review_comments_free(gcli_pr_review_comment *it, size_t size);
-
-int gcli_review_get_reviews(gcli_ctx *ctx, char const *owner, char const *repo,
-                            int pr, gcli_pr_review_list *out);
-
-void gcli_review_print_review_table(gcli_ctx *ctx,
-                                    gcli_pr_review_list const *reviews);
-
-void gcli_review_print_comments(gcli_pr_review_comment const *comments,
-                                size_t comments_size);
-
-#endif /* REVIEW_H */
+#endif /* GCLI_JSON_GEN_H */

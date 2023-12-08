@@ -77,7 +77,7 @@ gitea_get_milestone(gcli_ctx *ctx, char const *const owner,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/milestones/%lu", gcli_get_apibase(ctx),
+	url = sn_asprintf("%s/repos/%s/%s/milestones/%"PRIid, gcli_get_apibase(ctx),
 	                  e_owner, e_repo, milestone);
 
 	free(e_owner);
@@ -116,7 +116,7 @@ gitea_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/issues?state=all&milestones=%lu",
+	url = sn_asprintf("%s/repos/%s/%s/issues?state=all&milestones=%"PRIid,
 	                  gcli_get_apibase(ctx), e_owner, e_repo, milestone);
 
 	free(e_repo);

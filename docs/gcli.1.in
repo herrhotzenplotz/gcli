@@ -184,67 +184,18 @@ escape sequences. See
 .Sh FILES
 .Bl -tag -width ${XDG_CONFIG_DIR}/gcli/config -compact
 .It Pa ${XDG_CONFIG_DIR}/gcli/config
-The config file for
-.Nm .
-It shall contain the following data:
-.Pp
-.Bd -literal
-defaults {
-	editor=/path/to/ganoooo/emacs
-	github-default-account=herrhotzenplotz-gh
-	gitlab-default-account=herrhotzenplotz-gitlab
-}
-
-herrhotzenplotz-gh {
-	account=herrhotzenplotz
-	token=foobar
-	apibase=https://api.github.com
-	forge-type=github
-}
-
-herrhotzenplotz-gl {
-	account=herrhotzenplotz
-	token=<valid gitlab api token>
-	apibase=https://gitlab.com/api/v4
-	forge-type=gitlab
-}
-.Ed
-.Pp
-In case
-.Sq apibase
-is not set, it defaults to the above values.
-For the API token, you can set whatever scopes you want. However, I
-recommend setting the following on GitHub:
-.Sq admin:org, delete_repo, gist, repo, workflow .
-On GitLab you only need the
-.Sq api
-scope.
-.Pp
-If editor is not set in the config file,
-.Nm
-will use
-.Ev EDITOR
-from the environment.
-.Pp
-Both
-.Sq gitlab-default-account
-and
-.Sq github-default-account
-must point at a config section with that exact name.
+The user configuration file for gcli. It contains account definitions
+as well as sensible default values. See
+.Xr gcli 5 .
 .Pp
 .It Pa .gcli
-A repo-specific config file that may contain the following data:
-.Bd -literal
-pr.upstream=herrhotzenplotz/gcli
-pr.base=trunk
-pr.inhibit-delete-source-branch=yes
-.Ed
-.Pp
-It is intended to be committed into the repo so that users don't have
-to manually specify all the options like
+A repo-specific config file intended to be committed into the repo
+so that users don't have to manually specify all the options like
 .Fl -in ,
 .Fl -from ,
 .Fl -base etc.
+when creating pull requests. See
+.Xr gcli 5 for details about this file.
 .Pp
 .El
 .Sh EXAMPLES
@@ -314,8 +265,13 @@ There is an undocumented
 subcommand available for GitHub CI services. The subcommand is
 undocumented as it is not well tested and likely subject to changes.
 .Pp
-Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
-or on Github.
+Please report bugs via E-Mail to
+.Mt @PACKAGE_BUGREPORT@ .
+.Pp
+Alternatively you can report them on any of the forges linked at
+.Lk @PACKAGE_URL@ .
+However, the preferred and quickest method is to use the mailing
+list.
 .Pp
 You may also report an issue like so:
 .Bd -literal -offset indent

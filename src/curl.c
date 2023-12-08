@@ -137,6 +137,23 @@ gcli_fetch(gcli_ctx *ctx, char const *url, char **const pagination_next,
 	return gcli_fetch_with_method(ctx, "GET", url, NULL, pagination_next, out);
 }
 
+static int
+gcli_report_progress(void *_ctx, double dltotal, double dlnow,
+                     double ultotal, double ulnow)
+{
+	gcli_ctx *ctx = _ctx;
+
+	(void) dltotal;
+	(void) dlnow;
+	(void) ultotal;
+	(void) ulnow;
+
+	/* not done */
+	ctx->report_progress(false);
+
+	return 0;
+}
+
 /* Check the given url for a successful query */
 int
 gcli_curl_test_success(gcli_ctx *ctx, char const *url)
@@ -154,7 +171,6 @@ gcli_curl_test_success(gcli_ctx *ctx, char const *url)
 	curl_easy_setopt(ctx->curl, CURLOPT_BUFFERSIZE, 102400L);
 	curl_easy_setopt(ctx->curl, CURLOPT_NOPROGRESS, 1L);
 	curl_easy_setopt(ctx->curl, CURLOPT_MAXREDIRS, 50L);
-	curl_easy_setopt(ctx->curl, CURLOPT_FTP_SKIP_PASV_IP, 1L);
 	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, "curl/7.78.0");
 #if defined(CURL_HTTP_VERSION_2TLS)
 	curl_easy_setopt(
@@ -166,6 +182,13 @@ gcli_curl_test_success(gcli_ctx *ctx, char const *url)
 	curl_easy_setopt(ctx->curl, CURLOPT_FAILONERROR, 0L);
 	curl_easy_setopt(ctx->curl, CURLOPT_FOLLOWLOCATION, 1L);
 
+	if (ctx->report_progress) {
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFOFUNCTION,
+		                 gcli_report_progress);
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFODATA, ctx);
+		curl_easy_setopt(ctx->curl, CURLOPT_NOPROGRESS, 0L);
+	}
+
 	ret = curl_easy_perform(ctx->curl);
 
 	if (ret != CURLE_OK) {
@@ -176,6 +199,9 @@ gcli_curl_test_success(gcli_ctx *ctx, char const *url)
 		if (status_code >= 300L)
 			is_success = false;
 	}
+
+	if (ctx->report_progress)
+		ctx->report_progress(true);
 
 	free(buffer.data);
 
@@ -223,8 +249,18 @@ gcli_curl(gcli_ctx *ctx, FILE *stream, char const *url, char const *content_type
 	curl_easy_setopt(ctx->curl, CURLOPT_FAILONERROR, 0L);
 	curl_easy_setopt(ctx->curl, CURLOPT_FOLLOWLOCATION, 1L);
 
+	if (ctx->report_progress) {
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFOFUNCTION,
+		                 gcli_report_progress);
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFODATA, ctx);
+		curl_easy_setopt(ctx->curl, CURLOPT_NOPROGRESS, 0L);
+	}
+
 	ret = curl_easy_perform(ctx->curl);
 	rc = gcli_curl_check_api_error(ctx, ret, url, &buffer);
+
+	if (ctx->report_progress)
+		ctx->report_progress(true);
 
 	if (rc == 0)
 		fwrite(buffer.data, 1, buffer.length, stream);
@@ -372,8 +408,18 @@ gcli_fetch_with_method(
 	curl_easy_setopt(ctx->curl, CURLOPT_HEADERDATA, &link_header);
 	curl_easy_setopt(ctx->curl, CURLOPT_FOLLOWLOCATION, 1L);
 
+	if (ctx->report_progress) {
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFOFUNCTION,
+		                 gcli_report_progress);
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFODATA, ctx);
+		curl_easy_setopt(ctx->curl, CURLOPT_NOPROGRESS, 0L);
+	}
+
 	ret = curl_easy_perform(ctx->curl);
 	rc = gcli_curl_check_api_error(ctx, ret, url, buf);
+
+	if (ctx->report_progress)
+		ctx->report_progress(true);
 
 	/* only parse these headers and continue if there was no error */
 	if (rc == 0) {
@@ -446,8 +492,18 @@ gcli_post_upload(gcli_ctx *ctx, char const *url, char const *content_type,
 	curl_easy_setopt(ctx->curl, CURLOPT_WRITEDATA, out);
 	curl_easy_setopt(ctx->curl, CURLOPT_WRITEFUNCTION, fetch_write_callback);
 
+	if (ctx->report_progress) {
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFOFUNCTION,
+		                 gcli_report_progress);
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFODATA, ctx);
+		curl_easy_setopt(ctx->curl, CURLOPT_NOPROGRESS, 0L);
+	}
+
 	ret = curl_easy_perform(ctx->curl);
 	rc = gcli_curl_check_api_error(ctx, ret, url, out);
+
+	if (ctx->report_progress)
+		ctx->report_progress(true);
 
 	curl_slist_free_all(headers);
 	headers = NULL;
@@ -511,8 +567,18 @@ gcli_curl_gitea_upload_attachment(gcli_ctx *ctx, char const *url,
 	curl_easy_setopt(ctx->curl, CURLOPT_WRITEDATA, out);
 	curl_easy_setopt(ctx->curl, CURLOPT_WRITEFUNCTION, fetch_write_callback);
 
+	if (ctx->report_progress) {
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFOFUNCTION,
+		                 gcli_report_progress);
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFODATA, ctx);
+		curl_easy_setopt(ctx->curl, CURLOPT_NOPROGRESS, 0L);
+	}
+
 	ret = curl_easy_perform(ctx->curl);
 	rc = gcli_curl_check_api_error(ctx, ret, url, out);
+
+	if (ctx->report_progress)
+		ctx->report_progress(true);
 
 	/* Cleanup */
 	curl_slist_free_all(headers);

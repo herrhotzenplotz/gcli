@@ -119,7 +119,7 @@ gitea_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/issues/%lu", gcli_get_apibase(ctx),
+	url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid, gcli_get_apibase(ctx),
 	                  e_owner, e_repo, issue_number);
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, post_fields, NULL, NULL);
@@ -140,7 +140,7 @@ get_id_of_label(char const *label_name,
 {
 	for (size_t i = 0; i < list->labels_size; ++i)
 		if (strcmp(list->labels[i].name, label_name) == 0)
-			return sn_asprintf("%lu", list->labels[i].id);
+			return sn_asprintf("%"PRIid, list->labels[i].id);
 	return NULL;
 }
 
@@ -204,7 +204,7 @@ gitea_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 	list = sn_join_with((char const **)ids, labels_size, ",");
 	data = sn_asprintf("{ \"labels\": [%s] }", list);
 
-	url = sn_asprintf("%s/repos/%s/%s/issues/%lu/labels", gcli_get_apibase(ctx),
+	url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid"/labels", gcli_get_apibase(ctx),
 	                  owner, repo, issue);
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, data, NULL, NULL);
@@ -233,7 +233,7 @@ gitea_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 	for (size_t i = 0; i < labels_size; ++i) {
 		char *url = NULL;
 
-		url = sn_asprintf("%s/repos/%s/%s/issues/%lu/labels/%s",
+		url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid"/labels/%s",
 		                  gcli_get_apibase(ctx), owner, repo, issue, ids[i]);
 		rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
@@ -261,4 +261,12 @@ gitea_issue_clear_milestone(gcli_ctx *ctx, char const *owner,
                             char const *repo, gcli_id issue)
 {
 	return github_issue_set_milestone(ctx, owner, repo, issue, 0);
+}
+
+int
+gitea_issue_set_title(gcli_ctx *ctx, char const *const owner,
+                      char const *const repo, gcli_id const issue,
+                      char const *const new_title)
+{
+	return github_issue_set_title(ctx, owner, repo, issue, new_title);
 }

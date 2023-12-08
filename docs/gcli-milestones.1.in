@@ -84,6 +84,10 @@ and contributors.
 The delete subcommand deletes the milestone without asking for
 confirmation.
 .Pp
-Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
-or on Github.
-
+Please report bugs via E-Mail to
+.Mt @PACKAGE_BUGREPORT@ .
+.Pp
+Alternatively you can report them on any of the forges linked at
+.Lk @PACKAGE_URL@ .
+However, the preferred and quickest method is to use the mailing
+list.

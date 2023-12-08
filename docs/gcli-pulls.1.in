@@ -9,6 +9,7 @@
 .Op Fl a
 .Op Fl A Ar author
 .Op Fl L Ar label
+.Op Fl M Ar milestone
 .Op Fl s
 .Op Fl n Ar n
 .Op Fl o Ar owner Fl r Ar repo
@@ -56,6 +57,10 @@ needs to iterate all the fetched data and filter out the requested
 information.
 .It Fl L , -label Ar label
 Filter pull requests by the given label. See the notes about the
+.Fl A
+option above - the same reasoning applies to this option.
+.It Fl M , -milestone Ar milestone
+Filter pull requests by the given milestone. See the notes about the
 .Fl A
 option above - the same reasoning applies to this option.
 .It Fl a
@@ -163,6 +168,9 @@ Add the given label to the pull request.
 .It remove Ar label
 Remove the given label from the pull request.
 .El
+.It Cm title Ar new-title
+Change the title of the pull request to
+.Ar new-title .
 .El
 .Sh EXAMPLES
 Print a list of open PRs in the current project:
@@ -205,6 +213,22 @@ label:
 $ gcli pulls -L bug
 .Ed
 .Pp
+List pull requests that are associated with the milestone
+.Dq version420 :
+.Bd -literal -offset indent
+$ gcli pulls -M version420
+.Ed
+.Pp
+Change the title of pull request #42 on Github to
+.Dq "This is the new title" :
+.Bd -literal -offset indent
+$ gcli -t github pulls -i 42 title "This is the new title"
+.Ed
+.Pp
+Same command as above, but with abbreviated pulls subcommand:
+.Bd -literal -offset indent
+$ gcli -t github pu -i 42 title "This is the new title"
+.Ed
 .Sh SEE ALSO
 .Xr git 1 ,
 .Xr git-merge 1 ,
@@ -215,5 +239,10 @@ $ gcli pulls -L bug
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
 and contributors.
 .Sh BUGS
-Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
-or on Github.
+Please report bugs via E-Mail to
+.Mt @PACKAGE_BUGREPORT@ .
+.Pp
+Alternatively you can report them on any of the forges linked at
+.Lk @PACKAGE_URL@ .
+However, the preferred and quickest method is to use the mailing
+list.

@@ -181,7 +181,7 @@ gcli_json_escape(sn_sv const it)
 {
 	sn_sv result = {0};
 
-	result.data = malloc(2 * it.length);
+	result.data = calloc(2 * it.length + 1, 1);
 	if (!result.data)
 		err(1, "malloc");
 

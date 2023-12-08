@@ -34,6 +34,10 @@
 #include <config.h>
 #endif
 
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stdint.h>
+
 enum gcli_output_flags {
 	OUTPUT_SORTED = (1 << 0),
 	OUTPUT_LONG   = (1 << 1),
@@ -45,7 +49,9 @@ typedef enum gcli_forge_type {
 	GCLI_FORGE_GITEA,
 } gcli_forge_type;
 
-typedef unsigned long gcli_id;
+typedef uint64_t gcli_id;
+
+#define PRIid PRIu64
 
 #ifdef IN_LIBGCLI
 #include <gcli/ctx.h>
@@ -60,6 +66,7 @@ char const *gcli_init(gcli_ctx **,
 
 void *gcli_get_userdata(struct gcli_ctx const *);
 void gcli_set_userdata(struct gcli_ctx *, void *usrdata);
+void gcli_set_progress_func(struct gcli_ctx *, void (*pfunc)(bool done));
 void gcli_destroy(gcli_ctx **ctx);
 char const *gcli_get_error(gcli_ctx *ctx);
 

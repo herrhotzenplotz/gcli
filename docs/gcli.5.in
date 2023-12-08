@@ -1,0 +1,177 @@
+.Dd @PACKAGE_DATE@
+.Dt GCLI 5
+.Os @PACKAGE_STRING@
+.Sh NAME
+.Nm gcli
+.Nd gcli configuration file formats
+.Sh DESCRIPTION
+.Nm gcli
+has two different configuration files. A user configuration file
+that contains default values for
+.Nm gcli
+and a repository-local configuration that contains sensible default
+values for a given repository. The latter is meant to be checked
+into the repository and provide these default values to other users
+as well.
+.Ss User Configuration File
+The user configuration file is located in
+.Pa ${XDG_CONFIG_DIR}/gcli/config .
+On most systems this equal to
+.Pa ${HOME}/.config/gcli/config .
+.Pp
+The user configuration file contains definitions for accounts as
+well as sensible default values for things like an editor.
+.Pp
+The file is structured in sections, each section has a name and
+consists of a collection of key-value pairs. E.g.:
+.Pp
+.Bd -literal -offset indent
+section-name {
+	key1 = value 1
+	key2 = value 2
+}
+.Ed
+.Pp
+There must be a section named
+.Dq defaults
+which may contain the following keys:
+.Bl -tag
+.It editor
+Path to a default editor. This might be overridden by the environment
+variable
+.Ev EDITOR .
+.It github-default-account
+Section name of a default GitHub account to use whenever the account
+is unspecified on the command line or in the environment. See
+.Ev GCLI_ACCOUNT in
+.Xr gcli 1 .
+.It gitlab-default-account
+Section name of a default GitLab account to use whenever the account
+is unspecified on the command line or in the environment. See
+.Ev GCLI_ACCOUNT in
+.Xr gcli 1 .
+.It gitea-default-account
+Section name of a default Gitea account to use whenever the account
+is unspecified on the command line or in the environment. See
+.Ev GCLI_ACCOUNT in
+.Xr gcli 1 .
+.El
+.Pp
+All other sections define accounts for forges. Each of these account
+definitions have the account name as their section name and may
+have one or more of the following keys defined:
+.Bl -tag -width forge-type
+.It forge-type
+The type of the forge. May be one of:
+.Bl -bullet -compact
+.It
+github
+.It
+gitlab
+.It
+gitea
+.El
+.It api-base
+(optional) Used to override the API base URL of the forge. This is
+useful for self-hosted instances.  Depending on the
+.Dq forge-type
+the default values are:
+.Bl -column forge-type "default value"
+.It Em forge-type Ta Em "default value"
+.It github Ta Lk "https://api.github.com"
+.It gitlab Ta Lk "https://gitlab.com/api/v4"
+.It gitea  Ta Lk "https://codeberg.org/api/v1"
+.El
+.It account
+(optional) The username used to authenticate at the API.
+.It token
+(optional) A generated application token to use with this account.
+TODO: Document for each forge how to generate these.
+.El
+.Ss Repository Local Configuration File
+For repository-local configuration you can use a special configuration
+file. It contains definitions for gcli that are specific to the
+repository.
+.Pp
+The Repository-local configuration file is located in the root
+directory of the repository and should be named
+.Pa .gcli .
+.Pp
+It contains a list of key-value pairs. Allowed keys are:
+.Bl -tag -width pr.upstream
+.It pr.base
+Name of a branch that the changes should be merged into by default.
+Usually this is one of
+.Em master ,
+.Em main or
+.Em trunk .
+.It pr.upstream
+Name of the upstream repository to submit the pull request to by default.
+This is a pair of the format
+.Dq owner/repository .
+.It pr.inhibit-delete-source-branch
+If defined and set to
+.Dq yes
+this will prevent the pull request source branch to get deleted
+when merging a pull request by default.
+.It forge-type
+When hosting on multiple forges this can be set to a type that will
+be used as a default when other overrides are unspecified. For
+possible values see the equivalent definition in
+.Sx "User Configuration File" .
+.El
+.Sh EXAMPLES
+.Ss User Configuration File
+An example for the user configuration file consisting of both a
+Github and a Gitlab account:
+.Bd -literal
+defaults {
+	editor=/path/to/ganoooo/emacs
+	github-default-account=herrhotzenplotz-gh
+	gitlab-default-account=herrhotzenplotz-gitlab
+}
+
+herrhotzenplotz-gh {
+	account=herrhotzenplotz
+	token=foobar
+	apibase=https://api.github.com
+	forge-type=github
+}
+
+herrhotzenplotz-gl {
+	account=herrhotzenplotz
+	token=<valid gitlab api token>
+	apibase=https://gitlab.com/api/v4
+	forge-type=gitlab
+}
+.Ed
+.Pp
+Notice that this allows you to run gcli and force it to use a
+specific Gitlab account. E.g.:
+.Bd -literal
+$ gcli -a herrhotzenplotz-gl issues -a
+.Ed
+.Pp
+.Ss Repository-Local Configuration file
+The
+.Pa .gcli
+file for the gcli project itself looks like this:
+.Bd -literal
+pr.upstream=herrhotzenplotz/gcli
+pr.base=trunk
+pr.inhibit-delete-source-branch=yes
+.Ed
+.Sh SEE ALSO
+.Xr git 1 ,
+.Xr gcli 1
+.Sh AUTHORS
+.An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+and contributors.
+.Sh BUGS
+Please report bugs via E-Mail to
+.Mt @PACKAGE_BUGREPORT@ .
+.Pp
+Alternatively you can report them on any of the forges linked at
+.Lk @PACKAGE_URL@ .
+However, the preferred and quickest method is to use the mailing
+list.

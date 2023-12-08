@@ -58,7 +58,7 @@ usage(void)
 	fprintf(stderr, "usage: gcli pulls create [-o owner -r repo] [-f from]\n");
 	fprintf(stderr, "                         [-t to] [-d] [-l label] pull-request-title\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] [-a] [-A author] [-n number]\n");
-	fprintf(stderr, "                  [-L label] [-s]\n");
+	fprintf(stderr, "                  [-L label] [-M milestone] [-s]\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] -i pull-id actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
 	fprintf(stderr, "  -o owner        The repository owner\n");
@@ -66,6 +66,7 @@ usage(void)
 	fprintf(stderr, "  -a              Fetch everything including closed and merged PRs\n");
 	fprintf(stderr, "  -A author       Filter pull requests by the given author\n");
 	fprintf(stderr, "  -L label        Filter pull requests by the given label\n");
+	fprintf(stderr, "  -M milestone    Filter pull requests by the given milestone\n");
 	fprintf(stderr, "  -d              Mark newly created PR as a draft\n");
 	fprintf(stderr, "  -f owner:branch Specify the owner and branch of the fork that is the head of a PR.\n");
 	fprintf(stderr, "  -l label        Add the given label when creating the PR\n");
@@ -75,22 +76,25 @@ usage(void)
 	fprintf(stderr, "  -t branch       Specify target branch of the PR\n");
 	fprintf(stderr, "  -y              Do not ask for confirmation.\n");
 	fprintf(stderr, "ACTIONS:\n");
-	fprintf(stderr, "  all             Display status, commits, op and checks of the PR\n");
-	fprintf(stderr, "  op              Display original post\n");
-	fprintf(stderr, "  status          Display PR metadata\n");
-	fprintf(stderr, "  comments        Display comments\n");
-	fprintf(stderr, "  notes           Alias for notes\n");
-	fprintf(stderr, "  commits         Display commits of the PR\n");
-	fprintf(stderr, "  ci              Display CI/Pipeline status information about the PR\n");
-	fprintf(stderr, "  merge [-s] [-D] Merge the PR (-s = squash commits, -d = inhibit deleting source branch)\n");
-	fprintf(stderr, "  milestone <id>  Assign this PR to a milestone\n");
-	fprintf(stderr, "  milestone -d    Clear associated milestones from the PR\n");
-	fprintf(stderr, "  close           Close the PR\n");
-	fprintf(stderr, "  reopen          Reopen a closed PR\n");
-	fprintf(stderr, "  labels ...      Add or remove labels:\n");
-	fprintf(stderr, "                     add <name>\n");
-	fprintf(stderr, "                     remove <name>\n");
-	fprintf(stderr, "  diff            Display changes as diff\n");
+	fprintf(stderr, "  all                    Display status, commits, op and checks of the PR\n");
+	fprintf(stderr, "  op                     Display original post\n");
+	fprintf(stderr, "  status                 Display PR metadata\n");
+	fprintf(stderr, "  comments               Display comments\n");
+	fprintf(stderr, "  notes                  Alias for notes\n");
+	fprintf(stderr, "  commits                Display commits of the PR\n");
+	fprintf(stderr, "  ci                     Display CI/Pipeline status information about the PR\n");
+	fprintf(stderr, "  merge [-s] [-D]        Merge the PR (-s = squash commits, -D = inhibit deleting source branch)\n");
+	fprintf(stderr, "  milestone <id>         Assign this PR to a milestone\n");
+	fprintf(stderr, "  milestone -d           Clear associated milestones from the PR\n");
+	fprintf(stderr, "  close                  Close the PR\n");
+	fprintf(stderr, "  reopen                 Reopen a closed PR\n");
+	fprintf(stderr, "  labels ...             Add or remove labels:\n");
+	fprintf(stderr, "                            add <name>\n");
+	fprintf(stderr, "                            remove <name>\n");
+	fprintf(stderr, "  diff                   Display changes as diff\n");
+	fprintf(stderr, "  patch                  Display changes as patch series\n");
+	fprintf(stderr, "  title <new-title>      Change the title of the pull request\n");
+	fprintf(stderr, "  request-review <user>  Add <user> as a reviewer of the PR\n");
 
 	fprintf(stderr, "\n");
 	version();
@@ -104,7 +108,7 @@ gcli_print_pulls(enum gcli_output_flags const flags,
 	int n;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
-		{ .name = "NUMBER",  .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "NUMBER",  .type = GCLI_TBLCOLTYPE_ID,     .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "STATE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
 		{ .name = "MERGED",  .type = GCLI_TBLCOLTYPE_BOOL,   .flags = 0 },
 		{ .name = "CREATOR", .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_BOLD },
@@ -154,10 +158,17 @@ gcli_print_pulls(enum gcli_output_flags const flags,
 }
 
 int
-gcli_print_pull_diff(FILE *stream, char const *owner, char const *reponame,
+gcli_pull_print_diff(FILE *stream, char const *owner, char const *reponame,
                      int pr_number)
 {
 	return gcli_pull_get_diff(g_clictx, stream, owner, reponame, pr_number);
+}
+
+int
+gcli_pull_print_patch(FILE *stream, char const *owner, char const *reponame,
+                      int pr_number)
+{
+	return gcli_pull_get_patch(g_clictx, stream, owner, reponame, pr_number);
 }
 
 void
@@ -165,11 +176,11 @@ gcli_pull_print(gcli_pull const *const it)
 {
 	gcli_dict dict;
 	gcli_forge_descriptor const *const forge = gcli_forge(g_clictx);
-    int const quirks = forge->pull_summary_quirks;
+	int const quirks = forge->pull_summary_quirks;
 
 	dict = gcli_dict_begin();
 
-	gcli_dict_add(dict,        "NUMBER", 0, 0, "%d", it->number);
+	gcli_dict_add(dict,        "NUMBER", 0, 0, "%"PRIid, it->number);
 	gcli_dict_add_string(dict, "TITLE", 0, 0, it->title);
 	gcli_dict_add_string(dict, "HEAD", 0, 0, it->head_label);
 	gcli_dict_add_string(dict, "BASE", 0, 0, it->base_label);
@@ -211,6 +222,15 @@ gcli_pull_print(gcli_pull const *const it)
 		gcli_dict_add_sv_list(dict, "LABELS", it->labels, it->labels_size);
 	} else {
 		gcli_dict_add_string(dict, "LABELS", 0, 0, "none");
+	}
+
+	if (it->reviewers_size) {
+		gcli_dict_add_string_list(dict, "REVIEWERS",
+		                          /* cast needed because of nested const */
+		                          (char const *const *)it->reviewers,
+		                          it->reviewers_size);
+	} else {
+		gcli_dict_add_string(dict, "REVIEWERS", 0, 0, "none");
 	}
 
 	gcli_dict_end(dict);
@@ -478,7 +498,8 @@ subcommand_pull_create(int argc, char *argv[])
 		opts.from = pr_try_derive_head();
 
 	if (!opts.to.length) {
-		if (!(opts.to = gcli_config_get_base(g_clictx)).length)
+		opts.to = gcli_config_get_base(g_clictx);
+		if (opts.to.length == 0)
 			errx(1,
 			     "error: PR base is missing. Please either specify "
 			     "--to branch-name or set pr.base in .gcli.");
@@ -541,6 +562,10 @@ subcommand_pulls(int argc, char *argv[])
 		  .has_arg = no_argument,
 		  .flag    = NULL,
 		  .val     = 'L' },
+		{ .name    = "milestone",
+		  .has_arg = no_argument,
+		  .flag    = NULL,
+		  .val     = 'M' },
 		{ .name    = "sorted",
 		  .has_arg = no_argument,
 		  .flag    = NULL,
@@ -565,7 +590,7 @@ subcommand_pulls(int argc, char *argv[])
 	};
 
 	/* Parse commandline options */
-	while ((ch = getopt_long(argc, argv, "+n:o:r:i:asA:L:", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "+n:o:r:i:asA:L:M:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
 			owner = optarg;
@@ -600,6 +625,9 @@ subcommand_pulls(int argc, char *argv[])
 		} break;
 		case 'L': {
 			details.label = optarg;
+		} break;
+		case 'M': {
+			details.milestone = optarg;
 		} break;
 		case 's': {
 			flags |= OUTPUT_SORTED;
@@ -640,34 +668,345 @@ subcommand_pulls(int argc, char *argv[])
 	return handle_pull_actions(argc, argv, owner, repo, pr);
 }
 
+struct action_ctx {
+	int argc;
+	char **argv;
+	char const *owner, *repo;
+	int pr;
+
+	/* For ease of handling and not making redundant calls to the API
+	 * we'll fetch the summary only if a command requires it. Then
+	 * we'll proceed to actually handling it. */
+	int fetched_pull;
+	gcli_pull pull;
+};
+
 /** Helper routine for fetching a PR if required */
 static void
-ensure_pull(char const *owner, char const *repo, int pr,
-            int *const fetched_pull, gcli_pull *const pull)
+action_ctx_ensure_pull(struct action_ctx *ctx)
 {
-	if (*fetched_pull)
+	if (ctx->fetched_pull)
 		return;
 
-	if (gcli_get_pull(g_clictx, owner, repo, pr, pull) < 0)
+	if (gcli_get_pull(g_clictx, ctx->owner, ctx->repo, ctx->pr, &ctx->pull) < 0)
 		errx(1, "error: failed to fetch pull request data: %s",
 		     gcli_get_error(g_clictx));
 
-	*fetched_pull = 1;
+	ctx->fetched_pull = 1;
+}
+
+static void
+action_all(struct action_ctx *ctx)
+{
+	/* First make sure we have the data ready */
+	action_ctx_ensure_pull(ctx);
+
+	/* Print meta */
+	gcli_pull_print(&ctx->pull);
+
+	/* OP */
+	puts("\nORIGINAL POST");
+	gcli_pull_print_op(&ctx->pull);
+
+	/* Commits */
+	puts("\nCOMMITS");
+	if (gcli_pull_commits(ctx->owner, ctx->repo, ctx->pr) < 0)
+		errx(1, "error: failed to fetch pull request checks: %s",
+		     gcli_get_error(g_clictx));
+
+	/* Checks */
+	puts("\nCHECKS");
+	if (gcli_pull_checks(ctx->owner, ctx->repo, ctx->pr) < 0)
+		errx(1, "error: failed to fetch pull request checks: %s",
+		     gcli_get_error(g_clictx));
+}
+
+static void
+action_op(struct action_ctx *const ctx)
+{
+	/* Ensure we have fetched the data */
+	action_ctx_ensure_pull(ctx);
+
+	/* Print it */
+	gcli_pull_print_op(&ctx->pull);
+}
+
+static void
+action_status(struct action_ctx *const ctx)
+{
+	/* Ensure we have the data */
+	action_ctx_ensure_pull(ctx);
+
+	/* Print meta information */
+	gcli_pull_print(&ctx->pull);
+}
+
+static void
+action_commits(struct action_ctx *const ctx)
+{
+	/* Does not require the summary */
+	gcli_pull_commits(ctx->owner, ctx->repo, ctx->pr);
+}
+
+static void
+action_diff(struct action_ctx *const ctx)
+{
+	if (gcli_pull_print_diff(stdout, ctx->owner, ctx->repo, ctx->pr) < 0)
+		errx(1, "error: failed to fetch diff: %s",
+		     gcli_get_error(g_clictx));
+}
+
+static void
+action_patch(struct action_ctx *const ctx)
+{
+	if (gcli_pull_print_patch(stdout, ctx->owner, ctx->repo, ctx->pr) < 0)
+		errx(1, "error: failed to fetch patch: %s",
+		     gcli_get_error(g_clictx));
+}
+
+/* aliased to notes */
+static void
+action_comments(struct action_ctx *const ctx)
+{
+	if (gcli_pull_comments(ctx->owner, ctx->repo, ctx->pr) < 0)
+		errx(1, "error: failed to fetch pull comments: %s",
+		     gcli_get_error(g_clictx));
+}
+
+static void
+action_ci(struct action_ctx *const ctx)
+{
+	if (gcli_pull_checks(ctx->owner, ctx->repo, ctx->pr) < 0)
+		errx(1, "error: failed to fetch pull request checks: %s",
+		     gcli_get_error(g_clictx));
+}
+
+static void
+action_merge(struct action_ctx *const ctx)
+{
+	enum gcli_merge_flags flags = GCLI_PULL_MERGE_DELETEHEAD;
+
+	/* Default behaviour */
+	if (gcli_config_pr_inhibit_delete_source_branch(g_clictx))
+	    flags = 0;
+
+	if (ctx->argc > 1) {
+		/* Check whether the user intends a squash-merge
+		 * and/or wants to delete the source branch of the
+		 * PR */
+		char const *word = ctx->argv[1];
+		if (strcmp(word, "-s") == 0 || strcmp(word, "--squash") == 0) {
+			ctx->argc -= 1;
+			ctx->argv += 1;
+
+			flags |= GCLI_PULL_MERGE_SQUASH;
+		} else if (strcmp(word, "-D") == 0 || strcmp(word, "--inhibit-delete") == 0) {
+			ctx->argc -= 1;
+			ctx->argv += 1;
+
+			flags &= ~GCLI_PULL_MERGE_DELETEHEAD;
+		}
+	}
+
+	if (gcli_pull_merge(g_clictx, ctx->owner, ctx->repo, ctx->pr, flags) < 0)
+		errx(1, "error: failed to merge pull request: %s",
+		     gcli_get_error(g_clictx));
+}
+
+static void
+action_close(struct action_ctx *const ctx)
+{
+	if (gcli_pull_close(g_clictx, ctx->owner, ctx->repo, ctx->pr) < 0)
+		errx(1, "error: failed to close pull request: %s",
+		     gcli_get_error(g_clictx));
+}
+
+static void
+action_reopen(struct action_ctx *const ctx)
+{
+	if (gcli_pull_reopen(g_clictx, ctx->owner, ctx->repo, ctx->pr) < 0)
+		errx(1, "error: failed to reopen pull request: %s",
+		     gcli_get_error(g_clictx));
+}
+
+static void
+action_labels(struct action_ctx *const ctx)
+{
+	const char **add_labels = NULL;
+	size_t add_labels_size = 0;
+	const char **remove_labels = NULL;
+	size_t remove_labels_size = 0;
+	int rc = 0;
+
+	if (ctx->argc == 0) {
+		fprintf(stderr, "error: expected label action\n");
+		usage();
+		exit(EXIT_FAILURE);
+	}
+
+	/* HACK: parse_labels_options uses shift to walk the argv. We need to put
+	 *       it right at the first argument (either an add or a remove) where
+	 *       it should start parsing.
+	 *
+	 *       Thus, we "prematurely" advance argv and after we finished parsing
+	 *       we reduce back to make the following getopt calls not trip over
+	 *       a missing argv[0]. */
+	ctx->argc -= 1; ctx->argv += 1;
+	parse_labels_options(&ctx->argc, &ctx->argv,
+	                     &add_labels,    &add_labels_size,
+	                     &remove_labels, &remove_labels_size);
+	ctx->argc += 1; ctx->argv -= 1;
+
+	/* actually go about deleting and adding the labels */
+	if (add_labels_size) {
+		rc = gcli_pull_add_labels(g_clictx, ctx->owner, ctx->repo, ctx->pr,
+		                          add_labels, add_labels_size);
+		if (rc < 0)
+			errx(1, "error: failed to add labels: %s", gcli_get_error(g_clictx));
+	}
+
+	if (remove_labels_size) {
+		rc = gcli_pull_remove_labels(g_clictx, ctx->owner, ctx->repo, ctx->pr,
+		                             remove_labels, remove_labels_size);
+
+		if (rc < 0)
+			errx(1, "error: failed to remove labels: %s", gcli_get_error(g_clictx));
+	}
+
+	free(add_labels);
+	free(remove_labels);
+}
+
+static void
+action_milestone(struct action_ctx *const ctx)
+{
+	char const *arg;
+
+	if (ctx->argc < 2) {
+		fprintf(stderr, "error: missing arguments to milestone action\n");
+		usage();
+		exit(EXIT_FAILURE);
+	}
+
+	arg = ctx->argv[1];
+	ctx->argc -= 1;
+	ctx->argv += 1;
+
+	if (strcmp(arg, "-d") == 0) {
+		if (gcli_pull_clear_milestone(g_clictx, ctx->owner, ctx->repo, ctx->pr) < 0)
+			errx(1, "error: failed to clear milestone: %s",
+			     gcli_get_error(g_clictx));
+
+	} else {
+		int milestone_id = 0;
+		char *endptr;
+		int rc = 0;
+
+		milestone_id = strtoul(arg, &endptr, 10);
+		if (endptr != arg + strlen(arg)) {
+			fprintf(stderr, "error: cannot parse milestone id »%s«\n", arg);
+			exit(EXIT_FAILURE);
+		}
+
+		rc = gcli_pull_set_milestone(g_clictx, ctx->owner, ctx->repo, ctx->pr,
+		                             milestone_id);
+		if (rc < 0)
+			errx(1, "error: failed to set milestone: %s",
+			     gcli_get_error(g_clictx));
+	}
+}
+
+static void
+action_request_review(struct action_ctx *const ctx)
+{
+	int rc;
+
+	if (ctx->argc < 2) {
+		fprintf(stderr, "error: missing user name for reviewer\n");
+		usage();
+		exit(EXIT_FAILURE);
+	}
+
+	rc = gcli_pull_add_reviewer(g_clictx, ctx->owner, ctx->repo, ctx->pr,
+	                            ctx->argv[1]);
+	if (rc < 0)
+		errx(1, "error: failed to request review: %s", gcli_get_error(g_clictx));
+
+	ctx->argc -= 1;
+	ctx->argv += 1;
+}
+
+static void
+action_title(struct action_ctx *const ctx)
+{
+	int rc = 0;
+
+	if (ctx->argc < 2) {
+		fprintf(stderr, "error: missing title\n");
+		usage();
+		exit(EXIT_FAILURE);
+	}
+
+	rc = gcli_pull_set_title(g_clictx, ctx->owner, ctx->repo, ctx->pr,
+	                         ctx->argv[1]);
+	if (rc < 0) {
+		errx(1, "error: failed to update review title: %s",
+		     gcli_get_error(g_clictx));
+	}
+
+	ctx->argc -= 1;
+	ctx->argv += 1;
+}
+
+static struct action {
+	char const *name;
+	void (*fn)(struct action_ctx *ctx);
+} const actions[] = {
+	{ .name = "all",            .fn = action_all            },
+	{ .name = "op",             .fn = action_op             },
+	{ .name = "status",         .fn = action_status         },
+	{ .name = "commits",        .fn = action_commits        },
+	{ .name = "diff",           .fn = action_diff           },
+	{ .name = "patch",          .fn = action_patch          },
+	{ .name = "notes",          .fn = action_comments       },
+	{ .name = "comments",       .fn = action_comments       },
+	{ .name = "ci",             .fn = action_ci             },
+	{ .name = "merge",          .fn = action_merge          },
+	{ .name = "close",          .fn = action_close          },
+	{ .name = "reopen",         .fn = action_reopen         },
+	{ .name = "labels",         .fn = action_labels         },
+	{ .name = "milestone",      .fn = action_milestone      },
+	{ .name = "request-review", .fn = action_request_review },
+	{ .name = "title",          .fn = action_title          },
+};
+
+static size_t const actions_size = ARRAY_SIZE(actions);
+
+static struct action const *
+find_action(char const *const name)
+{
+	for (size_t i = 0; i < actions_size; ++i) {
+		if (strcmp(name, actions[i].name) == 0)
+			return &actions[i];
+	}
+
+	return NULL;
 }
 
 /** Handling routine for Pull Request related actions specified on the
  * command line. Make sure that the usage at the top is consistent
  * with the actions implemented here. */
 static int
-handle_pull_actions(int argc, char *argv[],
-                    char const *owner, char const *repo,
+handle_pull_actions(int argc, char *argv[], char const *owner, char const *repo,
                     int pr)
 {
-	/* For ease of handling and not making redundant calls to the API
-	 * we'll fetch the summary only if a command requires it. Then
-	 * we'll proceed to actually handling it. */
-	int fetched_pull = 0;
-	gcli_pull pull = {0};
+	struct action_ctx ctx = {
+		.argc = argc,
+		.argv = argv,
+		.owner = owner,
+		.repo = repo,
+		.pr = pr,
+	};
 
 	/* Check if the user missed out on supplying actions */
 	if (argc == 0) {
@@ -677,195 +1016,36 @@ handle_pull_actions(int argc, char *argv[],
 	}
 
 	/* Iterate over the argument list until the end */
-	while (argc > 0) {
+	while (ctx.argc > 0) {
 
 		/* Grab the next action from the argument list */
-		const char *action = shift(&argc, &argv);
+		const char *action = ctx.argv[0];
+		struct action const *handler = find_action(action);
 
-		/* Check if it is a valid one. When we find any of
-		 *
-		 *      all, op or status
-		 *
-		 * we must ensure that the summary has been fetched. */
-		if (strcmp(action, "all") == 0) {
+		if (handler) {
+			handler->fn(&ctx);
 
-			/* First make sure we have the data ready */
-			ensure_pull(owner, repo, pr, &fetched_pull, &pull);
-
-			/* Print meta */
-			gcli_pull_print(&pull);
-
-			/* OP */
-			puts("\nORIGINAL POST");
-			gcli_pull_print_op(&pull);
-
-			/* Commits */
-			puts("\nCOMMITS");
-			if (gcli_pull_commits(owner, repo, pr) < 0)
-				errx(1, "error: failed to fetch pull request checks: %s",
-				     gcli_get_error(g_clictx));
-
-			/* Checks */
-			puts("\nCHECKS");
-			if (gcli_pull_checks(owner, repo, pr) < 0)
-				errx(1, "error: failed to fetch pull request checks: %s",
-				     gcli_get_error(g_clictx));
-
-		} else if (strcmp(action, "op") == 0) {
-
-			/* Ensure we have fetched the data */
-			ensure_pull(owner, repo, pr, &fetched_pull, &pull);
-
-			/* Print it */
-			gcli_pull_print_op(&pull);
-
-		} else if (strcmp(action, "status") == 0) {
-
-			/* Ensure we have the data */
-			ensure_pull(owner, repo, pr, &fetched_pull, &pull);
-
-			/* Print meta information */
-			gcli_pull_print(&pull);
-
-		} else if (strcmp(action, "commits") == 0) {
-
-			/* Does not require the summary */
-			gcli_pull_commits(owner, repo, pr);
-
-		} else if (strcmp(action, "diff") == 0) {
-			if (gcli_print_pull_diff(stdout, owner, repo, pr) < 0)
-				errx(1, "error: failed to fetch diff: %s",
-				     gcli_get_error(g_clictx));
-
-		} else if (strcmp(action, "comments") == 0 ||
-		           strcmp(action, "notes") == 0) {
-			if (gcli_pull_comments(owner, repo, pr) < 0)
-				errx(1, "error: failed to fetch pull comments: %s",
-				     gcli_get_error(g_clictx));
-
-		} else if (strcmp(action, "ci") == 0) {
-			if (gcli_pull_checks(owner, repo, pr) < 0)
-				errx(1, "error: failed to fetch pull request checks: %s",
-				     gcli_get_error(g_clictx));
-
-		} else if (strcmp(action, "merge") == 0) {
-			enum gcli_merge_flags flags = GCLI_PULL_MERGE_DELETEHEAD;
-
-			/* Default behaviour */
-			if (gcli_config_pr_inhibit_delete_source_branch(g_clictx))
-			    flags = 0;
-
-			if (argc > 0) {
-				/* Check whether the user intends a squash-merge
-				 * and/or wants to delete the source branch of the
-				 * PR */
-				if (strcmp(argv[0], "-s") == 0 ||
-				    strcmp(argv[0], "--squash") == 0) {
-					--argc; ++argv;
-					flags |= GCLI_PULL_MERGE_SQUASH;
-				} else if (strcmp(argv[0], "-D") == 0 ||
-				           strcmp(argv[0], "--inhibit-delete") == 0) {
-					--argc; ++argv;
-					flags &= ~GCLI_PULL_MERGE_DELETEHEAD;
-				}
-			}
-
-			if (gcli_pull_merge(g_clictx, owner, repo, pr, flags) < 0)
-				errx(1, "error: failed to merge pull request: %s",
-				     gcli_get_error(g_clictx));
-
-		} else if (strcmp(action, "close") == 0) {
-			if (gcli_pull_close(g_clictx, owner, repo, pr) < 0)
-				errx(1, "error: failed to close pull request: %s",
-				     gcli_get_error(g_clictx));
-
-		} else if (strcmp(action, "reopen") == 0) {
-			if (gcli_pull_reopen(g_clictx, owner, repo, pr) < 0)
-				errx(1, "error: failed to reopen pull request: %s",
-				     gcli_get_error(g_clictx));
-
-		} else if (strcmp("labels", action) == 0) {
-			const char **add_labels = NULL;
-			size_t add_labels_size = 0;
-			const char **remove_labels = NULL;
-			size_t remove_labels_size = 0;
-			int rc = 0;
-
-			if (argc == 0) {
-				fprintf(stderr, "error: expected label action\n");
-				usage();
-				return EXIT_FAILURE;
-			}
-
-			parse_labels_options(&argc, &argv,
-			                     &add_labels,    &add_labels_size,
-			                     &remove_labels, &remove_labels_size);
-
-			/* actually go about deleting and adding the labels */
-			if (add_labels_size) {
-				rc = gcli_pull_add_labels(
-					g_clictx, owner, repo, pr, add_labels,
-					add_labels_size);
-				if (rc < 0)
-					errx(1, "error: failed to add labels: %s",
-					     gcli_get_error(g_clictx));
-			}
-			if (remove_labels_size) {
-				rc = gcli_pull_remove_labels(
-					g_clictx, owner, repo, pr, remove_labels,
-					remove_labels_size);
-
-				if (rc < 0)
-					errx(1, "error: failed to remove labels: %s",
-					     gcli_get_error(g_clictx));
-			}
-
-			free(add_labels);
-			free(remove_labels);
-
-		} else if (strcmp("milestone", action) == 0) {
-			char const *arg = shift(&argc, &argv);
-
-			if (strcmp(arg, "-d") == 0) {
-				if (gcli_pull_clear_milestone(g_clictx, owner, repo, pr) < 0)
-					errx(1, "error: failed to clear milestone: %s",
-					     gcli_get_error(g_clictx));
-
-			} else {
-				int milestone_id = 0;
-				char *endptr;
-				int rc = 0;
-
-				milestone_id = strtoul(arg, &endptr, 10);
-				if (endptr != arg + strlen(arg)) {
-					fprintf(stderr, "error: cannot parse milestone id »%s«\n", arg);
-					return EXIT_FAILURE;
-				}
-
-				rc = gcli_pull_set_milestone(g_clictx, owner, repo, pr,
-				                             milestone_id);
-				if (rc < 0)
-					errx(1, "error: failed to set milestone: %s",
-					     gcli_get_error(g_clictx));
-			}
 		} else {
 			/* At this point we found an unknown action / stray
 			 * options on the command line. Error out in this case. */
 
 			fprintf(stderr, "error: unknown action %s\n", action);
 			usage();
-			return EXIT_FAILURE;
 
+			return EXIT_FAILURE;
 		}
 
-		if (argc)
+		ctx.argc -= 1;
+		ctx.argv += 1;
+
+		if (ctx.argc)
 			putchar('\n');
 
 	} /* Next action */
 
 	/* Free the pull request data only when we actually fetched it */
-	if (fetched_pull)
-		gcli_pull_free(&pull);
+	if (ctx.fetched_pull)
+		gcli_pull_free(&ctx.pull);
 
 	return EXIT_SUCCESS;
 }

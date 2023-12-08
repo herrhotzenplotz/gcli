@@ -34,9 +34,9 @@ ID of the public key to delete.
 .It Cm ssh
 List SSH public keys for the current user.
 .It Cm ssh add
-Add a SSH public key for the current user.
+Add an SSH public key for the current user.
 .It Cm ssh delete
-Delete a SSH public key for the current user.
+Delete an SSH public key for the current user.
 .El
 .Sh EXAMPLES
 Print a list of registered SSH public keys:
@@ -63,5 +63,10 @@ When using this feature to manage SSH keys on Github be aware that you need the
 scope enabled on your access token. You will receive HTTP 404 errors
 otherwise.
 .Pp
-Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
-or on Github.
+Please report bugs via E-Mail to
+.Mt @PACKAGE_BUGREPORT@ .
+.Pp
+Alternatively you can report them on any of the forges linked at
+.Lk @PACKAGE_URL@ .
+However, the preferred and quickest method is to use the mailing
+list.

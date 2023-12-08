@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,17 +27,33 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GITHUB_REVIEW_H
-#define GITHUB_REVIEW_H
+#include <gcli/curl.h>
+#include <gcli/gitea/status.h>
+#include <gcli/github/status.h>
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include <sn/sn.h>
 
-#include <gcli/review.h>
+#include <templates/gitea/status.h>
 
-int github_review_get_reviews(gcli_ctx *ctx, char const *owner,
-                              char const *repo, gcli_id pr,
-                              gcli_pr_review_list *out);
+int
+gitea_get_notifications(gcli_ctx *ctx, int const max,
+                        gcli_notification_list *const out)
+{
+	char *url = NULL;
 
-#endif /* GITHUB_REVIEW_H */
+	gcli_fetch_list_ctx fl = {
+		.listp = &out->notifications,
+		.sizep = &out->notifications_size,
+		.parse = (parsefn)(parse_gitea_notifications),
+		.max = max,
+	};
+
+	url = sn_asprintf("%s/notifications", gcli_get_apibase(ctx));
+	return gcli_fetch_list(ctx, url, &fl);
+}
+
+int
+gitea_notification_mark_as_read(gcli_ctx *ctx, char const *id)
+{
+	return github_notification_mark_as_read(ctx, id);
+}

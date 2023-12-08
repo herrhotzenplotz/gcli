@@ -46,14 +46,20 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: gcli repos create -r repo [-d description] [-p]\n");
-	fprintf(stderr, "       gcli repos [-o owner -r repo] [-n number] [-s] [-y] [delete]\n");
+	fprintf(stderr, "       gcli repos [-o owner -r repo] [-n number] [-s]\n");
+	fprintf(stderr, "       gcli repos [-o owner -r repo] actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
-	fprintf(stderr, "  -o owner        The repository owner\n");
-	fprintf(stderr, "  -r repo         The repository name\n");
-	fprintf(stderr, "  -n number       Number of repos to fetch (-1 = everything)\n");
-	fprintf(stderr, "  -p              Make the repo private\n");
-	fprintf(stderr, "  -s              Print (sort) in reverse order\n");
-	fprintf(stderr, "  -y              Do not ask for confirmation\n");
+	fprintf(stderr, "  -o owner                The repository owner\n");
+	fprintf(stderr, "  -r repo                 The repository name\n");
+	fprintf(stderr, "  -n number               Number of repos to fetch (-1 = everything)\n");
+	fprintf(stderr, "  -p                      Make the repo private\n");
+	fprintf(stderr, "  -s                      Print (sort) in reverse order\n");
+	fprintf(stderr, "ACTIONS:\n");
+	fprintf(stderr, "  delete [-y]             Delete this repository:\n");
+	fprintf(stderr, "                            -y    Do not ask for confirmation\n");
+	fprintf(stderr, "  set-visibility <level>  Mark the reposity as public or private. Level may be one of:\n");
+	fprintf(stderr, "                            - public\n");
+	fprintf(stderr, "                            - private\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
@@ -115,7 +121,7 @@ gcli_repo_print(gcli_repo const *it)
 	gcli_dict dict;
 
 	dict = gcli_dict_begin();
-	gcli_dict_add(dict, "ID",         0, 0, "%d", it->id);
+	gcli_dict_add(dict, "ID",         0, 0, "%"PRIid, it->id);
 	gcli_dict_add(dict, "FULL NAME",  0, 0, SV_FMT, SV_ARGS(it->full_name));
 	gcli_dict_add(dict, "NAME",       0, 0, SV_FMT, SV_ARGS(it->name));
 	gcli_dict_add(dict, "OWNER",      0, 0, SV_FMT, SV_ARGS(it->owner));
@@ -187,15 +193,114 @@ subcommand_repos_create(int argc, char *argv[])
 	return EXIT_SUCCESS;
 }
 
+static int
+action_delete(char const *const owner, char const *const repo, int *argc,
+              char ***argv)
+{
+	int ch;
+	bool always_yes = false;
+	struct option const options[] = {
+		{ .name    = "yes",
+		  .has_arg = no_argument,
+		  .flag    = NULL,
+		  .val     = 'y' },
+		{0},
+	};
+
+	while ((ch = getopt_long(*argc, *argv, "+y", options, NULL)) != -1) {
+		switch (ch) {
+		case 'y':
+			always_yes = true;
+			break;
+		default:
+			usage();
+			return EXIT_FAILURE;
+		}
+	}
+
+	*argc -= optind;
+	*argv += optind;
+
+	delete_repo(always_yes, owner, repo);
+
+	return 0;
+}
+
+static gcli_repo_visibility
+parse_visibility(char const *str)
+{
+	if (strcmp(str, "public") == 0)
+		return GCLI_REPO_VISIBILITY_PUBLIC;
+	else if (strcmp(str, "private") == 0)
+		return GCLI_REPO_VISIBILITY_PRIVATE;
+	else
+		return -1;
+}
+
+/* Change the visibility level of a repository (e.g. public, private
+ * etc) */
+static int
+action_set_visibility(char const *const owner, char const *const repo,
+                      int *argc , char ***argv)
+{
+	char const *visblty_str;
+	gcli_repo_visibility visblty;
+	int rc;
+
+	if (*argc < 2) {
+		fprintf(stderr, "error: missing visibility level\n");
+		return 1;
+	}
+
+	visblty_str = (*argv)[1];
+	*argv += 2;
+	*argc -= 2;
+
+	visblty = parse_visibility(visblty_str);
+	if (visblty < 0) {
+		fprintf(stderr, "error: bad visibility level »%s«\n", visblty_str);
+		return 1;
+	}
+
+	if ((rc = gcli_repo_set_visibility(g_clictx, owner, repo, visblty)) < 0) {
+		fprintf(stderr, "error: failed to set visibility: %s\n",
+		        gcli_get_error(g_clictx));
+		return 1;
+	}
+
+	return 0;
+}
+
+static struct action {
+	char const *const name;
+	int (*fn)(char const *const owner, char const *const repo, int *argc,
+	          char ***argv);
+} const actions[] = {
+	{ .name = "delete",         .fn = action_delete },
+	{ .name = "set-visibility", .fn = action_set_visibility },
+};
+
+static size_t const actions_size = ARRAY_SIZE(actions);
+
+static struct action const *
+find_action(char const *const name)
+{
+	for (size_t i = 0; i < actions_size; ++i) {
+		if (strcmp(name, actions[i].name) == 0)
+			return &actions[i];
+	}
+
+	return NULL;
+}
+
 int
 subcommand_repos(int argc, char *argv[])
 {
-	int                     ch, n = 30;
-	char const             *owner      = NULL;
-	char const             *repo       = NULL;
-	gcli_repo_list          repos      = {0};
-	bool                    always_yes = false;
-	enum gcli_output_flags  flags      = 0;
+	int ch, n = 30;
+	char const *owner = NULL;
+	char const *repo = NULL;
+	gcli_repo_list repos = {0};
+	enum gcli_output_flags flags = 0;
 
 	/* detect whether we wanna create a repo */
 	if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
@@ -216,10 +321,6 @@ subcommand_repos(int argc, char *argv[])
 		  .has_arg = required_argument,
 		  .flag    = NULL,
 		  .val     = 'o' },
-		{ .name    = "yes",
-		  .has_arg = no_argument,
-		  .flag    = NULL,
-		  .val     = 'y' },
 		{ .name    = "sorted",
 		  .has_arg = no_argument,
 		  .flag    = NULL,
@@ -227,16 +328,13 @@ subcommand_repos(int argc, char *argv[])
 		{0},
 	};
 
-	while ((ch = getopt_long(argc, argv, "n:o:r:ys", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "+n:o:r:s", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
 			owner = optarg;
 			break;
 		case 'r':
 			repo = optarg;
-			break;
-		case 'y':
-			always_yes = true;
 			break;
 		case 's':
 			flags |= OUTPUT_SORTED;
@@ -259,6 +357,7 @@ subcommand_repos(int argc, char *argv[])
 
 	argc -= optind;
 	argv += optind;
+	optind = 0;
 
 	/* List repos of the owner */
 	if (argc == 0) {
@@ -273,6 +372,15 @@ subcommand_repos(int argc, char *argv[])
 		if (!owner)
 			owner = gcli_config_get_account_name(g_clictx);
 
+		/* whenever there is no default account we would be passing NULL to
+		 * gcli_get_repos. This is bad since that causes segfaults down the
+		 * line. (https://github.com/herrhotzenplotz/gcli/issues/118) */
+		if (!owner) {
+			fprintf(stderr, "error: no account specified or no default account"
+			        " configured. use -o to provide an explicit account name.\n");
+			return EXIT_FAILURE;
+		}
+
 		rc = gcli_get_repos(g_clictx, owner, n, &repos);
 		if (rc < 0)
 			errx(1, "error: failed to fetch repos: %s", gcli_get_error(g_clictx));
@@ -282,16 +390,18 @@ subcommand_repos(int argc, char *argv[])
 	} else {
 		check_owner_and_repo(&owner, &repo);
 
-		for (size_t i = 0; i < (size_t)argc; ++i) {
-			char const *action = argv[i];
+		while (argc) {
+			struct action const *action = find_action(argv[0]);
+			int rc = 0;
 
-			if (strcmp(action, "delete") == 0) {
-				delete_repo(always_yes, owner, repo);
-			} else {
-				fprintf(stderr, "error: repos: unknown action '%s'\n", action);
-				usage();
+			if (!action) {
+				fprintf(stderr, "error: unrecognised action »%s«\n", argv[0]);
 				return EXIT_FAILURE;
 			}
+
+			rc = action->fn(owner, repo, &argc, &argv);
+			if (rc)
+				return rc;
 		}
 	}
 

@@ -79,7 +79,7 @@ gitlab_mr_pipelines(char const *owner, char const *repo, int const mr_id)
 	if (rc == 0)
 		gitlab_print_pipelines(&list);
 
-	gitlab_free_pipelines(&list);
+	gitlab_pipelines_free(&list);
 
 	return rc;
 }
@@ -89,7 +89,7 @@ gitlab_print_pipelines(gitlab_pipeline_list const *const list)
 {
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
-		{ .name = "ID",      .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "ID",      .type = GCLI_TBLCOLTYPE_ID,     .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "STATUS",  .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
 		{ .name = "CREATED", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 		{ .name = "UPDATED", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
@@ -107,7 +107,7 @@ gitlab_print_pipelines(gitlab_pipeline_list const *const list)
 
 	for (size_t i = 0; i < list->pipelines_size; ++i) {
 		gcli_tbl_add_row(table,
-		                 (int)(list->pipelines[i].id),
+		                 list->pipelines[i].id,
 		                 list->pipelines[i].status,
 		                 list->pipelines[i].created_at,
 		                 list->pipelines[i].updated_at,
@@ -128,7 +128,7 @@ gitlab_pipelines(char const *owner, char const *repo, int const count)
 		return rc;
 
 	gitlab_print_pipelines(&pipelines);
-	gitlab_free_pipelines(&pipelines);
+	gitlab_pipelines_free(&pipelines);
 
 	return rc;
 }
@@ -138,7 +138,7 @@ gitlab_print_jobs(gitlab_job_list const *const list)
 {
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
-		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_LONG,   .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_ID,     .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 		{ .name = "STATUS",     .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
 		{ .name = "STARTED",    .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
@@ -194,7 +194,7 @@ gitlab_print_job_status(gitlab_job const *const job)
 
 	printer = gcli_dict_begin();
 
-	gcli_dict_add(printer,        "ID", 0, 0, "%ld", job->id);
+	gcli_dict_add(printer,        "ID", 0, 0, "%"PRIid, job->id);
 	gcli_dict_add_string(printer, "STATUS", GCLI_TBLCOL_STATECOLOURED, 0, job->status);
 	gcli_dict_add_string(printer, "STAGE", 0, 0, job->stage);
 	gcli_dict_add_string(printer, "NAME", GCLI_TBLCOL_BOLD, 0, job->name);

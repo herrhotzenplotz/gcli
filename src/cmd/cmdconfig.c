@@ -46,17 +46,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#ifdef HAVE_SYS_QUEUE_H
-#include <sys/queue.h>
-#endif /* HAVE_SYS_QUEUE_H */
-
-struct gcli_config_entry {
-	TAILQ_ENTRY(gcli_config_entry) next;
-	sn_sv key;
-	sn_sv value;
-};
-
-TAILQ_HEAD(gcli_config_entries, gcli_config_entry);
 struct gcli_config_section {
 	TAILQ_ENTRY(gcli_config_section) next;
 
@@ -65,7 +54,6 @@ struct gcli_config_section {
 	sn_sv title;
 };
 
-#define CONFIG_MAX_SECTIONS 16
 struct gcli_config {
 	TAILQ_HEAD(gcli_config_sections, gcli_config_section) sections;
 
@@ -615,6 +603,21 @@ find_section(struct gcli_config *cfg, char const *name)
 	return NULL;
 }
 
+struct gcli_config_entries const *
+gcli_config_get_section_entries(gcli_ctx *ctx, char const *section_name)
+{
+	struct gcli_config_section const *s;
+	struct gcli_config *cfg;
+
+	cfg = ensure_config(ctx);
+	s = find_section(cfg, section_name);
+
+	if (s == NULL)
+		return NULL;
+	else
+		return &s->entries;
+}
+
 sn_sv
 gcli_config_find_by_key(gcli_ctx *ctx, char const *section_name, char const *key)
 {
@@ -665,7 +668,7 @@ default_account_entry_names[] = {
 	[GCLI_FORGE_GITLAB] = "gitlab-default-account",
 	[GCLI_FORGE_GITEA]  = "gitea-default-account", };
 
-static char const *
+static char *
 get_default_account(gcli_ctx *ctx, gcli_forge_type ftype)
 {
 	char const *const defaultname = default_account_entry_names[ftype];
@@ -677,15 +680,15 @@ get_default_account(gcli_ctx *ctx, gcli_forge_type ftype)
 	return sn_sv_to_cstr(act);
 }
 
-static char const *
+static char *
 gcli_config_get_account(gcli_ctx *ctx)
 {
 	struct gcli_config *cfg = ctx_config(ctx);
 	gcli_forge_type ftype = gcli_config_get_forge_type(ctx);
-	char const *account;
+	char *account;
 
 	if (cfg->override_default_account) {
-		account = cfg->override_default_account;
+		account = strdup(cfg->override_default_account);
 	} else {
 		account = get_default_account(ctx, ftype);
 	}
@@ -702,7 +705,7 @@ static char const *const default_urls[] = {
 char *
 gcli_config_get_apibase(gcli_ctx *ctx)
 {
-	char const *acct = gcli_config_get_account(ctx);
+	char *acct = gcli_config_get_account(ctx);
 	char *url = NULL;
 
 	if (acct) {
@@ -714,15 +717,20 @@ gcli_config_get_apibase(gcli_ctx *ctx)
 	if (!url)
 		url = strdup(default_urls[gcli_config_get_forge_type(ctx)]);
 
+
+	free(acct);
+
 	return url;
 }
 
 char *
 gcli_config_get_account_name(gcli_ctx *ctx)
 {
-	char const *account = gcli_config_get_account(ctx);
+	char *account = gcli_config_get_account(ctx);
 	sn_sv actname = gcli_config_find_by_key(
 		ctx, account, "account");
+
+	free(account);
 
 	return sn_sv_to_cstr(actname);
 }
@@ -730,7 +738,7 @@ gcli_config_get_account_name(gcli_ctx *ctx)
 static char *
 get_account_token(gcli_ctx *ctx)
 {
-	char const *account;
+	char *account;
 	sn_sv token;
 
 	account = gcli_config_get_account(ctx);
@@ -738,6 +746,8 @@ get_account_token(gcli_ctx *ctx)
 		return NULL;
 
 	token = gcli_config_find_by_key(ctx, account, "token");
+
+	free(account);
 
 	return sn_sv_to_cstr(token);
 }

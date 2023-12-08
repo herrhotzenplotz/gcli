@@ -61,7 +61,7 @@ int
 gcli_pull_get_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
                    char const *reponame, gcli_id const pr_number)
 {
-	return gcli_forge(ctx)->print_pull_diff(ctx, stream, owner, reponame, pr_number);
+	return gcli_forge(ctx)->pull_get_diff(ctx, stream, owner, reponame, pr_number);
 }
 
 int
@@ -76,6 +76,7 @@ gcli_commits_free(gcli_commit_list *list)
 {
 	for (size_t i = 0; i < list->commits_size; ++i) {
 		free(list->commits[i].sha);
+		free(list->commits[i].long_sha);
 		free(list->commits[i].message);
 		free(list->commits[i].date);
 		free(list->commits[i].author);
@@ -96,9 +97,13 @@ gcli_pull_free(gcli_pull *const it)
 	free(it->title);
 	free(it->body);
 	free(it->created_at);
+	free(it->commits_link);
 	free(it->head_label);
 	free(it->base_label);
 	free(it->head_sha);
+	free(it->base_sha);
+	free(it->milestone);
+	free(it->coverage);
 
 	for (size_t i = 0; i < it->labels_size; ++i)
 		free(it->labels[i].data);
@@ -128,7 +133,7 @@ gcli_pull_checks_free(gcli_pull_checks_list *list)
 		github_free_checks((github_check_list *)list);
 		break;
 	case GCLI_FORGE_GITLAB:
-		gitlab_free_pipelines((gitlab_pipeline_list *)list);
+		gitlab_pipelines_free((gitlab_pipeline_list *)list);
 		break;
 	default:
 		assert(0 && "unreachable");
@@ -193,4 +198,27 @@ gcli_pull_clear_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
                           gcli_id const pr_number)
 {
 	return gcli_forge(ctx)->pull_clear_milestone(ctx, owner, repo, pr_number);
+}
+
+int
+gcli_pull_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
+                       gcli_id pr_number, char const *username)
+{
+	return gcli_forge(ctx)->pull_add_reviewer(
+		ctx, owner, repo, pr_number, username);
+}
+
+int
+gcli_pull_get_patch(gcli_ctx *ctx, FILE *out, char const *owner, char const *repo,
+                    gcli_id pull_id)
+{
+	return gcli_forge(ctx)->pull_get_patch(ctx, out, owner, repo, pull_id);
+}
+
+int
+gcli_pull_set_title(gcli_ctx *ctx, char const *const owner,
+                    char const *const repo, gcli_id const pull,
+                    char const *new_title)
+{
+	return gcli_forge(ctx)->pull_set_title(ctx, owner, repo, pull, new_title);
 }

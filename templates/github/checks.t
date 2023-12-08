@@ -7,7 +7,7 @@ object of gcli_github_check with
 	 "conclusion"   => conclusion as string,
 	 "started_at"   => started_at as string,
 	 "completed_at" => completed_at as string,
-	 "id"           => id as long);
+	 "id"           => id as id);
 
 parser github_checks is
 object of github_check_list with

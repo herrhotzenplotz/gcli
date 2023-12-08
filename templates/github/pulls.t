@@ -14,7 +14,7 @@ object of gcli_commit with
 
 parser github_commit is
 object of gcli_commit with
-	("sha"    => sha as string,
+	("sha"    => long_sha as string,
 	 "commit" => use parse_github_commit_commit_field);
 
 parser github_commits is array of gcli_commit
@@ -32,6 +32,9 @@ object of gcli_pull with
 parser github_pull_milestone is
 object of gcli_pull with
 	("title" => milestone as string);
+
+parser github_reviewer is
+object of char* select "login" as string;
 
 parser github_pull is
 object of gcli_pull with
@@ -54,7 +57,8 @@ object of gcli_pull with
 	 "user"          => author as user,
 	 "head"          => use parse_github_pull_head,
 	 "base"          => use parse_github_branch_label,
-	 "milestone"     => use parse_github_pull_milestone);
+	 "milestone"     => use parse_github_pull_milestone,
+	 "requested_reviewers" => reviewers as array of char* use parse_github_reviewer);
 
 parser github_pr_merge_message is object of char* select "message" as string;
 

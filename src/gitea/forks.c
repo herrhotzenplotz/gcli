@@ -39,9 +39,9 @@ gitea_get_forks(gcli_ctx *ctx, char const *owner, char const *repo,
 	return github_get_forks(ctx, owner, repo, max, out);
 }
 
-void
+int
 gitea_fork_create(gcli_ctx *ctx, char const *owner, char const *repo,
                   char const *_in)
 {
-	github_fork_create(ctx, owner, repo, _in);
+	return github_fork_create(ctx, owner, repo, _in);
 }

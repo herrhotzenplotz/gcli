@@ -130,7 +130,7 @@ gcli_issue_comments(char const *owner, char const *repo, int const issue)
 		return rc;
 
 	gcli_print_comment_list(&list);
-	gcli_comment_list_free(&list);
+	gcli_comments_free(&list);
 
 	return rc;
 }
@@ -146,7 +146,7 @@ gcli_pull_comments(char const *owner, char const *repo, int const pull)
 		return rc;
 
 	gcli_print_comment_list(&list);
-	gcli_comment_list_free(&list);
+	gcli_comments_free(&list);
 
 	return rc;
 }

@@ -55,7 +55,7 @@ Paste a new Gist. The following flags can be specified:
 .It Fl f , -file Pa file
 Read the content from the specified file instead of standard input.
 .It Fl d , -description Ar description
-The descrition of the Gist to be created.
+The description of the Gist to be created.
 .El
 .It Cm delete
 Delete a Gist. The following options can be specified:
@@ -65,6 +65,7 @@ Do not ask for confirmation before deleting the Gist. Assume yes.
 .El
 .It Cm get
 Download a file from a Gist. There are no options to this subcommand.
+.El
 .Sh EXAMPLES
 List neutaaaaan's Gists:
 .Bd -literal -offset indent
@@ -97,5 +98,10 @@ and contributors.
 This subcommand only works on GitHub. It is not implemented for
 GitLab, as GitLab snippets work differently.
 .Pp
-Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
-or on Github.
+Please report bugs via E-Mail to
+.Mt @PACKAGE_BUGREPORT@ .
+.Pp
+Alternatively you can report them on any of the forges linked at
+.Lk @PACKAGE_URL@ .
+However, the preferred and quickest method is to use the mailing
+list.

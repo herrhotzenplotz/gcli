@@ -41,8 +41,11 @@ int github_get_pulls(gcli_ctx *ctx, char const *owner, char const *reponame,
                      gcli_pull_fetch_details const *details, int max,
                      gcli_pull_list *out);
 
-int github_print_pull_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
-                           char const *reponame, gcli_id pr_number);
+int github_pull_get_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
+                         char const *reponame, gcli_id pr_number);
+
+int github_pull_get_patch(gcli_ctx *ctx, FILE *stream, char const *owner,
+                          char const *reponame, gcli_id pr_number);
 
 int github_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
                            gcli_id pr_number, gcli_pull_checks_list *out);
@@ -65,5 +68,11 @@ int github_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
                     gcli_id pr_number, gcli_pull *out);
 
 sn_sv github_pull_try_derive_head(void);
+
+int github_pull_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
+                             gcli_id pr_number, char const *username);
+
+int github_pull_set_title(gcli_ctx *ctx, char const *owner, char const *repo,
+                          gcli_id pull, char const *new_title);
 
 #endif /* GITHUB_PULLS_H */

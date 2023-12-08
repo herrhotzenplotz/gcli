@@ -38,15 +38,21 @@ gcli_get_notifications(gcli_ctx *ctx, int const max,
 }
 
 void
+gcli_free_notification(gcli_notification *const notification)
+{
+	free(notification->id);
+	free(notification->title);
+	free(notification->reason);
+	free(notification->date);
+	free(notification->type);
+	free(notification->repository);
+}
+
+void
 gcli_free_notifications(gcli_notification_list *list)
 {
 	for (size_t i = 0; i < list->notifications_size; ++i) {
-		free(list->notifications[i].id);
-		free(list->notifications[i].title);
-		free(list->notifications[i].reason);
-		free(list->notifications[i].date);
-		free(list->notifications[i].type);
-		free(list->notifications[i].repository);
+		gcli_free_notification(&list->notifications[i]);
 	}
 
 	free(list->notifications);

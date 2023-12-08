@@ -49,4 +49,8 @@ int gitlab_repo_delete(gcli_ctx *ctx, char const *owner, char const *repo);
 int gitlab_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *options,
                        gcli_repo *out);
 
+int gitlab_repo_set_visibility(gcli_ctx *ctx, char const *const owner,
+                               char const *const repo,
+                               gcli_repo_visibility vis);
+
 #endif /* GITLAB_REPOS_H */

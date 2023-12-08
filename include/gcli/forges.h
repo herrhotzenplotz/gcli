@@ -43,7 +43,6 @@
 #include <gcli/pulls.h>
 #include <gcli/releases.h>
 #include <gcli/repos.h>
-#include <gcli/review.h>
 #include <gcli/sshkeys.h>
 #include <gcli/status.h>
 
@@ -172,6 +171,12 @@ struct gcli_forge_descriptor {
 		gcli_fetch_buffer *out);
 
 	/**
+	 * Change the title of an issue */
+	int (*issue_set_title)(
+		gcli_ctx *ctx, char const *owner, char const *repo, gcli_id issue,
+		char const *new_title);
+
+	/**
 	 * Bitmask of exceptions/fields that the forge doesn't support */
 	enum {
 		GCLI_MILESTONE_QUIRKS_EXPIRED = 0x1,
@@ -257,13 +262,22 @@ struct gcli_forge_descriptor {
 		gcli_pull_list *out);
 
 	/**
-	 * Print a diff of the changes of a PR/MR to the stream */
-	int (*print_pull_diff)(
+	 * Fetch the PR diff into the file */
+	int (*pull_get_diff)(
 		gcli_ctx *ctx,
 		FILE *stream,
 		char const *owner,
 		char const *reponame,
 		gcli_id pr_number);
+
+	/**
+	 * Fetch the PR patch series into the file */
+	int (*pull_get_patch)(
+		gcli_ctx *ctx,
+		FILE *stream,
+		char const *owner,
+		char const *repo,
+		gcli_id pull_id);
 
 	/**
 	 * Return a list of checks associated with the given pull.
@@ -370,6 +384,24 @@ struct gcli_forge_descriptor {
 		gcli_id pull);
 
 	/**
+     * Request review of a given pull request by a user */
+	int (*pull_add_reviewer)(
+		gcli_ctx *ctx,
+		char const *owner,
+		char const *repo,
+		gcli_id pull,
+		char const *username);
+
+	/**
+	 * Change the title of a pull request */
+	int (*pull_set_title)(
+		gcli_ctx *ctx,
+		char const *owner,
+		char const *repo,
+		gcli_id pull,
+		char const *new_title);
+
+	/**
 	 * Get a list of releases in the given repo */
 	int (*get_releases)(
 		gcli_ctx *ctx,
@@ -442,10 +474,12 @@ struct gcli_forge_descriptor {
 		char const *repo);
 
 	/**
-	 * Fetch MR/PR reviews including comments */
-    int (*get_reviews)(
-	    gcli_ctx *ctx, char const *owner, char const *repo,
-		gcli_id pr, gcli_pr_review_list *out);
+	 * Change the visibility level of a repository */
+	int (*repo_set_visibility)(
+		gcli_ctx *ctx,
+		char const *owner,
+		char const *repo,
+		gcli_repo_visibility vis);
 
 	/**
 	 * Status summary for the account */

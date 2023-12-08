@@ -2,11 +2,15 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([gcli],[2.0.0],[nsonack@herrhotzenplotz.de],[gcli],[https://gitlab.com/herrhotzenplotz/gcli/])
+AC_INIT([gcli],
+        [2.1.0],
+        [~herrhotzenplotz/gcli-discuss@lists.sr.ht],
+        [gcli],
+        [https://herrhotzenplotz.de/gcli])
 AM_INIT_AUTOMAKE([1.0 foreign subdir-objects dist-bzip2 dist-xz -Wall])
 
 dnl Release Date.
-PACKAGE_DATE="2023-Sep-21"
+PACKAGE_DATE="2023-Dec-08"
 AC_SUBST([PACKAGE_DATE])
 
 dnl Silent by default.
@@ -26,7 +30,17 @@ AC_LANG([C])
 AC_PROG_YACC
 AC_PROG_LEX(noyywrap)
 
+dnl Produce a better error message if we don't have pkg-config's macros
+dnl Inspired by the way dpkg solves the problem
+m4_ifndef([PKG_PROG_PKG_CONFIG], [m4_fatal([pkgconf macros missing. do you have pkgconf installed?])])
 PKG_PROG_PKG_CONFIG
+
+dnl Use ccache if found
+CCACHE=""
+AC_CHECK_PROG([CCACHE], [ccache], [ccache])
+if ! test -z "${CCACHE}"; then
+	CC="${CCACHE} ${CC}"
+fi
 
 dnl Go looking for libcurl
 OPT_LIBCURL=check
@@ -45,7 +59,9 @@ AS_IF([test "x$OPT_LIBCURL" = "xcheck" || test "x$OPT_LIBCURL" = "xyes"],
       [CPPFLAGS="-I$OPT_LIBCURL/include $CPPFLAGS"
        LDFLAGS="-L$OPT_LIBCURL/lib $LDFLAGS"])
 AC_CHECK_HEADER([curl/curl.h],,[AC_MSG_ERROR([Cannot find libcurl headers])])
-AC_CHECK_LIB([curl],[curl_easy_init],,[AC_MSG_ERROR([-lcurl doesn not contain curl_easy_init])])
+
+dnl FIXME find a better way for this
+dnl AC_CHECK_LIB([curl],[curl_easy_init],,[AC_MSG_ERROR([-lcurl doesn not contain curl_easy_init])])
 
 dnl For the test suite we require libatf-c and Kyua
 OPT_LIBATFC=check
@@ -72,12 +88,15 @@ fi
 
 AS_IF([test "x$HAVE_ATFC" = "xyes"],
       [AC_CHECK_HEADER([atf-c.h],,[AC_MSG_ERROR([Cannot find libatf-c headers])])
-       AC_CHECK_LIB([atf-c],[atf_no_error],,[AC_MSG_ERROR([-latf-c doesn not contain atf_no_error])])
        HAVE_ATFC=yes])
 
+dnl FIXME find a better way to do this
+dnl       AC_CHECK_LIB([atf-c],[atf_no_error],,[AC_MSG_ERROR([-latf-c doesn not contain atf_no_error])])
+
 AC_CHECK_PROG([KYUA], [kyua], [kyua])
+AC_CHECK_PROGS([REALPATH], [realpath grealpath], [])
 HAVE_TESTS=0
-AS_IF([test -z "$KYUA" || test "x$HAVE_ATFC" = xno],
+AS_IF([test -z "$KYUA" || test "x$HAVE_ATFC" = xno || test -z "$REALPATH"],
       [HAVE_TESTS=no],
       [HAVE_TESTS=yes])
 AC_SUBST([HAVE_TESTS])
@@ -113,13 +132,16 @@ AC_CONFIG_FILES([Makefile
                  docs/gcli-repos.1
                  docs/gcli-snippets.1
                  docs/gcli-status.1
-                 docs/gcli.1])
+                 docs/gcli.1
+                 docs/gcli.5])
 
 dnl Technically only needed if tests are enabled but this doesn't
 dnl hurt.
-TESTSRCDIR="$(realpath ${srcdir}/tests)"
-AC_SUBST([TESTSRCDIR])
-AC_DEFINE_UNQUOTED([TESTSRCDIR], ["$TESTSRCDIR"], [Directory to the test sources])
+if test "x$HAVE_TESTS" = "xyes"; then
+	TESTSRCDIR="$($REALPATH ${srcdir}/tests)"
+	AC_SUBST([TESTSRCDIR])
+	AC_DEFINE_UNQUOTED([TESTSRCDIR], ["$TESTSRCDIR"], [Directory to the test sources])
+fi
 
 AC_CONFIG_FILES([tests/Kyuafile])
 

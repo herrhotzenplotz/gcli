@@ -41,7 +41,6 @@
 #include <gcli/github/pulls.h>
 #include <gcli/github/releases.h>
 #include <gcli/github/repos.h>
-#include <gcli/github/review.h>
 #include <gcli/github/sshkeys.h>
 #include <gcli/github/status.h>
 
@@ -56,7 +55,6 @@
 #include <gcli/gitlab/pipelines.h>
 #include <gcli/gitlab/releases.h>
 #include <gcli/gitlab/repos.h>
-#include <gcli/gitlab/review.h>
 #include <gcli/gitlab/status.h>
 #include <gcli/gitlab/sshkeys.h>
 
@@ -70,203 +68,278 @@
 #include <gcli/gitea/releases.h>
 #include <gcli/gitea/repos.h>
 #include <gcli/gitea/sshkeys.h>
+#include <gcli/gitea/status.h>
 
 static gcli_forge_descriptor const
 github_forge_descriptor =
 {
-	.perform_submit_comment    = github_perform_submit_comment,
+	/* Comments */
 	.get_issue_comments        = github_get_comments,
 	.get_pull_comments         = github_get_comments,
-	.get_forks                 = github_get_forks,
+	.perform_submit_comment    = github_perform_submit_comment,
+
+	/* Forks */
 	.fork_create               = github_fork_create,
-	.get_issues                = github_get_issues,
+	.get_forks                 = github_get_forks,
+
+	/* Issues */
 	.get_issue_summary         = github_get_issue_summary,
-	.issue_close               = github_issue_close,
-	.issue_reopen              = github_issue_reopen,
-	.issue_assign              = github_issue_assign,
+	.get_issues                = github_get_issues,
 	.issue_add_labels          = github_issue_add_labels,
-	.issue_remove_labels       = github_issue_remove_labels,
-	.perform_submit_issue      = github_perform_submit_issue,
-	.issue_set_milestone       = github_issue_set_milestone,
+	.issue_assign              = github_issue_assign,
 	.issue_clear_milestone     = github_issue_clear_milestone,
-	.get_milestones            = github_get_milestones,
-	.get_milestone             = github_get_milestone,
+	.issue_close               = github_issue_close,
+	.issue_remove_labels       = github_issue_remove_labels,
+	.issue_reopen              = github_issue_reopen,
+	.issue_set_milestone       = github_issue_set_milestone,
+	.issue_set_title           = github_issue_set_title,
+	.perform_submit_issue      = github_perform_submit_issue,
+
+	/* Milestones */
 	.create_milestone          = github_create_milestone,
 	.delete_milestone          = github_delete_milestone,
-	.milestone_set_duedate     = github_milestone_set_duedate,
+	.get_milestone             = github_get_milestone,
 	.get_milestone_issues      = github_milestone_get_issues,
-	.get_pulls                 = github_get_pulls,
-	.print_pull_diff           = github_print_pull_diff,
+	.get_milestones            = github_get_milestones,
+	.milestone_set_duedate     = github_milestone_set_duedate,
+
+	/* Pull requests */
+	.get_pull                  = github_get_pull,
 	.get_pull_checks           = github_pull_get_checks,
+	.get_pull_commits          = github_get_pull_commits,
+	.get_pulls                 = github_get_pulls,
+	.perform_submit_pull       = github_perform_submit_pull,
+	.pull_add_reviewer         = github_pull_add_reviewer,
+	.pull_close                = github_pull_close,
+	.pull_get_diff             = github_pull_get_diff,
+	.pull_get_patch            = github_pull_get_patch,
 	.pull_merge                = github_pull_merge,
 	.pull_reopen               = github_pull_reopen,
-	.pull_close                = github_pull_close,
+	.pull_set_title            = github_pull_set_title,
 
 	/* HACK: Here we can use the same functions as with issues because
 	 * PRs are the same as issues on Github and the functions have the
 	 * same types/arguments */
 	.pull_add_labels           = github_issue_add_labels,
-	.pull_remove_labels        = github_issue_remove_labels,
-
-	.perform_submit_pull       = github_perform_submit_pull,
-	.get_pull_commits          = github_get_pull_commits,
-	.get_pull                  = github_get_pull,
-
-	/* This works because the function signatures are the same and
-	 * GitHub treats pull requests as issues */
-	.pull_set_milestone        = github_issue_set_milestone,
 	.pull_clear_milestone      = github_issue_clear_milestone,
+	.pull_remove_labels        = github_issue_remove_labels,
+	.pull_set_milestone        = github_issue_set_milestone,
 
-	.get_releases              = github_get_releases,
+	/* Releases */
 	.create_release            = github_create_release,
 	.delete_release            = github_delete_release,
-	.get_labels                = github_get_labels,
+	.get_releases              = github_get_releases,
+
+	/* Labels */
 	.create_label              = github_create_label,
 	.delete_label              = github_delete_label,
+	.get_labels                = github_get_labels,
+
+	/* Repos */
 	.get_repos                 = github_get_repos,
-	.get_reviews               = github_review_get_reviews,
 	.repo_create               = github_repo_create,
 	.repo_delete               = github_repo_delete,
+	.repo_set_visibility       = github_repo_set_visibility,
 
-	.get_sshkeys               = github_get_sshkeys,
+	/* SSH Key management */
 	.add_sshkey                = github_add_sshkey,
 	.delete_sshkey             = github_delete_sshkey,
+	.get_sshkeys               = github_get_sshkeys,
 
+	/* Notifications */
 	.get_notifications         = github_get_notifications,
 	.notification_mark_as_read = github_notification_mark_as_read,
-	.make_authheader           = github_make_authheader,
+
+	/* Internal stuff */
 	.get_api_error_string      = github_api_error_string,
+	.make_authheader           = github_make_authheader,
 	.user_object_key           = "login",
-	.pull_summary_quirks       = GCLI_PRS_QUIRK_COVERAGE,
+
+	/* Quirks */
 	.milestone_quirks          = GCLI_MILESTONE_QUIRKS_EXPIRED
 	                           | GCLI_MILESTONE_QUIRKS_DUEDATE
 	                           | GCLI_MILESTONE_QUIRKS_PULLS,
+	.pull_summary_quirks       = GCLI_PRS_QUIRK_COVERAGE,
 };
 
 static gcli_forge_descriptor const
 gitlab_forge_descriptor =
 {
-	.perform_submit_comment    = gitlab_perform_submit_comment,
+	/* Comments */
 	.get_issue_comments        = gitlab_get_issue_comments,
 	.get_pull_comments         = gitlab_get_mr_comments,
-	.get_forks                 = gitlab_get_forks,
+	.perform_submit_comment    = gitlab_perform_submit_comment,
+
+	/* Forks */
 	.fork_create               = gitlab_fork_create,
-	.get_issues                = gitlab_get_issues,
+	.get_forks                 = gitlab_get_forks,
+
+	/* Issues */
 	.get_issue_summary         = gitlab_get_issue_summary,
-	.issue_close               = gitlab_issue_close,
-	.issue_reopen              = gitlab_issue_reopen,
-	.issue_assign              = gitlab_issue_assign,
+	.get_issues                = gitlab_get_issues,
 	.issue_add_labels          = gitlab_issue_add_labels,
+	.issue_assign              = gitlab_issue_assign,
+	.issue_clear_milestone     = gitlab_issue_clear_milestone,
+	.issue_close               = gitlab_issue_close,
 	.issue_remove_labels       = gitlab_issue_remove_labels,
+	.issue_reopen              = gitlab_issue_reopen,
+	.issue_set_milestone       = gitlab_issue_set_milestone,
+	.issue_set_title           = gitlab_issue_set_title,
 	.perform_submit_issue      = gitlab_perform_submit_issue,
-	.get_milestones            = gitlab_get_milestones,
-	.get_milestone             = gitlab_get_milestone,
+
+	/* Milestones */
 	.create_milestone          = gitlab_create_milestone,
 	.delete_milestone          = gitlab_delete_milestone,
-	.milestone_set_duedate     = gitlab_milestone_set_duedate,
+	.get_milestone             = gitlab_get_milestone,
 	.get_milestone_issues      = gitlab_milestone_get_issues,
-	.issue_set_milestone       = gitlab_issue_set_milestone,
-	.issue_clear_milestone     = gitlab_issue_clear_milestone,
-	.get_pulls                 = gitlab_get_mrs,
-	.print_pull_diff           = gitlab_print_pr_diff,
-	.get_pull_checks           = (gcli_get_pull_checks_cb)gitlab_get_mr_pipelines,
-	.pull_merge                = gitlab_mr_merge,
-	.pull_reopen               = gitlab_mr_reopen,
-	.pull_close                = gitlab_mr_close,
-	.perform_submit_pull       = gitlab_perform_submit_mr,
-	.get_pull_commits          = gitlab_get_pull_commits,
+	.get_milestones            = gitlab_get_milestones,
+	.milestone_set_duedate     = gitlab_milestone_set_duedate,
+
+	/* Pull requests */
 	.get_pull                  = gitlab_get_pull,
+	.get_pull_checks           = (gcli_get_pull_checks_cb)gitlab_get_mr_pipelines,
+	.get_pull_commits          = gitlab_get_pull_commits,
+	.get_pulls                 = gitlab_get_mrs,
+	.perform_submit_pull       = gitlab_perform_submit_mr,
 	.pull_add_labels           = gitlab_mr_add_labels,
-	.pull_remove_labels        = gitlab_mr_remove_labels,
-	.pull_set_milestone        = gitlab_mr_set_milestone,
+	.pull_add_reviewer         = gitlab_mr_add_reviewer,
 	.pull_clear_milestone      = gitlab_mr_clear_milestone,
-	.get_releases              = gitlab_get_releases,
+	.pull_close                = gitlab_mr_close,
+	.pull_get_diff             = gitlab_mr_get_diff,
+	.pull_get_patch            = gitlab_mr_get_patch,
+	.pull_merge                = gitlab_mr_merge,
+	.pull_remove_labels        = gitlab_mr_remove_labels,
+	.pull_reopen               = gitlab_mr_reopen,
+	.pull_set_milestone        = gitlab_mr_set_milestone,
+	.pull_set_title            = gitlab_mr_set_title,
+
+	/* Releases */
 	.create_release            = gitlab_create_release,
 	.delete_release            = gitlab_delete_release,
-	.get_labels                = gitlab_get_labels,
+	.get_releases              = gitlab_get_releases,
+
+	/* Labels */
 	.create_label              = gitlab_create_label,
 	.delete_label              = gitlab_delete_label,
+	.get_labels                = gitlab_get_labels,
+
+	/* Repos */
 	.get_repos                 = gitlab_get_repos,
-	.get_reviews               = gitlab_review_get_reviews,
 	.repo_create               = gitlab_repo_create,
 	.repo_delete               = gitlab_repo_delete,
-	.get_notifications         = gitlab_get_notifications,
-	.notification_mark_as_read = gitlab_notification_mark_as_read,
-	.make_authheader           = gitlab_make_authheader,
-	.get_sshkeys               = gitlab_get_sshkeys,
+	.repo_set_visibility       = gitlab_repo_set_visibility,
+
+	/* SSH Key management */
 	.add_sshkey                = gitlab_add_sshkey,
 	.delete_sshkey             = gitlab_delete_sshkey,
+	.get_sshkeys               = gitlab_get_sshkeys,
+
+	/* Notifications */
+	.get_notifications         = gitlab_get_notifications,
+	.notification_mark_as_read = gitlab_notification_mark_as_read,
+
+	/* Internal stuff */
 	.get_api_error_string      = gitlab_api_error_string,
+	.make_authheader           = gitlab_make_authheader,
 	.user_object_key           = "username",
+
+	/* Quirks */
+	.milestone_quirks          = GCLI_MILESTONE_QUIRKS_NISSUES,
 	.pull_summary_quirks       = GCLI_PRS_QUIRK_ADDDEL
 	                           | GCLI_PRS_QUIRK_COMMITS
 	                           | GCLI_PRS_QUIRK_CHANGES
 	                           | GCLI_PRS_QUIRK_MERGED,
-	.milestone_quirks          = GCLI_MILESTONE_QUIRKS_NISSUES,
 };
 
 static gcli_forge_descriptor const
 gitea_forge_descriptor =
 {
-	.get_issues                = gitea_get_issues,
-	.get_issue_summary         = gitea_get_issue_summary,
-	.perform_submit_issue      = gitea_submit_issue,
-	.issue_close               = gitea_issue_close,
-	.issue_reopen              = gitea_issue_reopen,
-	.issue_assign              = gitea_issue_assign,
-	.issue_set_milestone       = gitea_issue_set_milestone,
-	.issue_clear_milestone     = gitea_issue_clear_milestone,
+	/* Comments */
 	.get_issue_comments        = gitea_get_comments,
-	.get_milestones            = gitea_get_milestones,
-	.get_milestone             = gitea_get_milestone,
-	.create_milestone          = gitea_create_milestone,
-	.delete_milestone          = gitea_delete_milestone,
-	.milestone_set_duedate     = gitea_milestone_set_duedate,
-	.get_milestone_issues      = gitea_milestone_get_issues,
-	.perform_submit_comment    = gitea_perform_submit_comment,
-	.issue_add_labels          = gitea_issue_add_labels,
-	.issue_remove_labels       = gitea_issue_remove_labels,
-	.get_labels                = gitea_get_labels,
-	.create_label              = gitea_create_label,
-	.delete_label              = gitea_delete_label,
-	.get_pulls                 = gitea_get_pulls,
-	.get_pull_checks           = gitea_pull_get_checks, /* stub, will always return an error */
-	.pull_merge                = gitea_pull_merge,
-	.pull_reopen               = gitea_pull_reopen,
-	.pull_close                = gitea_pull_close,
 	.get_pull_comments         = gitea_get_comments,
-	.get_pull                  = gitea_get_pull,
-	.get_pull_commits          = gitea_get_pull_commits,
-	.pull_set_milestone        = gitea_pull_set_milestone,
-	.pull_clear_milestone      = gitea_pull_clear_milestone,
-	.get_releases              = gitea_get_releases,
-	.create_release            = gitea_create_release,
-	.delete_release            = gitea_delete_release,
-	.perform_submit_pull       = gitea_pull_submit,
-	.print_pull_diff           = gitea_print_pr_diff,
+	.perform_submit_comment    = gitea_perform_submit_comment,
+
+	/* Forks */
+	.fork_create               = gitea_fork_create,
 	.get_forks                 = gitea_get_forks,
 
-	/* Same procedure as with Github (see comment up there) */
+	/* Issues */
+	.get_issue_summary         = gitea_get_issue_summary,
+	.get_issues                = gitea_get_issues,
+	.issue_add_labels          = gitea_issue_add_labels,
+	.issue_assign              = gitea_issue_assign,
+	.issue_clear_milestone     = gitea_issue_clear_milestone,
+	.issue_close               = gitea_issue_close,
+	.issue_remove_labels       = gitea_issue_remove_labels,
+	.issue_reopen              = gitea_issue_reopen,
+	.issue_set_milestone       = gitea_issue_set_milestone,
+	.issue_set_title           = gitea_issue_set_title,
+	.perform_submit_issue      = gitea_submit_issue,
+
+	/* Milestones */
+	.create_milestone          = gitea_create_milestone,
+	.delete_milestone          = gitea_delete_milestone,
+	.get_milestone             = gitea_get_milestone,
+	.get_milestone_issues      = gitea_milestone_get_issues,
+	.get_milestones            = gitea_get_milestones,
+	.milestone_set_duedate     = gitea_milestone_set_duedate,
+
+	/* Pull requests */
+	.get_pull                  = gitea_get_pull,
+	.get_pull_checks           = gitea_pull_get_checks, /* stub, will always return an error */
+	.get_pull_commits          = gitea_get_pull_commits,
+	.get_pulls                 = gitea_get_pulls,
+	.perform_submit_pull       = gitea_pull_submit,
 	.pull_add_labels           = gitea_issue_add_labels,
+	.pull_add_reviewer         = gitea_pull_add_reviewer,
+	.pull_clear_milestone      = gitea_pull_clear_milestone,
+	.pull_close                = gitea_pull_close,
+	.pull_get_diff             = gitea_pull_get_diff,
+	.pull_get_patch            = gitea_pull_get_patch,
+	.pull_merge                = gitea_pull_merge,
 	.pull_remove_labels        = gitea_issue_remove_labels,
+	.pull_reopen               = gitea_pull_reopen,
+	.pull_set_milestone        = gitea_pull_set_milestone,
+	.pull_set_title            = gitea_pull_set_title,
+
+	/* Releases */
+	.create_release            = gitea_create_release,
+	.delete_release            = gitea_delete_release,
+	.get_releases              = gitea_get_releases,
+
+	/* Labels */
+	.create_label              = gitea_create_label,
+	.delete_label              = gitea_delete_label,
+	.get_labels                = gitea_get_labels,
+
+	/* Repos */
 	.get_repos                 = gitea_get_repos,
 	.repo_create               = gitea_repo_create,
 	.repo_delete               = gitea_repo_delete,
+	.repo_set_visibility       = gitea_repo_set_visibility,
 
-	.get_sshkeys               = gitea_get_sshkeys,
+	/* SSH Key management */
 	.add_sshkey                = gitea_add_sshkey,
 	.delete_sshkey             = gitea_delete_sshkey,
+	.get_sshkeys               = gitea_get_sshkeys,
 
+	/* Notifications */
+	.get_notifications         = gitea_get_notifications,
+	.notification_mark_as_read = gitea_notification_mark_as_read,
+
+	/* Internal stuff */
 	.make_authheader           = gitea_make_authheader,
 	.get_api_error_string      = github_api_error_string,    /* hack! */
 	.user_object_key           = "username",
+
+	/* Quirks */
+	.milestone_quirks          = GCLI_MILESTONE_QUIRKS_EXPIRED
+	                           | GCLI_MILESTONE_QUIRKS_PULLS,
 	.pull_summary_quirks       = GCLI_PRS_QUIRK_COMMITS
 	                           | GCLI_PRS_QUIRK_ADDDEL
 	                           | GCLI_PRS_QUIRK_DRAFT
 	                           | GCLI_PRS_QUIRK_CHANGES
 	                           | GCLI_PRS_QUIRK_COVERAGE,
-	.milestone_quirks          = GCLI_MILESTONE_QUIRKS_EXPIRED
-	                           | GCLI_MILESTONE_QUIRKS_PULLS,
 };
 
 gcli_forge_descriptor const *

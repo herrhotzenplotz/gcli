@@ -20,8 +20,9 @@ to `No expiration` and allow the following `Scopes`:
 
 Then create the token. It'll be printed in green. Do not share it!
 
-Now we need to tell gcli about this new token. To do this, create a
-configuration file for gcli:
+Now we need to tell gcli about this new token. To do this, create
+a configuration file for gcli - on Windows you need to do this from
+the MSYS2 Shell:
 
     $ mkdir -p ${HOME}/.config/gcli
     $ vi ${HOME}/.config/gcli/config

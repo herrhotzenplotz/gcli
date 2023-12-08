@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,57 +27,14 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/curl.h>
-#include <gcli/forges.h>
-#include <gcli/github/config.h>
-#include <gcli/json_util.h>
-#include <gcli/review.h>
+#ifndef GITEA_STATUS_H
+#define GITEA_STATUS_H
 
-#include <pdjson/pdjson.h>
+#include <gcli/status.h>
 
-#include <limits.h>
+int gitea_get_notifications(gcli_ctx *ctx, int max,
+                            gcli_notification_list *out);
 
-void
-gcli_review_reviews_free(gcli_pr_review_list *list)
-{
-	if (!list)
-		return;
+int gitea_notification_mark_as_read(gcli_ctx *ctx, char const *id);
 
-	for (size_t i = 0; i < list->reviews_size; ++i) {
-		free(list->reviews[i].author);
-		free(list->reviews[i].date);
-		free(list->reviews[i].state);
-		free(list->reviews[i].body);
-		free(list->reviews[i].id);
-	}
-
-	free(list->reviews);
-
-	list->reviews = NULL;
-	list->reviews_size = 0;
-}
-
-void
-gcli_review_comments_free(gcli_pr_review_comment *it, size_t const size)
-{
-	if (!it)
-		return;
-
-	for (size_t i = 0; i < size; ++i) {
-		free(it[i].id);
-		free(it[i].author);
-		free(it[i].date);
-		free(it[i].diff);
-		free(it[i].path);
-		free(it[i].body);
-	}
-
-	free(it);
-}
-
-int
-gcli_review_get_reviews(gcli_ctx *ctx, char const *owner, char const *repo,
-                        int const pr, gcli_pr_review_list *const out)
-{
-	return gcli_forge(ctx)->get_reviews(ctx, owner, repo, pr, out);
-}
+#endif /* GITEA_STATUS_H */

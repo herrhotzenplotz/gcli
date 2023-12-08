@@ -63,7 +63,7 @@ Retry the job.
 .It Cm artifacts Op Fl o Ar outfile
 Download the artifacts archive as a zip to disk. The default output file is
 .Pa artifacts.zip
-but it can be overriden by using the
+but it can be overridden by using the
 .Fl o
 flag.
 .El
@@ -82,7 +82,6 @@ Dump the log of Job #423141 in herrhotzenplotz/gcli:
 .Bd -literal -offset indent
 $ gcli pipelines -o herrhotzenplotz -r gcli -j 423141 log
 .Ed
-.Ed
 .Sh SEE ALSO
 .Xr git 1 ,
 .Xr gcli 1
@@ -94,5 +93,10 @@ We are missing a
 .Fl a
 flag. This is the current implied behaviour.
 .Pp
-Please report bugs at @PACKAGE_URL@, via E-Mail to @PACKAGE_BUGREPORT@
-or on Github.
+Please report bugs via E-Mail to
+.Mt @PACKAGE_BUGREPORT@ .
+.Pp
+Alternatively you can report them on any of the forges linked at
+.Lk @PACKAGE_URL@ .
+However, the preferred and quickest method is to use the mailing
+list.

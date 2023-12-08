@@ -48,12 +48,18 @@ gcli_fork_create(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 void
+gcli_fork_free(gcli_fork *fork)
+{
+	free(fork->full_name.data);
+	free(fork->owner.data);
+	free(fork->date.data);
+}
+
+void
 gcli_forks_free(gcli_fork_list *const list)
 {
 	for (size_t i = 0; i < list->forks_size; ++i) {
-		free(list->forks[i].full_name.data);
-		free(list->forks[i].owner.data);
-		free(list->forks[i].date.data);
+		gcli_fork_free(&list->forks[i]);
 	}
 
 	free(list->forks);

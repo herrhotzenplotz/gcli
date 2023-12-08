@@ -63,4 +63,5 @@ void gcli_fork_delete(char const *owner,
 
 void gcli_forks_free(gcli_fork_list *list);
 
+void gcli_fork_free(gcli_fork *fork);
 #endif /* FORK_H */

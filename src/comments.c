@@ -36,19 +36,19 @@
 #include <gcli/json_util.h>
 #include <sn/sn.h>
 
-static void
-gcli_issue_comment_free(gcli_comment *const it)
+void
+gcli_comment_free(gcli_comment *const it)
 {
-	free((void *)it->author);
-	free((void *)it->date);
-	free((void *)it->body);
+	free(it->author);
+	free(it->date);
+	free(it->body);
 }
 
 void
-gcli_comment_list_free(gcli_comment_list *list)
+gcli_comments_free(gcli_comment_list *const list)
 {
 	for (size_t i = 0; i < list->comments_size; ++i)
-		gcli_issue_comment_free(&list->comments[i]);
+		gcli_comment_free(&list->comments[i]);
 
 	free(list->comments);
 	list->comments = NULL;

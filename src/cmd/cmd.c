@@ -55,7 +55,9 @@ version(void)
 	        PACKAGE_STRING" ("HOSTOS")\n"
 	        "Using %s\n"
 	        "Using vendored pdjson library\n"
-	        "Report bugs at "PACKAGE_URL".\n",
+	        "\n"
+	        "Project website: "PACKAGE_URL"\n"
+	        "Bug reports: "PACKAGE_BUGREPORT"\n",
 	        curl_version());
 }
 

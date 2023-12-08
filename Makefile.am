@@ -57,7 +57,8 @@ dist_man_MANS = \
 	docs/gcli-repos.1 \
 	docs/gcli-snippets.1 \
 	docs/gcli-status.1 \
-	docs/gcli.1
+	docs/gcli.1 \
+	docs/gcli.5
 
 gcli_SOURCES = \
 	include/gcli/cmd/ci.h src/cmd/ci.c \
@@ -114,19 +115,18 @@ TEMPLATES = \
 	templates/gitlab/pipelines.t \
 	templates/gitlab/releases.t \
 	templates/gitlab/repos.t \
-	templates/gitlab/review.t \
 	templates/gitlab/sshkeys.t \
 	templates/gitlab/status.t \
 	templates/gitlab/snippets.t \
-	templates/gitea/milestones.t
+	templates/gitea/milestones.t \
+	templates/gitea/status.t
 
 headerdir = $(prefix)
 nobase_header_HEADERS = include/gcli/gcli.h include/gcli/comments.h	\
 	include/gcli/curl.h include/gcli/forks.h			\
 	include/gcli/issues.h include/gcli/labels.h			\
 	include/gcli/milestones.h include/gcli/pulls.h			\
-	include/gcli/releases.h include/gcli/repos.h			\
-	include/gcli/review.h include/gcli/gitlab/snippets.h		\
+	include/gcli/repos.h include/gcli/gitlab/snippets.h		\
 	include/gcli/status.h include/gcli/sshkeys.h
 
 pkgconfdir = $(libdir)/pkgconfig
@@ -141,13 +141,13 @@ libgcli_la_SOURCES = \
 	src/forges.c include/gcli/forges.h \
 	src/forks.c include/gcli/forks.h \
 	src/issues.c include/gcli/issues.h \
+	src/json_gen.c include/gcli/json_gen.h \
 	src/json_util.c include/gcli/json_util.h \
 	src/labels.c include/gcli/labels.h \
 	src/milestones.c include/gcli/milestones.h \
 	src/pulls.c include/gcli/pulls.h \
 	src/releases.c include/gcli/releases.h \
 	src/repos.c include/gcli/repos.h \
-	src/review.c include/gcli/review.h \
 	src/gitlab/snippets.c include/gcli/gitlab/snippets.h \
 	src/status.c include/gcli/status.h \
 	src/sshkeys.c include/gcli/sshkeys.h \
@@ -162,7 +162,6 @@ libgcli_la_SOURCES = \
 	src/gitlab/pipelines.c include/gcli/gitlab/pipelines.h \
 	src/gitlab/releases.c include/gcli/gitlab/releases.h \
 	src/gitlab/repos.c include/gcli/gitlab/repos.h \
-	src/gitlab/review.c include/gcli/gitlab/review.h \
 	src/gitlab/status.c include/gcli/gitlab/status.h \
 	src/gitlab/sshkeys.c include/gcli/gitlab/sshkeys.h \
 	src/github/releases.c include/gcli/github/releases.h \
@@ -176,7 +175,6 @@ libgcli_la_SOURCES = \
 	src/github/labels.c include/gcli/github/labels.h \
 	src/github/milestones.c include/gcli/github/milestones.h \
 	src/github/issues.c include/gcli/github/issues.h \
-	src/github/review.c include/gcli/github/review.h \
 	src/github/checks.c include/gcli/github/checks.h \
 	src/github/gists.c include/gcli/github/gists.h \
 	src/github/sshkeys.c include/gcli/github/sshkeys.h \
@@ -189,6 +187,7 @@ libgcli_la_SOURCES = \
 	src/gitea/releases.c include/gcli/gitea/releases.h \
 	src/gitea/repos.c include/gcli/gitea/repos.h \
 	src/gitea/sshkeys.c include/gcli/gitea/sshkeys.h \
+	src/gitea/status.c include/gcli/gitea/status.h \
 	src/gitea/milestones.c include/gcli/gitea/milestones.h \
 	$(TEMPLATES)
 
@@ -208,7 +207,8 @@ EXTRA_DIST = \
 	HACKING.md \
 	autogen.sh \
 	m4/.gitkeep \
-	docs/pgen.org
+	docs/pgen.org \
+	Changelog.md
 
 ###########################################
 # Tests
@@ -217,8 +217,10 @@ check_PROGRAMS = \
 	tests/json-escape$(EXEEXT) \
 	tests/github-parse-tests$(EXEEXT) \
 	tests/gitlab-parse-tests$(EXEEXT) \
+	tests/gitea-parse-tests$(EXEEXT) \
 	tests/url-encode$(EXEEXT) \
-	tests/pretty_print_test$(EXEEXT)
+	tests/pretty_print_test$(EXEEXT) \
+	tests/test-jsongen$(EXEEXT)
 
 $(check_PROGRAMS): tests/gcli_tests.h
 
@@ -246,6 +248,12 @@ tests_gitlab_parse_tests_LDADD = \
 	libgcli.la libpdjson.la libsn.la \
 	$(LIBATFC_LDFLAGS)
 
+tests_gitea_parse_tests_SOURCES = \
+	tests/gitea-parse-tests.c
+tests_gitea_parse_tests_LDADD = \
+	libgcli.la libpdjson.la libsn.la \
+	$(LIBATFC_LDFLAGS)
+
 tests_url_encode_SOURCES = \
 	tests/url-encode.c
 tests_url_encode_LDADD = \
@@ -256,6 +264,12 @@ tests_pretty_print_test_SOURCES = \
 	tests/pretty_print_test.c
 tests_pretty_print_test_LDADD = \
 	libsn.la \
+	$(LIBATFC_LDFLAGS)
+
+tests_test_jsongen_SOURCES = \
+	tests/test-jsongen.c
+tests_test_jsongen_LDADD = \
+	libgcli.la \
 	$(LIBATFC_LDFLAGS)
 
 EXTRA_DIST += tests/samples/github_simple_comment.json	\
@@ -276,6 +290,7 @@ EXTRA_DIST += tests/samples/github_simple_comment.json	\
 	tests/samples/gitlab_simple_release.json	\
 	tests/samples/gitlab_simple_repo.json		\
 	tests/samples/gitlab_simple_snippet.json	\
-	tests/samples/github_simple_check.json
+	tests/samples/github_simple_check.json		\
+	tests/samples/gitea_simple_notification.json
 
 endif

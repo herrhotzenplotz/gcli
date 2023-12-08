@@ -63,6 +63,7 @@ struct gcli_pull {
 	char *head_label;
 	char *base_label;
 	char *head_sha;
+	char *base_sha;
 	char *milestone;
 	gcli_id id;
 	gcli_id number;
@@ -73,15 +74,20 @@ struct gcli_pull {
 	int changed_files;
 	int head_pipeline_id;       /* GitLab specific */
 	char *coverage;             /* Gitlab Specific */
+
 	sn_sv *labels;
 	size_t labels_size;
+
+	char **reviewers;      /**< User names */
+	size_t reviewers_size; /**< Number of elements in the reviewers list */
+
 	bool merged;
 	bool mergeable;
 	bool draft;
 };
 
 struct gcli_commit {
-	char *sha, *message, *date, *author, *email;
+	char *sha, *long_sha, *message, *date, *author, *email;
 };
 
 struct gcli_commit_list {
@@ -106,6 +112,7 @@ struct gcli_pull_fetch_details {
 	bool all;
 	char const *author;
 	char const *label;
+	char const *milestone;
 };
 
 /** Generic list of checks ran on a pull request
@@ -175,5 +182,14 @@ int gcli_pull_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int gcli_pull_clear_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
                               gcli_id pr_number);
+
+int gcli_pull_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
+                           gcli_id pr_number, char const *username);
+
+int gcli_pull_get_patch(gcli_ctx *ctx, FILE *out, char const *owner,
+                        char const *repo, gcli_id pr_number);
+
+int gcli_pull_set_title(gcli_ctx *ctx, char const *owner, char const *repo,
+                        gcli_id pull, char const *new_title);
 
 #endif /* PULLS_H */

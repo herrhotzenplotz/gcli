@@ -66,6 +66,7 @@ enum gcli_tblcol_flags {
 enum gcli_tblcoltype {
 	GCLI_TBLCOLTYPE_INT,        /* integer */
 	GCLI_TBLCOLTYPE_LONG,       /* signed long int */
+	GCLI_TBLCOLTYPE_ID,         /* some ID type (uint64_t) */
 	GCLI_TBLCOLTYPE_STRING,     /* C string */
 	GCLI_TBLCOLTYPE_SV,         /* sn_sv */
 	GCLI_TBLCOLTYPE_DOUBLE,     /* double precision float */
@@ -92,23 +93,17 @@ int gcli_tbl_add_row(gcli_tbl table, ...);
 
 gcli_dict gcli_dict_begin(void);
 
-int gcli_dict_add(gcli_dict list,
-                  char const *key,
-                  int flags,
-                  uint32_t colour_args,
-                  char const *fmt,
-                  ...);
+int gcli_dict_add(gcli_dict list, char const *key, int flags,
+                  uint32_t colour_args, char const *fmt, ...);
 
-int gcli_dict_add_string(gcli_dict list,
-                         char const *key,
-                         int flags,
-                         uint32_t colour_args,
-                         char const *str);
+int gcli_dict_add_string(gcli_dict list, char const *key, int flags,
+                         uint32_t colour_args, char const *str);
 
-int gcli_dict_add_sv_list(gcli_dict dict,
-                          char const *key,
-                          sn_sv const *list,
+int gcli_dict_add_sv_list(gcli_dict dict, char const *key, sn_sv const *list,
                           size_t list_size);
+
+int gcli_dict_add_string_list(gcli_dict dict, char const *const key,
+                              char const *const *list, size_t const list_size);
 
 int gcli_dict_end(gcli_dict _list);
 

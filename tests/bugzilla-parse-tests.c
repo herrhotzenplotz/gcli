@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,48 +27,62 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GCLI_H
-#define GCLI_H
+#include <err.h>
+#include <string.h>
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <inttypes.h>
-#include <stdbool.h>
-#include <stdint.h>
-
-enum gcli_output_flags {
-	OUTPUT_SORTED = (1 << 0),
-	OUTPUT_LONG   = (1 << 1),
-};
-
-typedef enum gcli_forge_type {
-	GCLI_FORGE_GITHUB,
-	GCLI_FORGE_GITLAB,
-	GCLI_FORGE_GITEA,
-	GCLI_FORGE_BUGZILLA,
-} gcli_forge_type;
-
-typedef uint64_t gcli_id;
-
-#define PRIid PRIu64
-
-#ifdef IN_LIBGCLI
+#include <gcli/gcli.h>
+#include <gcli/issues.h>
 #include <gcli/ctx.h>
-#endif /* IN_LIBGCLI */
 
-typedef struct gcli_ctx gcli_ctx;
+#include <pdjson/pdjson.h>
 
-char const *gcli_init(gcli_ctx **,
-                      gcli_forge_type (*get_forge_type)(gcli_ctx *),
-                      char *(*get_authheader)(gcli_ctx *),
-                      char *(*get_apibase)(gcli_ctx *));
+#include "gcli_tests.h"
 
-void *gcli_get_userdata(struct gcli_ctx const *);
-void gcli_set_userdata(struct gcli_ctx *, void *usrdata);
-void gcli_set_progress_func(struct gcli_ctx *, void (*pfunc)(bool done));
-void gcli_destroy(gcli_ctx **ctx);
-char const *gcli_get_error(gcli_ctx *ctx);
+static gcli_forge_type
+get_bugzilla_forge_type(gcli_ctx *ctx)
+{
+	(void) ctx;
+	return GCLI_FORGE_BUGZILLA;
+}
 
-#endif /* GCLI_H */
+static gcli_ctx *
+test_context(void)
+{
+	gcli_ctx *ctx;
+	ATF_REQUIRE(gcli_init(&ctx, get_bugzilla_forge_type, NULL, NULL) == NULL);
+	return ctx;
+}
+
+static FILE *
+open_sample(char const *const name)
+{
+	FILE *r;
+	char p[4096] = {0};
+
+	snprintf(p, sizeof p, "%s/samples/%s", TESTSRCDIR, name);
+
+	r = fopen(p, "r");
+	return r;
+}
+
+ATF_TC_WITHOUT_HEAD(simple_bugzilla_issue);
+ATF_TC_BODY(simple_bugzilla_issue, tc)
+{
+	gcli_issue_list list = {0};
+	FILE *f;
+	json_stream stream;
+	gcli_ctx *ctx = test_context();
+
+	ATF_REQUIRE(f = open_sample("bugzilla_simple_bug.json"));
+	json_open_stream(&stream, f);
+
+	json_close(&stream);
+	gcli_destroy(&ctx);
+}
+
+ATF_TP_ADD_TCS(tp)
+{
+	ATF_TP_ADD_TC(tp, simple_bugzilla_issue);
+
+	return atf_no_error();
+}

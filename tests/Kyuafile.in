@@ -22,6 +22,11 @@ atf_test_program{
 }
 
 atf_test_program{
+        name = 'bugzilla-parse-tests',
+        required_files = '@TESTSRCDIR@/samples/bugzilla_simple_bug.json'
+}
+
+atf_test_program{
         name = 'url-encode'
 }
 

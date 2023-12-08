@@ -562,6 +562,8 @@ gcli_config_parse_args(gcli_ctx *ctx, int *argc, char ***argv)
 				cfg->override_forgetype = GCLI_FORGE_GITLAB;
 			} else if (strcmp(optarg, "gitea") == 0) {
 				cfg->override_forgetype = GCLI_FORGE_GITEA;
+			} else if (strcmp(optarg, "bugzilla") == 0) {
+				cfg->override_forgetype = GCLI_FORGE_BUGZILLA;
 			} else {
 				fprintf(stderr, "error: unknown forge type '%s'. "
 				        "Have either github, gitlab or gitea.\n", optarg);
@@ -852,6 +854,8 @@ gcli_config_get_forge_type_internal(gcli_ctx *ctx)
 			return GCLI_FORGE_GITLAB;
 		else if (sn_sv_eq_to(entry, "gitea"))
 			return GCLI_FORGE_GITEA;
+		else if (sn_sv_eq_to(entry, "bugzilla"))
+			return GCLI_FORGE_BUGZILLA;
 		else
 			errx(1, "Unknown forge type "SV_FMT, SV_ARGS(entry));
 	}

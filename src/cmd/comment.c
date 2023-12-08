@@ -38,6 +38,7 @@
 #include <gcli/comments.h>
 #include <gcli/json_util.h>
 
+#include <assert.h>
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
@@ -74,6 +75,10 @@ comment_init(gcli_ctx *ctx, FILE *f, void *_data)
 			break;
 		case GCLI_FORGE_GITLAB:
 			target_type = "Merge Request";
+			break;
+		case GCLI_FORGE_BUGZILLA:
+			/* FIXME think about this one */
+			assert(0 && "unreachable");
 			break;
 		}
 	} break;

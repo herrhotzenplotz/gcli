@@ -138,6 +138,7 @@ usage(void)
 	fprintf(stderr, "                    - github (default: github.com)\n");
 	fprintf(stderr, "                    - gitlab (default: gitlab.com)\n");
 	fprintf(stderr, "                    - gitea (default: codeberg.org)\n");
+	fprintf(stderr, "                    - bugzilla (default: bugs.freebsd.org)\n");
 	fprintf(stderr, "  -c             Force colour and text formatting.\n");
 	fprintf(stderr, "  -q             Be quiet. (Not implemented yet)\n\n");
 	fprintf(stderr, "  -v             Be verbose.\n\n");

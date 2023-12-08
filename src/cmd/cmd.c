@@ -70,6 +70,10 @@ longversion(void)
 void
 check_owner_and_repo(const char **owner, const char **repo)
 {
+	/* HACK */
+	if (gcli_config_get_forge_type(g_clictx) == GCLI_FORGE_BUGZILLA)
+		return;
+
 	/* If no remote was specified, try to autodetect */
 	if ((*owner == NULL) != (*repo == NULL))
 		errx(1, "gcli: error: missing either explicit owner or repo");

@@ -93,10 +93,11 @@ gcli_get_authheader(struct gcli_ctx *ctx)
 	char *hdr = NULL;
 	char *token = ctx->get_token(ctx);
 
-	if (token) {
+	if (token && gcli_forge(ctx)->make_authheader) {
 		hdr = gcli_forge(ctx)->make_authheader(ctx, token);
-		free(token);
 	}
+
+	free(token);
 
 	return hdr;
 }

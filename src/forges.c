@@ -70,6 +70,8 @@
 #include <gcli/gitea/sshkeys.h>
 #include <gcli/gitea/status.h>
 
+#include <gcli/bugzilla/bugs.h>
+
 static gcli_forge_descriptor const
 github_forge_descriptor =
 {
@@ -342,6 +344,15 @@ gitea_forge_descriptor =
 	                           | GCLI_PRS_QUIRK_COVERAGE,
 };
 
+static gcli_forge_descriptor const
+bugzilla_forge_descriptor =
+{
+	/* Issues */
+	.get_issues                = bugzilla_get_bugs,
+
+	.user_object_key           = "---dummy---",
+};
+
 gcli_forge_descriptor const *
 gcli_forge(gcli_ctx *ctx)
 {
@@ -352,6 +363,8 @@ gcli_forge(gcli_ctx *ctx)
 		return &gitlab_forge_descriptor;
 	case GCLI_FORGE_GITEA:
 		return &gitea_forge_descriptor;
+	case GCLI_FORGE_BUGZILLA:
+		return &bugzilla_forge_descriptor;
 	default:
 		errx(1,
 		     "error: cannot determine forge type. try forcing an account "

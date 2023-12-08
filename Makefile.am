@@ -119,7 +119,8 @@ TEMPLATES = \
 	templates/gitlab/status.t \
 	templates/gitlab/snippets.t \
 	templates/gitea/milestones.t \
-	templates/gitea/status.t
+	templates/gitea/status.t \
+	templates/bugzilla/bugs.t
 
 headerdir = $(prefix)
 nobase_header_HEADERS = include/gcli/gcli.h include/gcli/comments.h	\
@@ -189,6 +190,7 @@ libgcli_la_SOURCES = \
 	src/gitea/sshkeys.c include/gcli/gitea/sshkeys.h \
 	src/gitea/status.c include/gcli/gitea/status.h \
 	src/gitea/milestones.c include/gcli/gitea/milestones.h \
+	src/bugzilla/bugs.c include/gcli/bugzilla/bugs.h \
 	$(TEMPLATES)
 
 libgcli_la_CPPFLAGS = \
@@ -218,6 +220,7 @@ check_PROGRAMS = \
 	tests/github-parse-tests$(EXEEXT) \
 	tests/gitlab-parse-tests$(EXEEXT) \
 	tests/gitea-parse-tests$(EXEEXT) \
+	tests/bugzilla-parse-tests$(EXEEXT) \
 	tests/url-encode$(EXEEXT) \
 	tests/pretty_print_test$(EXEEXT) \
 	tests/test-jsongen$(EXEEXT)
@@ -251,6 +254,12 @@ tests_gitlab_parse_tests_LDADD = \
 tests_gitea_parse_tests_SOURCES = \
 	tests/gitea-parse-tests.c
 tests_gitea_parse_tests_LDADD = \
+	libgcli.la libpdjson.la libsn.la \
+	$(LIBATFC_LDFLAGS)
+
+tests_bugzilla_parse_tests_SOURCES = \
+	tests/bugzilla-parse-tests.c
+tests_bugzilla_parse_tests_LDADD = \
 	libgcli.la libpdjson.la libsn.la \
 	$(LIBATFC_LDFLAGS)
 

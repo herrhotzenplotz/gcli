@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,48 +27,20 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GCLI_H
-#define GCLI_H
-
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
 
-#include <inttypes.h>
-#include <stdbool.h>
-#include <stdint.h>
+#include <gcli/bugzilla/bugs.h>
 
-enum gcli_output_flags {
-	OUTPUT_SORTED = (1 << 0),
-	OUTPUT_LONG   = (1 << 1),
-};
+int
+bugzilla_get_bugs(gcli_ctx *ctx, char const *product, char const *component,
+                  gcli_issue_fetch_details const *details, int const max,
+                  gcli_issue_list *out)
+{
+	(void) product;
+	(void) component;
+	(void) details;
+	(void) max;
+	(void) out;
 
-typedef enum gcli_forge_type {
-	GCLI_FORGE_GITHUB,
-	GCLI_FORGE_GITLAB,
-	GCLI_FORGE_GITEA,
-	GCLI_FORGE_BUGZILLA,
-} gcli_forge_type;
-
-typedef uint64_t gcli_id;
-
-#define PRIid PRIu64
-
-#ifdef IN_LIBGCLI
-#include <gcli/ctx.h>
-#endif /* IN_LIBGCLI */
-
-typedef struct gcli_ctx gcli_ctx;
-
-char const *gcli_init(gcli_ctx **,
-                      gcli_forge_type (*get_forge_type)(gcli_ctx *),
-                      char *(*get_authheader)(gcli_ctx *),
-                      char *(*get_apibase)(gcli_ctx *));
-
-void *gcli_get_userdata(struct gcli_ctx const *);
-void gcli_set_userdata(struct gcli_ctx *, void *usrdata);
-void gcli_set_progress_func(struct gcli_ctx *, void (*pfunc)(bool done));
-void gcli_destroy(gcli_ctx **ctx);
-char const *gcli_get_error(gcli_ctx *ctx);
-
-#endif /* GCLI_H */
+	return gcli_error(ctx, "%s: not yet implemented", __func__);
+}

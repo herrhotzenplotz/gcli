@@ -88,6 +88,60 @@ bugzilla_get_bugs(gcli_ctx *ctx, char const *product, char const *component,
 }
 
 int
+parse_bugzilla_bug_comments_dictionary(gcli_ctx *const ctx, json_stream *stream,
+                                       gcli_comment_list *out)
+{
+	enum json_type next = JSON_NULL;
+	int rc = 0;
+
+	if ((next = json_next(stream)) != JSON_OBJECT)
+		return gcli_error(ctx, "expected bugzilla comments dictionary");
+
+	while ((next = json_next(stream)) == JSON_STRING) {
+		rc = parse_bugzilla_comments_internal(ctx, stream, out);
+		if (rc < 0)
+			return rc;
+	}
+
+	if (next != JSON_OBJECT_END)
+		return gcli_error(ctx, "unclosed bugzilla comments dictionary");
+
+	return rc;
+}
+
+int
+bugzilla_bug_get_comments(gcli_ctx *const ctx, char const *const product,
+                          char const *const component, gcli_id const bug_id,
+                          gcli_comment_list *out)
+{
+	int rc = 0;
+	gcli_fetch_buffer buffer = {0};
+	json_stream stream = {0};
+	char *url = NULL;
+
+	(void) product;
+	(void) component;
+
+	url = sn_asprintf("%s/rest/bug/%"PRIid"/comment?include_fields=_all",
+	                  gcli_get_apibase(ctx), bug_id);
+
+	rc = gcli_fetch(ctx, url, NULL, &buffer);
+	if (rc < 0)
+		goto error_fetch;
+
+	json_open_buffer(&stream, buffer.data, buffer.length);
+	rc = parse_bugzilla_comments(ctx, &stream, out);
+	json_close(&stream);
+
+	free(buffer.data);
+
+error_fetch:
+	free(url);
+
+	return rc;
+}
+
+int
 bugzilla_get_bug(gcli_ctx *ctx, char const *product, char const *component,
                  gcli_id bug_id, gcli_issue *out)
 {

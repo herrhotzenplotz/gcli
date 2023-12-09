@@ -1,4 +1,6 @@
+include "gcli/comments.h";
 include "gcli/issues.h";
+include "gcli/bugzilla/bugs.h";
 
 parser bugzilla_bug_creator is
 object of gcli_issue with
@@ -16,3 +18,17 @@ parser bugzilla_bugs is
 object of gcli_issue_list with
 	("bugs" => issues as array of gcli_issue use parse_bugzilla_bug_item);
 
+parser bugzilla_comment is
+object of gcli_comment with
+	("id" => id as id,
+	 "text" => body as string,
+	 "creation_time" => date as string,
+	 "creator" => author as string);
+
+parser bugzilla_comments_internal is
+object of gcli_comment_list with
+	("comments" => comments as array of gcli_comment use parse_bugzilla_comment);
+
+parser bugzilla_comments is
+object of gcli_comment_list with
+	("bugs" => use parse_bugzilla_bug_comments_dictionary);

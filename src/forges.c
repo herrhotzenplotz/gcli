@@ -352,6 +352,7 @@ bugzilla_forge_descriptor =
 	/* Issues */
 	.get_issues                = bugzilla_get_bugs,
 	.get_issue_summary         = bugzilla_get_bug,
+	.get_issue_comments        = bugzilla_bug_get_comments,
 
 	/* Internal stuff */
 	.make_authheader           = bugzilla_make_authheader,

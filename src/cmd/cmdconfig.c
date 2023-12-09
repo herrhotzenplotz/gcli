@@ -666,9 +666,10 @@ gcli_config_get_editor(gcli_ctx *ctx)
 
 static char const *const
 default_account_entry_names[] = {
-	[GCLI_FORGE_GITHUB] = "github-default-account",
-	[GCLI_FORGE_GITLAB] = "gitlab-default-account",
-	[GCLI_FORGE_GITEA]  = "gitea-default-account", };
+	[GCLI_FORGE_GITHUB]   = "github-default-account",
+	[GCLI_FORGE_GITLAB]   = "gitlab-default-account",
+	[GCLI_FORGE_GITEA]    = "gitea-default-account",
+	[GCLI_FORGE_BUGZILLA] = "bugzilla-default-account",};
 
 static char *
 get_default_account(gcli_ctx *ctx, gcli_forge_type ftype)
@@ -699,9 +700,10 @@ gcli_config_get_account(gcli_ctx *ctx)
 }
 
 static char const *const default_urls[] = {
-	[GCLI_FORGE_GITHUB] = "https://api.github.com",
-	[GCLI_FORGE_GITLAB] = "https://gitlab.com/api/v4",
-	[GCLI_FORGE_GITEA]  = "https://codeberg.org/api/v1",
+	[GCLI_FORGE_GITHUB]   = "https://api.github.com",
+	[GCLI_FORGE_GITLAB]   = "https://gitlab.com/api/v4",
+	[GCLI_FORGE_GITEA]    = "https://codeberg.org/api/v1",
+	[GCLI_FORGE_BUGZILLA] = "https://bugs.freebsd.org/bugzilla",
 };
 
 char *

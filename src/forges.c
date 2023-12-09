@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021, 2022, 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -70,7 +70,9 @@
 #include <gcli/gitea/sshkeys.h>
 #include <gcli/gitea/status.h>
 
+#include <gcli/bugzilla/api.h>
 #include <gcli/bugzilla/bugs.h>
+#include <gcli/bugzilla/config.h>
 
 static gcli_forge_descriptor const
 github_forge_descriptor =
@@ -351,6 +353,9 @@ bugzilla_forge_descriptor =
 	.get_issues                = bugzilla_get_bugs,
 	.get_issue_summary         = bugzilla_get_bug,
 
+	/* Internal stuff */
+	.make_authheader           = bugzilla_make_authheader,
+	.get_api_error_string      = bugzilla_api_error_string,
 	.user_object_key           = "---dummy---",
 };
 

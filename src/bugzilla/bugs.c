@@ -42,7 +42,7 @@ bugzilla_get_bugs(gcli_ctx *ctx, char const *product, char const *component,
                   gcli_issue_fetch_details const *details, int const max,
                   gcli_issue_list *out)
 {
-	char *url, *e_product = NULL, *e_component = NULL;
+	char *url, *e_product = NULL, *e_component = NULL, *e_author = NULL;
 	gcli_fetch_buffer buffer = {0};
 	int rc = 0;
 
@@ -58,18 +58,26 @@ bugzilla_get_bugs(gcli_ctx *ctx, char const *product, char const *component,
 		free(tmp);
 	}
 
+	if (details->author) {
+		char *tmp = gcli_urlencode(details->author);
+		e_author = sn_asprintf("&creator=%s", tmp);
+		free(tmp);
+	}
+
 	/* TODO: handle the max = -1 case */
 	/* Note(Nico): Most of the options here are not very well
 	 * documented. Specifically the order= parameter I have figured out by
 	 * reading the code and trying things until it worked. */
-	url = sn_asprintf("%s/rest/bug?order=bug_id%%20DESC%%2C&limit=%d%s%s%s",
+	url = sn_asprintf("%s/rest/bug?order=bug_id%%20DESC%%2C&limit=%d%s%s%s%s",
 	                  gcli_get_apibase(ctx), max,
 	                  details->all ? "&status=All" : "&status=Open&status=New",
 	                  e_product ? e_product : "",
-	                  e_component ? e_component : "");
+	                  e_component ? e_component : "",
+	                  e_author ? e_author : "");
 
 	free(e_product);
 	free(e_component);
+	free(e_author);
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc == 0) {

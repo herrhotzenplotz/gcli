@@ -35,6 +35,8 @@
 
 #include <gcli/curl.h>
 
+#include <assert.h>
+
 int
 bugzilla_get_bugs(gcli_ctx *ctx, char const *product, char const *component,
                   gcli_issue_fetch_details const *details, int const max,
@@ -89,10 +91,49 @@ int
 bugzilla_get_bug(gcli_ctx *ctx, char const *product, char const *component,
                  gcli_id bug_id, gcli_issue *out)
 {
+	int rc = 0;
+	char *url;
+	gcli_fetch_buffer buffer = {0};
+	gcli_issue_list list = {0};
+	json_stream stream = {0};
+
+	/* XXX should we warn if product or component is set? */
 	(void) product;
 	(void) component;
-	(void) bug_id;
-	(void) out;
 
-	return gcli_error(ctx, "%s: not yet implemented", __func__);
+	url = sn_asprintf("%s/rest/bug?limit=1&id=%"PRIid, gcli_get_apibase(ctx), bug_id);
+	rc = gcli_fetch(ctx, url, NULL, &buffer);
+
+	if (rc < 0)
+		goto error_fetch;
+
+	json_open_buffer(&stream, buffer.data, buffer.length);
+	rc = parse_bugzilla_bugs(ctx, &stream, &list);
+
+	if (rc < 0)
+		goto error_parse;
+
+	if (list.issues_size == 0) {
+		rc = gcli_error(ctx, "no bug with id %"PRIid, bug_id);
+		goto error_no_such_bug;
+	}
+
+	if (list.issues_size > 0) {
+		assert(list.issues_size == 1);
+		memcpy(out, &list.issues[0], sizeof(*out));
+	}
+
+	/* don't use gcli_issues_free because it frees data behind pointers we
+	 * just copied */
+	free(list.issues);
+
+error_no_such_bug:
+error_parse:
+	json_close(&stream);
+	free(buffer.data);
+
+error_fetch:
+	free(url);
+
+	return rc;
 }

@@ -44,12 +44,16 @@ int bugzilla_get_bugs(gcli_ctx *ctx, char const *product, char const *component,
 int bugzilla_get_bug(gcli_ctx *ctx, char const *product, char const *component,
                      gcli_id bug_id, gcli_issue *out);
 
-int parse_bugzilla_bug_comments_dictionary(gcli_ctx *const ctx,
-                                           json_stream *stream,
-                                           gcli_comment_list *out);
-
 int bugzilla_bug_get_comments(gcli_ctx *const ctx, char const *const product,
                               char const *const component, gcli_id const bug_id,
                               gcli_comment_list *out);
+
+int parse_bugzilla_bug_comments_dictionary_skip_first(gcli_ctx *const ctx,
+                                                      json_stream *stream,
+                                                      gcli_comment_list *out);
+
+int parse_bugzilla_comments_array_skip_first(gcli_ctx *ctx,
+                                             struct json_stream *stream,
+                                             gcli_comment_list *out);
 
 #endif /* GCLI_BUGZILLA_BUGS_H */

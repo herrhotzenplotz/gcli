@@ -34,6 +34,7 @@
 #include <templates/bugzilla/bugs.h>
 
 #include <gcli/curl.h>
+#include <gcli/json_util.h>
 
 #include <assert.h>
 
@@ -96,8 +97,36 @@ bugzilla_get_bugs(gcli_ctx *ctx, char const *product, char const *component,
 }
 
 int
-parse_bugzilla_bug_comments_dictionary(gcli_ctx *const ctx, json_stream *stream,
-                                       gcli_comment_list *out)
+parse_bugzilla_comments_array_skip_first(gcli_ctx *ctx,
+                                         struct json_stream *stream,
+                                         gcli_comment_list *out)
+{
+	int rc = 0;
+
+	if (json_next(stream) != JSON_ARRAY)
+		return gcli_error(ctx, "expected array for comments array");
+
+	SKIP_OBJECT_VALUE(stream);
+
+	while (json_peek(stream) != JSON_ARRAY_END) {
+		out->comments = realloc(out->comments, sizeof(*out->comments) * (out->comments_size + 1));
+		memset(&out->comments[out->comments_size], 0, sizeof(out->comments[out->comments_size]));
+		rc = parse_bugzilla_comment(ctx, stream, &out->comments[out->comments_size++]);
+		if (rc < 0)
+			return rc;
+	}
+
+	if (json_next(stream) != JSON_ARRAY_END)
+		return gcli_error(ctx, "unexpected element in array while parsing");
+
+	return 0;
+}
+
+
+int
+parse_bugzilla_bug_comments_dictionary_skip_first(gcli_ctx *const ctx,
+                                                  json_stream *stream,
+                                                  gcli_comment_list *out)
 {
 	enum json_type next = JSON_NULL;
 	int rc = 0;
@@ -106,7 +135,7 @@ parse_bugzilla_bug_comments_dictionary(gcli_ctx *const ctx, json_stream *stream,
 		return gcli_error(ctx, "expected bugzilla comments dictionary");
 
 	while ((next = json_next(stream)) == JSON_STRING) {
-		rc = parse_bugzilla_comments_internal(ctx, stream, out);
+		rc = parse_bugzilla_comments_internal_skip_first(ctx, stream, out);
 		if (rc < 0)
 			return rc;
 	}

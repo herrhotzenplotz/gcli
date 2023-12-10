@@ -112,15 +112,9 @@ ATF_TC_BODY(bugzilla_comments, tc)
 	fclose(f);
 	f = NULL;
 
-	ATF_REQUIRE_EQ(list.comments_size, 2);
+	ATF_REQUIRE_EQ(list.comments_size, 1);
 
 	cmt = &list.comments[0];
-	ATF_CHECK_EQ(cmt->id, 1285941);
-	ATF_CHECK_STREQ(cmt->author, "zlei@FreeBSD.org");
-	ATF_CHECK_STREQ(cmt->date, "2023-11-27T17:14:39Z");
-	ATF_CHECK(cmt->body != NULL);
-
-	cmt += 1;
 	ATF_CHECK_EQ(cmt->id, 1285943);
 	ATF_CHECK_STREQ(cmt->author, "zlei@FreeBSD.org");
 	ATF_CHECK_STREQ(cmt->date, "2023-11-27T17:20:15Z");

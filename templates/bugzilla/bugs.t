@@ -25,10 +25,10 @@ object of gcli_comment with
 	 "creation_time" => date as string,
 	 "creator" => author as string);
 
-parser bugzilla_comments_internal is
+parser bugzilla_comments_internal_skip_first is
 object of gcli_comment_list with
-	("comments" => comments as array of gcli_comment use parse_bugzilla_comment);
+	("comments" => use parse_bugzilla_comments_array_skip_first);
 
 parser bugzilla_comments is
 object of gcli_comment_list with
-	("bugs" => use parse_bugzilla_bug_comments_dictionary);
+	("bugs" => use parse_bugzilla_bug_comments_dictionary_skip_first);

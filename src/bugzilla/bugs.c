@@ -122,6 +122,29 @@ parse_bugzilla_comments_array_skip_first(gcli_ctx *ctx,
 	return 0;
 }
 
+int
+parse_bugzilla_comments_array_only_first(gcli_ctx *ctx,
+                                         struct json_stream *stream,
+                                         sn_sv *out)
+{
+	int rc = 0;
+
+	if (json_next(stream) != JSON_ARRAY)
+		return gcli_error(ctx, "expected array for comments array");
+
+	rc = parse_bugzilla_comment_text(ctx, stream, out);
+	if (rc < 0)
+		return rc;
+
+	while (json_peek(stream) != JSON_ARRAY_END) {
+		SKIP_OBJECT_VALUE(stream);
+	}
+
+	if (json_next(stream) != JSON_ARRAY_END)
+		return gcli_error(ctx, "unexpected element in array while parsing");
+
+	return 0;
+}
 
 int
 parse_bugzilla_bug_comments_dictionary_skip_first(gcli_ctx *const ctx,
@@ -136,6 +159,29 @@ parse_bugzilla_bug_comments_dictionary_skip_first(gcli_ctx *const ctx,
 
 	while ((next = json_next(stream)) == JSON_STRING) {
 		rc = parse_bugzilla_comments_internal_skip_first(ctx, stream, out);
+		if (rc < 0)
+			return rc;
+	}
+
+	if (next != JSON_OBJECT_END)
+		return gcli_error(ctx, "unclosed bugzilla comments dictionary");
+
+	return rc;
+}
+
+int
+parse_bugzilla_bug_comments_dictionary_only_first(gcli_ctx *const ctx,
+                                                  json_stream *stream,
+                                                  sn_sv *out)
+{
+	enum json_type next = JSON_NULL;
+	int rc = 0;
+
+	if ((next = json_next(stream)) != JSON_OBJECT)
+		return gcli_error(ctx, "expected bugzilla comments dictionary");
+
+	while ((next = json_next(stream)) == JSON_STRING) {
+		rc = parse_bugzilla_comments_internal_only_first(ctx, stream, out);
 		if (rc < 0)
 			return rc;
 	}
@@ -168,6 +214,33 @@ bugzilla_bug_get_comments(gcli_ctx *const ctx, char const *const product,
 
 	json_open_buffer(&stream, buffer.data, buffer.length);
 	rc = parse_bugzilla_comments(ctx, &stream, out);
+	json_close(&stream);
+
+	free(buffer.data);
+
+error_fetch:
+	free(url);
+
+	return rc;
+}
+
+static int
+bugzilla_bug_get_op(gcli_ctx *ctx, gcli_id const bug_id, sn_sv *out)
+{
+	int rc = 0;
+	gcli_fetch_buffer buffer = {0};
+	json_stream stream = {0};
+	char *url = NULL;
+
+	url = sn_asprintf("%s/rest/bug/%"PRIid"/comment?include_fields=_all",
+	                  gcli_get_apibase(ctx), bug_id);
+
+	rc = gcli_fetch(ctx, url, NULL, &buffer);
+	if (rc < 0)
+		goto error_fetch;
+
+	json_open_buffer(&stream, buffer.data, buffer.length);
+	rc = parse_bugzilla_bug_op(ctx, &stream, out);
 	json_close(&stream);
 
 	free(buffer.data);
@@ -217,6 +290,9 @@ bugzilla_get_bug(gcli_ctx *ctx, char const *product, char const *component,
 	/* don't use gcli_issues_free because it frees data behind pointers we
 	 * just copied */
 	free(list.issues);
+
+	/* The OP is in the comments. Fetch it separately. */
+	rc = bugzilla_bug_get_op(ctx, bug_id, &out->body);
 
 error_no_such_bug:
 error_parse:

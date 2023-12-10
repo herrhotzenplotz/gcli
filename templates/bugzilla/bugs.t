@@ -32,3 +32,14 @@ object of gcli_comment_list with
 parser bugzilla_comments is
 object of gcli_comment_list with
 	("bugs" => use parse_bugzilla_bug_comments_dictionary_skip_first);
+
+parser bugzilla_comment_text is
+object of sn_sv select "text" as sv;
+
+parser bugzilla_comments_internal_only_first is
+object of sn_sv with
+	("comments" => use parse_bugzilla_comments_array_only_first);
+
+parser bugzilla_bug_op is
+object of sn_sv with
+	("bugs" => use parse_bugzilla_bug_comments_dictionary_only_first);

@@ -580,6 +580,7 @@ gcli_print_attachments(gcli_attachment_list const *const list)
 		{ .name = "AUTHOR",   .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_BOLD     },
 		{ .name = "CREATED",  .type = GCLI_TBLCOLTYPE_STRING, .flags = 0                    },
 		{ .name = "CONTENT",  .type = GCLI_TBLCOLTYPE_STRING, .flags = 0                    },
+		{ .name = "OBSOLETE", .type = GCLI_TBLCOLTYPE_BOOL,   .flags = 0                    },
 		{ .name = "FILENAME", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0                    },
 	};
 
@@ -588,7 +589,7 @@ gcli_print_attachments(gcli_attachment_list const *const list)
 	for (size_t i = 0; i < list->attachments_size; ++i) {
 		gcli_attachment const *const it = &list->attachments[i];
 		gcli_tbl_add_row(tbl, it->id, it->author, it->created_at,
-		                 it->content_type, it->file_name);
+		                 it->content_type, it->is_obsolete, it->file_name);
 	}
 
 	gcli_tbl_end(tbl);

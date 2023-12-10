@@ -69,6 +69,7 @@ struct gcli_issue {
 
 struct gcli_attachment {
 	gcli_id id;
+	bool is_obsolete;
 	char *created_at;
 	char *author;
 	char *file_name;

@@ -49,6 +49,7 @@
 #define get_double(ctx, input, out)        get_double_(ctx, input, out, __func__)
 #define get_parse_int(ctx, input, out)     get_parse_int_(ctx, input, out, __func__)
 #define get_bool(ctx, input, out)          get_bool_(ctx, input, out, __func__)
+#define get_bool_relaxed(ctx, input, out)  get_bool_relaxed_(ctx, input, out, __func__)
 #define get_string(ctx, input, out)        get_string_(ctx, input, out, __func__)
 #define get_sv(ctx, input, out)            get_sv_(ctx, input, out, __func__)
 #define get_user(ctx, input, out)          get_user_(ctx, input, out, __func__)
@@ -63,6 +64,7 @@ int get_size_t_(gcli_ctx *ctx, json_stream *input, size_t *out, char const *func
 int get_double_(gcli_ctx *ctx, json_stream *input, double *out, char const *function);
 int get_parse_int_(gcli_ctx *ctx, json_stream *input, long *out, char const *function);
 int get_bool_(gcli_ctx *ctx, json_stream *input, bool *out, char const *function);
+int get_bool_relaxed_(gcli_ctx *ctx, json_stream *input, bool *out, char const *function);
 int get_string_(gcli_ctx *ctx, json_stream *input, char **out, char const *function);
 int get_sv_(gcli_ctx *ctx, json_stream *input, sn_sv *out, char const *function);
 int get_user_(gcli_ctx *ctx, json_stream *input, char **out, char const *function);

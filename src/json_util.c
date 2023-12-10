@@ -139,6 +139,24 @@ get_bool_(gcli_ctx *ctx,json_stream *const input, bool *out, char const *where)
 }
 
 int
+get_bool_relaxed_(gcli_ctx *ctx,json_stream *const input, bool *out, char const *where)
+{
+	enum json_type value_type = json_next(input);
+	if (value_type == JSON_TRUE) {
+		*out = true;
+		return 0;
+	} else if (value_type == JSON_FALSE || value_type == JSON_NULL) { // HACK
+		*out = false;
+		return 0;
+	} else if (value_type == JSON_NUMBER) {
+		*out = json_get_number(input) != 0.0;
+		return 0;
+	}
+
+	return gcli_error(ctx, "unexpected non-boolean value in %s", where);
+}
+
+int
 get_user_(gcli_ctx *ctx, json_stream *const input, char **out,
           char const *where)
 {

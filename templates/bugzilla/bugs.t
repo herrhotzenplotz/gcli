@@ -66,7 +66,9 @@ object of gcli_attachment with
 	 "summary" => summary as string,
 	 "file_name" => file_name as string,
 	 "creation_time" => created_at as string,
-	 "creator" => author as string);
+	 "creator" => author as string,
+	 "content_type" => content_type as string,
+	 "is_obsolete" => is_obsolete as bool_relaxed);
 
 parser bugzilla_bug_attachments_internal is
 array of gcli_attachment use parse_bugzilla_bug_attachment;

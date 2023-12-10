@@ -57,14 +57,14 @@ gcli_comments_free(gcli_comment_list *const list)
 
 int
 gcli_get_issue_comments(gcli_ctx *ctx, char const *owner, char const *repo,
-                        int const issue, gcli_comment_list *out)
+                        gcli_id const issue, gcli_comment_list *out)
 {
 	return gcli_forge(ctx)->get_issue_comments(ctx, owner, repo, issue, out);
 }
 
 int
 gcli_get_pull_comments(gcli_ctx *ctx, char const *owner, char const *repo,
-                       int const pull, gcli_comment_list *out)
+                       gcli_id const pull, gcli_comment_list *out)
 {
 	return gcli_forge(ctx)->get_pull_comments(ctx, owner, repo, pull, out);
 }

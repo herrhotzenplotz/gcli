@@ -2,7 +2,7 @@ include "gcli/github/comments.h";
 
 parser github_comment is
 object of gcli_comment with
-	("id"         => id as int,
+	("id"         => id as id,
 	 "created_at" => date as string,
 	 "body"       => body as string,
 	 "user"       => author as user);

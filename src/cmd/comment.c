@@ -84,7 +84,7 @@ comment_init(gcli_ctx *ctx, FILE *f, void *_data)
 		"! Enter your comment above, save and exit.\n"
 		"! All lines with a leading '!' are discarded and will not\n"
 		"! appear in your comment.\n"
-		"! COMMENT IN : %s/%s %s #%d\n",
+		"! COMMENT IN : %s/%s %s #%"PRIid"\n",
 		info->owner, info->repo, target_type, info->target_id);
 }
 
@@ -103,7 +103,7 @@ comment_submit(gcli_submit_comment_opts opts, int always_yes)
 
 	fprintf(
 		stdout,
-		"You will be commenting the following in %s/%s #%d:\n"SV_FMT"\n",
+		"You will be commenting the following in %s/%s #%"PRIid":\n"SV_FMT"\n",
 		opts.owner, opts.repo, opts.target_id, SV_ARGS(message));
 
 	if (!always_yes) {

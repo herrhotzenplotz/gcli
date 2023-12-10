@@ -58,7 +58,7 @@ gitlab_perform_submit_comment(gcli_ctx *ctx, gcli_submit_comment_opts opts,
 		"{ \"body\": \""SV_FMT"\" }",
 		SV_ARGS(opts.message));
 	char *url = sn_asprintf(
-		"%s/projects/%s%%2F%s/%s/%d/notes",
+		"%s/projects/%s%%2F%s/%s/%"PRIid"/notes",
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, type, opts.target_id);
 

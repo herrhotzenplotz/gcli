@@ -47,7 +47,7 @@ github_perform_submit_comment(gcli_ctx *ctx, gcli_submit_comment_opts opts,
 		"{ \"body\": \""SV_FMT"\" }",
 		SV_ARGS(opts.message));
 	char *url         = sn_asprintf(
-		"%s/repos/%s/%s/issues/%d/comments",
+		"%s/repos/%s/%s/issues/%"PRIid"/comments",
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, opts.target_id);
 

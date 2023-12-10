@@ -146,4 +146,7 @@ int gcli_issue_get_attachments(gcli_ctx *ctx, char const *owner,
                                char const *repo, gcli_id issue,
                                gcli_attachment_list *attachments);
 
+void gcli_attachments_free(gcli_attachment_list *list);
+void gcli_attachment_free(gcli_attachment *attachment);
+
 #endif /* ISSUES_H */

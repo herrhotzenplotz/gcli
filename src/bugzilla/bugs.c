@@ -320,9 +320,53 @@ bugzilla_bug_get_attachments(gcli_ctx *ctx, char const *const product,
                              char const *const component, gcli_id const bug_id,
                              gcli_attachment_list *const out)
 {
+	int rc = 0;
+	char *url = NULL;
+	gcli_fetch_buffer buffer = {0};
+	json_stream stream = {0};
+
 	(void) product;
 	(void) component;
-	(void) bug_id;
-	(void) out;
-	return gcli_error(ctx, "not yet implemented");
+
+	url = sn_asprintf("%s/rest/bug/%"PRIid"/attachment",
+	                  gcli_get_apibase(ctx), bug_id);
+
+	rc = gcli_fetch(ctx, url, NULL, &buffer);
+	if (rc < 0)
+		goto error_fetch;
+
+	json_open_buffer(&stream, buffer.data, buffer.length);
+	rc = parse_bugzilla_bug_attachments(ctx, &stream, out);
+	json_close(&stream);
+
+	free(buffer.data);
+
+error_fetch:
+	free(url);
+
+	return rc;
+}
+
+int
+parse_bugzilla_bug_attachments_dict(gcli_ctx *ctx, json_stream *stream,
+                                    gcli_attachment_list *out)
+{
+	enum json_type next = JSON_NULL;
+	int rc = 0;
+
+	if ((next = json_next(stream)) != JSON_OBJECT)
+		return gcli_error(ctx, "expected bugzilla attachments dictionary");
+
+	while ((next = json_next(stream)) == JSON_STRING) {
+		rc = parse_bugzilla_bug_attachments_internal(ctx, stream,
+		                                             &out->attachments,
+		                                             &out->attachments_size);
+		if (rc < 0)
+			return rc;
+	}
+
+	if (next != JSON_OBJECT_END)
+		return gcli_error(ctx, "unclosed bugzilla attachments dictionary");
+
+	return rc;
 }

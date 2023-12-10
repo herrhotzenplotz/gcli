@@ -54,3 +54,18 @@ object of char* with
 parser bugzilla_bug_op is
 object of char* with
 	("bugs" => use parse_bugzilla_bug_comments_dictionary_only_first);
+
+parser bugzilla_bug_attachments is
+object of gcli_attachment_list with
+	("bugs" => use parse_bugzilla_bug_attachments_dict);
+
+parser bugzilla_bug_attachment is
+object of gcli_attachment with
+	("id" => id as id,
+	 "summary" => summary as string,
+	 "file_name" => file_name as string,
+	 "creation_time" => created_at as string,
+	 "creator" => author as string);
+
+parser bugzilla_bug_attachments_internal is
+array of gcli_attachment use parse_bugzilla_bug_attachment;

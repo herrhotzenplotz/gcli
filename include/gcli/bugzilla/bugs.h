@@ -64,4 +64,7 @@ int parse_bugzilla_comments_array_only_first(gcli_ctx *ctx,
                                              struct json_stream *stream,
                                              char **out);
 
+int parse_bugzilla_assignee(gcli_ctx *ctx, struct json_stream *stream,
+                            gcli_issue *out);
+
 #endif /* GCLI_BUGZILLA_BUGS_H */

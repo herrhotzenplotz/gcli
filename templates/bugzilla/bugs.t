@@ -6,6 +6,10 @@ parser bugzilla_bug_creator is
 object of gcli_issue with
 	("real_name" => author as string);
 
+parser bugzilla_assigned_to_detail is
+object of gcli_issue with
+	("name" => use parse_bugzilla_assignee);
+
 parser bugzilla_bug_item is
 object of gcli_issue with
 	("id" => number as id,
@@ -14,7 +18,11 @@ object of gcli_issue with
 	 "creator_detail" => use parse_bugzilla_bug_creator,
 	 "status" => state as string,
 	 "product" => product as string,
-	 "component" => component as string);
+	 "component" => component as string,
+	 "status" => state as string,
+	 "product" => product as string,
+	 "component" => component as string,
+	 "assigned_to_detail" => use parse_bugzilla_assigned_to_detail);
 
 parser bugzilla_bugs is
 object of gcli_issue_list with

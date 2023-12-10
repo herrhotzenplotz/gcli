@@ -659,6 +659,18 @@ handle_issues_actions(int argc, char *argv[],
 				     gcli_get_error(g_clictx));
 			}
 
+		} else if (strcmp("attachments", operation) == 0) {
+
+			gcli_attachment_list list = {0};
+			int rc = gcli_issue_get_attachments(g_clictx, owner, repo, issue_id,
+			                                    &list);
+			if (rc < 0) {
+				errx(1, "error: failed to fetch attachments: %s",
+				     gcli_get_error(g_clictx));
+			}
+
+			gcli_attachments_free(&list);
+
 		} else {
 			fprintf(stderr, "gcli: error: unknown operation %s\n", operation);
 			usage();

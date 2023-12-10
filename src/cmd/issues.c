@@ -158,6 +158,12 @@ gcli_issue_print_summary(gcli_issue const *const it)
 	gcli_dict_add(dict, "TITLE", 0, 0, "%s", it->title);
 
 	gcli_dict_add(dict, "CREATED", 0, 0, "%s", it->created_at);
+
+	if ((quirks & GCLI_ISSUE_QUIRKS_PROD_COMP) == 0) {
+		gcli_dict_add(dict, "PRODUCT", 0, 0, "%s", it->product);
+		gcli_dict_add(dict, "COMPONENT", 0, 0, "%s", it->component);
+	}
+
 	gcli_dict_add(dict, "AUTHOR",  GCLI_TBLCOL_BOLD, 0,
 	              "%s", it->author);
 	gcli_dict_add(dict, "STATE", GCLI_TBLCOL_STATECOLOURED, 0,

@@ -36,7 +36,8 @@
 void
 gcli_issue_free(gcli_issue *const it)
 {
-	free(it->title);
+	free(it->product);
+	free(it->component);
 	free(it->created_at);
 	free(it->author);
 	free(it->state);

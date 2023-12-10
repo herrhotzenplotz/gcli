@@ -47,6 +47,8 @@ typedef struct gcli_issue_fetch_details gcli_issue_fetch_details;
 struct gcli_issue {
 	gcli_id number;
 	char *title;
+	char *product;     /* only on Bugzilla */
+	char *component;   /* only on Bugzilla */
 	char *created_at;
 	char *author;
 	char *state;

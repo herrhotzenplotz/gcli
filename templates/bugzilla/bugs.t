@@ -12,7 +12,9 @@ object of gcli_issue with
 	 "summary" => title as string,
 	 "creation_time" => created_at as string,
 	 "creator_detail" => use parse_bugzilla_bug_creator,
-	 "status" => state as string);
+	 "status" => state as string,
+	 "product" => product as string,
+	 "component" => component as string);
 
 parser bugzilla_bugs is
 object of gcli_issue_list with

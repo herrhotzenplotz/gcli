@@ -90,6 +90,8 @@ ATF_TC_BODY(simple_bugzilla_issue, tc)
 	ATF_CHECK_STREQ(issue->created_at, "1994-09-14T09:10:01Z");
 	ATF_CHECK_STREQ(issue->author, "Dave Evans");
 	ATF_CHECK_STREQ(issue->state, "Closed");
+	ATF_CHECK_STREQ(issue->product, "Base System");
+	ATF_CHECK_STREQ(issue->component, "kern");
 
 	json_close(&stream);
 	gcli_destroy(&ctx);

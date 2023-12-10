@@ -36,6 +36,7 @@
 #include <gcli/cmd/table.h>
 
 #include <gcli/comments.h>
+#include <gcli/forges.h>
 #include <gcli/issues.h>
 
 #include <stdlib.h>
@@ -149,6 +150,7 @@ void
 gcli_issue_print_summary(gcli_issue const *const it)
 {
 	gcli_dict dict;
+	uint32_t const quirks = gcli_forge(g_clictx)->issue_quirks;
 
 	dict = gcli_dict_begin();
 
@@ -161,8 +163,11 @@ gcli_issue_print_summary(gcli_issue const *const it)
 	gcli_dict_add(dict, "STATE", GCLI_TBLCOL_STATECOLOURED, 0,
 	              "%s", it->state);
 
-	gcli_dict_add(dict, "COMMENTS", 0, 0, "%d", it->comments);
-	gcli_dict_add(dict, "LOCKED", 0, 0, "%s", sn_bool_yesno(it->locked));
+	if ((quirks & GCLI_ISSUE_QUIRKS_COMMENTS) == 0)
+		gcli_dict_add(dict, "COMMENTS", 0, 0, "%d", it->comments);
+
+	if ((quirks & GCLI_ISSUE_QUIRKS_LOCKED) == 0)
+		gcli_dict_add(dict, "LOCKED", 0, 0, "%s", sn_bool_yesno(it->locked));
 
 	if (it->milestone)
 		gcli_dict_add(dict, "MILESTONE", 0, 0, "%s", it->milestone);

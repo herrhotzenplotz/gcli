@@ -125,7 +125,7 @@ parse_bugzilla_comments_array_skip_first(gcli_ctx *ctx,
 int
 parse_bugzilla_comments_array_only_first(gcli_ctx *ctx,
                                          struct json_stream *stream,
-                                         sn_sv *out)
+                                         char **out)
 {
 	int rc = 0;
 
@@ -172,7 +172,7 @@ parse_bugzilla_bug_comments_dictionary_skip_first(gcli_ctx *const ctx,
 int
 parse_bugzilla_bug_comments_dictionary_only_first(gcli_ctx *const ctx,
                                                   json_stream *stream,
-                                                  sn_sv *out)
+                                                  char **out)
 {
 	enum json_type next = JSON_NULL;
 	int rc = 0;
@@ -225,7 +225,7 @@ error_fetch:
 }
 
 static int
-bugzilla_bug_get_op(gcli_ctx *ctx, gcli_id const bug_id, sn_sv *out)
+bugzilla_bug_get_op(gcli_ctx *ctx, gcli_id const bug_id, char **out)
 {
 	int rc = 0;
 	gcli_fetch_buffer buffer = {0};

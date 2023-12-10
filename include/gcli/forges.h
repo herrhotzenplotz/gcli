@@ -176,6 +176,13 @@ struct gcli_forge_descriptor {
 		gcli_ctx *ctx, char const *owner, char const *repo, gcli_id issue,
 		char const *new_title);
 
+	/* Issue quirk bitmask */
+	enum {
+		GCLI_ISSUE_QUIRKS_LOCKED    = 0x1,
+		GCLI_ISSUE_QUIRKS_COMMENTS  = 0x2,
+		GCLI_ISSUE_QUIRKS_PROD_COMP = 0x4,
+	} const issue_quirks;
+
 	/**
 	 * Bitmask of exceptions/fields that the forge doesn't support */
 	enum {

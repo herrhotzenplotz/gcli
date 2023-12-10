@@ -58,10 +58,10 @@ int parse_bugzilla_comments_array_skip_first(gcli_ctx *ctx,
 
 int parse_bugzilla_bug_comments_dictionary_only_first(gcli_ctx *const ctx,
                                                       json_stream *stream,
-                                                      sn_sv *out);
+                                                      char **out);
 
 int parse_bugzilla_comments_array_only_first(gcli_ctx *ctx,
                                              struct json_stream *stream,
-                                             sn_sv *out);
+                                             char **out);
 
 #endif /* GCLI_BUGZILLA_BUGS_H */

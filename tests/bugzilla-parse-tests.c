@@ -95,9 +95,45 @@ ATF_TC_BODY(simple_bugzilla_issue, tc)
 	gcli_destroy(&ctx);
 }
 
+ATF_TC_WITHOUT_HEAD(bugzilla_comments);
+ATF_TC_BODY(bugzilla_comments, tc)
+{
+	FILE *f;
+	gcli_comment const *cmt = NULL;
+	gcli_comment_list list = {0};
+	gcli_ctx *ctx = test_context();
+	json_stream stream;
+
+	ATF_REQUIRE(f = open_sample("bugzilla_comments.json"));
+	json_open_stream(&stream, f);
+
+	ATF_REQUIRE(parse_bugzilla_comments(ctx, &stream, &list) == 0);
+	json_close(&stream);
+	fclose(f);
+	f = NULL;
+
+	ATF_REQUIRE_EQ(list.comments_size, 2);
+
+	cmt = &list.comments[0];
+	ATF_CHECK_EQ(cmt->id, 1285941);
+	ATF_CHECK_STREQ(cmt->author, "zlei@FreeBSD.org");
+	ATF_CHECK_STREQ(cmt->date, "2023-11-27T17:14:39Z");
+	ATF_CHECK(cmt->body != NULL);
+
+	cmt += 1;
+	ATF_CHECK_EQ(cmt->id, 1285943);
+	ATF_CHECK_STREQ(cmt->author, "zlei@FreeBSD.org");
+	ATF_CHECK_STREQ(cmt->date, "2023-11-27T17:20:15Z");
+	ATF_CHECK(cmt->body != NULL);
+
+	gcli_comments_free(&list);
+	gcli_destroy(&ctx);
+}
+
 ATF_TP_ADD_TCS(tp)
 {
 	ATF_TP_ADD_TC(tp, simple_bugzilla_issue);
+	ATF_TP_ADD_TC(tp, bugzilla_comments);
 
 	return atf_no_error();
 }

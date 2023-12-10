@@ -49,6 +49,7 @@ struct gcli_issue {
 	char *title;
 	char *product;     /* only on Bugzilla */
 	char *component;   /* only on Bugzilla */
+	char *url;         /* only on Bugzilla */
 	char *created_at;
 	char *author;
 	char *state;

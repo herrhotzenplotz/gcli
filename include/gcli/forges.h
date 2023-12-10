@@ -181,6 +181,7 @@ struct gcli_forge_descriptor {
 		GCLI_ISSUE_QUIRKS_LOCKED    = 0x1,
 		GCLI_ISSUE_QUIRKS_COMMENTS  = 0x2,
 		GCLI_ISSUE_QUIRKS_PROD_COMP = 0x4,
+		GCLI_ISSUE_QUIRKS_URL       = 0x8,
 	} const issue_quirks;
 
 	/**

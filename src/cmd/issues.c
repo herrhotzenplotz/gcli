@@ -169,6 +169,9 @@ gcli_issue_print_summary(gcli_issue const *const it)
 	gcli_dict_add(dict, "STATE", GCLI_TBLCOL_STATECOLOURED, 0,
 	              "%s", it->state);
 
+	if ((quirks & GCLI_ISSUE_QUIRKS_URL) == 0 && it->url)
+		gcli_dict_add(dict, "URL", 0, 0, "%s", it->url);
+
 	if ((quirks & GCLI_ISSUE_QUIRKS_COMMENTS) == 0)
 		gcli_dict_add(dict, "COMMENTS", 0, 0, "%d", it->comments);
 

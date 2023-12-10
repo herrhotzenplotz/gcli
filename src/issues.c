@@ -42,6 +42,7 @@ gcli_issue_free(gcli_issue *const it)
 	free(it->author);
 	free(it->state);
 	free(it->body);
+	free(it->url);
 
 	for (size_t i = 0; i < it->labels_size; ++i)
 		free(it->labels[i]);

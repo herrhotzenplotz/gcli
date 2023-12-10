@@ -22,7 +22,8 @@ object of gcli_issue with
 	 "status" => state as string,
 	 "product" => product as string,
 	 "component" => component as string,
-	 "assigned_to_detail" => use parse_bugzilla_assigned_to_detail);
+	 "assigned_to_detail" => use parse_bugzilla_assigned_to_detail,
+	 "url" => url as string);
 
 parser bugzilla_bugs is
 object of gcli_issue_list with

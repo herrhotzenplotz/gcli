@@ -571,6 +571,29 @@ handle_issue_milestone_action(int *argc, char ***argv,
 		     gcli_get_error(g_clictx));
 }
 
+static void
+gcli_print_attachments(gcli_attachment_list const *const list)
+{
+	gcli_tbl tbl;
+	gcli_tblcoldef columns[] = {
+		{ .name = "ID",       .type = GCLI_TBLCOLTYPE_ID,     .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "AUTHOR",   .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_BOLD     },
+		{ .name = "CREATED",  .type = GCLI_TBLCOLTYPE_STRING, .flags = 0                    },
+		{ .name = "CONTENT",  .type = GCLI_TBLCOLTYPE_STRING, .flags = 0                    },
+		{ .name = "FILENAME", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0                    },
+	};
+
+	tbl = gcli_tbl_begin(columns, ARRAY_SIZE(columns));
+
+	for (size_t i = 0; i < list->attachments_size; ++i) {
+		gcli_attachment const *const it = &list->attachments[i];
+		gcli_tbl_add_row(tbl, it->id, it->author, it->created_at,
+		                 it->content_type, it->file_name);
+	}
+
+	gcli_tbl_end(tbl);
+}
+
 static inline int
 handle_issues_actions(int argc, char *argv[],
                       char const *const owner,
@@ -669,6 +692,7 @@ handle_issues_actions(int argc, char *argv[],
 				     gcli_get_error(g_clictx));
 			}
 
+			gcli_print_attachments(&list);
 			gcli_attachments_free(&list);
 
 		} else {

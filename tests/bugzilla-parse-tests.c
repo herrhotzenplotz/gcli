@@ -126,10 +126,54 @@ ATF_TC_BODY(bugzilla_comments, tc)
 	gcli_destroy(&ctx);
 }
 
+ATF_TC_WITHOUT_HEAD(bugzilla_attachments);
+ATF_TC_BODY(bugzilla_attachments, tc)
+{
+	FILE *f = NULL;
+	gcli_attachment const *it;
+	gcli_attachment_list list = {0};
+	gcli_ctx *ctx = test_context();
+	json_stream stream = {0};
+
+	ATF_REQUIRE(f = open_sample("bugzilla_attachments.json"));
+	json_open_stream(&stream, f);
+
+	ATF_REQUIRE(parse_bugzilla_bug_attachments(ctx, &stream, &list) == 0);
+
+	ATF_CHECK(list.attachments_size == 2);
+
+	it = list.attachments;
+	ATF_CHECK_EQ(it->id, 246131);
+	ATF_CHECK_EQ(it->is_obsolete, true);
+	ATF_CHECK_STREQ(it->author, "nsonack@outlook.com");
+	ATF_CHECK_STREQ(it->content_type, "text/plain");
+	ATF_CHECK_STREQ(it->created_at, "2023-11-04T20:19:11Z");
+	ATF_CHECK_STREQ(it->file_name, "0001-devel-open62541-Update-to-version-1.3.8.patch");
+	ATF_CHECK_STREQ(it->summary, "Patch for updating the port");
+
+	it++;
+	ATF_CHECK_EQ(it->id, 246910);
+	ATF_CHECK_EQ(it->is_obsolete, false);
+	ATF_CHECK_STREQ(it->author, "nsonack@outlook.com");
+	ATF_CHECK_STREQ(it->content_type, "text/plain");
+	ATF_CHECK_STREQ(it->created_at, "2023-12-08T17:10:06Z");
+	ATF_CHECK_STREQ(it->file_name, "0001-devel-open62541-Update-to-version-1.3.8.patch");
+	ATF_CHECK_STREQ(it->summary, "Patch v2 (now for version 1.3.9)");
+
+	gcli_attachments_free(&list);
+
+	json_close(&stream);
+	fclose(f);
+	f = NULL;
+
+	gcli_destroy(&ctx);
+}
+
 ATF_TP_ADD_TCS(tp)
 {
 	ATF_TP_ADD_TC(tp, simple_bugzilla_issue);
 	ATF_TP_ADD_TC(tp, bugzilla_comments);
+	ATF_TP_ADD_TC(tp, bugzilla_attachments);
 
 	return atf_no_error();
 }

@@ -27,30 +27,37 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GCLI_BUGZILLA_BUGS_H
-#define GCLI_BUGZILLA_BUGS_H
+#ifndef GCLI_BUGZILLA_BUGS_PARSER_H
+#define GCLI_BUGZILLA_BUGS_PARSER_H
 
 #include <config.h>
 
 #include <gcli/comments.h>
+#include <gcli/gcli.h>
 #include <gcli/issues.h>
 
 #include <pdjson/pdjson.h>
 
-int bugzilla_get_bugs(gcli_ctx *ctx, char const *product, char const *component,
-                      gcli_issue_fetch_details const *details, int const max,
-                      gcli_issue_list *out);
+int parse_bugzilla_bug_comments_dictionary_skip_first(gcli_ctx *const ctx,
+                                                      json_stream *stream,
+                                                      gcli_comment_list *out);
 
-int bugzilla_get_bug(gcli_ctx *ctx, char const *product, char const *component,
-                     gcli_id bug_id, gcli_issue *out);
+int parse_bugzilla_comments_array_skip_first(gcli_ctx *ctx,
+                                             struct json_stream *stream,
+                                             gcli_comment_list *out);
 
-int bugzilla_bug_get_comments(gcli_ctx *const ctx, char const *const product,
-                              char const *const component, gcli_id const bug_id,
-                              gcli_comment_list *out);
+int parse_bugzilla_bug_comments_dictionary_only_first(gcli_ctx *const ctx,
+                                                      json_stream *stream,
+                                                      char **out);
 
-int bugzilla_bug_get_attachments(gcli_ctx *ctx, char const *const product,
-                                 char const *const component,
-                                 gcli_id const bug_id,
-                                 gcli_attachment_list *const out);
+int parse_bugzilla_comments_array_only_first(gcli_ctx *ctx,
+                                             struct json_stream *stream,
+                                             char **out);
 
-#endif /* GCLI_BUGZILLA_BUGS_H */
+int parse_bugzilla_assignee(gcli_ctx *ctx, struct json_stream *stream,
+                            gcli_issue *out);
+
+int parse_bugzilla_bug_attachments_dict(gcli_ctx *ctx, json_stream *stream,
+                                        gcli_attachment_list *out);
+
+#endif /* GCLI_BUGZILLA_BUGS_PARSER_H */

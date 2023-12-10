@@ -1,6 +1,7 @@
 include "gcli/comments.h";
 include "gcli/issues.h";
 include "gcli/bugzilla/bugs.h";
+include "gcli/bugzilla/bugs-parser.h";
 
 parser bugzilla_bug_creator is
 object of gcli_issue with

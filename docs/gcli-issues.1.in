@@ -119,6 +119,8 @@ action that prints the list of comments associated with the issue.
 .It Cm title Ar new-title
 Change the title of the issue to
 .Ar new-title .
+.It Cm attachments
+List bug attachments. This action is only available on Bugzilla.
 .El
 .Sh EXAMPLES
 Print a list of issues in the current project:

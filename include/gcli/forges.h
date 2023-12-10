@@ -176,12 +176,19 @@ struct gcli_forge_descriptor {
 		gcli_ctx *ctx, char const *owner, char const *repo, gcli_id issue,
 		char const *new_title);
 
+	/**
+	 * Get attachments of an issue */
+	int (*get_issue_attachments)(
+		gcli_ctx *ctx, char const *owner, char const *repo, gcli_id issue,
+		gcli_attachment_list *out);
+
 	/* Issue quirk bitmask */
 	enum {
-		GCLI_ISSUE_QUIRKS_LOCKED    = 0x1,
-		GCLI_ISSUE_QUIRKS_COMMENTS  = 0x2,
-		GCLI_ISSUE_QUIRKS_PROD_COMP = 0x4,
-		GCLI_ISSUE_QUIRKS_URL       = 0x8,
+		GCLI_ISSUE_QUIRKS_LOCKED      = 0x1,
+		GCLI_ISSUE_QUIRKS_COMMENTS    = 0x2,
+		GCLI_ISSUE_QUIRKS_PROD_COMP   = 0x4,
+		GCLI_ISSUE_QUIRKS_URL         = 0x8,
+		GCLI_ISSUE_QUIRKS_ATTACHMENTS = 0x10,
 	} const issue_quirks;
 
 	/**

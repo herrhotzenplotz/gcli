@@ -157,3 +157,21 @@ gcli_issue_set_title(gcli_ctx *ctx, char const *owner, char const *repo,
 	                     new_title);
 }
 
+int
+gcli_issue_get_attachments(gcli_ctx *ctx, char const *owner, char const *repo,
+                           gcli_id issue, gcli_attachment_list *out)
+{
+	gcli_forge_descriptor const *const forge =
+		gcli_forge(ctx);
+
+	bool const avail =
+		(forge->issue_quirks & GCLI_ISSUE_QUIRKS_ATTACHMENTS) &&
+		(forge->get_issue_attachments != NULL);
+
+	if (avail) {
+		return gcli_error(ctx, "attachments are not available on this forge");
+	} else {
+		return gcli_forge(ctx)->get_issue_attachments(ctx, owner, repo,
+		                                              issue, out);
+	}
+}

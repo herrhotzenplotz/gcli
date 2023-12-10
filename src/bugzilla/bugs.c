@@ -314,3 +314,15 @@ parse_bugzilla_assignee(gcli_ctx *ctx, struct json_stream *stream,
 
 	return get_string(ctx, stream, out->assignees);
 }
+
+int
+bugzilla_bug_get_attachments(gcli_ctx *ctx, char const *const product,
+                             char const *const component, gcli_id const bug_id,
+                             gcli_attachment_list *const out)
+{
+	(void) product;
+	(void) component;
+	(void) bug_id;
+	(void) out;
+	return gcli_error(ctx, "not yet implemented");
+}

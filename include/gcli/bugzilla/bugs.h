@@ -48,6 +48,11 @@ int bugzilla_bug_get_comments(gcli_ctx *const ctx, char const *const product,
                               char const *const component, gcli_id const bug_id,
                               gcli_comment_list *out);
 
+int bugzilla_bug_get_attachments(gcli_ctx *ctx, char const *const product,
+                                 char const *const component,
+                                 gcli_id const bug_id,
+                                 gcli_attachment_list *const out);
+
 int parse_bugzilla_bug_comments_dictionary_skip_first(gcli_ctx *const ctx,
                                                       json_stream *stream,
                                                       gcli_comment_list *out);

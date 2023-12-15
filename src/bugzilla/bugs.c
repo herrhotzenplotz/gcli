@@ -33,6 +33,7 @@
 
 #include <templates/bugzilla/bugs.h>
 
+#include <gcli/base64.h>
 #include <gcli/curl.h>
 
 #include <assert.h>
@@ -239,3 +240,4 @@ error_fetch:
 
 	return rc;
 }
+

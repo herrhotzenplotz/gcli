@@ -138,6 +138,7 @@ libgcli_la_SOURCES = \
 	include/gcli/ctx.h src/ctx.c \
 	include/gcli/gcli.h src/gcli.c \
 	include/gcli/date_time.h src/date_time.c \
+	src/base64.c include/gcli/base64.h \
 	src/comments.c include/gcli/comments.h \
 	src/curl.c include/gcli/curl.h \
 	src/forges.c include/gcli/forges.h \
@@ -225,6 +226,7 @@ check_PROGRAMS = \
 	tests/gitlab-parse-tests$(EXEEXT) \
 	tests/gitea-parse-tests$(EXEEXT) \
 	tests/bugzilla-parse-tests$(EXEEXT) \
+	tests/base64-tests$(EXEEXT) \
 	tests/url-encode$(EXEEXT) \
 	tests/pretty_print_test$(EXEEXT) \
 	tests/test-jsongen$(EXEEXT)
@@ -264,6 +266,12 @@ tests_gitea_parse_tests_LDADD = \
 tests_bugzilla_parse_tests_SOURCES = \
 	tests/bugzilla-parse-tests.c
 tests_bugzilla_parse_tests_LDADD = \
+	libgcli.la libpdjson.la libsn.la \
+	$(LIBATFC_LDFLAGS)
+
+tests_base64_tests_SOURCES = \
+	tests/base64-tests.c
+tests_base64_tests_LDADD = \
 	libgcli.la libpdjson.la libsn.la \
 	$(LIBATFC_LDFLAGS)
 

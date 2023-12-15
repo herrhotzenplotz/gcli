@@ -27,6 +27,10 @@ atf_test_program{
 }
 
 atf_test_program{
+        name = 'base64-tests'
+}
+
+atf_test_program{
         name = 'url-encode'
 }
 

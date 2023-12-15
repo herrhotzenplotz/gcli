@@ -38,6 +38,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <gcli/cmd/attachments.h>
 #include <gcli/cmd/ci.h>
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/cmdconfig.h>
@@ -116,6 +117,9 @@ static struct subcommand {
 	{ .cmd_name = "status",
 	  .fn = subcommand_status,
 	  .docstring = "General user status and notifications" },
+	{ .cmd_name = "attachments",
+	  .fn = subcommand_attachments,
+	  .docstring = "Bugzilla Attachments management" },
 	{ .cmd_name = "api",
 	  .fn = subcommand_api,
 	  .docstring = "Fetch plain JSON info from an API (for debugging purposes)" },

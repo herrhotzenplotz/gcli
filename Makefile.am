@@ -61,6 +61,7 @@ dist_man_MANS = \
 	docs/gcli.5
 
 gcli_SOURCES = \
+	include/gcli/cmd/attachments.h src/cmd/attachments.c \
 	include/gcli/cmd/ci.h src/cmd/ci.c \
 	include/gcli/cmd/cmdconfig.h src/cmd/cmdconfig.c \
 	include/gcli/cmd/cmd.h src/cmd/cmd.c \

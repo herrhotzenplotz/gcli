@@ -230,7 +230,8 @@ gcli_curl(gcli_ctx *ctx, FILE *stream, char const *url, char const *content_type
 		headers = curl_slist_append(headers, content_type);
 
 	auth_header = gcli_get_authheader(ctx);
-	headers = curl_slist_append(headers, auth_header);
+	if (auth_header)
+		headers = curl_slist_append(headers, auth_header);
 
 	curl_easy_setopt(ctx->curl, CURLOPT_URL, url);
 	curl_easy_setopt(ctx->curl, CURLOPT_BUFFERSIZE, 102400L);

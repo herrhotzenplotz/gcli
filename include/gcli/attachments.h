@@ -64,5 +64,6 @@ struct gcli_attachment_list {
 
 void gcli_attachments_free(gcli_attachment_list *list);
 void gcli_attachment_free(gcli_attachment *attachment);
+int gcli_attachment_get_content(gcli_ctx *const ctx, gcli_id const id, FILE *out);
 
 #endif /* GCLI_ATTACHMENTS_H */

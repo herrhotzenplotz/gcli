@@ -30,6 +30,8 @@
 #include <gcli/gcli.h>
 #include <gcli/cmd/cmd.h>
 
+#include <gcli/attachments.h>
+
 #include <errno.h>
 #include <getopt.h>
 #include <stdlib.h>
@@ -50,7 +52,8 @@ usage(void)
 static int
 action_attachment_get(int *argc, char ***argv, gcli_id const id)
 {
-	int ch;
+	int ch, rc = 0;
+	bool oflag_seen = false;
 	FILE *outfile = NULL;
 	struct option options[] = {
 		{ .name = "output", .has_arg = required_argument, .flag = NULL, .val = 'o' },
@@ -66,6 +69,7 @@ action_attachment_get(int *argc, char ***argv, gcli_id const id)
 				        optarg, strerror(errno));
 				return EXIT_FAILURE;
 			}
+			oflag_seen = true;
 		} break;
 		default: {
 			usage();
@@ -82,10 +86,19 @@ action_attachment_get(int *argc, char ***argv, gcli_id const id)
 	if (outfile == NULL)
 		outfile = stdout;
 
-	(void) id;
+	rc = gcli_attachment_get_content(g_clictx, id, outfile);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: failed to get attachment: %s\n",
+		        gcli_get_error(g_clictx));
+		return EXIT_FAILURE;
+	}
 
-	fprintf(stderr, "gcli: get action is not yet implemented\n");
-	return EXIT_FAILURE;
+	if (oflag_seen)
+		fclose(outfile);
+
+	outfile = NULL;
+
+	return EXIT_SUCCESS;
 }
 
 static struct action {

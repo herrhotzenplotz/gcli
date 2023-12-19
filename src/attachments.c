@@ -28,6 +28,7 @@
  */
 
 #include <gcli/attachments.h>
+#include <gcli/forges.h>
 
 #include <stdlib.h>
 
@@ -52,4 +53,16 @@ gcli_attachment_free(gcli_attachment *it)
 	free(it->summary);
 	free(it->content_type);
 	free(it->data);
+}
+
+int
+gcli_attachment_get_content(gcli_ctx *const ctx, gcli_id const id, FILE *out)
+{
+	gcli_forge_descriptor const *const forge = gcli_forge(ctx);
+
+	/* FIXME: this is not entirely correct. Add a separate quirks category. */
+	if (forge->issue_quirks & GCLI_ISSUE_QUIRKS_ATTACHMENTS)
+		return gcli_error(ctx, "forge does not support attachements");
+	else
+		return gcli_forge(ctx)->attachment_get_content(ctx, id, out);
 }

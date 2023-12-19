@@ -182,6 +182,11 @@ struct gcli_forge_descriptor {
 		gcli_ctx *ctx, char const *owner, char const *repo, gcli_id issue,
 		gcli_attachment_list *out);
 
+	/**
+	 * Dump the contents of the attachment to the given file */
+	int (*attachment_get_content)(
+		gcli_ctx *ctx, gcli_id id, FILE *out);
+
 	/* Issue quirk bitmask */
 	enum {
 		GCLI_ISSUE_QUIRKS_LOCKED      = 0x1,

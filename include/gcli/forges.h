@@ -530,4 +530,21 @@ struct gcli_forge_descriptor {
 
 gcli_forge_descriptor const *gcli_forge(gcli_ctx *ctx);
 
+/** A macro used for calling one of the dispatch points above.
+ *
+ * It check whether the given function pointer is null. If it is it will return
+ * an error message otherwise the function is called with the specified
+ * arguments. */
+#define gcli_null_check_call(routine, ctx, ...)                                             \
+	do {                                                                                \
+		gcli_forge_descriptor const *const forge = gcli_forge(ctx);                 \
+		                                                                            \
+		if (forge->routine) {                                                       \
+			return forge->routine(ctx, __VA_ARGS__);                            \
+		} else {                                                                    \
+			return gcli_error(ctx, #routine " is not available on this forge"); \
+		}                                                                           \
+	} while (0)
+
+
 #endif /* FORGES_H */

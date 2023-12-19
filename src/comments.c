@@ -59,18 +59,18 @@ int
 gcli_get_issue_comments(gcli_ctx *ctx, char const *owner, char const *repo,
                         gcli_id const issue, gcli_comment_list *out)
 {
-	return gcli_forge(ctx)->get_issue_comments(ctx, owner, repo, issue, out);
+	gcli_null_check_call(get_issue_comments, ctx, owner, repo, issue, out);
 }
 
 int
 gcli_get_pull_comments(gcli_ctx *ctx, char const *owner, char const *repo,
                        gcli_id const pull, gcli_comment_list *out)
 {
-	return gcli_forge(ctx)->get_pull_comments(ctx, owner, repo, pull, out);
+	gcli_null_check_call(get_pull_comments, ctx, owner, repo, pull, out);
 }
 
 int
 gcli_comment_submit(gcli_ctx *ctx, gcli_submit_comment_opts opts)
 {
-	return gcli_forge(ctx)->perform_submit_comment(ctx, opts, NULL);
+	gcli_null_check_call(perform_submit_comment, ctx, opts, NULL);
 }

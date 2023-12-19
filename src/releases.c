@@ -38,7 +38,7 @@ int
 gcli_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
                   int const max, gcli_release_list *const list)
 {
-	return gcli_forge(ctx)->get_releases(ctx, owner, repo, max, list);
+	gcli_null_check_call(get_releases, ctx, owner, repo, max, list);
 }
 
 void
@@ -75,7 +75,7 @@ gcli_free_releases(gcli_release_list *const list)
 int
 gcli_create_release(gcli_ctx *ctx, gcli_new_release const *release)
 {
-	return gcli_forge(ctx)->create_release(ctx, release);
+	gcli_null_check_call(create_release, ctx, release);
 }
 
 int
@@ -94,5 +94,5 @@ int
 gcli_delete_release(gcli_ctx *ctx, char const *const owner,
                     char const *const repo, char const *const id)
 {
-	return gcli_forge(ctx)->delete_release(ctx, owner, repo, id);
+	gcli_null_check_call(delete_release, ctx, owner, repo, id);
 }

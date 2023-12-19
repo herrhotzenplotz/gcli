@@ -139,6 +139,7 @@ libgcli_la_SOURCES = \
 	include/gcli/ctx.h src/ctx.c \
 	include/gcli/gcli.h src/gcli.c \
 	include/gcli/date_time.h src/date_time.c \
+	src/attachments.c include/gcli/attachments.h \
 	src/base64.c include/gcli/base64.h \
 	src/comments.c include/gcli/comments.h \
 	src/curl.c include/gcli/curl.h \

@@ -34,18 +34,18 @@
 #include <config.h>
 #endif
 
-#include <sn/sn.h>
 #include <gcli/gcli.h>
+
+#include <sn/sn.h>
 #include <stdio.h>
 #include <stdbool.h>
+
+#include <gcli/attachments.h>
 
 typedef struct gcli_issue gcli_issue;
 typedef struct gcli_submit_issue_options gcli_submit_issue_options;
 typedef struct gcli_issue_list gcli_issue_list;
 typedef struct gcli_issue_fetch_details gcli_issue_fetch_details;
-typedef struct gcli_attachment gcli_attachment;
-typedef struct gcli_attachment_list gcli_attachment_list;
-
 struct gcli_issue {
 	gcli_id number;
 	char *title;
@@ -65,24 +65,6 @@ struct gcli_issue {
 	/* workaround for GitHub where PRs are also issues */
 	int is_pr;
 	char *milestone;
-};
-
-struct gcli_attachment {
-	gcli_id id;
-	bool is_obsolete;
-	char *created_at;
-	char *author;
-	char *file_name;
-	char *summary;
-	char *content_type;
-
-	uint8_t *data;
-	size_t data_size;
-};
-
-struct gcli_attachment_list {
-	gcli_attachment *attachments;
-	size_t attachments_size;
 };
 
 struct gcli_submit_issue_options {
@@ -146,8 +128,5 @@ int gcli_issue_set_title(gcli_ctx *ctx, char const *owner, char const *repo,
 int gcli_issue_get_attachments(gcli_ctx *ctx, char const *owner,
                                char const *repo, gcli_id issue,
                                gcli_attachment_list *attachments);
-
-void gcli_attachments_free(gcli_attachment_list *list);
-void gcli_attachment_free(gcli_attachment *attachment);
 
 #endif /* ISSUES_H */

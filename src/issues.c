@@ -176,25 +176,3 @@ gcli_issue_get_attachments(gcli_ctx *ctx, char const *owner, char const *repo,
 	}
 }
 
-void
-gcli_attachments_free(gcli_attachment_list *list)
-{
-	for (size_t i = 0; i < list->attachments_size; ++i) {
-		gcli_attachment_free(&list->attachments[i]);
-	}
-
-	free(list->attachments);
-	list->attachments = NULL;
-	list->attachments_size = 0;
-}
-
-void
-gcli_attachment_free(gcli_attachment *it)
-{
-	free(it->created_at);
-	free(it->author);
-	free(it->file_name);
-	free(it->summary);
-	free(it->content_type);
-	free(it->data);
-}

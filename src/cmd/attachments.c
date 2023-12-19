@@ -30,6 +30,7 @@
 #include <gcli/gcli.h>
 #include <gcli/cmd/cmd.h>
 
+#include <errno.h>
 #include <getopt.h>
 #include <stdlib.h>
 
@@ -49,8 +50,38 @@ usage(void)
 static int
 action_attachment_get(int *argc, char ***argv, gcli_id const id)
 {
-	(void) argc;
-	(void) argv;
+	int ch;
+	FILE *outfile = NULL;
+	struct option options[] = {
+		{ .name = "output", .has_arg = required_argument, .flag = NULL, .val = 'o' },
+		{0},
+	};
+
+	while ((ch = getopt_long(*argc, *argv, "+o:", options, NULL)) != -1) {
+		switch (ch) {
+		case 'o': {
+			outfile = fopen(optarg, "w");
+			if (!outfile) {
+				fprintf(stderr, "gcli: failed to open »%s«: %s\n",
+				        optarg, strerror(errno));
+				return EXIT_FAILURE;
+			}
+		} break;
+		default: {
+			usage();
+			return EXIT_FAILURE;
+		} break;
+		}
+	}
+
+	*argc -= optind;
+	*argv += optind;
+	optind = 0; /* reset */
+
+	/* -o wasn't specified */
+	if (outfile == NULL)
+		outfile = stdout;
+
 	(void) id;
 
 	fprintf(stderr, "gcli: get action is not yet implemented\n");
@@ -109,6 +140,8 @@ subcommand_attachments(int argc, char *argv[])
 
 	argc -= optind;
 	argv += optind;
+
+	optind = 0;  /* reset */
 
 	if (!iflag_seen) {
 		fprintf(stderr, "gcli: missing -i flag\n");

@@ -38,7 +38,7 @@ int
 gcli_get_repos(gcli_ctx *ctx, char const *owner, int const max,
                gcli_repo_list *const out)
 {
-	return gcli_forge(ctx)->get_repos(ctx, owner, max, out);
+	gcli_null_check_call(get_repos, ctx, owner, max, out);
 }
 
 void
@@ -68,19 +68,19 @@ gcli_repos_free(gcli_repo_list *const list)
 int
 gcli_repo_delete(gcli_ctx *ctx, char const *owner, char const *repo)
 {
-	return gcli_forge(ctx)->repo_delete(ctx, owner, repo);
+	gcli_null_check_call(repo_delete, ctx, owner, repo);
 }
 
 int
 gcli_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *options,
                  gcli_repo *out)
 {
-	return gcli_forge(ctx)->repo_create(ctx, options, out);
+	gcli_null_check_call(repo_create, ctx, options, out);
 }
 
 int
 gcli_repo_set_visibility(gcli_ctx *ctx, char const *const owner,
                          char const *const repo, gcli_repo_visibility vis)
 {
-	return gcli_forge(ctx)->repo_set_visibility(ctx, owner, repo, vis);
+	gcli_null_check_call(repo_set_visibility, ctx, owner, repo, vis);
 }

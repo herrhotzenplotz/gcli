@@ -195,6 +195,7 @@ libgcli_la_SOURCES = \
 	src/gitea/status.c include/gcli/gitea/status.h \
 	src/gitea/milestones.c include/gcli/gitea/milestones.h \
 	src/bugzilla/api.c include/gcli/bugzilla/api.h \
+	src/bugzilla/attachments.c include/gcli/bugzilla/attachments.h \
 	src/bugzilla/bugs.c include/gcli/bugzilla/bugs.h \
 	src/bugzilla/bugs-parser.c include/gcli/bugzilla/bugs-parser.h \
 	src/bugzilla/config.c include/gcli/bugzilla/config.h \

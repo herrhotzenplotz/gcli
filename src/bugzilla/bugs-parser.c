@@ -164,3 +164,25 @@ parse_bugzilla_bug_attachments_dict(gcli_ctx *ctx, json_stream *stream,
 
 	return rc;
 }
+
+int
+parse_bugzilla_attachment_content_only_first(gcli_ctx *ctx, json_stream *stream,
+                                             gcli_attachment *out)
+{
+	enum json_type next = JSON_NULL;
+	int rc = 0;
+
+	if ((next = json_next(stream)) != JSON_OBJECT)
+		return gcli_error(ctx, "expected bugzilla attachments dictionary");
+
+	while ((next = json_next(stream)) == JSON_STRING) {
+		rc = parse_bugzilla_bug_attachment(ctx, stream, out);
+		if (rc < 0)
+			return rc;
+	}
+
+	if (next != JSON_OBJECT_END)
+		return gcli_error(ctx, "unclosed bugzilla attachments dictionary");
+
+	return rc;
+}

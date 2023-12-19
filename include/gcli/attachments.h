@@ -53,8 +53,7 @@ struct gcli_attachment {
 	char *summary;
 	char *content_type;
 
-	uint8_t *data;
-	size_t data_size;
+	char *data_base64;
 };
 
 struct gcli_attachment_list {

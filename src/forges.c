@@ -71,6 +71,7 @@
 #include <gcli/gitea/status.h>
 
 #include <gcli/bugzilla/api.h>
+#include <gcli/bugzilla/attachments.h>
 #include <gcli/bugzilla/bugs.h>
 #include <gcli/bugzilla/config.h>
 
@@ -365,6 +366,8 @@ bugzilla_forge_descriptor =
 	.get_issue_attachments     = bugzilla_bug_get_attachments,
 	.issue_quirks              = GCLI_ISSUE_QUIRKS_COMMENTS
 	                           | GCLI_ISSUE_QUIRKS_LOCKED,
+
+	.attachment_get_content    = bugzilla_attachment_get_content,
 
 	/* Internal stuff */
 	.make_authheader           = bugzilla_make_authheader,

@@ -68,7 +68,12 @@ object of gcli_attachment with
 	 "creation_time" => created_at as string,
 	 "creator" => author as string,
 	 "content_type" => content_type as string,
-	 "is_obsolete" => is_obsolete as bool_relaxed);
+	 "is_obsolete" => is_obsolete as bool_relaxed,
+	 "data" => data_base64 as string);
 
 parser bugzilla_bug_attachments_internal is
 array of gcli_attachment use parse_bugzilla_bug_attachment;
+
+parser bugzilla_attachment_content is
+object of gcli_attachment with
+	("attachments" => use parse_bugzilla_attachment_content_only_first);

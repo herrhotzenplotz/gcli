@@ -60,4 +60,7 @@ int parse_bugzilla_assignee(gcli_ctx *ctx, struct json_stream *stream,
 int parse_bugzilla_bug_attachments_dict(gcli_ctx *ctx, json_stream *stream,
                                         gcli_attachment_list *out);
 
+int parse_bugzilla_attachment_content_only_first(gcli_ctx *ctx, json_stream *stream,
+                                                 gcli_attachment *out);
+
 #endif /* GCLI_BUGZILLA_BUGS_PARSER_H */

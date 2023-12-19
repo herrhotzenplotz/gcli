@@ -27,42 +27,12 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef GCLI_BUGZILLA_ATTACHMENTS_H
+#define GCLI_BUGZILLA_ATTACHMENTS_H
+
 #include <gcli/attachments.h>
-#include <gcli/forges.h>
 
-#include <stdlib.h>
+int bugzilla_attachment_get_content(gcli_ctx *ctx, gcli_id attachment_id,
+                                    FILE *output);
 
-void
-gcli_attachments_free(gcli_attachment_list *list)
-{
-	for (size_t i = 0; i < list->attachments_size; ++i) {
-		gcli_attachment_free(&list->attachments[i]);
-	}
-
-	free(list->attachments);
-	list->attachments = NULL;
-	list->attachments_size = 0;
-}
-
-void
-gcli_attachment_free(gcli_attachment *it)
-{
-	free(it->created_at);
-	free(it->author);
-	free(it->file_name);
-	free(it->summary);
-	free(it->content_type);
-	free(it->data_base64);
-}
-
-int
-gcli_attachment_get_content(gcli_ctx *const ctx, gcli_id const id, FILE *out)
-{
-	gcli_forge_descriptor const *const forge = gcli_forge(ctx);
-
-	/* FIXME: this is not entirely correct. Add a separate quirks category. */
-	if (forge->issue_quirks & GCLI_ISSUE_QUIRKS_ATTACHMENTS)
-		return gcli_error(ctx, "forge does not support attachements");
-	else
-		return gcli_forge(ctx)->attachment_get_content(ctx, id, out);
-}
+#endif /* GCLI_BUGZILLA_ATTACHMENTS_H */

@@ -27,42 +27,45 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/attachments.h>
-#include <gcli/forges.h>
+#include <gcli/bugzilla/attachments.h>
 
-#include <stdlib.h>
+#include <gcli/base64.h>
+#include <gcli/curl.h>
 
-void
-gcli_attachments_free(gcli_attachment_list *list)
-{
-	for (size_t i = 0; i < list->attachments_size; ++i) {
-		gcli_attachment_free(&list->attachments[i]);
-	}
-
-	free(list->attachments);
-	list->attachments = NULL;
-	list->attachments_size = 0;
-}
-
-void
-gcli_attachment_free(gcli_attachment *it)
-{
-	free(it->created_at);
-	free(it->author);
-	free(it->file_name);
-	free(it->summary);
-	free(it->content_type);
-	free(it->data_base64);
-}
+#include <templates/bugzilla/bugs.h>
 
 int
-gcli_attachment_get_content(gcli_ctx *const ctx, gcli_id const id, FILE *out)
+bugzilla_attachment_get_content(gcli_ctx *ctx, gcli_id attachment_id,
+                                FILE *output)
 {
-	gcli_forge_descriptor const *const forge = gcli_forge(ctx);
+	int rc = 0;
+	char *url;
+	gcli_fetch_buffer buffer = {0};
+	json_stream stream = {0};
+	gcli_attachment attachment = {0};
 
-	/* FIXME: this is not entirely correct. Add a separate quirks category. */
-	if (forge->issue_quirks & GCLI_ISSUE_QUIRKS_ATTACHMENTS)
-		return gcli_error(ctx, "forge does not support attachements");
-	else
-		return gcli_forge(ctx)->attachment_get_content(ctx, id, out);
+	url = sn_asprintf("%s/rest/bug/attachment/%"PRIid,
+	                  gcli_get_apibase(ctx), attachment_id);
+
+	rc = gcli_fetch(ctx, url, NULL, &buffer);
+	if (rc < 0)
+		goto error_fetch;
+
+	json_open_buffer(&stream, buffer.data, buffer.length);
+	rc = parse_bugzilla_attachment_content(ctx, &stream, &attachment);
+	if (rc < 0)
+		goto error_parse;
+
+	rc = gcli_base64_decode_print(ctx, output, attachment.data_base64);
+
+	gcli_attachment_free(&attachment);
+
+error_parse:
+	json_close(&stream);
+	free(buffer.data);
+
+error_fetch:
+	free(url);
+
+	return rc;
 }

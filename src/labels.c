@@ -34,7 +34,7 @@ int
 gcli_get_labels(gcli_ctx *ctx, char const *owner, char const *reponame,
                 int const max, gcli_label_list *const out)
 {
-	return gcli_forge(ctx)->get_labels(ctx, owner, reponame, max, out);
+	gcli_null_check_call(get_labels, ctx, owner, reponame, max, out);
 }
 
 void
@@ -59,12 +59,12 @@ int
 gcli_create_label(gcli_ctx *ctx, char const *owner, char const *repo,
                   gcli_label *const label)
 {
-	return gcli_forge(ctx)->create_label(ctx, owner, repo, label);
+	gcli_null_check_call(create_label, ctx, owner, repo, label);
 }
 
 int
 gcli_delete_label(gcli_ctx *ctx, char const *owner, char const *repo,
                   char const *const label)
 {
-	return gcli_forge(ctx)->delete_label(ctx, owner, repo, label);
+	gcli_null_check_call(delete_label, ctx, owner, repo, label);
 }

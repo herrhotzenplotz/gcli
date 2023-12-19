@@ -34,7 +34,7 @@ int
 gcli_get_notifications(gcli_ctx *ctx, int const max,
                        gcli_notification_list *const out)
 {
-	return gcli_forge(ctx)->get_notifications(ctx, max, out);
+	gcli_null_check_call(get_notifications, ctx, max, out);
 }
 
 void
@@ -63,5 +63,5 @@ gcli_free_notifications(gcli_notification_list *list)
 int
 gcli_notification_mark_as_read(gcli_ctx *ctx, char const *id)
 {
-	return gcli_forge(ctx)->notification_mark_as_read(ctx, id);
+	gcli_null_check_call(notification_mark_as_read, ctx, id);
 }

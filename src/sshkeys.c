@@ -38,7 +38,7 @@
 int
 gcli_sshkeys_get_keys(gcli_ctx *ctx, gcli_sshkey_list *out)
 {
-	return gcli_forge(ctx)->get_sshkeys(ctx, out);
+	gcli_null_check_call(get_sshkeys, ctx, out);
 }
 
 void
@@ -62,12 +62,17 @@ gcli_sshkeys_add_key(gcli_ctx *ctx, char const *title,
 {
 	int rc;
 	char *buffer;
+	gcli_forge_descriptor const *const forge = gcli_forge(ctx);
+
+	if (forge->add_sshkey == NULL) {
+		return gcli_error(ctx, "ssh_add_key is not supported by this forge");
+	}
 
 	rc = sn_read_file(public_key_path, &buffer);
 	if (rc < 0)
 		return rc;
 
-	rc = gcli_forge(ctx)->add_sshkey(ctx, title, buffer, out);
+	rc = forge->add_sshkey(ctx, title, buffer, out);
 	free(buffer);
 
 	return rc;
@@ -76,5 +81,5 @@ gcli_sshkeys_add_key(gcli_ctx *ctx, char const *title,
 int
 gcli_sshkeys_delete_key(gcli_ctx *ctx, gcli_id const id)
 {
-	return gcli_forge(ctx)->delete_sshkey(ctx, id);
+	gcli_null_check_call(delete_sshkey, ctx, id);
 }

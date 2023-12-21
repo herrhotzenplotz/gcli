@@ -82,7 +82,7 @@ gcli_labels_print(gcli_label_list const *const list, int const max)
 	/* Fill table */
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
-		errx(1, "error: could not init table");
+		errx(1, "gcli: error: could not init table");
 
 	for (size_t i = 0; i < n; ++i) {
 		gcli_tbl_add_row(table,
@@ -99,7 +99,7 @@ gcli_labels_print(gcli_label_list const *const list, int const max)
 static int
 subcommand_labels_delete(int argc, char *argv[])
 {
-	int         ch, rc;
+	int ch, rc;
 	char const *owner = NULL, *repo = NULL;
 	const struct option options[] = {
 		{.name = "repo",  .has_arg = required_argument, .val = 'r'},
@@ -128,14 +128,14 @@ subcommand_labels_delete(int argc, char *argv[])
 	check_owner_and_repo(&owner, &repo);
 
 	if (argc != 1) {
-		fprintf(stderr, "error: missing label to delete\n");
+		fprintf(stderr, "gcli: error: missing label to delete\n");
 		usage();
 		return EXIT_FAILURE;
 	}
 
 	rc = gcli_delete_label(g_clictx, owner, repo, argv[0]);
 	if (rc < 0) {
-		fprintf(stderr, "error: couldn't delete label\n");
+		fprintf(stderr, "gcli: error: couldn't delete label\n");
 		return EXIT_FAILURE;
 	}
 
@@ -192,19 +192,21 @@ subcommand_labels_create(int argc, char *argv[])
 	check_owner_and_repo(&owner, &repo);
 
 	if (!label.name) {
-		fprintf(stderr, "error: missing name for label\n");
+		fprintf(stderr, "gcli: error: missing name for label\n");
 		usage();
 		return EXIT_FAILURE;
 	}
 
 	if (!label.description) {
-		fprintf(stderr, "error: missing description for label\n");
+		fprintf(stderr, "gcli: error: missing description for label\n");
 		usage();
 		return EXIT_FAILURE;
 	}
 
-	if (gcli_create_label(g_clictx, owner, repo, &label) < 0)
-		errx(1, "error: failed to create label: %s", gcli_get_error(g_clictx));
+	if (gcli_create_label(g_clictx, owner, repo, &label) < 0) {
+		errx(1, "gcli: error: failed to create label: %s",
+		     gcli_get_error(g_clictx));
+	}
 
 	/* only if we are not quieted */
 	if (!sn_quiet())
@@ -262,7 +264,7 @@ subcommand_labels(int argc, char *argv[])
 				errx(1, "labels: cannot parse label count");
 
 			if (count == 0)
-				errx(1, "error: number of labels must not be zero");
+				errx(1, "gcli: error: number of labels must not be zero");
 		} break;
 		case '?':
 		default:
@@ -276,7 +278,7 @@ subcommand_labels(int argc, char *argv[])
 
 	/* sanity check: we must have parsed everything by now */
 	if (argc > 0) {
-		fprintf(stderr, "error: stray arguments\n");
+		fprintf(stderr, "gcli: error: stray arguments\n");
 		usage();
 		return EXIT_FAILURE;
 	}
@@ -284,7 +286,7 @@ subcommand_labels(int argc, char *argv[])
 	check_owner_and_repo(&owner, &repo);
 
 	if (gcli_get_labels(g_clictx, owner, repo, count, &labels) < 0)
-		errx(1, "error: could not fetch list of labels: %s",
+		errx(1, "gcli: error: could not fetch list of labels: %s",
 		     gcli_get_error(g_clictx));
 
 	gcli_labels_print(&labels, count);

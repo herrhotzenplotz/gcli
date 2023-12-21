@@ -87,7 +87,7 @@ gcli_print_forks(enum gcli_output_flags const flags,
 
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
-		errx(1, "error: could not initialize table");
+		errx(1, "gcli: error: could not initialize table");
 
 	if (flags & OUTPUT_SORTED) {
 		for (size_t i = 0; i < n; ++i) {
@@ -164,7 +164,7 @@ subcommand_forks_create(int argc, char *argv[])
 	check_owner_and_repo(&owner, &repo);
 
 	if (gcli_fork_create(g_clictx, owner, repo, in) < 0)
-		errx(1, "error: failed to fork repository: %s", gcli_get_error(g_clictx));
+		errx(1, "gcli: error: failed to fork repository: %s", gcli_get_error(g_clictx));
 
 	if (!always_yes) {
 		if (!sn_yesno("Do you want to add a remote for the fork?"))
@@ -173,7 +173,7 @@ subcommand_forks_create(int argc, char *argv[])
 
 	if (!in) {
 		if ((in = gcli_config_get_account_name(g_clictx)) == NULL) {
-			errx(1, "error: could not fetch account: %s",
+			errx(1, "gcli: error: could not fetch account: %s",
 			     gcli_get_error(g_clictx));
 		}
 	}
@@ -239,10 +239,10 @@ subcommand_forks(int argc, char *argv[])
 			count = strtol(optarg, &endptr, 10);
 
 			if (endptr != (optarg + strlen(optarg)))
-				err(1, "forks: unable to parse forks count argument");
+				err(1, "gcli: error: unable to parse forks count argument");
 
 			if (count == 0)
-				errx(1, "error: forks count must not be zero");
+				errx(1, "gcli: error: forks count must not be zero");
 		} break;
 		case 's':
 			flags |= OUTPUT_SORTED;
@@ -261,7 +261,7 @@ subcommand_forks(int argc, char *argv[])
 
 	if (argc == 0) {
 		if (gcli_get_forks(g_clictx, owner, repo, count, &forks) < 0)
-			errx(1, "error: could not get forks: %s", gcli_get_error(g_clictx));
+			errx(1, "gcli: error: could not get forks: %s", gcli_get_error(g_clictx));
 
 		gcli_print_forks(flags, &forks, count);
 		gcli_forks_free(&forks);
@@ -275,7 +275,7 @@ subcommand_forks(int argc, char *argv[])
 		if (strcmp(action, "delete") == 0) {
 			delete_repo(always_yes, owner, repo);
 		} else {
-			fprintf(stderr, "error: forks: unknown action '%s'\n", action);
+			fprintf(stderr, "gcli: error: forks: unknown action '%s'\n", action);
 		}
 	}
 

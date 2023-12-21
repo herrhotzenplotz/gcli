@@ -164,7 +164,7 @@ gcli_print_gists_short(enum gcli_output_flags const flags,
 
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
-		errx(1, "error: could not init table");
+		errx(1, "gcli: error: could not init table");
 
 	if (flags & OUTPUT_SORTED) {
 		for (size_t i = 0; i < n; ++i) {
@@ -215,7 +215,7 @@ subcommand_gist_get(int argc, char *argv[])
 	gcli_gist_file *file = NULL;
 
 	if (gcli_get_gist(g_clictx, gist_id, &gist) < 0)
-		errx(1, "error: failed to get gist: %s", gcli_get_error(g_clictx));
+		errx(1, "gcli: error: failed to get gist: %s", gcli_get_error(g_clictx));
 
 	for (size_t f = 0; f < gist.files_size; ++f) {
 		if (sn_sv_eq_to(gist.files[f].filename, file_name)) {
@@ -225,14 +225,14 @@ subcommand_gist_get(int argc, char *argv[])
 	}
 
 	if (!file)
-		errx(1, "error: gists get: %s: no such file in gist with id %s",
+		errx(1, "gcli: error: %s: no such file in gist with id %s",
 		     file_name, gist_id);
 
 	if (isatty(STDOUT_FILENO) && (file->size >= 4 * 1024 * 1024))
-		errx(1, "error: File is bigger than 4 MiB, refusing to print to stdout.");
+		errx(1, "gcli: error: File is bigger than 4 MiB, refusing to print to stdout.");
 
 	if (gcli_curl(g_clictx, stdout, file->url.data, file->type.data) < 0)
-		errx(1, "error: failed to fetch gist: %s", gcli_get_error(g_clictx));
+		errx(1, "gcli: error: failed to fetch gist: %s", gcli_get_error(g_clictx));
 
 	gcli_gist_free(&gist);
 
@@ -277,7 +277,7 @@ subcommand_gist_create(int argc, char *argv[])
 	argv += optind;
 
 	if (argc != 1) {
-		fprintf(stderr, "error: gists create: missing file name for gist\n");
+		fprintf(stderr, "gcli: error: missing file name for gist\n");
 		usage();
 		return EXIT_FAILURE;
 	}
@@ -286,7 +286,7 @@ subcommand_gist_create(int argc, char *argv[])
 
 	if (file) {
 		if ((opts.file = fopen(file, "r")) == NULL)
-			err(1, "error: gists create: cannot open file");
+			err(1, "gcli: error: cannot open file");
 	} else {
 		opts.file = stdin;
 	}
@@ -295,7 +295,7 @@ subcommand_gist_create(int argc, char *argv[])
 		opts.gist_description = "gcli paste";
 
 	if (gcli_create_gist(g_clictx, opts) < 0)
-		errx(1, "error: failed to create gist: %s", gcli_get_error(g_clictx));
+		errx(1, "gcli: error: failed to create gist: %s", gcli_get_error(g_clictx));
 
 	return EXIT_SUCCESS;
 }
@@ -333,7 +333,7 @@ subcommand_gist_delete(int argc, char *argv[])
 	gist_id = shift(&argc, &argv);
 
 	if (!always_yes && !sn_yesno("Are you sure you want to delete this gist?"))
-		errx(1, "Aborted by user");
+		errx(1, "gcli: Aborted by user");
 
 	gcli_delete_gist(g_clictx, gist_id);
 
@@ -360,7 +360,7 @@ subcommand_gists(int argc, char *argv[])
 
 	/* Make sure we are looking at a GitHub forge */
 	if (gcli_config_get_forge_type(g_clictx) != GCLI_FORGE_GITHUB) {
-		errx(1, "error: The gists subcommand only works for Github "
+		errx(1, "gcli: error: The gists subcommand only works for Github "
 		     "forges. Please use either -a or -t to force using a "
 		     "Github account.");
 	}
@@ -421,7 +421,7 @@ subcommand_gists(int argc, char *argv[])
 	argv += optind;
 
 	if (gcli_get_gists(g_clictx, user, count, &gists) < 0)
-		errx(1, "error: failed to get gists: %s", gcli_get_error(g_clictx));
+		errx(1, "gcli: error: failed to get gists: %s", gcli_get_error(g_clictx));
 
 	gcli_print_gists(flags, &gists, count);
 	gcli_gists_free(&gists);

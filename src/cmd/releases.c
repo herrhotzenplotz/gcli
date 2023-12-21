@@ -144,7 +144,7 @@ gcli_releases_print_short(enum gcli_output_flags const flags,
 
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
-		errx(1, "error: could not init table");
+		errx(1, "gcli: error: could not init table");
 
 	if (flags & OUTPUT_SORTED) {
 		for (size_t i = 0; i < n; ++i) {
@@ -286,8 +286,10 @@ subcommand_releases_create(int argc, char *argv[])
 				.name  = optarg,
 				.label = "unused",
 			};
-			if (gcli_release_push_asset(g_clictx, &release, asset) < 0)
-				errx(1, "failed to add asset: %s", gcli_get_error(g_clictx));
+			if (gcli_release_push_asset(g_clictx, &release, asset) < 0) {
+				errx(1, "gcli: error: failed to add asset: %s",
+				     gcli_get_error(g_clictx));
+			}
 		} break;
 		case 'y': {
 			always_yes = true;
@@ -305,7 +307,7 @@ subcommand_releases_create(int argc, char *argv[])
 
 	/* make sure we have a tag for the release */
 	if (!release.tag) {
-		fprintf(stderr, "error: releases create: missing tag name\n");
+		fprintf(stderr, "gcli: error: releases create: missing tag name\n");
 		usage();
 		return EXIT_FAILURE;
 	}
@@ -314,10 +316,12 @@ subcommand_releases_create(int argc, char *argv[])
 
 	if (!always_yes)
 		if (!sn_yesno("Do you want to create this release?"))
-			errx(1, "Aborted by user");
+			errx(1, "gcli: Aborted by user");
 
-	if (gcli_create_release(g_clictx, &release) < 0)
-		errx(1, "failed to create release: %s", gcli_get_error(g_clictx));
+	if (gcli_create_release(g_clictx, &release) < 0) {
+		errx(1, "gcli: error: failed to create release: %s",
+		     gcli_get_error(g_clictx));
+	}
 
 	return EXIT_SUCCESS;
 }
@@ -370,17 +374,19 @@ subcommand_releases_delete(int argc, char *argv[])
 
 	/* make sure the user supplied the release id */
 	if (argc != 1) {
-		fprintf(stderr, "error: releases delete: missing release id\n");
+		fprintf(stderr, "gcli: error: releases delete: missing release id\n");
 		usage();
 		return EXIT_FAILURE;
 	}
 
 	if (!always_yes)
 		if (!sn_yesno("Are you sure you want to delete this release?"))
-			errx(1, "Aborted by user");
+			errx(1, "gcli: Aborted by user");
 
-	if (gcli_delete_release(g_clictx, owner, repo, argv[0]) < 0)
-		errx(1, "failed to delete the release: %s", gcli_get_error(g_clictx));
+	if (gcli_delete_release(g_clictx, owner, repo, argv[0]) < 0) {
+		errx(1, "gcli: error: failed to delete the release: %s",
+		     gcli_get_error(g_clictx));
+	}
 
 	return EXIT_SUCCESS;
 }
@@ -448,10 +454,10 @@ subcommand_releases(int argc, char *argv[])
 			char *endptr = NULL;
 			count        = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
-				err(1, "releases: cannot parse release count");
+				err(1, "gcli: error: cannot parse release count");
 
 			if (count == 0)
-				errx(1, "error: number of releases must not be zero");
+				errx(1, "gcli: error: number of releases must not be zero");
 
 		} break;
 		case 's':
@@ -472,15 +478,17 @@ subcommand_releases(int argc, char *argv[])
 
 	/* sanity check */
 	if (argc > 0) {
-		fprintf(stderr, "error: stray arguments\n");
+		fprintf(stderr, "gcli: error: stray arguments\n");
 		usage();
 		return EXIT_FAILURE;
 	}
 
 	check_owner_and_repo(&owner, &repo);
 
-	if (gcli_get_releases(g_clictx, owner, repo, count, &releases) < 0)
-		errx(1, "error: could not get releases: %s", gcli_get_error(g_clictx));
+	if (gcli_get_releases(g_clictx, owner, repo, count, &releases) < 0) {
+		errx(1, "gcli: error: could not get releases: %s",
+		     gcli_get_error(g_clictx));
+	}
 
 	gcli_releases_print(flags, &releases, count);
 

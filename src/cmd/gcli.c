@@ -216,7 +216,7 @@ is_unique_match(size_t const idx, char const *const name, size_t const name_len)
 			break; /* we found a duplicate prefix. */
 	}
 
-	fprintf(stderr, "error: %s: subcommand is ambiguous. could be one of:\n", name);
+	fprintf(stderr, "gcli: error: %s: subcommand is ambiguous. could be one of:\n", name);
 	/* List until either the end or until we don't match any more prefixes */
 	for (size_t i = idx; i < subcommands_size; ++i) {
 		if (strncmp(name, subcommands[i].cmd_name, name_len))
@@ -256,7 +256,7 @@ find_subcommand(char const *const name, int *error)
 	}
 
 	/* no match */
-	fprintf(stderr, "error: %s: no such subcommand\n", name);
+	fprintf(stderr, "gcli: error: %s: no such subcommand\n", name);
 	if (error)
 		*error = LOOKUP_NOSUCHCMD;
 
@@ -273,7 +273,7 @@ add_subcommand_alias(char const *alias_name, char const *alias_for)
 
 	old_sc = find_subcommand(alias_for, NULL);
 	if (old_sc == NULL) {
-		fprintf(stderr, "note: this error occured while defining the alias »%s«\n",
+		fprintf(stderr, "gcli: note: this error occured while defining the alias »%s«\n",
 		        alias_name);
 		exit(EXIT_FAILURE);
 	}
@@ -333,10 +333,10 @@ main(int argc, char *argv[])
 	errmsg = gcli_init(&g_clictx, gcli_config_get_forge_type,
 	                   gcli_config_get_token, gcli_config_get_apibase);
 	if (errmsg)
-		errx(1, "error: %s", errmsg);
+		errx(1, "gcli: error: %s", errmsg);
 
 	if (gcli_config_init_ctx(g_clictx) < 0)
-		errx(1, "error: failed to init context: %s", gcli_get_error(g_clictx));
+		errx(1, "gcli: error: failed to init context: %s", gcli_get_error(g_clictx));
 
 	gcli_set_progress_func(g_clictx, gcli_progress_func);
 
@@ -357,7 +357,7 @@ main(int argc, char *argv[])
 
 	/* Make sure we have a subcommand */
 	if (argc == 0) {
-		fprintf(stderr, "error: missing subcommand\n");
+		fprintf(stderr, "gcli: error: missing subcommand\n");
 		usage();
 		return EXIT_FAILURE;
 	}

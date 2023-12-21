@@ -89,7 +89,7 @@ list_sshkeys(void)
 	gcli_sshkey_list list = {0};
 
 	if (gcli_sshkeys_get_keys(g_clictx, &list) < 0) {
-		fprintf(stderr, "error: could not get list of SSH keys\n");
+		fprintf(stderr, "gcli: error: could not get list of SSH keys\n");
 		return EXIT_FAILURE;
 	}
 
@@ -120,7 +120,7 @@ add_sshkey(int argc, char *argv[])
 			keypath = optarg;
 
 			if (access(keypath, R_OK) < 0) {
-				fprintf(stderr, "error: cannot access %s: %s\n",
+				fprintf(stderr, "gcli: error: cannot access %s: %s\n",
 				        keypath, strerror(errno));
 				return EXIT_FAILURE;
 			}
@@ -133,13 +133,13 @@ add_sshkey(int argc, char *argv[])
 	}
 
 	if (title == NULL) {
-		fprintf(stderr, "error: missing title\n");
+		fprintf(stderr, "gcli: error: missing title\n");
 		usage();
 		return EXIT_FAILURE;
 	}
 
 	if (keypath == NULL) {
-		fprintf(stderr, "error: missing public key path\n");
+		fprintf(stderr, "gcli: error: missing public key path\n");
 		usage();
 		return EXIT_FAILURE;
 	}
@@ -160,7 +160,7 @@ delete_sshkey(int argc, char *argv[])
 	--argc; ++argv;
 
 	if (argc != 1) {
-		fprintf(stderr, "error: incorrect number of arguments\n");
+		fprintf(stderr, "gcli: error: incorrect number of arguments\n");
 		usage();
 		return EXIT_FAILURE;
 	}
@@ -169,7 +169,7 @@ delete_sshkey(int argc, char *argv[])
 	id = strtol(argv[0], &endptr, 10);
 
 	if (endptr != argv[0] + strlen(argv[0])) {
-		fprintf(stderr, "error: could not parse ID of SSH key to delete\n");
+		fprintf(stderr, "gcli: error: could not parse ID of SSH key to delete\n");
 		return EXIT_FAILURE;
 	}
 
@@ -194,7 +194,7 @@ subcommand_ssh(int argc, char *argv[])
 	else if (strcmp(cmdname, "delete") == 0)
 		return delete_sshkey(argc, argv);
 
-	fprintf(stderr, "error: unrecognised subcommand »%s«.\n", cmdname);
+	fprintf(stderr, "gcli: error: unrecognised subcommand »%s«.\n", cmdname);
 	usage();
 	return EXIT_FAILURE;
 }
@@ -229,7 +229,7 @@ subcommand_config(int argc, char *argv[])
 	/* Check if the user gave us at least one option for this
 	 * subcommand */
 	if (argc == 0) {
-		fprintf(stderr, "error: missing subcommand for config\n");
+		fprintf(stderr, "gcli: error: missing subcommand for config\n");
 		usage();
 		return EXIT_FAILURE;
 	}
@@ -239,7 +239,7 @@ subcommand_config(int argc, char *argv[])
 			return subcommands[i].fn(argc, argv);
 	}
 
-	fprintf(stderr, "error: unrecognised config subcommand »%s«\n",
+	fprintf(stderr, "gcli: error: unrecognised config subcommand »%s«\n",
 	        argv[0]);
 	usage();
 

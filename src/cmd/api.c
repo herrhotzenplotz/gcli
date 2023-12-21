@@ -67,7 +67,7 @@ fetch_all(char *_url)
 		gcli_fetch_buffer buffer = {0};
 
 		if (gcli_fetch(g_clictx, url, &next_url, &buffer) < 0)
-			errx(1, "error: failed to fetch data: %s",
+			errx(1, "gcli: error: failed to fetch data: %s",
 			     gcli_get_error(g_clictx));
 
 		fwrite(buffer.data, buffer.length, 1, stdout);
@@ -109,9 +109,9 @@ subcommand_api(int argc, char *argv[])
 		path = shift(&argc, &argv);
 	} else {
 		if (!argc)
-			errx(1, "error: missing path");
+			errx(1, "gcli: error: missing path");
 		else
-			errx(1, "error: too many arguments");
+			errx(1, "gcli: error: too many arguments");
 	}
 
 	if (path[0] == '/')
@@ -122,7 +122,7 @@ subcommand_api(int argc, char *argv[])
 	if (do_all)
 		fetch_all(url);
 	else if (gcli_curl(g_clictx, stdout, url, "application/json") < 0)
-		errx(1, "error: failed to fetch data: %s",
+		errx(1, "gcli: error: failed to fetch data: %s",
 		     gcli_get_error(g_clictx));
 
 	free(url);

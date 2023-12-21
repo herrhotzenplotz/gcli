@@ -66,7 +66,7 @@ check_owner_and_repo(const char **owner, const char **repo)
 {
 	/* If no remote was specified, try to autodetect */
 	if ((*owner == NULL) != (*repo == NULL))
-		errx(1, "error: missing either explicit owner or repo");
+		errx(1, "gcli: error: missing either explicit owner or repo");
 
 	if (*owner == NULL)
 		gcli_config_get_repo(g_clictx, owner, repo);
@@ -132,8 +132,8 @@ delete_repo(bool always_yes, const char *owner, const char *repo)
 	}
 
 	if (!delete)
-		errx(1, "Operation aborted");
+		errx(1, "gcli: Operation aborted");
 
 	if (gcli_repo_delete(g_clictx, owner, repo) < 0)
-		errx(1, "error: failed to delete repo");
+		errx(1, "gcli: error: failed to delete repo");
 }

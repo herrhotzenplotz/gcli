@@ -213,7 +213,7 @@ subcommand_comment(int argc, char *argv[])
 				char *endptr;
 				target_id = strtoul(optarg, &endptr, 10);
 				if (endptr != optarg + strlen(optarg))
-					err(1, "error: Cannot parse issue/PR number");
+					err(1, "gcli: error: Cannot parse issue/PR number");
 			} break;
 		case 'y':
 			always_yes = true;
@@ -230,7 +230,7 @@ subcommand_comment(int argc, char *argv[])
 	check_owner_and_repo(&owner, &repo);
 
 	if (target_id < 0) {
-		fprintf(stderr, "error: missing issue/PR number (use -i/-p)\n");
+		fprintf(stderr, "gcli: error: missing issue/PR number (use -i/-p)\n");
 		usage();
 		return EXIT_FAILURE;
 	}
@@ -243,7 +243,7 @@ subcommand_comment(int argc, char *argv[])
 		always_yes);
 
 	if (rc < 0)
-		errx(1, "error: failed to submit comment: %s", gcli_get_error(g_clictx));
+		errx(1, "gcli: error: failed to submit comment: %s", gcli_get_error(g_clictx));
 
 	return EXIT_SUCCESS;
 }

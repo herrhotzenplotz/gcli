@@ -35,6 +35,7 @@
 #endif
 
 #include <gcli/gcli.h>
+#include <gcli/nvlist.h>
 
 #include <sn/sn.h>
 #include <stdio.h>
@@ -46,6 +47,7 @@ typedef struct gcli_issue gcli_issue;
 typedef struct gcli_submit_issue_options gcli_submit_issue_options;
 typedef struct gcli_issue_list gcli_issue_list;
 typedef struct gcli_issue_fetch_details gcli_issue_fetch_details;
+
 struct gcli_issue {
 	gcli_id number;
 	char *title;
@@ -72,6 +74,8 @@ struct gcli_submit_issue_options {
 	char const *repo;
 	char *title;
 	char *body;
+
+	gcli_nvlist extra;
 };
 
 struct gcli_issue_list {

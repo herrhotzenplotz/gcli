@@ -39,6 +39,7 @@
 #include <gcli/forges.h>
 #include <gcli/issues.h>
 
+#include <errno.h>
 #include <stdlib.h>
 
 #ifdef HAVE_GETOPT_H
@@ -259,11 +260,38 @@ create_issue(gcli_submit_issue_options opts, int always_yes)
 }
 
 static int
+parse_submit_issue_option(gcli_submit_issue_options *opts)
+{
+	char *hd = strdup(optarg);
+	char *key = hd;
+	char *value = NULL;
+
+	hd = strchr(hd, '=');
+	if (hd == NULL || *hd != '=') {
+		fprintf(stderr, "gcli: -O expects a key-value-pair as key=value\n");
+		return -1;
+	}
+
+	*hd++ = '\0';
+	value = strdup(hd); /* make key and value separate allocations */
+
+	gcli_nvlist_append(&opts->extra, key, value);
+
+	return 0;
+}
+
+static int
 subcommand_issue_create(int argc, char *argv[])
 {
 	int ch;
 	gcli_submit_issue_options opts = {0};
 	int always_yes = 0;
+
+	if (gcli_nvlist_init(&opts.extra) < 0) {
+		fprintf(stderr, "gcli: failed to init nvlist: %s\n",
+		        strerror(errno));
+		return EXIT_FAILURE;
+	}
 
 	const struct option options[] = {
 		{ .name    = "owner",
@@ -281,7 +309,7 @@ subcommand_issue_create(int argc, char *argv[])
 		{0},
 	};
 
-	while ((ch = getopt_long(argc, argv, "o:r:", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "o:r:O:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
 			opts.owner = optarg;
@@ -292,6 +320,11 @@ subcommand_issue_create(int argc, char *argv[])
 		case 'y':
 			always_yes = 1;
 			break;
+		case 'O': {
+			int rc = parse_submit_issue_option(&opts);
+			if (rc < 0)
+				return EXIT_FAILURE;
+		} break;
 		default:
 			usage();
 			return EXIT_FAILURE;
@@ -314,6 +347,8 @@ subcommand_issue_create(int argc, char *argv[])
 	if (create_issue(opts, always_yes) < 0)
 		errx(1, "gcli: error: failed to submit issue: %s",
 		     gcli_get_error(g_clictx));
+
+	gcli_nvlist_free(&opts.extra);
 
 	return EXIT_SUCCESS;
 }

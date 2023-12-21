@@ -106,7 +106,7 @@ gcli_pull_free(gcli_pull *const it)
 	free(it->coverage);
 
 	for (size_t i = 0; i < it->labels_size; ++i)
-		free(it->labels[i].data);
+		free(it->labels[i]);
 
 	free(it->labels);
 }

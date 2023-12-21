@@ -219,7 +219,9 @@ gcli_pull_print(gcli_pull const *const it)
 		gcli_dict_add_string(dict, "COVERAGE", 0, 0, it->coverage);
 
 	if (it->labels_size) {
-		gcli_dict_add_sv_list(dict, "LABELS", it->labels, it->labels_size);
+		gcli_dict_add_string_list(dict, "LABELS",
+		                          (char const *const *)it->labels,
+		                          it->labels_size);
 	} else {
 		gcli_dict_add_string(dict, "LABELS", 0, 0, "none");
 	}

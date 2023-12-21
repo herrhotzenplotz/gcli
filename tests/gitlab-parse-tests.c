@@ -95,19 +95,19 @@ ATF_TC_BODY(gitlab_simple_issue, tc)
 	ATF_REQUIRE(parse_gitlab_issue(ctx, &stream, &issue) == 0);
 
 	ATF_CHECK(issue.number == 193);
-	ATF_CHECK_SV_EQTO(issue.title, "Make notifications API use a list struct containing both the ptr and size");
-	ATF_CHECK_SV_EQTO(issue.created_at, "2023-08-13T18:43:05.766Z");
-	ATF_CHECK_SV_EQTO(issue.author, "herrhotzenplotz");
-	ATF_CHECK_SV_EQTO(issue.state, "closed");
+	ATF_CHECK_STREQ(issue.title, "Make notifications API use a list struct containing both the ptr and size");
+	ATF_CHECK_STREQ(issue.created_at, "2023-08-13T18:43:05.766Z");
+	ATF_CHECK_STREQ(issue.author, "herrhotzenplotz");
+	ATF_CHECK_STREQ(issue.state, "closed");
 	ATF_CHECK(issue.comments == 2);
 	ATF_CHECK(issue.locked == false);
-	ATF_CHECK_SV_EQTO(issue.body, "That would make some of the code much cleaner");
+	ATF_CHECK_STREQ(issue.body, "That would make some of the code much cleaner");
 	ATF_CHECK(issue.labels_size == 1);
-	ATF_CHECK_SV_EQTO(issue.labels[0], "good-first-issue");
+	ATF_CHECK_STREQ(issue.labels[0], "good-first-issue");
 	ATF_CHECK(issue.assignees == NULL);
 	ATF_CHECK(issue.assignees_size == 0);
 	ATF_CHECK(issue.is_pr == 0);
-	ATF_CHECK(sn_sv_null(issue.milestone));
+	ATF_CHECK(issue.milestone == NULL);
 
 	json_close(&stream);
 	gcli_issue_free(&issue);

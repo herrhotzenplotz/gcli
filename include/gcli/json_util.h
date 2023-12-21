@@ -93,9 +93,9 @@ get_user_sv(gcli_ctx *ctx, json_stream *input, sn_sv *out)
 }
 
 static inline int
-parse_user(gcli_ctx *ctx, json_stream *input, sn_sv *out)
+parse_user(gcli_ctx *ctx, json_stream *input, char **out)
 {
-    return get_user_sv(ctx, input, out);
+    return get_user(ctx, input, out);
 }
 
 static inline char const *

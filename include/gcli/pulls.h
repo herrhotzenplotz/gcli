@@ -75,7 +75,7 @@ struct gcli_pull {
 	int head_pipeline_id;       /* GitLab specific */
 	char *coverage;             /* Gitlab Specific */
 
-	sn_sv *labels;
+	char **labels;
 	size_t labels_size;
 
 	char **reviewers;      /**< User names */

@@ -56,7 +56,7 @@ static bool
 pull_has_label(gcli_pull const *p, char const *const label)
 {
 	for (size_t i = 0; i < p->labels_size; ++i) {
-		if (sn_sv_eq_to(p->labels[i], label))
+		if (strcmp(p->labels[i], label) == 0)
 			return true;
 	}
 	return false;

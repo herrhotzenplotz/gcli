@@ -24,7 +24,7 @@ object of gcli_pull with
 	 "created_at"       => created_at as string,
 	 "iid"              => number as id,
 	 "id"               => id as id,
-	 "labels"           => labels as array of sn_sv use parse_sv,
+	 "labels"           => labels as array of char* use get_string,
 	 "user_notes_count" => comments as int,
 	 "merge_status"     => mergeable as gitlab_can_be_merged,
 	 "draft"            => draft as bool,

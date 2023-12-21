@@ -36,25 +36,25 @@
 void
 gcli_issue_free(gcli_issue *const it)
 {
-	free(it->title.data);
-	free(it->created_at.data);
-	free(it->author.data);
-	free(it->state.data);
-	free(it->body.data);
+	free(it->title);
+	free(it->created_at);
+	free(it->author);
+	free(it->state);
+	free(it->body);
 
 	for (size_t i = 0; i < it->labels_size; ++i)
-		free(it->labels[i].data);
+		free(it->labels[i]);
 
 	free(it->labels);
 	it->labels = NULL;
 
 	for (size_t i = 0; i < it->assignees_size; ++i)
-		free(it->assignees[i].data);
+		free(it->assignees[i]);
 
 	free(it->assignees);
 	it->assignees = NULL;
 
-	free(it->milestone.data);
+	free(it->milestone);
 }
 
 void

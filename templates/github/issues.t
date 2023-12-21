@@ -5,21 +5,21 @@ include "templates/github/labels.h";
 
 parser github_issue_milestone is
 object of gcli_issue with
-	("title" => milestone as sv);
+	("title" => milestone as string);
 
 parser github_issue is
 object of gcli_issue with
-	("title"        => title as sv,
-	 "state"        => state as sv,
-	 "body"         => body as sv,
-	 "created_at"   => created_at as sv,
+	("title"        => title as string,
+	 "state"        => state as string,
+	 "body"         => body as string,
+	 "created_at"   => created_at as string,
 	 "number"       => number as id,
 	 "comments"     => comments as int,
-	 "user"         => author as user_sv,
+	 "user"         => author as user,
 	 "locked"       => locked as bool,
 	 "labels"       => labels as array of github_label
 	                   use parse_github_label_text,
-	 "assignees"    => assignees as array of sn_sv use parse_user,
+	 "assignees"    => assignees as array of char* use get_user,
 	 "pull_request" => is_pr as github_is_pr,
 	 "milestone"    => use parse_github_issue_milestone);
 

@@ -153,27 +153,32 @@ gcli_issue_print_summary(gcli_issue const *const it)
 	dict = gcli_dict_begin();
 
 	gcli_dict_add(dict, "NUMBER", 0, 0, "%"PRIid, it->number);
-	gcli_dict_add(dict, "TITLE", 0, 0, SV_FMT, SV_ARGS(it->title));
-	gcli_dict_add(dict, "CREATED", 0, 0, SV_FMT, SV_ARGS(it->created_at));
+	gcli_dict_add(dict, "TITLE", 0, 0, "%s", it->title);
+
+	gcli_dict_add(dict, "CREATED", 0, 0, "%s", it->created_at);
 	gcli_dict_add(dict, "AUTHOR",  GCLI_TBLCOL_BOLD, 0,
-	              SV_FMT, SV_ARGS(it->author));
+	              "%s", it->author);
 	gcli_dict_add(dict, "STATE", GCLI_TBLCOL_STATECOLOURED, 0,
-	              SV_FMT, SV_ARGS(it->state));
+	              "%s", it->state);
+
 	gcli_dict_add(dict, "COMMENTS", 0, 0, "%d", it->comments);
 	gcli_dict_add(dict, "LOCKED", 0, 0, "%s", sn_bool_yesno(it->locked));
 
-	if (it->milestone.length)
-		gcli_dict_add(dict, "MILESTONE", 0, 0, SV_FMT, SV_ARGS(it->milestone));
+	if (it->milestone)
+		gcli_dict_add(dict, "MILESTONE", 0, 0, "%s", it->milestone);
 
 	if (it->labels_size) {
-		gcli_dict_add_sv_list(dict, "LABELS", it->labels, it->labels_size);
+		gcli_dict_add_string_list(dict, "LABELS",
+		                          (char const *const *)it->labels,
+		                          it->labels_size);
 	} else {
 		gcli_dict_add(dict, "LABELS", 0, 0, "none");
 	}
 
 	if (it->assignees_size) {
-		gcli_dict_add_sv_list(dict, "ASSIGNEES",
-		                      it->assignees, it->assignees_size);
+		gcli_dict_add_string_list(dict, "ASSIGNEES",
+		                          (char const *const *)it->assignees,
+		                          it->assignees_size);
 	} else {
 		gcli_dict_add(dict, "ASSIGNEES", 0, 0, "none");
 	}
@@ -186,8 +191,8 @@ gcli_issue_print_summary(gcli_issue const *const it)
 void
 gcli_issue_print_op(gcli_issue const *const it)
 {
-	if (it->body.length && it->body.data)
-		pretty_print(it->body.data, 4, 80, stdout);
+	if (it->body)
+		pretty_print(it->body, 4, 80, stdout);
 }
 
 static void

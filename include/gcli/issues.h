@@ -46,20 +46,20 @@ typedef struct gcli_issue_fetch_details gcli_issue_fetch_details;
 
 struct gcli_issue {
 	gcli_id number;
-	sn_sv title;
-	sn_sv created_at;
-	sn_sv author;
-	sn_sv state;
+	char *title;
+	char *created_at;
+	char *author;
+	char *state;
 	int comments;
 	bool locked;
-	sn_sv body;
-	sn_sv *labels;
+	char *body;
+	char **labels;
 	size_t labels_size;
-	sn_sv *assignees;
+	char **assignees;
 	size_t assignees_size;
 	/* workaround for GitHub where PRs are also issues */
 	int is_pr;
-	sn_sv milestone;
+	char *milestone;
 };
 
 struct gcli_submit_issue_options {

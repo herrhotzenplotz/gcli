@@ -85,18 +85,18 @@ ATF_TC_BODY(simple_github_issue, tc)
 	ATF_REQUIRE(parse_github_issue(ctx, &stream, &issue) == 0);
 
 	ATF_CHECK(issue.number = 115);
-	ATF_CHECK_SV_EQTO(issue.title, "consider removing FILE *out from printing functions");
-	ATF_CHECK_SV_EQTO(issue.created_at, "2022-03-22T16:06:10Z");
-	ATF_CHECK_SV_EQTO(issue.author, "herrhotzenplotz");
-	ATF_CHECK_SV_EQTO(issue.state, "closed");
+	ATF_CHECK_STREQ(issue.title, "consider removing FILE *out from printing functions");
+	ATF_CHECK_STREQ(issue.created_at, "2022-03-22T16:06:10Z");
+	ATF_CHECK_STREQ(issue.author, "herrhotzenplotz");
+	ATF_CHECK_STREQ(issue.state, "closed");
 	ATF_CHECK(issue.comments == 0);
 	ATF_CHECK(issue.locked == false);
 
-	ATF_CHECK_SV_EQTO(issue.body,
-		          "We use these functions with ghcli only anyways. In "
-		          "the GUI stuff we use the datastructures returned by "
-		          "the api directly. And If we output, it is stdout "
-		          "everywhere.\n");
+	ATF_CHECK_STREQ(issue.body,
+		        "We use these functions with ghcli only anyways. In "
+		        "the GUI stuff we use the datastructures returned by "
+		        "the api directly. And If we output, it is stdout "
+		        "everywhere.\n");
 
 	ATF_CHECK(issue.labels_size == 0);
 	ATF_CHECK(issue.labels == NULL);
@@ -105,7 +105,7 @@ ATF_TC_BODY(simple_github_issue, tc)
 	ATF_CHECK(issue.assignees == NULL);
 
 	ATF_CHECK(issue.is_pr == 0);
-	ATF_CHECK(sn_sv_null(issue.milestone));
+	ATF_CHECK(!issue.milestone);
 
 	json_close(&stream);
 	gcli_issue_free(&issue);

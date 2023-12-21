@@ -1,0 +1,29 @@
+image: debian/stable
+packages:
+  - build-essential
+  - libcurl4-openssl-dev
+  - pkgconf
+  - autotools-dev
+  - bison
+  - flex
+  - make
+  - autoconf
+  - automake
+  - libtool
+  - libbsd-dev
+  - libatf-dev kyua
+sources:
+  - https://git.sr.ht/~herrhotzenplotz/gcli
+tasks:
+  - build: |
+      cd gcli
+      ./autogen.sh
+      {
+      CFLAGS='-std=c99 -pedantic -Wall -Wextra -Werror' \
+      CPPFLAGS='-D_XOPEN_SOURCE=600' \
+      ./configure --disable-silent-rules || (cat config.log && exit 42)
+      }
+      make
+  - check: |
+      cd gcli
+      make distcheck

@@ -150,6 +150,7 @@ libgcli_la_SOURCES = \
 	src/json_util.c include/gcli/json_util.h \
 	src/labels.c include/gcli/labels.h \
 	src/milestones.c include/gcli/milestones.h \
+	src/nvlist.c include/gcli/nvlist.h \
 	src/pulls.c include/gcli/pulls.h \
 	src/releases.c include/gcli/releases.h \
 	src/repos.c include/gcli/repos.h \

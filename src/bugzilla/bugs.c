@@ -244,6 +244,36 @@ error_fetch:
 	return rc;
 }
 
+static void
+add_extra_options(gcli_nvlist const *list, gcli_jsongen *gen)
+{
+	static struct extra_opt {
+		char const *json_name;
+		char const *cli_name;
+		char const *default_value;
+	} extra_opts[] = {
+		{ .json_name = "op_sys",
+		  .cli_name = "os",
+		  .default_value = "All" },
+		{ .json_name = "rep_platform",
+		  .cli_name = "hardware",
+		  .default_value = "All" },
+		{ .json_name = "version",
+		  .cli_name = "version",
+		  .default_value = "unspecified" },
+	};
+	static size_t extra_opts_size = ARRAY_SIZE(extra_opts);
+
+	for (size_t i = 0; i < extra_opts_size; ++i) {
+		struct extra_opt const *o = &extra_opts[i];
+		char const *const val = gcli_nvlist_find_or(
+			list, o->json_name, o->default_value);
+
+		gcli_jsongen_objmember(gen, o->json_name);
+		gcli_jsongen_string(gen, val);
+	}
+}
+
 int
 bugzilla_bug_submit(gcli_ctx *ctx, gcli_submit_issue_options opts,
                     gcli_fetch_buffer *out)
@@ -294,18 +324,10 @@ bugzilla_bug_submit(gcli_ctx *ctx, gcli_submit_issue_options opts,
 		gcli_jsongen_objmember(&gen, "description");
 		gcli_jsongen_string(&gen, description);
 
-		/* TODO: don't hardcode */
-		gcli_jsongen_objmember(&gen, "op_sys");
-		gcli_jsongen_string(&gen, "All");
-
-		gcli_jsongen_objmember(&gen, "rep_platform");
-		gcli_jsongen_string(&gen, "All");
-
-		gcli_jsongen_objmember(&gen, "version");
-		gcli_jsongen_string(&gen, "unspecified");
-
 		gcli_jsongen_objmember(&gen, "api_key");
 		gcli_jsongen_string(&gen, token);
+
+		add_extra_options(&opts.extra, &gen);
 	}
 	gcli_jsongen_end_object(&gen);
 

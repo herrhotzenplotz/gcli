@@ -3,7 +3,7 @@
 Simple and portable CLI tool for interacting with GitHub, GitLab and
 Gitea from the command line.
 
-![](docs/screenshot-04.png)
+![](docs/screenshot.png)
 
 ## Why?
 

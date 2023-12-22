@@ -24,7 +24,7 @@ cp -vp \
 	${DISTDIR}/tutorial
 
 cp -vp \
-	../screenshot-04.png \
+	../screenshot.png \
 	${DISTDIR}/assets/screenshot.png
 
 tar -c -f - -C ${DISTDIR} \. | xz > website_dist.tar.xz

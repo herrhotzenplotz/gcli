@@ -51,8 +51,14 @@ copyright(void)
 void
 version(void)
 {
+	fprintf(stderr, PACKAGE_STRING" ("HOSTOS")\n");
+}
+
+void
+longversion(void)
+{
+	version();
 	fprintf(stderr,
-	        PACKAGE_STRING" ("HOSTOS")\n"
 	        "Using %s\n"
 	        "Using vendored pdjson library\n"
 	        "\n"

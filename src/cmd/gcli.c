@@ -63,7 +63,7 @@ subcommand_version(int argc, char *argv[])
 	(void) argc;
 	(void) argv;
 
-	version();
+	longversion();
 	copyright();
 
 	return EXIT_SUCCESS;

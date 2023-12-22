@@ -51,6 +51,7 @@ shift(int *argc, char ***argv)
 }
 
 void version(void);
+void longversion(void);
 void copyright(void);
 void check_owner_and_repo(const char **owner, const char **repo);
 

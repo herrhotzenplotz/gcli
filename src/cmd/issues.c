@@ -89,10 +89,10 @@ gcli_print_issues(enum gcli_output_flags const flags,
 	int n, pruned = 0;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
-		{ .name = "NUMBER", .type = GCLI_TBLCOLTYPE_ID,  .flags = GCLI_TBLCOL_JUSTIFYR },
-		{ .name = "NOTES",  .type = GCLI_TBLCOLTYPE_INT, .flags = GCLI_TBLCOL_JUSTIFYR },
-		{ .name = "STATE",  .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_STATECOLOURED },
-		{ .name = "TITLE",  .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
+		{ .name = "NUMBER", .type = GCLI_TBLCOLTYPE_ID,     .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "NOTES",  .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "STATE",  .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
+		{ .name = "TITLE",  .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
 	if (list->issues_size == 0) {

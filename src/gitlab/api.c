@@ -37,7 +37,7 @@
 char const *
 gitlab_api_error_string(gcli_ctx *ctx, gcli_fetch_buffer *const buf)
 {
-	char *msg;
+	char *msg = NULL;
 	int rc;
 	json_stream stream = {0};
 
@@ -45,10 +45,18 @@ gitlab_api_error_string(gcli_ctx *ctx, gcli_fetch_buffer *const buf)
 	rc = parse_gitlab_get_error(ctx, &stream, &msg);
 	json_close(&stream);
 
-	if (rc < 0)
-		return strdup("no error message: failed to parse error response");
-	else
+	if (rc < 0 || msg == NULL) {
+		if (sn_verbose()) {
+			return sn_asprintf("Could not parse Gitlab error response. "
+			                   "The response was:\n\n%.*s\n",
+			                   (int)buf->length, buf->data);
+		} else {
+			return strdup("no error message: failed to parse error response. "
+			              "Please run the gcli query with verbose mode again.");
+		}
+	} else {
 		return msg;
+	}
 }
 
 int

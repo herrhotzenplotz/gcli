@@ -9,6 +9,12 @@ This changelog does not follow semantic versioning.
 
 ### Fixed
 
+- Fixed a segmentation fault when getting a 404 on Gitlab. This bug
+  occured on Debian Linux when querying pipelines at the KiCad project.
+  The returned 404 contained unparsable data which then lead to the
+  error message to be improperly initialised.
+  Reported by: Simon Richter
+
 ### Changed
 
 ### Removed

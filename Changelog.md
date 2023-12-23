@@ -15,6 +15,11 @@ This changelog does not follow semantic versioning.
   error message to be improperly initialised.
   Reported by: Simon Richter
 
+- Fixed missing URL-encode calls in Gitlab Pipelines causing 404 errors
+  when using subprojects on Gitlab. You're now not forced anymore
+  to manually urlencode slashes as %2F in the repos.
+  Reported by: Simon Richter
+
 ### Changed
 
 ### Removed

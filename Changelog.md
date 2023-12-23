@@ -7,6 +7,16 @@ This changelog does not follow semantic versioning.
 
 ### Added
 
+### Fixed
+
+### Changed
+
+### Removed
+
+## 2.1.0 (2023-Dec-08)
+
+### Added
+
 - Added a little spinner to indicate network activity
 - Added Windows 10 MSYS2 to list of confirmed-to-work platforms
 - Added a new action `set-visibility` to the repos subcommand that

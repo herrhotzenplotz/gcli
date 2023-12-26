@@ -31,10 +31,13 @@
 
 #include <gcli/bugzilla/bugs.h>
 
+#include <sn/sn.h>
+
 #include <templates/bugzilla/bugs.h>
 
 #include <gcli/base64.h>
 #include <gcli/curl.h>
+#include <gcli/json_gen.h>
 
 #include <assert.h>
 
@@ -241,3 +244,83 @@ error_fetch:
 	return rc;
 }
 
+int
+bugzilla_bug_submit(gcli_ctx *ctx, gcli_submit_issue_options opts,
+                    gcli_fetch_buffer *out)
+{
+	char *payload = NULL, *url = NULL;
+	char *token; /* bugzilla wants the api token as a parameter in the url or the json payload */
+	char const *product = opts.owner, *component = opts.repo,
+	           *summary = opts.title, *description = opts.body;
+	gcli_jsongen gen = {0};
+	int rc = 0;
+
+	/* prepare data for payload generation */
+	if (product == NULL)
+		return gcli_error(ctx, "product must not be empty");
+
+	if (component == NULL)
+		return gcli_error(ctx, "component must not be empty");
+
+	token = gcli_get_token(ctx);
+	if (!token)
+		return gcli_error(ctx, "creating bugs on bugzilla requires a token");
+
+	/* generate payload */
+	rc = gcli_jsongen_init(&gen);
+	if (rc < 0) {
+		gcli_error(ctx, "failed to init json generator");
+		goto err_jsongen_init;
+	}
+
+	/*
+	 * {
+	 *    "product" : "TestProduct",
+	 *    "component" : "TestComponent",
+	 *    "summary" : "'This is a test bug - please disregard",
+	 *    "description": ...,
+	 * } */
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "product");
+		gcli_jsongen_string(&gen, product);
+
+		gcli_jsongen_objmember(&gen, "component");
+		gcli_jsongen_string(&gen, component);
+
+		gcli_jsongen_objmember(&gen, "summary");
+		gcli_jsongen_string(&gen, summary);
+
+		gcli_jsongen_objmember(&gen, "description");
+		gcli_jsongen_string(&gen, description);
+
+		/* TODO: don't hardcode */
+		gcli_jsongen_objmember(&gen, "op_sys");
+		gcli_jsongen_string(&gen, "All");
+
+		gcli_jsongen_objmember(&gen, "rep_platform");
+		gcli_jsongen_string(&gen, "All");
+
+		gcli_jsongen_objmember(&gen, "version");
+		gcli_jsongen_string(&gen, "unspecified");
+
+		gcli_jsongen_objmember(&gen, "api_key");
+		gcli_jsongen_string(&gen, token);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* generate url and perform request */
+	url = sn_asprintf("%s/rest/bug", gcli_get_apibase(ctx));
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, out);
+
+	free(url);
+	free(payload);
+
+err_jsongen_init:
+	free(token);
+
+	return rc;
+}

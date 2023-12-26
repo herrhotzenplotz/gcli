@@ -33,6 +33,7 @@
 #include <config.h>
 
 #include <gcli/comments.h>
+#include <gcli/curl.h>
 #include <gcli/issues.h>
 
 #include <pdjson/pdjson.h>
@@ -52,5 +53,8 @@ int bugzilla_bug_get_attachments(gcli_ctx *ctx, char const *const product,
                                  char const *const component,
                                  gcli_id const bug_id,
                                  gcli_attachment_list *const out);
+
+int bugzilla_bug_submit(gcli_ctx *ctx, gcli_submit_issue_options opts,
+                        gcli_fetch_buffer *out);
 
 #endif /* GCLI_BUGZILLA_BUGS_H */

@@ -55,5 +55,6 @@ int gcli_error(struct gcli_ctx *ctx, char const *const fmt, ...);
 
 char *gcli_get_apibase(struct gcli_ctx *ctx);
 char *gcli_get_authheader(struct gcli_ctx *ctx);
+char *gcli_get_token(struct gcli_ctx *ctx);
 
 #endif /* GCLI_CTX_H */

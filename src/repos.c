@@ -44,11 +44,11 @@ gcli_get_repos(gcli_ctx *ctx, char const *owner, int const max,
 void
 gcli_repo_free(gcli_repo *it)
 {
-	free(it->full_name.data);
-	free(it->name.data);
-	free(it->owner.data);
-	free(it->date.data);
-	free(it->visibility.data);
+	free(it->full_name);
+	free(it->name);
+	free(it->owner);
+	free(it->date);
+	free(it->visibility);
 	memset(it, 0, sizeof(*it));
 }
 

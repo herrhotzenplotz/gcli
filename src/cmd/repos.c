@@ -72,10 +72,10 @@ gcli_print_repos(enum gcli_output_flags const flags,
 	size_t n;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
-		{ .name = "FORK",     .type = GCLI_TBLCOLTYPE_BOOL, .flags = 0 },
-		{ .name = "VISBLTY",  .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
-		{ .name = "DATE",     .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
-		{ .name = "FULLNAME", .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
+		{ .name = "FORK",     .type = GCLI_TBLCOLTYPE_BOOL,   .flags = 0 },
+		{ .name = "VISBLTY",  .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "DATE",     .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "FULLNAME", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
 	if (list->repos_size == 0) {
@@ -122,11 +122,11 @@ gcli_repo_print(gcli_repo const *it)
 
 	dict = gcli_dict_begin();
 	gcli_dict_add(dict, "ID",         0, 0, "%"PRIid, it->id);
-	gcli_dict_add(dict, "FULL NAME",  0, 0, SV_FMT, SV_ARGS(it->full_name));
-	gcli_dict_add(dict, "NAME",       0, 0, SV_FMT, SV_ARGS(it->name));
-	gcli_dict_add(dict, "OWNER",      0, 0, SV_FMT, SV_ARGS(it->owner));
-	gcli_dict_add(dict, "DATE",       0, 0, SV_FMT, SV_ARGS(it->date));
-	gcli_dict_add(dict, "VISIBILITY", 0, 0, SV_FMT, SV_ARGS(it->visibility));
+	gcli_dict_add(dict, "FULL NAME",  0, 0, "%s", it->full_name);
+	gcli_dict_add(dict, "NAME",       0, 0, "%s", it->name);
+	gcli_dict_add(dict, "OWNER",      0, 0, "%s", it->owner);
+	gcli_dict_add(dict, "DATE",       0, 0, "%s", it->date);
+	gcli_dict_add(dict, "VISIBILITY", 0, 0, "%s", it->visibility);
 	gcli_dict_add(dict, "IS FORK",    0, 0, "%s", sn_bool_yesno(it->is_fork));
 
 	gcli_dict_end(dict);
@@ -158,10 +158,10 @@ subcommand_repos_create(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "r:d:p", options, NULL)) != -1) {
 		switch (ch) {
 		case 'r':
-			create_options.name = SV(optarg);
+			create_options.name = optarg;
 			break;
 		case 'd':
-			create_options.description = SV(optarg);
+			create_options.description = optarg;
 			break;
 		case 'p':
 			create_options.private = true;
@@ -176,7 +176,7 @@ subcommand_repos_create(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	if (sn_sv_null(create_options.name)) {
+	if (!create_options.name) {
 		fprintf(stderr,
 		        "gcli: name cannot be empty. please set a repository "
 		        "name with -r/--name\n");

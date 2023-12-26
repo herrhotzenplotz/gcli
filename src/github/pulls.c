@@ -306,51 +306,61 @@ github_pull_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
 int
 github_perform_submit_pull(gcli_ctx *ctx, gcli_submit_pull_options opts)
 {
-	sn_sv e_head, e_base, e_title, e_body;
+	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
 	gcli_fetch_buffer fetch_buffer = {0};
-	struct json_stream json = {0};
-	gcli_pull pull = {0};
+	gcli_jsongen gen = {0};
 	int rc = 0;
 
-	e_head  = gcli_json_escape(opts.from);
-	e_base  = gcli_json_escape(opts.to);
-	e_title = gcli_json_escape(opts.title);
-	e_body  = gcli_json_escape(opts.body);
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "head");
+		gcli_jsongen_string(&gen, opts.from);
 
-	char *post_fields = sn_asprintf(
-		"{\"head\":\""SV_FMT"\",\"base\":\""SV_FMT"\", "
-		"\"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
-		SV_ARGS(e_head),
-		SV_ARGS(e_base),
-		SV_ARGS(e_title),
-		SV_ARGS(e_body));
-	char *url = sn_asprintf(
-		"%s/repos/%s/%s/pulls",
-		gcli_get_apibase(ctx),
-		opts.owner, opts.repo);
+		gcli_jsongen_objmember(&gen, "base");
+		gcli_jsongen_string(&gen, opts.to);
 
-	rc = gcli_fetch_with_method(ctx, "POST", url, post_fields, NULL,
-	                            &fetch_buffer);
+		gcli_jsongen_objmember(&gen, "title");
+		gcli_jsongen_string(&gen, opts.title);
+
+		gcli_jsongen_objmember(&gen, "body");
+		gcli_jsongen_string(&gen, opts.body);
+	}
+	gcli_jsongen_end_object(&gen);
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	e_owner = gcli_urlencode(opts.owner);
+	e_repo = gcli_urlencode(opts.repo);
+
+	url = sn_asprintf("%s/repos/%s/%s/pulls", gcli_get_apibase(ctx), e_owner,
+	                  e_repo);
+
+	free(e_owner);
+	free(e_repo);
+
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, &fetch_buffer);
 
 	/* Add labels if requested. GitHub doesn't allow us to do this all
 	 * with one request. */
 	if (rc == 0 && opts.labels_size) {
+		json_stream json = {0};
+		gcli_pull pull = {0};
+
 		json_open_buffer(&json, fetch_buffer.data, fetch_buffer.length);
 		parse_github_pull(ctx, &json, &pull);
 
 		github_issue_add_labels(ctx, opts.owner, opts.repo, pull.id,
-		                        opts.labels, opts.labels_size);
+		                        (char const *const *)opts.labels,
+		                        opts.labels_size);
 
 		gcli_pull_free(&pull);
 		json_close(&json);
 	}
 
+
 	free(fetch_buffer.data);
-	free(e_head.data);
-	free(e_base.data);
-	free(e_title.data);
-	free(e_body.data);
-	free(post_fields);
+	free(payload);
 	free(url);
 
 	return rc;

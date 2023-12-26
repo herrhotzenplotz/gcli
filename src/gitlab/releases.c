@@ -30,6 +30,7 @@
 #include <gcli/curl.h>
 #include <gcli/gitlab/config.h>
 #include <gcli/gitlab/releases.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
 #include <templates/gitlab/releases.h>
@@ -98,34 +99,9 @@ gitlab_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
 int
 gitlab_create_release(gcli_ctx *ctx, gcli_new_release const *release)
 {
-	char *url = NULL;
-	char *upload_url = NULL;
-	char *post_data = NULL;
-	char *name_json = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
-	char *commitish_json = NULL;
-	sn_sv escaped_body = {0};
+	char *e_owner = NULL, *e_repo = NULL, *url = NULL, *payload = NULL;
+	gcli_jsongen gen = {0};
 	int rc = 0;
-
-	e_owner = gcli_urlencode(release->owner);
-	e_repo  = gcli_urlencode(release->repo);
-
-	/* https://docs.github.com/en/rest/reference/repos#create-a-release */
-	url = sn_asprintf("%s/projects/%s%%2F%s/releases", gcli_get_apibase(ctx),
-	                  e_owner, e_repo);
-
-	escaped_body = gcli_json_escape(release->body);
-
-	if (release->commitish)
-		commitish_json = sn_asprintf(
-			",\"ref\": \"%s\"",
-			release->commitish);
-
-	if (release->name)
-		name_json = sn_asprintf(
-			",\"name\": \"%s\"",
-			release->name);
 
 	/* Warnings because unsupported on gitlab */
 	if (release->prerelease)
@@ -134,31 +110,48 @@ gitlab_create_release(gcli_ctx *ctx, gcli_new_release const *release)
 	if (release->draft)
 		warnx("draft releases are not supported on GitLab, option ignored");
 
-	post_data = sn_asprintf(
-		"{"
-		"    \"tag_name\": \"%s\","
-		"    \"description\": \""SV_FMT"\""
-		"    %s"
-		"    %s"
-		"}",
-		release->tag,
-		SV_ARGS(escaped_body),
-		commitish_json ? commitish_json : "",
-		name_json ? name_json : "");
-
-	rc = gcli_fetch_with_method(ctx, "POST", url, post_data, NULL, NULL);
-
 	if (release->assets_size)
 		warnx("GitLab release asset uploads are not yet supported");
 
-	free(upload_url);
-	free(url);
-	free(post_data);
-	free(escaped_body.data);
-	free(name_json);
-	free(commitish_json);
+	/* Payload generation */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "tag_name");
+		gcli_jsongen_string(&gen, release->tag);
+
+		gcli_jsongen_objmember(&gen, "description");
+		gcli_jsongen_string(&gen, release->body);
+
+		if (release->commitish) {
+			gcli_jsongen_objmember(&gen, "ref");
+			gcli_jsongen_string(&gen, release->commitish);
+		}
+
+		if (release->name) {
+			gcli_jsongen_objmember(&gen, "name");
+			gcli_jsongen_string(&gen, release->name);
+		}
+	}
+	gcli_jsongen_end_object(&gen);
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* Generate URL */
+	e_owner = gcli_urlencode(release->owner);
+	e_repo = gcli_urlencode(release->repo);
+
+	/* https://docs.github.com/en/rest/reference/repos#create-a-release */
+	url = sn_asprintf("%s/projects/%s%%2F%s/releases", gcli_get_apibase(ctx),
+	                  e_owner, e_repo);
+
 	free(e_owner);
 	free(e_repo);
+
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
+
+	free(url);
+	free(payload);
 
 	return rc;
 }

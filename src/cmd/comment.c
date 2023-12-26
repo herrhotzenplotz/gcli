@@ -88,7 +88,7 @@ comment_init(gcli_ctx *ctx, FILE *f, void *_data)
 		info->owner, info->repo, target_type, info->target_id);
 }
 
-static sn_sv
+static char *
 gcli_comment_get_message(gcli_submit_comment_opts *info)
 {
 	return gcli_editor_get_user_message(g_clictx, comment_init, info);
@@ -97,14 +97,16 @@ gcli_comment_get_message(gcli_submit_comment_opts *info)
 static int
 comment_submit(gcli_submit_comment_opts opts, int always_yes)
 {
-	sn_sv const message = gcli_comment_get_message(&opts);
-	opts.message = gcli_json_escape(message);
 	int rc = 0;
+	char *message;
+
+	message = gcli_comment_get_message(&opts);
+	opts.message = message;
 
 	fprintf(
 		stdout,
-		"You will be commenting the following in %s/%s #%"PRIid":\n"SV_FMT"\n",
-		opts.owner, opts.repo, opts.target_id, SV_ARGS(message));
+		"You will be commenting the following in %s/%s #%"PRIid":\n%s\n",
+		opts.owner, opts.repo, opts.target_id, opts.message);
 
 	if (!always_yes) {
 		if (!sn_yesno("Is this okay?"))
@@ -113,8 +115,8 @@ comment_submit(gcli_submit_comment_opts opts, int always_yes)
 
 	rc = gcli_comment_submit(g_clictx, opts);
 
-	free(message.data);
-	free(opts.message.data);
+	free(message);
+	opts.message = NULL;
 
 	return rc;
 }

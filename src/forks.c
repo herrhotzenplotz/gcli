@@ -50,9 +50,9 @@ gcli_fork_create(gcli_ctx *ctx, char const *owner, char const *repo,
 void
 gcli_fork_free(gcli_fork *fork)
 {
-	free(fork->full_name.data);
-	free(fork->owner.data);
-	free(fork->date.data);
+	free(fork->full_name);
+	free(fork->owner);
+	free(fork->date);
 }
 
 void

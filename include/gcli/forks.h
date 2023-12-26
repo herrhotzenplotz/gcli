@@ -41,9 +41,9 @@ typedef struct gcli_fork gcli_fork;
 typedef struct gcli_fork_list gcli_fork_list;
 
 struct gcli_fork {
-	sn_sv full_name;
-	sn_sv owner;
-	sn_sv date;
+	char *full_name;
+	char *owner;
+	char *date;
 	int forks;
 };
 
@@ -64,4 +64,5 @@ void gcli_fork_delete(char const *owner,
 void gcli_forks_free(gcli_fork_list *list);
 
 void gcli_fork_free(gcli_fork *fork);
+
 #endif /* FORK_H */

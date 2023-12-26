@@ -202,13 +202,13 @@ issue_init_user_file(gcli_ctx *ctx, FILE *stream, void *_opts)
 	gcli_submit_issue_options *opts = _opts;
 	fprintf(
 		stream,
-		"! ISSUE TITLE : "SV_FMT"\n"
+		"! ISSUE TITLE : %s\n"
 		"! Enter issue description above.\n"
 		"! All lines starting with '!' will be discarded.\n",
-		SV_ARGS(opts->title));
+		opts->title);
 }
 
-static sn_sv
+static char *
 gcli_issue_get_user_message(gcli_submit_issue_options *opts)
 {
 	return gcli_editor_get_user_message(g_clictx, issue_init_user_file, opts);
@@ -223,13 +223,11 @@ create_issue(gcli_submit_issue_options opts, int always_yes)
 
 	printf("The following issue will be created:\n"
 	       "\n"
-	       "TITLE   : "SV_FMT"\n"
+	       "TITLE   : %s\n"
 	       "OWNER   : %s\n"
 	       "REPO    : %s\n"
-	       "MESSAGE :\n"SV_FMT"\n",
-	       SV_ARGS(opts.title),
-	       opts.owner, opts.repo,
-	       SV_ARGS(opts.body));
+	       "MESSAGE :\n%s\n",
+	       opts.title, opts.owner, opts.repo, opts.body);
 
 	putchar('\n');
 
@@ -240,8 +238,8 @@ create_issue(gcli_submit_issue_options opts, int always_yes)
 
 	rc = gcli_issue_submit(g_clictx, opts);
 
-	free(opts.body.data);
-	free(opts.body.data);
+	free(opts.body);
+	free(opts.body);
 
 	return rc;
 }
@@ -297,7 +295,7 @@ subcommand_issue_create(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	opts.title = SV(argv[0]);
+	opts.title = argv[0];
 
 	if (create_issue(opts, always_yes) < 0)
 		errx(1, "gcli: error: failed to submit issue: %s",

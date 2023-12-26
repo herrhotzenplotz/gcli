@@ -364,13 +364,13 @@ pull_init_user_file(gcli_ctx *ctx, FILE *stream, void *_opts)
 	(void) ctx;
 	fprintf(
 		stream,
-		"! PR TITLE : "SV_FMT"\n"
+		"! PR TITLE : %s\n"
 		"! Enter PR comments above.\n"
 		"! All lines starting with '!' will be discarded.\n",
-		SV_ARGS(opts->title));
+		opts->title);
 }
 
-static sn_sv
+static char *
 gcli_pull_get_user_message(gcli_submit_pull_options *opts)
 {
 	return gcli_editor_get_user_message(g_clictx, pull_init_user_file, opts);
@@ -384,15 +384,13 @@ create_pull(gcli_submit_pull_options opts, int always_yes)
 	fprintf(stdout,
 	        "The following PR will be created:\n"
 	        "\n"
-	        "TITLE   : "SV_FMT"\n"
-	        "BASE    : "SV_FMT"\n"
-	        "HEAD    : "SV_FMT"\n"
+	        "TITLE   : %s\n"
+	        "BASE    : %s\n"
+	        "HEAD    : %s\n"
 	        "IN      : %s/%s\n"
-	        "MESSAGE :\n"SV_FMT"\n",
-	        SV_ARGS(opts.title),SV_ARGS(opts.to),
-	        SV_ARGS(opts.from),
-	        opts.owner, opts.repo,
-	        SV_ARGS(opts.body));
+	        "MESSAGE :\n%s\n",
+	        opts.title, opts.to, opts.from,
+	        opts.owner, opts.repo, opts.body);
 
 	fputc('\n', stdout);
 
@@ -403,7 +401,7 @@ create_pull(gcli_submit_pull_options opts, int always_yes)
 	return gcli_pull_submit(g_clictx, opts);
 }
 
-static sn_sv
+static char const *
 pr_try_derive_head(void)
 {
 	char const *account;
@@ -424,7 +422,7 @@ pr_try_derive_head(void)
 		     " want to pull request.");
 	}
 
-	return sn_sv_fmt("%s:"SV_FMT, account, SV_ARGS(branch));
+	return sn_asprintf("%s:"SV_FMT, account, SV_ARGS(branch));
 }
 
 static int
@@ -466,10 +464,10 @@ subcommand_pull_create(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "yf:t:do:r:l:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'f':
-			opts.from  = SV(optarg);
+			opts.from = optarg;
 			break;
 		case 't':
-			opts.to    = SV(optarg);
+			opts.to = optarg;
 			break;
 		case 'd':
 			opts.draft = 1;
@@ -497,15 +495,17 @@ subcommand_pull_create(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	if (!opts.from.length)
+	if (!opts.from)
 		opts.from = pr_try_derive_head();
 
-	if (!opts.to.length) {
-		opts.to = gcli_config_get_base(g_clictx);
-		if (opts.to.length == 0)
+	if (!opts.to) {
+		sn_sv base = gcli_config_get_base(g_clictx);
+		if (base.length == 0)
 			errx(1,
 			     "gcli: error: PR base is missing. Please either specify "
 			     "--to branch-name or set pr.base in .gcli.");
+
+		opts.to = sn_sv_to_cstr(base);
 	}
 
 	check_owner_and_repo(&opts.owner, &opts.repo);
@@ -516,7 +516,7 @@ subcommand_pull_create(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	opts.title = SV(argv[0]);
+	opts.title = argv[0];
 
 	if (create_pull(opts, always_yes) < 0)
 		errx(1, "gcli: error: failed to submit pull request: %s",

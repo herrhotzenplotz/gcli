@@ -2,13 +2,13 @@ include "gcli/gitlab/forks.h";
 
 parser gitlab_fork_namespace is
 object of gcli_fork with
-	("full_path" => owner as sv);
+	("full_path" => owner as string);
 
 parser gitlab_fork is
 object of gcli_fork with
-	("path_with_namespace" => full_name as sv,
+	("path_with_namespace" => full_name as string,
 	 "namespace"           => use parse_gitlab_fork_namespace,
-	 "created_at"          => date as sv,
+	 "created_at"          => date as string,
 	 "forks_count"         => forks as int);
 
 parser gitlab_forks is

@@ -217,14 +217,14 @@ ATF_TC_BODY(simple_github_release, tc)
 
 	ATF_REQUIRE(parse_github_release(ctx, &stream, &release) == 0);
 
-	ATF_CHECK_SV_EQTO(release.id, "116031718");
+	ATF_CHECK_STREQ(release.id, "116031718");
 	ATF_CHECK(release.assets_size == 0);
 	ATF_CHECK(release.assets == NULL);
-	ATF_CHECK_SV_EQTO(release.name, "1.2.0");
-	ATF_CHECK_SV_EQTO(release.body, "# Version 1.2.0\n\nThis is version 1.2.0 of gcli.\n\n## Notes\n\nPlease test and report bugs.\n\nYou can download autotoolized tarballs at: https://herrhotzenplotz.de/gcli/releases/gcli-1.2.0/\n\n## Bug Fixes\n\n- Fix compile error when providing --with-libcurl without any arguments\n- Fix memory leaks in string processing functions\n- Fix missing nul termination in read-file function\n- Fix segmentation fault when clearing the milestone of a PR on Gitea\n- Fix missing documentation for milestone action in issues and pulls\n- Set the 'merged' flag properly when showing Gitlab merge requests\n\n## New features\n\n- Add a config subcommand for managing ssh keys (see gcli-config(1))\n- Show number of comments/notes in list of issues and PRs\n- Add support for milestone management in pull requests\n");
-	ATF_CHECK_SV_EQTO(release.author, "herrhotzenplotz");
-	ATF_CHECK_SV_EQTO(release.date, "2023-08-11T07:42:37Z");
-	ATF_CHECK_SV_EQTO(release.upload_url, "https://uploads.github.com/repos/herrhotzenplotz/gcli/releases/116031718/assets{?name,label}");
+	ATF_CHECK_STREQ(release.name, "1.2.0");
+	ATF_CHECK_STREQ(release.body, "# Version 1.2.0\n\nThis is version 1.2.0 of gcli.\n\n## Notes\n\nPlease test and report bugs.\n\nYou can download autotoolized tarballs at: https://herrhotzenplotz.de/gcli/releases/gcli-1.2.0/\n\n## Bug Fixes\n\n- Fix compile error when providing --with-libcurl without any arguments\n- Fix memory leaks in string processing functions\n- Fix missing nul termination in read-file function\n- Fix segmentation fault when clearing the milestone of a PR on Gitea\n- Fix missing documentation for milestone action in issues and pulls\n- Set the 'merged' flag properly when showing Gitlab merge requests\n\n## New features\n\n- Add a config subcommand for managing ssh keys (see gcli-config(1))\n- Show number of comments/notes in list of issues and PRs\n- Add support for milestone management in pull requests\n");
+	ATF_CHECK_STREQ(release.author, "herrhotzenplotz");
+	ATF_CHECK_STREQ(release.date, "2023-08-11T07:42:37Z");
+	ATF_CHECK_STREQ(release.upload_url, "https://uploads.github.com/repos/herrhotzenplotz/gcli/releases/116031718/assets{?name,label}");
 	ATF_CHECK(release.draft == false);
 	ATF_CHECK(release.prerelease == false);
 
@@ -247,11 +247,11 @@ ATF_TC_BODY(simple_github_repo, tc)
 	ATF_REQUIRE(parse_github_repo(ctx, &stream, &repo) == 0);
 
 	ATF_CHECK(repo.id == 415015197);
-	ATF_CHECK_SV_EQTO(repo.full_name, "herrhotzenplotz/gcli");
-	ATF_CHECK_SV_EQTO(repo.name, "gcli");
-	ATF_CHECK_SV_EQTO(repo.owner, "herrhotzenplotz");
-	ATF_CHECK_SV_EQTO(repo.date, "2021-10-08T14:20:15Z");
-	ATF_CHECK_SV_EQTO(repo.visibility, "public");
+	ATF_CHECK_STREQ(repo.full_name, "herrhotzenplotz/gcli");
+	ATF_CHECK_STREQ(repo.name, "gcli");
+	ATF_CHECK_STREQ(repo.owner, "herrhotzenplotz");
+	ATF_CHECK_STREQ(repo.date, "2021-10-08T14:20:15Z");
+	ATF_CHECK_STREQ(repo.visibility, "public");
 	ATF_CHECK(repo.is_fork == false);
 
 	json_close(&stream);
@@ -272,9 +272,9 @@ ATF_TC_BODY(simple_github_fork, tc)
 
 	ATF_REQUIRE(parse_github_fork(ctx, &stream, &fork) == 0);
 
-	ATF_CHECK_SV_EQTO(fork.full_name, "gjnoonan/quick-lint-js");
-	ATF_CHECK_SV_EQTO(fork.owner, "gjnoonan");
-	ATF_CHECK_SV_EQTO(fork.date, "2023-05-11T05:37:41Z");
+	ATF_CHECK_STREQ(fork.full_name, "gjnoonan/quick-lint-js");
+	ATF_CHECK_STREQ(fork.owner, "gjnoonan");
+	ATF_CHECK_STREQ(fork.date, "2023-05-11T05:37:41Z");
 	ATF_CHECK(fork.forks == 0);
 
 	json_close(&stream);

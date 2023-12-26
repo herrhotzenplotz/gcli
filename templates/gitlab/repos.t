@@ -2,11 +2,11 @@ include "gcli/gitlab/repos.h";
 
 parser gitlab_repo is
 object of gcli_repo with
-	("path_with_namespace" => full_name as sv,
-	 "name"                => name as sv,
-	 "owner"               => owner as user_sv,
-	 "created_at"          => date as sv,
-	 "visibility"          => visibility as sv,
+	("path_with_namespace" => full_name as string,
+	 "name"                => name as string,
+	 "owner"               => owner as user,
+	 "created_at"          => date as string,
+	 "visibility"          => visibility as string,
 	 "fork"                => is_fork as bool,
 	 "id"                  => id as id);
 

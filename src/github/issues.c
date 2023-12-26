@@ -278,26 +278,38 @@ int
 github_perform_submit_issue(gcli_ctx *ctx, gcli_submit_issue_options opts,
                             gcli_fetch_buffer *out)
 {
-	char *e_owner = gcli_urlencode(opts.owner);
-	char *e_repo = gcli_urlencode(opts.repo);
-	sn_sv e_title = gcli_json_escape(opts.title);
-	sn_sv e_body = gcli_json_escape(opts.body);
+	char *e_owner = NULL, *e_repo = NULL, *payload = NULL, *url = NULL;
+	gcli_jsongen gen = {0};
 	int rc = 0;
 
-	char *post_fields = sn_asprintf(
-		"{ \"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
-		SV_ARGS(e_title), SV_ARGS(e_body));
+	/* Generate Payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "title");
+		gcli_jsongen_string(&gen, opts.title);
 
-	char *url = sn_asprintf("%s/repos/%s/%s/issues",
-	                        gcli_get_apibase(ctx), e_owner, e_repo);
+		gcli_jsongen_objmember(&gen, "body");
+		gcli_jsongen_string(&gen, opts.body);
+	}
+	gcli_jsongen_begin_object(&gen);
 
-	rc = gcli_fetch_with_method(ctx, "POST", url, post_fields, NULL, out);
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* Generate URL */
+	e_owner = gcli_urlencode(opts.owner);
+	e_repo = gcli_urlencode(opts.repo);
+
+	url = sn_asprintf("%s/repos/%s/%s/issues", gcli_get_apibase(ctx), e_owner,
+	                  e_repo);
 
 	free(e_owner);
 	free(e_repo);
-	free(e_title.data);
-	free(e_body.data);
-	free(post_fields);
+
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, out);
+
+	free(payload);
 	free(url);
 
 	return rc;

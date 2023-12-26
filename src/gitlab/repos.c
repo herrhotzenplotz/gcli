@@ -29,6 +29,7 @@
 
 #include <gcli/gitlab/config.h>
 #include <gcli/gitlab/repos.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
@@ -75,18 +76,14 @@ gitlab_get_repo(gcli_ctx *ctx, char const *owner, char const *repo,
 static void
 gitlab_repos_fixup_missing_visibility(gcli_repo_list *const list)
 {
-	static char const public[] = "public";
-	static size_t const public_len = sizeof(public) - 1;
+	static char const *const public = "public";
 
 	/* Gitlab does not return a visibility field in the repo object on
 	 * unauthenticated API requests. We fix up the missing field here
 	 * assuming that the repository must be public. */
 	for (size_t i = 0; i < list->repos_size; ++i) {
-		if (sn_sv_null(list->repos[i].visibility))
-			list->repos[i].visibility = (sn_sv) {
-				.data = strdup(public),
-				.length = public_len,
-			};
+		if (!list->repos[i].visibility)
+			list->repos[i].visibility = strdup(public);
 	}
 }
 
@@ -143,23 +140,34 @@ int
 gitlab_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *options,
                    gcli_repo *out)
 {
-	char *url, *data;
+	char *url, *payload;
 	gcli_fetch_buffer buffer = {0};
-	json_stream stream = {0};
+	gcli_jsongen gen = {0};
 	int rc;
+	json_stream stream = {0};
 
 	/* Request preparation */
 	url = sn_asprintf("%s/projects", gcli_get_apibase(ctx));
-	/* TODO: escape the repo name and the description */
-	data = sn_asprintf("{\"name\": \""SV_FMT"\","
-	                   " \"description\": \""SV_FMT"\","
-	                   " \"visibility\": \"%s\" }",
-	                   SV_ARGS(options->name),
-	                   SV_ARGS(options->description),
-	                   options->private ? "private" : "public");
+
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "name");
+		gcli_jsongen_string(&gen, options->name);
+
+		gcli_jsongen_objmember(&gen, "description");
+		gcli_jsongen_string(&gen, options->description);
+
+		gcli_jsongen_objmember(&gen, "visibility");
+		gcli_jsongen_string(&gen, options->private ? "private" : "public");
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
 
 	/* Fetch and parse result */
-	rc = gcli_fetch_with_method(ctx, "POST", url, data, NULL, out ? &buffer : NULL);
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, out ? &buffer : NULL);
 	if (rc == 0 && out) {
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		parse_gitlab_repo(ctx, &stream, out);
@@ -168,7 +176,7 @@ gitlab_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *options,
 	}
 
 	free(buffer.data);
-	free(data);
+	free(payload);
 	free(url);
 
 	return rc;

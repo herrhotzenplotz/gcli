@@ -92,9 +92,9 @@ static void
 print_gist_file(gcli_gist_file const *const file)
 {
 	printf("      • %-15.15s  %-8.8s  %-s\n",
-	       language_fmt(file->language.data),
+	       language_fmt(file->language),
 	       human_readable_size(file->size),
-	       file->filename.data);
+	       file->filename);
 }
 
 static void
@@ -102,18 +102,18 @@ print_gist(enum gcli_output_flags const flags, gcli_gist const *const gist)
 {
 	(void) flags;
 
-	printf("   ID : %s"SV_FMT"%s\n"
-	       "OWNER : %s"SV_FMT"%s\n"
-	       "DESCR : "SV_FMT"\n"
-	       " DATE : "SV_FMT"\n"
-	       "  URL : "SV_FMT"\n"
-	       " PULL : "SV_FMT"\n",
-	       gcli_setcolour(GCLI_COLOR_YELLOW), SV_ARGS(gist->id), gcli_resetcolour(),
-	       gcli_setbold(), SV_ARGS(gist->owner), gcli_resetbold(),
-	       SV_ARGS(gist->description),
-	       SV_ARGS(gist->date),
-	       SV_ARGS(gist->url),
-	       SV_ARGS(gist->git_pull_url));
+	printf("   ID : %s%s%s\n"
+	       "OWNER : %s%s%s\n"
+	       "DESCR : %s\n"
+	       " DATE : %s\n"
+	       "  URL : %s\n"
+	       " PULL : %s\n",
+	       gcli_setcolour(GCLI_COLOR_YELLOW), gist->id, gcli_resetcolour(),
+	       gcli_setbold(), gist->owner, gcli_resetbold(),
+	       gist->description,
+	       gist->date,
+	       gist->url,
+	       gist->git_pull_url);
 	printf("FILES : %-15.15s  %-8.8s  %-s\n",
 	       "LANGUAGE", "SIZE", "FILENAME");
 
@@ -218,7 +218,7 @@ subcommand_gist_get(int argc, char *argv[])
 		errx(1, "gcli: error: failed to get gist: %s", gcli_get_error(g_clictx));
 
 	for (size_t f = 0; f < gist.files_size; ++f) {
-		if (sn_sv_eq_to(gist.files[f].filename, file_name)) {
+		if (strcmp(gist.files[f].filename, file_name) == 0) {
 			file = &gist.files[f];
 			break;
 		}
@@ -231,7 +231,7 @@ subcommand_gist_get(int argc, char *argv[])
 	if (isatty(STDOUT_FILENO) && (file->size >= 4 * 1024 * 1024))
 		errx(1, "gcli: error: File is bigger than 4 MiB, refusing to print to stdout.");
 
-	if (gcli_curl(g_clictx, stdout, file->url.data, file->type.data) < 0)
+	if (gcli_curl(g_clictx, stdout, file->url, file->type) < 0)
 		errx(1, "gcli: error: failed to fetch gist: %s", gcli_get_error(g_clictx));
 
 	gcli_gist_free(&gist);

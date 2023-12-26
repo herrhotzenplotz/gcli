@@ -99,11 +99,11 @@ struct gcli_commit_list {
 struct gcli_submit_pull_options {
 	char const *owner;
 	char const *repo;
-	sn_sv from;
-	sn_sv to;
-	sn_sv title;
-	sn_sv body;
-	char const **labels;
+	char const *from;
+	char const *to;
+	char const *title;
+	char *body;
+	char **labels;
 	size_t labels_size;
 	int draft;
 };

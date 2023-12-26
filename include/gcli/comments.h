@@ -61,7 +61,7 @@ struct gcli_submit_comment_opts {
 	enum comment_target_type { ISSUE_COMMENT, PR_COMMENT }  target_type;
 	char const *owner, *repo;
 	gcli_id target_id;
-	sn_sv message;
+	char const *message;
 };
 
 void gcli_comments_free(gcli_comment_list *list);

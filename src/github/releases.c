@@ -30,6 +30,7 @@
 #include <gcli/curl.h>
 #include <gcli/github/config.h>
 #include <gcli/github/releases.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 #include <pdjson/pdjson.h>
 
@@ -83,12 +84,12 @@ github_parse_single_release(gcli_ctx *ctx, gcli_fetch_buffer buffer,
 static int
 github_get_upload_url(gcli_ctx *ctx, gcli_release *const it, char **out)
 {
-	char *delim = strchr(it->upload_url.data, '{');
+	char *delim = strchr(it->upload_url, '{');
 	if (delim == NULL)
 		return gcli_error(ctx, "GitHub API returned an invalid upload url");
 
-	size_t len = delim - it->upload_url.data;
-	*out = sn_strndup(it->upload_url.data, len);
+	size_t len = delim - it->upload_url;
+	*out = sn_strndup(it->upload_url, len);
 
 	return 0;
 }
@@ -126,57 +127,55 @@ github_upload_release_asset(gcli_ctx *ctx, char const *url,
 int
 github_create_release(gcli_ctx *ctx, gcli_new_release const *release)
 {
-	char *url = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
-	char *upload_url = NULL;
-	char *post_data = NULL;
-	char *name_json = NULL;
-	char *commitish_json = NULL;
-	sn_sv escaped_body = {0};
+	char *url = NULL, *e_owner = NULL, *e_repo = NULL, *upload_url = NULL,
+	     *payload = NULL;
 	gcli_fetch_buffer buffer = {0};
+	gcli_jsongen gen = {0};
 	gcli_release response = {0};
 	int rc = 0;
 
-	assert(release);
+	/* Payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "tag_name");
+		gcli_jsongen_string(&gen, release->tag);
+
+		gcli_jsongen_objmember(&gen, "draft");
+		gcli_jsongen_bool(&gen, release->draft);
+
+		gcli_jsongen_objmember(&gen, "prerelease");
+		gcli_jsongen_bool(&gen, release->prerelease);
+
+		gcli_jsongen_objmember(&gen, "body");
+		gcli_jsongen_string(&gen, release->body);
+
+
+		if (release->commitish) {
+			gcli_jsongen_objmember(&gen, "target_commitish");
+			gcli_jsongen_string(&gen, release->commitish);
+		}
+
+		if (release->name) {
+			gcli_jsongen_objmember(&gen, "name");
+			gcli_jsongen_string(&gen, release->name);
+		}
+	}
+	gcli_jsongen_end_object(&gen);
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
 
 	e_owner = gcli_urlencode(release->owner);
 	e_repo = gcli_urlencode(release->repo);
 
 	/* https://docs.github.com/en/rest/reference/repos#create-a-release */
-	url = sn_asprintf(
-		"%s/repos/%s/%s/releases",
-		gcli_get_apibase(ctx), e_owner, e_repo);
+	url = sn_asprintf("%s/repos/%s/%s/releases", gcli_get_apibase(ctx),
+	                  e_owner, e_repo);
 
-	escaped_body = gcli_json_escape(release->body);
+	free(e_owner);
+	free(e_repo);
 
-	if (release->commitish)
-		commitish_json = sn_asprintf(
-			",\"target_commitish\": \"%s\"",
-			release->commitish);
-
-	if (release->name)
-		name_json = sn_asprintf(
-			",\"name\": \"%s\"",
-			release->name);
-
-	post_data = sn_asprintf(
-		"{"
-		"    \"tag_name\": \"%s\","
-		"    \"draft\": %s,"
-		"    \"prerelease\": %s,"
-		"    \"body\": \""SV_FMT"\""
-		"    %s"
-		"    %s"
-		"}",
-		release->tag,
-		gcli_json_bool(release->draft),
-		gcli_json_bool(release->prerelease),
-		SV_ARGS(escaped_body),
-		commitish_json ? commitish_json : "",
-		name_json ? name_json : "");
-
-	rc = gcli_fetch_with_method(ctx, "POST", url, post_data, NULL, &buffer);
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, &buffer);
 	if (rc < 0)
 		goto out;
 
@@ -195,15 +194,11 @@ github_create_release(gcli_ctx *ctx, gcli_new_release const *release)
 	}
 
 out:
+	gcli_release_free(&response);
 	free(upload_url);
 	free(buffer.data);
 	free(url);
-	free(post_data);
-	free(escaped_body.data);
-	free(e_owner);
-	free(e_repo);
-	free(name_json);
-	free(commitish_json);
+	free(payload);
 
 	return rc;
 }

@@ -29,6 +29,7 @@
 
 #include <gcli/gitlab/comments.h>
 #include <gcli/gitlab/config.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
 #include <templates/gitlab/comments.h>
@@ -37,9 +38,9 @@ int
 gitlab_perform_submit_comment(gcli_ctx *ctx, gcli_submit_comment_opts opts,
                               gcli_fetch_buffer *const out)
 {
+	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
 	char const *type = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
+	gcli_jsongen gen = {0};
 	int rc = 0;
 
 	e_owner = gcli_urlencode(opts.owner);
@@ -54,20 +55,27 @@ gitlab_perform_submit_comment(gcli_ctx *ctx, gcli_submit_comment_opts opts,
 		break;
 	}
 
-	char *post_fields = sn_asprintf(
-		"{ \"body\": \""SV_FMT"\" }",
-		SV_ARGS(opts.message));
-	char *url = sn_asprintf(
-		"%s/projects/%s%%2F%s/%s/%"PRIid"/notes",
-		gcli_get_apibase(ctx),
-		e_owner, e_repo, type, opts.target_id);
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "body");
+		gcli_jsongen_string(&gen, opts.message);
+	}
+	gcli_jsongen_end_object(&gen);
 
-	rc = gcli_fetch_with_method(ctx, "POST", url, post_fields, NULL, out);
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
 
-	free(post_fields);
+	url = sn_asprintf("%s/project/%s%%2F%s/%s/%"PRIid"/notes",
+	                  gcli_get_apibase(ctx), e_owner, e_repo, type,
+	                  opts.target_id);
+
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, out);
+
+	free(payload);
+	free(url);
 	free(e_owner);
 	free(e_repo);
-	free(url);
 
 	return rc;
 }

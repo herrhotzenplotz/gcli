@@ -44,12 +44,12 @@ gcli_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
 void
 gcli_release_free(gcli_release *release)
 {
-	free(release->id.data);
-	free(release->name.data);
-	free(release->body.data);
-	free(release->author.data);
-	free(release->date.data);
-	free(release->upload_url.data);
+	free(release->id);
+	free(release->name);
+	free(release->body);
+	free(release->author);
+	free(release->date);
+	free(release->upload_url);
 
 	for (size_t i = 0; i < release->assets_size; ++i) {
 		free(release->assets[i].name);

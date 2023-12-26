@@ -45,10 +45,10 @@ typedef struct gcli_gist_file gcli_gist_file;
 typedef struct gcli_new_gist  gcli_new_gist;
 
 struct gcli_gist_file {
-	sn_sv filename;
-	sn_sv language;
-	sn_sv url;
-	sn_sv type;
+	char *filename;
+	char *language;
+	char *url;
+	char *type;
 	size_t size;
 };
 
@@ -58,12 +58,12 @@ struct gcli_gist_list {
 };
 
 struct gcli_gist {
-	sn_sv id;
-	sn_sv owner;
-	sn_sv url;
-	sn_sv date;
-	sn_sv git_pull_url;
-	sn_sv description;
+	char *id;
+	char *owner;
+	char *url;
+	char *date;
+	char *git_pull_url;
+	char *description;
 	gcli_gist_file *files;
 	size_t files_size;
 };

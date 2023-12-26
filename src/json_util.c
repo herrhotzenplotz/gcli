@@ -363,16 +363,14 @@ get_gitlab_style_colour(gcli_ctx *ctx, json_stream *const input, uint32_t *out)
 }
 
 int
-get_gitea_visibility(gcli_ctx *ctx, json_stream *const input, sn_sv *out)
+get_gitea_visibility(gcli_ctx *ctx, json_stream *const input, char **out)
 {
-	char *v = NULL;
 	bool is_private;
 	int rc = get_bool(ctx, input, &is_private);
 	if (rc < 0)
 		return rc;
 
-	v = strdup(is_private ? "private" : "public");
-	*out = SV(v);
+	*out = strdup(is_private ? "private" : "public");
 
 	return 0;
 }

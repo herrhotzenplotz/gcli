@@ -416,82 +416,75 @@ gitlab_perform_submit_mr(gcli_ctx *ctx, gcli_submit_pull_options opts)
 	/* Note: this doesn't really allow merging into repos with
 	 * different names. We need to figure out a way to make this
 	 * better for both github and gitlab. */
+	char *source_branch = NULL, *source_owner = NULL, *payload = NULL,
+	     *e_owner = NULL, *e_repo = NULL, *url = NULL;
+	char const *target_branch = NULL;
+	gcli_jsongen gen = {0};
 	gcli_repo target = {0};
-	sn_sv target_branch = {0};
-	sn_sv source_owner = {0};
-	sn_sv source_branch = {0};
-	char *labels = NULL;
 	int rc = 0;
 
-	/* json escaped variants */
-	sn_sv e_source_branch, e_target_branch, e_title, e_body;
-
 	target_branch = opts.to;
-	source_branch = opts.from;
-	source_owner = sn_sv_chop_until(&source_branch, ':');
-	if (source_branch.length == 0)
+	source_owner = strdup(opts.from);
+	source_branch = strchr(source_owner, ':');
+	if (source_branch == NULL)
 		return gcli_error(ctx, "bad merge request source: expected 'owner:branch'");
 
-	source_branch.length -= 1;
-	source_branch.data += 1;
+	*source_branch++ = '\0';
 
 	/* Figure out the project id */
 	rc = gitlab_get_repo(ctx, opts.owner, opts.repo, &target);
 	if (rc < 0)
 		return rc;
 
-	/* escape things in the post payload */
-	e_source_branch = gcli_json_escape(source_branch);
-	e_target_branch = gcli_json_escape(target_branch);
-	e_title = gcli_json_escape(opts.title);
-	e_body = gcli_json_escape(opts.body);
+	/* generate payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "source_branch");
+		gcli_jsongen_string(&gen, source_branch);
 
-	/* Prepare the label list if needed */
-	if (opts.labels_size) {
-		char *joined_items = NULL;
+		gcli_jsongen_objmember(&gen, "target_branch");
+		gcli_jsongen_string(&gen, target_branch);
 
-		/* Join by "," */
-		joined_items = sn_join_with(
-			opts.labels, opts.labels_size, "\",\"");
+		gcli_jsongen_objmember(&gen, "title");
+		gcli_jsongen_string(&gen, opts.title);
 
-		/* Construct something we can shove into the payload below */
-		labels = sn_asprintf(", \"labels\": [\"%s\"]", joined_items);
-		free(joined_items);
+		gcli_jsongen_objmember(&gen, "description");
+		gcli_jsongen_string(&gen, opts.body);
+
+		gcli_jsongen_objmember(&gen, "target_project_id");
+		gcli_jsongen_number(&gen, target.id);
+
+		if (opts.labels_size) {
+			gcli_jsongen_objmember(&gen, "labels");
+
+			gcli_jsongen_begin_array(&gen);
+			for (size_t i = 0; i < opts.labels_size; ++i)
+				gcli_jsongen_string(&gen, opts.labels[i]);
+			gcli_jsongen_end_array(&gen);
+		}
 	}
+	gcli_jsongen_end_object(&gen);
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+	gcli_repo_free(&target);
 
-	/* prepare payload */
-	char *post_fields = sn_asprintf(
-		"{\"source_branch\":\""SV_FMT"\",\"target_branch\":\""SV_FMT"\", "
-		"\"title\": \""SV_FMT"\", \"description\": \""SV_FMT"\", "
-		"\"target_project_id\": %"PRIid" %s }",
-		SV_ARGS(e_source_branch),
-		SV_ARGS(e_target_branch),
-		SV_ARGS(e_title),
-		SV_ARGS(e_body),
-		target.id,
-		labels ? labels : "");
+	/* generate url */
+	e_owner = gcli_urlencode(source_owner);
+	e_repo = gcli_urlencode(opts.repo);
 
-	/* construct url. The thing below works as the string view is
-	 * malloced and also NUL-terminated */
-	char *e_owner = gcli_urlencode_sv(source_owner).data;
-	char *e_repo = gcli_urlencode(opts.repo);
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests", gcli_get_apibase(ctx),
+	                  e_owner, e_repo);
 
-	char *url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests",
-	                        gcli_get_apibase(ctx),
-	    e_owner, e_repo);
-
-	/* perform request */
-	rc = gcli_fetch_with_method(ctx, "POST", url, post_fields, NULL, NULL);
-
-	/* cleanup */
-	free(e_source_branch.data);
-	free(e_target_branch.data);
-	free(e_title.data);
-	free(e_body.data);
 	free(e_owner);
 	free(e_repo);
-	free(labels);
-	free(post_fields);
+
+	/* perform request */
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
+
+	/* cleanup */
+	free(source_owner);
+	free(payload);
 	free(url);
 
 	return rc;

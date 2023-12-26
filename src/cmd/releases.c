@@ -77,10 +77,10 @@ gcli_print_release(enum gcli_output_flags const flags,
 
 	dict = gcli_dict_begin();
 
-	gcli_dict_add(dict,        "ID",         0, 0, SV_FMT, SV_ARGS(it->id));
-	gcli_dict_add(dict,        "NAME",       0, 0, SV_FMT, SV_ARGS(it->name));
-	gcli_dict_add(dict,        "AUTHOR",     0, 0, SV_FMT, SV_ARGS(it->author));
-	gcli_dict_add(dict,        "DATE",       0, 0, SV_FMT, SV_ARGS(it->date));
+	gcli_dict_add(dict,        "ID",         0, 0, "%s", it->id);
+	gcli_dict_add(dict,        "NAME",       0, 0, "%s", it->name);
+	gcli_dict_add(dict,        "AUTHOR",     0, 0, "%s", it->author);
+	gcli_dict_add(dict,        "DATE",       0, 0, "%s", it->date);
 	gcli_dict_add_string(dict, "DRAFT",      0, 0, sn_bool_yesno(it->draft));
 	gcli_dict_add_string(dict, "PRERELEASE", 0, 0, sn_bool_yesno(it->prerelease));
 	gcli_dict_add_string(dict, "ASSETS",     0, 0, "");
@@ -94,9 +94,9 @@ gcli_print_release(enum gcli_output_flags const flags,
 	gcli_dict_end(dict);
 
 	/* body */
-	if (it->body.length) {
+	if (it->body) {
 		putchar('\n');
-		pretty_print(it->body.data, 13, 80, stdout);
+		pretty_print(it->body, 13, 80, stdout);
 	}
 
 	putchar('\n');
@@ -130,11 +130,11 @@ gcli_releases_print_short(enum gcli_output_flags const flags,
 	size_t n;
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
-		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
-		{ .name = "DATE",       .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
-		{ .name = "DRAFT",      .type = GCLI_TBLCOLTYPE_BOOL, .flags = 0 },
-		{ .name = "PRERELEASE", .type = GCLI_TBLCOLTYPE_BOOL, .flags = 0 },
-		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
+		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "DATE",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "DRAFT",      .type = GCLI_TBLCOLTYPE_BOOL,   .flags = 0 },
+		{ .name = "PRERELEASE", .type = GCLI_TBLCOLTYPE_BOOL,   .flags = 0 },
+		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
 	if (max < 0 || (size_t)(max) > list->releases_size)
@@ -202,7 +202,7 @@ releasemsg_init(gcli_ctx *ctx, FILE *f, void *_data)
 		info->owner, info->repo, info->tag, info->name);
 }
 
-static sn_sv
+static char *
 get_release_message(gcli_new_release const *info)
 {
 	return gcli_editor_get_user_message(g_clictx, releasemsg_init,
@@ -212,9 +212,9 @@ get_release_message(gcli_new_release const *info)
 static int
 subcommand_releases_create(int argc, char *argv[])
 {
-	gcli_new_release release    = {0};
-	int              ch;
-	bool             always_yes = false;
+	gcli_new_release release = {0};
+	int ch;
+	bool always_yes = false;
 
 	struct option const options[] = {
 		{ .name    = "yes",

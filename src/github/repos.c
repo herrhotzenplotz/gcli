@@ -30,6 +30,7 @@
 #include <gcli/curl.h>
 #include <gcli/github/config.h>
 #include <gcli/github/repos.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
@@ -131,28 +132,35 @@ int
 github_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *options,
                    gcli_repo *const out)
 {
-	char *url, *data;
+	char *url, *payload;
 	gcli_fetch_buffer buffer = {0};
+	gcli_jsongen gen = {0};
 	struct json_stream stream = {0};
-	sn_sv e_name, e_description;
 	int rc = 0;
 
 	/* Request preparation */
 	url = sn_asprintf("%s/user/repos", gcli_get_apibase(ctx));
 
-	/* JSON-escape repo name and description */
-	e_name = gcli_json_escape(options->name);
-	e_description = gcli_json_escape(options->description);
-
 	/* Construct payload */
-	data = sn_asprintf("{\"name\": \""SV_FMT"\","
-	                   " \"description\": \""SV_FMT"\","
-	                   " \"private\": %s }",
-	                   SV_ARGS(e_name), SV_ARGS(e_description),
-	                   gcli_json_bool(options->private));
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "name");
+		gcli_jsongen_string(&gen, options->name);
+
+		gcli_jsongen_objmember(&gen, "description");
+		gcli_jsongen_string(&gen, options->description);
+
+		gcli_jsongen_objmember(&gen, "private");
+		gcli_jsongen_bool(&gen, options->private);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
 
 	/* Fetch and parse result */
-	rc = gcli_fetch_with_method(ctx, "POST", url, data, NULL,
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL,
 	                            out ? &buffer : NULL);
 
 	if (rc == 0 && out) {
@@ -163,9 +171,7 @@ github_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *options,
 
 	/* Cleanup */
 	free(buffer.data);
-	free(e_name.data);
-	free(e_description.data);
-	free(data);
+	free(payload);
 	free(url);
 
 	return rc;

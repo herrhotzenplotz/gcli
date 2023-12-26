@@ -11,12 +11,12 @@ object of gcli_release with
 
 parser gitlab_release is
 object of gcli_release with
-	("name"             => name as sv,
-	 "tag_name"         => id as sv,
-	 "description"      => body as sv,
+	("name"             => name as string,
+	 "tag_name"         => id as string,
+	 "description"      => body as string,
 	 "assets"           => use parse_gitlab_release_assets,
-	 "author"           => author as user_sv,
-	 "created_at"       => date as sv,
+	 "author"           => author as user,
+	 "created_at"       => date as string,
 	 "upcoming_release" => prerelease as bool);
 
 parser gitlab_releases is

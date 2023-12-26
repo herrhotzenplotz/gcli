@@ -49,14 +49,14 @@ struct gcli_release_asset {
 };
 
 struct gcli_release {
-	sn_sv               id;     /* Probably shouldn't be called id */
+	char               *id;     /* Probably shouldn't be called id */
 	gcli_release_asset *assets;
 	size_t              assets_size;
-	sn_sv               name;
-	sn_sv               body;
-	sn_sv               author;
-	sn_sv               date;
-	sn_sv               upload_url;
+	char               *name;
+	char               *body;
+	char               *author;
+	char               *date;
+	char               *upload_url;
 	bool                draft;
 	bool                prerelease;
 };
@@ -78,7 +78,7 @@ struct gcli_new_release {
 	char const *repo;
 	char const *tag;
 	char const *name;
-	sn_sv body;
+	char *body;
 	char const *commitish;
 	bool draft;
 	bool prerelease;

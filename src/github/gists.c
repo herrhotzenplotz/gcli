@@ -203,18 +203,18 @@ gcli_delete_gist(gcli_ctx *ctx, char const *gist_id)
 void
 gcli_gist_free(gcli_gist *g)
 {
-	free(g->id.data);
-	free(g->owner.data);
-	free(g->url.data);
-	free(g->date.data);
-	free(g->git_pull_url.data);
-	free(g->description.data);
+	free(g->id);
+	free(g->owner);
+	free(g->url);
+	free(g->date);
+	free(g->git_pull_url);
+	free(g->description);
 
 	for (size_t j = 0; j < g->files_size; ++j) {
-		free(g->files[j].filename.data);
-		free(g->files[j].language.data);
-		free(g->files[j].url.data);
-		free(g->files[j].type.data);
+		free(g->files[j].filename);
+		free(g->files[j].language);
+		free(g->files[j].url);
+		free(g->files[j].type);
 	}
 
 	free(g->files);

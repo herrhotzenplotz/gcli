@@ -170,7 +170,7 @@ gcli_issue_print_summary(gcli_issue const *const it)
 	gcli_dict_add(dict, "STATE", GCLI_TBLCOL_STATECOLOURED, 0,
 	              "%s", it->state);
 
-	if ((quirks & GCLI_ISSUE_QUIRKS_URL) == 0 && it->url)
+	if ((quirks & GCLI_ISSUE_QUIRKS_URL) == 0 && !sn_strempty(it->url))
 		gcli_dict_add(dict, "URL", 0, 0, "%s", it->url);
 
 	if ((quirks & GCLI_ISSUE_QUIRKS_COMMENTS) == 0)
@@ -179,7 +179,7 @@ gcli_issue_print_summary(gcli_issue const *const it)
 	if ((quirks & GCLI_ISSUE_QUIRKS_LOCKED) == 0)
 		gcli_dict_add(dict, "LOCKED", 0, 0, "%s", sn_bool_yesno(it->locked));
 
-	if (it->milestone)
+	if (!sn_strempty(it->milestone))
 		gcli_dict_add(dict, "MILESTONE", 0, 0, "%s", it->milestone);
 
 	if (it->labels_size) {

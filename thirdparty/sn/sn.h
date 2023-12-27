@@ -147,6 +147,15 @@ sn_sv_null(sn_sv it)
 	return it.data == NULL && it.length == 0;
 }
 
+static inline bool
+sn_strempty(char const *const str)
+{
+	if (str == NULL)
+		return true;
+
+	return *str == '\0';
+}
+
 /* interactive user functions */
 bool sn_yesno(const char *fmt, ...) PRINTF_FORMAT(1, 2);
 

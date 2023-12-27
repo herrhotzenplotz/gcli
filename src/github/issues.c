@@ -214,29 +214,24 @@ github_get_issue_summary(gcli_ctx *ctx, char const *owner, char const *repo,
 	return rc;
 }
 
-int
-github_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
-                   gcli_id const issue_number)
+static int
+github_issue_patch_state(gcli_ctx *ctx, char const *const owner,
+                         char const *const repo, gcli_id const issue,
+                         char const *const state)
 {
-	char *url = NULL;
-	char *data = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
+	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
 	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf(
-		"%s/repos/%s/%s/issues/%"PRIid,
-		gcli_get_apibase(ctx),
-		e_owner, e_repo,
-		issue_number);
-	data = sn_asprintf("{ \"state\": \"close\"}");
+	url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid, gcli_get_apibase(ctx),
+	                  e_owner, e_repo, issue);
+	payload = sn_asprintf("{ \"state\": \"%s\"}", state);
 
-	rc = gcli_fetch_with_method(ctx, "PATCH", url, data, NULL, NULL);
+	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
 
-	free(data);
+	free(payload);
 	free(url);
 	free(e_owner);
 	free(e_repo);
@@ -245,33 +240,17 @@ github_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-github_issue_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
-                    gcli_id const issue_number)
+github_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
+                   gcli_id const issue)
 {
-	char *url = NULL;
-	char *data = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
-	int rc = 0;
+	return github_issue_patch_state(ctx, owner, repo, issue, "closed");
+}
 
-	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
-
-	url = sn_asprintf(
-		"%s/repos/%s/%s/issues/%"PRIid,
-		gcli_get_apibase(ctx),
-		e_owner, e_repo,
-		issue_number);
-	data = sn_asprintf("{ \"state\": \"open\"}");
-
-	rc = gcli_fetch_with_method(ctx, "PATCH", url, data, NULL, NULL);
-
-	free(data);
-	free(url);
-	free(e_owner);
-	free(e_repo);
-
-	return rc;
+int
+github_issue_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
+                    gcli_id const issue)
+{
+	return github_issue_patch_state(ctx, owner, repo, issue, "open");
 }
 
 int

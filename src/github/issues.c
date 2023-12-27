@@ -412,7 +412,8 @@ int
 github_issue_clear_milestone(gcli_ctx *ctx, char const *const owner,
                              char const *const repo, gcli_id const issue)
 {
-	char *url, *e_owner, *e_repo, *body;
+	char *url, *e_owner, *e_repo;
+	char const *payload;
 	int rc;
 
 	e_owner = gcli_urlencode(owner);
@@ -422,11 +423,10 @@ github_issue_clear_milestone(gcli_ctx *ctx, char const *const owner,
 	                  gcli_get_apibase(ctx),
 	                  e_owner, e_repo, issue);
 
-	body = sn_asprintf("{ \"milestone\": null }");
+	payload = "{ \"milestone\": null }";
 
-	rc = gcli_fetch_with_method(ctx, "PATCH", url, body, NULL, NULL);
+	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
 
-	free(body);
 	free(url);
 	free(e_repo);
 	free(e_owner);

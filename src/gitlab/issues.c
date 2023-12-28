@@ -142,58 +142,57 @@ gitlab_get_issue_summary(gcli_ctx *ctx, char const *owner, char const *repo,
 	return rc;
 }
 
-int
-gitlab_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
-                   gcli_id const issue_number)
+static int
+gitlab_issue_patch_state(gcli_ctx *const ctx, char const *const owner,
+                         char const *const repo, gcli_id const issue,
+                         char const *const new_state)
 {
-	char *url = NULL;
-	char *data = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
+	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
+	gcli_jsongen gen = {0};
 	int rc = 0;
 
+	/* Generate payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "state_event");
+		gcli_jsongen_string(&gen, new_state);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* Generate URL */
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url  = sn_asprintf("%s/projects/%s%%2F%s/issues/%"PRIid, gcli_get_apibase(ctx),
-	                   e_owner, e_repo, issue_number);
-	data = sn_asprintf("{ \"state_event\": \"close\"}");
+	url  = sn_asprintf("%s/projects/%s%%2F%s/issues/%"PRIid,
+	                   gcli_get_apibase(ctx), e_owner, e_repo, issue);
 
-	rc = gcli_fetch_with_method(ctx, "PUT", url, data, NULL, NULL);
-
-	free(data);
-	free(url);
 	free(e_owner);
 	free(e_repo);
+
+	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
+
+	free(payload);
+	free(url);
 
 	return rc;
 }
 
 int
-gitlab_issue_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
-                    gcli_id const issue_number)
+gitlab_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
+                   gcli_id const issue)
 {
-	char *url = NULL;
-	char *data = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
-	int rc = 0;
+	return gitlab_issue_patch_state(ctx, owner, repo, issue, "close");
+}
 
-	e_owner = gcli_urlencode(owner);
-	e_repo = gcli_urlencode(repo);
-
-	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%"PRIid, gcli_get_apibase(ctx),
-	                  e_owner, e_repo, issue_number);
-	data = sn_asprintf("{ \"state_event\": \"reopen\"}");
-
-	rc = gcli_fetch_with_method(ctx, "PUT", url, data, NULL, NULL);
-
-	free(data);
-	free(url);
-	free(e_owner);
-	free(e_repo);
-
-	return rc;
+int
+gitlab_issue_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
+                    gcli_id const issue)
+{
+	return gitlab_issue_patch_state(ctx, owner, repo, issue, "reopen");
 }
 
 int

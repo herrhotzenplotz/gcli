@@ -115,29 +115,37 @@ int
 gitea_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
                    gcli_id const issue_number, char const *const assignee)
 {
-	sn_sv escaped_assignee = SV_NULL;
-	char *post_fields = NULL;
-	char *url = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
+	char *url = NULL, *e_owner = NULL, *e_repo = NULL, *payload = NULL;
+	gcli_jsongen gen = {0};
 	int rc = 0;
 
-	escaped_assignee = gcli_json_escape(SV((char *)assignee));
-	post_fields = sn_asprintf("{ \"assignees\": [\""SV_FMT"\"] }",
-	                          SV_ARGS(escaped_assignee));
+	/* Generate payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "assignees");
+		gcli_jsongen_begin_array(&gen);
+		gcli_jsongen_string(&gen, assignee);
+		gcli_jsongen_end_array(&gen);
+	}
+	gcli_jsongen_end_object(&gen);
 
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* Generate URL */
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid, gcli_get_apibase(ctx),
 	                  e_owner, e_repo, issue_number);
 
-	rc = gcli_fetch_with_method(ctx, "PATCH", url, post_fields, NULL, NULL);
-
-	free(escaped_assignee.data);
-	free(post_fields);
 	free(e_owner);
 	free(e_repo);
+
+	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
+
+	free(payload);
 	free(url);
 
 	return rc;

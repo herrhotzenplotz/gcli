@@ -278,29 +278,59 @@ gitlab_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
 	return rc;
 }
 
+static int
+gitlab_issues_update_labels(gcli_ctx *const ctx, char const *const owner,
+                            char const *const repo, gcli_id const issue,
+                            char const *const labels[], size_t const labels_size,
+                            char const *const what)
+{
+	char *url = NULL, *payload = NULL, *label_list = NULL, *e_owner = NULL,
+	     *e_repo = NULL;
+	gcli_jsongen gen = {0};
+	int rc = 0;
+
+	/* Generate payload. For some reason Gitlab expects us to put a
+	 * comma-separated list of issues into a JSON string. Figures...*/
+	label_list = sn_join_with(labels, labels_size, ",");
+
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, what);
+		gcli_jsongen_string(&gen, label_list);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	free(label_list);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* Generate URL */
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%"PRIid, gcli_get_apibase(ctx),
+	                  e_owner, e_repo, issue);
+
+	free(e_owner);
+	free(e_repo);
+
+	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
+
+	free(url);
+	free(payload);
+
+	return rc;
+}
+
 int
 gitlab_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
                         gcli_id const issue, char const *const labels[],
                         size_t const labels_size)
 {
-	char *url = NULL;
-	char *data = NULL;
-	char *list = NULL;
-	int rc = 0;
-
-	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%"PRIid, gcli_get_apibase(ctx),
-	                  owner, repo, issue);
-
-	list = sn_join_with(labels, labels_size, ",");
-	data = sn_asprintf("{ \"add_labels\": \"%s\"}", list);
-
-	rc = gcli_fetch_with_method(ctx, "PUT", url, data, NULL, NULL);
-
-	free(url);
-	free(data);
-	free(list);
-
-	return rc;
+	return gitlab_issues_update_labels(ctx, owner, repo, issue, labels,
+	                                   labels_size, "add_labels");
 }
 
 int
@@ -308,24 +338,8 @@ gitlab_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
                            gcli_id const issue, char const *const labels[],
                            size_t const labels_size)
 {
-	char *url = NULL;
-	char *data = NULL;
-	char *list = NULL;
-	int rc = 0;
-
-	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%"PRIid, gcli_get_apibase(ctx),
-	                  owner, repo, issue);
-
-	list = sn_join_with(labels, labels_size, ",");
-	data = sn_asprintf("{ \"remove_labels\": \"%s\"}", list);
-
-	rc = gcli_fetch_with_method(ctx, "PUT", url, data, NULL, NULL);
-
-	free(url);
-	free(data);
-	free(list);
-
-	return rc;
+	return gitlab_issues_update_labels(ctx, owner, repo, issue, labels,
+	                                   labels_size, "remove_labels");
 }
 
 int

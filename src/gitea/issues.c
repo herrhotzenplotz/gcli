@@ -32,6 +32,7 @@
 #include <gcli/gitea/issues.h>
 #include <gcli/gitea/labels.h>
 #include <gcli/github/issues.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 #include <gcli/labels.h>
 
@@ -64,25 +65,34 @@ static int
 gitea_issue_patch_state(gcli_ctx *ctx, char const *owner, char const *repo,
                         int const issue_number, char const *const state)
 {
-	char *url = NULL;
-	char *data = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
+	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
+	gcli_jsongen gen = {0};
 	int rc = 0;
+
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "state");
+		gcli_jsongen_string(&gen, state);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/repos/%s/%s/issues/%d", gcli_get_apibase(ctx),
 	                  e_owner, e_repo, issue_number);
-	data = sn_asprintf("{ \"state\": \"%s\"}", state);
 
-	rc = gcli_fetch_with_method(ctx, "PATCH", url, data, NULL, NULL);
-
-	free(data);
-	free(url);
 	free(e_owner);
 	free(e_repo);
+
+	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
+
+	free(payload);
+	free(url);
 
 	return rc;
 }

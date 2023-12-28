@@ -255,6 +255,7 @@ gitea_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
                           size_t const labels_size)
 {
 	int rc = 0;
+	char *e_owner, *e_repo;
 	/* Unfortunately the gitea api does not give us an endpoint to
 	 * delete labels from an issue in bulk. So, just iterate over the
 	 * given labels and delete them one after another. */
@@ -262,11 +263,15 @@ gitea_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 	if (!ids)
 		return -1;
 
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
 	for (size_t i = 0; i < labels_size; ++i) {
 		char *url = NULL;
 
 		url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid"/labels/%s",
-		                  gcli_get_apibase(ctx), owner, repo, issue, ids[i]);
+		                  gcli_get_apibase(ctx), e_owner, e_repo, issue,
+		                  ids[i]);
 		rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
 		free(url);
@@ -274,6 +279,9 @@ gitea_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 		if (rc < 0)
 			break;
 	}
+
+	free(e_owner);
+	free(e_repo);
 
 	free_id_list(ids, labels_size);
 

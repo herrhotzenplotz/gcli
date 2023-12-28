@@ -206,9 +206,8 @@ gitea_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
                        gcli_id const issue, char const *const labels[],
                        size_t const labels_size)
 {
-	char *list = NULL;
-	char *data = NULL;
-	char *url = NULL;
+	char *payload = NULL, *url = NULL, *e_owner = NULL, *e_repo = NULL;
+	gcli_jsongen gen = {0};
 	int rc = 0;
 
 	/* First, convert to ids */
@@ -217,20 +216,35 @@ gitea_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 		return -1;
 
 	/* Construct json payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "labels");
+		gcli_jsongen_begin_array(&gen);
+		for (size_t i = 0; i < labels_size; ++i) {
+			gcli_jsongen_string(&gen, ids[i]);
+		}
+		gcli_jsongen_end_array(&gen);
+	}
+	gcli_jsongen_end_object(&gen);
 
-	/* Note: http://www.c-faq.com/ansi/constmismatch.html */
-	list = sn_join_with((char const **)ids, labels_size, ",");
-	data = sn_asprintf("{ \"labels\": [%s] }", list);
-
-	url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid"/labels", gcli_get_apibase(ctx),
-	                  owner, repo, issue);
-
-	rc = gcli_fetch_with_method(ctx, "POST", url, data, NULL, NULL);
-
-	free(list);
-	free(data);
-	free(url);
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
 	free_id_list(ids, labels_size);
+
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid"/labels",
+	                  gcli_get_apibase(ctx), e_owner, e_repo, issue);
+
+	free(e_owner);
+	free(e_repo);
+
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
+
+	free(payload);
+	free(url);
 
 	return rc;
 }

@@ -238,29 +238,42 @@ int
 gitlab_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
                     gcli_id const issue_number, char const *assignee)
 {
+	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
+	gcli_jsongen gen = {0};
 	int assignee_uid = -1;
-	char *url = NULL;
-	char *post_data = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
 	int rc = 0;
 
 	assignee_uid = gitlab_user_id(ctx, assignee);
 	if (assignee_uid < 0)
 		return assignee_uid;
 
+	/* Generate payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "assignee_ids");
+		gcli_jsongen_begin_array(&gen);
+		gcli_jsongen_number(&gen, assignee_uid);
+		gcli_jsongen_end_array(&gen);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* Generate URL */
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/issues/%"PRIid, gcli_get_apibase(ctx),
 	                  e_owner, e_repo, issue_number);
-	post_data = sn_asprintf("{ \"assignee_ids\": [ %d ] }", assignee_uid);
-	rc = gcli_fetch_with_method(ctx, "PUT", url, post_data, NULL, NULL);
-
 	free(e_owner);
 	free(e_repo);
+
+	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
+
 	free(url);
-	free(post_data);
+	free(payload);
 
 	return rc;
 }

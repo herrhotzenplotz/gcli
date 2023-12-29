@@ -568,19 +568,36 @@ int
 gitlab_mr_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
                         gcli_id mr, gcli_id milestone_id)
 {
-	char *url = NULL;
-	char *data = NULL;
+	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
+	gcli_jsongen gen = {0};
 	int rc = 0;
 
+	/* Generate Payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "milestone_id");
+		gcli_jsongen_id(&gen, milestone_id);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* Generate URL */
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
 	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid,
-	                  gcli_get_apibase(ctx), owner, repo, mr);
+	                  gcli_get_apibase(ctx), e_owner, e_repo, mr);
 
-	data = sn_asprintf("{ \"milestone_id\": \"%"PRIid"\"}", milestone_id);
+	free(e_owner);
+	free(e_repo);
 
-	rc = gcli_fetch_with_method(ctx, "PUT", url, data, NULL, NULL);
+	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
 
 	free(url);
-	free(data);
+	free(payload);
 
 	return rc;
 }

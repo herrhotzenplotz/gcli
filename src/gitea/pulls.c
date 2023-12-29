@@ -31,6 +31,8 @@
 #include <gcli/github/pulls.h>
 #include <gcli/github/issues.h>
 
+#include <gcli/json_gen.h>
+
 int
 gitea_get_pulls(gcli_ctx *ctx, char const *owner, char const *repo,
                 gcli_pull_fetch_details const *const details, int const max,
@@ -63,30 +65,43 @@ gitea_pull_submit(gcli_ctx *ctx, gcli_submit_pull_options opts)
 
 int
 gitea_pull_merge(gcli_ctx *ctx, char const *owner, char const *repo,
-                 gcli_id const pr_number, enum gcli_merge_flags const flags)
+                 gcli_id const pr, enum gcli_merge_flags const flags)
 {
-	int rc = 0;
-	char *url = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
-	char *data = NULL;
-	bool const squash = flags & GCLI_PULL_MERGE_SQUASH;
 	bool const delete_branch = flags & GCLI_PULL_MERGE_DELETEHEAD;
+	bool const squash = flags & GCLI_PULL_MERGE_SQUASH;
+	char *url = NULL, *e_owner = NULL, *e_repo = NULL, *payload = NULL;
+	gcli_jsongen gen = {0};
+	int rc = 0;
 
+	/* Generate payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "Do");
+		gcli_jsongen_string(&gen, squash ? "squash" : "merge");
+
+		gcli_jsongen_objmember(&gen, "delete_branch_after_merge");
+		gcli_jsongen_bool(&gen, delete_branch);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* Generate URL */
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
+
 	url = sn_asprintf("%s/repos/%s/%s/pulls/%"PRIid"/merge",
-	                  gcli_get_apibase(ctx), e_owner, e_repo, pr_number);
-	data = sn_asprintf("{ \"Do\": \"%s\", \"delete_branch_after_merge\": %s }",
-	                   squash ? "squash" : "merge",
-	                   delete_branch ? "true" : "false");
+	                  gcli_get_apibase(ctx), e_owner, e_repo, pr);
 
-	rc = gcli_fetch_with_method(ctx, "POST", url, data, NULL, NULL);
-
-	free(url);
 	free(e_owner);
 	free(e_repo);
-	free(data);
+
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
+
+	free(url);
+	free(payload);
 
 	return rc;
 }

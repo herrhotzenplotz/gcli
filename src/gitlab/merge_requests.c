@@ -370,58 +370,57 @@ gitlab_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
 	return gcli_fetch_list(ctx, url, &fl);
 }
 
-int
-gitlab_mr_close(gcli_ctx *ctx, char const *owner, char const *repo,
-                gcli_id const pr_number)
+static int
+gitlab_mr_patch_state(gcli_ctx *const ctx, char const *const owner,
+                      char const *const repo, gcli_id const mr,
+                      char const *const new_state)
 {
-	char *url = NULL;
-	char *data = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
+	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
+	gcli_jsongen gen = {0};
 	int rc = 0;
 
+	/* Generate payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "state_event");
+		gcli_jsongen_string(&gen, new_state);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* Generate URL */
 	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
+	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid,
-	                  gcli_get_apibase(ctx), e_owner, e_repo, pr_number);
-	data = sn_asprintf("{ \"state_event\": \"close\"}");
+	                  gcli_get_apibase(ctx), e_owner, e_repo, mr);
 
-	rc = gcli_fetch_with_method(ctx, "PUT", url, data, NULL, NULL);
-
-	free(url);
 	free(e_owner);
 	free(e_repo);
-	free(data);
+
+	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
+
+	free(url);
+	free(payload);
 
 	return rc;
 }
 
 int
-gitlab_mr_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
-                 gcli_id const pr_number)
+gitlab_mr_close(gcli_ctx *ctx, char const *owner, char const *repo,
+                gcli_id const mr)
 {
-	char *url = NULL;
-	char *data = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
-	int rc = 0;
+	return gitlab_mr_patch_state(ctx, owner, repo, mr, "close");
+}
 
-	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
-
-	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid,
-	                  gcli_get_apibase(ctx), e_owner, e_repo, pr_number);
-	data = sn_asprintf("{ \"state_event\": \"reopen\"}");
-
-	rc = gcli_fetch_with_method(ctx, "PUT", url, data, NULL, NULL);
-
-	free(e_owner);
-	free(e_repo);
-	free(url);
-	free(data);
-
-	return rc;
+int
+gitlab_mr_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
+                 gcli_id const mr)
+{
+	return gitlab_mr_patch_state(ctx, owner, repo, mr, "reopen");
 }
 
 int

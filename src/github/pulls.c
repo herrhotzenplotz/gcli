@@ -245,62 +245,57 @@ github_pull_merge(gcli_ctx *ctx, char const *owner, char const *repo,
 	return rc;
 }
 
-int
-github_pull_close(gcli_ctx *ctx, char const *owner, char const *repo,
-                  gcli_id const pr_number)
+static int
+github_pull_patch_state(gcli_ctx *const ctx, char const *const owner,
+                        char const *const repo, gcli_id const pr,
+                        char const *const new_state)
 {
-	char *url = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
-	char *data = NULL;
+	char *url = NULL, *e_owner = NULL, *e_repo = NULL, *payload = NULL;
+	gcli_jsongen gen = {0};
 	int rc = 0;
 
+	/* Generate payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "state");
+		gcli_jsongen_string(&gen, new_state);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* Generate URL */
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%"PRIid,
-		gcli_get_apibase(ctx),
-		e_owner, e_repo, pr_number);
-	data = sn_asprintf("{ \"state\": \"closed\"}");
+	url = sn_asprintf("%s/repos/%s/%s/pulls/%"PRIid, gcli_get_apibase(ctx),
+	                  e_owner, e_repo, pr);
 
-	rc = gcli_fetch_with_method(ctx, "PATCH", url, data, NULL, NULL);
-
-	free(url);
 	free(e_repo);
 	free(e_owner);
-	free(data);
+
+	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
+
+	free(url);
+	free(payload);
 
 	return rc;
 }
 
 int
-github_pull_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
-                   gcli_id const pr_number)
+github_pull_close(gcli_ctx *ctx, char const *owner, char const *repo,
+                  gcli_id const pr)
 {
-	char *url = NULL;
-	char *data = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
-	int rc = 0;
+	return github_pull_patch_state(ctx, owner, repo, pr, "closed");
+}
 
-	e_owner = gcli_urlencode(owner);
-	e_repo = gcli_urlencode(repo);
-
-	url  = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%"PRIid,
-		gcli_get_apibase(ctx),
-		e_owner, e_repo, pr_number);
-	data = sn_asprintf("{ \"state\": \"open\"}");
-
-	rc = gcli_fetch_with_method(ctx, "PATCH", url, data, NULL, NULL);
-
-	free(url);
-	free(data);
-	free(e_owner);
-	free(e_repo);
-
-	return rc;
+int
+github_pull_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
+                   gcli_id const pr)
+{
+	return github_pull_patch_state(ctx, owner, repo, pr, "open");
 }
 
 int

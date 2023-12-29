@@ -28,6 +28,7 @@
  */
 
 #include <gcli/github/labels.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
@@ -59,42 +60,47 @@ int
 github_create_label(gcli_ctx *ctx, char const *owner, char const *repo,
                     gcli_label *const label)
 {
-	char *url = NULL;
-	char *data = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
-	char *colour = NULL;
-	sn_sv label_name = SV_NULL;
-	sn_sv label_descr = SV_NULL;
-	sn_sv label_colour = SV_NULL;
+	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL,
+	     *colour = NULL;
 	gcli_fetch_buffer buffer = {0};
-	struct json_stream stream = {0};
+	gcli_jsongen gen = {0};
 	int rc = 0;
+	json_stream stream = {0};
 
-	e_owner = gcli_urlencode(owner);
-	e_repo  = gcli_urlencode(repo);
-
+	/* Generate payload */
 	colour = sn_asprintf("%06X", label->colour >> 8);
 
-	label_name   = gcli_json_escape(SV(label->name));
-	label_descr  = gcli_json_escape(SV(label->description));
-	label_colour = gcli_json_escape(SV(colour));
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "name");
+		gcli_jsongen_string(&gen, label->name);
+
+		gcli_jsongen_objmember(&gen, "description");
+		gcli_jsongen_string(&gen, label->description);
+
+		gcli_jsongen_objmember(&gen, "color");
+		gcli_jsongen_string(&gen, colour);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+
+	gcli_jsongen_free(&gen);
+	free(colour);
+
+	/* Generate URL */
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
 
 	/* /repos/{owner}/{repo}/labels */
-	url = sn_asprintf("%s/repos/%s/%s/labels",
-	                  gcli_get_apibase(ctx), e_owner, e_repo);
+	url = sn_asprintf("%s/repos/%s/%s/labels", gcli_get_apibase(ctx), e_owner,
+	                  e_repo);
 
+	free(e_owner);
+	free(e_repo);
 
-	data = sn_asprintf("{ "
-	                   "  \"name\": \""SV_FMT"\", "
-	                   "  \"description\": \""SV_FMT"\", "
-	                   "  \"color\": \""SV_FMT"\""
-	                   "}",
-	                   SV_ARGS(label_name),
-	                   SV_ARGS(label_descr),
-	                   SV_ARGS(label_colour));
-
-	rc = gcli_fetch_with_method(ctx, "POST", url, data, NULL, &buffer);
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, &buffer);
 
 	if (rc == 0) {
 		json_open_buffer(&stream, buffer.data, buffer.length);
@@ -103,13 +109,7 @@ github_create_label(gcli_ctx *ctx, char const *owner, char const *repo,
 	}
 
 	free(url);
-	free(data);
-	free(e_owner);
-	free(e_repo);
-	free(colour);
-	free(label_name.data);
-	free(label_descr.data);
-	free(label_colour.data);
+	free(payload);
 	free(buffer.data);
 
 	return rc;

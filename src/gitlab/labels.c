@@ -29,6 +29,7 @@
 
 #include <gcli/gitlab/config.h>
 #include <gcli/gitlab/labels.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
 #include <templates/gitlab/labels.h>
@@ -59,30 +60,46 @@ int
 gitlab_create_label(gcli_ctx *ctx, char const *owner, char const *repo,
                     gcli_label *const label)
 {
-	char *url = NULL;
-	char *data = NULL;
-	char *colour_string = NULL;
-	sn_sv lname_escaped = SV_NULL;
-	sn_sv ldesc_escaped = SV_NULL;
+	char *url = NULL, *payload = NULL, *colour_string = NULL, *e_owner = NULL,
+	     *e_repo = NULL;
 	gcli_fetch_buffer buffer = {0};
-	struct json_stream stream = {0};
+	gcli_jsongen gen = {0};
 	int rc = 0;
+	json_stream stream = {0};
+
+	/* Generate payload */
+	colour_string = sn_asprintf("#%06X", (label->colour>>8)&0xFFFFFF);
+
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "name");
+		gcli_jsongen_string(&gen, label->name);
+
+		gcli_jsongen_objmember(&gen, "color");
+		gcli_jsongen_string(&gen, colour_string);
+
+		gcli_jsongen_objmember(&gen, "description");
+		gcli_jsongen_string(&gen, label->description);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+
+	gcli_jsongen_free(&gen);
+	free(colour_string);
+
+	/* Generate URL */
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/labels", gcli_get_apibase(ctx),
-	                  owner, repo);
+	                  e_owner, e_repo);
 
-	lname_escaped = gcli_json_escape(SV(label->name));
-	ldesc_escaped = gcli_json_escape(SV(label->description));
-	colour_string = sn_asprintf("%06X", (label->colour>>8)&0xFFFFFF);
-	data = sn_asprintf(
-		"{\"name\": \""SV_FMT"\","
-		"\"color\":\"#%s\","
-		"\"description\":\""SV_FMT"\"}",
-		SV_ARGS(lname_escaped),
-		colour_string,
-		SV_ARGS(ldesc_escaped));
+	free(e_owner);
+	free(e_repo);
 
-	rc = gcli_fetch_with_method(ctx, "POST", url, data, NULL, &buffer);
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, &buffer);
 
 	if (rc == 0) {
 		json_open_buffer(&stream, buffer.data, buffer.length);
@@ -91,10 +108,7 @@ gitlab_create_label(gcli_ctx *ctx, char const *owner, char const *repo,
 		json_close(&stream);
 	}
 
-	free(lname_escaped.data);
-	free(ldesc_escaped.data);
-	free(colour_string);
-	free(data);
+	free(payload);
 	free(url);
 	free(buffer.data);
 

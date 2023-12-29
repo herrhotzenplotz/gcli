@@ -503,29 +503,56 @@ gitlab_perform_submit_mr(gcli_ctx *ctx, gcli_submit_pull_options opts)
 	return rc;
 }
 
+static int
+gitlab_mr_update_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+                        gcli_id const mr, char const *const labels[],
+                        size_t const labels_size,
+                        char const *const update_action)
+{
+	char *url  = NULL, *payload = NULL, *list = NULL, *e_owner = NULL,
+	     *e_repo = NULL;
+	gcli_jsongen gen = {0};
+	int rc = 0;
+
+	/* Generate payload */
+	list = sn_join_with(labels, labels_size, ",");
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, update_action);
+		gcli_jsongen_string(&gen, list);
+	}
+	gcli_jsongen_end_object(&gen);
+	payload = gcli_jsongen_to_string(&gen);
+
+	gcli_jsongen_free(&gen);
+	free(list);
+
+	/* Generate URL */
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid,
+	                  gcli_get_apibase(ctx), e_owner, e_repo, mr);
+
+	free(e_owner);
+	free(e_repo);
+
+	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
+
+	free(url);
+	free(payload);
+
+	return rc;
+}
+
 int
 gitlab_mr_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
                      gcli_id const mr, char const *const labels[],
                      size_t const labels_size)
 {
-	char *url  = NULL;
-	char *data = NULL;
-	char *list = NULL;
-	int   rc   = 0;
-
-	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid,
-	                  gcli_get_apibase(ctx), owner, repo, mr);
-
-	list = sn_join_with(labels, labels_size, ",");
-	data = sn_asprintf("{ \"add_labels\": \"%s\"}", list);
-
-	rc = gcli_fetch_with_method(ctx, "PUT", url, data, NULL, NULL);
-
-	free(url);
-	free(data);
-	free(list);
-
-	return rc;
+	return gitlab_mr_update_labels(ctx, owner, repo, mr, labels, labels_size,
+	                               "add_labels");
 }
 
 int
@@ -533,24 +560,8 @@ gitlab_mr_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
                         gcli_id const mr, char const *const labels[],
                         size_t const labels_size)
 {
-	char *url = NULL;
-	char *data = NULL;
-	char *list = NULL;
-	int rc = 0;
-
-	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid,
-	                  gcli_get_apibase(ctx), owner, repo, mr);
-
-	list = sn_join_with(labels, labels_size, ",");
-	data = sn_asprintf("{ \"remove_labels\": \"%s\"}", list);
-
-	rc = gcli_fetch_with_method(ctx, "PUT", url, data, NULL, NULL);
-
-	free(url);
-	free(data);
-	free(list);
-
-	return rc;
+	return gitlab_mr_update_labels(ctx, owner, repo, mr, labels, labels_size,
+	                               "remove_labels");
 }
 
 int

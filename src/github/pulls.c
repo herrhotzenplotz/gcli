@@ -372,7 +372,7 @@ filter_commit_short_sha(gcli_commit **listp, size_t *sizep, void *_data)
 
 int
 github_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
-                        gcli_id const pr_number, gcli_commit_list *const out)
+                        gcli_id const pr, gcli_commit_list *const out)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -389,10 +389,8 @@ github_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%"PRIid"/commits",
-		gcli_get_apibase(ctx),
-		e_owner, e_repo, pr_number);
+	url = sn_asprintf("%s/repos/%s/%s/pulls/%"PRIid"/commits",
+	                  gcli_get_apibase(ctx), e_owner, e_repo, pr);
 
 	free(e_owner);
 	free(e_repo);
@@ -402,21 +400,18 @@ github_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 github_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
-                gcli_id const pr_number, gcli_pull *const out)
+                gcli_id const pr, gcli_pull *const out)
 {
 	int rc = 0;
 	gcli_fetch_buffer json_buffer = {0};
-	char *url = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
+	char *url = NULL, *e_owner = NULL, *e_repo = NULL;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%"PRIid,
-		gcli_get_apibase(ctx),
-		e_owner, e_repo, pr_number);
+	url = sn_asprintf("%s/repos/%s/%s/pulls/%"PRIid, gcli_get_apibase(ctx),
+	                  e_owner, e_repo, pr);
+
 	free(e_owner);
 	free(e_repo);
 

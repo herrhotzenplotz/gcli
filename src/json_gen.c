@@ -264,6 +264,18 @@ gcli_jsongen_number(gcli_jsongen *gen, long long const number)
 }
 
 int
+gcli_jsongen_id(gcli_jsongen *gen, gcli_id const id)
+{
+	put_comma_if_needed(gen);
+	append_strf(gen, "%"PRIid, id);
+
+	gen->await_object_value = false;
+	gen->first_elem = false;
+
+	return 0;
+}
+
+int
 gcli_jsongen_bool(gcli_jsongen *gen, bool const value)
 {
 	put_comma_if_needed(gen);

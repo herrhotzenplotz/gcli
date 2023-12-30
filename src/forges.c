@@ -167,7 +167,8 @@ github_forge_descriptor =
 	.milestone_quirks          = GCLI_MILESTONE_QUIRKS_EXPIRED
 	                           | GCLI_MILESTONE_QUIRKS_DUEDATE
 	                           | GCLI_MILESTONE_QUIRKS_PULLS,
-	.pull_summary_quirks       = GCLI_PRS_QUIRK_COVERAGE,
+	.pull_summary_quirks       = GCLI_PRS_QUIRK_COVERAGE
+	                           | GCLI_PRS_QUIRK_AUTOMERGE,
 };
 
 static struct gcli_forge_descriptor const
@@ -351,6 +352,7 @@ gitea_forge_descriptor =
 	                           | GCLI_MILESTONE_QUIRKS_PULLS,
 	.pull_summary_quirks       = GCLI_PRS_QUIRK_COMMITS
 	                           | GCLI_PRS_QUIRK_ADDDEL
+	                           | GCLI_PRS_QUIRK_AUTOMERGE
 	                           | GCLI_PRS_QUIRK_DRAFT
 	                           | GCLI_PRS_QUIRK_CHANGES
 	                           | GCLI_PRS_QUIRK_COVERAGE,

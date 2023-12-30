@@ -18,23 +18,24 @@ object of struct gcli_pull with
 
 parser gitlab_mr is
 object of struct gcli_pull with
-	("title"            => title as string,
-	 "state"            => state as string,
-	 "description"      => body as string,
-	 "created_at"       => created_at as string,
-	 "iid"              => number as id,
-	 "id"               => id as id,
-	 "labels"           => labels as array of char* use get_string,
-	 "user_notes_count" => comments as int,
-	 "merge_status"     => mergeable as gitlab_can_be_merged,
-	 "draft"            => draft as bool,
-	 "author"           => author as user,
-	 "source_branch"    => head_label as string,
-	 "target_branch"    => base_label as string,
-	 "milestone"        => use parse_gitlab_mr_milestone,
-	 "head_pipeline"    => use parse_gitlab_mr_head_pipeline,
-	 "reviewers"        => reviewers as array of char* use parse_gitlab_reviewer,
-	 "diff_refs"        => use parse_gitlab_diff_refs);
+	("title"                        => title as string,
+	 "state"                        => state as string,
+	 "description"                  => body as string,
+	 "created_at"                   => created_at as string,
+	 "iid"                          => number as id,
+	 "id"                           => id as id,
+	 "labels"                       => labels as array of char* use get_string,
+	 "user_notes_count"             => comments as int,
+	 "merge_status"                 => mergeable as gitlab_can_be_merged,
+	 "draft"                        => draft as bool,
+	 "author"                       => author as user,
+	 "source_branch"                => head_label as string,
+	 "target_branch"                => base_label as string,
+	 "milestone"                    => use parse_gitlab_mr_milestone,
+	 "head_pipeline"                => use parse_gitlab_mr_head_pipeline,
+	 "reviewers"                    => reviewers as array of char* use parse_gitlab_reviewer,
+	 "diff_refs"                    => use parse_gitlab_diff_refs,
+	 "merge_when_pipeline_succeeds" => automerge as bool);
 
 parser gitlab_mrs is array of struct gcli_pull use parse_gitlab_mr;
 

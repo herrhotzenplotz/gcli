@@ -76,6 +76,7 @@ struct gcli_pull {
 	bool merged;
 	bool mergeable;
 	bool draft;
+	bool automerge;
 };
 
 struct gcli_commit {

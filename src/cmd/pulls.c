@@ -208,6 +208,9 @@ gcli_pull_print(struct gcli_pull const *const it)
 	if ((quirks & GCLI_PRS_QUIRK_CHANGES) == 0)
 		gcli_dict_add(dict, "CHANGED", 0, 0, "%d", it->changed_files);
 
+	if ((quirks & GCLI_PRS_QUIRK_AUTOMERGE) == 0)
+		gcli_dict_add_string(dict, "AUTOMERGE", 0, 0, sn_bool_yesno(it->automerge));
+
 	if ((quirks & GCLI_PRS_QUIRK_MERGED) == 0)
 		gcli_dict_add_string(dict, "MERGED", 0, 0, sn_bool_yesno(it->merged));
 

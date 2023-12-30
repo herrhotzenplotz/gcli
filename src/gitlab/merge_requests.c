@@ -148,6 +148,29 @@ gitlab_free_diffs(gitlab_diff_list *list)
 	list->diffs_size = 0;
 }
 
+static void
+gitlab_make_commit_diff(gcli_commit const *const commit,
+                        gitlab_diff const *const diff,
+                        char const *const prev_commit_sha, FILE *const out)
+{
+	fprintf(out, "diff --git a/%s b/%s\n", diff->old_path, diff->new_path);
+	if (diff->new_file) {
+		fprintf(out, "new file mode %s\n", diff->b_mode);
+		fprintf(out, "index 0000000..%s\n", commit->sha);
+	} else {
+		fprintf(out, "index %s..%s %s\n", prev_commit_sha, commit->sha,
+		        diff->b_mode);
+	}
+
+	fprintf(out, "--- %s%s\n",
+	        diff->new_file ? "" : "a/",
+	        diff->new_file ? "/dev/null" : diff->old_path);
+	fprintf(out, "+++ %s%s\n",
+	        diff->deleted_file ? "" : "b/",
+	        diff->deleted_file ? "/dev/null" : diff->new_path);
+	fputs(diff->diff, out);
+}
+
 static int
 gitlab_make_commit_patch(gcli_ctx *ctx, FILE *stream,
                          char const *const e_owner, char const *const e_repo,
@@ -179,20 +202,11 @@ gitlab_make_commit_patch(gcli_ctx *ctx, FILE *stream,
 	fprintf(stream, "Subject: %s\n\n", commit->message);
 
 	for (size_t i = 0; i < list.diffs_size; ++i) {
-		gitlab_diff const *d = &list.diffs[i];
-		fprintf(stream,
-		        "diff --git a/%s b/%s\n"
-		        "index %s..%s %s\n"
-		        "--- a/%s\n"
-		        "+++ b/%s\n"
-		        "%s",
-		        d->old_path, d->new_path,
-		        prev_commit_sha, commit->sha, d->b_mode,
-		        d->old_path, d->new_path,
-		        d->diff);
+		gitlab_make_commit_diff(commit, &list.diffs[i],
+		                        prev_commit_sha, stream);
 	}
 
-	fprintf(stream, "--\n2.42.2\n\n");
+	fprintf(stream, "--\n2.42.2\n\n\n");
 
 	gitlab_free_diffs(&list);
 
@@ -225,14 +239,14 @@ gitlab_mr_get_patch(gcli_ctx *ctx, FILE *stream, char const *owner,
 
 	base_sha_short = sn_strndup(pull.base_sha, 8);
 	prev_commit_sha = base_sha_short;
-	for (size_t i = 0; i < commits.commits_size; ++i) {
+	for (size_t i = commits.commits_size; i > 0; --i) {
 		rc = gitlab_make_commit_patch(ctx, stream, e_owner, e_repo,
 		                              prev_commit_sha,
-		                              &commits.commits[i]);
+		                              &commits.commits[i - 1]);
 		if (rc < 0)
 			goto err_make_commit_patch;
 
-		prev_commit_sha = commits.commits[i].sha;
+		prev_commit_sha = commits.commits[i - 1].sha;
 	}
 
 err_make_commit_patch:

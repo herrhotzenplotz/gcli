@@ -20,6 +20,11 @@ This changelog does not follow semantic versioning.
   to manually urlencode slashes as %2F in the repos.
   Reported by: Simon Richter
 
+- Fixed the patch generator for Gitlab Merge Requests to produce
+  patches that can be applied with `git am`.
+  Previously the patches were invalid when new files were created
+  or deleted.
+
 ### Changed
 
 ### Removed

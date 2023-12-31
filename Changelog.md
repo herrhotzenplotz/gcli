@@ -27,6 +27,16 @@ This changelog does not follow semantic versioning.
 
 ### Changed
 
+- Internally a lot of code was using string views. Maintaining this
+  was a bit cumbersome and required frequent reallocations.
+  A lot of these uses have been refactored to use plain C-Strings
+  now. This also involved changing some code to use the new
+  `gcli_jsongen` set of routines.
+  Due to these changes there may be regressions that are only visible
+  during use. If you encounter such regressions where previously
+  working commands suddenly fail due to malformed requests please
+  report immediately.
+
 ### Removed
 
 ## 2.1.0 (2023-Dec-08)

@@ -7,6 +7,12 @@ This changelog does not follow semantic versioning.
 
 ### Added
 
+- Preliminary (and thus experimental) support for Bugzilla has been
+  added. For this a new yet undocumented `attachments` subcommand
+  has been introduced.
+  Currently if now account has been specified it will default to
+  the FreeBSD Bugzilla - this may however change in the future.
+
 ### Fixed
 
 - Fixed a segmentation fault when getting a 404 on Gitlab. This bug

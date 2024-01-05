@@ -36,8 +36,6 @@
 
 #include <sn/sn.h>
 
-typedef struct gcli_gitremote gcli_gitremote;
-
 struct gcli_gitremote {
 	sn_sv name;
 	sn_sv owner;

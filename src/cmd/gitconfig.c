@@ -44,7 +44,7 @@
 #include <unistd.h>
 
 #define MAX_REMOTES 64
-static gcli_gitremote remotes[MAX_REMOTES];
+static struct gcli_gitremote remotes[MAX_REMOTES];
 static size_t         remotes_size;
 
 /* Resolve a worktree .git if needed */
@@ -256,7 +256,7 @@ gcli_gitconfig_get_current_branch(void)
 }
 
 static void
-http_extractor(gcli_gitremote *const remote, char const *prefix)
+http_extractor(struct gcli_gitremote *const remote, char const *prefix)
 {
 	size_t prefix_size = strlen(prefix);
 	sn_sv  pair        = remote->url;
@@ -289,7 +289,7 @@ http_extractor(gcli_gitremote *const remote, char const *prefix)
 }
 
 static void
-ssh_extractor(gcli_gitremote *const remote, char const *prefix)
+ssh_extractor(struct gcli_gitremote *const remote, char const *prefix)
 {
 	size_t prefix_size = strlen(prefix);
 
@@ -320,7 +320,7 @@ ssh_extractor(gcli_gitremote *const remote, char const *prefix)
 
 struct forge_ex_def {
 	char const *prefix;
-	void (*extractor)(gcli_gitremote *const, char const *);
+	void (*extractor)(struct gcli_gitremote *const, char const *);
 } url_extractors[] = {
 	{ .prefix = "git@",     .extractor = ssh_extractor  },
 	{ .prefix = "ssh://",   .extractor = ssh_extractor  },
@@ -352,7 +352,7 @@ gitconfig_parse_remote(sn_sv section_title, sn_sv entry)
 			if (remotes_size == MAX_REMOTES)
 				errx(1, "error: too many remotes");
 
-			gcli_gitremote *const remote = &remotes[remotes_size++];
+			struct gcli_gitremote *const remote = &remotes[remotes_size++];
 
 			remote->name = remote_name;
 

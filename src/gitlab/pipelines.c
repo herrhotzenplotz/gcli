@@ -45,7 +45,7 @@
 
 static int
 fetch_pipelines(struct gcli_ctx *ctx, char *url, int const max,
-                gitlab_pipeline_list *const list)
+                struct gitlab_pipeline_list *const list)
 {
 	struct gcli_fetch_list_ctx fl = {
 		.listp = &list->pipelines,
@@ -59,7 +59,7 @@ fetch_pipelines(struct gcli_ctx *ctx, char *url, int const max,
 
 int
 gitlab_get_pipelines(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                     int const max, gitlab_pipeline_list *const list)
+                     int const max, struct gitlab_pipeline_list *const list)
 {
 	char *url = NULL;
 	char *e_owner = gcli_urlencode(owner);
@@ -75,7 +75,7 @@ gitlab_get_pipelines(struct gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gitlab_get_mr_pipelines(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                        gcli_id const mr_id, gitlab_pipeline_list *const list)
+                        gcli_id const mr_id, struct gitlab_pipeline_list *const list)
 {
 	char *url = NULL;
 	char *e_owner = gcli_urlencode(owner);
@@ -92,7 +92,7 @@ gitlab_get_mr_pipelines(struct gcli_ctx *ctx, char const *owner, char const *rep
 }
 
 void
-gitlab_pipeline_free(gitlab_pipeline *pipeline)
+gitlab_pipeline_free(struct gitlab_pipeline *pipeline)
 {
 	free(pipeline->status);
 	free(pipeline->created_at);
@@ -103,7 +103,7 @@ gitlab_pipeline_free(gitlab_pipeline *pipeline)
 }
 
 void
-gitlab_pipelines_free(gitlab_pipeline_list *const list)
+gitlab_pipelines_free(struct gitlab_pipeline_list *const list)
 {
 	for (size_t i = 0; i < list->pipelines_size; ++i) {
 		gitlab_pipeline_free(&list->pipelines[i]);
@@ -117,7 +117,7 @@ gitlab_pipelines_free(gitlab_pipeline_list *const list)
 int
 gitlab_get_pipeline_jobs(struct gcli_ctx *ctx, char const *owner,
                          char const *repo, gcli_id const pipeline,
-                         int const max, gitlab_job_list *const out)
+                         int const max, struct gitlab_job_list *const out)
 {
 	char *url = NULL, *e_owner = NULL, *e_repo = NULL;
 	struct gcli_fetch_list_ctx fl = {
@@ -140,7 +140,7 @@ gitlab_get_pipeline_jobs(struct gcli_ctx *ctx, char const *owner,
 }
 
 void
-gitlab_free_job(gitlab_job *const job)
+gitlab_free_job(struct gitlab_job *const job)
 {
 	free(job->status);
 	free(job->stage);
@@ -154,7 +154,7 @@ gitlab_free_job(gitlab_job *const job)
 }
 
 void
-gitlab_free_jobs(gitlab_job_list *list)
+gitlab_free_jobs(struct gitlab_job_list *list)
 {
 	for (size_t i = 0; i < list->jobs_size; ++i)
 		gitlab_free_job(&list->jobs[i]);
@@ -190,7 +190,7 @@ gitlab_job_get_log(struct gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gitlab_get_job(struct gcli_ctx *ctx, char const *owner, char const *repo,
-               gcli_id const jid, gitlab_job *const out)
+               gcli_id const jid, struct gitlab_job *const out)
 {
 	struct gcli_fetch_buffer buffer = {0};
 	char *url = NULL, *e_owner = NULL, *e_repo = NULL;

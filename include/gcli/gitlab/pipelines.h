@@ -36,11 +36,6 @@
 
 #include <gcli/pulls.h>
 
-typedef struct gitlab_pipeline      gitlab_pipeline;
-typedef struct gitlab_pipeline_list gitlab_pipeline_list;
-typedef struct gitlab_job           gitlab_job;
-typedef struct gitlab_job_list      gitlab_job_list;
-
 struct gitlab_pipeline {
 	gcli_id id;
 	char *status;
@@ -52,7 +47,7 @@ struct gitlab_pipeline {
 };
 
 struct gitlab_pipeline_list {
-	gitlab_pipeline *pipelines;
+	struct gitlab_pipeline *pipelines;
 	size_t pipelines_size;
 };
 
@@ -72,22 +67,23 @@ struct gitlab_job {
 };
 
 struct gitlab_job_list {
-	gitlab_job *jobs;
+	struct gitlab_job *jobs;
 	size_t jobs_size;
 };
 
 int gitlab_get_pipelines(struct gcli_ctx *ctx, char const *owner,
-                         char const *repo, int max, gitlab_pipeline_list *out);
+                         char const *repo, int max,
+                         struct gitlab_pipeline_list *out);
 
-void gitlab_pipeline_free(gitlab_pipeline *pipeline);
-void gitlab_pipelines_free(gitlab_pipeline_list *list);
+void gitlab_pipeline_free(struct gitlab_pipeline *pipeline);
+void gitlab_pipelines_free(struct gitlab_pipeline_list *list);
 
 int gitlab_get_pipeline_jobs(struct gcli_ctx *ctx, char const *owner,
                              char const *repo, gcli_id pipeline, int count,
-                             gitlab_job_list *out);
+                             struct gitlab_job_list *out);
 
-void gitlab_free_jobs(gitlab_job_list *jobs);
-void gitlab_free_job(gitlab_job *job);
+void gitlab_free_jobs(struct gitlab_job_list *jobs);
+void gitlab_free_job(struct gitlab_job *job);
 
 int gitlab_job_get_log(struct  gcli_ctx *ctx, char const *owner,
                        char const *repo, gcli_id job_id, FILE *stream);
@@ -104,9 +100,9 @@ int gitlab_job_download_artifacts(struct gcli_ctx *ctx, char const *owner,
 
 int gitlab_get_mr_pipelines(struct gcli_ctx *ctx, char const *owner,
                             char const *repo, gcli_id mr_id,
-                            gitlab_pipeline_list *list);
+                            struct gitlab_pipeline_list *list);
 
 int gitlab_get_job(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                   gcli_id const jid, gitlab_job *const out);
+                   gcli_id const jid, struct gitlab_job *const out);
 
 #endif /* GITLAB_PIPELINES_H */

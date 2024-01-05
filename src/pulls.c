@@ -134,7 +134,7 @@ gcli_pull_checks_free(gcli_pull_checks_list *list)
 		github_free_checks((struct github_check_list *)list);
 		break;
 	case GCLI_FORGE_GITLAB:
-		gitlab_pipelines_free((gitlab_pipeline_list *)list);
+		gitlab_pipelines_free((struct gitlab_pipeline_list *)list);
 		break;
 	default:
 		assert(0 && "unreachable");

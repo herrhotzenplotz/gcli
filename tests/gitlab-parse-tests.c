@@ -244,7 +244,7 @@ ATF_TC_BODY(gitlab_simple_pipeline, tc)
 	json_stream stream = {0};
 	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_pipeline.json");
-	gitlab_pipeline pipeline = {0};
+	struct gitlab_pipeline pipeline = {0};
 
 	json_open_stream(&stream, f);
 	ATF_REQUIRE(parse_gitlab_pipeline(ctx, &stream, &pipeline) == 0);

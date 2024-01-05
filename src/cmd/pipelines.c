@@ -72,7 +72,7 @@ usage(void)
 int
 gitlab_mr_pipelines(char const *owner, char const *repo, int const mr_id)
 {
-	gitlab_pipeline_list list = {0};
+	struct gitlab_pipeline_list list = {0};
 	int rc = 0;
 
 	rc = gitlab_get_mr_pipelines(g_clictx, owner, repo, mr_id, &list);
@@ -85,7 +85,7 @@ gitlab_mr_pipelines(char const *owner, char const *repo, int const mr_id)
 }
 
 void
-gitlab_print_pipelines(gitlab_pipeline_list const *const list)
+gitlab_print_pipelines(struct gitlab_pipeline_list const *const list)
 {
 	gcli_tbl table;
 	struct gcli_tblcoldef cols[] = {
@@ -120,7 +120,7 @@ gitlab_print_pipelines(gitlab_pipeline_list const *const list)
 int
 gitlab_pipelines(char const *owner, char const *repo, int const count)
 {
-	gitlab_pipeline_list pipelines = {0};
+	struct gitlab_pipeline_list pipelines = {0};
 	int rc = 0;
 
 	rc = gitlab_get_pipelines(g_clictx, owner, repo, count, &pipelines);
@@ -134,7 +134,7 @@ gitlab_pipelines(char const *owner, char const *repo, int const count)
 }
 
 void
-gitlab_print_jobs(gitlab_job_list const *const list)
+gitlab_print_jobs(struct gitlab_job_list const *const list)
 {
 	gcli_tbl table;
 	struct gcli_tblcoldef cols[] = {
@@ -174,7 +174,7 @@ int
 gitlab_pipeline_jobs(char const *owner, char const *repo,
                      long const id, int const count)
 {
-	gitlab_job_list jobs = {0};
+	struct gitlab_job_list jobs = {0};
 	int rc = 0;
 
 	rc = gitlab_get_pipeline_jobs(g_clictx, owner, repo, id, count, &jobs);
@@ -188,7 +188,7 @@ gitlab_pipeline_jobs(char const *owner, char const *repo,
 }
 
 void
-gitlab_print_job_status(gitlab_job const *const job)
+gitlab_print_job_status(struct gitlab_job const *const job)
 {
 	gcli_dict printer;
 
@@ -213,7 +213,7 @@ gitlab_print_job_status(gitlab_job const *const job)
 int
 gitlab_job_status(char const *owner, char const *repo, long const jid)
 {
-	gitlab_job job = {0};
+	struct gitlab_job job = {0};
 	int rc = 0;
 
 	rc = gitlab_get_job(g_clictx, owner, repo, jid, &job);

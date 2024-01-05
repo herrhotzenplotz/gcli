@@ -120,7 +120,7 @@ struct gcli_pull_fetch_details {
  * NOTE: KEEP THIS ORDER! WE DEPEND ON THE ABI HERE.
  *
  * For github the type of checks is gitlab_check*
- * For gitlab the type of checks is gitlab_pipeline*
+ * For gitlab the type of checks is struct gitlab_pipeline*
  *
  * You can cast this type to the list type of either one of them. */
 struct gcli_pull_checks_list {

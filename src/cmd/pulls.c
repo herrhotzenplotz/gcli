@@ -253,7 +253,7 @@ gcli_print_checks_list(gcli_pull_checks_list const *const list)
 		github_print_checks((struct github_check_list const *)(list));
 		break;
 	case GCLI_FORGE_GITLAB:
-		gitlab_print_pipelines((gitlab_pipeline_list const*)(list));
+		gitlab_print_pipelines((struct gitlab_pipeline_list const*)(list));
 		break;
 	default:
 		assert(0 && "unreachable");

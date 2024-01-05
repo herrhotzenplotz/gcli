@@ -308,7 +308,7 @@ ATF_TC_BODY(simple_github_comment, tc)
 ATF_TC_WITHOUT_HEAD(simple_github_check);
 ATF_TC_BODY(simple_github_check, tc)
 {
-    gcli_github_check check = {0};
+    struct gcli_github_check check = {0};
 	FILE *f;
 	json_stream stream;
 	struct gcli_ctx *ctx = test_context();

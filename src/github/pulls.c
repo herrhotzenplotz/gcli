@@ -442,7 +442,7 @@ github_pull_get_checks(struct gcli_ctx *ctx, char const *owner, char const *repo
 	snprintf(refname, sizeof refname, "refs%%2Fpull%%2F%"PRIid"%%2Fhead", pr_number);
 
 	return github_get_checks(ctx, owner, repo, refname, -1,
-	                         (github_check_list *)out);
+	                         (struct github_check_list *)out);
 }
 
 int

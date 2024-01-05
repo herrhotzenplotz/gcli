@@ -1,7 +1,7 @@
 include "gcli/github/checks.h";
 
 parser github_check is
-object of gcli_github_check with
+object of struct gcli_github_check with
 	("name"         => name as string,
 	 "status"       => status as string,
 	 "conclusion"   => conclusion as string,
@@ -10,6 +10,6 @@ object of gcli_github_check with
 	 "id"           => id as id);
 
 parser github_checks is
-object of github_check_list with
+object of struct github_check_list with
 	("check_runs" => checks as array of gcli_github_check
 	                 use parse_github_check);

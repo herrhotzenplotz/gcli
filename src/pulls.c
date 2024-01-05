@@ -131,7 +131,7 @@ gcli_pull_checks_free(gcli_pull_checks_list *list)
 {
 	switch (list->forge_type) {
 	case GCLI_FORGE_GITHUB:
-		github_free_checks((github_check_list *)list);
+		github_free_checks((struct github_check_list *)list);
 		break;
 	case GCLI_FORGE_GITLAB:
 		gitlab_pipelines_free((gitlab_pipeline_list *)list);

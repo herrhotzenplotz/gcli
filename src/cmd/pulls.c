@@ -250,7 +250,7 @@ gcli_print_checks_list(gcli_pull_checks_list const *const list)
 {
 	switch (list->forge_type) {
 	case GCLI_FORGE_GITHUB:
-		github_print_checks((github_check_list const *)(list));
+		github_print_checks((struct github_check_list const *)(list));
 		break;
 	case GCLI_FORGE_GITLAB:
 		gitlab_print_pipelines((gitlab_pipeline_list const*)(list));

@@ -59,7 +59,7 @@ usage(void)
 }
 
 void
-github_print_checks(github_check_list const *const list)
+github_print_checks(struct github_check_list const *const list)
 {
 	gcli_tbl table;
 	gcli_tblcoldef cols[] = {
@@ -93,7 +93,7 @@ int
 github_checks(char const *const owner, char const *const repo,
               char const *const ref, int const max)
 {
-	github_check_list list = {0};
+	struct github_check_list list = {0};
 	int rc = 0;
 
 	rc = github_get_checks(g_clictx, owner, repo, ref, max, &list);

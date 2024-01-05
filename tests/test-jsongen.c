@@ -36,7 +36,7 @@
 ATF_TC_WITHOUT_HEAD(empty_object);
 ATF_TC_BODY(empty_object, tc)
 {
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 
 	ATF_REQUIRE(gcli_jsongen_init(&gen) == 0);
 	ATF_REQUIRE(gcli_jsongen_begin_object(&gen) == 0);
@@ -52,7 +52,7 @@ ATF_TC_BODY(empty_object, tc)
 ATF_TC_WITHOUT_HEAD(array_with_two_empty_objects);
 ATF_TC_BODY(array_with_two_empty_objects, tc)
 {
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 
 	ATF_REQUIRE(gcli_jsongen_init(&gen) == 0);
 	ATF_REQUIRE(gcli_jsongen_begin_array(&gen) == 0);
@@ -72,7 +72,7 @@ ATF_TC_BODY(array_with_two_empty_objects, tc)
 ATF_TC_WITHOUT_HEAD(empty_array);
 ATF_TC_BODY(empty_array, tc)
 {
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 
 	ATF_REQUIRE(gcli_jsongen_init(&gen) == 0);
 	ATF_REQUIRE(gcli_jsongen_begin_array(&gen) == 0);
@@ -88,7 +88,7 @@ ATF_TC_BODY(empty_array, tc)
 ATF_TC_WITHOUT_HEAD(object_with_number);
 ATF_TC_BODY(object_with_number, tc)
 {
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 
 	ATF_REQUIRE(gcli_jsongen_init(&gen) == 0);
 	ATF_REQUIRE(gcli_jsongen_begin_object(&gen) == 0);
@@ -106,7 +106,7 @@ ATF_TC_BODY(object_with_number, tc)
 ATF_TC_WITHOUT_HEAD(object_nested);
 ATF_TC_BODY(object_nested, tc)
 {
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 
 	ATF_REQUIRE(gcli_jsongen_init(&gen) == 0);
 	ATF_REQUIRE(gcli_jsongen_begin_object(&gen) == 0);
@@ -131,7 +131,7 @@ ATF_TC_BODY(object_nested, tc)
 ATF_TC_WITHOUT_HEAD(object_with_strings);
 ATF_TC_BODY(object_with_strings, tc)
 {
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 
 	ATF_REQUIRE(gcli_jsongen_init(&gen) == 0);
 	ATF_REQUIRE(gcli_jsongen_begin_object(&gen) == 0);
@@ -149,7 +149,7 @@ ATF_TC_BODY(object_with_strings, tc)
 ATF_TC_WITHOUT_HEAD(object_with_mixed_values);
 ATF_TC_BODY(object_with_mixed_values, tc)
 {
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 
 	ATF_REQUIRE(gcli_jsongen_init(&gen) == 0);
 	ATF_REQUIRE(gcli_jsongen_begin_object(&gen) == 0);
@@ -174,7 +174,7 @@ ATF_TC_BODY(object_with_mixed_values, tc)
 ATF_TC_WITHOUT_HEAD(object_with_two_keys_and_values_that_are_string);
 ATF_TC_BODY(object_with_two_keys_and_values_that_are_string, tc)
 {
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 
 	ATF_REQUIRE(gcli_jsongen_init(&gen) == 0);
 	ATF_REQUIRE(gcli_jsongen_begin_object(&gen) == 0);

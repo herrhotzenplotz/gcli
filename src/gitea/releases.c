@@ -79,7 +79,7 @@ gitea_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *releas
 {
 	char *e_owner = NULL, *e_repo = NULL, *payload = NULL, *upload_url = NULL, *url = NULL;
 	struct gcli_fetch_buffer buffer = {0};
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	struct gcli_release response = {0};
 	int rc = 0;
 

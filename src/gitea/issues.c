@@ -67,7 +67,7 @@ gitea_issue_patch_state(struct gcli_ctx *ctx, char const *owner, char const *rep
                         int const issue_number, char const *const state)
 {
 	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
 	gcli_jsongen_init(&gen);
@@ -117,7 +117,7 @@ gitea_issue_assign(struct gcli_ctx *ctx, char const *owner, char const *repo,
                    gcli_id const issue_number, char const *const assignee)
 {
 	char *url = NULL, *e_owner = NULL, *e_repo = NULL, *payload = NULL;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
 	/* Generate payload */
@@ -208,7 +208,7 @@ gitea_issue_add_labels(struct gcli_ctx *ctx, char const *owner, char const *repo
                        size_t const labels_size)
 {
 	char *payload = NULL, *url = NULL, *e_owner = NULL, *e_repo = NULL;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
 	/* First, convert to ids */

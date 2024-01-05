@@ -42,7 +42,7 @@ github_perform_submit_comment(struct gcli_ctx *ctx,
                               struct gcli_fetch_buffer *out)
 {
 	int rc = 0;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	char *e_owner = gcli_urlencode(opts.owner);
 	char *e_repo = gcli_urlencode(opts.repo);
 	char *payload = NULL, *url = NULL;

@@ -149,7 +149,7 @@ gitlab_issue_patch_state(struct gcli_ctx *const ctx, char const *const owner,
                          char const *const new_state)
 {
 	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
 	/* Generate payload */
@@ -201,7 +201,7 @@ gitlab_perform_submit_issue(struct gcli_ctx *ctx, struct gcli_submit_issue_optio
                             struct gcli_fetch_buffer *const out)
 {
 	char *e_owner = NULL, *e_repo = NULL, *url = NULL, *payload = NULL;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
 	e_owner = gcli_urlencode(opts.owner);
@@ -240,7 +240,7 @@ gitlab_issue_assign(struct gcli_ctx *ctx, char const *owner, char const *repo,
                     gcli_id const issue_number, char const *assignee)
 {
 	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	int assignee_uid = -1;
 	int rc = 0;
 
@@ -287,7 +287,7 @@ gitlab_issues_update_labels(struct gcli_ctx *const ctx, char const *const owner,
 {
 	char *url = NULL, *payload = NULL, *label_list = NULL, *e_owner = NULL,
 	     *e_repo = NULL;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
 	/* Generate payload. For some reason Gitlab expects us to put a
@@ -406,7 +406,7 @@ gitlab_issue_set_title(struct gcli_ctx *ctx, char const *owner,
                        char const *const new_title)
 {
 	char *url, *e_owner, *e_repo, *payload;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	int rc;
 
 	/* Generate url */

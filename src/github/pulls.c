@@ -251,7 +251,7 @@ github_pull_patch_state(struct gcli_ctx *const ctx, char const *const owner,
                         char const *const new_state)
 {
 	char *url = NULL, *e_owner = NULL, *e_repo = NULL, *payload = NULL;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
 	/* Generate payload */
@@ -303,7 +303,7 @@ github_perform_submit_pull(struct gcli_ctx *ctx, gcli_submit_pull_options opts)
 {
 	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
 	struct gcli_fetch_buffer fetch_buffer = {0};
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
 	gcli_jsongen_init(&gen);
@@ -452,7 +452,7 @@ github_pull_add_reviewer(struct gcli_ctx *ctx, char const *owner,
 {
 	int rc = 0;
 	char *url, *payload, *e_owner, *e_repo;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 
 	/* URL-encode repo and owner */
 	e_owner = gcli_urlencode(owner);
@@ -494,7 +494,7 @@ github_pull_set_title(struct gcli_ctx *ctx, char const *owner, char const *repo,
 {
 	char *url, *e_owner, *e_repo, *payload;
 	int rc;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 
 	/* Generate the url */
 	e_owner = gcli_urlencode(owner);

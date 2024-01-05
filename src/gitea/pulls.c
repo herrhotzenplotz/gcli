@@ -71,7 +71,7 @@ gitea_pull_merge(struct gcli_ctx *ctx, char const *owner, char const *repo,
 	bool const delete_branch = flags & GCLI_PULL_MERGE_DELETEHEAD;
 	bool const squash = flags & GCLI_PULL_MERGE_SQUASH;
 	char *url = NULL, *e_owner = NULL, *e_repo = NULL, *payload = NULL;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
 	/* Generate payload */

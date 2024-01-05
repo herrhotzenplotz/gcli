@@ -376,7 +376,7 @@ gitlab_mr_patch_state(struct gcli_ctx *const ctx, char const *const owner,
                       char const *const new_state)
 {
 	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
 	/* Generate payload */
@@ -432,7 +432,7 @@ gitlab_perform_submit_mr(struct gcli_ctx *ctx, gcli_submit_pull_options opts)
 	char *source_branch = NULL, *source_owner = NULL, *payload = NULL,
 	     *e_owner = NULL, *e_repo = NULL, *url = NULL;
 	char const *target_branch = NULL;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	gcli_repo target = {0};
 	int rc = 0;
 
@@ -511,7 +511,7 @@ gitlab_mr_update_labels(struct gcli_ctx *ctx, char const *owner,
 {
 	char *url  = NULL, *payload = NULL, *list = NULL, *e_owner = NULL,
 	     *e_repo = NULL;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
 	/* Generate payload */
@@ -569,7 +569,7 @@ gitlab_mr_set_milestone(struct gcli_ctx *ctx, char const *owner,
                         char const *repo, gcli_id mr, gcli_id milestone_id)
 {
 	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
 	/* Generate Payload */
@@ -657,7 +657,7 @@ gitlab_mr_add_reviewer(struct gcli_ctx *ctx, char const *owner, char const *repo
 	char *url, *e_owner, *e_repo, *payload;
 	int uid, rc = 0;
 	struct gitlab_reviewer_id_list list = {0};
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
@@ -719,7 +719,7 @@ gitlab_mr_set_title(struct gcli_ctx *ctx, char const *const owner,
                     char const *const new_title)
 {
 	char *url, *e_owner, *e_repo, *payload;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
 	/* Generate url

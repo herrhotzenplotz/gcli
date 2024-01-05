@@ -40,7 +40,7 @@ gitlab_perform_submit_comment(struct gcli_ctx *ctx, struct gcli_submit_comment_o
 {
 	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
 	char const *type = NULL;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
 	e_owner = gcli_urlencode(opts.owner);

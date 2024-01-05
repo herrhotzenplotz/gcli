@@ -259,7 +259,7 @@ github_perform_submit_issue(struct gcli_ctx *ctx, struct gcli_submit_issue_optio
                             struct gcli_fetch_buffer *out)
 {
 	char *e_owner = NULL, *e_repo = NULL, *payload = NULL, *url = NULL;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
 	/* Generate Payload */
@@ -299,7 +299,7 @@ int
 github_issue_assign(struct gcli_ctx *ctx, char const *owner, char const *repo,
                     gcli_id const issue_number, char const *assignee)
 {
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
 	int rc = 0;
 
@@ -448,7 +448,7 @@ github_issue_set_title(struct gcli_ctx *ctx, char const *const owner,
                        char const *const new_title)
 {
 	char *url, *e_owner, *e_repo, *payload;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	int rc;
 
 	/* Generate url */

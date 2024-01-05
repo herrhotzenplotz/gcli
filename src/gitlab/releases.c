@@ -100,7 +100,7 @@ int
 gitlab_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *release)
 {
 	char *e_owner = NULL, *e_repo = NULL, *url = NULL, *payload = NULL;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
 	/* Warnings because unsupported on gitlab */

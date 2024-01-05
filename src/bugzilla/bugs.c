@@ -245,7 +245,7 @@ error_fetch:
 }
 
 static void
-add_extra_options(gcli_nvlist const *list, gcli_jsongen *gen)
+add_extra_options(gcli_nvlist const *list, struct gcli_jsongen *gen)
 {
 	static struct extra_opt {
 		char const *json_name;
@@ -282,7 +282,7 @@ bugzilla_bug_submit(struct gcli_ctx *ctx, struct gcli_submit_issue_options opts,
 	char *token; /* bugzilla wants the api token as a parameter in the url or the json payload */
 	char const *product = opts.owner, *component = opts.repo,
 	           *summary = opts.title, *description = opts.body;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
 	/* prepare data for payload generation */

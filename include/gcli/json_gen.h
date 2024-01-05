@@ -44,7 +44,6 @@ enum {
 	GCLI_JSONGEN_OBJECT = 2,
 };
 
-typedef struct gcli_jsongen gcli_jsongen;
 struct gcli_jsongen {
 	char *buffer;
 	size_t buffer_size;
@@ -58,19 +57,19 @@ struct gcli_jsongen {
 	bool first_elem;          /* first element in object/array */
 };
 
-int gcli_jsongen_init(gcli_jsongen *gen);
-void gcli_jsongen_free(gcli_jsongen *gen);
-char *gcli_jsongen_to_string(gcli_jsongen *gen);
+int gcli_jsongen_init(struct gcli_jsongen *gen);
+void gcli_jsongen_free(struct gcli_jsongen *gen);
+char *gcli_jsongen_to_string(struct gcli_jsongen *gen);
 
-int gcli_jsongen_begin_object(gcli_jsongen *gen);
-int gcli_jsongen_end_object(gcli_jsongen *gen);
-int gcli_jsongen_begin_array(gcli_jsongen *gen);
-int gcli_jsongen_end_array(gcli_jsongen *gen);
-int gcli_jsongen_objmember(gcli_jsongen *gen, char const *key);
-int gcli_jsongen_number(gcli_jsongen *gen, long long num);
-int gcli_jsongen_id(gcli_jsongen *gen, gcli_id const id);
-int gcli_jsongen_string(gcli_jsongen *gen, char const *value);
-int gcli_jsongen_bool(gcli_jsongen *gen, bool value);
-int gcli_jsongen_null(gcli_jsongen *gen);
+int gcli_jsongen_begin_object(struct gcli_jsongen *gen);
+int gcli_jsongen_end_object(struct gcli_jsongen *gen);
+int gcli_jsongen_begin_array(struct gcli_jsongen *gen);
+int gcli_jsongen_end_array(struct gcli_jsongen *gen);
+int gcli_jsongen_objmember(struct gcli_jsongen *gen, char const *key);
+int gcli_jsongen_number(struct gcli_jsongen *gen, long long num);
+int gcli_jsongen_id(struct gcli_jsongen *gen, gcli_id const id);
+int gcli_jsongen_string(struct gcli_jsongen *gen, char const *value);
+int gcli_jsongen_bool(struct gcli_jsongen *gen, bool value);
+int gcli_jsongen_null(struct gcli_jsongen *gen);
 
 #endif /* GCLI_JSON_GEN_H */

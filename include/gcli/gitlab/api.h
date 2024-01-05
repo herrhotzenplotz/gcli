@@ -36,7 +36,7 @@
 
 #include <gcli/curl.h>
 
-char const *gitlab_api_error_string(gcli_ctx *ctx, gcli_fetch_buffer *buf);
-int gitlab_user_id(gcli_ctx *ctx, char const *user_name);
+char const *gitlab_api_error_string(struct gcli_ctx *ctx, gcli_fetch_buffer *buf);
+int gitlab_user_id(struct gcli_ctx *ctx, char const *user_name);
 
 #endif /* GITLAB_API_H */

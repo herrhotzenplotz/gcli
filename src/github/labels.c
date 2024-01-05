@@ -36,7 +36,7 @@
 #include <templates/github/labels.h>
 
 int
-github_get_labels(gcli_ctx *ctx, char const *owner, char const *reponame,
+github_get_labels(struct gcli_ctx *ctx, char const *owner, char const *reponame,
                   int const max, gcli_label_list *const out)
 {
 	char *url = NULL;
@@ -57,7 +57,7 @@ github_get_labels(gcli_ctx *ctx, char const *owner, char const *reponame,
 }
 
 int
-github_create_label(gcli_ctx *ctx, char const *owner, char const *repo,
+github_create_label(struct gcli_ctx *ctx, char const *owner, char const *repo,
                     gcli_label *const label)
 {
 	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL,
@@ -116,7 +116,7 @@ github_create_label(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-github_delete_label(gcli_ctx *ctx, char const *owner, char const *repo,
+github_delete_label(struct gcli_ctx *ctx, char const *owner, char const *repo,
                     char const *label)
 {
 	char *url = NULL;

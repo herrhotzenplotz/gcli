@@ -40,21 +40,21 @@
 #include <string.h>
 
 static void
-fixup_asset_name(gcli_ctx *ctx, gcli_release_asset *const asset)
+fixup_asset_name(struct gcli_ctx *ctx, gcli_release_asset *const asset)
 {
 	if (!asset->name)
 		asset->name = gcli_urldecode(ctx, strrchr(asset->url, '/') + 1);
 }
 
 void
-gitlab_fixup_release_assets(gcli_ctx *ctx, gcli_release *const release)
+gitlab_fixup_release_assets(struct gcli_ctx *ctx, gcli_release *const release)
 {
 	for (size_t i = 0; i < release->assets_size; ++i)
 		fixup_asset_name(ctx, &release->assets[i]);
 }
 
 static void
-fixup_release_asset_names(gcli_ctx *ctx, gcli_release_list *list)
+fixup_release_asset_names(struct gcli_ctx *ctx, gcli_release_list *list)
 {
 	/* Iterate over releases */
 	for (size_t i = 0; i < list->releases_size; ++i)
@@ -62,7 +62,7 @@ fixup_release_asset_names(gcli_ctx *ctx, gcli_release_list *list)
 }
 
 int
-gitlab_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_get_releases(struct gcli_ctx *ctx, char const *owner, char const *repo,
                     int const max, gcli_release_list *const list)
 {
 	char *url = NULL;
@@ -97,7 +97,7 @@ gitlab_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_create_release(gcli_ctx *ctx, gcli_new_release const *release)
+gitlab_create_release(struct gcli_ctx *ctx, gcli_new_release const *release)
 {
 	char *e_owner = NULL, *e_repo = NULL, *url = NULL, *payload = NULL;
 	gcli_jsongen gen = {0};
@@ -157,7 +157,8 @@ gitlab_create_release(gcli_ctx *ctx, gcli_new_release const *release)
 }
 
 int
-gitlab_delete_release(gcli_ctx *ctx, char const *owner, char const *repo, char const *id)
+gitlab_delete_release(struct gcli_ctx *ctx, char const *owner,
+                      char const *repo, char const *id)
 {
 	char *url     = NULL;
 	char *e_owner = NULL;

@@ -37,7 +37,7 @@
 #include <templates/gitlab/forks.h>
 
 int
-gitlab_get_forks(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_get_forks(struct gcli_ctx *ctx, char const *owner, char const *repo,
                  int const max, gcli_fork_list *const list)
 {
 	char *url = NULL;
@@ -66,7 +66,7 @@ gitlab_get_forks(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_fork_create(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_fork_create(struct gcli_ctx *ctx, char const *owner, char const *repo,
                    char const *_in)
 {
 	char *url = NULL;

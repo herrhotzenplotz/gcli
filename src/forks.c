@@ -34,14 +34,14 @@
 #include <gcli/github/forks.h>
 
 int
-gcli_get_forks(gcli_ctx *ctx, char const *owner, char const *repo,
+gcli_get_forks(struct gcli_ctx *ctx, char const *owner, char const *repo,
                int const max, gcli_fork_list *const out)
 {
 	gcli_null_check_call(get_forks, ctx, owner, repo, max, out);
 }
 
 int
-gcli_fork_create(gcli_ctx *ctx, char const *owner, char const *repo,
+gcli_fork_create(struct gcli_ctx *ctx, char const *owner, char const *repo,
                  char const *_in)
 {
 	gcli_null_check_call(fork_create, ctx, owner, repo, _in);

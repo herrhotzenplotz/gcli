@@ -43,7 +43,7 @@
 #include <time.h>
 
 int
-github_get_milestones(gcli_ctx *ctx, char const *const owner,
+github_get_milestones(struct gcli_ctx *ctx, char const *const owner,
                       char const *const repo, int const max,
                       gcli_milestone_list *const out)
 {
@@ -69,7 +69,7 @@ github_get_milestones(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-github_get_milestone(gcli_ctx *ctx, char const *const owner,
+github_get_milestone(struct gcli_ctx *ctx, char const *const owner,
                      char const *const repo, gcli_id const milestone,
                      gcli_milestone *const out)
 {
@@ -102,7 +102,7 @@ github_get_milestone(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-github_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
+github_milestone_get_issues(struct gcli_ctx *ctx, char const *const owner,
                             char const *const repo, gcli_id const milestone,
                             gcli_issue_list *const out)
 {
@@ -122,7 +122,7 @@ github_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-github_create_milestone(gcli_ctx *ctx,
+github_create_milestone(struct gcli_ctx *ctx,
                         struct gcli_milestone_create_args const *args)
 {
 	char *url, *e_owner, *e_repo;
@@ -162,7 +162,7 @@ github_create_milestone(gcli_ctx *ctx,
 }
 
 int
-github_delete_milestone(gcli_ctx *ctx, char const *const owner,
+github_delete_milestone(struct gcli_ctx *ctx, char const *const owner,
                         char const *const repo, gcli_id const milestone)
 {
 	char *url, *e_owner, *e_repo;
@@ -186,7 +186,7 @@ github_delete_milestone(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-github_milestone_set_duedate(gcli_ctx *ctx, char const *const owner,
+github_milestone_set_duedate(struct gcli_ctx *ctx, char const *const owner,
                              char const *const repo, gcli_id const milestone,
                              char const *const date)
 {

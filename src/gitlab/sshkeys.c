@@ -41,7 +41,7 @@
 #include <templates/gitlab/sshkeys.h>
 
 int
-gitlab_get_sshkeys(gcli_ctx *ctx, gcli_sshkey_list *list)
+gitlab_get_sshkeys(struct gcli_ctx *ctx, gcli_sshkey_list *list)
 {
 	char *url;
 	gcli_fetch_list_ctx fl = {
@@ -58,7 +58,7 @@ gitlab_get_sshkeys(gcli_ctx *ctx, gcli_sshkey_list *list)
 }
 
 int
-gitlab_add_sshkey(gcli_ctx *ctx, char const *const title,
+gitlab_add_sshkey(struct gcli_ctx *ctx, char const *const title,
                   char const *const pubkey, gcli_sshkey *const out)
 {
 	char *url, *payload;
@@ -92,7 +92,7 @@ gitlab_add_sshkey(gcli_ctx *ctx, char const *const title,
 }
 
 int
-gitlab_delete_sshkey(gcli_ctx *ctx, gcli_id id)
+gitlab_delete_sshkey(struct gcli_ctx *ctx, gcli_id id)
 {
 	char *url;
 	int rc = 0;

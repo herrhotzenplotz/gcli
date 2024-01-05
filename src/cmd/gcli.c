@@ -159,7 +159,7 @@ usage(void)
 }
 
 /** The CMD global gcli context */
-gcli_ctx *g_clictx = NULL;
+struct gcli_ctx *g_clictx = NULL;
 
 static void
 gcli_progress_func(bool const done)

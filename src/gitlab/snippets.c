@@ -65,7 +65,8 @@ gcli_snippets_free(gcli_gitlab_snippet_list *const list)
 }
 
 int
-gcli_snippets_get(gcli_ctx *ctx, int const max, gcli_gitlab_snippet_list *const out)
+gcli_snippets_get(struct gcli_ctx *ctx, int const max,
+                  gcli_gitlab_snippet_list *const out)
 {
 	char *url = NULL;
 
@@ -83,7 +84,7 @@ gcli_snippets_get(gcli_ctx *ctx, int const max, gcli_gitlab_snippet_list *const 
 }
 
 int
-gcli_snippet_delete(gcli_ctx *ctx, char const *snippet_id)
+gcli_snippet_delete(struct  gcli_ctx *ctx, char const *snippet_id)
 {
 	int rc = 0;
 	char *url;
@@ -97,7 +98,7 @@ gcli_snippet_delete(gcli_ctx *ctx, char const *snippet_id)
 }
 
 int
-gcli_snippet_get(gcli_ctx *ctx, char const *snippet_id, FILE *stream)
+gcli_snippet_get(struct gcli_ctx *ctx, char const *snippet_id, FILE *stream)
 {
 	int rc = 0;
 	char *url = sn_asprintf("%s/snippets/%s/raw",

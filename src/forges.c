@@ -377,7 +377,7 @@ bugzilla_forge_descriptor =
 };
 
 gcli_forge_descriptor const *
-gcli_forge(gcli_ctx *ctx)
+gcli_forge(struct gcli_ctx *ctx)
 {
 	switch (ctx->get_forge_type(ctx)) {
 	case GCLI_FORGE_GITHUB:

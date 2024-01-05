@@ -39,7 +39,7 @@
 #include <templates/github/releases.h>
 
 int
-github_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
+github_get_releases(struct gcli_ctx *ctx, char const *owner, char const *repo,
                     int const max, gcli_release_list *const list)
 {
 	char *url = NULL;
@@ -70,7 +70,7 @@ github_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 static void
-github_parse_single_release(gcli_ctx *ctx, gcli_fetch_buffer buffer,
+github_parse_single_release(struct gcli_ctx *ctx, gcli_fetch_buffer buffer,
                             gcli_release *const out)
 {
 	struct json_stream stream = {0};
@@ -82,7 +82,7 @@ github_parse_single_release(gcli_ctx *ctx, gcli_fetch_buffer buffer,
 }
 
 static int
-github_get_upload_url(gcli_ctx *ctx, gcli_release *const it, char **out)
+github_get_upload_url(struct gcli_ctx *ctx, gcli_release *const it, char **out)
 {
 	char *delim = strchr(it->upload_url, '{');
 	if (delim == NULL)
@@ -95,7 +95,7 @@ github_get_upload_url(gcli_ctx *ctx, gcli_release *const it, char **out)
 }
 
 static int
-github_upload_release_asset(gcli_ctx *ctx, char const *url,
+github_upload_release_asset(struct gcli_ctx *ctx, char const *url,
                             gcli_release_asset_upload const asset)
 {
 	char *req = NULL;
@@ -125,7 +125,7 @@ github_upload_release_asset(gcli_ctx *ctx, char const *url,
 }
 
 int
-github_create_release(gcli_ctx *ctx, gcli_new_release const *release)
+github_create_release(struct gcli_ctx *ctx, gcli_new_release const *release)
 {
 	char *url = NULL, *e_owner = NULL, *e_repo = NULL, *upload_url = NULL,
 	     *payload = NULL;
@@ -204,7 +204,7 @@ out:
 }
 
 int
-github_delete_release(gcli_ctx *ctx, char const *owner, char const *repo,
+github_delete_release(struct gcli_ctx *ctx, char const *owner, char const *repo,
                       char const *id)
 {
 	char *url = NULL;

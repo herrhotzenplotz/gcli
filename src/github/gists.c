@@ -41,7 +41,7 @@
 
 /* /!\ Before changing this, see comment in gists.h /!\ */
 int
-parse_github_gist_files_idiot_hack(gcli_ctx *ctx, json_stream *stream,
+parse_github_gist_files_idiot_hack(struct gcli_ctx *ctx, json_stream *stream,
                                    gcli_gist *const gist)
 {
 	(void) ctx;
@@ -68,7 +68,7 @@ parse_github_gist_files_idiot_hack(gcli_ctx *ctx, json_stream *stream,
 }
 
 int
-gcli_get_gists(gcli_ctx *ctx, char const *user, int const max,
+gcli_get_gists(struct gcli_ctx *ctx, char const *user, int const max,
                gcli_gist_list *const list)
 {
 	char *url = NULL;
@@ -88,7 +88,7 @@ gcli_get_gists(gcli_ctx *ctx, char const *user, int const max,
 }
 
 int
-gcli_get_gist(gcli_ctx *ctx, char const *gist_id, gcli_gist *out)
+gcli_get_gist(struct gcli_ctx *ctx, char const *gist_id, gcli_gist *out)
 {
 	char *url = NULL;
 	gcli_fetch_buffer buffer = {0};
@@ -134,7 +134,7 @@ read_file(FILE *f, char **out)
 }
 
 int
-gcli_create_gist(gcli_ctx *ctx, gcli_new_gist opts)
+gcli_create_gist(struct gcli_ctx *ctx, gcli_new_gist opts)
 {
 	char *url = NULL;
 	char *post_data = NULL;
@@ -184,7 +184,7 @@ gcli_create_gist(gcli_ctx *ctx, gcli_new_gist opts)
 }
 
 int
-gcli_delete_gist(gcli_ctx *ctx, char const *gist_id)
+gcli_delete_gist(struct gcli_ctx *ctx, char const *gist_id)
 {
 	char *url = NULL;
 	gcli_fetch_buffer buffer = {0};

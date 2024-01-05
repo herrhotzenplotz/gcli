@@ -35,7 +35,7 @@
 #include <pdjson/pdjson.h>
 
 char const *
-bugzilla_api_error_string(gcli_ctx *ctx, gcli_fetch_buffer *const buf)
+bugzilla_api_error_string(struct gcli_ctx *ctx, gcli_fetch_buffer *const buf)
 {
 	json_stream stream = {0};
 	int rc;

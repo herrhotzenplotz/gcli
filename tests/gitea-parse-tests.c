@@ -12,16 +12,16 @@
 #include <templates/gitea/status.h>
 
 static gcli_forge_type
-get_gitea_forge_type(gcli_ctx *ctx)
+get_gitea_forge_type(struct gcli_ctx *ctx)
 {
 	(void) ctx;
 	return GCLI_FORGE_GITEA;
 }
 
-static gcli_ctx *
+static struct gcli_ctx *
 test_context(void)
 {
-	gcli_ctx *ctx;
+	struct gcli_ctx *ctx;
 	ATF_REQUIRE(gcli_init(&ctx, get_gitea_forge_type, NULL, NULL) == NULL);
 	return ctx;
 }
@@ -45,7 +45,7 @@ ATF_TC_BODY(gitea_simple_notification, tc)
 	gcli_notification notification = {0};
 	FILE *sample;
 	json_stream stream = {0};
-	gcli_ctx *ctx;
+	struct gcli_ctx *ctx;
 
 	ctx = test_context();
 	sample = open_sample("gitea_simple_notification.json");

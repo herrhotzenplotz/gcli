@@ -37,7 +37,7 @@
 #include <stdarg.h>
 
 int
-get_int_(gcli_ctx *ctx, json_stream *const input, int *out, char const *where)
+get_int_(struct gcli_ctx *ctx, json_stream *const input, int *out, char const *where)
 {
 	if (json_next(input) != JSON_NUMBER)
 		return gcli_error(ctx, "unexpected non-integer field in %s", where);
@@ -48,7 +48,7 @@ get_int_(gcli_ctx *ctx, json_stream *const input, int *out, char const *where)
 }
 
 int
-get_id_(gcli_ctx *ctx, json_stream *const input, gcli_id *out, char const *where)
+get_id_(struct gcli_ctx *ctx, json_stream *const input, gcli_id *out, char const *where)
 {
 	if (json_next(input) != JSON_NUMBER)
 		return gcli_error(ctx, "unexpected non-integer ID field in %s", where);
@@ -59,7 +59,7 @@ get_id_(gcli_ctx *ctx, json_stream *const input, gcli_id *out, char const *where
 }
 
 int
-get_long_(gcli_ctx *ctx, json_stream *const input, long *out, char const *where)
+get_long_(struct gcli_ctx *ctx, json_stream *const input, long *out, char const *where)
 {
 	if (json_next(input) != JSON_NUMBER)
 		return gcli_error(ctx, "unexpected non-integer field in %s", where);
@@ -70,7 +70,7 @@ get_long_(gcli_ctx *ctx, json_stream *const input, long *out, char const *where)
 }
 
 int
-get_size_t_(gcli_ctx *ctx, json_stream *const input, size_t *out, char const *where)
+get_size_t_(struct gcli_ctx *ctx, json_stream *const input, size_t *out, char const *where)
 {
 	if (json_next(input) != JSON_NUMBER)
 		return gcli_error(ctx, "unexpected non-integer field in %s", where);
@@ -81,7 +81,7 @@ get_size_t_(gcli_ctx *ctx, json_stream *const input, size_t *out, char const *wh
 }
 
 int
-get_double_(gcli_ctx *ctx, json_stream *const input, double *out, char const *where)
+get_double_(struct gcli_ctx *ctx, json_stream *const input, double *out, char const *where)
 {
 	enum json_type type = json_next(input);
 
@@ -100,7 +100,7 @@ get_double_(gcli_ctx *ctx, json_stream *const input, double *out, char const *wh
 }
 
 int
-get_string_(gcli_ctx *ctx, json_stream *const input, char **out,
+get_string_(struct gcli_ctx *ctx, json_stream *const input, char **out,
             char const *where)
 {
 	enum json_type const type = json_next(input);
@@ -124,7 +124,7 @@ get_string_(gcli_ctx *ctx, json_stream *const input, char **out,
 }
 
 int
-get_bool_(gcli_ctx *ctx,json_stream *const input, bool *out, char const *where)
+get_bool_(struct gcli_ctx *ctx,json_stream *const input, bool *out, char const *where)
 {
 	enum json_type value_type = json_next(input);
 	if (value_type == JSON_TRUE) {
@@ -139,7 +139,7 @@ get_bool_(gcli_ctx *ctx,json_stream *const input, bool *out, char const *where)
 }
 
 int
-get_bool_relaxed_(gcli_ctx *ctx,json_stream *const input, bool *out, char const *where)
+get_bool_relaxed_(struct gcli_ctx *ctx,json_stream *const input, bool *out, char const *where)
 {
 	enum json_type value_type = json_next(input);
 	if (value_type == JSON_TRUE) {
@@ -157,7 +157,7 @@ get_bool_relaxed_(gcli_ctx *ctx,json_stream *const input, bool *out, char const 
 }
 
 int
-get_user_(gcli_ctx *ctx, json_stream *const input, char **out,
+get_user_(struct gcli_ctx *ctx, json_stream *const input, char **out,
           char const *where)
 {
 	if (json_next(input) != JSON_OBJECT)
@@ -225,7 +225,7 @@ gcli_json_escape(sn_sv const it)
 }
 
 int
-get_sv_(gcli_ctx *ctx, json_stream *const input, sn_sv *out, char const *where)
+get_sv_(struct gcli_ctx *ctx, json_stream *const input, sn_sv *out, char const *where)
 {
 	enum json_type type = json_next(input);
 	if (type == JSON_NULL) {
@@ -245,7 +245,7 @@ get_sv_(gcli_ctx *ctx, json_stream *const input, sn_sv *out, char const *where)
 }
 
 int
-get_label_(gcli_ctx *ctx, json_stream *const input, char const **out,
+get_label_(struct gcli_ctx *ctx, json_stream *const input, char const **out,
            char const *where)
 {
 	if (json_next(input) != JSON_OBJECT)
@@ -271,7 +271,7 @@ get_label_(gcli_ctx *ctx, json_stream *const input, char const **out,
 }
 
 int
-gcli_json_advance(gcli_ctx *ctx, json_stream *const stream, char const *fmt, ...)
+gcli_json_advance(struct gcli_ctx *ctx, json_stream *const stream, char const *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -317,7 +317,7 @@ gcli_json_advance(gcli_ctx *ctx, json_stream *const stream, char const *fmt, ...
 }
 
 int
-get_parse_int_(gcli_ctx *ctx, json_stream *const input, long *out,
+get_parse_int_(struct gcli_ctx *ctx, json_stream *const input, long *out,
                char const *function)
 {
 	char *endptr = NULL;
@@ -336,7 +336,7 @@ get_parse_int_(gcli_ctx *ctx, json_stream *const input, long *out,
 }
 
 int
-get_github_style_colour(gcli_ctx *ctx, json_stream *const input, uint32_t *out)
+get_github_style_colour(struct gcli_ctx *ctx, json_stream *const input, uint32_t *out)
 {
 	char *colour_str;
 	char *endptr = NULL;
@@ -358,7 +358,7 @@ get_github_style_colour(gcli_ctx *ctx, json_stream *const input, uint32_t *out)
 }
 
 int
-get_gitlab_style_colour(gcli_ctx *ctx, json_stream *const input, uint32_t *out)
+get_gitlab_style_colour(struct gcli_ctx *ctx, json_stream *const input, uint32_t *out)
 {
 	char *colour;
 	char *endptr = NULL;
@@ -381,7 +381,7 @@ get_gitlab_style_colour(gcli_ctx *ctx, json_stream *const input, uint32_t *out)
 }
 
 int
-get_gitea_visibility(gcli_ctx *ctx, json_stream *const input, char **out)
+get_gitea_visibility(struct gcli_ctx *ctx, json_stream *const input, char **out)
 {
 	bool is_private;
 	int rc = get_bool(ctx, input, &is_private);
@@ -394,7 +394,7 @@ get_gitea_visibility(gcli_ctx *ctx, json_stream *const input, char **out)
 }
 
 int
-get_gitlab_can_be_merged(gcli_ctx *ctx, json_stream *const input, bool *out)
+get_gitlab_can_be_merged(struct gcli_ctx *ctx, json_stream *const input, bool *out)
 {
 	sn_sv tmp;
 	int rc = 0;
@@ -410,7 +410,7 @@ get_gitlab_can_be_merged(gcli_ctx *ctx, json_stream *const input, bool *out)
 }
 
 int
-get_github_is_pr(gcli_ctx *ctx, json_stream *input, int *out)
+get_github_is_pr(struct gcli_ctx *ctx, json_stream *input, int *out)
 {
 	enum json_type next = json_peek(input);
 
@@ -427,7 +427,7 @@ get_github_is_pr(gcli_ctx *ctx, json_stream *input, int *out)
 }
 
 int
-get_int_to_sv_(gcli_ctx *ctx, json_stream *input, sn_sv *out,
+get_int_to_sv_(struct gcli_ctx *ctx, json_stream *input, sn_sv *out,
                char const *function)
 {
 	int rc, val;
@@ -440,4 +440,3 @@ get_int_to_sv_(gcli_ctx *ctx, json_stream *input, sn_sv *out,
 
 	return 0;
 }
-

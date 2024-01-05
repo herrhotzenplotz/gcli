@@ -32,7 +32,7 @@
 #include <sn/sn.h>
 
 char *
-gitea_make_authheader(gcli_ctx *ctx, char const *token)
+gitea_make_authheader(struct gcli_ctx *ctx, char const *token)
 {
 	(void) ctx;
 	return sn_asprintf("Authorization: token %s", token);

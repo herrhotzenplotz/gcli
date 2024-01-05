@@ -40,7 +40,7 @@
 #include <assert.h>
 
 int
-gitlab_get_repo(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_get_repo(struct gcli_ctx *ctx, char const *owner, char const *repo,
                 gcli_repo *const out)
 {
 	/* GET /projects/:id */
@@ -88,7 +88,7 @@ gitlab_repos_fixup_missing_visibility(gcli_repo_list *const list)
 }
 
 int
-gitlab_get_repos(gcli_ctx *ctx, char const *owner, int const max,
+gitlab_get_repos(struct gcli_ctx *ctx, char const *owner, int const max,
                  gcli_repo_list *const list)
 {
 	char *url = NULL;
@@ -114,7 +114,7 @@ gitlab_get_repos(gcli_ctx *ctx, char const *owner, int const max,
 }
 
 int
-gitlab_repo_delete(gcli_ctx *ctx, char const *owner, char const *repo)
+gitlab_repo_delete(struct gcli_ctx *ctx, char const *owner, char const *repo)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -137,7 +137,7 @@ gitlab_repo_delete(gcli_ctx *ctx, char const *owner, char const *repo)
 }
 
 int
-gitlab_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *options,
+gitlab_repo_create(struct gcli_ctx *ctx, gcli_repo_create_options const *options,
                    gcli_repo *out)
 {
 	char *url, *payload;
@@ -183,7 +183,7 @@ gitlab_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *options,
 }
 
 int
-gitlab_repo_set_visibility(gcli_ctx *ctx, char const *const owner,
+gitlab_repo_set_visibility(struct gcli_ctx *ctx, char const *const owner,
                            char const *const repo, gcli_repo_visibility vis)
 {
 	char *url;

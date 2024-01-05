@@ -41,16 +41,16 @@
 #include "gcli_tests.h"
 
 static gcli_forge_type
-get_bugzilla_forge_type(gcli_ctx *ctx)
+get_bugzilla_forge_type(struct gcli_ctx *ctx)
 {
 	(void) ctx;
 	return GCLI_FORGE_BUGZILLA;
 }
 
-static gcli_ctx *
+static struct gcli_ctx *
 test_context(void)
 {
-	gcli_ctx *ctx;
+	struct gcli_ctx *ctx;
 	ATF_REQUIRE(gcli_init(&ctx, get_bugzilla_forge_type, NULL, NULL) == NULL);
 	return ctx;
 }
@@ -74,7 +74,7 @@ ATF_TC_BODY(simple_bugzilla_issue, tc)
 	gcli_issue const *issue;
 	FILE *f;
 	json_stream stream;
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("bugzilla_simple_bug.json"));
 	json_open_stream(&stream, f);
@@ -103,7 +103,7 @@ ATF_TC_BODY(bugzilla_comments, tc)
 	FILE *f;
 	gcli_comment const *cmt = NULL;
 	gcli_comment_list list = {0};
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 	json_stream stream;
 
 	ATF_REQUIRE(f = open_sample("bugzilla_comments.json"));
@@ -132,7 +132,7 @@ ATF_TC_BODY(bugzilla_attachments, tc)
 	FILE *f = NULL;
 	gcli_attachment const *it;
 	gcli_attachment_list list = {0};
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 	json_stream stream = {0};
 
 	ATF_REQUIRE(f = open_sample("bugzilla_attachments.json"));

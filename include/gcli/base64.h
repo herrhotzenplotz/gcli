@@ -34,9 +34,10 @@
 
 #include <stdio.h>
 
-int gcli_decode_base64(gcli_ctx *ctx, char const *input, char *buffer,
+int gcli_decode_base64(struct gcli_ctx *ctx, char const *input, char *buffer,
                        size_t buffer_size);
 
-int gcli_base64_decode_print(gcli_ctx *ctx, FILE *out, char const *const input);
+int gcli_base64_decode_print(struct gcli_ctx *ctx, FILE *out,
+                             char const *const input);
 
 #endif /* GCLI_BASE64_H */

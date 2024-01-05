@@ -37,7 +37,7 @@
 #include <templates/github/status.h>
 
 int
-github_get_notifications(gcli_ctx *ctx, int const max,
+github_get_notifications(struct gcli_ctx *ctx, int const max,
                          gcli_notification_list *const out)
 {
 	char *url = NULL;
@@ -54,7 +54,7 @@ github_get_notifications(gcli_ctx *ctx, int const max,
 }
 
 int
-github_notification_mark_as_read(gcli_ctx *ctx, char const *id)
+github_notification_mark_as_read(struct gcli_ctx *ctx, char const *id)
 {
 	char *url = NULL;
 	int rc = 0;

@@ -56,21 +56,21 @@ gcli_comments_free(gcli_comment_list *const list)
 }
 
 int
-gcli_get_issue_comments(gcli_ctx *ctx, char const *owner, char const *repo,
+gcli_get_issue_comments(struct gcli_ctx *ctx, char const *owner, char const *repo,
                         gcli_id const issue, gcli_comment_list *out)
 {
 	gcli_null_check_call(get_issue_comments, ctx, owner, repo, issue, out);
 }
 
 int
-gcli_get_pull_comments(gcli_ctx *ctx, char const *owner, char const *repo,
+gcli_get_pull_comments(struct gcli_ctx *ctx, char const *owner, char const *repo,
                        gcli_id const pull, gcli_comment_list *out)
 {
 	gcli_null_check_call(get_pull_comments, ctx, owner, repo, pull, out);
 }
 
 int
-gcli_comment_submit(gcli_ctx *ctx, gcli_submit_comment_opts opts)
+gcli_comment_submit(struct gcli_ctx *ctx, gcli_submit_comment_opts opts)
 {
 	gcli_null_check_call(perform_submit_comment, ctx, opts, NULL);
 }

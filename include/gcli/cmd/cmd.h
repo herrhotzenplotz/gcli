@@ -38,7 +38,7 @@
 
 #include <sn/sn.h>
 
-extern gcli_ctx *g_clictx;
+extern struct gcli_ctx *g_clictx;
 
 static inline char *
 shift(int *argc, char ***argv)

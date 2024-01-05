@@ -52,8 +52,8 @@ sv_append(sn_sv this, sn_sv const that)
 
 char *
 gcli_editor_get_user_message(
-	gcli_ctx *ctx,
-	void (*file_initializer)(gcli_ctx *, FILE *, void *),
+	struct gcli_ctx *ctx,
+	void (*file_initializer)(struct gcli_ctx *, FILE *, void *),
 	void *user_data)
 {
 	char *editor     = getenv("EDITOR");

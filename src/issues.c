@@ -72,7 +72,7 @@ gcli_issues_free(gcli_issue_list *const list)
 }
 
 int
-gcli_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
+gcli_get_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
                 gcli_issue_fetch_details const *details, int const max,
                 gcli_issue_list *const out)
 {
@@ -80,7 +80,7 @@ gcli_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gcli_get_issue(gcli_ctx *ctx, char const *owner, char const *repo,
+gcli_get_issue(struct gcli_ctx *ctx, char const *owner, char const *repo,
                gcli_id const issue_number, gcli_issue *const out)
 {
 	gcli_null_check_call(get_issue_summary, ctx, owner, repo, issue_number,
@@ -88,27 +88,27 @@ gcli_get_issue(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gcli_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
+gcli_issue_close(struct gcli_ctx *ctx, char const *owner, char const *repo,
                  gcli_id const issue_number)
 {
 	gcli_null_check_call(issue_close, ctx, owner, repo, issue_number);
 }
 
 int
-gcli_issue_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
+gcli_issue_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
                   gcli_id const issue_number)
 {
 	gcli_null_check_call(issue_reopen, ctx, owner, repo, issue_number);
 }
 
 int
-gcli_issue_submit(gcli_ctx *ctx, gcli_submit_issue_options opts)
+gcli_issue_submit(struct gcli_ctx *ctx, gcli_submit_issue_options opts)
 {
 	gcli_null_check_call(perform_submit_issue, ctx, opts, NULL);
 }
 
 int
-gcli_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
+gcli_issue_assign(struct gcli_ctx *ctx, char const *owner, char const *repo,
                   gcli_id const issue_number, char const *assignee)
 {
 	gcli_null_check_call(issue_assign, ctx, owner, repo, issue_number,
@@ -116,7 +116,7 @@ gcli_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gcli_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+gcli_issue_add_labels(struct gcli_ctx *ctx, char const *owner, char const *repo,
                       gcli_id const issue, char const *const labels[],
                       size_t const labels_size)
 {
@@ -125,16 +125,16 @@ gcli_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gcli_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                         gcli_id const issue, char const *const labels[],
-                         size_t const labels_size)
+gcli_issue_remove_labels(struct gcli_ctx *ctx, char const *owner,
+                         char const *repo, gcli_id const issue,
+                         char const *const labels[], size_t const labels_size)
 {
 	gcli_null_check_call(issue_remove_labels, ctx, owner, repo, issue,
 	                     labels, labels_size);
 }
 
 int
-gcli_issue_set_milestone(gcli_ctx *ctx, char const *const owner,
+gcli_issue_set_milestone(struct gcli_ctx *ctx, char const *const owner,
                          char const *const repo, gcli_id const issue,
                          int const milestone)
 {
@@ -143,14 +143,14 @@ gcli_issue_set_milestone(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-gcli_issue_clear_milestone(gcli_ctx *ctx, char const *const owner,
+gcli_issue_clear_milestone(struct gcli_ctx *ctx, char const *const owner,
                            char const *const repo, gcli_id const issue)
 {
 	gcli_null_check_call(issue_clear_milestone, ctx, owner, repo, issue);
 }
 
 int
-gcli_issue_set_title(gcli_ctx *ctx, char const *owner, char const *repo,
+gcli_issue_set_title(struct gcli_ctx *ctx, char const *owner, char const *repo,
                      gcli_id issue, char const *new_title)
 {
 	gcli_null_check_call(issue_set_title, ctx, owner, repo, issue,
@@ -158,8 +158,9 @@ gcli_issue_set_title(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gcli_issue_get_attachments(gcli_ctx *ctx, char const *owner, char const *repo,
-                           gcli_id issue, gcli_attachment_list *out)
+gcli_issue_get_attachments(struct gcli_ctx *ctx, char const *owner,
+                           char const *repo, gcli_id issue,
+                           gcli_attachment_list *out)
 {
 	gcli_forge_descriptor const *const forge =
 		gcli_forge(ctx);
@@ -175,4 +176,3 @@ gcli_issue_get_attachments(gcli_ctx *ctx, char const *owner, char const *repo,
 		                                              issue, out);
 	}
 }
-

@@ -35,7 +35,7 @@
 #include <stdlib.h>
 
 int
-gcli_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
+gcli_get_releases(struct gcli_ctx *ctx, char const *owner, char const *repo,
                   int const max, gcli_release_list *const list)
 {
 	gcli_null_check_call(get_releases, ctx, owner, repo, max, list);
@@ -73,13 +73,13 @@ gcli_free_releases(gcli_release_list *const list)
 }
 
 int
-gcli_create_release(gcli_ctx *ctx, gcli_new_release const *release)
+gcli_create_release(struct gcli_ctx *ctx, gcli_new_release const *release)
 {
 	gcli_null_check_call(create_release, ctx, release);
 }
 
 int
-gcli_release_push_asset(gcli_ctx *ctx, gcli_new_release *const release,
+gcli_release_push_asset(struct gcli_ctx *ctx, gcli_new_release *const release,
                         gcli_release_asset_upload const asset)
 {
 	if (release->assets_size == GCLI_RELEASE_MAX_ASSETS)
@@ -91,7 +91,7 @@ gcli_release_push_asset(gcli_ctx *ctx, gcli_new_release *const release,
 }
 
 int
-gcli_delete_release(gcli_ctx *ctx, char const *const owner,
+gcli_delete_release(struct gcli_ctx *ctx, char const *const owner,
                     char const *const repo, char const *const id)
 {
 	gcli_null_check_call(delete_release, ctx, owner, repo, id);

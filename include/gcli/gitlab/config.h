@@ -38,6 +38,6 @@
 
 #include <gcli/gcli.h>
 
-char *gitlab_make_authheader(gcli_ctx *ctx, char const *token);
+char *gitlab_make_authheader(struct gcli_ctx *ctx, char const *token);
 
 #endif /* GITLAB_CONFIG_H */

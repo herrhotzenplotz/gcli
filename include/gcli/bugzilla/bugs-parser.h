@@ -38,29 +38,31 @@
 
 #include <pdjson/pdjson.h>
 
-int parse_bugzilla_bug_comments_dictionary_skip_first(gcli_ctx *const ctx,
+int parse_bugzilla_bug_comments_dictionary_skip_first(struct gcli_ctx *const ctx,
                                                       json_stream *stream,
                                                       gcli_comment_list *out);
 
-int parse_bugzilla_comments_array_skip_first(gcli_ctx *ctx,
+int parse_bugzilla_comments_array_skip_first(struct gcli_ctx *ctx,
                                              struct json_stream *stream,
                                              gcli_comment_list *out);
 
-int parse_bugzilla_bug_comments_dictionary_only_first(gcli_ctx *const ctx,
+int parse_bugzilla_bug_comments_dictionary_only_first(struct gcli_ctx *const ctx,
                                                       json_stream *stream,
                                                       char **out);
 
-int parse_bugzilla_comments_array_only_first(gcli_ctx *ctx,
+int parse_bugzilla_comments_array_only_first(struct gcli_ctx *ctx,
                                              struct json_stream *stream,
                                              char **out);
 
-int parse_bugzilla_assignee(gcli_ctx *ctx, struct json_stream *stream,
+int parse_bugzilla_assignee(struct gcli_ctx *ctx, struct json_stream *stream,
                             gcli_issue *out);
 
-int parse_bugzilla_bug_attachments_dict(gcli_ctx *ctx, json_stream *stream,
+int parse_bugzilla_bug_attachments_dict(struct gcli_ctx *ctx,
+                                        struct json_stream *stream,
                                         gcli_attachment_list *out);
 
-int parse_bugzilla_attachment_content_only_first(gcli_ctx *ctx, json_stream *stream,
+int parse_bugzilla_attachment_content_only_first(struct gcli_ctx *ctx,
+                                                 json_stream *stream,
                                                  gcli_attachment *out);
 
 #endif /* GCLI_BUGZILLA_BUGS_PARSER_H */

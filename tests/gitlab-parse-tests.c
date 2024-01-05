@@ -16,16 +16,16 @@
 #include "gcli_tests.h"
 
 static gcli_forge_type
-get_gitlab_forge_type(gcli_ctx *ctx)
+get_gitlab_forge_type(struct gcli_ctx *ctx)
 {
 	(void) ctx;
 	return GCLI_FORGE_GITLAB;
 }
 
-static gcli_ctx *
+static struct gcli_ctx *
 test_context(void)
 {
-	gcli_ctx *ctx;
+	struct gcli_ctx *ctx;
 	ATF_REQUIRE(gcli_init(&ctx, get_gitlab_forge_type, NULL, NULL) == NULL);
 	return ctx;
 }
@@ -47,7 +47,7 @@ ATF_TC_WITHOUT_HEAD(gitlab_simple_merge_request);
 ATF_TC_BODY(gitlab_simple_merge_request, tc)
 {
 	json_stream stream = {0};
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_merge_request.json");
 	gcli_pull pull = {0};
 
@@ -87,7 +87,7 @@ ATF_TC_WITHOUT_HEAD(gitlab_simple_issue);
 ATF_TC_BODY(gitlab_simple_issue, tc)
 {
 	json_stream stream = {0};
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_issue.json");
 	gcli_issue issue = {0};
 
@@ -118,7 +118,7 @@ ATF_TC_WITHOUT_HEAD(gitlab_simple_label);
 ATF_TC_BODY(gitlab_simple_label, tc)
 {
 	json_stream stream = {0};
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_label.json");
 	gcli_label label = {0};
 
@@ -139,7 +139,7 @@ ATF_TC_WITHOUT_HEAD(gitlab_simple_release);
 ATF_TC_BODY(gitlab_simple_release, tc)
 {
 	json_stream stream = {0};
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_release.json");
 	gcli_release release = {0};
 
@@ -192,7 +192,7 @@ ATF_TC_WITHOUT_HEAD(gitlab_simple_fork);
 ATF_TC_BODY(gitlab_simple_fork, tc)
 {
 	json_stream stream = {0};
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_fork.json");
 	gcli_fork fork = {0};
 
@@ -213,7 +213,7 @@ ATF_TC_WITHOUT_HEAD(gitlab_simple_milestone);
 ATF_TC_BODY(gitlab_simple_milestone, tc)
 {
 	json_stream stream = {0};
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_milestone.json");
 	gcli_milestone milestone = {0};
 
@@ -242,7 +242,7 @@ ATF_TC_WITHOUT_HEAD(gitlab_simple_pipeline);
 ATF_TC_BODY(gitlab_simple_pipeline, tc)
 {
 	json_stream stream = {0};
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_pipeline.json");
 	gitlab_pipeline pipeline = {0};
 
@@ -266,7 +266,7 @@ ATF_TC_WITHOUT_HEAD(gitlab_simple_repo);
 ATF_TC_BODY(gitlab_simple_repo, tc)
 {
 	json_stream stream = {0};
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_repo.json");
 	gcli_repo repo = {0};
 
@@ -290,7 +290,7 @@ ATF_TC_WITHOUT_HEAD(gitlab_simple_snippet);
 ATF_TC_BODY(gitlab_simple_snippet, tc)
 {
 	json_stream stream = {0};
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_snippet.json");
 	gcli_gitlab_snippet snippet = {0};
 

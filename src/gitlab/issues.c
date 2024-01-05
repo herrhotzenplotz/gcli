@@ -40,7 +40,7 @@
 
 /** Given the url fetch issues */
 int
-gitlab_fetch_issues(gcli_ctx *ctx, char *url, int const max,
+gitlab_fetch_issues(struct gcli_ctx *ctx, char *url, int const max,
                     gcli_issue_list *const out)
 {
 	gcli_fetch_list_ctx fl = {
@@ -54,7 +54,7 @@ gitlab_fetch_issues(gcli_ctx *ctx, char *url, int const max,
 }
 
 int
-gitlab_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_get_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
                   gcli_issue_fetch_details const *details, int const max,
                   gcli_issue_list *const out)
 {
@@ -110,8 +110,9 @@ gitlab_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_get_issue_summary(gcli_ctx *ctx, char const *owner, char const *repo,
-                         gcli_id const issue_number, gcli_issue *const out)
+gitlab_get_issue_summary(struct gcli_ctx *ctx, char const *owner,
+                         char const *repo, gcli_id const issue_number,
+                         gcli_issue *const out)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -143,7 +144,7 @@ gitlab_get_issue_summary(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 static int
-gitlab_issue_patch_state(gcli_ctx *const ctx, char const *const owner,
+gitlab_issue_patch_state(struct gcli_ctx *const ctx, char const *const owner,
                          char const *const repo, gcli_id const issue,
                          char const *const new_state)
 {
@@ -182,21 +183,21 @@ gitlab_issue_patch_state(gcli_ctx *const ctx, char const *const owner,
 }
 
 int
-gitlab_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_issue_close(struct gcli_ctx *ctx, char const *owner, char const *repo,
                    gcli_id const issue)
 {
 	return gitlab_issue_patch_state(ctx, owner, repo, issue, "close");
 }
 
 int
-gitlab_issue_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_issue_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
                     gcli_id const issue)
 {
 	return gitlab_issue_patch_state(ctx, owner, repo, issue, "reopen");
 }
 
 int
-gitlab_perform_submit_issue(gcli_ctx *ctx, gcli_submit_issue_options opts,
+gitlab_perform_submit_issue(struct gcli_ctx *ctx, gcli_submit_issue_options opts,
                             gcli_fetch_buffer *const out)
 {
 	char *e_owner = NULL, *e_repo = NULL, *url = NULL, *payload = NULL;
@@ -235,7 +236,7 @@ gitlab_perform_submit_issue(gcli_ctx *ctx, gcli_submit_issue_options opts,
 }
 
 int
-gitlab_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_issue_assign(struct gcli_ctx *ctx, char const *owner, char const *repo,
                     gcli_id const issue_number, char const *assignee)
 {
 	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
@@ -279,7 +280,7 @@ gitlab_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 static int
-gitlab_issues_update_labels(gcli_ctx *const ctx, char const *const owner,
+gitlab_issues_update_labels(struct gcli_ctx *const ctx, char const *const owner,
                             char const *const repo, gcli_id const issue,
                             char const *const labels[], size_t const labels_size,
                             char const *const what)
@@ -325,25 +326,25 @@ gitlab_issues_update_labels(gcli_ctx *const ctx, char const *const owner,
 }
 
 int
-gitlab_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                        gcli_id const issue, char const *const labels[],
-                        size_t const labels_size)
+gitlab_issue_add_labels(struct gcli_ctx *ctx, char const *owner,
+                        char const *repo, gcli_id const issue,
+                        char const *const labels[], size_t const labels_size)
 {
 	return gitlab_issues_update_labels(ctx, owner, repo, issue, labels,
 	                                   labels_size, "add_labels");
 }
 
 int
-gitlab_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                           gcli_id const issue, char const *const labels[],
-                           size_t const labels_size)
+gitlab_issue_remove_labels(struct gcli_ctx *ctx, char const *owner,
+                           char const *repo, gcli_id const issue,
+                           char const *const labels[], size_t const labels_size)
 {
 	return gitlab_issues_update_labels(ctx, owner, repo, issue, labels,
 	                                   labels_size, "remove_labels");
 }
 
 int
-gitlab_issue_set_milestone(gcli_ctx *ctx, char const *const owner,
+gitlab_issue_set_milestone(struct gcli_ctx *ctx, char const *const owner,
                            char const *const repo, gcli_id const issue,
                            gcli_id const milestone)
 {
@@ -365,7 +366,7 @@ gitlab_issue_set_milestone(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-gitlab_issue_clear_milestone(gcli_ctx *ctx, char const *const owner,
+gitlab_issue_clear_milestone(struct gcli_ctx *ctx, char const *const owner,
                              char const *const repo, gcli_id const issue)
 {
 	char *url, *e_owner, *e_repo;
@@ -400,8 +401,9 @@ gitlab_issue_clear_milestone(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-gitlab_issue_set_title(gcli_ctx *ctx, char const *owner, char const *repo,
-                       gcli_id issue, char const *const new_title)
+gitlab_issue_set_title(struct gcli_ctx *ctx, char const *owner,
+                       char const *repo, gcli_id issue,
+                       char const *const new_title)
 {
 	char *url, *e_owner, *e_repo, *payload;
 	gcli_jsongen gen = {0};

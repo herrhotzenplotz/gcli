@@ -32,7 +32,7 @@
 
 #include <gcli/attachments.h>
 
-int bugzilla_attachment_get_content(gcli_ctx *ctx, gcli_id attachment_id,
+int bugzilla_attachment_get_content(struct gcli_ctx *ctx, gcli_id attachment_id,
                                     FILE *output);
 
 #endif /* GCLI_BUGZILLA_ATTACHMENTS_H */

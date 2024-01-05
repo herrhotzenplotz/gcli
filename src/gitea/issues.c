@@ -39,7 +39,7 @@
 #include <pdjson/pdjson.h>
 
 int
-gitea_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
+gitea_get_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
                  gcli_issue_fetch_details const *details, int const max,
                  gcli_issue_list *const out)
 {
@@ -47,14 +47,15 @@ gitea_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitea_get_issue_summary(gcli_ctx *ctx, char const *owner, char const *repo,
-                        gcli_id const issue_number, gcli_issue *const out)
+gitea_get_issue_summary(struct gcli_ctx *ctx, char const *owner,
+                        char const *repo, gcli_id const issue_number,
+                        gcli_issue *const out)
 {
 	return github_get_issue_summary(ctx, owner, repo, issue_number, out);
 }
 
 int
-gitea_submit_issue(gcli_ctx *ctx, gcli_submit_issue_options opts,
+gitea_submit_issue(struct gcli_ctx *ctx, gcli_submit_issue_options opts,
                    gcli_fetch_buffer *const out)
 {
 	return github_perform_submit_issue(ctx,opts, out);
@@ -62,7 +63,7 @@ gitea_submit_issue(gcli_ctx *ctx, gcli_submit_issue_options opts,
 
 /* Gitea has closed, Github has close ... go figure */
 static int
-gitea_issue_patch_state(gcli_ctx *ctx, char const *owner, char const *repo,
+gitea_issue_patch_state(struct gcli_ctx *ctx, char const *owner, char const *repo,
                         int const issue_number, char const *const state)
 {
 	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
@@ -98,21 +99,21 @@ gitea_issue_patch_state(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitea_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
+gitea_issue_close(struct gcli_ctx *ctx, char const *owner, char const *repo,
                   gcli_id const issue_number)
 {
 	return gitea_issue_patch_state(ctx, owner, repo, issue_number, "closed");
 }
 
 int
-gitea_issue_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
+gitea_issue_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
                    gcli_id const issue_number)
 {
 	return gitea_issue_patch_state(ctx, owner, repo, issue_number, "open");
 }
 
 int
-gitea_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
+gitea_issue_assign(struct gcli_ctx *ctx, char const *owner, char const *repo,
                    gcli_id const issue_number, char const *const assignee)
 {
 	char *url = NULL, *e_owner = NULL, *e_repo = NULL, *payload = NULL;
@@ -172,7 +173,7 @@ free_id_list(char *list[], size_t const list_size)
 }
 
 static char **
-label_names_to_ids(gcli_ctx *ctx, char const *owner, char const *repo,
+label_names_to_ids(struct gcli_ctx *ctx, char const *owner, char const *repo,
                    char const *const names[], size_t const names_size)
 {
 	gcli_label_list list = {0};
@@ -202,7 +203,7 @@ out:
 }
 
 int
-gitea_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+gitea_issue_add_labels(struct gcli_ctx *ctx, char const *owner, char const *repo,
                        gcli_id const issue, char const *const labels[],
                        size_t const labels_size)
 {
@@ -250,9 +251,9 @@ gitea_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitea_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                          gcli_id const issue, char const *const labels[],
-                          size_t const labels_size)
+gitea_issue_remove_labels(struct gcli_ctx *ctx, char const *owner,
+                          char const *repo, gcli_id const issue,
+                          char const *const labels[], size_t const labels_size)
 {
 	int rc = 0;
 	char *e_owner, *e_repo;
@@ -289,7 +290,7 @@ gitea_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitea_issue_set_milestone(gcli_ctx *ctx, char const *const owner,
+gitea_issue_set_milestone(struct gcli_ctx *ctx, char const *const owner,
                           char const *const repo, gcli_id const issue,
                           gcli_id const milestone)
 {
@@ -297,14 +298,14 @@ gitea_issue_set_milestone(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-gitea_issue_clear_milestone(gcli_ctx *ctx, char const *owner,
+gitea_issue_clear_milestone(struct gcli_ctx *ctx, char const *owner,
                             char const *repo, gcli_id issue)
 {
 	return github_issue_set_milestone(ctx, owner, repo, issue, 0);
 }
 
 int
-gitea_issue_set_title(gcli_ctx *ctx, char const *const owner,
+gitea_issue_set_title(struct gcli_ctx *ctx, char const *const owner,
                       char const *const repo, gcli_id const issue,
                       char const *const new_title)
 {

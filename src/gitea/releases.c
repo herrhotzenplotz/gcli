@@ -37,14 +37,14 @@
 #include <templates/github/releases.h>
 
 int
-gitea_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
+gitea_get_releases(struct gcli_ctx *ctx, char const *owner, char const *repo,
                    int const max, gcli_release_list *const list)
 {
 	return github_get_releases(ctx, owner, repo, max, list);
 }
 
 static void
-gitea_parse_release(gcli_ctx *ctx, gcli_fetch_buffer const *const buffer,
+gitea_parse_release(struct gcli_ctx *ctx, gcli_fetch_buffer const *const buffer,
                     gcli_release *const out)
 {
 	json_stream stream = {0};
@@ -54,7 +54,7 @@ gitea_parse_release(gcli_ctx *ctx, gcli_fetch_buffer const *const buffer,
 }
 
 static int
-gitea_upload_release_asset(gcli_ctx *ctx, char *const url,
+gitea_upload_release_asset(struct gcli_ctx *ctx, char *const url,
                            gcli_release_asset_upload const asset)
 {
 	char *e_assetname = NULL;
@@ -75,7 +75,7 @@ gitea_upload_release_asset(gcli_ctx *ctx, char *const url,
 }
 
 int
-gitea_create_release(gcli_ctx *ctx, gcli_new_release const *release)
+gitea_create_release(struct gcli_ctx *ctx, gcli_new_release const *release)
 {
 	char *e_owner = NULL, *e_repo = NULL, *payload = NULL, *upload_url = NULL, *url = NULL;
 	gcli_fetch_buffer buffer = {0};
@@ -152,7 +152,7 @@ out:
 }
 
 int
-gitea_delete_release(gcli_ctx *ctx, char const *owner, char const *repo,
+gitea_delete_release(struct gcli_ctx *ctx, char const *owner, char const *repo,
                      char const *id)
 {
 	return github_delete_release(ctx, owner, repo, id);

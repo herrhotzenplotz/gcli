@@ -37,7 +37,7 @@
 #include <pdjson/pdjson.h>
 
 int
-gitlab_get_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_get_labels(struct gcli_ctx *ctx, char const *owner, char const *repo,
                   int const max, gcli_label_list *const out)
 {
 	char *url = NULL;
@@ -57,7 +57,7 @@ gitlab_get_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_create_label(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_create_label(struct gcli_ctx *ctx, char const *owner, char const *repo,
                     gcli_label *const label)
 {
 	char *url = NULL, *payload = NULL, *colour_string = NULL, *e_owner = NULL,
@@ -116,7 +116,7 @@ gitlab_create_label(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_delete_label(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_delete_label(struct gcli_ctx *ctx, char const *owner, char const *repo,
                     char const *label)
 {
 	char *url = NULL;

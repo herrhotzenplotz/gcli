@@ -357,7 +357,7 @@ gcli_pull_commits(char const *owner, char const *repo,
 }
 
 static void
-pull_init_user_file(gcli_ctx *ctx, FILE *stream, void *_opts)
+pull_init_user_file(struct gcli_ctx *ctx, FILE *stream, void *_opts)
 {
 	gcli_submit_pull_options *opts = _opts;
 

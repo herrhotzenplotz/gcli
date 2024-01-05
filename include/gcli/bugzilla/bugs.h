@@ -38,23 +38,25 @@
 
 #include <pdjson/pdjson.h>
 
-int bugzilla_get_bugs(gcli_ctx *ctx, char const *product, char const *component,
+int bugzilla_get_bugs(struct gcli_ctx *ctx, char const *product,
+                      char const *component,
                       gcli_issue_fetch_details const *details, int const max,
                       gcli_issue_list *out);
 
-int bugzilla_get_bug(gcli_ctx *ctx, char const *product, char const *component,
-                     gcli_id bug_id, gcli_issue *out);
+int bugzilla_get_bug(struct gcli_ctx *ctx, char const *product,
+                     char const *component, gcli_id bug_id, gcli_issue *out);
 
-int bugzilla_bug_get_comments(gcli_ctx *const ctx, char const *const product,
+int bugzilla_bug_get_comments(struct gcli_ctx *const ctx,
+                              char const *const product,
                               char const *const component, gcli_id const bug_id,
                               gcli_comment_list *out);
 
-int bugzilla_bug_get_attachments(gcli_ctx *ctx, char const *const product,
+int bugzilla_bug_get_attachments(struct gcli_ctx *ctx, char const *const product,
                                  char const *const component,
                                  gcli_id const bug_id,
                                  gcli_attachment_list *const out);
 
-int bugzilla_bug_submit(gcli_ctx *ctx, gcli_submit_issue_options opts,
+int bugzilla_bug_submit(struct gcli_ctx *ctx, gcli_submit_issue_options opts,
                         gcli_fetch_buffer *out);
 
 #endif /* GCLI_BUGZILLA_BUGS_H */

@@ -55,17 +55,17 @@ struct gcli_label_list {
 	size_t labels_size;
 };
 
-int gcli_get_labels(gcli_ctx *ctx, char const *owner, char const *reponame,
+int gcli_get_labels(struct gcli_ctx *ctx, char const *owner, char const *repo,
                     int max, gcli_label_list *out);
 
 void gcli_free_label(gcli_label *label);
 
 void gcli_free_labels(gcli_label_list *labels);
 
-int gcli_create_label(gcli_ctx *ctx, char const *owner, char const *repo,
+int gcli_create_label(struct gcli_ctx *ctx, char const *owner, char const *repo,
                       gcli_label *label);
 
-int gcli_delete_label(gcli_ctx *ctx, char const *owner, char const *repo,
+int gcli_delete_label(struct gcli_ctx *ctx, char const *owner, char const *repo,
                       char const *label);
 
 #endif /* LABELS_H */

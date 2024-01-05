@@ -38,6 +38,6 @@
 
 #include <sn/sn.h>
 
-char *gitea_make_authheader(gcli_ctx *ctx, char const *token);
+char *gitea_make_authheader(struct gcli_ctx *ctx, char const *token);
 
 #endif /* GITEA_CONFIG_H */

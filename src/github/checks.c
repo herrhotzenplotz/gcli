@@ -41,7 +41,7 @@
 #include <pdjson/pdjson.h>
 
 int
-github_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
+github_get_checks(struct gcli_ctx *ctx, char const *owner, char const *repo,
                   char const *ref, int const max, github_check_list *const out)
 {
 	gcli_fetch_buffer buffer = {0};

@@ -60,7 +60,7 @@ gcli_curl_isalnum(char const c)
 
 /* XXX move to gcli_ctx destructor */
 void
-gcli_curl_ctx_destroy(gcli_ctx *ctx)
+gcli_curl_ctx_destroy(struct gcli_ctx *ctx)
 {
 	if (ctx->curl)
 		curl_easy_cleanup(ctx->curl);
@@ -70,7 +70,7 @@ gcli_curl_ctx_destroy(gcli_ctx *ctx)
 /* Ensures a clean cURL handle. Call this whenever you wanna use the
  * ctx->curl */
 static int
-gcli_curl_ensure(gcli_ctx *ctx)
+gcli_curl_ensure(struct gcli_ctx *ctx)
 {
 	if (ctx->curl) {
 		curl_easy_reset(ctx->curl);
@@ -86,7 +86,7 @@ gcli_curl_ensure(gcli_ctx *ctx)
 /* Check the given curl code for an OK result. If not, print an
  * appropriate error message and exit */
 static int
-gcli_curl_check_api_error(gcli_ctx *ctx, CURLcode code, char const *url,
+gcli_curl_check_api_error(struct gcli_ctx *ctx, CURLcode code, char const *url,
                           gcli_fetch_buffer *const result)
 {
 	long status_code = 0;
@@ -131,7 +131,7 @@ fetch_write_callback(char *in, size_t size, size_t nmemb, void *data)
  * pagination_next returns the next url to query for paged results.
  * Results are placed into the gcli_fetch_buffer. */
 int
-gcli_fetch(gcli_ctx *ctx, char const *url, char **const pagination_next,
+gcli_fetch(struct gcli_ctx *ctx, char const *url, char **const pagination_next,
            gcli_fetch_buffer *out)
 {
 	return gcli_fetch_with_method(ctx, "GET", url, NULL, pagination_next, out);
@@ -141,7 +141,7 @@ static int
 gcli_report_progress(void *_ctx, double dltotal, double dlnow,
                      double ultotal, double ulnow)
 {
-	gcli_ctx *ctx = _ctx;
+	struct gcli_ctx *ctx = _ctx;
 
 	(void) dltotal;
 	(void) dlnow;
@@ -156,7 +156,7 @@ gcli_report_progress(void *_ctx, double dltotal, double dlnow,
 
 /* Check the given url for a successful query */
 int
-gcli_curl_test_success(gcli_ctx *ctx, char const *url)
+gcli_curl_test_success(struct gcli_ctx *ctx, char const *url)
 {
 	CURLcode ret;
 	gcli_fetch_buffer buffer = {0};
@@ -213,7 +213,8 @@ gcli_curl_test_success(gcli_ctx *ctx, char const *url)
  *
  * content_type may be NULL. */
 int
-gcli_curl(gcli_ctx *ctx, FILE *stream, char const *url, char const *content_type)
+gcli_curl(struct gcli_ctx *ctx, FILE *stream, char const *url,
+          char const *content_type)
 {
 	CURLcode ret;
 	struct curl_slist *headers;
@@ -351,7 +352,7 @@ parse_link_header(char *_header)
  * will be set to NULL. */
 int
 gcli_fetch_with_method(
-	gcli_ctx *ctx,
+	struct gcli_ctx *ctx,
 	char const *method,         /* HTTP method. e.g. POST, GET, DELETE etc. */
 	char const *url,            /* Endpoint                                 */
 	char const *data,           /* Form data                                */
@@ -454,7 +455,7 @@ gcli_fetch_with_method(
  * content_type may not be NULL.
  */
 int
-gcli_post_upload(gcli_ctx *ctx, char const *url, char const *content_type,
+gcli_post_upload(struct gcli_ctx *ctx, char const *url, char const *content_type,
                  void *buffer, size_t const buffer_size,
                  gcli_fetch_buffer *const out)
 {
@@ -522,7 +523,7 @@ gcli_post_upload(gcli_ctx *ctx, char const *url, char const *content_type,
  *  code.
  */
 int
-gcli_curl_gitea_upload_attachment(gcli_ctx *ctx, char const *url,
+gcli_curl_gitea_upload_attachment(struct gcli_ctx *ctx, char const *url,
                                   char const *filename,
                                   gcli_fetch_buffer *const out)
 {
@@ -625,7 +626,7 @@ gcli_urlencode(char const *input)
 }
 
 char *
-gcli_urldecode(gcli_ctx *ctx, char const *input)
+gcli_urldecode(struct gcli_ctx *ctx, char const *input)
 {
 	char *curlresult, *result;
 
@@ -657,7 +658,7 @@ gcli_urldecode(gcli_ctx *ctx, char const *input)
  *
  * If max is -1 then everything will be fetched. */
 int
-gcli_fetch_list(gcli_ctx *ctx, char *url, gcli_fetch_list_ctx *fl)
+gcli_fetch_list(struct gcli_ctx *ctx, char *url, gcli_fetch_list_ctx *fl)
 {
 	char *next_url = NULL;
 	int rc;

@@ -35,7 +35,7 @@
 #include <templates/gitlab/comments.h>
 
 int
-gitlab_perform_submit_comment(gcli_ctx *ctx, gcli_submit_comment_opts opts,
+gitlab_perform_submit_comment(struct gcli_ctx *ctx, gcli_submit_comment_opts opts,
                               gcli_fetch_buffer *const out)
 {
 	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
@@ -81,7 +81,7 @@ gitlab_perform_submit_comment(gcli_ctx *ctx, gcli_submit_comment_opts opts,
 }
 
 int
-gitlab_get_mr_comments(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_get_mr_comments(struct gcli_ctx *ctx, char const *owner, char const *repo,
                        gcli_id const mr, gcli_comment_list *const out)
 {
 	char *e_owner = gcli_urlencode(owner);
@@ -106,8 +106,9 @@ gitlab_get_mr_comments(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_get_issue_comments(gcli_ctx *ctx, char const *owner, char const *repo,
-                          gcli_id const issue, gcli_comment_list *const out)
+gitlab_get_issue_comments(struct gcli_ctx *ctx, char const *owner,
+                          char const *repo, gcli_id const issue,
+                          gcli_comment_list *const out)
 {
 	char *e_owner = gcli_urlencode(owner);
 	char *e_repo = gcli_urlencode(repo);

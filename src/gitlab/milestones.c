@@ -43,7 +43,7 @@
 #include <time.h>
 
 int
-gitlab_get_milestones(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_get_milestones(struct gcli_ctx *ctx, char const *owner, char const *repo,
                       int max, gcli_milestone_list *const out)
 {
 	char *url;
@@ -69,7 +69,7 @@ gitlab_get_milestones(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_get_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_get_milestone(struct gcli_ctx *ctx, char const *owner, char const *repo,
                      gcli_id const milestone, gcli_milestone *const out)
 {
 	char *url, *e_owner, *e_repo;
@@ -99,7 +99,7 @@ gitlab_get_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
+gitlab_milestone_get_issues(struct gcli_ctx *ctx, char const *const owner,
                             char const *const repo, gcli_id const milestone,
                             gcli_issue_list *const out)
 {
@@ -119,7 +119,7 @@ gitlab_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-gitlab_create_milestone(gcli_ctx *ctx,
+gitlab_create_milestone(struct gcli_ctx *ctx,
                         struct gcli_milestone_create_args const *args)
 {
 	char *url, *e_owner, *e_repo, *e_title, *json_body, *description = NULL;
@@ -159,7 +159,7 @@ gitlab_create_milestone(gcli_ctx *ctx,
 }
 
 int
-gitlab_delete_milestone(gcli_ctx *ctx, char const *const owner,
+gitlab_delete_milestone(struct gcli_ctx *ctx, char const *const owner,
                         char const *const repo, gcli_id const milestone)
 {
 	char *url, *e_owner, *e_repo;
@@ -181,7 +181,7 @@ gitlab_delete_milestone(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-gitlab_milestone_set_duedate(gcli_ctx *ctx, char const *const owner,
+gitlab_milestone_set_duedate(struct gcli_ctx *ctx, char const *const owner,
                              char const *const repo, gcli_id const milestone,
                              char const *const date)
 {

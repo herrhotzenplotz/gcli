@@ -185,7 +185,7 @@ gcli_releases_print(enum gcli_output_flags const flags,
 }
 
 static void
-releasemsg_init(gcli_ctx *ctx, FILE *f, void *_data)
+releasemsg_init(struct gcli_ctx *ctx, FILE *f, void *_data)
 {
 	gcli_new_release const *info = _data;
 

@@ -34,8 +34,10 @@
 #include <string.h>
 
 char const *
-gcli_init(gcli_ctx **ctx, gcli_forge_type (*get_forge_type)(gcli_ctx *),
-          char *(*get_token)(gcli_ctx *), char *(*get_apibase)(gcli_ctx *))
+gcli_init(struct gcli_ctx **ctx,
+          gcli_forge_type (*get_forge_type)(struct gcli_ctx *),
+          char *(*get_token)(struct gcli_ctx *),
+          char *(*get_apibase)(struct gcli_ctx *))
 {
 	*ctx = calloc(sizeof (struct gcli_ctx), 1);
 	if (!(*ctx))
@@ -51,7 +53,7 @@ gcli_init(gcli_ctx **ctx, gcli_forge_type (*get_forge_type)(gcli_ctx *),
 }
 
 void
-gcli_destroy(gcli_ctx **ctx)
+gcli_destroy(struct gcli_ctx **ctx)
 {
 	if (ctx && *ctx) {
 		free((*ctx)->apibase);
@@ -64,7 +66,7 @@ gcli_destroy(gcli_ctx **ctx)
 }
 
 char const *
-gcli_get_error(gcli_ctx *ctx)
+gcli_get_error(struct gcli_ctx *ctx)
 {
 	if (ctx->last_error)
 		return ctx->last_error;

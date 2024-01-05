@@ -31,7 +31,7 @@
 #include <gcli/labels.h>
 
 int
-gcli_get_labels(gcli_ctx *ctx, char const *owner, char const *reponame,
+gcli_get_labels(struct gcli_ctx *ctx, char const *owner, char const *reponame,
                 int const max, gcli_label_list *const out)
 {
 	gcli_null_check_call(get_labels, ctx, owner, reponame, max, out);
@@ -56,14 +56,14 @@ gcli_free_labels(gcli_label_list *const list)
 }
 
 int
-gcli_create_label(gcli_ctx *ctx, char const *owner, char const *repo,
+gcli_create_label(struct gcli_ctx *ctx, char const *owner, char const *repo,
                   gcli_label *const label)
 {
 	gcli_null_check_call(create_label, ctx, owner, repo, label);
 }
 
 int
-gcli_delete_label(gcli_ctx *ctx, char const *owner, char const *repo,
+gcli_delete_label(struct gcli_ctx *ctx, char const *owner, char const *repo,
                   char const *const label)
 {
 	gcli_null_check_call(delete_label, ctx, owner, repo, label);

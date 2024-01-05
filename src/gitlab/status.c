@@ -38,7 +38,7 @@
 #include <templates/gitlab/status.h>
 
 int
-gitlab_get_notifications(gcli_ctx *ctx, int const max,
+gitlab_get_notifications(struct gcli_ctx *ctx, int const max,
                          gcli_notification_list *const out)
 {
 	char *url = NULL;
@@ -56,7 +56,7 @@ gitlab_get_notifications(gcli_ctx *ctx, int const max,
 }
 
 int
-gitlab_notification_mark_as_read(gcli_ctx *ctx, char const *id)
+gitlab_notification_mark_as_read(struct gcli_ctx *ctx, char const *id)
 {
 	char *url = NULL;
 	int rc = 0;

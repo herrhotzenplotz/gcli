@@ -62,56 +62,59 @@ struct gitlab_diff_list {
 	size_t diffs_size;
 };
 
-int gitlab_fetch_mrs(gcli_ctx *ctx, char *url, int max,
+int gitlab_fetch_mrs(struct gcli_ctx *ctx, char *url, int max,
                      gcli_pull_list *list);
 
-int gitlab_get_mrs(gcli_ctx *ctx, char const *owner,
+int gitlab_get_mrs(struct gcli_ctx *ctx, char const *owner,
                    char const *reponame,
                    gcli_pull_fetch_details const *details,
                    int max,
                    gcli_pull_list *out);
 
-int gitlab_mr_get_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
+int gitlab_mr_get_diff(struct gcli_ctx *ctx, FILE *stream, char const *owner,
                        char const *reponame, gcli_id mr_number);
 
-int gitlab_mr_get_patch(gcli_ctx *ctx, FILE *stream, char const *owner,
+int gitlab_mr_get_patch(struct gcli_ctx *ctx, FILE *stream, char const *owner,
                         char const *reponame, gcli_id mr_number);
 
-int gitlab_mr_merge(gcli_ctx *ctx, char const *owner, char const *reponame,
+int gitlab_mr_merge(struct gcli_ctx *ctx, char const *owner, char const *repo,
                     gcli_id mr_number, enum gcli_merge_flags flags);
 
-int gitlab_mr_close(gcli_ctx *ctx, char const *owner, char const *reponame,
+int gitlab_mr_close(struct gcli_ctx *ctx, char const *owner, char const *repo,
                     gcli_id mr_number);
 
-int gitlab_mr_reopen(gcli_ctx *ctx, char const *owner, char const *reponame,
+int gitlab_mr_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
                      gcli_id mr_number);
 
-int gitlab_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
+int gitlab_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
                     gcli_id mr_number, gcli_pull *out);
 
-int gitlab_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
-                            gcli_id mr_number, gcli_commit_list *out);
+int gitlab_get_pull_commits(struct gcli_ctx *ctx, char const *owner,
+                            char const *repo, gcli_id mr_number,
+                            gcli_commit_list *out);
 
-int gitlab_perform_submit_mr(gcli_ctx *ctx, gcli_submit_pull_options opts);
+int gitlab_perform_submit_mr(struct gcli_ctx *ctx, gcli_submit_pull_options opts);
 
-int gitlab_mr_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                         gcli_id mr_number, char const *const labels[],
-                         size_t labels_size);
+int gitlab_mr_add_labels(struct gcli_ctx *ctx, char const *owner,
+                         char const *repo, gcli_id mr_number,
+                         char const *const labels[], size_t labels_size);
 
-int gitlab_mr_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                            gcli_id mr_number, char const *const labels[],
-                            size_t labels_size);
+int gitlab_mr_remove_labels(struct gcli_ctx *ctx, char const *owner,
+                            char const *repo, gcli_id mr_number,
+                            char const *const labels[], size_t labels_size);
 
-int gitlab_mr_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                            gcli_id mr_number, gcli_id milestone_id);
+int gitlab_mr_set_milestone(struct  gcli_ctx *ctx, char const *owner,
+                            char const *repo, gcli_id mr_number,
+                            gcli_id milestone_id);
 
-int gitlab_mr_clear_milestone(gcli_ctx *ctx, char const *owner,
+int gitlab_mr_clear_milestone(struct gcli_ctx *ctx, char const *owner,
                               char const *repo, gcli_id mr_number);
 
-int gitlab_mr_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
-                           gcli_id mr_number, char const *username);
+int gitlab_mr_add_reviewer(struct gcli_ctx *ctx, char const *owner,
+                           char const *repo, gcli_id mr_number,
+                           char const *username);
 
-int gitlab_mr_set_title(gcli_ctx *ctx, char const *const owner,
+int gitlab_mr_set_title(struct gcli_ctx *ctx, char const *const owner,
                         char const *const repo, gcli_id const id,
                         char const *const new_title);
 

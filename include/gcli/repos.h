@@ -67,18 +67,18 @@ typedef enum {
 	GCLI_REPO_VISIBILITY_PUBLIC,
 } gcli_repo_visibility;
 
-int gcli_get_repos(gcli_ctx *ctx, char const *owner, int max,
+int gcli_get_repos(struct gcli_ctx *ctx, char const *owner, int max,
                    gcli_repo_list *list);
 
 void gcli_repos_free(gcli_repo_list *list);
 void gcli_repo_free(gcli_repo *it);
 
-int gcli_repo_delete(gcli_ctx *ctx, char const *owner, char const *repo);
+int gcli_repo_delete(struct gcli_ctx *ctx, char const *owner, char const *repo);
 
-int gcli_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *,
+int gcli_repo_create(struct gcli_ctx *ctx, gcli_repo_create_options const *,
                      gcli_repo *out);
 
-int gcli_repo_set_visibility(gcli_ctx *ctx, char const *owner, char const *repo,
-                             gcli_repo_visibility visibility);
+int gcli_repo_set_visibility(struct gcli_ctx *ctx, char const *owner,
+                             char const *repo, gcli_repo_visibility visibility);
 
 #endif /* REPOS_H */

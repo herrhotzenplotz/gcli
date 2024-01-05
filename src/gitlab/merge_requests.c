@@ -50,7 +50,7 @@ gitlab_mrs_fixup(gcli_pull_list *const list)
 }
 
 int
-gitlab_fetch_mrs(gcli_ctx *ctx, char *url, int const max,
+gitlab_fetch_mrs(struct gcli_ctx *ctx, char *url, int const max,
                  gcli_pull_list *const list)
 {
 	int rc = 0;
@@ -72,7 +72,7 @@ gitlab_fetch_mrs(gcli_ctx *ctx, char *url, int const max,
 }
 
 int
-gitlab_get_mrs(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_get_mrs(struct gcli_ctx *ctx, char const *owner, char const *repo,
                gcli_pull_fetch_details const *const details, int const max,
                gcli_pull_list *const list)
 {
@@ -172,7 +172,7 @@ gitlab_make_commit_diff(gcli_commit const *const commit,
 }
 
 static int
-gitlab_make_commit_patch(gcli_ctx *ctx, FILE *stream,
+gitlab_make_commit_patch(struct gcli_ctx *ctx, FILE *stream,
                          char const *const e_owner, char const *const e_repo,
                          char const *const prev_commit_sha,
                          gcli_commit const *const commit)
@@ -216,7 +216,7 @@ err_fetch_diffs:
 }
 
 int
-gitlab_mr_get_patch(gcli_ctx *ctx, FILE *stream, char const *owner,
+gitlab_mr_get_patch(struct gcli_ctx *ctx, FILE *stream, char const *owner,
                     char const *reponame, gcli_id mr_number)
 {
 	int rc = 0;
@@ -262,7 +262,7 @@ err_get_pull:
 }
 
 int
-gitlab_mr_get_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
+gitlab_mr_get_diff(struct gcli_ctx *ctx, FILE *stream, char const *owner,
                    char const *reponame, gcli_id mr_number)
 {
 	(void) stream;
@@ -274,7 +274,7 @@ gitlab_mr_get_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
 }
 
 int
-gitlab_mr_merge(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_mr_merge(struct gcli_ctx *ctx, char const *owner, char const *repo,
                 gcli_id const mr_number, enum gcli_merge_flags const flags)
 {
 	gcli_fetch_buffer  buffer  = {0};
@@ -309,7 +309,7 @@ gitlab_mr_merge(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
                 gcli_id const pr_number, gcli_pull *const out)
 {
 	gcli_fetch_buffer json_buffer = {0};
@@ -343,7 +343,7 @@ gitlab_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_get_pull_commits(struct gcli_ctx *ctx, char const *owner, char const *repo,
                         gcli_id const pr_number, gcli_commit_list *const out)
 {
 	char *url = NULL;
@@ -371,7 +371,7 @@ gitlab_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 static int
-gitlab_mr_patch_state(gcli_ctx *const ctx, char const *const owner,
+gitlab_mr_patch_state(struct gcli_ctx *const ctx, char const *const owner,
                       char const *const repo, gcli_id const mr,
                       char const *const new_state)
 {
@@ -410,21 +410,21 @@ gitlab_mr_patch_state(gcli_ctx *const ctx, char const *const owner,
 }
 
 int
-gitlab_mr_close(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_mr_close(struct gcli_ctx *ctx, char const *owner, char const *repo,
                 gcli_id const mr)
 {
 	return gitlab_mr_patch_state(ctx, owner, repo, mr, "close");
 }
 
 int
-gitlab_mr_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_mr_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
                  gcli_id const mr)
 {
 	return gitlab_mr_patch_state(ctx, owner, repo, mr, "reopen");
 }
 
 int
-gitlab_perform_submit_mr(gcli_ctx *ctx, gcli_submit_pull_options opts)
+gitlab_perform_submit_mr(struct gcli_ctx *ctx, gcli_submit_pull_options opts)
 {
 	/* Note: this doesn't really allow merging into repos with
 	 * different names. We need to figure out a way to make this
@@ -504,9 +504,9 @@ gitlab_perform_submit_mr(gcli_ctx *ctx, gcli_submit_pull_options opts)
 }
 
 static int
-gitlab_mr_update_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                        gcli_id const mr, char const *const labels[],
-                        size_t const labels_size,
+gitlab_mr_update_labels(struct gcli_ctx *ctx, char const *owner,
+                        char const *repo, gcli_id const mr,
+                        char const *const labels[], size_t const labels_size,
                         char const *const update_action)
 {
 	char *url  = NULL, *payload = NULL, *list = NULL, *e_owner = NULL,
@@ -547,7 +547,7 @@ gitlab_mr_update_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_mr_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_mr_add_labels(struct gcli_ctx *ctx, char const *owner, char const *repo,
                      gcli_id const mr, char const *const labels[],
                      size_t const labels_size)
 {
@@ -556,17 +556,17 @@ gitlab_mr_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_mr_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                        gcli_id const mr, char const *const labels[],
-                        size_t const labels_size)
+gitlab_mr_remove_labels(struct gcli_ctx *ctx, char const *owner,
+                        char const *repo, gcli_id const mr,
+                        char const *const labels[], size_t const labels_size)
 {
 	return gitlab_mr_update_labels(ctx, owner, repo, mr, labels, labels_size,
 	                               "remove_labels");
 }
 
 int
-gitlab_mr_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                        gcli_id mr, gcli_id milestone_id)
+gitlab_mr_set_milestone(struct gcli_ctx *ctx, char const *owner,
+                        char const *repo, gcli_id mr, gcli_id milestone_id)
 {
 	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
 	gcli_jsongen gen = {0};
@@ -603,8 +603,8 @@ gitlab_mr_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_mr_clear_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                          gcli_id const mr)
+gitlab_mr_clear_milestone(struct gcli_ctx *ctx, char const *owner,
+                          char const *repo, gcli_id const mr)
 {
 	/* GitLab's REST API docs state:
 	 *
@@ -617,8 +617,9 @@ gitlab_mr_clear_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
 /* Helper function to fetch the list of user ids that are reviewers
  * of a merge requests. */
 static int
-gitlab_mr_get_reviewers(gcli_ctx *ctx, char const *e_owner, char const *e_repo,
-                        gcli_id const mr, gitlab_reviewer_id_list *const out)
+gitlab_mr_get_reviewers(struct gcli_ctx *ctx, char const *e_owner,
+                        char const *e_repo, gcli_id const mr,
+                        gitlab_reviewer_id_list *const out)
 {
 	char *url;
 	int rc;
@@ -650,7 +651,7 @@ gitlab_reviewer_list_free(gitlab_reviewer_id_list *const list)
 }
 
 int
-gitlab_mr_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_mr_add_reviewer(struct gcli_ctx *ctx, char const *owner, char const *repo,
                        gcli_id mr_number, char const *username)
 {
 	char *url, *e_owner, *e_repo, *payload;
@@ -713,7 +714,7 @@ bail_get_reviewers:
 }
 
 int
-gitlab_mr_set_title(gcli_ctx *ctx, char const *const owner,
+gitlab_mr_set_title(struct gcli_ctx *ctx, char const *const owner,
                     char const *const repo, gcli_id const id,
                     char const *const new_title)
 {

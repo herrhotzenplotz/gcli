@@ -97,7 +97,7 @@ ctx_config(struct gcli_ctx *ctx)
 }
 
 static bool
-should_init_dotgcli(gcli_ctx *ctx)
+should_init_dotgcli(struct gcli_ctx *ctx)
 {
 	struct gcli_dotgcli *dgcli = ctx_dotgcli(ctx);
 
@@ -178,7 +178,7 @@ find_dotgcli(void)
 }
 
 static void
-init_local_config(gcli_ctx *ctx)
+init_local_config(struct gcli_ctx *ctx)
 {
 	if (!should_init_dotgcli(ctx)) {
 		return;
@@ -378,7 +378,7 @@ parse_config_file(struct gcli_config *cfg,
  * return 0. Otherwise return -1.
  */
 static struct gcli_config *
-ensure_config(gcli_ctx *ctx)
+ensure_config(struct gcli_ctx *ctx)
 {
 	struct gcli_config *cfg = ctx_config(ctx);
 	char *file_path = NULL;
@@ -490,7 +490,7 @@ gcli_config_init_ctx(struct gcli_ctx *ctx)
 }
 
 int
-gcli_config_parse_args(gcli_ctx *ctx, int *argc, char ***argv)
+gcli_config_parse_args(struct gcli_ctx *ctx, int *argc, char ***argv)
 {
 	/* These are the very first options passed to the gcli command
 	 * itself. It is the first ever getopt call we do to parse any
@@ -606,7 +606,7 @@ find_section(struct gcli_config *cfg, char const *name)
 }
 
 struct gcli_config_entries const *
-gcli_config_get_section_entries(gcli_ctx *ctx, char const *section_name)
+gcli_config_get_section_entries(struct gcli_ctx *ctx, char const *section_name)
 {
 	struct gcli_config_section const *s;
 	struct gcli_config *cfg;
@@ -621,7 +621,8 @@ gcli_config_get_section_entries(gcli_ctx *ctx, char const *section_name)
 }
 
 sn_sv
-gcli_config_find_by_key(gcli_ctx *ctx, char const *section_name, char const *key)
+gcli_config_find_by_key(struct gcli_ctx *ctx, char const *section_name,
+                        char const *key)
 {
 	struct gcli_config_entry *entry;
 	struct gcli_config *cfg = ensure_config(ctx);
@@ -643,7 +644,7 @@ gcli_config_find_by_key(gcli_ctx *ctx, char const *section_name, char const *key
 }
 
 static sn_sv
-gcli_local_config_find_by_key(gcli_ctx *ctx, char const *const key)
+gcli_local_config_find_by_key(struct gcli_ctx *ctx, char const *const key)
 {
 	struct gcli_dotgcli *lcfg = ctx_dotgcli(ctx);
 	struct gcli_config_entry *entry;
@@ -657,7 +658,7 @@ gcli_local_config_find_by_key(gcli_ctx *ctx, char const *const key)
 }
 
 char *
-gcli_config_get_editor(gcli_ctx *ctx)
+gcli_config_get_editor(struct gcli_ctx *ctx)
 {
 	ensure_config(ctx);
 
@@ -672,7 +673,7 @@ default_account_entry_names[] = {
 	[GCLI_FORGE_BUGZILLA] = "bugzilla-default-account",};
 
 static char *
-get_default_account(gcli_ctx *ctx, gcli_forge_type ftype)
+get_default_account(struct gcli_ctx *ctx, gcli_forge_type ftype)
 {
 	char const *const defaultname = default_account_entry_names[ftype];
 	sn_sv act = gcli_config_find_by_key(ctx, "defaults", defaultname);
@@ -684,7 +685,7 @@ get_default_account(gcli_ctx *ctx, gcli_forge_type ftype)
 }
 
 static char *
-gcli_config_get_account(gcli_ctx *ctx)
+gcli_config_get_account(struct gcli_ctx *ctx)
 {
 	struct gcli_config *cfg = ctx_config(ctx);
 	gcli_forge_type ftype = gcli_config_get_forge_type(ctx);
@@ -707,7 +708,7 @@ static char const *const default_urls[] = {
 };
 
 char *
-gcli_config_get_apibase(gcli_ctx *ctx)
+gcli_config_get_apibase(struct gcli_ctx *ctx)
 {
 	char *acct = gcli_config_get_account(ctx);
 	char *url = NULL;
@@ -728,7 +729,7 @@ gcli_config_get_apibase(gcli_ctx *ctx)
 }
 
 char *
-gcli_config_get_account_name(gcli_ctx *ctx)
+gcli_config_get_account_name(struct gcli_ctx *ctx)
 {
 	char *account = gcli_config_get_account(ctx);
 	sn_sv actname = gcli_config_find_by_key(
@@ -740,7 +741,7 @@ gcli_config_get_account_name(gcli_ctx *ctx)
 }
 
 static char *
-get_account_token(gcli_ctx *ctx)
+get_account_token(struct gcli_ctx *ctx)
 {
 	char *account;
 	sn_sv token;
@@ -757,7 +758,7 @@ get_account_token(gcli_ctx *ctx)
 }
 
 char *
-gcli_config_get_token(gcli_ctx *ctx)
+gcli_config_get_token(struct gcli_ctx *ctx)
 {
 	ensure_config(ctx);
 
@@ -765,7 +766,7 @@ gcli_config_get_token(gcli_ctx *ctx)
 }
 
 sn_sv
-gcli_config_get_upstream(gcli_ctx *ctx)
+gcli_config_get_upstream(struct  gcli_ctx *ctx)
 {
 	init_local_config(ctx);
 
@@ -773,7 +774,7 @@ gcli_config_get_upstream(gcli_ctx *ctx)
 }
 
 bool
-gcli_config_pr_inhibit_delete_source_branch(gcli_ctx *ctx)
+gcli_config_pr_inhibit_delete_source_branch(struct gcli_ctx *ctx)
 {
 	sn_sv val;
 
@@ -785,7 +786,7 @@ gcli_config_pr_inhibit_delete_source_branch(gcli_ctx *ctx)
 }
 
 void
-gcli_config_get_upstream_parts(gcli_ctx *ctx, sn_sv *const owner,
+gcli_config_get_upstream_parts(struct gcli_ctx *ctx, sn_sv *const owner,
                                sn_sv *const repo)
 {
 	ensure_config(ctx);
@@ -803,7 +804,7 @@ gcli_config_get_upstream_parts(gcli_ctx *ctx, sn_sv *const owner,
 }
 
 sn_sv
-gcli_config_get_base(gcli_ctx *ctx)
+gcli_config_get_base(struct gcli_ctx *ctx)
 {
 	init_local_config(ctx);
 
@@ -811,7 +812,7 @@ gcli_config_get_base(gcli_ctx *ctx)
 }
 
 sn_sv
-gcli_config_get_override_default_account(gcli_ctx *ctx)
+gcli_config_get_override_default_account(struct gcli_ctx *ctx)
 {
 	struct gcli_config *cfg;
 
@@ -825,7 +826,7 @@ gcli_config_get_override_default_account(gcli_ctx *ctx)
 }
 
 static gcli_forge_type
-gcli_config_get_forge_type_internal(gcli_ctx *ctx)
+gcli_config_get_forge_type_internal(struct gcli_ctx *ctx)
 {
 	struct gcli_config *cfg = ctx_config(ctx);
 
@@ -872,7 +873,7 @@ gcli_config_get_forge_type_internal(gcli_ctx *ctx)
 }
 
 gcli_forge_type
-gcli_config_get_forge_type(gcli_ctx *ctx)
+gcli_config_get_forge_type(struct gcli_ctx *ctx)
 {
 	gcli_forge_type const result = gcli_config_get_forge_type_internal(ctx);
 
@@ -896,7 +897,7 @@ gcli_config_get_forge_type(gcli_ctx *ctx)
 }
 
 void
-gcli_config_get_repo(gcli_ctx *ctx, char const **const owner,
+gcli_config_get_repo(struct gcli_ctx *ctx, char const **const owner,
                      char const **const repo)
 {
 	sn_sv upstream = {0};
@@ -932,7 +933,7 @@ gcli_config_get_repo(gcli_ctx *ctx, char const **const owner,
 }
 
 int
-gcli_config_have_colours(gcli_ctx *ctx)
+gcli_config_have_colours(struct gcli_ctx *ctx)
 {
 	static int tested_tty = 0;
 	struct gcli_config *cfg;

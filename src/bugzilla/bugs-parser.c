@@ -37,7 +37,7 @@
 #include <templates/bugzilla/bugs.h>
 
 int
-parse_bugzilla_comments_array_skip_first(gcli_ctx *ctx,
+parse_bugzilla_comments_array_skip_first(struct  gcli_ctx *ctx,
                                          struct json_stream *stream,
                                          gcli_comment_list *out)
 {
@@ -63,7 +63,7 @@ parse_bugzilla_comments_array_skip_first(gcli_ctx *ctx,
 }
 
 int
-parse_bugzilla_comments_array_only_first(gcli_ctx *ctx,
+parse_bugzilla_comments_array_only_first(struct gcli_ctx *ctx,
                                          struct json_stream *stream, char **out)
 {
 	int rc = 0;
@@ -86,7 +86,7 @@ parse_bugzilla_comments_array_only_first(gcli_ctx *ctx,
 }
 
 int
-parse_bugzilla_bug_comments_dictionary_skip_first(gcli_ctx *const ctx,
+parse_bugzilla_bug_comments_dictionary_skip_first(struct gcli_ctx *const ctx,
                                                   json_stream *stream,
                                                   gcli_comment_list *out)
 {
@@ -109,7 +109,7 @@ parse_bugzilla_bug_comments_dictionary_skip_first(gcli_ctx *const ctx,
 }
 
 int
-parse_bugzilla_bug_comments_dictionary_only_first(gcli_ctx *const ctx,
+parse_bugzilla_bug_comments_dictionary_only_first(struct gcli_ctx *const ctx,
                                                   json_stream *stream,
                                                   char **out)
 {
@@ -132,7 +132,7 @@ parse_bugzilla_bug_comments_dictionary_only_first(gcli_ctx *const ctx,
 }
 
 int
-parse_bugzilla_assignee(gcli_ctx *ctx, struct json_stream *stream,
+parse_bugzilla_assignee(struct gcli_ctx *ctx, struct json_stream *stream,
                         gcli_issue *out)
 {
 	out->assignees = calloc(1, sizeof (*out->assignees));
@@ -142,7 +142,8 @@ parse_bugzilla_assignee(gcli_ctx *ctx, struct json_stream *stream,
 }
 
 int
-parse_bugzilla_bug_attachments_dict(gcli_ctx *ctx, json_stream *stream,
+parse_bugzilla_bug_attachments_dict(struct gcli_ctx *ctx,
+                                    struct json_stream *stream,
                                     gcli_attachment_list *out)
 {
 	enum json_type next = JSON_NULL;
@@ -166,7 +167,8 @@ parse_bugzilla_bug_attachments_dict(gcli_ctx *ctx, json_stream *stream,
 }
 
 int
-parse_bugzilla_attachment_content_only_first(gcli_ctx *ctx, json_stream *stream,
+parse_bugzilla_attachment_content_only_first(struct gcli_ctx *ctx,
+                                             struct json_stream *stream,
                                              gcli_attachment *out)
 {
 	enum json_type next = JSON_NULL;

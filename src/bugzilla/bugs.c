@@ -42,7 +42,7 @@
 #include <assert.h>
 
 int
-bugzilla_get_bugs(gcli_ctx *ctx, char const *product, char const *component,
+bugzilla_get_bugs(struct gcli_ctx *ctx, char const *product, char const *component,
                   gcli_issue_fetch_details const *details, int const max,
                   gcli_issue_list *out)
 {
@@ -100,7 +100,7 @@ bugzilla_get_bugs(gcli_ctx *ctx, char const *product, char const *component,
 }
 
 int
-bugzilla_bug_get_comments(gcli_ctx *const ctx, char const *const product,
+bugzilla_bug_get_comments(struct gcli_ctx *const ctx, char const *const product,
                           char const *const component, gcli_id const bug_id,
                           gcli_comment_list *out)
 {
@@ -132,7 +132,7 @@ error_fetch:
 }
 
 static int
-bugzilla_bug_get_op(gcli_ctx *ctx, gcli_id const bug_id, char **out)
+bugzilla_bug_get_op(struct gcli_ctx *ctx, gcli_id const bug_id, char **out)
 {
 	int rc = 0;
 	gcli_fetch_buffer buffer = {0};
@@ -159,8 +159,8 @@ error_fetch:
 }
 
 int
-bugzilla_get_bug(gcli_ctx *ctx, char const *product, char const *component,
-                 gcli_id bug_id, gcli_issue *out)
+bugzilla_get_bug(struct gcli_ctx *ctx, char const *product,
+                 char const *component, gcli_id bug_id, gcli_issue *out)
 {
 	int rc = 0;
 	char *url;
@@ -213,7 +213,7 @@ error_fetch:
 }
 
 int
-bugzilla_bug_get_attachments(gcli_ctx *ctx, char const *const product,
+bugzilla_bug_get_attachments(struct gcli_ctx *ctx, char const *const product,
                              char const *const component, gcli_id const bug_id,
                              gcli_attachment_list *const out)
 {
@@ -275,7 +275,7 @@ add_extra_options(gcli_nvlist const *list, gcli_jsongen *gen)
 }
 
 int
-bugzilla_bug_submit(gcli_ctx *ctx, gcli_submit_issue_options opts,
+bugzilla_bug_submit(struct gcli_ctx *ctx, gcli_submit_issue_options opts,
                     gcli_fetch_buffer *out)
 {
 	char *payload = NULL, *url = NULL;

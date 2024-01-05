@@ -211,7 +211,7 @@ gcli_issue_print_op(gcli_issue const *const it)
 }
 
 static void
-issue_init_user_file(gcli_ctx *ctx, FILE *stream, void *_opts)
+issue_init_user_file(struct gcli_ctx *ctx, FILE *stream, void *_opts)
 {
 	(void) ctx;
 	gcli_submit_issue_options *opts = _opts;

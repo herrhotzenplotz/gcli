@@ -40,7 +40,7 @@
 #include <assert.h>
 
 int
-github_get_repos(gcli_ctx *ctx, char const *owner, int const max,
+github_get_repos(struct gcli_ctx *ctx, char const *owner, int const max,
                  gcli_repo_list *const list)
 {
 	char *url = NULL;
@@ -89,7 +89,8 @@ github_get_repos(gcli_ctx *ctx, char const *owner, int const max,
 }
 
 int
-github_get_own_repos(gcli_ctx *ctx, int const max, gcli_repo_list *const list)
+github_get_own_repos(struct gcli_ctx *ctx, int const max,
+                     gcli_repo_list *const list)
 {
 	char *url = NULL;
 	gcli_fetch_list_ctx fl = {
@@ -105,7 +106,7 @@ github_get_own_repos(gcli_ctx *ctx, int const max, gcli_repo_list *const list)
 }
 
 int
-github_repo_delete(gcli_ctx *ctx, char const *owner, char const *repo)
+github_repo_delete(struct gcli_ctx *ctx, char const *owner, char const *repo)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -129,7 +130,7 @@ github_repo_delete(gcli_ctx *ctx, char const *owner, char const *repo)
 }
 
 int
-github_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *options,
+github_repo_create(struct gcli_ctx *ctx, gcli_repo_create_options const *options,
                    gcli_repo *const out)
 {
 	char *url, *payload;
@@ -178,7 +179,7 @@ github_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *options,
 }
 
 int
-github_repo_set_visibility(gcli_ctx *ctx, char const *const owner,
+github_repo_set_visibility(struct gcli_ctx *ctx, char const *const owner,
                            char const *const repo, gcli_repo_visibility vis)
 {
 	char *url;

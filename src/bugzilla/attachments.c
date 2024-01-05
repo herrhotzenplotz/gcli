@@ -35,7 +35,7 @@
 #include <templates/bugzilla/bugs.h>
 
 int
-bugzilla_attachment_get_content(gcli_ctx *ctx, gcli_id attachment_id,
+bugzilla_attachment_get_content(struct gcli_ctx *ctx, gcli_id attachment_id,
                                 FILE *output)
 {
 	int rc = 0;

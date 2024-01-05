@@ -45,16 +45,16 @@
 #include "gcli_tests.h"
 
 static gcli_forge_type
-get_github_forge_type(gcli_ctx *ctx)
+get_github_forge_type(struct gcli_ctx *ctx)
 {
 	(void) ctx;
 	return GCLI_FORGE_GITHUB;
 }
 
-static gcli_ctx *
+static struct gcli_ctx *
 test_context(void)
 {
-	gcli_ctx *ctx;
+	struct gcli_ctx *ctx;
 	ATF_REQUIRE(gcli_init(&ctx, get_github_forge_type, NULL, NULL) == NULL);
 	return ctx;
 }
@@ -77,7 +77,7 @@ ATF_TC_BODY(simple_github_issue, tc)
 	gcli_issue issue = {0};
 	FILE *f;
 	json_stream stream;
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_issue.json"));
 	json_open_stream(&stream, f);
@@ -118,7 +118,7 @@ ATF_TC_BODY(simple_github_pull, tc)
 	gcli_pull pull = {0};
 	FILE *f;
 	json_stream stream;
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_pull.json"));
 	json_open_stream(&stream, f);
@@ -158,7 +158,7 @@ ATF_TC_BODY(simple_github_label, tc)
 	gcli_label label = {0};
 	FILE *f;
 	json_stream stream;
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_label.json"));
 	json_open_stream(&stream, f);
@@ -181,7 +181,7 @@ ATF_TC_BODY(simple_github_milestone, tc)
 	gcli_milestone milestone = {0};
 	FILE *f;
 	json_stream stream;
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_milestone.json"));
 	json_open_stream(&stream, f);
@@ -210,7 +210,7 @@ ATF_TC_BODY(simple_github_release, tc)
 	gcli_release release = {0};
 	FILE *f;
 	json_stream stream;
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_release.json"));
 	json_open_stream(&stream, f);
@@ -239,7 +239,7 @@ ATF_TC_BODY(simple_github_repo, tc)
 	gcli_repo repo = {0};
 	FILE *f;
 	json_stream stream;
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_repo.json"));
 	json_open_stream(&stream, f);
@@ -265,7 +265,7 @@ ATF_TC_BODY(simple_github_fork, tc)
 	gcli_fork fork = {0};
 	FILE *f;
 	json_stream stream;
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_fork.json"));
 	json_open_stream(&stream, f);
@@ -288,7 +288,7 @@ ATF_TC_BODY(simple_github_comment, tc)
 	gcli_comment comment = {0};
 	FILE *f;
 	json_stream stream;
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_comment.json"));
 	json_open_stream(&stream, f);
@@ -311,7 +311,7 @@ ATF_TC_BODY(simple_github_check, tc)
     gcli_github_check check = {0};
 	FILE *f;
 	json_stream stream;
-	gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_check.json"));
 	json_open_stream(&stream, f);

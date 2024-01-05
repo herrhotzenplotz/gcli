@@ -58,7 +58,7 @@ usage(void)
 }
 
 static void
-comment_init(gcli_ctx *ctx, FILE *f, void *_data)
+comment_init(struct gcli_ctx *ctx, FILE *f, void *_data)
 {
 	gcli_submit_comment_opts *info = _data;
 	const char *target_type = NULL;

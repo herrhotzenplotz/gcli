@@ -56,7 +56,7 @@ gcli_attachment_free(gcli_attachment *it)
 }
 
 int
-gcli_attachment_get_content(gcli_ctx *const ctx, gcli_id const id, FILE *out)
+gcli_attachment_get_content(struct gcli_ctx *const ctx, gcli_id const id, FILE *out)
 {
 	gcli_forge_descriptor const *const forge = gcli_forge(ctx);
 

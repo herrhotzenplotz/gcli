@@ -355,7 +355,7 @@ struct gcli_dict {
 
 	size_t max_key_len;
 
-	gcli_ctx *ctx;
+	struct gcli_ctx *ctx;
 };
 
 /* Create a new long list printer and return a handle to it */

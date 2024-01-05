@@ -56,11 +56,11 @@ struct gcli_gitlab_snippet_list {
 
 void gcli_snippets_free(gcli_gitlab_snippet_list *list);
 
-int gcli_snippets_get(gcli_ctx *ctx, int max, gcli_gitlab_snippet_list *out);
+int gcli_snippets_get(struct gcli_ctx *ctx, int max, gcli_gitlab_snippet_list *out);
 
-int gcli_snippet_delete(gcli_ctx *ctx, char const *snippet_id);
+int gcli_snippet_delete(struct gcli_ctx *ctx, char const *snippet_id);
 
-int gcli_snippet_get(gcli_ctx *ctx, char const *snippet_id, FILE *stream);
+int gcli_snippet_get(struct gcli_ctx *ctx, char const *snippet_id, FILE *stream);
 
 void gcli_gitlab_snippet_free(gcli_gitlab_snippet *snippet);
 #endif /* GITLAB_SNIPPETS_H */

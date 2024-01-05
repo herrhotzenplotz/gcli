@@ -35,7 +35,7 @@
 #include <time.h>
 
 int
-gcli_normalize_date(gcli_ctx *ctx, int fmt, char const *const input,
+gcli_normalize_date(struct gcli_ctx *ctx, int fmt, char const *const input,
                     char *output, size_t const output_size)
 {
 	struct tm tm_buf = {0};

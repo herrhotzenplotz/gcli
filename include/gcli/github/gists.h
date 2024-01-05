@@ -74,14 +74,14 @@ struct gcli_new_gist {
 	char const *gist_description;
 };
 
-int gcli_get_gists(gcli_ctx *ctx, char const *user, int max,
+int gcli_get_gists(struct gcli_ctx *ctx, char const *user, int max,
                    gcli_gist_list *list);
 
-int gcli_get_gist(gcli_ctx *ctx, char const *gist_id, gcli_gist *out);
+int gcli_get_gist(struct gcli_ctx *ctx, char const *gist_id, gcli_gist *out);
 
-int gcli_create_gist(gcli_ctx *ctx, gcli_new_gist);
+int gcli_create_gist(struct gcli_ctx *ctx, gcli_new_gist);
 
-int gcli_delete_gist(gcli_ctx *ctx, char const *gist_id);
+int gcli_delete_gist(struct gcli_ctx *ctx, char const *gist_id);
 
 void gcli_gists_free(gcli_gist_list *list);
 void gcli_gist_free(gcli_gist *g);
@@ -92,7 +92,7 @@ void gcli_gist_free(gcli_gist *g);
  * file names. The objects describing the files obviously contain the
  * file name again. Whatever...here's a hack. Blame GitHub.
  */
-int parse_github_gist_files_idiot_hack(gcli_ctx *ctx, json_stream *stream,
-                                       gcli_gist *gist);
+int parse_github_gist_files_idiot_hack(struct gcli_ctx *ctx,
+                                       json_stream *stream, gcli_gist *gist);
 
 #endif /* GCLI_GITHUB_GISTS_H */

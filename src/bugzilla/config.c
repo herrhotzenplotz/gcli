@@ -31,7 +31,7 @@
 #include <sn/sn.h>
 
 char *
-bugzilla_make_authheader(gcli_ctx *ctx, char const *const token)
+bugzilla_make_authheader(struct gcli_ctx *ctx, char const *const token)
 {
 	(void) ctx;
 	(void) token;

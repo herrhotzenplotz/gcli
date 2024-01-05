@@ -32,6 +32,6 @@
 
 #include <gcli/gcli.h>
 
-char *bugzilla_make_authheader(gcli_ctx *ctx, char const *token);
+char *bugzilla_make_authheader(struct gcli_ctx *ctx, char const *token);
 
 #endif /* GCLI_BUGZILLA_CONFIG_H */

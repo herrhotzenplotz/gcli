@@ -67,7 +67,7 @@ github_hack_fixup_issues_that_are_actually_pulls(gcli_issue **list, size_t *size
 }
 
 int
-github_fetch_issues(gcli_ctx *ctx, char *url, int const max,
+github_fetch_issues(struct gcli_ctx *ctx, char *url, int const max,
                     gcli_issue_list *const out)
 {
 	gcli_fetch_list_ctx fl = {
@@ -82,7 +82,7 @@ github_fetch_issues(gcli_ctx *ctx, char *url, int const max,
 }
 
 static int
-get_milestone_id(gcli_ctx *ctx, char const *owner, char const *repo,
+get_milestone_id(struct gcli_ctx *ctx, char const *owner, char const *repo,
                  char const *milestone_name, gcli_id *out)
 {
 	int rc = 0;
@@ -108,8 +108,8 @@ get_milestone_id(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 static int
-parse_github_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                       char const *milestone, gcli_id *out)
+parse_github_milestone(struct gcli_ctx *ctx, char const *owner,
+                       char const *repo, char const *milestone, gcli_id *out)
 {
 	char *endptr = NULL;
 	size_t const m_len = strlen(milestone);
@@ -124,7 +124,7 @@ parse_github_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-github_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
+github_get_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
                   gcli_issue_fetch_details const *details, int const max,
                   gcli_issue_list *const out)
 {
@@ -180,8 +180,9 @@ github_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-github_get_issue_summary(gcli_ctx *ctx, char const *owner, char const *repo,
-                         gcli_id const issue_number, gcli_issue *const out)
+github_get_issue_summary(struct gcli_ctx *ctx, char const *owner,
+                         char const *repo, gcli_id const issue_number,
+                         gcli_issue *const out)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -215,7 +216,7 @@ github_get_issue_summary(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 static int
-github_issue_patch_state(gcli_ctx *ctx, char const *const owner,
+github_issue_patch_state(struct gcli_ctx *ctx, char const *const owner,
                          char const *const repo, gcli_id const issue,
                          char const *const state)
 {
@@ -240,21 +241,21 @@ github_issue_patch_state(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-github_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
+github_issue_close(struct gcli_ctx *ctx, char const *owner, char const *repo,
                    gcli_id const issue)
 {
 	return github_issue_patch_state(ctx, owner, repo, issue, "closed");
 }
 
 int
-github_issue_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
+github_issue_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
                     gcli_id const issue)
 {
 	return github_issue_patch_state(ctx, owner, repo, issue, "open");
 }
 
 int
-github_perform_submit_issue(gcli_ctx *ctx, gcli_submit_issue_options opts,
+github_perform_submit_issue(struct gcli_ctx *ctx, gcli_submit_issue_options opts,
                             gcli_fetch_buffer *out)
 {
 	char *e_owner = NULL, *e_repo = NULL, *payload = NULL, *url = NULL;
@@ -295,7 +296,7 @@ github_perform_submit_issue(gcli_ctx *ctx, gcli_submit_issue_options opts,
 }
 
 int
-github_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
+github_issue_assign(struct gcli_ctx *ctx, char const *owner, char const *repo,
                     gcli_id const issue_number, char const *assignee)
 {
 	gcli_jsongen gen = {0};
@@ -335,9 +336,9 @@ github_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-github_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                        gcli_id const issue, char const *const labels[],
-                        size_t const labels_size)
+github_issue_add_labels(struct gcli_ctx *ctx, char const *owner,
+                        char const *repo, gcli_id const issue,
+                        char const *const labels[], size_t const labels_size)
 {
 	char *url = NULL;
 	char *data = NULL;
@@ -362,9 +363,9 @@ github_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-github_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                           gcli_id const issue, char const *const labels[],
-                           size_t const labels_size)
+github_issue_remove_labels(struct gcli_ctx *ctx, char const *owner,
+                           char const *repo, gcli_id const issue,
+                           char const *const labels[], size_t const labels_size)
 {
 	char *url = NULL;
 	char *e_label = NULL;
@@ -389,7 +390,7 @@ github_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-github_issue_set_milestone(gcli_ctx *ctx, char const *const owner,
+github_issue_set_milestone(struct gcli_ctx *ctx, char const *const owner,
                            char const *const repo, gcli_id const issue,
                            gcli_id const milestone)
 {
@@ -416,7 +417,7 @@ github_issue_set_milestone(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-github_issue_clear_milestone(gcli_ctx *ctx, char const *const owner,
+github_issue_clear_milestone(struct gcli_ctx *ctx, char const *const owner,
                              char const *const repo, gcli_id const issue)
 {
 	char *url, *e_owner, *e_repo;
@@ -442,7 +443,7 @@ github_issue_clear_milestone(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-github_issue_set_title(gcli_ctx *ctx, char const *const owner,
+github_issue_set_title(struct gcli_ctx *ctx, char const *const owner,
                        char const *const repo, gcli_id const issue,
                        char const *const new_title)
 {

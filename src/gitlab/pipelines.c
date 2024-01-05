@@ -44,7 +44,7 @@
 #include <templates/gitlab/pipelines.h>
 
 static int
-fetch_pipelines(gcli_ctx *ctx, char *url, int const max,
+fetch_pipelines(struct gcli_ctx *ctx, char *url, int const max,
                 gitlab_pipeline_list *const list)
 {
 	gcli_fetch_list_ctx fl = {
@@ -58,7 +58,7 @@ fetch_pipelines(gcli_ctx *ctx, char *url, int const max,
 }
 
 int
-gitlab_get_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_get_pipelines(struct gcli_ctx *ctx, char const *owner, char const *repo,
                      int const max, gitlab_pipeline_list *const list)
 {
 	char *url = NULL;
@@ -74,7 +74,7 @@ gitlab_get_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_get_mr_pipelines(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_get_mr_pipelines(struct gcli_ctx *ctx, char const *owner, char const *repo,
                         gcli_id const mr_id, gitlab_pipeline_list *const list)
 {
 	char *url = NULL;
@@ -115,9 +115,9 @@ gitlab_pipelines_free(gitlab_pipeline_list *const list)
 }
 
 int
-gitlab_get_pipeline_jobs(gcli_ctx *ctx, char const *owner, char const *repo,
-                         gcli_id const pipeline, int const max,
-                         gitlab_job_list *const out)
+gitlab_get_pipeline_jobs(struct gcli_ctx *ctx, char const *owner,
+                         char const *repo, gcli_id const pipeline,
+                         int const max, gitlab_job_list *const out)
 {
 	char *url = NULL, *e_owner = NULL, *e_repo = NULL;
 	gcli_fetch_list_ctx fl = {
@@ -166,7 +166,7 @@ gitlab_free_jobs(gitlab_job_list *list)
 }
 
 int
-gitlab_job_get_log(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_job_get_log(struct gcli_ctx *ctx, char const *owner, char const *repo,
                    gcli_id const job_id, FILE *stream)
 {
 	char *url = NULL, *e_owner = NULL, *e_repo = NULL;
@@ -189,7 +189,7 @@ gitlab_job_get_log(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_get_job(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_get_job(struct gcli_ctx *ctx, char const *owner, char const *repo,
                gcli_id const jid, gitlab_job *const out)
 {
 	gcli_fetch_buffer buffer = {0};
@@ -222,7 +222,7 @@ gitlab_get_job(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_job_cancel(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_job_cancel(struct gcli_ctx *ctx, char const *owner, char const *repo,
                   gcli_id const jid)
 {
 	char *url = NULL, *e_owner = NULL, *e_repo = NULL;
@@ -245,7 +245,7 @@ gitlab_job_cancel(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_job_retry(gcli_ctx *ctx, char const *owner, char const *repo,
+gitlab_job_retry(struct gcli_ctx *ctx, char const *owner, char const *repo,
                  gcli_id const jid)
 {
 	int rc = 0;
@@ -268,7 +268,7 @@ gitlab_job_retry(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_job_download_artifacts(gcli_ctx *ctx, char const *owner,
+gitlab_job_download_artifacts(struct gcli_ctx *ctx, char const *owner,
                               char const *repo, gcli_id const jid,
                               char const *const outfile)
 {

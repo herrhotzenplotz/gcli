@@ -39,7 +39,7 @@
 #include <pdjson/pdjson.h>
 
 int
-gitea_get_milestones(gcli_ctx *ctx, char const *const owner,
+gitea_get_milestones(struct gcli_ctx *ctx, char const *const owner,
                      char const *const repo, int const max,
                      gcli_milestone_list *const out)
 {
@@ -66,7 +66,7 @@ gitea_get_milestones(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-gitea_get_milestone(gcli_ctx *ctx, char const *const owner,
+gitea_get_milestone(struct gcli_ctx *ctx, char const *const owner,
                     char const *const repo, gcli_id const milestone,
                     gcli_milestone *const out)
 {
@@ -100,14 +100,14 @@ gitea_get_milestone(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-gitea_create_milestone(gcli_ctx *ctx,
+gitea_create_milestone(struct gcli_ctx *ctx,
                        struct gcli_milestone_create_args const *args)
 {
 	return github_create_milestone(ctx, args);
 }
 
 int
-gitea_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
+gitea_milestone_get_issues(struct gcli_ctx *ctx, char const *const owner,
                            char const *const repo, gcli_id const milestone,
                            gcli_issue_list *const out)
 {
@@ -126,14 +126,14 @@ gitea_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-gitea_delete_milestone(gcli_ctx *ctx, char const *const owner,
+gitea_delete_milestone(struct gcli_ctx *ctx, char const *const owner,
                        char const *const repo, gcli_id const milestone)
 {
 	return github_delete_milestone(ctx, owner, repo, milestone);
 }
 
 int
-gitea_milestone_set_duedate(gcli_ctx *ctx, char const *const owner,
+gitea_milestone_set_duedate(struct gcli_ctx *ctx, char const *const owner,
                             char const *const repo, gcli_id const milestone,
                             char const *const date)
 {

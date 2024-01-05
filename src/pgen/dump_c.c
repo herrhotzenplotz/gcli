@@ -37,7 +37,7 @@ pregen_array_parser(struct objparser *p, struct objentry *it)
 {
 	fprintf(outfile,
 	        "static int\n"
-	        "parse_%s_%s_array(gcli_ctx *ctx, struct json_stream *stream, "
+	        "parse_%s_%s_array(struct gcli_ctx *ctx, struct json_stream *stream, "
 	        "%s *out)\n",
 	        p->name, it->name, p->returntype);
 	fprintf(outfile, "{\n");
@@ -139,7 +139,7 @@ objparser_dump_c(struct objparser *p)
 
 	fprintf(outfile,
 	        "int\n"
-	        "parse_%s(gcli_ctx *ctx, struct json_stream *stream, %s *out)\n",
+	        "parse_%s(struct gcli_ctx *ctx, struct json_stream *stream, %s *out)\n",
 	        p->name, p->returntype);
 	fprintf(outfile, "{\n");
 	fprintf(outfile, "\tenum json_type key_type;\n");
@@ -166,7 +166,7 @@ arrayparser_dump_c(struct arrayparser *p)
 {
 	fprintf(outfile,
 	        "int\n"
-	        "parse_%s(gcli_ctx *ctx, struct json_stream *stream, %s **out, "
+	        "parse_%s(struct gcli_ctx *ctx, struct json_stream *stream, %s **out, "
 	        "size_t *out_size)\n",
 	        p->name, p->returntype);
 	fprintf(outfile, "{\n");

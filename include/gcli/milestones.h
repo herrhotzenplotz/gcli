@@ -75,26 +75,26 @@ struct gcli_milestone_create_args {
 	char const *repo;
 };
 
-int gcli_get_milestones(gcli_ctx *ctx, char const *owner, char const *repo,
-                        int max, gcli_milestone_list *out);
+int gcli_get_milestones(struct gcli_ctx *ctx, char const *owner,
+                        char const *repo, int max, gcli_milestone_list *out);
 
-int gcli_get_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                       gcli_id milestone, gcli_milestone *out);
+int gcli_get_milestone(struct gcli_ctx *ctx, char const *owner,
+                       char const *repo, gcli_id milestone, gcli_milestone *out);
 
-int gcli_create_milestone(gcli_ctx *ctx,
+int gcli_create_milestone(struct gcli_ctx *ctx,
                           struct gcli_milestone_create_args const *args);
 
-int gcli_delete_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                          gcli_id milestone);
+int gcli_delete_milestone(struct gcli_ctx *ctx, char const *owner,
+                          char const *repo, gcli_id milestone);
 
 void gcli_free_milestone(gcli_milestone *it);
 void gcli_free_milestones(gcli_milestone_list *it);
 
-int gcli_milestone_get_issues(gcli_ctx *ctx, char const *owner,
+int gcli_milestone_get_issues(struct gcli_ctx *ctx, char const *owner,
                               char const *repo, gcli_id milestone,
                               gcli_issue_list *out);
 
-int gcli_milestone_set_duedate(gcli_ctx *ctx, char const *owner,
+int gcli_milestone_set_duedate(struct gcli_ctx *ctx, char const *owner,
                                char const *repo, gcli_id milestone,
                                char const *date);
 

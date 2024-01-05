@@ -31,7 +31,7 @@
 #include <gcli/forges.h>
 
 int
-gcli_get_notifications(gcli_ctx *ctx, int const max,
+gcli_get_notifications(struct gcli_ctx *ctx, int const max,
                        gcli_notification_list *const out)
 {
 	gcli_null_check_call(get_notifications, ctx, max, out);
@@ -61,7 +61,7 @@ gcli_free_notifications(gcli_notification_list *list)
 }
 
 int
-gcli_notification_mark_as_read(gcli_ctx *ctx, char const *id)
+gcli_notification_mark_as_read(struct gcli_ctx *ctx, char const *id)
 {
 	gcli_null_check_call(notification_mark_as_read, ctx, id);
 }

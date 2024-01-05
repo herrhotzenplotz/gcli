@@ -69,7 +69,7 @@ usage(void)
 
 static void
 gcli_print_release(enum gcli_output_flags const flags,
-                   gcli_release const *const it)
+                   struct gcli_release const *const it)
 {
 	gcli_dict dict;
 
@@ -104,7 +104,7 @@ gcli_print_release(enum gcli_output_flags const flags,
 
 static void
 gcli_releases_print_long(enum gcli_output_flags const flags,
-                         gcli_release_list const *const list, int const max)
+                         struct gcli_release_list const *const list, int const max)
 {
 	int n;
 
@@ -125,7 +125,8 @@ gcli_releases_print_long(enum gcli_output_flags const flags,
 
 static void
 gcli_releases_print_short(enum gcli_output_flags const flags,
-                          gcli_release_list const *const list, int const max)
+                          struct gcli_release_list const *const list,
+                          int const max)
 {
 	size_t n;
 	gcli_tbl table;
@@ -171,7 +172,7 @@ gcli_releases_print_short(enum gcli_output_flags const flags,
 
 void
 gcli_releases_print(enum gcli_output_flags const flags,
-                    gcli_release_list const *const list, int const max)
+                    struct gcli_release_list const *const list, int const max)
 {
 	if (list->releases_size == 0) {
 		puts("No releases");
@@ -187,7 +188,7 @@ gcli_releases_print(enum gcli_output_flags const flags,
 static void
 releasemsg_init(struct gcli_ctx *ctx, FILE *f, void *_data)
 {
-	gcli_new_release const *info = _data;
+	struct gcli_new_release const *info = _data;
 
 	(void) ctx;
 
@@ -203,7 +204,7 @@ releasemsg_init(struct gcli_ctx *ctx, FILE *f, void *_data)
 }
 
 static char *
-get_release_message(gcli_new_release const *info)
+get_release_message(struct gcli_new_release const *info)
 {
 	return gcli_editor_get_user_message(g_clictx, releasemsg_init,
 	                                    (void *)info);
@@ -212,7 +213,7 @@ get_release_message(gcli_new_release const *info)
 static int
 subcommand_releases_create(int argc, char *argv[])
 {
-	gcli_new_release release = {0};
+	struct gcli_new_release release = {0};
 	int ch;
 	bool always_yes = false;
 
@@ -281,7 +282,7 @@ subcommand_releases_create(int argc, char *argv[])
 			release.owner = optarg;
 			break;
 		case 'a': {
-			gcli_release_asset_upload asset = {
+			struct gcli_release_asset_upload asset = {
 				.path  = optarg,
 				.name  = optarg,
 				.label = "unused",
@@ -402,12 +403,12 @@ static struct {
 int
 subcommand_releases(int argc, char *argv[])
 {
-	int                     ch;
-	int                     count    = 30;
-	char const             *owner    = NULL;
-	char const             *repo     = NULL;
-	gcli_release_list       releases = {0};
-	enum gcli_output_flags  flags    = 0;
+	int ch;
+	int count = 30;
+	char const *owner = NULL;
+	char const *repo = NULL;
+	struct gcli_release_list releases = {0};
+	enum gcli_output_flags flags = 0;
 
 	if (argc > 1) {
 		for (size_t i = 0; i < ARRAY_SIZE(releases_subcommands); ++i) {

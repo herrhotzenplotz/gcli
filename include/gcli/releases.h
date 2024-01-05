@@ -37,32 +37,26 @@
 #include <gcli/gcli.h>
 #include <sn/sn.h>
 
-typedef struct gcli_release              gcli_release;
-typedef struct gcli_release_list         gcli_release_list;
-typedef struct gcli_new_release          gcli_new_release;
-typedef struct gcli_release_asset        gcli_release_asset;
-typedef struct gcli_release_asset_upload gcli_release_asset_upload;
-
 struct gcli_release_asset {
 	char *name;
 	char *url;
 };
 
 struct gcli_release {
-	char               *id;     /* Probably shouldn't be called id */
-	gcli_release_asset *assets;
-	size_t              assets_size;
-	char               *name;
-	char               *body;
-	char               *author;
-	char               *date;
-	char               *upload_url;
-	bool                draft;
-	bool                prerelease;
+	char *id; /* Probably shouldn't be called id */
+	struct gcli_release_asset *assets;
+	size_t assets_size;
+	char *name;
+	char *body;
+	char *author;
+	char *date;
+	char *upload_url;
+	bool draft;
+	bool prerelease;
 };
 
 struct gcli_release_list {
-	gcli_release *releases;
+	struct gcli_release *releases;
 	size_t releases_size;
 };
 
@@ -82,23 +76,23 @@ struct gcli_new_release {
 	char const *commitish;
 	bool draft;
 	bool prerelease;
-	gcli_release_asset_upload assets[GCLI_RELEASE_MAX_ASSETS];
+	struct gcli_release_asset_upload assets[GCLI_RELEASE_MAX_ASSETS];
 	size_t assets_size;
 };
 
 int gcli_get_releases(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                      int max, gcli_release_list *list);
+                      int max, struct gcli_release_list *list);
 
-void gcli_free_releases(gcli_release_list *);
+void gcli_free_releases(struct gcli_release_list *);
 
-int gcli_create_release(struct gcli_ctx *ctx, gcli_new_release const *);
+int gcli_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *);
 
-int gcli_release_push_asset(struct gcli_ctx *, gcli_new_release *,
-                            gcli_release_asset_upload);
+int gcli_release_push_asset(struct gcli_ctx *, struct gcli_new_release *,
+                            struct gcli_release_asset_upload);
 
 int gcli_delete_release(struct gcli_ctx *ctx, char const *owner,
                         char const *repo, char const *id);
 
-void gcli_release_free(gcli_release *release);
+void gcli_release_free(struct gcli_release *release);
 
 #endif /* RELEASES_H */

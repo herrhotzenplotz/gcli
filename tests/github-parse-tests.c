@@ -207,7 +207,7 @@ ATF_TC_BODY(simple_github_milestone, tc)
 ATF_TC_WITHOUT_HEAD(simple_github_release);
 ATF_TC_BODY(simple_github_release, tc)
 {
-	gcli_release release = {0};
+	struct gcli_release release = {0};
 	FILE *f;
 	json_stream stream;
 	struct gcli_ctx *ctx = test_context();

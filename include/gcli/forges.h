@@ -436,13 +436,13 @@ struct gcli_forge_descriptor {
 		char const *owner,
 		char const *repo,
 		int max,
-		gcli_release_list *out);
+		struct gcli_release_list *out);
 
 	/**
 	 * Create a new release */
 	int (*create_release)(
 		struct gcli_ctx *ctx,
-		gcli_new_release const *release);
+		struct gcli_new_release const *release);
 
 	/**
 	 * Delete the release */

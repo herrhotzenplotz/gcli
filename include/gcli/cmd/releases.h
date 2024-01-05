@@ -37,7 +37,7 @@
 #include <gcli/releases.h>
 
 void gcli_releases_print(enum gcli_output_flags flags,
-                         gcli_release_list const *list, int max);
+                         struct gcli_release_list const *list, int max);
 
 int subcommand_releases(int argc, char *argv[]);
 

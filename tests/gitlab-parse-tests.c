@@ -141,7 +141,7 @@ ATF_TC_BODY(gitlab_simple_release, tc)
 	json_stream stream = {0};
 	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_release.json");
-	gcli_release release = {0};
+	struct gcli_release release = {0};
 
 	json_open_stream(&stream, f);
 	ATF_REQUIRE(parse_gitlab_release(ctx, &stream, &release) == 0);

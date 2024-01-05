@@ -40,7 +40,7 @@
 
 int
 github_get_releases(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                    int const max, gcli_release_list *const list)
+                    int const max, struct gcli_release_list *const list)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -53,7 +53,7 @@ github_get_releases(struct gcli_ctx *ctx, char const *owner, char const *repo,
 		.parse = (parsefn)(parse_github_releases),
 	};
 
-	*list = (gcli_release_list) {0};
+	*list = (struct gcli_release_list) {0};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -71,7 +71,7 @@ github_get_releases(struct gcli_ctx *ctx, char const *owner, char const *repo,
 
 static void
 github_parse_single_release(struct gcli_ctx *ctx, gcli_fetch_buffer buffer,
-                            gcli_release *const out)
+                            struct gcli_release *const out)
 {
 	struct json_stream stream = {0};
 
@@ -82,7 +82,8 @@ github_parse_single_release(struct gcli_ctx *ctx, gcli_fetch_buffer buffer,
 }
 
 static int
-github_get_upload_url(struct gcli_ctx *ctx, gcli_release *const it, char **out)
+github_get_upload_url(struct gcli_ctx *ctx, struct gcli_release *const it,
+                      char **out)
 {
 	char *delim = strchr(it->upload_url, '{');
 	if (delim == NULL)
@@ -96,7 +97,7 @@ github_get_upload_url(struct gcli_ctx *ctx, gcli_release *const it, char **out)
 
 static int
 github_upload_release_asset(struct gcli_ctx *ctx, char const *url,
-                            gcli_release_asset_upload const asset)
+                            struct gcli_release_asset_upload const asset)
 {
 	char *req = NULL;
 	sn_sv file_content = {0};
@@ -125,13 +126,13 @@ github_upload_release_asset(struct gcli_ctx *ctx, char const *url,
 }
 
 int
-github_create_release(struct gcli_ctx *ctx, gcli_new_release const *release)
+github_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *release)
 {
 	char *url = NULL, *e_owner = NULL, *e_repo = NULL, *upload_url = NULL,
 	     *payload = NULL;
 	gcli_fetch_buffer buffer = {0};
 	gcli_jsongen gen = {0};
-	gcli_release response = {0};
+	struct gcli_release response = {0};
 	int rc = 0;
 
 	/* Payload */

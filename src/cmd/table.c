@@ -45,9 +45,9 @@ struct gcli_tblrow;
 /* Internal state of a table printer. We return a handle to it in
  * gcli_table_init. */
 struct gcli_tbl {
-	gcli_tblcoldef const *cols; /* user provided column definitons */
-	int *col_widths;            /* minimum width of the columns */
-	size_t cols_size;           /* size of above arrays */
+	struct gcli_tblcoldef const *cols; /* user provided column definitons */
+	int *col_widths;                   /* minimum width of the columns */
+	size_t cols_size;                  /* size of above arrays */
 
 	struct gcli_tblrow *rows;   /* list of rows */
 	size_t rows_size;           /* number of rows */
@@ -76,7 +76,7 @@ table_pushrow(struct gcli_tbl *const table, struct gcli_tblrow row)
 
 /** Initialize the internal state structure of the table printer. */
 gcli_tbl
-gcli_tbl_begin(gcli_tblcoldef const *const cols, size_t const cols_size)
+gcli_tbl_begin(struct gcli_tblcoldef const *const cols, size_t const cols_size)
 {
 	struct gcli_tbl *tbl;
 

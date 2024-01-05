@@ -105,7 +105,7 @@ gcli_print_snippets_short(enum gcli_output_flags const flags,
 {
 	int n;
 	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
+	struct gcli_tblcoldef cols[] = {
 		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_ID,     .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "DATE",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 		{ .name = "VISIBILITY", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },

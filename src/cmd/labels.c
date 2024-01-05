@@ -66,7 +66,7 @@ gcli_labels_print(gcli_label_list const *const list, int const max)
 {
 	size_t n;
 	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
+	struct gcli_tblcoldef cols[] = {
 		{ .name = "ID",          .type = GCLI_TBLCOLTYPE_ID,     .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "",            .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_256COLOUR|GCLI_TBLCOL_TIGHT },
 		{ .name = "NAME",        .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },

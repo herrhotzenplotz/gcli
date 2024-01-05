@@ -71,7 +71,7 @@ gcli_print_repos(enum gcli_output_flags const flags,
 {
 	size_t n;
 	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
+	struct gcli_tblcoldef cols[] = {
 		{ .name = "FORK",     .type = GCLI_TBLCOLTYPE_BOOL,   .flags = 0 },
 		{ .name = "VISBLTY",  .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 		{ .name = "DATE",     .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },

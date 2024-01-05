@@ -149,7 +149,7 @@ gcli_print_gists_short(enum gcli_output_flags const flags,
 {
 	size_t n;
 	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
+	struct gcli_tblcoldef cols[] = {
 		{ .name = "ID",          .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_COLOUREXPL },
 		{ .name = "OWNER",       .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_BOLD },
 		{ .name = "DATE",        .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },

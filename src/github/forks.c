@@ -38,7 +38,7 @@
 
 int
 github_get_forks(struct  gcli_ctx *ctx, char const *owner, char const *repo,
-                 int const max, gcli_fork_list *const list)
+                 int const max, struct gcli_fork_list *const list)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -51,7 +51,7 @@ github_get_forks(struct  gcli_ctx *ctx, char const *owner, char const *repo,
 		.parse = (parsefn)(parse_github_forks),
 	};
 
-	*list = (gcli_fork_list) {0};
+	*list = (struct gcli_fork_list) {0};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);

@@ -262,7 +262,7 @@ ATF_TC_BODY(simple_github_repo, tc)
 ATF_TC_WITHOUT_HEAD(simple_github_fork);
 ATF_TC_BODY(simple_github_fork, tc)
 {
-	gcli_fork fork = {0};
+	struct gcli_fork fork = {0};
 	FILE *f;
 	json_stream stream;
 	struct gcli_ctx *ctx = test_context();

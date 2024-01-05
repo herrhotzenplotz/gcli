@@ -37,7 +37,7 @@
 #include <gcli/forks.h>
 
 int github_get_forks(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                     int max, gcli_fork_list *out);
+                     int max, struct gcli_fork_list *out);
 
 int github_fork_create(struct gcli_ctx *ctx, char const *owner, char const *repo,
                        char const *_in);

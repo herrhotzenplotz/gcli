@@ -63,7 +63,7 @@ usage(void)
 
 void
 gcli_print_forks(enum gcli_output_flags const flags,
-                 gcli_fork_list const *const list, int const max)
+                 struct gcli_fork_list const *const list, int const max)
 {
 	size_t n;
 	gcli_tbl table;
@@ -186,7 +186,7 @@ subcommand_forks_create(int argc, char *argv[])
 int
 subcommand_forks(int argc, char *argv[])
 {
-	gcli_fork_list forks = {0};
+	struct gcli_fork_list forks = {0};
 	char const *owner = NULL, *repo = NULL;
 	int ch = 0;
 	int count = 30;

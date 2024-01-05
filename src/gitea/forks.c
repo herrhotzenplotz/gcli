@@ -34,7 +34,7 @@
 
 int
 gitea_get_forks(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                int const max, gcli_fork_list *const out)
+                int const max, struct gcli_fork_list *const out)
 {
 	return github_get_forks(ctx, owner, repo, max, out);
 }

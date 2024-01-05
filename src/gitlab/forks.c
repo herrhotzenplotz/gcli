@@ -38,7 +38,7 @@
 
 int
 gitlab_get_forks(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                 int const max, gcli_fork_list *const list)
+                 int const max, struct gcli_fork_list *const list)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -54,7 +54,7 @@ gitlab_get_forks(struct gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	*list = (gcli_fork_list) {0};
+	*list = (struct gcli_fork_list) {0};
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/forks", gcli_get_apibase(ctx),
 	                  e_owner, e_repo);

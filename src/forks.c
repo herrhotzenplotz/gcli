@@ -35,7 +35,7 @@
 
 int
 gcli_get_forks(struct gcli_ctx *ctx, char const *owner, char const *repo,
-               int const max, gcli_fork_list *const out)
+               int const max, struct gcli_fork_list *const out)
 {
 	gcli_null_check_call(get_forks, ctx, owner, repo, max, out);
 }
@@ -48,7 +48,7 @@ gcli_fork_create(struct gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 void
-gcli_fork_free(gcli_fork *fork)
+gcli_fork_free(struct gcli_fork *fork)
 {
 	free(fork->full_name);
 	free(fork->owner);
@@ -56,7 +56,7 @@ gcli_fork_free(gcli_fork *fork)
 }
 
 void
-gcli_forks_free(gcli_fork_list *const list)
+gcli_forks_free(struct gcli_fork_list *const list)
 {
 	for (size_t i = 0; i < list->forks_size; ++i) {
 		gcli_fork_free(&list->forks[i]);

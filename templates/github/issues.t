@@ -4,11 +4,11 @@ include "gcli/labels.h";
 include "templates/github/labels.h";
 
 parser github_issue_milestone is
-object of gcli_issue with
+object of struct gcli_issue with
 	("title" => milestone as string);
 
 parser github_issue is
-object of gcli_issue with
+object of struct gcli_issue with
 	("title"        => title as string,
 	 "state"        => state as string,
 	 "body"         => body as string,
@@ -23,4 +23,4 @@ object of gcli_issue with
 	 "pull_request" => is_pr as github_is_pr,
 	 "milestone"    => use parse_github_issue_milestone);
 
-parser github_issues is array of gcli_issue use parse_github_issue;
+parser github_issues is array of struct gcli_issue use parse_github_issue;

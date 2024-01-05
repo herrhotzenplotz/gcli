@@ -40,8 +40,8 @@
 
 int
 gitea_get_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                 gcli_issue_fetch_details const *details, int const max,
-                 gcli_issue_list *const out)
+                 struct gcli_issue_fetch_details const *details, int const max,
+                 struct gcli_issue_list *const out)
 {
 	return github_get_issues(ctx, owner, repo, details, max, out);
 }
@@ -49,13 +49,13 @@ gitea_get_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
 int
 gitea_get_issue_summary(struct gcli_ctx *ctx, char const *owner,
                         char const *repo, gcli_id const issue_number,
-                        gcli_issue *const out)
+                        struct gcli_issue *const out)
 {
 	return github_get_issue_summary(ctx, owner, repo, issue_number, out);
 }
 
 int
-gitea_submit_issue(struct gcli_ctx *ctx, gcli_submit_issue_options opts,
+gitea_submit_issue(struct gcli_ctx *ctx, struct gcli_submit_issue_options opts,
                    struct gcli_fetch_buffer *const out)
 {
 	return github_perform_submit_issue(ctx,opts, out);

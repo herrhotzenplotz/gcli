@@ -52,6 +52,6 @@ int gitea_milestone_set_duedate(struct gcli_ctx *ctx, char const *owner,
 
 int gitea_milestone_get_issues(struct gcli_ctx *ctx, char const *owner,
                                char const *repo, gcli_id milestone,
-                               gcli_issue_list *out);
+                               struct gcli_issue_list *out);
 
 #endif /* GCLI_GITEA_MILESTONES_H */

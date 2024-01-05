@@ -47,14 +47,14 @@
  * request issues. This function nukes them from the list, readjusts
  * the allocation size and fixes the reported list size. */
 static void
-github_hack_fixup_issues_that_are_actually_pulls(gcli_issue **list, size_t *size,
+github_hack_fixup_issues_that_are_actually_pulls(struct gcli_issue **list, size_t *size,
                                                  void *_data)
 {
 	(void) _data;
 
 	for (size_t i = *size; i > 0; --i) {
 		if ((*list)[i-1].is_pr) {
-			gcli_issue *l = *list;
+			struct gcli_issue *l = *list;
 			/*  len = 7, i = 5, to move = 7 - 5 = 2
 			 *   0   1   2   3   4   5   6
 			 * | x | x | x | x | X | x | x | */
@@ -68,7 +68,7 @@ github_hack_fixup_issues_that_are_actually_pulls(gcli_issue **list, size_t *size
 
 int
 github_fetch_issues(struct gcli_ctx *ctx, char *url, int const max,
-                    gcli_issue_list *const out)
+                    struct gcli_issue_list *const out)
 {
 	struct gcli_fetch_list_ctx fl = {
 		.listp = &out->issues,
@@ -125,8 +125,8 @@ parse_github_milestone(struct gcli_ctx *ctx, char const *owner,
 
 int
 github_get_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                  gcli_issue_fetch_details const *details, int const max,
-                  gcli_issue_list *const out)
+                  struct gcli_issue_fetch_details const *details, int const max,
+                  struct gcli_issue_list *const out)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -182,7 +182,7 @@ github_get_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
 int
 github_get_issue_summary(struct gcli_ctx *ctx, char const *owner,
                          char const *repo, gcli_id const issue_number,
-                         gcli_issue *const out)
+                         struct gcli_issue *const out)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -255,7 +255,7 @@ github_issue_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-github_perform_submit_issue(struct gcli_ctx *ctx, gcli_submit_issue_options opts,
+github_perform_submit_issue(struct gcli_ctx *ctx, struct gcli_submit_issue_options opts,
                             struct gcli_fetch_buffer *out)
 {
 	char *e_owner = NULL, *e_repo = NULL, *payload = NULL, *url = NULL;

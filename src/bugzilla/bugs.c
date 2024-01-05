@@ -43,8 +43,8 @@
 
 int
 bugzilla_get_bugs(struct gcli_ctx *ctx, char const *product, char const *component,
-                  gcli_issue_fetch_details const *details, int const max,
-                  gcli_issue_list *out)
+                  struct gcli_issue_fetch_details const *details, int const max,
+                  struct gcli_issue_list *out)
 {
 	char *url, *e_product = NULL, *e_component = NULL, *e_author = NULL;
 	struct gcli_fetch_buffer buffer = {0};
@@ -160,12 +160,12 @@ error_fetch:
 
 int
 bugzilla_get_bug(struct gcli_ctx *ctx, char const *product,
-                 char const *component, gcli_id bug_id, gcli_issue *out)
+                 char const *component, gcli_id bug_id, struct gcli_issue *out)
 {
 	int rc = 0;
 	char *url;
 	struct gcli_fetch_buffer buffer = {0};
-	gcli_issue_list list = {0};
+	struct gcli_issue_list list = {0};
 	json_stream stream = {0};
 
 	/* XXX should we warn if product or component is set? */
@@ -275,7 +275,7 @@ add_extra_options(gcli_nvlist const *list, gcli_jsongen *gen)
 }
 
 int
-bugzilla_bug_submit(struct gcli_ctx *ctx, gcli_submit_issue_options opts,
+bugzilla_bug_submit(struct gcli_ctx *ctx, struct gcli_submit_issue_options opts,
                     struct gcli_fetch_buffer *out)
 {
 	char *payload = NULL, *url = NULL;

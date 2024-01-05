@@ -34,7 +34,7 @@
 #include <sn/sn.h>
 
 void
-gcli_issue_free(gcli_issue *const it)
+gcli_issue_free(struct gcli_issue *const it)
 {
 	free(it->product);
 	free(it->component);
@@ -60,7 +60,7 @@ gcli_issue_free(gcli_issue *const it)
 }
 
 void
-gcli_issues_free(gcli_issue_list *const list)
+gcli_issues_free(struct gcli_issue_list *const list)
 {
 	for (size_t i = 0; i < list->issues_size; ++i)
 		gcli_issue_free(&list->issues[i]);
@@ -73,15 +73,15 @@ gcli_issues_free(gcli_issue_list *const list)
 
 int
 gcli_get_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                gcli_issue_fetch_details const *details, int const max,
-                gcli_issue_list *const out)
+                struct gcli_issue_fetch_details const *details, int const max,
+                struct gcli_issue_list *const out)
 {
 	gcli_null_check_call(get_issues, ctx, owner, repo, details, max, out);
 }
 
 int
 gcli_get_issue(struct gcli_ctx *ctx, char const *owner, char const *repo,
-               gcli_id const issue_number, gcli_issue *const out)
+               gcli_id const issue_number, struct gcli_issue *const out)
 {
 	gcli_null_check_call(get_issue_summary, ctx, owner, repo, issue_number,
 	                     out);
@@ -102,7 +102,7 @@ gcli_issue_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gcli_issue_submit(struct gcli_ctx *ctx, gcli_submit_issue_options opts)
+gcli_issue_submit(struct gcli_ctx *ctx, struct gcli_submit_issue_options opts)
 {
 	gcli_null_check_call(perform_submit_issue, ctx, opts, NULL);
 }

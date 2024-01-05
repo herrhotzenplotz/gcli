@@ -41,7 +41,7 @@
 /** Given the url fetch issues */
 int
 gitlab_fetch_issues(struct gcli_ctx *ctx, char *url, int const max,
-                    gcli_issue_list *const out)
+                    struct gcli_issue_list *const out)
 {
 	struct gcli_fetch_list_ctx fl = {
 		.listp = &out->issues,
@@ -55,8 +55,8 @@ gitlab_fetch_issues(struct gcli_ctx *ctx, char *url, int const max,
 
 int
 gitlab_get_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                  gcli_issue_fetch_details const *details, int const max,
-                  gcli_issue_list *const out)
+                  struct gcli_issue_fetch_details const *details, int const max,
+                  struct gcli_issue_list *const out)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -112,7 +112,7 @@ gitlab_get_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
 int
 gitlab_get_issue_summary(struct gcli_ctx *ctx, char const *owner,
                          char const *repo, gcli_id const issue_number,
-                         gcli_issue *const out)
+                         struct gcli_issue *const out)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -197,7 +197,7 @@ gitlab_issue_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_perform_submit_issue(struct gcli_ctx *ctx, gcli_submit_issue_options opts,
+gitlab_perform_submit_issue(struct gcli_ctx *ctx, struct gcli_submit_issue_options opts,
                             struct gcli_fetch_buffer *const out)
 {
 	char *e_owner = NULL, *e_repo = NULL, *url = NULL, *payload = NULL;

@@ -74,7 +74,7 @@ open_sample(char const *const name)
 ATF_TC_WITHOUT_HEAD(simple_github_issue);
 ATF_TC_BODY(simple_github_issue, tc)
 {
-	gcli_issue issue = {0};
+	struct gcli_issue issue = {0};
 	FILE *f;
 	json_stream stream;
 	struct gcli_ctx *ctx = test_context();

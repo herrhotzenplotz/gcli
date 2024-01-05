@@ -89,7 +89,7 @@ ATF_TC_BODY(gitlab_simple_issue, tc)
 	json_stream stream = {0};
 	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_issue.json");
-	gcli_issue issue = {0};
+	struct gcli_issue issue = {0};
 
 	json_open_stream(&stream, f);
 	ATF_REQUIRE(parse_gitlab_issue(ctx, &stream, &issue) == 0);

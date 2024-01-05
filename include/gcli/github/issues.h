@@ -38,15 +38,15 @@
 #include <gcli/issues.h>
 
 int github_fetch_issues(struct gcli_ctx *ctx, char *url, int max,
-                        gcli_issue_list *out);
+                        struct gcli_issue_list *out);
 
 int github_get_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                      gcli_issue_fetch_details const *details, int max,
-                      gcli_issue_list *out);
+                      struct gcli_issue_fetch_details const *details, int max,
+                      struct gcli_issue_list *out);
 
 int github_get_issue_summary(struct gcli_ctx *ctx, char const *owner,
                              char const *repo, gcli_id issue_number,
-                             gcli_issue *out);
+                             struct gcli_issue *out);
 
 int github_issue_close(struct gcli_ctx *ctx, char const *owner,
                        char const *repo, gcli_id issue_number);
@@ -55,7 +55,7 @@ int github_issue_reopen(struct gcli_ctx *ctx, char const *owner,
                         char const *repo, gcli_id issue_number);
 
 int github_perform_submit_issue(struct gcli_ctx *ctx,
-                                gcli_submit_issue_options opts,
+                                struct gcli_submit_issue_options opts,
                                 struct gcli_fetch_buffer *out);
 
 int github_issue_assign(struct gcli_ctx *ctx, char const *owner,

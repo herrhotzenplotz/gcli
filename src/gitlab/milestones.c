@@ -101,7 +101,7 @@ gitlab_get_milestone(struct gcli_ctx *ctx, char const *owner, char const *repo,
 int
 gitlab_milestone_get_issues(struct gcli_ctx *ctx, char const *const owner,
                             char const *const repo, gcli_id const milestone,
-                            gcli_issue_list *const out)
+                            struct gcli_issue_list *const out)
 {
 	char *url, *e_owner, *e_repo;
 

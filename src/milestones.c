@@ -91,7 +91,7 @@ gcli_free_milestones(gcli_milestone_list *const it)
 int
 gcli_milestone_get_issues(struct  gcli_ctx *ctx, char const *const owner,
                           char const *const repo, gcli_id const milestone,
-                          gcli_issue_list *const out)
+                          struct gcli_issue_list *const out)
 {
 	gcli_null_check_call(get_milestone_issues, ctx, owner, repo, milestone,
 	                     out);

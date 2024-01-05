@@ -52,7 +52,7 @@ int gitlab_get_milestone(struct gcli_ctx *ctx, char const *owner,
 
 int gitlab_milestone_get_issues(struct gcli_ctx *ctx, char const *owner,
                                 char const *repo, gcli_id milestone,
-                                gcli_issue_list *out);
+                                struct gcli_issue_list *out);
 
 int gitlab_milestone_set_duedate(struct gcli_ctx *ctx, char const *owner,
                                  char const *repo, gcli_id milestone,

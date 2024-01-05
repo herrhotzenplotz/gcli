@@ -55,7 +55,7 @@ int parse_bugzilla_comments_array_only_first(struct gcli_ctx *ctx,
                                              char **out);
 
 int parse_bugzilla_assignee(struct gcli_ctx *ctx, struct json_stream *stream,
-                            gcli_issue *out);
+                            struct gcli_issue *out);
 
 int parse_bugzilla_bug_attachments_dict(struct gcli_ctx *ctx,
                                         struct json_stream *stream,

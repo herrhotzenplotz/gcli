@@ -133,7 +133,7 @@ parse_bugzilla_bug_comments_dictionary_only_first(struct gcli_ctx *const ctx,
 
 int
 parse_bugzilla_assignee(struct gcli_ctx *ctx, struct json_stream *stream,
-                        gcli_issue *out)
+                        struct gcli_issue *out)
 {
 	out->assignees = calloc(1, sizeof (*out->assignees));
 	out->assignees_size = 1;

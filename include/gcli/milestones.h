@@ -92,7 +92,7 @@ void gcli_free_milestones(gcli_milestone_list *it);
 
 int gcli_milestone_get_issues(struct gcli_ctx *ctx, char const *owner,
                               char const *repo, gcli_id milestone,
-                              gcli_issue_list *out);
+                              struct gcli_issue_list *out);
 
 int gcli_milestone_set_duedate(struct gcli_ctx *ctx, char const *owner,
                                char const *repo, gcli_id milestone,

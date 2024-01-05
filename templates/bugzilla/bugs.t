@@ -4,15 +4,15 @@ include "gcli/bugzilla/bugs.h";
 include "gcli/bugzilla/bugs-parser.h";
 
 parser bugzilla_bug_creator is
-object of gcli_issue with
+object of struct gcli_issue with
 	("real_name" => author as string);
 
 parser bugzilla_assigned_to_detail is
-object of gcli_issue with
+object of struct gcli_issue with
 	("name" => use parse_bugzilla_assignee);
 
 parser bugzilla_bug_item is
-object of gcli_issue with
+object of struct gcli_issue with
 	("id" => number as id,
 	 "summary" => title as string,
 	 "creation_time" => created_at as string,
@@ -27,7 +27,7 @@ object of gcli_issue with
 	 "url" => url as string);
 
 parser bugzilla_bugs is
-object of gcli_issue_list with
+object of struct gcli_issue_list with
 	("bugs" => issues as array of gcli_issue use parse_bugzilla_bug_item);
 
 parser bugzilla_comment is

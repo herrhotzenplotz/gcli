@@ -70,8 +70,8 @@ open_sample(char const *const name)
 ATF_TC_WITHOUT_HEAD(simple_bugzilla_issue);
 ATF_TC_BODY(simple_bugzilla_issue, tc)
 {
-	gcli_issue_list list = {0};
-	gcli_issue const *issue;
+	struct gcli_issue_list list = {0};
+	struct gcli_issue const *issue;
 	FILE *f;
 	json_stream stream;
 	struct gcli_ctx *ctx = test_context();

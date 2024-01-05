@@ -86,7 +86,7 @@ usage(void)
 
 void
 gcli_print_issues(enum gcli_output_flags const flags,
-                  gcli_issue_list const *const list, int const max)
+                  struct gcli_issue_list const *const list, int const max)
 {
 	int n, pruned = 0;
 	gcli_tbl table;
@@ -148,7 +148,7 @@ gcli_print_issues(enum gcli_output_flags const flags,
 }
 
 void
-gcli_issue_print_summary(gcli_issue const *const it)
+gcli_issue_print_summary(struct gcli_issue const *const it)
 {
 	gcli_dict dict;
 	uint32_t const quirks = gcli_forge(g_clictx)->issue_quirks;
@@ -204,7 +204,7 @@ gcli_issue_print_summary(gcli_issue const *const it)
 }
 
 void
-gcli_issue_print_op(gcli_issue const *const it)
+gcli_issue_print_op(struct gcli_issue const *const it)
 {
 	if (it->body)
 		pretty_print(it->body, 4, 80, stdout);
@@ -214,7 +214,7 @@ static void
 issue_init_user_file(struct gcli_ctx *ctx, FILE *stream, void *_opts)
 {
 	(void) ctx;
-	gcli_submit_issue_options *opts = _opts;
+	struct gcli_submit_issue_options *opts = _opts;
 	fprintf(
 		stream,
 		"! ISSUE TITLE : %s\n"
@@ -224,13 +224,13 @@ issue_init_user_file(struct gcli_ctx *ctx, FILE *stream, void *_opts)
 }
 
 static char *
-gcli_issue_get_user_message(gcli_submit_issue_options *opts)
+gcli_issue_get_user_message(struct gcli_submit_issue_options *opts)
 {
 	return gcli_editor_get_user_message(g_clictx, issue_init_user_file, opts);
 }
 
 static int
-create_issue(gcli_submit_issue_options opts, int always_yes)
+create_issue(struct gcli_submit_issue_options opts, int always_yes)
 {
 	int rc;
 
@@ -260,7 +260,7 @@ create_issue(gcli_submit_issue_options opts, int always_yes)
 }
 
 static int
-parse_submit_issue_option(gcli_submit_issue_options *opts)
+parse_submit_issue_option(struct gcli_submit_issue_options *opts)
 {
 	char *hd = strdup(optarg);
 	char *key = hd;
@@ -284,7 +284,7 @@ static int
 subcommand_issue_create(int argc, char *argv[])
 {
 	int ch;
-	gcli_submit_issue_options opts = {0};
+	struct gcli_submit_issue_options opts = {0};
 	int always_yes = 0;
 
 	if (gcli_nvlist_init(&opts.extra) < 0) {
@@ -361,12 +361,12 @@ static inline int handle_issues_actions(int argc, char *argv[],
 int
 subcommand_issues(int argc, char *argv[])
 {
-	gcli_issue_list list = {0};
+	struct gcli_issue_list list = {0};
 	char const *owner = NULL;
 	char const *repo = NULL;
 	char *endptr = NULL;
 	int ch = 0, issue_id = -1, n = 30;
-	gcli_issue_fetch_details details = {0};
+	struct gcli_issue_fetch_details details = {0};
 	enum gcli_output_flags flags = 0;
 
 	/* detect whether we wanna create an issue */
@@ -499,7 +499,7 @@ subcommand_issues(int argc, char *argv[])
 static inline void
 ensure_issue(char const *const owner, char const *const repo,
              int const issue_id,
-             int *const have_fetched_issue, gcli_issue *const issue)
+             int *const have_fetched_issue, struct gcli_issue *const issue)
 {
 	if (*have_fetched_issue)
 		return;
@@ -637,7 +637,7 @@ handle_issues_actions(int argc, char *argv[],
                       int const issue_id)
 {
 	int have_fetched_issue = 0;
-	gcli_issue issue = {0};
+	struct gcli_issue issue = {0};
 
 	/* Check if the user missed out on supplying actions */
 	if (argc == 0) {

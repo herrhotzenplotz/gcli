@@ -47,7 +47,7 @@ int github_delete_milestone(struct gcli_ctx *ctx, char const *owner,
 
 int github_milestone_get_issues(struct gcli_ctx *ctx, char const *owner,
                                 char const *repo, gcli_id milestone,
-                                gcli_issue_list *out);
+                                struct gcli_issue_list *out);
 
 int github_milestone_set_duedate(struct gcli_ctx *ctx, char const *owner,
                                  char const *repo, gcli_id milestone,

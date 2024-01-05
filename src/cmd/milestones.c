@@ -339,7 +339,7 @@ handle_milestone_actions(int argc, char *argv[],
 		if (strcmp(action, "all") == 0) {
 			int rc = 0;
 
-			gcli_issue_list issues = {0};
+			struct gcli_issue_list issues = {0};
 
 			ensure_milestone(owner, repo, milestone_id,
 			                 &fetched_milestone, &milestone);
@@ -359,7 +359,7 @@ handle_milestone_actions(int argc, char *argv[],
 
 		} else if (strcmp(action, "issues") == 0) {
 			int rc = 0;
-			gcli_issue_list issues = {0};
+			struct gcli_issue_list issues = {0};
 
 			/* Fetch list of issues associated with milestone */
 			rc = gcli_milestone_get_issues(g_clictx, owner, repo, milestone_id,

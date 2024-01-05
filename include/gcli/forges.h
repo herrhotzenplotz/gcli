@@ -103,9 +103,9 @@ struct gcli_forge_descriptor {
 		struct gcli_ctx *ctx,
 		char const *owner,
 		char const *repo,
-		gcli_issue_fetch_details const *details,
+		struct gcli_issue_fetch_details const *details,
 		int max,
-		gcli_issue_list *out);
+		struct gcli_issue_list *out);
 
 	/**
 	 * Get a summary of an issue */
@@ -114,7 +114,7 @@ struct gcli_forge_descriptor {
 		char const *owner,
 		char const *repo,
 		gcli_id issue_number,
-		gcli_issue *out);
+		struct gcli_issue *out);
 
 	/**
 	 * Close the given issue */
@@ -165,7 +165,7 @@ struct gcli_forge_descriptor {
 	 * Submit an issue */
 	int (*perform_submit_issue)(
 		struct gcli_ctx *ctx,
-		gcli_submit_issue_options opts,
+		struct gcli_submit_issue_options opts,
 		struct gcli_fetch_buffer *out);
 
 	/**
@@ -259,7 +259,7 @@ struct gcli_forge_descriptor {
 		char const *owner,
 		char const *repo,
 		gcli_id milestone,
-		gcli_issue_list *out);
+		struct gcli_issue_list *out);
 
 	/** Assign an issue to a milestone */
 	int (*issue_set_milestone)(

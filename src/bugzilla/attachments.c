@@ -40,7 +40,7 @@ bugzilla_attachment_get_content(struct gcli_ctx *ctx, gcli_id attachment_id,
 {
 	int rc = 0;
 	char *url;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	json_stream stream = {0};
 	struct gcli_attachment attachment = {0};
 

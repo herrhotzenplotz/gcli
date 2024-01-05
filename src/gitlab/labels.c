@@ -62,7 +62,7 @@ gitlab_create_label(struct gcli_ctx *ctx, char const *owner, char const *repo,
 {
 	char *url = NULL, *payload = NULL, *colour_string = NULL, *e_owner = NULL,
 	     *e_repo = NULL;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	gcli_jsongen gen = {0};
 	int rc = 0;
 	json_stream stream = {0};

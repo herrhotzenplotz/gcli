@@ -277,7 +277,7 @@ int
 gitlab_mr_merge(struct gcli_ctx *ctx, char const *owner, char const *repo,
                 gcli_id const mr_number, enum gcli_merge_flags const flags)
 {
-	gcli_fetch_buffer  buffer  = {0};
+	struct gcli_fetch_buffer  buffer  = {0};
 	char *url = NULL;
 	char *e_owner = NULL;
 	char *e_repo = NULL;
@@ -312,7 +312,7 @@ int
 gitlab_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
                 gcli_id const pr_number, gcli_pull *const out)
 {
-	gcli_fetch_buffer json_buffer = {0};
+	struct gcli_fetch_buffer json_buffer = {0};
 	char *url = NULL;
 	char *e_owner = NULL;
 	char *e_repo = NULL;
@@ -623,7 +623,7 @@ gitlab_mr_get_reviewers(struct gcli_ctx *ctx, char const *e_owner,
 {
 	char *url;
 	int rc;
-	gcli_fetch_buffer json_buffer = {0};
+	struct gcli_fetch_buffer json_buffer = {0};
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid,
 	                  gcli_get_apibase(ctx), e_owner, e_repo, mr);

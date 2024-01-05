@@ -63,7 +63,7 @@ gitlab_add_sshkey(struct gcli_ctx *ctx, char const *const title,
 {
 	char *url, *payload;
 	char *e_title, *e_key;
-	gcli_fetch_buffer buf = {0};
+	struct gcli_fetch_buffer buf = {0};
 	int rc = 0;
 
 	url = sn_asprintf("%s/user/keys", gcli_get_apibase(ctx));

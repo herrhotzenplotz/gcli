@@ -46,12 +46,11 @@
 typedef int (*parsefn)(struct gcli_ctx *, json_stream *stream, void *list,
                        size_t *listsize);
 typedef void (*filterfn)(void *list, size_t *listsize, void const *userdata);
-typedef struct gcli_fetch_buffer gcli_fetch_buffer;
 typedef struct gcli_fetch_list_ctx gcli_fetch_list_ctx;
 
 struct gcli_fetch_buffer {
-	char   *data;
-	size_t  length;
+	char *data;
+	size_t length;
 };
 
 struct gcli_fetch_list_ctx {
@@ -65,22 +64,22 @@ struct gcli_fetch_list_ctx {
 };
 
 int gcli_fetch(struct gcli_ctx *ctx, char const *url, char **pagination_next,
-               gcli_fetch_buffer *out);
+               struct gcli_fetch_buffer *out);
 
 int gcli_curl(struct gcli_ctx *ctx, FILE *stream, char const *url,
               char const *content_type);
 
 int gcli_fetch_with_method(struct  gcli_ctx *ctx, char const *method,
                            char const *url, char const *data,
-                           char **pagination_next, gcli_fetch_buffer *out);
+                           char **pagination_next, struct gcli_fetch_buffer *out);
 
 int gcli_post_upload(struct gcli_ctx *ctx, char const *url,
                      char const *content_type, void *buffer, size_t buffer_size,
-                     gcli_fetch_buffer *out);
+                     struct gcli_fetch_buffer *out);
 
 int gcli_curl_gitea_upload_attachment(struct gcli_ctx *ctx, char const *url,
                                       char const *filename,
-                                      gcli_fetch_buffer *out);
+                                      struct gcli_fetch_buffer *out);
 
 int gcli_curl_test_success(struct gcli_ctx *ctx, char const *url);
 char *gcli_urlencode(char const *);

@@ -36,7 +36,7 @@
 
 int
 gitlab_perform_submit_comment(struct gcli_ctx *ctx, struct gcli_submit_comment_opts opts,
-                              gcli_fetch_buffer *const out)
+                              struct gcli_fetch_buffer *const out)
 {
 	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
 	char const *type = NULL;

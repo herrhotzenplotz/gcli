@@ -187,7 +187,7 @@ github_get_issue_summary(struct gcli_ctx *ctx, char const *owner,
 	char *url = NULL;
 	char *e_owner = NULL;
 	char *e_repo = NULL;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	json_stream	parser = {0};
 	int rc = 0;
 
@@ -256,7 +256,7 @@ github_issue_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 github_perform_submit_issue(struct gcli_ctx *ctx, gcli_submit_issue_options opts,
-                            gcli_fetch_buffer *out)
+                            struct gcli_fetch_buffer *out)
 {
 	char *e_owner = NULL, *e_repo = NULL, *payload = NULL, *url = NULL;
 	gcli_jsongen gen = {0};

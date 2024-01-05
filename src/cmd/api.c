@@ -64,7 +64,7 @@ fetch_all(char *_url)
 	url = _url;
 
 	do {
-		gcli_fetch_buffer buffer = {0};
+		struct gcli_fetch_buffer buffer = {0};
 
 		if (gcli_fetch(g_clictx, url, &next_url, &buffer) < 0)
 			errx(1, "gcli: error: failed to fetch data: %s",

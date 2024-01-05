@@ -39,7 +39,7 @@
 int
 github_perform_submit_comment(struct gcli_ctx *ctx,
                               struct gcli_submit_comment_opts opts,
-                              gcli_fetch_buffer *out)
+                              struct gcli_fetch_buffer *out)
 {
 	int rc = 0;
 	gcli_jsongen gen = {0};

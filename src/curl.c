@@ -87,7 +87,7 @@ gcli_curl_ensure(struct gcli_ctx *ctx)
  * appropriate error message and exit */
 static int
 gcli_curl_check_api_error(struct gcli_ctx *ctx, CURLcode code, char const *url,
-                          gcli_fetch_buffer *const result)
+                          struct gcli_fetch_buffer *const result)
 {
 	long status_code = 0;
 
@@ -108,7 +108,7 @@ gcli_curl_check_api_error(struct gcli_ctx *ctx, CURLcode code, char const *url,
 	return 0;
 }
 
-/* Callback for writing data into the gcli_fetch_buffer passed by
+/* Callback for writing data into the struct gcli_fetch_buffer passed by
  * calling routines */
 static size_t
 fetch_write_callback(char *in, size_t size, size_t nmemb, void *data)
@@ -116,7 +116,7 @@ fetch_write_callback(char *in, size_t size, size_t nmemb, void *data)
 	/* the user may have passed null indicating that we do not care
 	 * about the result body of the request. */
 	if (data) {
-		gcli_fetch_buffer *out = data;
+		struct gcli_fetch_buffer *out = data;
 
 		out->data = realloc(out->data, out->length + size * nmemb);
 		memcpy(&(out->data[out->length]), in, size * nmemb);
@@ -129,10 +129,10 @@ fetch_write_callback(char *in, size_t size, size_t nmemb, void *data)
 /* Plain HTTP get request.
  *
  * pagination_next returns the next url to query for paged results.
- * Results are placed into the gcli_fetch_buffer. */
+ * Results are placed into the struct gcli_fetch_buffer. */
 int
 gcli_fetch(struct gcli_ctx *ctx, char const *url, char **const pagination_next,
-           gcli_fetch_buffer *out)
+           struct gcli_fetch_buffer *out)
 {
 	return gcli_fetch_with_method(ctx, "GET", url, NULL, pagination_next, out);
 }
@@ -159,7 +159,7 @@ int
 gcli_curl_test_success(struct gcli_ctx *ctx, char const *url)
 {
 	CURLcode ret;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	long status_code;
 	bool is_success = true;
 	int rc = 0;
@@ -218,7 +218,7 @@ gcli_curl(struct gcli_ctx *ctx, FILE *stream, char const *url,
 {
 	CURLcode ret;
 	struct curl_slist *headers;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	char *auth_header = NULL;
 	int rc = 0;
 
@@ -353,16 +353,16 @@ parse_link_header(char *_header)
 int
 gcli_fetch_with_method(
 	struct gcli_ctx *ctx,
-	char const *method,         /* HTTP method. e.g. POST, GET, DELETE etc. */
-	char const *url,            /* Endpoint                                 */
-	char const *data,           /* Form data                                */
-	char **const pagination_next, /* Next URL for pagination                  */
-	gcli_fetch_buffer *const out) /* output buffer                            */
+	char const *method,                  /* HTTP method. e.g. POST, GET, DELETE etc. */
+	char const *url,                     /* Endpoint */
+	char const *data,                    /* Form data */
+	char **const pagination_next,        /* Next URL for pagination */
+	struct gcli_fetch_buffer *const out) /* output buffer */
 {
 	CURLcode ret;
 	struct curl_slist *headers;
-	gcli_fetch_buffer tmp = {0}; /* used for error codes when out is NULL */
-	gcli_fetch_buffer *buf = NULL;
+	struct gcli_fetch_buffer tmp = {0}; /* used for error codes when out is NULL */
+	struct gcli_fetch_buffer *buf = NULL;
 	char *link_header = NULL;
 	int rc = 0;
 
@@ -388,7 +388,7 @@ gcli_fetch_with_method(
 	 * user is not interested in the result we use a temporary buffer
 	 * for proper error reporting. */
 	if (out) {
-		*out = (gcli_fetch_buffer) {0};
+		*out = (struct gcli_fetch_buffer) {0};
 		buf = out;
 	} else {
 		buf = &tmp;
@@ -457,7 +457,7 @@ gcli_fetch_with_method(
 int
 gcli_post_upload(struct gcli_ctx *ctx, char const *url, char const *content_type,
                  void *buffer, size_t const buffer_size,
-                 gcli_fetch_buffer *const out)
+                 struct gcli_fetch_buffer *const out)
 {
 	CURLcode ret;
 	struct curl_slist *headers;
@@ -525,7 +525,7 @@ gcli_post_upload(struct gcli_ctx *ctx, char const *url, char const *content_type
 int
 gcli_curl_gitea_upload_attachment(struct gcli_ctx *ctx, char const *url,
                                   char const *filename,
-                                  gcli_fetch_buffer *const out)
+                                  struct gcli_fetch_buffer *const out)
 {
 	CURLcode ret;
 	curl_mime *mime;
@@ -664,7 +664,7 @@ gcli_fetch_list(struct gcli_ctx *ctx, char *url, gcli_fetch_list_ctx *fl)
 	int rc;
 
 	do {
-		gcli_fetch_buffer buffer = {0};
+		struct gcli_fetch_buffer buffer = {0};
 
 		rc = gcli_fetch(ctx, url, &next_url, &buffer);
 		if (rc == 0) {

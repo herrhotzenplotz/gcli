@@ -45,7 +45,7 @@ int gitea_get_issue_summary(struct gcli_ctx *ctx, char const *owner,
                             gcli_issue *out);
 
 int gitea_submit_issue(struct gcli_ctx *ctx, gcli_submit_issue_options opts,
-                       gcli_fetch_buffer *out);
+                       struct gcli_fetch_buffer *out);
 
 int gitea_issue_close(struct gcli_ctx *ctx, char const *owner, char const *repo,
                       gcli_id issue_number);

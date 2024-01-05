@@ -47,7 +47,7 @@ bugzilla_get_bugs(struct gcli_ctx *ctx, char const *product, char const *compone
                   gcli_issue_list *out)
 {
 	char *url, *e_product = NULL, *e_component = NULL, *e_author = NULL;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	int rc = 0;
 
 	if (product) {
@@ -105,7 +105,7 @@ bugzilla_bug_get_comments(struct gcli_ctx *const ctx, char const *const product,
                           struct gcli_comment_list *out)
 {
 	int rc = 0;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	json_stream stream = {0};
 	char *url = NULL;
 
@@ -135,7 +135,7 @@ static int
 bugzilla_bug_get_op(struct gcli_ctx *ctx, gcli_id const bug_id, char **out)
 {
 	int rc = 0;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	json_stream stream = {0};
 	char *url = NULL;
 
@@ -164,7 +164,7 @@ bugzilla_get_bug(struct gcli_ctx *ctx, char const *product,
 {
 	int rc = 0;
 	char *url;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	gcli_issue_list list = {0};
 	json_stream stream = {0};
 
@@ -219,7 +219,7 @@ bugzilla_bug_get_attachments(struct gcli_ctx *ctx, char const *const product,
 {
 	int rc = 0;
 	char *url = NULL;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	json_stream stream = {0};
 
 	(void) product;
@@ -276,7 +276,7 @@ add_extra_options(gcli_nvlist const *list, gcli_jsongen *gen)
 
 int
 bugzilla_bug_submit(struct gcli_ctx *ctx, gcli_submit_issue_options opts,
-                    gcli_fetch_buffer *out)
+                    struct gcli_fetch_buffer *out)
 {
 	char *payload = NULL, *url = NULL;
 	char *token; /* bugzilla wants the api token as a parameter in the url or the json payload */

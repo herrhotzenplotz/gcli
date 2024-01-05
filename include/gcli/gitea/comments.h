@@ -42,6 +42,6 @@ int gitea_get_comments(struct gcli_ctx *ctx, char const *owner, char const *repo
 
 int gitea_perform_submit_comment(struct gcli_ctx *ctx,
                                  struct gcli_submit_comment_opts opts,
-                                 gcli_fetch_buffer *out);
+                                 struct gcli_fetch_buffer *out);
 
 #endif /* GITEA_COMMENTS_H */

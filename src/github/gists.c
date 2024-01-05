@@ -91,7 +91,7 @@ int
 gcli_get_gist(struct gcli_ctx *ctx, char const *gist_id, struct gcli_gist *out)
 {
 	char *url = NULL;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	int rc = 0;
 
 	url = sn_asprintf("%s/gists/%s", gcli_get_apibase(ctx), gist_id);
@@ -138,7 +138,7 @@ gcli_create_gist(struct gcli_ctx *ctx, struct gcli_new_gist opts)
 {
 	char *url = NULL;
 	char *post_data = NULL;
-	gcli_fetch_buffer fetch_buffer = {0};
+	struct gcli_fetch_buffer fetch_buffer = {0};
 	sn_sv read_buffer = {0};
 	sn_sv content = {0};
 	int rc = 0;
@@ -187,7 +187,7 @@ int
 gcli_delete_gist(struct gcli_ctx *ctx, char const *gist_id)
 {
 	char *url = NULL;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	int rc = 0;
 
 	url = sn_asprintf("%s/gists/%s", gcli_get_apibase(ctx), gist_id);

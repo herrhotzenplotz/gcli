@@ -39,7 +39,7 @@
 
 int gitlab_perform_submit_comment(struct gcli_ctx *ctx,
                                   struct gcli_submit_comment_opts opts,
-                                  gcli_fetch_buffer *out);
+                                  struct gcli_fetch_buffer *out);
 
 int gitlab_get_issue_comments(struct gcli_ctx *ctx, char const *owner,
                               char const *repo, gcli_id issue,

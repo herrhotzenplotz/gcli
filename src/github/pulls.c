@@ -302,7 +302,7 @@ int
 github_perform_submit_pull(struct gcli_ctx *ctx, gcli_submit_pull_options opts)
 {
 	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
-	gcli_fetch_buffer fetch_buffer = {0};
+	struct gcli_fetch_buffer fetch_buffer = {0};
 	gcli_jsongen gen = {0};
 	int rc = 0;
 
@@ -404,7 +404,7 @@ github_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
                 gcli_id const pr, gcli_pull *const out)
 {
 	int rc = 0;
-	gcli_fetch_buffer json_buffer = {0};
+	struct gcli_fetch_buffer json_buffer = {0};
 	char *url = NULL, *e_owner = NULL, *e_repo = NULL;
 
 	e_owner = gcli_urlencode(owner);

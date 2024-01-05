@@ -70,7 +70,7 @@ github_get_releases(struct gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 static void
-github_parse_single_release(struct gcli_ctx *ctx, gcli_fetch_buffer buffer,
+github_parse_single_release(struct gcli_ctx *ctx, struct gcli_fetch_buffer buffer,
                             struct gcli_release *const out)
 {
 	struct json_stream stream = {0};
@@ -101,7 +101,7 @@ github_upload_release_asset(struct gcli_ctx *ctx, char const *url,
 {
 	char *req = NULL;
 	sn_sv file_content = {0};
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	int rc = 0;
 
 	file_content.length = sn_mmap_file(asset.path, (void **)&file_content.data);
@@ -130,7 +130,7 @@ github_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *relea
 {
 	char *url = NULL, *e_owner = NULL, *e_repo = NULL, *upload_url = NULL,
 	     *payload = NULL;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	gcli_jsongen gen = {0};
 	struct gcli_release response = {0};
 	int rc = 0;

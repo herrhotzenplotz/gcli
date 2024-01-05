@@ -60,7 +60,7 @@ struct gcli_forge_descriptor {
 	int (*perform_submit_comment)(
 		struct gcli_ctx *ctx,
 		struct gcli_submit_comment_opts  opts,
-		gcli_fetch_buffer        *out);
+		struct gcli_fetch_buffer        *out);
 
 	/**
 	 * List comments on the given issue */
@@ -166,7 +166,7 @@ struct gcli_forge_descriptor {
 	int (*perform_submit_issue)(
 		struct gcli_ctx *ctx,
 		gcli_submit_issue_options opts,
-		gcli_fetch_buffer *out);
+		struct gcli_fetch_buffer *out);
 
 	/**
 	 * Change the title of an issue */
@@ -546,7 +546,7 @@ struct gcli_forge_descriptor {
 	 * Get the error string from the API */
 	char const *(*get_api_error_string)(
 		struct gcli_ctx *ctx,
-		gcli_fetch_buffer *);
+		struct gcli_fetch_buffer *);
 
 	/**
 	 * A key in the user json object sent by the API that represents

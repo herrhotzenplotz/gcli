@@ -192,7 +192,7 @@ int
 gitlab_get_job(struct gcli_ctx *ctx, char const *owner, char const *repo,
                gcli_id const jid, gitlab_job *const out)
 {
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	char *url = NULL, *e_owner = NULL, *e_repo = NULL;
 	int rc = 0;
 

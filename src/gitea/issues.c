@@ -56,7 +56,7 @@ gitea_get_issue_summary(struct gcli_ctx *ctx, char const *owner,
 
 int
 gitea_submit_issue(struct gcli_ctx *ctx, gcli_submit_issue_options opts,
-                   gcli_fetch_buffer *const out)
+                   struct gcli_fetch_buffer *const out)
 {
 	return github_perform_submit_issue(ctx,opts, out);
 }

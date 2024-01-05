@@ -134,7 +134,7 @@ github_repo_create(struct gcli_ctx *ctx, gcli_repo_create_options const *options
                    gcli_repo *const out)
 {
 	char *url, *payload;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	gcli_jsongen gen = {0};
 	struct json_stream stream = {0};
 	int rc = 0;

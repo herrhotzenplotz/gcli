@@ -35,7 +35,7 @@
 #include <pdjson/pdjson.h>
 
 char const *
-gitlab_api_error_string(struct gcli_ctx *ctx, gcli_fetch_buffer *const buf)
+gitlab_api_error_string(struct gcli_ctx *ctx, struct gcli_fetch_buffer *const buf)
 {
 	char *msg = NULL;
 	int rc;
@@ -62,7 +62,7 @@ gitlab_api_error_string(struct gcli_ctx *ctx, gcli_fetch_buffer *const buf)
 int
 gitlab_user_id(struct gcli_ctx *ctx, char const *user_name)
 {
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	struct json_stream stream = {0};
 	char *url = NULL;
 	char *e_username;

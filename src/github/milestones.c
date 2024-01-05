@@ -74,7 +74,7 @@ github_get_milestone(struct gcli_ctx *ctx, char const *const owner,
                      gcli_milestone *const out)
 {
 	char *url, *e_owner, *e_repo;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);

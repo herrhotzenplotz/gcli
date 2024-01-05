@@ -44,7 +44,7 @@ gitea_get_releases(struct gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 static void
-gitea_parse_release(struct gcli_ctx *ctx, gcli_fetch_buffer const *const buffer,
+gitea_parse_release(struct gcli_ctx *ctx, struct gcli_fetch_buffer const *const buffer,
                     struct gcli_release *const out)
 {
 	json_stream stream = {0};
@@ -59,7 +59,7 @@ gitea_upload_release_asset(struct gcli_ctx *ctx, char *const url,
 {
 	char *e_assetname = NULL;
 	char *request = NULL;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	int rc = 0;
 
 	e_assetname = gcli_urlencode(asset.name);
@@ -78,7 +78,7 @@ int
 gitea_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *release)
 {
 	char *e_owner = NULL, *e_repo = NULL, *payload = NULL, *upload_url = NULL, *url = NULL;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	gcli_jsongen gen = {0};
 	struct gcli_release response = {0};
 	int rc = 0;

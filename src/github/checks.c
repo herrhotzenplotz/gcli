@@ -44,7 +44,7 @@ int
 github_get_checks(struct gcli_ctx *ctx, char const *owner, char const *repo,
                   char const *ref, int const max, struct github_check_list *const out)
 {
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	char *url = NULL, *next_url = NULL;
 	int rc = 0;
 

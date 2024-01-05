@@ -36,6 +36,6 @@
 
 #include <gcli/curl.h>
 
-char const *bugzilla_api_error_string(struct gcli_ctx *ctx, gcli_fetch_buffer *it);
+char const *bugzilla_api_error_string(struct gcli_ctx *ctx, struct gcli_fetch_buffer *it);
 
 #endif /* GCLI_BUGZILLA_API_H */

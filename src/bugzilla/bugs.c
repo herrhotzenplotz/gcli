@@ -102,7 +102,7 @@ bugzilla_get_bugs(struct gcli_ctx *ctx, char const *product, char const *compone
 int
 bugzilla_bug_get_comments(struct gcli_ctx *const ctx, char const *const product,
                           char const *const component, gcli_id const bug_id,
-                          gcli_comment_list *out)
+                          struct gcli_comment_list *out)
 {
 	int rc = 0;
 	gcli_fetch_buffer buffer = {0};

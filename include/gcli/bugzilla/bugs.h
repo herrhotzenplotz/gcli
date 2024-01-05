@@ -49,7 +49,7 @@ int bugzilla_get_bug(struct gcli_ctx *ctx, char const *product,
 int bugzilla_bug_get_comments(struct gcli_ctx *const ctx,
                               char const *const product,
                               char const *const component, gcli_id const bug_id,
-                              gcli_comment_list *out);
+                              struct gcli_comment_list *out);
 
 int bugzilla_bug_get_attachments(struct gcli_ctx *ctx, char const *const product,
                                  char const *const component,

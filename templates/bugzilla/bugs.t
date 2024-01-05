@@ -31,18 +31,18 @@ object of gcli_issue_list with
 	("bugs" => issues as array of gcli_issue use parse_bugzilla_bug_item);
 
 parser bugzilla_comment is
-object of gcli_comment with
+object of struct gcli_comment with
 	("id" => id as id,
 	 "text" => body as string,
 	 "creation_time" => date as string,
 	 "creator" => author as string);
 
 parser bugzilla_comments_internal_skip_first is
-object of gcli_comment_list with
+object of struct gcli_comment_list with
 	("comments" => use parse_bugzilla_comments_array_skip_first);
 
 parser bugzilla_comments is
-object of gcli_comment_list with
+object of struct gcli_comment_list with
 	("bugs" => use parse_bugzilla_bug_comments_dictionary_skip_first);
 
 parser bugzilla_comment_text is

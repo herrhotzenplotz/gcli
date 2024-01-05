@@ -38,7 +38,7 @@
 
 int
 github_perform_submit_comment(struct gcli_ctx *ctx,
-                              gcli_submit_comment_opts opts,
+                              struct gcli_submit_comment_opts opts,
                               gcli_fetch_buffer *out)
 {
 	int rc = 0;
@@ -73,7 +73,7 @@ github_perform_submit_comment(struct gcli_ctx *ctx,
 
 int
 github_get_comments(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                    gcli_id const issue, gcli_comment_list *const out)
+                    gcli_id const issue, struct gcli_comment_list *const out)
 {
 	char *e_owner = NULL;
 	char *e_repo = NULL;

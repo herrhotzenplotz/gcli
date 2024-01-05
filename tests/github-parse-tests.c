@@ -285,7 +285,7 @@ ATF_TC_BODY(simple_github_fork, tc)
 ATF_TC_WITHOUT_HEAD(simple_github_comment);
 ATF_TC_BODY(simple_github_comment, tc)
 {
-	gcli_comment comment = {0};
+	struct gcli_comment comment = {0};
 	FILE *f;
 	json_stream stream;
 	struct gcli_ctx *ctx = test_context();

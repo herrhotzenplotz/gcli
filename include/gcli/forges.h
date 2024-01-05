@@ -61,7 +61,7 @@ struct gcli_forge_descriptor {
 	 * Submit a comment to a pull/mr or issue */
 	int (*perform_submit_comment)(
 		struct gcli_ctx *ctx,
-		gcli_submit_comment_opts  opts,
+		struct gcli_submit_comment_opts  opts,
 		gcli_fetch_buffer        *out);
 
 	/**
@@ -71,7 +71,7 @@ struct gcli_forge_descriptor {
 		char const *owner,
 		char const *repo,
 		gcli_id issue,
-		gcli_comment_list *out);
+		struct gcli_comment_list *out);
 
 	/**
 	 * List comments on the given PR */
@@ -80,7 +80,7 @@ struct gcli_forge_descriptor {
 		char const *owner,
 		char const *repo,
 		gcli_id pr,
-		gcli_comment_list *out);
+		struct gcli_comment_list *out);
 
 	/**
 	 * List forks of the given repo */

@@ -60,7 +60,7 @@ usage(void)
 static void
 comment_init(struct gcli_ctx *ctx, FILE *f, void *_data)
 {
-	gcli_submit_comment_opts *info = _data;
+	struct gcli_submit_comment_opts *info = _data;
 	const char *target_type = NULL;
 
 	switch (info->target_type) {
@@ -94,13 +94,13 @@ comment_init(struct gcli_ctx *ctx, FILE *f, void *_data)
 }
 
 static char *
-gcli_comment_get_message(gcli_submit_comment_opts *info)
+gcli_comment_get_message(struct gcli_submit_comment_opts *info)
 {
 	return gcli_editor_get_user_message(g_clictx, comment_init, info);
 }
 
 static int
-comment_submit(gcli_submit_comment_opts opts, int always_yes)
+comment_submit(struct gcli_submit_comment_opts opts, int always_yes)
 {
 	int rc = 0;
 	char *message;
@@ -129,7 +129,7 @@ comment_submit(gcli_submit_comment_opts opts, int always_yes)
 int
 gcli_issue_comments(char const *owner, char const *repo, int const issue)
 {
-	gcli_comment_list list = {0};
+	struct gcli_comment_list list = {0};
 	int rc = 0;
 
 	rc = gcli_get_issue_comments(g_clictx, owner, repo, issue, &list);
@@ -145,7 +145,7 @@ gcli_issue_comments(char const *owner, char const *repo, int const issue)
 int
 gcli_pull_comments(char const *owner, char const *repo, int const pull)
 {
-	gcli_comment_list list = {0};
+	struct gcli_comment_list list = {0};
 	int rc = 0;
 
 	rc = gcli_get_pull_comments(g_clictx, owner, repo, pull, &list);
@@ -159,7 +159,7 @@ gcli_pull_comments(char const *owner, char const *repo, int const pull)
 }
 
 void
-gcli_print_comment_list(gcli_comment_list const *const list)
+gcli_print_comment_list(struct gcli_comment_list const *const list)
 {
 	for (size_t i = 0; i < list->comments_size; ++i) {
 		printf("AUTHOR : %s%s%s\n"
@@ -242,7 +242,7 @@ subcommand_comment(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	rc = comment_submit((gcli_submit_comment_opts) {
+	rc = comment_submit((struct gcli_submit_comment_opts) {
 			.owner = owner,
 			.repo = repo,
 			.target_type = target_type,

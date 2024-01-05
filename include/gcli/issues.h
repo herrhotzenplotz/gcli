@@ -131,6 +131,6 @@ int gcli_issue_set_title(struct gcli_ctx *ctx, char const *owner, char const *re
 
 int gcli_issue_get_attachments(struct gcli_ctx *ctx, char const *owner,
                                char const *repo, gcli_id issue,
-                               gcli_attachment_list *attachments);
+                               struct gcli_attachment_list *attachments);
 
 #endif /* ISSUES_H */

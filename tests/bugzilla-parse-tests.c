@@ -130,8 +130,8 @@ ATF_TC_WITHOUT_HEAD(bugzilla_attachments);
 ATF_TC_BODY(bugzilla_attachments, tc)
 {
 	FILE *f = NULL;
-	gcli_attachment const *it;
-	gcli_attachment_list list = {0};
+	struct gcli_attachment const *it;
+	struct gcli_attachment_list list = {0};
 	struct gcli_ctx *ctx = test_context();
 	json_stream stream = {0};
 

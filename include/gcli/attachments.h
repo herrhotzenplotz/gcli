@@ -41,9 +41,6 @@
 
 #include <gcli/gcli.h>
 
-typedef struct gcli_attachment gcli_attachment;
-typedef struct gcli_attachment_list gcli_attachment_list;
-
 struct gcli_attachment {
 	gcli_id id;
 	bool is_obsolete;
@@ -57,12 +54,12 @@ struct gcli_attachment {
 };
 
 struct gcli_attachment_list {
-	gcli_attachment *attachments;
+	struct gcli_attachment *attachments;
 	size_t attachments_size;
 };
 
-void gcli_attachments_free(gcli_attachment_list *list);
-void gcli_attachment_free(gcli_attachment *attachment);
+void gcli_attachments_free(struct gcli_attachment_list *list);
+void gcli_attachment_free(struct gcli_attachment *attachment);
 int gcli_attachment_get_content(struct gcli_ctx *const ctx, gcli_id const id,
                                 FILE *out);
 

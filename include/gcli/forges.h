@@ -186,7 +186,7 @@ struct gcli_forge_descriptor {
 		char const *owner,
 		char const *repo,
 		gcli_id issue,
-		gcli_attachment_list *out);
+		struct gcli_attachment_list *out);
 
 	/**
 	 * Dump the contents of the attachment to the given file */

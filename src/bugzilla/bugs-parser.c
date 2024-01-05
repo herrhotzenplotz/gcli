@@ -144,7 +144,7 @@ parse_bugzilla_assignee(struct gcli_ctx *ctx, struct json_stream *stream,
 int
 parse_bugzilla_bug_attachments_dict(struct gcli_ctx *ctx,
                                     struct json_stream *stream,
-                                    gcli_attachment_list *out)
+                                    struct gcli_attachment_list *out)
 {
 	enum json_type next = JSON_NULL;
 	int rc = 0;
@@ -169,7 +169,7 @@ parse_bugzilla_bug_attachments_dict(struct gcli_ctx *ctx,
 int
 parse_bugzilla_attachment_content_only_first(struct gcli_ctx *ctx,
                                              struct json_stream *stream,
-                                             gcli_attachment *out)
+                                             struct gcli_attachment *out)
 {
 	enum json_type next = JSON_NULL;
 	int rc = 0;

@@ -607,7 +607,7 @@ handle_issue_milestone_action(int *argc, char ***argv,
 }
 
 static void
-gcli_print_attachments(gcli_attachment_list const *const list)
+gcli_print_attachments(struct gcli_attachment_list const *const list)
 {
 	gcli_tbl tbl;
 	gcli_tblcoldef columns[] = {
@@ -622,7 +622,7 @@ gcli_print_attachments(gcli_attachment_list const *const list)
 	tbl = gcli_tbl_begin(columns, ARRAY_SIZE(columns));
 
 	for (size_t i = 0; i < list->attachments_size; ++i) {
-		gcli_attachment const *const it = &list->attachments[i];
+		struct gcli_attachment const *const it = &list->attachments[i];
 		gcli_tbl_add_row(tbl, it->id, it->author, it->created_at,
 		                 it->content_type, it->is_obsolete, it->file_name);
 	}
@@ -720,7 +720,7 @@ handle_issues_actions(int argc, char *argv[],
 
 		} else if (strcmp("attachments", operation) == 0) {
 
-			gcli_attachment_list list = {0};
+			struct gcli_attachment_list list = {0};
 			int rc = gcli_issue_get_attachments(g_clictx, owner, repo, issue_id,
 			                                    &list);
 			if (rc < 0) {

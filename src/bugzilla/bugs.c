@@ -215,7 +215,7 @@ error_fetch:
 int
 bugzilla_bug_get_attachments(struct gcli_ctx *ctx, char const *const product,
                              char const *const component, gcli_id const bug_id,
-                             gcli_attachment_list *const out)
+                             struct gcli_attachment_list *const out)
 {
 	int rc = 0;
 	char *url = NULL;

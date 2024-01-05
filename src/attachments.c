@@ -33,7 +33,7 @@
 #include <stdlib.h>
 
 void
-gcli_attachments_free(gcli_attachment_list *list)
+gcli_attachments_free(struct gcli_attachment_list *list)
 {
 	for (size_t i = 0; i < list->attachments_size; ++i) {
 		gcli_attachment_free(&list->attachments[i]);
@@ -45,7 +45,7 @@ gcli_attachments_free(gcli_attachment_list *list)
 }
 
 void
-gcli_attachment_free(gcli_attachment *it)
+gcli_attachment_free(struct gcli_attachment *it)
 {
 	free(it->created_at);
 	free(it->author);

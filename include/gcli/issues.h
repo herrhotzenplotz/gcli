@@ -70,7 +70,7 @@ struct gcli_submit_issue_options {
 	char *title;
 	char *body;
 
-	gcli_nvlist extra;
+	struct gcli_nvlist extra;
 };
 
 struct gcli_issue_list {

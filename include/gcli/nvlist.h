@@ -36,9 +36,6 @@
 
 #include <sys/queue.h>
 
-typedef struct gcli_nvpair gcli_nvpair;
-typedef struct gcli_nvlist gcli_nvlist;
-
 struct gcli_nvpair {
 	TAILQ_ENTRY(gcli_nvpair) next;
 
@@ -48,11 +45,11 @@ struct gcli_nvpair {
 
 TAILQ_HEAD(gcli_nvlist, gcli_nvpair);
 
-int gcli_nvlist_init(gcli_nvlist *list);
-int gcli_nvlist_free(gcli_nvlist *list);
-int gcli_nvlist_append(gcli_nvlist *list, char *key, char *value);
-char const *gcli_nvlist_find(gcli_nvlist const *list, char const *key);
-char const *gcli_nvlist_find_or(gcli_nvlist const *list, char const *key,
-                                char const *alternative);
+int gcli_nvlist_init(struct gcli_nvlist *list);
+int gcli_nvlist_free(struct gcli_nvlist *list);
+int gcli_nvlist_append(struct gcli_nvlist *list, char *key, char *value);
+char const *gcli_nvlist_find(struct gcli_nvlist const *list, char const *key);
+char const *gcli_nvlist_find_or(struct gcli_nvlist const *list,
+                                char const *key, char const *alternative);
 
 #endif /* GCLI_NVLIST_H */

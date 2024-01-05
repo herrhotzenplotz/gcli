@@ -245,7 +245,7 @@ error_fetch:
 }
 
 static void
-add_extra_options(gcli_nvlist const *list, struct gcli_jsongen *gen)
+add_extra_options(struct gcli_nvlist const *list, struct gcli_jsongen *gen)
 {
 	static struct extra_opt {
 		char const *json_name;

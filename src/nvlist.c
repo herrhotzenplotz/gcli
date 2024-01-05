@@ -35,7 +35,7 @@
 #include <string.h>
 
 int
-gcli_nvlist_init(gcli_nvlist *list)
+gcli_nvlist_init(struct gcli_nvlist *list)
 {
 	TAILQ_INIT(list);
 
@@ -43,9 +43,9 @@ gcli_nvlist_init(gcli_nvlist *list)
 }
 
 int
-gcli_nvlist_free(gcli_nvlist *list)
+gcli_nvlist_free(struct gcli_nvlist *list)
 {
-	gcli_nvpair *p1, *p2;
+	struct gcli_nvpair *p1, *p2;
 
 	p1 = TAILQ_FIRST(list);
 	while (p1 != NULL) {
@@ -64,12 +64,12 @@ gcli_nvlist_free(gcli_nvlist *list)
 }
 
 int
-gcli_nvlist_append(gcli_nvlist *list, char *key, char *value)
+gcli_nvlist_append(struct gcli_nvlist *list, char *key, char *value)
 {
 	/* TODO: handle the case where a pair with an already existing
 	 * key is inserted. */
 
-	gcli_nvpair *pair = calloc(1, sizeof(*pair));
+	struct gcli_nvpair *pair = calloc(1, sizeof(*pair));
 	if (pair == NULL)
 		return -1;
 
@@ -82,9 +82,9 @@ gcli_nvlist_append(gcli_nvlist *list, char *key, char *value)
 }
 
 char const *
-gcli_nvlist_find(gcli_nvlist const *list, char const *key)
+gcli_nvlist_find(struct gcli_nvlist const *list, char const *key)
 {
-	gcli_nvpair const *pair;
+	struct gcli_nvpair const *pair;
 
 	TAILQ_FOREACH(pair, list,next) {
 		if (strcmp(pair->key, key) == 0)
@@ -94,7 +94,7 @@ gcli_nvlist_find(gcli_nvlist const *list, char const *key)
 }
 
 char const *
-gcli_nvlist_find_or(gcli_nvlist const *list, char const *const key,
+gcli_nvlist_find_or(struct gcli_nvlist const *list, char const *const key,
                     char const *const alternative)
 {
 	char const *const result = gcli_nvlist_find(list, key);

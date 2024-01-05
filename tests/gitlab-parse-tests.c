@@ -46,7 +46,7 @@ open_sample(char const *const name)
 ATF_TC_WITHOUT_HEAD(gitlab_simple_merge_request);
 ATF_TC_BODY(gitlab_simple_merge_request, tc)
 {
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_merge_request.json");
 	struct gcli_pull pull = {0};
@@ -86,7 +86,7 @@ ATF_TC_BODY(gitlab_simple_merge_request, tc)
 ATF_TC_WITHOUT_HEAD(gitlab_simple_issue);
 ATF_TC_BODY(gitlab_simple_issue, tc)
 {
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_issue.json");
 	struct gcli_issue issue = {0};
@@ -117,7 +117,7 @@ ATF_TC_BODY(gitlab_simple_issue, tc)
 ATF_TC_WITHOUT_HEAD(gitlab_simple_label);
 ATF_TC_BODY(gitlab_simple_label, tc)
 {
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_label.json");
 	struct gcli_label label = {0};
@@ -138,7 +138,7 @@ ATF_TC_BODY(gitlab_simple_label, tc)
 ATF_TC_WITHOUT_HEAD(gitlab_simple_release);
 ATF_TC_BODY(gitlab_simple_release, tc)
 {
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_release.json");
 	struct gcli_release release = {0};
@@ -191,7 +191,7 @@ ATF_TC_BODY(gitlab_simple_release, tc)
 ATF_TC_WITHOUT_HEAD(gitlab_simple_fork);
 ATF_TC_BODY(gitlab_simple_fork, tc)
 {
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_fork.json");
 	struct gcli_fork fork = {0};
@@ -212,7 +212,7 @@ ATF_TC_BODY(gitlab_simple_fork, tc)
 ATF_TC_WITHOUT_HEAD(gitlab_simple_milestone);
 ATF_TC_BODY(gitlab_simple_milestone, tc)
 {
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_milestone.json");
 	struct gcli_milestone milestone = {0};
@@ -241,7 +241,7 @@ ATF_TC_BODY(gitlab_simple_milestone, tc)
 ATF_TC_WITHOUT_HEAD(gitlab_simple_pipeline);
 ATF_TC_BODY(gitlab_simple_pipeline, tc)
 {
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_pipeline.json");
 	struct gitlab_pipeline pipeline = {0};
@@ -265,7 +265,7 @@ ATF_TC_BODY(gitlab_simple_pipeline, tc)
 ATF_TC_WITHOUT_HEAD(gitlab_simple_repo);
 ATF_TC_BODY(gitlab_simple_repo, tc)
 {
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_repo.json");
 	struct gcli_repo repo = {0};
@@ -289,7 +289,7 @@ ATF_TC_BODY(gitlab_simple_repo, tc)
 ATF_TC_WITHOUT_HEAD(gitlab_simple_snippet);
 ATF_TC_BODY(gitlab_simple_snippet, tc)
 {
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_snippet.json");
 	struct gcli_gitlab_snippet snippet = {0};

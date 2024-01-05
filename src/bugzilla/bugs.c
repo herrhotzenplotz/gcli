@@ -85,7 +85,7 @@ bugzilla_get_bugs(struct gcli_ctx *ctx, char const *product, char const *compone
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc == 0) {
-		json_stream stream = {0};
+		struct json_stream stream = {0};
 
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		rc = parse_bugzilla_bugs(ctx, &stream, out);
@@ -106,7 +106,7 @@ bugzilla_bug_get_comments(struct gcli_ctx *const ctx, char const *const product,
 {
 	int rc = 0;
 	struct gcli_fetch_buffer buffer = {0};
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 	char *url = NULL;
 
 	(void) product;
@@ -136,7 +136,7 @@ bugzilla_bug_get_op(struct gcli_ctx *ctx, gcli_id const bug_id, char **out)
 {
 	int rc = 0;
 	struct gcli_fetch_buffer buffer = {0};
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 	char *url = NULL;
 
 	url = sn_asprintf("%s/rest/bug/%"PRIid"/comment?include_fields=_all",
@@ -166,7 +166,7 @@ bugzilla_get_bug(struct gcli_ctx *ctx, char const *product,
 	char *url;
 	struct gcli_fetch_buffer buffer = {0};
 	struct gcli_issue_list list = {0};
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 
 	/* XXX should we warn if product or component is set? */
 	(void) product;
@@ -220,7 +220,7 @@ bugzilla_bug_get_attachments(struct gcli_ctx *ctx, char const *const product,
 	int rc = 0;
 	char *url = NULL;
 	struct gcli_fetch_buffer buffer = {0};
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 
 	(void) product;
 	(void) component;

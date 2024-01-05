@@ -39,7 +39,7 @@ gitlab_api_error_string(struct gcli_ctx *ctx, struct gcli_fetch_buffer *const bu
 {
 	char *msg = NULL;
 	int rc;
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 
 	json_open_buffer(&stream, buf->data, buf->length);
 	rc = parse_gitlab_get_error(ctx, &stream, &msg);

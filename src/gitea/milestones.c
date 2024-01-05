@@ -86,7 +86,7 @@ gitea_get_milestone(struct gcli_ctx *ctx, char const *const owner,
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 
 	if (rc == 0) {
-		json_stream stream = {0};
+		struct json_stream stream = {0};
 
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		parse_gitea_milestone(ctx, &stream, out);

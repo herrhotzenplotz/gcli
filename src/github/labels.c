@@ -65,7 +65,7 @@ github_create_label(struct gcli_ctx *ctx, char const *owner, char const *repo,
 	struct gcli_fetch_buffer buffer = {0};
 	struct gcli_jsongen gen = {0};
 	int rc = 0;
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 
 	/* Generate payload */
 	colour = sn_asprintf("%06X", label->colour >> 8);

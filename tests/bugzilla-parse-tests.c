@@ -73,7 +73,7 @@ ATF_TC_BODY(simple_bugzilla_issue, tc)
 	struct gcli_issue_list list = {0};
 	struct gcli_issue const *issue;
 	FILE *f;
-	json_stream stream;
+	struct json_stream stream;
 	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("bugzilla_simple_bug.json"));
@@ -104,7 +104,7 @@ ATF_TC_BODY(bugzilla_comments, tc)
 	struct gcli_comment const *cmt = NULL;
 	struct gcli_comment_list list = {0};
 	struct gcli_ctx *ctx = test_context();
-	json_stream stream;
+	struct json_stream stream;
 
 	ATF_REQUIRE(f = open_sample("bugzilla_comments.json"));
 	json_open_stream(&stream, f);
@@ -133,7 +133,7 @@ ATF_TC_BODY(bugzilla_attachments, tc)
 	struct gcli_attachment const *it;
 	struct gcli_attachment_list list = {0};
 	struct gcli_ctx *ctx = test_context();
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 
 	ATF_REQUIRE(f = open_sample("bugzilla_attachments.json"));
 	json_open_stream(&stream, f);

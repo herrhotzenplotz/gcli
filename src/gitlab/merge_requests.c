@@ -330,7 +330,7 @@ gitlab_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
 
 	rc = gcli_fetch(ctx, url, NULL, &json_buffer);
 	if (rc == 0) {
-		json_stream stream = {0};
+		struct json_stream stream = {0};
 		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 		parse_gitlab_mr(ctx, &stream, out);
 		json_close(&stream);
@@ -630,7 +630,7 @@ gitlab_mr_get_reviewers(struct gcli_ctx *ctx, char const *e_owner,
 
 	rc = gcli_fetch(ctx, url, NULL, &json_buffer);
 	if (rc == 0) {
-		json_stream stream = {0};
+		struct json_stream stream = {0};
 		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 		parse_gitlab_reviewer_ids(ctx, &stream, out);
 		json_close(&stream);

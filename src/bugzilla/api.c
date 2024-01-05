@@ -37,7 +37,7 @@
 char const *
 bugzilla_api_error_string(struct gcli_ctx *ctx, struct gcli_fetch_buffer *const buf)
 {
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 	int rc;
 	char *msg;
 

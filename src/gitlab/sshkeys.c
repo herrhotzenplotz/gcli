@@ -79,11 +79,11 @@ gitlab_add_sshkey(struct gcli_ctx *ctx, char const *const title,
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, &buf);
 	if (rc == 0 && out) {
-		json_stream str;
+		struct json_stream stream = {0};
 
-		json_open_buffer(&str, buf.data, buf.length);
-		parse_gitlab_sshkey(ctx, &str, out);
-		json_close(&str);
+		json_open_buffer(&stream, buf.data, buf.length);
+		parse_gitlab_sshkey(ctx, &stream, out);
+		json_close(&stream);
 	}
 
 	free(buf.data);

@@ -74,7 +74,7 @@ gitlab_get_milestone(struct gcli_ctx *ctx, char const *owner, char const *repo,
 {
 	char *url, *e_owner, *e_repo;
 	struct gcli_fetch_buffer buffer = {0};
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);

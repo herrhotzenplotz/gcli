@@ -47,7 +47,7 @@ static void
 gitea_parse_release(struct gcli_ctx *ctx, struct gcli_fetch_buffer const *const buffer,
                     struct gcli_release *const out)
 {
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 	json_open_buffer(&stream, buffer->data, buffer->length);
 	parse_github_release(ctx, &stream, out);
 	json_close(&stream);

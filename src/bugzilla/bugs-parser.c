@@ -87,7 +87,7 @@ parse_bugzilla_comments_array_only_first(struct gcli_ctx *ctx,
 
 int
 parse_bugzilla_bug_comments_dictionary_skip_first(struct gcli_ctx *const ctx,
-                                                  json_stream *stream,
+                                                  struct json_stream *stream,
                                                   struct gcli_comment_list *out)
 {
 	enum json_type next = JSON_NULL;
@@ -110,7 +110,7 @@ parse_bugzilla_bug_comments_dictionary_skip_first(struct gcli_ctx *const ctx,
 
 int
 parse_bugzilla_bug_comments_dictionary_only_first(struct gcli_ctx *const ctx,
-                                                  json_stream *stream,
+                                                  struct json_stream *stream,
                                                   char **out)
 {
 	enum json_type next = JSON_NULL;

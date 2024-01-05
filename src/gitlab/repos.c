@@ -46,7 +46,7 @@ gitlab_get_repo(struct gcli_ctx *ctx, char const *owner, char const *repo,
 	/* GET /projects/:id */
 	char *url = NULL;
 	struct gcli_fetch_buffer buffer = {0};
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 	char *e_owner = {0};
 	char *e_repo = {0};
 	int rc;
@@ -144,7 +144,7 @@ gitlab_repo_create(struct gcli_ctx *ctx, struct gcli_repo_create_options const *
 	struct gcli_fetch_buffer buffer = {0};
 	struct gcli_jsongen gen = {0};
 	int rc;
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 
 	/* Request preparation */
 	url = sn_asprintf("%s/projects", gcli_get_apibase(ctx));

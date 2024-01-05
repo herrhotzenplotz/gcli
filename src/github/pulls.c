@@ -339,7 +339,7 @@ github_perform_submit_pull(struct gcli_ctx *ctx, struct gcli_submit_pull_options
 	/* Add labels if requested. GitHub doesn't allow us to do this all
 	 * with one request. */
 	if (rc == 0 && opts.labels_size) {
-		json_stream json = {0};
+		struct json_stream json = {0};
 		struct gcli_pull pull = {0};
 
 		json_open_buffer(&json, fetch_buffer.data, fetch_buffer.length);
@@ -418,7 +418,7 @@ github_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
 
 	rc = gcli_fetch(ctx, url, NULL, &json_buffer);
 	if (rc == 0) {
-		json_stream stream = {0};
+		struct json_stream stream = {0};
 
 		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 		parse_github_pull(ctx, &stream, out);

@@ -44,7 +44,7 @@ ATF_TC_BODY(gitea_simple_notification, tc)
 {
 	struct gcli_notification notification = {0};
 	FILE *sample;
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 	struct gcli_ctx *ctx;
 
 	ctx = test_context();

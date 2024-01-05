@@ -76,7 +76,7 @@ ATF_TC_BODY(simple_github_issue, tc)
 {
 	struct gcli_issue issue = {0};
 	FILE *f;
-	json_stream stream;
+	struct json_stream stream;
 	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_issue.json"));
@@ -117,7 +117,7 @@ ATF_TC_BODY(simple_github_pull, tc)
 {
 	struct gcli_pull pull = {0};
 	FILE *f;
-	json_stream stream;
+	struct json_stream stream;
 	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_pull.json"));
@@ -157,7 +157,7 @@ ATF_TC_BODY(simple_github_label, tc)
 {
 	struct gcli_label label = {0};
 	FILE *f;
-	json_stream stream;
+	struct json_stream stream;
 	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_label.json"));
@@ -180,7 +180,7 @@ ATF_TC_BODY(simple_github_milestone, tc)
 {
 	struct gcli_milestone milestone = {0};
 	FILE *f;
-	json_stream stream;
+	struct json_stream stream;
 	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_milestone.json"));
@@ -209,7 +209,7 @@ ATF_TC_BODY(simple_github_release, tc)
 {
 	struct gcli_release release = {0};
 	FILE *f;
-	json_stream stream;
+	struct json_stream stream;
 	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_release.json"));
@@ -238,7 +238,7 @@ ATF_TC_BODY(simple_github_repo, tc)
 {
 	struct gcli_repo repo = {0};
 	FILE *f;
-	json_stream stream;
+	struct json_stream stream;
 	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_repo.json"));
@@ -264,7 +264,7 @@ ATF_TC_BODY(simple_github_fork, tc)
 {
 	struct gcli_fork fork = {0};
 	FILE *f;
-	json_stream stream;
+	struct json_stream stream;
 	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_fork.json"));
@@ -287,7 +287,7 @@ ATF_TC_BODY(simple_github_comment, tc)
 {
 	struct gcli_comment comment = {0};
 	FILE *f;
-	json_stream stream;
+	struct json_stream stream;
 	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_comment.json"));
@@ -310,7 +310,7 @@ ATF_TC_BODY(simple_github_check, tc)
 {
     struct gcli_github_check check = {0};
 	FILE *f;
-	json_stream stream;
+	struct json_stream stream;
 	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_check.json"));

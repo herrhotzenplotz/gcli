@@ -118,7 +118,7 @@ gitlab_get_issue_summary(struct gcli_ctx *ctx, char const *owner,
 	char *e_owner = NULL;
 	char *e_repo = NULL;
 	struct gcli_fetch_buffer buffer = {0};
-	json_stream parser = {0};
+	struct json_stream parser = {0};
 	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);

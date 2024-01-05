@@ -58,7 +58,7 @@ usage(void)
 
 static void
 gcli_print_snippet(enum gcli_output_flags const flags,
-                   gcli_gitlab_snippet const *const it)
+                   struct gcli_gitlab_snippet const *const it)
 {
 	gcli_dict dict;
 
@@ -79,7 +79,7 @@ gcli_print_snippet(enum gcli_output_flags const flags,
 
 static void
 gcli_print_snippets_long(enum gcli_output_flags const flags,
-                         gcli_gitlab_snippet_list const *const list, int const max)
+                         struct gcli_gitlab_snippet_list const *const list, int const max)
 {
 	int n;
 
@@ -100,7 +100,7 @@ gcli_print_snippets_long(enum gcli_output_flags const flags,
 
 static void
 gcli_print_snippets_short(enum gcli_output_flags const flags,
-                          gcli_gitlab_snippet_list const *const list,
+                          struct gcli_gitlab_snippet_list const *const list,
                           int const max)
 {
 	int n;
@@ -147,7 +147,7 @@ gcli_print_snippets_short(enum gcli_output_flags const flags,
 
 void
 gcli_snippets_print(enum gcli_output_flags const flags,
-                    gcli_gitlab_snippet_list const *const list, int const max)
+                    struct gcli_gitlab_snippet_list const *const list, int const max)
 {
 	if (list->snippets_size == 0) {
 		puts("No Snippets");
@@ -226,7 +226,7 @@ int
 subcommand_snippets(int argc, char *argv[])
 {
 	int ch;
-	gcli_gitlab_snippet_list list = {0};
+	struct gcli_gitlab_snippet_list list = {0};
 	int count = 30;
 	enum gcli_output_flags flags = 0;
 

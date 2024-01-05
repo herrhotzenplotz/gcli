@@ -78,7 +78,7 @@ github_get_comments(struct gcli_ctx *ctx, char const *owner, char const *repo,
 	char *e_owner = NULL;
 	char *e_repo = NULL;
 	char *url = NULL;
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &out->comments,
 		.sizep = &out->comments_size,
 		.parse = (parsefn)parse_github_comments,

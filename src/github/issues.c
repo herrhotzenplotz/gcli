@@ -70,7 +70,7 @@ int
 github_fetch_issues(struct gcli_ctx *ctx, char *url, int const max,
                     gcli_issue_list *const out)
 {
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &out->issues,
 		.sizep = &out->issues_size,
 		.parse = (parsefn)(parse_github_issues),

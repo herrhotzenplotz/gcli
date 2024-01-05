@@ -55,7 +55,7 @@ gitlab_fetch_mrs(struct gcli_ctx *ctx, char *url, int const max,
 {
 	int rc = 0;
 
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &list->pulls,
 		.sizep = &list->pulls_size,
 		.max = max,
@@ -181,7 +181,7 @@ gitlab_make_commit_patch(struct gcli_ctx *ctx, FILE *stream,
 	int rc;
 	gitlab_diff_list list = {0};
 
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &list.diffs,
 		.sizep = &list.diffs_size,
 		.max = -1,
@@ -350,7 +350,7 @@ gitlab_get_pull_commits(struct gcli_ctx *ctx, char const *owner, char const *rep
 	char *e_owner = NULL;
 	char *e_repo = NULL;
 
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &out->commits,
 		.sizep = &out->commits_size,
 		.max = -1,

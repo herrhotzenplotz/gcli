@@ -48,7 +48,7 @@ github_get_milestones(struct gcli_ctx *ctx, char const *const owner,
                       gcli_milestone_list *const out)
 {
 	char *url, *e_owner, *e_repo;
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &out->milestones,
 		.sizep = &out->milestones_size,
 		.parse = (parsefn)parse_github_milestones,

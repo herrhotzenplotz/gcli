@@ -49,7 +49,7 @@ gitlab_get_milestones(struct gcli_ctx *ctx, char const *owner, char const *repo,
 	char *url;
 	char *e_owner, *e_repo;
 
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &out->milestones,
 		.sizep = &out->milestones_size,
 		.max = max,

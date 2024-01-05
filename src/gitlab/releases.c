@@ -70,7 +70,7 @@ gitlab_get_releases(struct gcli_ctx *ctx, char const *owner, char const *repo,
 	char *e_repo = NULL;
 	int rc = 0;
 
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &list->releases,
 		.sizep = &list->releases_size,
 		.max = max,

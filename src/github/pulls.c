@@ -95,7 +95,7 @@ github_fetch_pulls(struct gcli_ctx *ctx, char *url,
                    gcli_pull_fetch_details const *details, int max,
                    gcli_pull_list *const list)
 {
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &list->pulls,
 		.sizep = &list->pulls_size,
 		.parse = (parsefn)(parse_github_pulls),
@@ -379,7 +379,7 @@ github_get_pull_commits(struct gcli_ctx *ctx, char const *owner,
 	char *e_owner = NULL;
 	char *e_repo = NULL;
 
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &out->commits,
 		.sizep = &out->commits_size,
 		.max = -1,

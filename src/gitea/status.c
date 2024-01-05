@@ -41,7 +41,7 @@ gitea_get_notifications(struct gcli_ctx *ctx, int const max,
 {
 	char *url = NULL;
 
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &out->notifications,
 		.sizep = &out->notifications_size,
 		.parse = (parsefn)(parse_gitea_notifications),

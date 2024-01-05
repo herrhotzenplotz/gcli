@@ -658,7 +658,7 @@ gcli_urldecode(struct gcli_ctx *ctx, char const *input)
  *
  * If max is -1 then everything will be fetched. */
 int
-gcli_fetch_list(struct gcli_ctx *ctx, char *url, gcli_fetch_list_ctx *fl)
+gcli_fetch_list(struct gcli_ctx *ctx, char *url, struct gcli_fetch_list_ctx *fl)
 {
 	char *next_url = NULL;
 	int rc;

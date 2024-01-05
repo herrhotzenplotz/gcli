@@ -47,7 +47,7 @@ static int
 fetch_pipelines(struct gcli_ctx *ctx, char *url, int const max,
                 gitlab_pipeline_list *const list)
 {
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &list->pipelines,
 		.sizep = &list->pipelines_size,
 		.max = max,
@@ -120,7 +120,7 @@ gitlab_get_pipeline_jobs(struct gcli_ctx *ctx, char const *owner,
                          int const max, gitlab_job_list *const out)
 {
 	char *url = NULL, *e_owner = NULL, *e_repo = NULL;
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &out->jobs,
 		.sizep = &out->jobs_size,
 		.max = max,

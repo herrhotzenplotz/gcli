@@ -87,7 +87,7 @@ gitlab_get_mr_comments(struct gcli_ctx *ctx, char const *owner, char const *repo
 	char *e_owner = gcli_urlencode(owner);
 	char *e_repo = gcli_urlencode(repo);
 
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 			.listp = &out->comments,
 			.sizep = &out->comments_size,
 			.parse = (parsefn)parse_gitlab_comments,
@@ -113,7 +113,7 @@ gitlab_get_issue_comments(struct gcli_ctx *ctx, char const *owner,
 	char *e_owner = gcli_urlencode(owner);
 	char *e_repo = gcli_urlencode(repo);
 
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &out->comments,
 		.sizep = &out->comments_size,
 		.parse = (parsefn)parse_gitlab_comments,

@@ -46,7 +46,6 @@
 typedef int (*parsefn)(struct gcli_ctx *, json_stream *stream, void *list,
                        size_t *listsize);
 typedef void (*filterfn)(void *list, size_t *listsize, void const *userdata);
-typedef struct gcli_fetch_list_ctx gcli_fetch_list_ctx;
 
 struct gcli_fetch_buffer {
 	char *data;
@@ -69,9 +68,10 @@ int gcli_fetch(struct gcli_ctx *ctx, char const *url, char **pagination_next,
 int gcli_curl(struct gcli_ctx *ctx, FILE *stream, char const *url,
               char const *content_type);
 
-int gcli_fetch_with_method(struct  gcli_ctx *ctx, char const *method,
+int gcli_fetch_with_method(struct gcli_ctx *ctx, char const *method,
                            char const *url, char const *data,
-                           char **pagination_next, struct gcli_fetch_buffer *out);
+                           char **pagination_next,
+                           struct gcli_fetch_buffer *out);
 
 int gcli_post_upload(struct gcli_ctx *ctx, char const *url,
                      char const *content_type, void *buffer, size_t buffer_size,
@@ -85,6 +85,7 @@ int gcli_curl_test_success(struct gcli_ctx *ctx, char const *url);
 char *gcli_urlencode(char const *);
 sn_sv gcli_urlencode_sv(sn_sv const);
 char *gcli_urldecode(struct gcli_ctx *ctx, char const *input);
-int gcli_fetch_list(struct gcli_ctx *ctx, char *url, gcli_fetch_list_ctx *fctx);
+int gcli_fetch_list(struct gcli_ctx *ctx, char *url,
+                    struct gcli_fetch_list_ctx *fctx);
 
 #endif /* CURL_H */

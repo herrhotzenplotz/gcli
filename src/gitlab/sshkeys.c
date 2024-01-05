@@ -44,7 +44,7 @@ int
 gitlab_get_sshkeys(struct gcli_ctx *ctx, gcli_sshkey_list *list)
 {
 	char *url;
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &list->keys,
 		.sizep = &list->keys_size,
 		.max = -1,

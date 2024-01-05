@@ -94,7 +94,7 @@ gitlab_get_repos(struct gcli_ctx *ctx, char const *owner, int const max,
 	char *url = NULL;
 	char *e_owner = NULL;
 	int rc = 0;
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &list->repos,
 		.sizep = &list->repos_size,
 		.parse = (parsefn)(parse_gitlab_repos),

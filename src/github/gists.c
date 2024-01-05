@@ -72,7 +72,7 @@ gcli_get_gists(struct gcli_ctx *ctx, char const *user, int const max,
                struct gcli_gist_list *const list)
 {
 	char *url = NULL;
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &list->gists,
 		.sizep = &list->gists_size,
 		.parse = (parsefn)(parse_github_gists),

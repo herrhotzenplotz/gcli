@@ -47,7 +47,7 @@ github_get_repos(struct gcli_ctx *ctx, char const *owner, int const max,
 	char *e_owner = NULL;
 	int rc = 0;
 
-	gcli_fetch_list_ctx lf = {
+	struct gcli_fetch_list_ctx lf = {
 		.listp = &list->repos,
 		.sizep = &list->repos_size,
 		.max = max,
@@ -93,7 +93,7 @@ github_get_own_repos(struct gcli_ctx *ctx, int const max,
                      gcli_repo_list *const list)
 {
 	char *url = NULL;
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &list->repos,
 		.sizep = &list->repos_size,
 		.max = max,

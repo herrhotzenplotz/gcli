@@ -70,7 +70,7 @@ gcli_snippets_get(struct gcli_ctx *ctx, int const max,
 {
 	char *url = NULL;
 
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &out->snippets,
 		.sizep = &out->snippets_size,
 		.max = max,

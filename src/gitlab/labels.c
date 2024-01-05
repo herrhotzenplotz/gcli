@@ -41,7 +41,7 @@ gitlab_get_labels(struct gcli_ctx *ctx, char const *owner, char const *repo,
                   int const max, gcli_label_list *const out)
 {
 	char *url = NULL;
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &out->labels,
 		.sizep = &out->labels_size,
 		.max = max,

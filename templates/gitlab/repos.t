@@ -1,7 +1,7 @@
 include "gcli/gitlab/repos.h";
 
 parser gitlab_repo is
-object of gcli_repo with
+object of struct gcli_repo with
 	("path_with_namespace" => full_name as string,
 	 "name"                => name as string,
 	 "owner"               => owner as user,
@@ -11,4 +11,4 @@ object of gcli_repo with
 	 "id"                  => id as id);
 
 parser gitlab_repos is
-array of gcli_repo use parse_gitlab_repo;
+array of struct gcli_repo use parse_gitlab_repo;

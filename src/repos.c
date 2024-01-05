@@ -36,13 +36,13 @@
 
 int
 gcli_get_repos(struct gcli_ctx *ctx, char const *owner, int const max,
-               gcli_repo_list *const out)
+               struct gcli_repo_list *const out)
 {
 	gcli_null_check_call(get_repos, ctx, owner, max, out);
 }
 
 void
-gcli_repo_free(gcli_repo *it)
+gcli_repo_free(struct gcli_repo *it)
 {
 	free(it->full_name);
 	free(it->name);
@@ -53,7 +53,7 @@ gcli_repo_free(gcli_repo *it)
 }
 
 void
-gcli_repos_free(gcli_repo_list *const list)
+gcli_repos_free(struct gcli_repo_list *const list)
 {
 	for (size_t i = 0; i < list->repos_size; ++i) {
 		gcli_repo_free(&list->repos[i]);
@@ -72,8 +72,8 @@ gcli_repo_delete(struct gcli_ctx *ctx, char const *owner, char const *repo)
 }
 
 int
-gcli_repo_create(struct gcli_ctx *ctx, gcli_repo_create_options const *options,
-                 gcli_repo *out)
+gcli_repo_create(struct gcli_ctx *ctx, struct gcli_repo_create_options const *options,
+                 struct gcli_repo *out)
 {
 	gcli_null_check_call(repo_create, ctx, options, out);
 }

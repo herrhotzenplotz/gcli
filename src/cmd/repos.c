@@ -67,7 +67,7 @@ usage(void)
 
 void
 gcli_print_repos(enum gcli_output_flags const flags,
-                 gcli_repo_list const *const list, int const max)
+                 struct gcli_repo_list const *const list, int const max)
 {
 	size_t n;
 	gcli_tbl table;
@@ -116,7 +116,7 @@ gcli_print_repos(enum gcli_output_flags const flags,
 }
 
 void
-gcli_repo_print(gcli_repo const *it)
+gcli_repo_print(struct gcli_repo const *it)
 {
 	gcli_dict dict;
 
@@ -136,8 +136,8 @@ static int
 subcommand_repos_create(int argc, char *argv[])
 {
 	int ch;
-	gcli_repo_create_options create_options = {0};
-	gcli_repo repo = {0};
+	struct gcli_repo_create_options create_options = {0};
+	struct gcli_repo repo = {0};
 
 	const struct option options[] = {
 		{ .name    = "repo",
@@ -301,7 +301,7 @@ subcommand_repos(int argc, char *argv[])
 	int ch, n = 30;
 	char const *owner = NULL;
 	char const *repo = NULL;
-	gcli_repo_list repos = {0};
+	struct gcli_repo_list repos = {0};
 	enum gcli_output_flags flags = 0;
 
 	/* detect whether we wanna create a repo */

@@ -483,14 +483,14 @@ struct gcli_forge_descriptor {
 		struct gcli_ctx *ctx,
 		char const *owner,
 		int max,
-		gcli_repo_list *out);
+		struct gcli_repo_list *out);
 
 	/**
 	 * Create the given repo */
 	int (*repo_create)(
 		struct gcli_ctx *ctx,
-		gcli_repo_create_options const *options,
-		gcli_repo *out);
+		struct gcli_repo_create_options const *options,
+		struct gcli_repo *out);
 
 	/**
 	 * Delete the given repo */

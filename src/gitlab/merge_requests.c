@@ -433,7 +433,7 @@ gitlab_perform_submit_mr(struct gcli_ctx *ctx, struct gcli_submit_pull_options o
 	     *e_owner = NULL, *e_repo = NULL, *url = NULL;
 	char const *target_branch = NULL;
 	struct gcli_jsongen gen = {0};
-	gcli_repo target = {0};
+	struct gcli_repo target = {0};
 	int rc = 0;
 
 	target_branch = opts.to;

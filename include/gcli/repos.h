@@ -37,10 +37,6 @@
 #include <sn/sn.h>
 #include <gcli/gcli.h>
 
-typedef struct gcli_repo gcli_repo;
-typedef struct gcli_repo_list gcli_repo_list;
-typedef struct gcli_repo_create_options gcli_repo_create_options;
-
 struct gcli_repo {
 	gcli_id id;
 	char *full_name;
@@ -52,7 +48,7 @@ struct gcli_repo {
 };
 
 struct gcli_repo_list {
-	gcli_repo *repos;
+	struct gcli_repo *repos;
 	size_t repos_size;
 };
 
@@ -68,15 +64,16 @@ typedef enum {
 } gcli_repo_visibility;
 
 int gcli_get_repos(struct gcli_ctx *ctx, char const *owner, int max,
-                   gcli_repo_list *list);
+                   struct gcli_repo_list *list);
 
-void gcli_repos_free(gcli_repo_list *list);
-void gcli_repo_free(gcli_repo *it);
+void gcli_repos_free(struct gcli_repo_list *list);
+void gcli_repo_free(struct gcli_repo *it);
 
 int gcli_repo_delete(struct gcli_ctx *ctx, char const *owner, char const *repo);
 
-int gcli_repo_create(struct gcli_ctx *ctx, gcli_repo_create_options const *,
-                     gcli_repo *out);
+int gcli_repo_create(struct gcli_ctx *ctx,
+                     struct gcli_repo_create_options const *,
+                     struct gcli_repo *out);
 
 int gcli_repo_set_visibility(struct gcli_ctx *ctx, char const *owner,
                              char const *repo, gcli_repo_visibility visibility);

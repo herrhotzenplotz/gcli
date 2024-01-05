@@ -37,17 +37,20 @@
 #include <gcli/repos.h>
 
 int gitlab_get_repo(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                    gcli_repo *out);
+                    struct gcli_repo *out);
 
 int gitlab_get_repos(struct gcli_ctx *ctx, char const *owner, int max,
-                     gcli_repo_list *out);
+                     struct gcli_repo_list *out);
 
-int gitlab_get_own_repos(struct gcli_ctx *ctx, int max, gcli_repo_list *out);
+int gitlab_get_own_repos(struct gcli_ctx *ctx, int max,
+                         struct gcli_repo_list *out);
 
-int gitlab_repo_delete(struct gcli_ctx *ctx, char const *owner, char const *repo);
+int gitlab_repo_delete(struct gcli_ctx *ctx, char const *owner,
+                       char const *repo);
 
 int gitlab_repo_create(struct gcli_ctx *ctx,
-                       gcli_repo_create_options const *options, gcli_repo *out);
+                       struct gcli_repo_create_options const *options,
+                       struct gcli_repo *out);
 
 int gitlab_repo_set_visibility(struct gcli_ctx *ctx, char const *const owner,
                                char const *const repo,

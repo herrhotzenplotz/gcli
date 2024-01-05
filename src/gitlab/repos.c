@@ -41,7 +41,7 @@
 
 int
 gitlab_get_repo(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                gcli_repo *const out)
+                struct gcli_repo *const out)
 {
 	/* GET /projects/:id */
 	char *url = NULL;
@@ -74,7 +74,7 @@ gitlab_get_repo(struct gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 static void
-gitlab_repos_fixup_missing_visibility(gcli_repo_list *const list)
+gitlab_repos_fixup_missing_visibility(struct gcli_repo_list *const list)
 {
 	static char const *const public = "public";
 
@@ -89,7 +89,7 @@ gitlab_repos_fixup_missing_visibility(gcli_repo_list *const list)
 
 int
 gitlab_get_repos(struct gcli_ctx *ctx, char const *owner, int const max,
-                 gcli_repo_list *const list)
+                 struct gcli_repo_list *const list)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -137,8 +137,8 @@ gitlab_repo_delete(struct gcli_ctx *ctx, char const *owner, char const *repo)
 }
 
 int
-gitlab_repo_create(struct gcli_ctx *ctx, gcli_repo_create_options const *options,
-                   gcli_repo *out)
+gitlab_repo_create(struct gcli_ctx *ctx, struct gcli_repo_create_options const *options,
+                   struct gcli_repo *out)
 {
 	char *url, *payload;
 	struct gcli_fetch_buffer buffer = {0};

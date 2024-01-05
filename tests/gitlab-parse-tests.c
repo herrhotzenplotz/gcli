@@ -268,7 +268,7 @@ ATF_TC_BODY(gitlab_simple_repo, tc)
 	json_stream stream = {0};
 	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_repo.json");
-	gcli_repo repo = {0};
+	struct gcli_repo repo = {0};
 
 	json_open_stream(&stream, f);
 	ATF_REQUIRE(parse_gitlab_repo(ctx, &stream, &repo) == 0);

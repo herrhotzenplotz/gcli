@@ -62,7 +62,7 @@ gcli_sshkeys_add_key(struct gcli_ctx *ctx, char const *title,
 {
 	int rc;
 	char *buffer;
-	gcli_forge_descriptor const *const forge = gcli_forge(ctx);
+	struct gcli_forge_descriptor const *const forge = gcli_forge(ctx);
 
 	if (forge->add_sshkey == NULL) {
 		return gcli_error(ctx, "ssh_add_key is not supported by this forge");

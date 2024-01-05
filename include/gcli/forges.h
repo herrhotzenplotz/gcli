@@ -46,8 +46,6 @@
 #include <gcli/sshkeys.h>
 #include <gcli/status.h>
 
-typedef struct gcli_forge_descriptor gcli_forge_descriptor;
-
 /* Hopefully temporary hack */
 typedef int (*gcli_get_pull_checks_cb)(
 	struct gcli_ctx *, char const *, char const *, gcli_id,
@@ -556,7 +554,7 @@ struct gcli_forge_descriptor {
 	char const *user_object_key;
 };
 
-gcli_forge_descriptor const *gcli_forge(struct gcli_ctx *ctx);
+struct gcli_forge_descriptor const *gcli_forge(struct gcli_ctx *ctx);
 
 /** A macro used for calling one of the dispatch points above.
  *
@@ -565,7 +563,7 @@ gcli_forge_descriptor const *gcli_forge(struct gcli_ctx *ctx);
  * arguments. */
 #define gcli_null_check_call(routine, ctx, ...)                                             \
 	do {                                                                                \
-		gcli_forge_descriptor const *const forge = gcli_forge(ctx);                 \
+		struct gcli_forge_descriptor const *const forge = gcli_forge(ctx);                 \
 		                                                                            \
 		if (forge->routine) {                                                       \
 			return forge->routine(ctx, __VA_ARGS__);                            \

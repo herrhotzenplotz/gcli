@@ -58,7 +58,7 @@ gcli_attachment_free(struct gcli_attachment *it)
 int
 gcli_attachment_get_content(struct gcli_ctx *const ctx, gcli_id const id, FILE *out)
 {
-	gcli_forge_descriptor const *const forge = gcli_forge(ctx);
+	struct gcli_forge_descriptor const *const forge = gcli_forge(ctx);
 
 	/* FIXME: this is not entirely correct. Add a separate quirks category. */
 	if (forge->issue_quirks & GCLI_ISSUE_QUIRKS_ATTACHMENTS)

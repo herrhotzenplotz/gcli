@@ -162,7 +162,7 @@ gcli_issue_get_attachments(struct gcli_ctx *ctx, char const *owner,
                            char const *repo, gcli_id issue,
                            struct gcli_attachment_list *out)
 {
-	gcli_forge_descriptor const *const forge =
+	struct gcli_forge_descriptor const *const forge =
 		gcli_forge(ctx);
 
 	bool const avail =

@@ -75,7 +75,7 @@
 #include <gcli/bugzilla/bugs.h>
 #include <gcli/bugzilla/config.h>
 
-static gcli_forge_descriptor const
+static struct gcli_forge_descriptor const
 github_forge_descriptor =
 {
 	/* Comments */
@@ -170,7 +170,7 @@ github_forge_descriptor =
 	.pull_summary_quirks       = GCLI_PRS_QUIRK_COVERAGE,
 };
 
-static gcli_forge_descriptor const
+static struct gcli_forge_descriptor const
 gitlab_forge_descriptor =
 {
 	/* Comments */
@@ -262,7 +262,7 @@ gitlab_forge_descriptor =
 	                           | GCLI_PRS_QUIRK_MERGED,
 };
 
-static gcli_forge_descriptor const
+static struct gcli_forge_descriptor const
 gitea_forge_descriptor =
 {
 	/* Comments */
@@ -356,7 +356,7 @@ gitea_forge_descriptor =
 	                           | GCLI_PRS_QUIRK_COVERAGE,
 };
 
-static gcli_forge_descriptor const
+static struct gcli_forge_descriptor const
 bugzilla_forge_descriptor =
 {
 	/* Issues */
@@ -376,7 +376,7 @@ bugzilla_forge_descriptor =
 	.user_object_key           = "---dummy---",
 };
 
-gcli_forge_descriptor const *
+struct gcli_forge_descriptor const *
 gcli_forge(struct gcli_ctx *ctx)
 {
 	switch (ctx->get_forge_type(ctx)) {

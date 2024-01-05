@@ -175,7 +175,7 @@ void
 gcli_pull_print(gcli_pull const *const it)
 {
 	gcli_dict dict;
-	gcli_forge_descriptor const *const forge = gcli_forge(g_clictx);
+	struct gcli_forge_descriptor const *const forge = gcli_forge(g_clictx);
 	int const quirks = forge->pull_summary_quirks;
 
 	dict = gcli_dict_begin();

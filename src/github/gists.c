@@ -42,7 +42,7 @@
 /* /!\ Before changing this, see comment in gists.h /!\ */
 int
 parse_github_gist_files_idiot_hack(struct gcli_ctx *ctx, json_stream *stream,
-                                   gcli_gist *const gist)
+                                   struct gcli_gist *const gist)
 {
 	(void) ctx;
 
@@ -56,7 +56,7 @@ parse_github_gist_files_idiot_hack(struct gcli_ctx *ctx, json_stream *stream,
 
 	while ((next = json_next(stream)) == JSON_STRING) {
 		gist->files = realloc(gist->files, sizeof(*gist->files) * (gist->files_size + 1));
-		gcli_gist_file *it = &gist->files[gist->files_size++];
+		struct gcli_gist_file *it = &gist->files[gist->files_size++];
 		if (parse_github_gist_file(ctx, stream, it) < 0)
 			return -1;
 	}
@@ -69,7 +69,7 @@ parse_github_gist_files_idiot_hack(struct gcli_ctx *ctx, json_stream *stream,
 
 int
 gcli_get_gists(struct gcli_ctx *ctx, char const *user, int const max,
-               gcli_gist_list *const list)
+               struct gcli_gist_list *const list)
 {
 	char *url = NULL;
 	gcli_fetch_list_ctx fl = {
@@ -88,7 +88,7 @@ gcli_get_gists(struct gcli_ctx *ctx, char const *user, int const max,
 }
 
 int
-gcli_get_gist(struct gcli_ctx *ctx, char const *gist_id, gcli_gist *out)
+gcli_get_gist(struct gcli_ctx *ctx, char const *gist_id, struct gcli_gist *out)
 {
 	char *url = NULL;
 	gcli_fetch_buffer buffer = {0};
@@ -134,7 +134,7 @@ read_file(FILE *f, char **out)
 }
 
 int
-gcli_create_gist(struct gcli_ctx *ctx, gcli_new_gist opts)
+gcli_create_gist(struct gcli_ctx *ctx, struct gcli_new_gist opts)
 {
 	char *url = NULL;
 	char *post_data = NULL;
@@ -201,7 +201,7 @@ gcli_delete_gist(struct gcli_ctx *ctx, char const *gist_id)
 }
 
 void
-gcli_gist_free(gcli_gist *g)
+gcli_gist_free(struct gcli_gist *g)
 {
 	free(g->id);
 	free(g->owner);
@@ -223,7 +223,7 @@ gcli_gist_free(gcli_gist *g)
 }
 
 void
-gcli_gists_free(gcli_gist_list *const list)
+gcli_gists_free(struct gcli_gist_list *const list)
 {
 	for (size_t i = 0; i < list->gists_size; ++i)
 		gcli_gist_free(&list->gists[i]);

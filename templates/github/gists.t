@@ -2,7 +2,7 @@ include "gcli/json_util.h";
 include "gcli/github/gists.h";
 
 parser github_gist_file is
-object of gcli_gist_file with
+object of struct gcli_gist_file with
 	("filename" => filename as string,
 	 "language" => language as string,
 	 "raw_url"  => url as string,
@@ -10,7 +10,7 @@ object of gcli_gist_file with
 	 "type"     => type as string);
 
 parser github_gist is
-object of gcli_gist with
+object of struct gcli_gist with
 	("owner"        => owner as user,
 	 "html_url"     => url as string,
 	 "id"           => id as string,
@@ -19,5 +19,5 @@ object of gcli_gist with
 	 "description"  => description as string,
 	 "files"        => use parse_github_gist_files_idiot_hack);
 
-parser github_gists is array of gcli_gist
+parser github_gists is array of struct gcli_gist
 	use parse_github_gist;

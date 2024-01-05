@@ -89,7 +89,7 @@ language_fmt(char const *it)
 }
 
 static void
-print_gist_file(gcli_gist_file const *const file)
+print_gist_file(struct gcli_gist_file const *const file)
 {
 	printf("      • %-15.15s  %-8.8s  %-s\n",
 	       language_fmt(file->language),
@@ -98,7 +98,7 @@ print_gist_file(gcli_gist_file const *const file)
 }
 
 static void
-print_gist(enum gcli_output_flags const flags, gcli_gist const *const gist)
+print_gist(enum gcli_output_flags const flags, struct gcli_gist const *const gist)
 {
 	(void) flags;
 
@@ -125,7 +125,7 @@ print_gist(enum gcli_output_flags const flags, gcli_gist const *const gist)
 
 static void
 gcli_print_gists_long(enum gcli_output_flags const flags,
-                      gcli_gist_list const *const list, int const max)
+                      struct gcli_gist_list const *const list, int const max)
 {
 	size_t n;
 
@@ -145,7 +145,7 @@ gcli_print_gists_long(enum gcli_output_flags const flags,
 
 static void
 gcli_print_gists_short(enum gcli_output_flags const flags,
-                       gcli_gist_list const *const list, int const max)
+                       struct gcli_gist_list const *const list, int const max)
 {
 	size_t n;
 	gcli_tbl table;
@@ -191,7 +191,7 @@ gcli_print_gists_short(enum gcli_output_flags const flags,
 
 void
 gcli_print_gists(enum gcli_output_flags const flags,
-                 gcli_gist_list const *const list, int const max)
+                 struct gcli_gist_list const *const list, int const max)
 {
 	if (list->gists_size == 0) {
 		puts("No Gists");
@@ -211,8 +211,8 @@ subcommand_gist_get(int argc, char *argv[])
 
 	char const *gist_id = shift(&argc, &argv);
 	char const *file_name = shift(&argc, &argv);
-	gcli_gist gist = {0};
-	gcli_gist_file *file = NULL;
+	struct gcli_gist gist = {0};
+	struct gcli_gist_file *file = NULL;
 
 	if (gcli_get_gist(g_clictx, gist_id, &gist) < 0)
 		errx(1, "gcli: error: failed to get gist: %s", gcli_get_error(g_clictx));
@@ -243,7 +243,7 @@ static int
 subcommand_gist_create(int argc, char *argv[])
 {
 	int            ch;
-	gcli_new_gist  opts = {0};
+	struct gcli_new_gist  opts = {0};
 	char const    *file = NULL;
 
 	struct option const options[] = {
@@ -354,7 +354,7 @@ subcommand_gists(int argc, char *argv[])
 {
 	int                     ch;
 	char const             *user  = NULL;
-	gcli_gist_list          gists = {0};
+	struct gcli_gist_list          gists = {0};
 	int                     count = 30;
 	enum gcli_output_flags  flags = 0;
 

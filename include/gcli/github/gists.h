@@ -39,11 +39,6 @@
 #include <pdjson/pdjson.h>
 #include <sn/sn.h>
 
-typedef struct gcli_gist      gcli_gist;
-typedef struct gcli_gist_list gcli_gist_list;
-typedef struct gcli_gist_file gcli_gist_file;
-typedef struct gcli_new_gist  gcli_new_gist;
-
 struct gcli_gist_file {
 	char *filename;
 	char *language;
@@ -53,7 +48,7 @@ struct gcli_gist_file {
 };
 
 struct gcli_gist_list {
-	gcli_gist *gists;
+	struct gcli_gist *gists;
 	size_t gists_size;
 };
 
@@ -64,7 +59,7 @@ struct gcli_gist {
 	char *date;
 	char *git_pull_url;
 	char *description;
-	gcli_gist_file *files;
+	struct gcli_gist_file *files;
 	size_t files_size;
 };
 
@@ -75,16 +70,17 @@ struct gcli_new_gist {
 };
 
 int gcli_get_gists(struct gcli_ctx *ctx, char const *user, int max,
-                   gcli_gist_list *list);
+                   struct gcli_gist_list *list);
 
-int gcli_get_gist(struct gcli_ctx *ctx, char const *gist_id, gcli_gist *out);
+int gcli_get_gist(struct gcli_ctx *ctx, char const *gist_id,
+                  struct gcli_gist *out);
 
-int gcli_create_gist(struct gcli_ctx *ctx, gcli_new_gist);
+int gcli_create_gist(struct gcli_ctx *ctx, struct gcli_new_gist);
 
 int gcli_delete_gist(struct gcli_ctx *ctx, char const *gist_id);
 
-void gcli_gists_free(gcli_gist_list *list);
-void gcli_gist_free(gcli_gist *g);
+void gcli_gists_free(struct gcli_gist_list *list);
+void gcli_gist_free(struct gcli_gist *g);
 
 /**
  * NOTE(Nico): Because of idiots designing a web API, we get a list of
@@ -93,6 +89,7 @@ void gcli_gist_free(gcli_gist *g);
  * file name again. Whatever...here's a hack. Blame GitHub.
  */
 int parse_github_gist_files_idiot_hack(struct gcli_ctx *ctx,
-                                       json_stream *stream, gcli_gist *gist);
+                                       struct json_stream *stream,
+                                       struct gcli_gist *gist);
 
 #endif /* GCLI_GITHUB_GISTS_H */

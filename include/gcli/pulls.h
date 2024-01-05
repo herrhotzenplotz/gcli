@@ -40,16 +40,8 @@
 #include <sn/sn.h>
 #include <gcli/gcli.h>
 
-typedef struct gcli_pull gcli_pull;
-typedef struct gcli_pull_fetch_details gcli_pull_fetch_details;
-typedef struct gcli_submit_pull_options gcli_submit_pull_options;
-typedef struct gcli_commit gcli_commit;
-typedef struct gcli_commit_list gcli_commit_list;
-typedef struct gcli_pull_list gcli_pull_list;
-typedef struct gcli_pull_checks_list gcli_pull_checks_list;
-
 struct gcli_pull_list {
-	gcli_pull *pulls;
+	struct gcli_pull *pulls;
 	size_t pulls_size;
 };
 
@@ -91,7 +83,7 @@ struct gcli_commit {
 };
 
 struct gcli_commit_list {
-	gcli_commit *commits;
+	struct gcli_commit *commits;
 	size_t commits_size;
 };
 
@@ -130,30 +122,32 @@ struct gcli_pull_checks_list {
 };
 
 int gcli_get_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                   gcli_pull_fetch_details const *details, int max,
-                   gcli_pull_list *out);
+                   struct gcli_pull_fetch_details const *details, int max,
+                   struct gcli_pull_list *out);
 
-void gcli_pull_free(gcli_pull *it);
+void gcli_pull_free(struct gcli_pull *it);
 
-void gcli_pulls_free(gcli_pull_list *list);
+void gcli_pulls_free(struct gcli_pull_list *list);
 
 int gcli_pull_get_diff(struct gcli_ctx *ctx, FILE *fout, char const *owner,
                        char const *repo, gcli_id pr_number);
 
-int gcli_pull_get_checks(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                         gcli_id pr_number, gcli_pull_checks_list *out);
+int gcli_pull_get_checks(struct gcli_ctx *ctx, char const *owner,
+                         char const *repo, gcli_id pr_number,
+                         struct gcli_pull_checks_list *out);
 
-void gcli_pull_checks_free(gcli_pull_checks_list *list);
+void gcli_pull_checks_free(struct gcli_pull_checks_list *list);
 
-int gcli_pull_get_commits(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                          gcli_id pr_number, gcli_commit_list *out);
+int gcli_pull_get_commits(struct gcli_ctx *ctx, char const *owner,
+                          char const *repo, gcli_id pr_number,
+                          struct gcli_commit_list *out);
 
-void gcli_commits_free(gcli_commit_list *list);
+void gcli_commits_free(struct gcli_commit_list *list);
 
 int gcli_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                  gcli_id pr_number, gcli_pull *out);
+                  gcli_id pr_number, struct gcli_pull *out);
 
-int gcli_pull_submit(struct gcli_ctx *ctx, gcli_submit_pull_options);
+int gcli_pull_submit(struct gcli_ctx *ctx, struct gcli_submit_pull_options);
 
 enum gcli_merge_flags {
 	GCLI_PULL_MERGE_SQUASH = 0x1, /* squash commits when merging */
@@ -178,7 +172,8 @@ int gcli_pull_remove_labels(struct gcli_ctx *ctx, char const *owner,
                             char const *const labels[], size_t labels_size);
 
 int gcli_pull_set_milestone(struct gcli_ctx *ctx, char const *owner,
-                            char const *repo, gcli_id pr_number, int milestone_id);
+                            char const *repo, gcli_id pr_number,
+                            int milestone_id);
 
 int gcli_pull_clear_milestone(struct gcli_ctx *ctx, char const *owner,
                               char const *repo, gcli_id pr_number);

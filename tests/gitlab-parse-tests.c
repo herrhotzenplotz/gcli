@@ -49,7 +49,7 @@ ATF_TC_BODY(gitlab_simple_merge_request, tc)
 	json_stream stream = {0};
 	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_merge_request.json");
-	gcli_pull pull = {0};
+	struct gcli_pull pull = {0};
 
 	json_open_stream(&stream, f);
 	ATF_REQUIRE(parse_gitlab_mr(ctx, &stream, &pull) == 0);

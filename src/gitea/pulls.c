@@ -35,15 +35,15 @@
 
 int
 gitea_get_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                gcli_pull_fetch_details const *const details, int const max,
-                gcli_pull_list *const out)
+                struct gcli_pull_fetch_details const *const details, int const max,
+                struct gcli_pull_list *const out)
 {
 	return github_get_pulls(ctx, owner, repo, details, max, out);
 }
 
 int
 gitea_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
-               gcli_id const pr_number, gcli_pull *const out)
+               gcli_id const pr_number, struct gcli_pull *const out)
 {
 	return github_get_pull(ctx, owner, repo, pr_number, out);
 }
@@ -51,13 +51,13 @@ gitea_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
 int
 gitea_get_pull_commits(struct gcli_ctx *ctx, char const *owner,
                        char const *repo, gcli_id const pr_number,
-                       gcli_commit_list *const out)
+                       struct gcli_commit_list *const out)
 {
 	return github_get_pull_commits(ctx, owner, repo, pr_number, out);
 }
 
 int
-gitea_pull_submit(struct gcli_ctx *ctx, gcli_submit_pull_options opts)
+gitea_pull_submit(struct gcli_ctx *ctx, struct gcli_submit_pull_options opts)
 {
 	warnx("In case the following process errors out, see: "
 	      "https://github.com/go-gitea/gitea/issues/20175");
@@ -205,7 +205,7 @@ gitea_pull_get_diff(struct gcli_ctx *ctx, FILE *const stream, char const *owner,
 
 int
 gitea_pull_get_checks(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                      gcli_id const pr_number, gcli_pull_checks_list *out)
+                      gcli_id const pr_number, struct gcli_pull_checks_list *out)
 {
 	(void) ctx;
 	(void) owner;

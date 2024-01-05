@@ -49,7 +49,7 @@
 /* Hopefully temporary hack */
 typedef int (*gcli_get_pull_checks_cb)(
 	struct gcli_ctx *, char const *, char const *, gcli_id,
-	gcli_pull_checks_list *);
+	struct gcli_pull_checks_list *);
 
 /**
  * Struct of function pointers to perform actions in the given
@@ -283,9 +283,9 @@ struct gcli_forge_descriptor {
 		struct gcli_ctx *ctx,
 		char const *owner,
 		char const *reponame,
-		gcli_pull_fetch_details const *details,
+		struct gcli_pull_fetch_details const *details,
 		int max,
-		gcli_pull_list *out);
+		struct gcli_pull_list *out);
 
 	/**
 	 * Fetch the PR diff into the file */
@@ -309,7 +309,7 @@ struct gcli_forge_descriptor {
 	 * Return a list of checks associated with the given pull.
 	 *
 	 * The type of the returned list depends on the forge type. See
-	 * the definition of gcli_pull_checks_list. */
+	 * the definition of struct gcli_pull_checks_list. */
 	gcli_get_pull_checks_cb get_pull_checks;
 
 	/**
@@ -341,7 +341,7 @@ struct gcli_forge_descriptor {
 	 * Submit PR/MR */
 	int (*perform_submit_pull)(
 		struct gcli_ctx *ctx,
-		gcli_submit_pull_options opts);
+		struct gcli_submit_pull_options opts);
 
 	/**
 	 * Get a list of commits in the given PR/MR */
@@ -350,7 +350,7 @@ struct gcli_forge_descriptor {
 		char const *owner,
 		char const *repo,
 		gcli_id pr_number,
-		gcli_commit_list *out);
+		struct gcli_commit_list *out);
 
 	/** Bitmask of unsupported fields in the pull summary for this
 	 * forge */
@@ -370,7 +370,7 @@ struct gcli_forge_descriptor {
 		char const *owner,
 		char const *repo,
 		gcli_id pr_number,
-		gcli_pull *out);
+		struct gcli_pull *out);
 
 	/**
 	 * Add labels to Pull Requests */

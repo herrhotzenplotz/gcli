@@ -38,17 +38,17 @@
 #include <gcli/pulls.h>
 
 int gitea_get_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                    gcli_pull_fetch_details const *details, int max,
-                    gcli_pull_list *out);
+                    struct gcli_pull_fetch_details const *details, int max,
+                    struct gcli_pull_list *out);
 
 int gitea_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                   gcli_id pr_number, gcli_pull *out);
+                   gcli_id pr_number, struct gcli_pull *out);
 
 int gitea_get_pull_commits(struct gcli_ctx *ctx, char const *owner,
                            char const *repo, gcli_id pr_number,
-                           gcli_commit_list *out);
+                           struct gcli_commit_list *out);
 
-int gitea_pull_submit(struct gcli_ctx *ctx, gcli_submit_pull_options opts);
+int gitea_pull_submit(struct gcli_ctx *ctx, struct gcli_submit_pull_options opts);
 
 int gitea_pull_merge(struct gcli_ctx *ctx, char const *owner, char const *repo,
                      gcli_id pr_number, enum gcli_merge_flags flags);
@@ -67,7 +67,7 @@ int gitea_pull_get_patch(struct gcli_ctx *ctx, FILE *stream, char const *owner,
 
 int gitea_pull_get_checks(struct gcli_ctx *ctx, char const *owner,
                           char const *repo, gcli_id pr_number,
-                          gcli_pull_checks_list *out);
+                          struct gcli_pull_checks_list *out);
 
 int gitea_pull_set_milestone(struct gcli_ctx *ctx, char const *owner,
                              char const *repo, gcli_id pr_number,

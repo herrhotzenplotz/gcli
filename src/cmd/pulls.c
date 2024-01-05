@@ -103,7 +103,7 @@ usage(void)
 
 void
 gcli_print_pulls(enum gcli_output_flags const flags,
-                 gcli_pull_list const *const list, int const max)
+                 struct gcli_pull_list const *const list, int const max)
 {
 	int n;
 	gcli_tbl table;
@@ -172,7 +172,7 @@ gcli_pull_print_patch(FILE *stream, char const *owner, char const *reponame,
 }
 
 void
-gcli_pull_print(gcli_pull const *const it)
+gcli_pull_print(struct gcli_pull const *const it)
 {
 	gcli_dict dict;
 	struct gcli_forge_descriptor const *const forge = gcli_forge(g_clictx);
@@ -239,14 +239,14 @@ gcli_pull_print(gcli_pull const *const it)
 }
 
 void
-gcli_pull_print_op(gcli_pull const *const pull)
+gcli_pull_print_op(struct gcli_pull const *const pull)
 {
 	if (pull->body)
 		pretty_print(pull->body, 4, 80, stdout);
 }
 
 static void
-gcli_print_checks_list(gcli_pull_checks_list const *const list)
+gcli_print_checks_list(struct gcli_pull_checks_list const *const list)
 {
 	switch (list->forge_type) {
 	case GCLI_FORGE_GITHUB:
@@ -263,7 +263,7 @@ gcli_print_checks_list(gcli_pull_checks_list const *const list)
 int
 gcli_pull_checks(char const *owner, char const *repo, int pr_number)
 {
-	gcli_pull_checks_list list = {0};
+	struct gcli_pull_checks_list list = {0};
 	gcli_forge_type t = gcli_config_get_forge_type(g_clictx);
 
 	list.forge_type = t;
@@ -306,7 +306,7 @@ cut_newline(char const *const _it)
 }
 
 void
-gcli_print_commits(gcli_commit_list const *const list)
+gcli_print_commits(struct gcli_commit_list const *const list)
 {
 	gcli_tbl table;
 	struct gcli_tblcoldef cols[] = {
@@ -343,7 +343,7 @@ int
 gcli_pull_commits(char const *owner, char const *repo,
                   int const pr_number)
 {
-	gcli_commit_list commits = {0};
+	struct gcli_commit_list commits = {0};
 	int rc = 0;
 
 	rc = gcli_pull_get_commits(g_clictx, owner, repo, pr_number, &commits);
@@ -359,7 +359,7 @@ gcli_pull_commits(char const *owner, char const *repo,
 static void
 pull_init_user_file(struct gcli_ctx *ctx, FILE *stream, void *_opts)
 {
-	gcli_submit_pull_options *opts = _opts;
+	struct gcli_submit_pull_options *opts = _opts;
 
 	(void) ctx;
 	fprintf(
@@ -371,13 +371,13 @@ pull_init_user_file(struct gcli_ctx *ctx, FILE *stream, void *_opts)
 }
 
 static char *
-gcli_pull_get_user_message(gcli_submit_pull_options *opts)
+gcli_pull_get_user_message(struct gcli_submit_pull_options *opts)
 {
 	return gcli_editor_get_user_message(g_clictx, pull_init_user_file, opts);
 }
 
 static int
-create_pull(gcli_submit_pull_options opts, int always_yes)
+create_pull(struct gcli_submit_pull_options opts, int always_yes)
 {
 	opts.body = gcli_pull_get_user_message(&opts);
 
@@ -430,7 +430,7 @@ subcommand_pull_create(int argc, char *argv[])
 {
 	/* we'll use getopt_long here to parse the arguments */
 	int ch;
-	gcli_submit_pull_options opts   = {0};
+	struct gcli_submit_pull_options opts   = {0};
 	int always_yes = 0;
 
 	const struct option options[] = {
@@ -539,11 +539,11 @@ subcommand_pulls(int argc, char *argv[])
 	char *endptr = NULL;
 	char const *owner = NULL;
 	char const *repo = NULL;
-	gcli_pull_list pulls = {0};
+	struct gcli_pull_list pulls = {0};
 	int ch = 0;
 	int pr = -1;
 	int n = 30;                 /* how many prs to fetch at least */
-	gcli_pull_fetch_details details = {0};
+	struct gcli_pull_fetch_details details = {0};
 	enum gcli_output_flags flags = 0;
 
 	/* detect whether we wanna create a PR */
@@ -681,7 +681,7 @@ struct action_ctx {
 	 * we'll fetch the summary only if a command requires it. Then
 	 * we'll proceed to actually handling it. */
 	int fetched_pull;
-	gcli_pull pull;
+	struct gcli_pull pull;
 };
 
 /** Helper routine for fetching a PR if required */

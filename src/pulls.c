@@ -38,7 +38,7 @@
 #include <assert.h>
 
 void
-gcli_pulls_free(gcli_pull_list *const it)
+gcli_pulls_free(struct gcli_pull_list *const it)
 {
 	for (size_t i = 0; i < it->pulls_size; ++i)
 		gcli_pull_free(&it->pulls[i]);
@@ -51,8 +51,8 @@ gcli_pulls_free(gcli_pull_list *const it)
 
 int
 gcli_get_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
-               gcli_pull_fetch_details const *const details, int const max,
-               gcli_pull_list *const out)
+               struct gcli_pull_fetch_details const *const details, int const max,
+               struct gcli_pull_list *const out)
 {
 	gcli_null_check_call(get_pulls, ctx, owner, repo, details, max, out);
 }
@@ -67,13 +67,13 @@ gcli_pull_get_diff(struct gcli_ctx *ctx, FILE *stream, char const *owner,
 
 int
 gcli_pull_get_commits(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                      gcli_id const pr_number, gcli_commit_list *const out)
+                      gcli_id const pr_number, struct gcli_commit_list *const out)
 {
 	gcli_null_check_call(get_pull_commits, ctx, owner, repo, pr_number, out);
 }
 
 void
-gcli_commits_free(gcli_commit_list *list)
+gcli_commits_free(struct gcli_commit_list *list)
 {
 	for (size_t i = 0; i < list->commits_size; ++i) {
 		free(list->commits[i].sha);
@@ -91,7 +91,7 @@ gcli_commits_free(gcli_commit_list *list)
 }
 
 void
-gcli_pull_free(gcli_pull *const it)
+gcli_pull_free(struct gcli_pull *const it)
 {
 	free(it->author);
 	free(it->state);
@@ -114,20 +114,20 @@ gcli_pull_free(gcli_pull *const it)
 
 int
 gcli_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
-              gcli_id const pr_number, gcli_pull *const out)
+              gcli_id const pr_number, struct gcli_pull *const out)
 {
 	gcli_null_check_call(get_pull, ctx, owner, repo, pr_number, out);
 }
 
 int
 gcli_pull_get_checks(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                     gcli_id const pr_number, gcli_pull_checks_list *out)
+                     gcli_id const pr_number, struct gcli_pull_checks_list *out)
 {
 	gcli_null_check_call(get_pull_checks, ctx, owner, repo, pr_number, out);
 }
 
 void
-gcli_pull_checks_free(gcli_pull_checks_list *list)
+gcli_pull_checks_free(struct gcli_pull_checks_list *list)
 {
 	switch (list->forge_type) {
 	case GCLI_FORGE_GITHUB:
@@ -142,7 +142,7 @@ gcli_pull_checks_free(gcli_pull_checks_list *list)
 }
 
 int
-gcli_pull_submit(struct gcli_ctx *ctx, gcli_submit_pull_options opts)
+gcli_pull_submit(struct gcli_ctx *ctx, struct gcli_submit_pull_options opts)
 {
 	gcli_null_check_call(perform_submit_pull, ctx, opts);
 }

@@ -53,7 +53,7 @@
  * allocation. */
 
 static bool
-pull_has_label(gcli_pull const *p, char const *const label)
+pull_has_label(struct gcli_pull const *p, char const *const label)
 {
 	for (size_t i = 0; i < p->labels_size; ++i) {
 		if (strcmp(p->labels[i], label) == 0)
@@ -63,12 +63,12 @@ pull_has_label(gcli_pull const *p, char const *const label)
 }
 
 static void
-github_pulls_filter(gcli_pull **listp, size_t *sizep,
-                    gcli_pull_fetch_details const *details)
+github_pulls_filter(struct gcli_pull **listp, size_t *sizep,
+                    struct gcli_pull_fetch_details const *details)
 {
 	for (size_t i = *sizep; i > 0; --i) {
-		gcli_pull *pulls = *listp;
-		gcli_pull *pull = &pulls[i-1];
+		struct gcli_pull *pulls = *listp;
+		struct gcli_pull *pull = &pulls[i-1];
 		bool should_remove = false;
 
 		if (details->author && strcmp(details->author, pull->author))
@@ -92,8 +92,8 @@ github_pulls_filter(gcli_pull **listp, size_t *sizep,
 
 static int
 github_fetch_pulls(struct gcli_ctx *ctx, char *url,
-                   gcli_pull_fetch_details const *details, int max,
-                   gcli_pull_list *const list)
+                   struct gcli_pull_fetch_details const *details, int max,
+                   struct gcli_pull_list *const list)
 {
 	struct gcli_fetch_list_ctx fl = {
 		.listp = &list->pulls,
@@ -109,8 +109,8 @@ github_fetch_pulls(struct gcli_ctx *ctx, char *url,
 
 int
 github_get_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                 gcli_pull_fetch_details const *const details,
-                 int const max, gcli_pull_list *const list)
+                 struct gcli_pull_fetch_details const *const details,
+                 int const max, struct gcli_pull_list *const list)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -186,7 +186,7 @@ static int
 github_pull_delete_head_branch(struct gcli_ctx *ctx, char const *owner,
                                char const *repo, gcli_id const pr_number)
 {
-	gcli_pull pull = {0};
+	struct gcli_pull pull = {0};
 	char *url, *e_owner, *e_repo;
 	char const *head_branch;
 	int rc = 0;
@@ -299,7 +299,7 @@ github_pull_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-github_perform_submit_pull(struct gcli_ctx *ctx, gcli_submit_pull_options opts)
+github_perform_submit_pull(struct gcli_ctx *ctx, struct gcli_submit_pull_options opts)
 {
 	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
 	struct gcli_fetch_buffer fetch_buffer = {0};
@@ -340,7 +340,7 @@ github_perform_submit_pull(struct gcli_ctx *ctx, gcli_submit_pull_options opts)
 	 * with one request. */
 	if (rc == 0 && opts.labels_size) {
 		json_stream json = {0};
-		gcli_pull pull = {0};
+		struct gcli_pull pull = {0};
 
 		json_open_buffer(&json, fetch_buffer.data, fetch_buffer.length);
 		parse_github_pull(ctx, &json, &pull);
@@ -362,7 +362,7 @@ github_perform_submit_pull(struct gcli_ctx *ctx, gcli_submit_pull_options opts)
 }
 
 static void
-filter_commit_short_sha(gcli_commit **listp, size_t *sizep, void *_data)
+filter_commit_short_sha(struct gcli_commit **listp, size_t *sizep, void *_data)
 {
 	(void) _data;
 
@@ -373,7 +373,7 @@ filter_commit_short_sha(gcli_commit **listp, size_t *sizep, void *_data)
 int
 github_get_pull_commits(struct gcli_ctx *ctx, char const *owner,
                         char const *repo, gcli_id const pr,
-                        gcli_commit_list *const out)
+                        struct gcli_commit_list *const out)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -401,7 +401,7 @@ github_get_pull_commits(struct gcli_ctx *ctx, char const *owner,
 
 int
 github_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                gcli_id const pr, gcli_pull *const out)
+                gcli_id const pr, struct gcli_pull *const out)
 {
 	int rc = 0;
 	struct gcli_fetch_buffer json_buffer = {0};
@@ -433,7 +433,7 @@ github_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 github_pull_get_checks(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                       gcli_id const pr_number, gcli_pull_checks_list *out)
+                       gcli_id const pr_number, struct gcli_pull_checks_list *out)
 {
 	char refname[64] = {0};
 

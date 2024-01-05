@@ -60,13 +60,13 @@ struct gitlab_diff_list {
 };
 
 int gitlab_fetch_mrs(struct gcli_ctx *ctx, char *url, int max,
-                     gcli_pull_list *list);
+                     struct gcli_pull_list *list);
 
 int gitlab_get_mrs(struct gcli_ctx *ctx, char const *owner,
                    char const *reponame,
-                   gcli_pull_fetch_details const *details,
+                   struct gcli_pull_fetch_details const *details,
                    int max,
-                   gcli_pull_list *out);
+                   struct gcli_pull_list *out);
 
 int gitlab_mr_get_diff(struct gcli_ctx *ctx, FILE *stream, char const *owner,
                        char const *reponame, gcli_id mr_number);
@@ -84,13 +84,13 @@ int gitlab_mr_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
                      gcli_id mr_number);
 
 int gitlab_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                    gcli_id mr_number, gcli_pull *out);
+                    gcli_id mr_number, struct gcli_pull *out);
 
 int gitlab_get_pull_commits(struct gcli_ctx *ctx, char const *owner,
                             char const *repo, gcli_id mr_number,
-                            gcli_commit_list *out);
+                            struct gcli_commit_list *out);
 
-int gitlab_perform_submit_mr(struct gcli_ctx *ctx, gcli_submit_pull_options opts);
+int gitlab_perform_submit_mr(struct gcli_ctx *ctx, struct gcli_submit_pull_options opts);
 
 int gitlab_mr_add_labels(struct gcli_ctx *ctx, char const *owner,
                          char const *repo, gcli_id mr_number,

@@ -1,23 +1,23 @@
 include "gcli/gitlab/merge_requests.h";
 
 parser gitlab_mr_milestone is
-object of gcli_pull with
+object of struct gcli_pull with
 	("title" => milestone as string);
 
 parser gitlab_mr_head_pipeline is
-object of gcli_pull with
+object of struct gcli_pull with
 	("id"       => head_pipeline_id as int,
 	 "coverage" => coverage as string);
 
 parser gitlab_reviewer is object of char* select "username" as string;
 
 parser gitlab_diff_refs is
-object of gcli_pull with
+object of struct gcli_pull with
 	("base_sha" => base_sha as string,
 	 "head_sha" => head_sha as string);
 
 parser gitlab_mr is
-object of gcli_pull with
+object of struct gcli_pull with
 	("title"            => title as string,
 	 "state"            => state as string,
 	 "description"      => body as string,
@@ -36,10 +36,10 @@ object of gcli_pull with
 	 "reviewers"        => reviewers as array of char* use parse_gitlab_reviewer,
 	 "diff_refs"        => use parse_gitlab_diff_refs);
 
-parser gitlab_mrs is array of gcli_pull use parse_gitlab_mr;
+parser gitlab_mrs is array of struct gcli_pull use parse_gitlab_mr;
 
 parser gitlab_commit is
-object of gcli_commit with
+object of struct gcli_commit with
 	("short_id"     => sha as string,
 	 "id"           => long_sha as string,
 	 "title"        => message as string,
@@ -47,7 +47,7 @@ object of gcli_commit with
 	 "author_name"  => author as string,
 	 "author_email" => email as string);
 
-parser gitlab_commits is array of gcli_commit use parse_gitlab_commit;
+parser gitlab_commits is array of struct gcli_commit use parse_gitlab_commit;
 
 parser gitlab_reviewer_id is object of gcli_id select "id" as id;
 

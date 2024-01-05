@@ -42,7 +42,7 @@
 /* Workaround because gitlab doesn't give us an explicit field for
  * this. */
 static void
-gitlab_mrs_fixup(gcli_pull_list *const list)
+gitlab_mrs_fixup(struct gcli_pull_list *const list)
 {
 	for (size_t i = 0; i < list->pulls_size; ++i) {
 		list->pulls[i].merged = !strcmp(list->pulls[i].state, "merged");
@@ -51,7 +51,7 @@ gitlab_mrs_fixup(gcli_pull_list *const list)
 
 int
 gitlab_fetch_mrs(struct gcli_ctx *ctx, char *url, int const max,
-                 gcli_pull_list *const list)
+                 struct gcli_pull_list *const list)
 {
 	int rc = 0;
 
@@ -73,8 +73,8 @@ gitlab_fetch_mrs(struct gcli_ctx *ctx, char *url, int const max,
 
 int
 gitlab_get_mrs(struct gcli_ctx *ctx, char const *owner, char const *repo,
-               gcli_pull_fetch_details const *const details, int const max,
-               gcli_pull_list *const list)
+               struct gcli_pull_fetch_details const *const details, int const max,
+               struct gcli_pull_list *const list)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -149,7 +149,7 @@ gitlab_free_diffs(struct gitlab_diff_list *list)
 }
 
 static void
-gitlab_make_commit_diff(gcli_commit const *const commit,
+gitlab_make_commit_diff(struct gcli_commit const *const commit,
                         struct gitlab_diff const *const diff,
                         char const *const prev_commit_sha, FILE *const out)
 {
@@ -175,7 +175,7 @@ static int
 gitlab_make_commit_patch(struct gcli_ctx *ctx, FILE *stream,
                          char const *const e_owner, char const *const e_repo,
                          char const *const prev_commit_sha,
-                         gcli_commit const *const commit)
+                         struct gcli_commit const *const commit)
 {
 	char *url;
 	int rc;
@@ -221,8 +221,8 @@ gitlab_mr_get_patch(struct gcli_ctx *ctx, FILE *stream, char const *owner,
 {
 	int rc = 0;
 	char *e_owner, *e_repo;
-	gcli_pull pull = {0};
-	gcli_commit_list commits = {0};
+	struct gcli_pull pull = {0};
+	struct gcli_commit_list commits = {0};
 	char const *prev_commit_sha;
 	char *base_sha_short;
 
@@ -310,7 +310,7 @@ gitlab_mr_merge(struct gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gitlab_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                gcli_id const pr_number, gcli_pull *const out)
+                gcli_id const pr_number, struct gcli_pull *const out)
 {
 	struct gcli_fetch_buffer json_buffer = {0};
 	char *url = NULL;
@@ -344,7 +344,7 @@ gitlab_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gitlab_get_pull_commits(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                        gcli_id const pr_number, gcli_commit_list *const out)
+                        gcli_id const pr_number, struct gcli_commit_list *const out)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -424,7 +424,7 @@ gitlab_mr_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_perform_submit_mr(struct gcli_ctx *ctx, gcli_submit_pull_options opts)
+gitlab_perform_submit_mr(struct gcli_ctx *ctx, struct gcli_submit_pull_options opts)
 {
 	/* Note: this doesn't really allow merging into repos with
 	 * different names. We need to figure out a way to make this

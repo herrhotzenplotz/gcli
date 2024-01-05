@@ -115,7 +115,7 @@ ATF_TC_BODY(simple_github_issue, tc)
 ATF_TC_WITHOUT_HEAD(simple_github_pull);
 ATF_TC_BODY(simple_github_pull, tc)
 {
-	gcli_pull pull = {0};
+	struct gcli_pull pull = {0};
 	FILE *f;
 	json_stream stream;
 	struct gcli_ctx *ctx = test_context();

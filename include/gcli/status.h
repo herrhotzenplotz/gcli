@@ -38,9 +38,6 @@
 
 #include <stdlib.h>
 
-typedef struct gcli_notification gcli_notification;
-typedef struct gcli_notification_list gcli_notification_list;
-
 struct gcli_notification {
 	char *id;
 	char *title;
@@ -51,14 +48,14 @@ struct gcli_notification {
 };
 
 struct gcli_notification_list {
-	gcli_notification *notifications;
+	struct gcli_notification *notifications;
 	size_t notifications_size;
 };
 
 int gcli_get_notifications(struct gcli_ctx *ctx, int count,
-                           gcli_notification_list *out);
+                           struct gcli_notification_list *out);
 int gcli_notification_mark_as_read(struct gcli_ctx *ctx, char const *id);
-void gcli_free_notification(gcli_notification *);
-void gcli_free_notifications(gcli_notification_list *);
+void gcli_free_notification(struct gcli_notification *);
+void gcli_free_notifications(struct gcli_notification_list *);
 
 #endif /* STATUS_H */

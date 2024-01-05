@@ -32,13 +32,13 @@
 
 int
 gcli_get_notifications(struct gcli_ctx *ctx, int const max,
-                       gcli_notification_list *const out)
+                       struct gcli_notification_list *const out)
 {
 	gcli_null_check_call(get_notifications, ctx, max, out);
 }
 
 void
-gcli_free_notification(gcli_notification *const notification)
+gcli_free_notification(struct gcli_notification *const notification)
 {
 	free(notification->id);
 	free(notification->title);
@@ -49,7 +49,7 @@ gcli_free_notification(gcli_notification *const notification)
 }
 
 void
-gcli_free_notifications(gcli_notification_list *list)
+gcli_free_notifications(struct gcli_notification_list *list)
 {
 	for (size_t i = 0; i < list->notifications_size; ++i) {
 		gcli_free_notification(&list->notifications[i]);

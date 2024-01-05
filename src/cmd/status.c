@@ -54,7 +54,7 @@ usage(void)
 int
 gcli_status(int const count)
 {
-	gcli_notification_list list = {0};
+	struct gcli_notification_list list = {0};
 	int rc = 0;
 
 	rc = gcli_get_notifications(g_clictx, count, &list);
@@ -68,7 +68,7 @@ gcli_status(int const count)
 }
 
 void
-gcli_print_notifications(gcli_notification_list const *const list)
+gcli_print_notifications(struct gcli_notification_list const *const list)
 {
 	for (size_t i = 0; i < list->notifications_size; ++i) {
 		printf("%s - %s - %s - %s",

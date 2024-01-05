@@ -37,7 +37,7 @@
 
 int
 gitea_get_notifications(struct gcli_ctx *ctx, int const max,
-                        gcli_notification_list *const out)
+                        struct gcli_notification_list *const out)
 {
 	char *url = NULL;
 

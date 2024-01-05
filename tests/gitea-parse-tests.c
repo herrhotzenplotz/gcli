@@ -42,7 +42,7 @@ open_sample(char const *const name)
 ATF_TC_WITHOUT_HEAD(gitea_simple_notification);
 ATF_TC_BODY(gitea_simple_notification, tc)
 {
-	gcli_notification notification = {0};
+	struct gcli_notification notification = {0};
 	FILE *sample;
 	json_stream stream = {0};
 	struct gcli_ctx *ctx;

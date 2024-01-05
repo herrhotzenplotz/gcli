@@ -512,7 +512,7 @@ struct gcli_forge_descriptor {
     int (*get_notifications)(
 	    struct gcli_ctx *ctx,
 	    int max,
-		gcli_notification_list *notifications);
+		struct gcli_notification_list *notifications);
 
 	/**
 	 * Mark notification with the given id as read

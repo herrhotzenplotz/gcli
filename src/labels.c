@@ -32,20 +32,20 @@
 
 int
 gcli_get_labels(struct gcli_ctx *ctx, char const *owner, char const *reponame,
-                int const max, gcli_label_list *const out)
+                int const max, struct gcli_label_list *const out)
 {
 	gcli_null_check_call(get_labels, ctx, owner, reponame, max, out);
 }
 
 void
-gcli_free_label(gcli_label *const label)
+gcli_free_label(struct gcli_label *const label)
 {
 	free(label->name);
 	free(label->description);
 }
 
 void
-gcli_free_labels(gcli_label_list *const list)
+gcli_free_labels(struct gcli_label_list *const list)
 {
 	for (size_t i = 0; i < list->labels_size; ++i)
 		gcli_free_label(&list->labels[i]);
@@ -57,7 +57,7 @@ gcli_free_labels(gcli_label_list *const list)
 
 int
 gcli_create_label(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                  gcli_label *const label)
+                  struct gcli_label *const label)
 {
 	gcli_null_check_call(create_label, ctx, owner, repo, label);
 }

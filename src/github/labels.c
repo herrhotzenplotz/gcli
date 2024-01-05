@@ -37,7 +37,7 @@
 
 int
 github_get_labels(struct gcli_ctx *ctx, char const *owner, char const *reponame,
-                  int const max, gcli_label_list *const out)
+                  int const max, struct gcli_label_list *const out)
 {
 	char *url = NULL;
 	struct gcli_fetch_list_ctx fl = {
@@ -47,7 +47,7 @@ github_get_labels(struct gcli_ctx *ctx, char const *owner, char const *reponame,
 		.max = max,
 	};
 
-	*out = (gcli_label_list) {0};
+	*out = (struct gcli_label_list) {0};
 
 	url = sn_asprintf(
 		"%s/repos/%s/%s/labels",
@@ -58,7 +58,7 @@ github_get_labels(struct gcli_ctx *ctx, char const *owner, char const *reponame,
 
 int
 github_create_label(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                    gcli_label *const label)
+                    struct gcli_label *const label)
 {
 	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL,
 	     *colour = NULL;

@@ -155,7 +155,7 @@ gitea_issue_assign(struct gcli_ctx *ctx, char const *owner, char const *repo,
 /* Return the stringified id of the given label */
 static char *
 get_id_of_label(char const *label_name,
-                gcli_label_list const *const list)
+                struct gcli_label_list const *const list)
 {
 	for (size_t i = 0; i < list->labels_size; ++i)
 		if (strcmp(list->labels[i].name, label_name) == 0)
@@ -176,7 +176,7 @@ static char **
 label_names_to_ids(struct gcli_ctx *ctx, char const *owner, char const *repo,
                    char const *const names[], size_t const names_size)
 {
-	gcli_label_list list = {0};
+	struct gcli_label_list list = {0};
 	char **ids = NULL;
 	size_t ids_size = 0;
 

@@ -155,7 +155,7 @@ ATF_TC_BODY(simple_github_pull, tc)
 ATF_TC_WITHOUT_HEAD(simple_github_label);
 ATF_TC_BODY(simple_github_label, tc)
 {
-	gcli_label label = {0};
+	struct gcli_label label = {0};
 	FILE *f;
 	json_stream stream;
 	struct gcli_ctx *ctx = test_context();

@@ -37,10 +37,10 @@
 #include <gcli/labels.h>
 
 int gitlab_get_labels(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                      int max, gcli_label_list *out);
+                      int max, struct gcli_label_list *out);
 
 int gitlab_create_label(struct gcli_ctx *ctx, char const *owner,
-                        char const *repo, gcli_label *label);
+                        char const *repo, struct gcli_label *label);
 
 int gitlab_delete_label(struct gcli_ctx *ctx, char const *owner,
                         char const *repo, char const *label);

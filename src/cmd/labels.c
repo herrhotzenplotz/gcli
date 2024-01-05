@@ -62,7 +62,7 @@ usage(void)
 }
 
 void
-gcli_labels_print(gcli_label_list const *const list, int const max)
+gcli_labels_print(struct gcli_label_list const *const list, int const max)
 {
 	size_t n;
 	gcli_tbl table;
@@ -145,8 +145,8 @@ subcommand_labels_delete(int argc, char *argv[])
 static int
 subcommand_labels_create(int argc, char *argv[])
 {
-	gcli_label label = {0};
-	gcli_label_list labels = { .labels = &label, .labels_size = 1 };
+	struct gcli_label label = {0};
+	struct gcli_label_list labels = { .labels = &label, .labels_size = 1 };
 	char const *owner = NULL, *repo = NULL;
 	int         ch;
 
@@ -231,7 +231,7 @@ subcommand_labels(int argc, char *argv[])
 	int count = 30;
 	int ch;
 	char const *owner = NULL, *repo = NULL;
-	gcli_label_list labels = {0};
+	struct gcli_label_list labels = {0};
 
 	const struct option options[] = {
 		{.name = "repo",  .has_arg = required_argument, .flag = NULL, .val = 'r'},

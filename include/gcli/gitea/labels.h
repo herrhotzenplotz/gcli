@@ -37,10 +37,10 @@
 #include <gcli/labels.h>
 
 int gitea_get_labels(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                     int max, gcli_label_list *out);
+                     int max, struct gcli_label_list *out);
 
 int gitea_create_label(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                       gcli_label *label);
+                       struct gcli_label *label);
 
 int gitea_delete_label(struct gcli_ctx *ctx, char const *owner, char const *repo,
                        char const *label);

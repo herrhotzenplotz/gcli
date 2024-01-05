@@ -457,7 +457,7 @@ struct gcli_forge_descriptor {
 		char const *owner,
 		char const *repo,
 		int max,
-		gcli_label_list *out);
+		struct gcli_label_list *out);
 
 	/**
 	 * Create the given label
@@ -467,7 +467,7 @@ struct gcli_forge_descriptor {
 	    struct gcli_ctx *ctx,
 		char const *owner,
 		char const *repo,
-		gcli_label *label);
+		struct gcli_label *label);
 
 	/**
 	 * Delete the given label */

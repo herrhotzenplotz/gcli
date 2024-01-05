@@ -38,7 +38,7 @@
 
 int
 gitlab_get_labels(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                  int const max, gcli_label_list *const out)
+                  int const max, struct gcli_label_list *const out)
 {
 	char *url = NULL;
 	struct gcli_fetch_list_ctx fl = {
@@ -48,7 +48,7 @@ gitlab_get_labels(struct gcli_ctx *ctx, char const *owner, char const *repo,
 		.parse = (parsefn)(parse_gitlab_labels),
 	};
 
-	*out = (gcli_label_list) {0};
+	*out = (struct gcli_label_list) {0};
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/labels", gcli_get_apibase(ctx),
 	                  owner, repo);
@@ -58,7 +58,7 @@ gitlab_get_labels(struct gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gitlab_create_label(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                    gcli_label *const label)
+                    struct gcli_label *const label)
 {
 	char *url = NULL, *payload = NULL, *colour_string = NULL, *e_owner = NULL,
 	     *e_repo = NULL;

@@ -33,14 +33,14 @@
 int
 gcli_get_milestones(struct gcli_ctx *ctx, char const *const owner,
                     char const *const repo, int const max,
-                    gcli_milestone_list *const out)
+                    struct gcli_milestone_list *const out)
 {
 	gcli_null_check_call(get_milestones, ctx, owner, repo, max, out);
 }
 
 int
 gcli_get_milestone(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                   gcli_id const milestone, gcli_milestone *const out)
+                   gcli_id const milestone, struct gcli_milestone *const out)
 {
 	gcli_null_check_call(get_milestone, ctx, owner, repo, milestone, out);
 }
@@ -60,7 +60,7 @@ gcli_delete_milestone(struct gcli_ctx *ctx, char const *const owner,
 }
 
 void
-gcli_free_milestone(gcli_milestone *const it)
+gcli_free_milestone(struct gcli_milestone *const it)
 {
 	free(it->title);
 	it->title = NULL;
@@ -78,7 +78,7 @@ gcli_free_milestone(gcli_milestone *const it)
 }
 
 void
-gcli_free_milestones(gcli_milestone_list *const it)
+gcli_free_milestones(struct gcli_milestone_list *const it)
 {
 	for (size_t i = 0; i < it->milestones_size; ++i)
 		gcli_free_milestone(&it->milestones[i]);

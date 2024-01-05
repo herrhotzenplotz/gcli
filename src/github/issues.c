@@ -86,7 +86,7 @@ get_milestone_id(struct gcli_ctx *ctx, char const *owner, char const *repo,
                  char const *milestone_name, gcli_id *out)
 {
 	int rc = 0;
-	gcli_milestone_list list = {0};
+	struct gcli_milestone_list list = {0};
 
 	rc = github_get_milestones(ctx, owner, repo, -1, &list);
 	if (rc < 0)

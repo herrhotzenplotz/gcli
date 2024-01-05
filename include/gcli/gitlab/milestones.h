@@ -38,7 +38,7 @@
 
 int gitlab_get_milestones(struct gcli_ctx *ctx, char const *owner,
                           char const *repo, int max,
-                          gcli_milestone_list *const out);
+                          struct gcli_milestone_list *const out);
 
 int gitlab_create_milestone(struct gcli_ctx *ctx,
                             struct gcli_milestone_create_args const *args);
@@ -48,7 +48,7 @@ int gitlab_delete_milestone(struct gcli_ctx *ctx, char const *owner,
 
 int gitlab_get_milestone(struct gcli_ctx *ctx, char const *owner,
                          char const *repo, gcli_id milestone,
-                         gcli_milestone *out);
+                         struct gcli_milestone *out);
 
 int gitlab_milestone_get_issues(struct gcli_ctx *ctx, char const *owner,
                                 char const *repo, gcli_id milestone,

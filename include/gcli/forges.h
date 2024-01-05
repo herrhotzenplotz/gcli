@@ -218,7 +218,7 @@ struct gcli_forge_descriptor {
 		char const *owner,
 		char const *repo,
 		int max,
-		gcli_milestone_list *out);
+		struct gcli_milestone_list *out);
 
 	/**
 	 * Get a single milestone */
@@ -227,7 +227,7 @@ struct gcli_forge_descriptor {
 		char const *owner,
 		char const *repo,
 		gcli_id milestone,
-		gcli_milestone *out);
+		struct gcli_milestone *out);
 
 	/**
 	 * create a milestone */

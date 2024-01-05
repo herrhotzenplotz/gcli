@@ -45,7 +45,7 @@
 int
 github_get_milestones(struct gcli_ctx *ctx, char const *const owner,
                       char const *const repo, int const max,
-                      gcli_milestone_list *const out)
+                      struct gcli_milestone_list *const out)
 {
 	char *url, *e_owner, *e_repo;
 	struct gcli_fetch_list_ctx fl = {
@@ -71,7 +71,7 @@ github_get_milestones(struct gcli_ctx *ctx, char const *const owner,
 int
 github_get_milestone(struct gcli_ctx *ctx, char const *const owner,
                      char const *const repo, gcli_id const milestone,
-                     gcli_milestone *const out)
+                     struct gcli_milestone *const out)
 {
 	char *url, *e_owner, *e_repo;
 	struct gcli_fetch_buffer buffer = {0};

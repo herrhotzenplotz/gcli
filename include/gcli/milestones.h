@@ -40,9 +40,6 @@
 #include <gcli/issues.h>
 #include <gcli/pulls.h>
 
-typedef struct gcli_milestone gcli_milestone;
-typedef struct gcli_milestone_list gcli_milestone_list;
-
 struct gcli_milestone {
 	gcli_id id;
 	char *title;
@@ -61,7 +58,7 @@ struct gcli_milestone {
 };
 
 struct gcli_milestone_list {
-	gcli_milestone *milestones;
+	struct gcli_milestone *milestones;
 	size_t milestones_size;
 };
 
@@ -76,10 +73,12 @@ struct gcli_milestone_create_args {
 };
 
 int gcli_get_milestones(struct gcli_ctx *ctx, char const *owner,
-                        char const *repo, int max, gcli_milestone_list *out);
+                        char const *repo, int max,
+                        struct gcli_milestone_list *out);
 
 int gcli_get_milestone(struct gcli_ctx *ctx, char const *owner,
-                       char const *repo, gcli_id milestone, gcli_milestone *out);
+                       char const *repo, gcli_id milestone,
+                       struct gcli_milestone *out);
 
 int gcli_create_milestone(struct gcli_ctx *ctx,
                           struct gcli_milestone_create_args const *args);
@@ -87,8 +86,8 @@ int gcli_create_milestone(struct gcli_ctx *ctx,
 int gcli_delete_milestone(struct gcli_ctx *ctx, char const *owner,
                           char const *repo, gcli_id milestone);
 
-void gcli_free_milestone(gcli_milestone *it);
-void gcli_free_milestones(gcli_milestone_list *it);
+void gcli_free_milestone(struct gcli_milestone *it);
+void gcli_free_milestones(struct gcli_milestone_list *it);
 
 int gcli_milestone_get_issues(struct gcli_ctx *ctx, char const *owner,
                               char const *repo, gcli_id milestone,

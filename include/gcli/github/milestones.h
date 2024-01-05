@@ -33,11 +33,12 @@
 #include <gcli/milestones.h>
 
 int github_get_milestones(struct gcli_ctx *ctx, char const *owner,
-                          char const *repo, int max, gcli_milestone_list *out);
+                          char const *repo, int max,
+                          struct gcli_milestone_list *out);
 
 int github_get_milestone(struct gcli_ctx *ctx, char const *owner,
                          char const *repo, gcli_id milestone,
-                         gcli_milestone *out);
+                         struct gcli_milestone *out);
 
 int github_create_milestone(struct gcli_ctx *ctx,
                             struct gcli_milestone_create_args const *args);

@@ -44,7 +44,7 @@
 
 int
 gitlab_get_milestones(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                      int max, gcli_milestone_list *const out)
+                      int max, struct gcli_milestone_list *const out)
 {
 	char *url;
 	char *e_owner, *e_repo;
@@ -70,7 +70,7 @@ gitlab_get_milestones(struct gcli_ctx *ctx, char const *owner, char const *repo,
 
 int
 gitlab_get_milestone(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                     gcli_id const milestone, gcli_milestone *const out)
+                     gcli_id const milestone, struct gcli_milestone *const out)
 {
 	char *url, *e_owner, *e_repo;
 	struct gcli_fetch_buffer buffer = {0};

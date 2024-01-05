@@ -64,7 +64,7 @@ usage(void)
 }
 
 void
-gcli_print_milestones(gcli_milestone_list const *const list, int max)
+gcli_print_milestones(struct gcli_milestone_list const *const list, int max)
 {
 	size_t n;
 	gcli_tbl tbl;
@@ -101,7 +101,7 @@ gcli_print_milestones(gcli_milestone_list const *const list, int max)
 }
 
 void
-gcli_print_milestone(gcli_milestone const *const milestone)
+gcli_print_milestone(struct gcli_milestone const *const milestone)
 {
 	gcli_dict dict;
 	uint32_t const quirks = gcli_forge(g_clictx)->milestone_quirks;
@@ -275,7 +275,7 @@ subcommand_milestones(int argc, char *argv[])
 	check_owner_and_repo(&owner, &repo);
 
 	if (milestone_id < 0) {
-		gcli_milestone_list list = {0};
+		struct gcli_milestone_list list = {0};
 
 		rc = gcli_get_milestones(g_clictx, owner, repo, max, &list);
 		if (rc < 0) {
@@ -298,7 +298,7 @@ ensure_milestone(char const *const owner,
                  char const *const repo,
                  int const milestone_id,
                  int *const fetched_milestone,
-                 gcli_milestone *const milestone)
+                 struct gcli_milestone *const milestone)
 {
 	int rc;
 
@@ -319,7 +319,7 @@ handle_milestone_actions(int argc, char *argv[],
                          char const *const repo,
                          int const milestone_id)
 {
-	gcli_milestone milestone = {0};
+	struct gcli_milestone milestone = {0};
 	int fetched_milestone = 0;
 
 	/* Check if the user missed out on supplying actions */

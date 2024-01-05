@@ -1,7 +1,7 @@
 include "gcli/milestones.h";
 
 parser github_milestone is
-object of gcli_milestone with
+object of struct gcli_milestone with
 	("number" => id as id,
 	 "title" => title as string,
 	 "created_at" => created_at as string,
@@ -12,4 +12,4 @@ object of gcli_milestone with
 	 "closed_issues" => closed_issues as int);
 
 parser github_milestones is
-array of gcli_milestone use parse_github_milestone;
+array of struct gcli_milestone use parse_github_milestone;

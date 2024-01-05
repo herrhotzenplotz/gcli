@@ -178,7 +178,7 @@ ATF_TC_BODY(simple_github_label, tc)
 ATF_TC_WITHOUT_HEAD(simple_github_milestone);
 ATF_TC_BODY(simple_github_milestone, tc)
 {
-	gcli_milestone milestone = {0};
+	struct gcli_milestone milestone = {0};
 	FILE *f;
 	json_stream stream;
 	struct gcli_ctx *ctx = test_context();

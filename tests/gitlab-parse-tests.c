@@ -215,7 +215,7 @@ ATF_TC_BODY(gitlab_simple_milestone, tc)
 	json_stream stream = {0};
 	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_milestone.json");
-	gcli_milestone milestone = {0};
+	struct gcli_milestone milestone = {0};
 
 	json_open_stream(&stream, f);
 	ATF_REQUIRE(parse_gitlab_milestone(ctx, &stream, &milestone) == 0);

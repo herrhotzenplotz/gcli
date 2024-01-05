@@ -32,10 +32,10 @@
 
 #include <gcli/sshkeys.h>
 
-int gitea_get_sshkeys(struct gcli_ctx *ctx, gcli_sshkey_list *out);
+int gitea_get_sshkeys(struct gcli_ctx *ctx, struct gcli_sshkey_list *out);
 
 int gitea_add_sshkey(struct gcli_ctx *ctx, char const *title,
-                     char const *public_key_data, gcli_sshkey *out);
+                     char const *public_key_data, struct gcli_sshkey *out);
 
 int gitea_delete_sshkey(struct gcli_ctx *ctx, gcli_id id);
 

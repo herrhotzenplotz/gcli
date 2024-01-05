@@ -528,7 +528,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Get list of SSH keys */
-	int (*get_sshkeys)(struct gcli_ctx *ctx, gcli_sshkey_list *);
+	int (*get_sshkeys)(struct gcli_ctx *ctx, struct gcli_sshkey_list *);
 
 	/**
 	 * Add an SSH public key */
@@ -536,7 +536,7 @@ struct gcli_forge_descriptor {
 		struct gcli_ctx *ctx,
 		char const *title,
 		char const *public_key_path,
-		gcli_sshkey *out);
+		struct gcli_sshkey *out);
 
 	/**
 	 * Delete an SSH public key by its ID */

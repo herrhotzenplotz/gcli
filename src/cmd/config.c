@@ -59,7 +59,7 @@ usage(void)
 }
 
 void
-gcli_sshkeys_print_keys(gcli_sshkey_list const *list)
+gcli_sshkeys_print_keys(struct gcli_sshkey_list const *list)
 {
 	gcli_tbl *tbl;
 	struct gcli_tblcoldef cols[] = {
@@ -86,7 +86,7 @@ gcli_sshkeys_print_keys(gcli_sshkey_list const *list)
 static int
 list_sshkeys(void)
 {
-	gcli_sshkey_list list = {0};
+	struct gcli_sshkey_list list = {0};
 
 	if (gcli_sshkeys_get_keys(g_clictx, &list) < 0) {
 		fprintf(stderr, "gcli: error: could not get list of SSH keys\n");

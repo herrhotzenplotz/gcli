@@ -36,13 +36,13 @@
 #include <gcli/cmd/table.h>
 
 int
-gcli_sshkeys_get_keys(struct gcli_ctx *ctx, gcli_sshkey_list *out)
+gcli_sshkeys_get_keys(struct gcli_ctx *ctx, struct gcli_sshkey_list *out)
 {
 	gcli_null_check_call(get_sshkeys, ctx, out);
 }
 
 void
-gcli_sshkeys_free_keys(gcli_sshkey_list *list)
+gcli_sshkeys_free_keys(struct gcli_sshkey_list *list)
 {
 	for (size_t i = 0; i < list->keys_size; ++i) {
 		free(list->keys[i].title);
@@ -58,7 +58,7 @@ gcli_sshkeys_free_keys(gcli_sshkey_list *list)
 
 int
 gcli_sshkeys_add_key(struct gcli_ctx *ctx, char const *title,
-                     char const *public_key_path, gcli_sshkey *out)
+                     char const *public_key_path, struct gcli_sshkey *out)
 {
 	int rc;
 	char *buffer;

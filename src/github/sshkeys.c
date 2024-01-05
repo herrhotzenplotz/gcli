@@ -34,14 +34,14 @@
 #include <gcli/gitlab/sshkeys.h>
 
 int
-github_get_sshkeys(struct gcli_ctx *ctx, gcli_sshkey_list *out)
+github_get_sshkeys(struct gcli_ctx *ctx, struct gcli_sshkey_list *out)
 {
 	return gitlab_get_sshkeys(ctx, out);
 }
 
 int
 github_add_sshkey(struct gcli_ctx *ctx, char const *const title,
-                  char const *const pubkey, gcli_sshkey *out)
+                  char const *const pubkey, struct gcli_sshkey *out)
 {
 	return gitlab_add_sshkey(ctx, title, pubkey, out);
 }

@@ -41,7 +41,7 @@
 #include <templates/gitlab/sshkeys.h>
 
 int
-gitlab_get_sshkeys(struct gcli_ctx *ctx, gcli_sshkey_list *list)
+gitlab_get_sshkeys(struct gcli_ctx *ctx, struct gcli_sshkey_list *list)
 {
 	char *url;
 	struct gcli_fetch_list_ctx fl = {
@@ -51,7 +51,7 @@ gitlab_get_sshkeys(struct gcli_ctx *ctx, gcli_sshkey_list *list)
 		.parse = (parsefn)(parse_gitlab_sshkeys),
 	};
 
-	*list = (gcli_sshkey_list) {0};
+	*list = (struct gcli_sshkey_list) {0};
 	url = sn_asprintf("%s/user/keys", gcli_get_apibase(ctx));
 
 	return gcli_fetch_list(ctx, url, &fl);
@@ -59,7 +59,7 @@ gitlab_get_sshkeys(struct gcli_ctx *ctx, gcli_sshkey_list *list)
 
 int
 gitlab_add_sshkey(struct gcli_ctx *ctx, char const *const title,
-                  char const *const pubkey, gcli_sshkey *const out)
+                  char const *const pubkey, struct gcli_sshkey *const out)
 {
 	char *url, *payload;
 	char *e_title, *e_key;

@@ -50,13 +50,10 @@ struct gcli_sshkey_list {
 	size_t keys_size;
 };
 
-typedef struct gcli_sshkey gcli_sshkey;
-typedef struct gcli_sshkey_list gcli_sshkey_list;
-
-int gcli_sshkeys_get_keys(struct gcli_ctx *ctx, gcli_sshkey_list *out);
+int gcli_sshkeys_get_keys(struct gcli_ctx *ctx, struct gcli_sshkey_list *out);
 int gcli_sshkeys_add_key(struct gcli_ctx *ctx, char const *title,
-                         char const *public_key_path, gcli_sshkey *out);
+                         char const *public_key_path, struct gcli_sshkey *out);
 int gcli_sshkeys_delete_key(struct gcli_ctx *ctx, gcli_id id);
-void gcli_sshkeys_free_keys(gcli_sshkey_list *list);
+void gcli_sshkeys_free_keys(struct gcli_sshkey_list *list);
 
 #endif /* GCLI_SSHKEYS_H */

@@ -61,6 +61,7 @@ use                                { yycol += yyleng; return USE;       }
 array                              { yycol += yyleng; return ARRAY;     }
 of                                 { yycol += yyleng; return OF;        }
 select                             { yycol += yyleng; return SELECT;    }
+struct                             { yycol += yyleng; return STRUCT;    }
 =>                                 { yycol += yyleng; return FATARROW;  }
 "("                                { yycol += yyleng; return OPAREN;    }
 ")"                                { yycol += yyleng; return CPAREN;    }

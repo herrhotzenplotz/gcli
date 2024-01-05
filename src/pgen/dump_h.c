@@ -73,8 +73,8 @@ header_dump_h(void)
 void
 objparser_dump_h(struct objparser *p)
 {
-	fprintf(outfile, "int parse_%s(struct gcli_ctx *ctx, struct json_stream *, %s *);\n",
-	        p->name, p->returntype);
+	fprintf(outfile, "int parse_%s(struct gcli_ctx *ctx, struct json_stream *, %s%s *);\n",
+	        p->name, p->is_struct ?  "struct " : "", p->returntype);
 }
 
 void
@@ -97,6 +97,6 @@ void
 arrayparser_dump_h(struct arrayparser *p)
 {
 	fprintf(outfile, "int parse_%s(struct gcli_ctx *ctx, struct json_stream *, "
-	        "%s **out, size_t *out_size);\n",
-	        p->name, p->returntype);
+	        "%s%s **out, size_t *out_size);\n",
+	        p->name, p->is_struct ? "struct " : "", p->returntype);
 }

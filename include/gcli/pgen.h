@@ -5,6 +5,7 @@
 #include <config.h>
 #endif
 
+#include <stdbool.h>
 #include <stdio.h>
 
 /* PGen command line options */
@@ -30,6 +31,7 @@ struct objparser {
 	enum { OBJPARSER_ENTRIES, OBJPARSER_SELECT } kind;
 	char            *name;
 	char            *returntype;
+	bool            is_struct;
 	struct objentry *entries;
 	struct {
 		char *fieldtype;
@@ -39,6 +41,7 @@ struct objparser {
 
 struct arrayparser {
 	char *name;
+	bool is_struct;
 	char *returntype;
 	char *parser;
 };

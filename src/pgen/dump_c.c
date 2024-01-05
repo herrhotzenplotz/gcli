@@ -38,8 +38,8 @@ pregen_array_parser(struct objparser *p, struct objentry *it)
 	fprintf(outfile,
 	        "static int\n"
 	        "parse_%s_%s_array(struct gcli_ctx *ctx, struct json_stream *stream, "
-	        "%s *out)\n",
-	        p->name, it->name, p->returntype);
+	        "%s%s *out)\n",
+	        p->name, it->name, p->is_struct ? "struct " : "", p->returntype);
 	fprintf(outfile, "{\n");
 	fprintf(outfile, "\tint rc = 0;\n");
 	fprintf(outfile, "\tif (json_peek(stream) == JSON_NULL) {\n");
@@ -139,8 +139,8 @@ objparser_dump_c(struct objparser *p)
 
 	fprintf(outfile,
 	        "int\n"
-	        "parse_%s(struct gcli_ctx *ctx, struct json_stream *stream, %s *out)\n",
-	        p->name, p->returntype);
+	        "parse_%s(struct gcli_ctx *ctx, struct json_stream *stream, %s%s *out)\n",
+	        p->name, p->is_struct ? "struct " : "", p->returntype);
 	fprintf(outfile, "{\n");
 	fprintf(outfile, "\tenum json_type key_type;\n");
 	fprintf(outfile, "\tconst char *key;\n\n");
@@ -166,9 +166,9 @@ arrayparser_dump_c(struct arrayparser *p)
 {
 	fprintf(outfile,
 	        "int\n"
-	        "parse_%s(struct gcli_ctx *ctx, struct json_stream *stream, %s **out, "
+	        "parse_%s(struct gcli_ctx *ctx, struct json_stream *stream, %s%s **out, "
 	        "size_t *out_size)\n",
-	        p->name, p->returntype);
+	        p->name, p->is_struct ? "struct " : "", p->returntype);
 	fprintf(outfile, "{\n");
 	fprintf(outfile, "\tif (json_peek(stream) == JSON_NULL) {\n");
 	fprintf(outfile, "\t\tjson_next(stream);\n");
@@ -183,7 +183,7 @@ arrayparser_dump_c(struct arrayparser *p)
 
 	fprintf(outfile, "\twhile (json_peek(stream) != JSON_ARRAY_END) {\n");
 	fprintf(outfile, "\t\tint rc;\n");
-	fprintf(outfile, "\t\t%s *it;\n", p->returntype);
+	fprintf(outfile, "\t\t%s%s *it;\n", p->is_struct ? "struct " : "", p->returntype);
 	fprintf(outfile, "\t\t*out = realloc(*out, sizeof(**out) * (*out_size + 1));\n");
 	fprintf(outfile, "\t\tit = &(*out)[(*out_size)++];\n");
 	fprintf(outfile, "\t\tmemset(it, 0, sizeof(*it));\n");

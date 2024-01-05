@@ -125,7 +125,7 @@ gitlab_get_mrs(struct gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 static void
-gitlab_free_diff(gitlab_diff *diff)
+gitlab_free_diff(struct gitlab_diff *diff)
 {
 	free(diff->diff);
 	free(diff->old_path);
@@ -137,7 +137,7 @@ gitlab_free_diff(gitlab_diff *diff)
 }
 
 static void
-gitlab_free_diffs(gitlab_diff_list *list)
+gitlab_free_diffs(struct gitlab_diff_list *list)
 {
 	for (size_t i = 0; i < list->diffs_size; ++i) {
 		gitlab_free_diff(&list->diffs[i]);
@@ -150,7 +150,7 @@ gitlab_free_diffs(gitlab_diff_list *list)
 
 static void
 gitlab_make_commit_diff(gcli_commit const *const commit,
-                        gitlab_diff const *const diff,
+                        struct gitlab_diff const *const diff,
                         char const *const prev_commit_sha, FILE *const out)
 {
 	fprintf(out, "diff --git a/%s b/%s\n", diff->old_path, diff->new_path);
@@ -179,7 +179,7 @@ gitlab_make_commit_patch(struct gcli_ctx *ctx, FILE *stream,
 {
 	char *url;
 	int rc;
-	gitlab_diff_list list = {0};
+	struct gitlab_diff_list list = {0};
 
 	struct gcli_fetch_list_ctx fl = {
 		.listp = &list.diffs,

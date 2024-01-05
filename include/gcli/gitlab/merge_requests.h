@@ -43,7 +43,6 @@ struct gitlab_reviewer_id_list {
 
 /* Structs used for internal patch generator. Gitlab does not provide
  * an endpoint for doing this properly. */
-typedef struct gitlab_diff gitlab_diff;
 struct gitlab_diff {
 	char *diff;
 	char *old_path;
@@ -55,9 +54,8 @@ struct gitlab_diff {
 	bool deleted_file;
 };
 
-typedef struct gitlab_diff_list gitlab_diff_list;
 struct gitlab_diff_list {
-	gitlab_diff *diffs;
+	struct gitlab_diff *diffs;
 	size_t diffs_size;
 };
 

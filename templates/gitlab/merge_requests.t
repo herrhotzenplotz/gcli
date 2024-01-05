@@ -56,7 +56,7 @@ object of struct gitlab_reviewer_id_list with
 	("reviewers" => reviewers as array of gcli_id use parse_gitlab_reviewer_id);
 
 parser gitlab_diff is
-object of gitlab_diff with
+object of struct gitlab_diff with
 	("diff" => diff as string,
 	 "new_path" => new_path as string,
 	 "old_path" => old_path as string,
@@ -67,4 +67,4 @@ object of gitlab_diff with
 	 "deleted_file" => deleted_file as bool);
 
 parser gitlab_diffs is
-array of gitlab_diff use parse_gitlab_diff;
+array of struct gitlab_diff use parse_gitlab_diff;

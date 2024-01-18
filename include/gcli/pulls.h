@@ -99,6 +99,7 @@ struct gcli_submit_pull_options {
 	char **labels;
 	size_t labels_size;
 	int draft;
+	bool automerge;           /** Automatically merge the PR when a pipeline passes */
 };
 
 struct gcli_pull_fetch_details {

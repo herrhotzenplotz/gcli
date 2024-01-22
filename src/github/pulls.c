@@ -298,6 +298,47 @@ github_pull_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
 	return github_pull_patch_state(ctx, owner, repo, pr, "open");
 }
 
+static int
+github_pull_set_automerge(struct gcli_ctx *const ctx, char const *const node_id)
+{
+	char *url, *query, *payload;
+	int rc;
+	char const *const fmt =
+		"mutation updateAutomergeState {\n"
+		"   enablePullRequestAutoMerge(input: {\n"
+		"       pullRequestId: \"%s\",\n"
+		"       mergeMethod: MERGE\n"
+		"   }) {\n"
+		"      clientMutationId\n"
+		"   }\n"
+		"}\n";
+
+	struct gcli_jsongen gen = {0};
+
+	query = sn_asprintf(fmt, node_id);
+
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "query");
+		gcli_jsongen_string(&gen, query);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+	free(query);
+
+	url = sn_asprintf("%s/graphql", gcli_get_apibase(ctx));
+
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
+
+	free(payload);
+	free(url);
+
+	return rc;
+}
+
 int
 github_perform_submit_pull(struct gcli_ctx *ctx, struct gcli_submit_pull_options opts)
 {
@@ -341,16 +382,23 @@ github_perform_submit_pull(struct gcli_ctx *ctx, struct gcli_submit_pull_options
 
 	/* Add labels if requested. GitHub doesn't allow us to do this all
 	 * with one request. */
-	if (rc == 0 && opts.labels_size) {
+	if (rc == 0 && (opts.labels_size || opts.automerge)) {
 		struct json_stream json = {0};
 		struct gcli_pull pull = {0};
 
 		json_open_buffer(&json, fetch_buffer.data, fetch_buffer.length);
 		parse_github_pull(ctx, &json, &pull);
 
-		github_issue_add_labels(ctx, opts.owner, opts.repo, pull.id,
-		                        (char const *const *)opts.labels,
-		                        opts.labels_size);
+		if (opts.labels_size) {
+			rc = github_issue_add_labels(ctx, opts.owner, opts.repo, pull.id,
+			                             (char const *const *)opts.labels,
+			                             opts.labels_size);
+		}
+
+		if (rc == 0 && opts.automerge) {
+			/* pull.id is the global pull request ID */
+			rc = github_pull_set_automerge(ctx, pull.node_id);
+		}
 
 		gcli_pull_free(&pull);
 		json_close(&json);

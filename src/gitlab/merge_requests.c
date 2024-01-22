@@ -39,6 +39,8 @@
 
 #include <pdjson/pdjson.h>
 
+#include <time.h> /* for nanosleep */
+
 /* Workaround because gitlab doesn't give us an explicit field for
  * this. */
 static void
@@ -274,10 +276,34 @@ gitlab_mr_get_diff(struct gcli_ctx *ctx, FILE *stream, char const *owner,
 }
 
 int
+gitlab_mr_set_automerge(struct gcli_ctx *const ctx, char const *const owner,
+                        char const *const repo, gcli_id const mr_number)
+{
+	char *url, *e_owner, *e_repo;
+	int rc;
+
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid"/merge"
+	                  "?merge_when_pipeline_succeeds=true",
+	                  gcli_get_apibase(ctx), e_owner, e_repo, mr_number);
+
+	free(e_owner);
+	free(e_repo);
+
+	rc = gcli_fetch_with_method(ctx, "PUT", url, NULL, NULL, NULL);
+
+	free(url);
+
+	return rc;
+}
+
+int
 gitlab_mr_merge(struct gcli_ctx *ctx, char const *owner, char const *repo,
                 gcli_id const mr_number, enum gcli_merge_flags const flags)
 {
-	struct gcli_fetch_buffer  buffer  = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	char *url = NULL;
 	char *e_owner = NULL;
 	char *e_repo = NULL;
@@ -423,6 +449,59 @@ gitlab_mr_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
 	return gitlab_mr_patch_state(ctx, owner, repo, mr, "reopen");
 }
 
+/* This routine is a workaround for a Gitlab bug:
+ *
+ * https://gitlab.com/gitlab-org/gitlab/-/issues/353984
+ *
+ * This is a race condition because something in the creation of a merge request
+ * is being handled asynchronously. See the above link for more details.
+ *
+ * TL;DR: We need to wait until the »merge_status« field of the MR is set to
+ * »can_be_merged«. This is indicated by the mergable field becoming true. */
+static int
+gitlab_mr_wait_until_mergeable(struct gcli_ctx *ctx, char const *const e_owner,
+                               char const *const e_repo, gcli_id const mr_id)
+{
+	char *url;
+	int rc = 0;
+	struct timespec const ts = { .tv_sec = 1, .tv_nsec = 0 };
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid,
+	                  gcli_get_apibase(ctx), e_owner, e_repo, mr_id);
+
+	for (;;) {
+		bool is_mergeable;
+		struct gcli_fetch_buffer buffer = {0};
+		struct json_stream stream = {0};
+		struct gcli_pull pull = {0};
+
+		rc = gcli_fetch(ctx, url, NULL, &buffer);
+		if (rc < 0)
+			break;
+
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		rc = parse_gitlab_mr(ctx, &stream, &pull);
+		json_close(&stream);
+
+		/* FIXME: this doesn't quite cut it when the PR has no commits in it.
+		 * In that case this will turn into an infinite loop. */
+		is_mergeable = pull.mergeable;
+
+		gcli_pull_free(&pull);
+		free(buffer.data);
+
+		if (is_mergeable)
+			break;
+
+		/* sort of a hack: wait for a second until the next request goes out */
+		nanosleep(&ts, NULL);
+	}
+
+	free(url);
+
+	return rc;
+}
+
 int
 gitlab_perform_submit_mr(struct gcli_ctx *ctx, struct gcli_submit_pull_options opts)
 {
@@ -432,9 +511,10 @@ gitlab_perform_submit_mr(struct gcli_ctx *ctx, struct gcli_submit_pull_options o
 	char *source_branch = NULL, *source_owner = NULL, *payload = NULL,
 	     *e_owner = NULL, *e_repo = NULL, *url = NULL;
 	char const *target_branch = NULL;
+	int rc = 0;
+	struct gcli_fetch_buffer buffer = {0};
 	struct gcli_jsongen gen = {0};
 	struct gcli_repo target = {0};
-	int rc = 0;
 
 	target_branch = opts.to;
 	source_owner = strdup(opts.from);
@@ -492,13 +572,36 @@ gitlab_perform_submit_mr(struct gcli_ctx *ctx, struct gcli_submit_pull_options o
 	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests", gcli_get_apibase(ctx),
 	                  e_owner, e_repo);
 
-	free(e_owner);
-	free(e_repo);
-
 	/* perform request */
-	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, &buffer);
+
+	/* if that succeeded and the user wants automerge, parse the result and
+	 * set the automerge flag */
+	if (rc == 0 && opts.automerge) {
+		struct json_stream stream = {0};
+		struct gcli_pull pull = {0};
+
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		rc = parse_gitlab_mr(ctx, &stream, &pull);
+		json_close(&stream);
+
+		if (rc < 0)
+			goto out;
+
+		rc = gitlab_mr_wait_until_mergeable(ctx, e_owner, e_repo, pull.number);
+		if (rc < 0)
+			goto out;
+
+		rc = gitlab_mr_set_automerge(ctx, opts.owner, opts.repo, pull.number);
+
+	out:
+		gcli_pull_free(&pull);
+	}
 
 	/* cleanup */
+	free(e_owner);
+	free(e_repo);
+	free(buffer.data);
 	free(source_owner);
 	free(payload);
 	free(url);

@@ -59,6 +59,7 @@ struct gcli_pull {
 	char *milestone;
 	gcli_id id;
 	gcli_id number;
+	char *node_id;              /* Github: GraphQL compat */
 	int comments;
 	int additions;
 	int deletions;

@@ -44,6 +44,7 @@ object of struct gcli_pull with
 	 "created_at"    => created_at as string,
 	 "number"        => number as id,
 	 "id"            => id as id,
+	 "node_id"       => node_id as string,
 	 "commits"       => commits as int,
 	 "labels"        => labels as array of github_label
 	                    use parse_github_label_text,

@@ -105,6 +105,7 @@ gcli_pull_free(struct gcli_pull *const it)
 	free(it->base_sha);
 	free(it->milestone);
 	free(it->coverage);
+	free(it->node_id);
 
 	for (size_t i = 0; i < it->labels_size; ++i)
 		free(it->labels[i]);

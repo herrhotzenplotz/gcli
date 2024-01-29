@@ -316,6 +316,9 @@ EXTRA_DIST += tests/samples/github_simple_comment.json	\
 	tests/samples/gitlab_simple_repo.json		\
 	tests/samples/gitlab_simple_snippet.json	\
 	tests/samples/github_simple_check.json		\
-	tests/samples/gitea_simple_notification.json
+	tests/samples/gitea_simple_notification.json    \
+	tests/samples/bugzilla_attachments.json         \
+	tests/samples/bugzilla_comments.json            \
+	tests/samples/bugzilla_simple_bug.json
 
 endif

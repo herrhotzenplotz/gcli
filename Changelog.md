@@ -31,6 +31,10 @@ This changelog does not follow semantic versioning.
   Previously the patches were invalid when new files were created
   or deleted.
 
+- Fixed Segmentation fault when the editor was opened and closed
+  without changing the file. Several subcommands have been updated
+  to also account for empty user messages.
+
 ### Changed
 
 - Internally a lot of code was using string views. Maintaining this

@@ -314,6 +314,8 @@ subcommand_releases_create(int argc, char *argv[])
 	}
 
 	release.body = get_release_message(&release);
+	if (release.body == NULL)
+		errx(1, "gcli: empty message. aborting.");
 
 	if (!always_yes)
 		if (!sn_yesno("Do you want to create this release?"))

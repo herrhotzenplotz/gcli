@@ -390,7 +390,7 @@ create_pull(struct gcli_submit_pull_options opts, int always_yes)
 	        "IN      : %s/%s\n"
 	        "MESSAGE :\n%s\n",
 	        opts.title, opts.to, opts.from,
-	        opts.owner, opts.repo, opts.body);
+	        opts.owner, opts.repo, opts.body ? opts.body : "No message.");
 
 	fputc('\n', stdout);
 

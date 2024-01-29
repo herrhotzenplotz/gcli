@@ -242,7 +242,8 @@ create_issue(struct gcli_submit_issue_options opts, int always_yes)
 	       "OWNER   : %s\n"
 	       "REPO    : %s\n"
 	       "MESSAGE :\n%s\n",
-	       opts.title, opts.owner, opts.repo, opts.body);
+	       opts.title, opts.owner, opts.repo,
+	       opts.body ? opts.body : "No message");
 
 	putchar('\n');
 

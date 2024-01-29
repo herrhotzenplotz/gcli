@@ -108,6 +108,9 @@ comment_submit(struct gcli_submit_comment_opts opts, int always_yes)
 	message = gcli_comment_get_message(&opts);
 	opts.message = message;
 
+	if (message == NULL)
+		errx(1, "gcli: empty message. aborting.");
+
 	fprintf(
 		stdout,
 		"You will be commenting the following in %s/%s #%"PRIid":\n%s\n",

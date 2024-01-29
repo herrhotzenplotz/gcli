@@ -121,7 +121,10 @@ gcli_editor_get_user_message(
 	munmap(file_content, len);
 	unlink(filename);
 
-	result.data[result.length] = '\0';
+	/* When the input is empty, the data pointer is going to be NULL.
+	 * Do not access it in this case. */
+	if (result.length)
+		result.data[result.length] = '\0';
 
 	return result.data;
 }

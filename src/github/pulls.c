@@ -318,8 +318,11 @@ github_perform_submit_pull(struct gcli_ctx *ctx, struct gcli_submit_pull_options
 		gcli_jsongen_objmember(&gen, "title");
 		gcli_jsongen_string(&gen, opts.title);
 
-		gcli_jsongen_objmember(&gen, "body");
-		gcli_jsongen_string(&gen, opts.body);
+		/* Body is optional and will be NULL if unset */
+		if (opts.body) {
+			gcli_jsongen_objmember(&gen, "body");
+			gcli_jsongen_string(&gen, opts.body);
+		}
 	}
 	gcli_jsongen_end_object(&gen);
 	payload = gcli_jsongen_to_string(&gen);

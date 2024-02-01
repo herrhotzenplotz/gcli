@@ -462,8 +462,11 @@ gitlab_perform_submit_mr(struct gcli_ctx *ctx, struct gcli_submit_pull_options o
 		gcli_jsongen_objmember(&gen, "title");
 		gcli_jsongen_string(&gen, opts.title);
 
-		gcli_jsongen_objmember(&gen, "description");
-		gcli_jsongen_string(&gen, opts.body);
+		/* description is optional and will be NULL if unset */
+		if (opts.body) {
+			gcli_jsongen_objmember(&gen, "description");
+			gcli_jsongen_string(&gen, opts.body);
+		}
 
 		gcli_jsongen_objmember(&gen, "target_project_id");
 		gcli_jsongen_number(&gen, target.id);

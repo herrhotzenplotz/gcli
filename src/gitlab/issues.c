@@ -213,8 +213,12 @@ gitlab_perform_submit_issue(struct gcli_ctx *ctx, struct gcli_submit_issue_optio
 		gcli_jsongen_objmember(&gen, "title");
 		gcli_jsongen_string(&gen, opts.title);
 
-		gcli_jsongen_objmember(&gen, "description");
-		gcli_jsongen_string(&gen, opts.body);
+		/* The body may be NULL if empty. In this case we can omit the
+		 * body / description as it is not required by the API */
+		if (opts.body) {
+			gcli_jsongen_objmember(&gen, "description");
+			gcli_jsongen_string(&gen, opts.body);
+		}
 	}
 	gcli_jsongen_end_object(&gen);
 

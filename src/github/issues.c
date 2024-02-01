@@ -269,8 +269,11 @@ github_perform_submit_issue(struct gcli_ctx *ctx, struct gcli_submit_issue_optio
 		gcli_jsongen_objmember(&gen, "title");
 		gcli_jsongen_string(&gen, opts.title);
 
-		gcli_jsongen_objmember(&gen, "body");
-		gcli_jsongen_string(&gen, opts.body);
+		/* Body can be omitted and is NULL in that case */
+		if (opts.body) {
+			gcli_jsongen_objmember(&gen, "body");
+			gcli_jsongen_string(&gen, opts.body);
+		}
 	}
 	gcli_jsongen_begin_object(&gen);
 

@@ -321,8 +321,10 @@ bugzilla_bug_submit(struct gcli_ctx *ctx, struct gcli_submit_issue_options opts,
 		gcli_jsongen_objmember(&gen, "summary");
 		gcli_jsongen_string(&gen, summary);
 
-		gcli_jsongen_objmember(&gen, "description");
-		gcli_jsongen_string(&gen, description);
+		if (description) {
+			gcli_jsongen_objmember(&gen, "description");
+			gcli_jsongen_string(&gen, description);
+		}
 
 		gcli_jsongen_objmember(&gen, "api_key");
 		gcli_jsongen_string(&gen, token);

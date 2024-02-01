@@ -96,8 +96,10 @@ gitea_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *releas
 		gcli_jsongen_objmember(&gen, "prerelease");
 		gcli_jsongen_bool(&gen, release->prerelease);
 
-		gcli_jsongen_objmember(&gen, "body");
-		gcli_jsongen_string(&gen, release->body);
+		if (release->body) {
+			gcli_jsongen_objmember(&gen, "body");
+			gcli_jsongen_string(&gen, release->body);
+		}
 
 		if (release->commitish) {
 			gcli_jsongen_objmember(&gen, "target_commitish");

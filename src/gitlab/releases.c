@@ -120,8 +120,10 @@ gitlab_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *relea
 		gcli_jsongen_objmember(&gen, "tag_name");
 		gcli_jsongen_string(&gen, release->tag);
 
-		gcli_jsongen_objmember(&gen, "description");
-		gcli_jsongen_string(&gen, release->body);
+		if (release->body) {
+			gcli_jsongen_objmember(&gen, "description");
+			gcli_jsongen_string(&gen, release->body);
+		}
 
 		if (release->commitish) {
 			gcli_jsongen_objmember(&gen, "ref");

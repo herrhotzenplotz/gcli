@@ -174,7 +174,7 @@ subcommand_labels_create(int argc, char *argv[])
 
 			label.colour = strtol(optarg, &endptr, 16);
 			if (endptr != (optarg + strlen(optarg)))
-				err(1, "labels: cannot parse colour");
+				err(1, "gcli: error: cannot parse colour");
 		} break;
 		case 'd': {
 			label.description = optarg;
@@ -264,7 +264,7 @@ subcommand_labels(int argc, char *argv[])
 			count = strtol(optarg, &endptr, 10);
 
 			if (endptr != (optarg + strlen(optarg)))
-				errx(1, "labels: cannot parse label count");
+				errx(1, "gcli: error: cannot parse label count");
 
 			if (count == 0)
 				errx(1, "gcli: error: number of labels must not be zero");

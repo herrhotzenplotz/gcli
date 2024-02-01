@@ -115,7 +115,7 @@ find_dotgcli(void)
 
 	curr_dir_path = getcwd(NULL, 128);
 	if (!curr_dir_path)
-		err(1, "getcwd");
+		err(1, "gcli: getcwd");
 
 	/* Here we are trying to traverse upwards through the directory
 	 * tree, searching for a directory called .git.
@@ -123,7 +123,7 @@ find_dotgcli(void)
 	do {
 		curr_dir = opendir(curr_dir_path);
 		if (!curr_dir)
-			err(1, "opendir");
+			err(1, "gcli: opendir");
 
 		while ((ent = readdir(curr_dir))) {
 			if (strcmp(".", ent->d_name) == 0 || strcmp("..", ent->d_name) == 0)
@@ -154,7 +154,7 @@ find_dotgcli(void)
 
 			curr_dir_path = realpath(tmp, NULL);
 			if (!curr_dir_path)
-				err(1, "realpath at %s", tmp);
+				err(1, "gcli: realpath at %s", tmp);
 
 			free(tmp);
 
@@ -198,7 +198,7 @@ init_local_config(struct gcli_ctx *ctx)
 
 	int len = sn_mmap_file(path, &dgcli->mmap_pointer);
 	if (len < 0)
-		err(1, "Unable to open config file");
+		err(1, "gcli: unable to open config file");
 
 	dgcli->buffer = sn_sv_from_parts(dgcli->mmap_pointer, len);
 	dgcli->buffer = sn_sv_trim_front(dgcli->buffer);
@@ -210,7 +210,7 @@ init_local_config(struct gcli_ctx *ctx)
 		line = sn_sv_trim(line);
 
 		if (line.length == 0)
-			errx(1, "%s:%d: Unexpected end of line",
+			errx(1, "gcli: %s:%d: Unexpected end of line",
 			     path, curr_line);
 
 		// Comments
@@ -225,7 +225,7 @@ init_local_config(struct gcli_ctx *ctx)
 		key = sn_sv_trim(key);
 
 		if (key.length == 0)
-			errx(1, "%s:%d: empty key", path, curr_line);
+			errx(1, "gcli: %s:%d: empty key", path, curr_line);
 
 		line.data   += 1;
 		line.length -= 1;
@@ -291,7 +291,7 @@ parse_section_entry(struct config_parser *input,
 	sn_sv key = sn_sv_chop_until(&input->buffer, '=');
 
 	if (key.length == 0)
-		errx(1, "%s:%d: empty key", input->filename, input->line);
+		errx(1, "gcli: %s:%d: empty key", input->filename, input->line);
 
 	input->buffer.data   += 1;
 	input->buffer.length -= 1;
@@ -307,7 +307,7 @@ parse_section_title(struct config_parser *input)
 {
 	size_t len = 0;
 	if (input->buffer.length == 0)
-		errx(1, "%s:%d: unexpected end of input in section title",
+		errx(1, "gcli: %s:%d: unexpected end of input in section title",
 		     input->filename, input->line);
 
 
@@ -321,10 +321,10 @@ parse_section_title(struct config_parser *input)
 	skip_ws_and_comments(input);
 
 	if (input->buffer.length == 0)
-		errx(1, "%s:%d: unexpected end of input", input->filename, input->line);
+		errx(1, "gcli: %s:%d: unexpected end of input", input->filename, input->line);
 
 	if (input->buffer.data[0] != '{')
-		errx(1, "%s:%d: expected '{'", input->filename, input->line);
+		errx(1, "gcli: %s:%d: expected '{'", input->filename, input->line);
 
 	input->buffer.length -= 1;
 	input->buffer.data   += 1;
@@ -354,7 +354,7 @@ parse_config_section(struct gcli_config *cfg,
 	}
 
 	if (input->buffer.length == 0)
-		errx(1, "%s:%d: missing '}' before end of file",
+		errx(1, "gcli: %s:%d: missing '}' before end of file",
 		     input->filename, input->line);
 
 	input->buffer.length -= 1;
@@ -405,13 +405,13 @@ ensure_config(struct gcli_ctx *ctx)
 	}
 
 	if (access(file_path, R_OK) < 0) {
-		warn("Cannot access config file at %s", file_path);
+		warn("gcli: cannot access config file at %s", file_path);
 		return cfg;
 	}
 
 	int len = sn_mmap_file(file_path, &cfg->mmap_pointer);
 	if (len < 0)
-		err(1, "Unable to open config file");
+		err(1, "gcli: unable to open config file");
 
 	cfg->buffer = sn_sv_from_parts(cfg->mmap_pointer, len);
 	cfg->buffer = sn_sv_trim_front(cfg->buffer);
@@ -565,7 +565,7 @@ gcli_config_parse_args(struct gcli_ctx *ctx, int *argc, char ***argv)
 			} else if (strcmp(optarg, "bugzilla") == 0) {
 				cfg->override_forgetype = GCLI_FORGE_BUGZILLA;
 			} else {
-				fprintf(stderr, "error: unknown forge type '%s'. "
+				fprintf(stderr, "gcli: error: unknown forge type '%s'. "
 				        "Have either github, gitlab or gitea.\n", optarg);
 				return EXIT_FAILURE;
 			}
@@ -631,7 +631,7 @@ gcli_config_find_by_key(struct gcli_ctx *ctx, char const *section_name,
 		find_section(cfg, section_name);
 
 	if (!section) {
-		warnx("no config section with name '%s'", section_name);
+		warnx("gcli: no config section with name '%s'", section_name);
 		return SV_NULL;
 	}
 
@@ -796,7 +796,7 @@ gcli_config_get_upstream_parts(struct gcli_ctx *ctx, sn_sv *const owner,
 
 	/* Sanity check: did we actually reach the '/'? */
 	if (*upstream.data != '/')
-		errx(1, ".gcli has invalid upstream format. expected owner/repo");
+		errx(1, "gcli: .gcli has invalid upstream format. expected owner/repo");
 
 	upstream.data   += 1;
 	upstream.length -= 1;
@@ -844,7 +844,7 @@ gcli_config_get_forge_type_internal(struct gcli_ctx *ctx)
 		entry = gcli_config_find_by_key(ctx, section, "forge-type");
 		if (sn_sv_null(entry))
 			errx(1,
-			     "error: given default override account not found or "
+			     "gcli: error: given default override account not found or "
 			     "missing forge-type");
 	} else {
 		entry = gcli_local_config_find_by_key(ctx, "forge-type");
@@ -860,13 +860,13 @@ gcli_config_get_forge_type_internal(struct gcli_ctx *ctx)
 		else if (sn_sv_eq_to(entry, "bugzilla"))
 			return GCLI_FORGE_BUGZILLA;
 		else
-			errx(1, "Unknown forge type "SV_FMT, SV_ARGS(entry));
+			errx(1, "gcli: unknown forge type "SV_FMT, SV_ARGS(entry));
 	}
 
 	/* As a last resort, try to infer from the git remote */
 	int const type = gcli_gitconfig_get_forgetype(ctx, cfg->override_remote);
 	if (type < 0)
-		errx(1, "error: cannot infer forge type. "
+		errx(1, "gcli: error: cannot infer forge type. "
 		     "use -t <forge-type> to overrride manually.");
 
 	return type;
@@ -889,7 +889,7 @@ gcli_config_get_forge_type(struct gcli_ctx *ctx)
 
 		if (!have_printed_forge_type) {
 			have_printed_forge_type = 1;
-			fprintf(stderr, "info: forge type is %s\n", ftype_name[result]);
+			fprintf(stderr, "gcli: info: forge type is %s\n", ftype_name[result]);
 		}
 	}
 
@@ -911,7 +911,7 @@ gcli_config_get_repo(struct gcli_ctx *ctx, char const **const owner,
 
 		if (forge >= 0) {
 			if ((int)(gcli_config_get_forge_type(ctx)) != forge)
-				errx(1, "error: forge types are inconsistent");
+				errx(1, "gcli: error: forge types are inconsistent");
 		}
 
 		return;

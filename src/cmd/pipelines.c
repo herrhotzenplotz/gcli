@@ -276,13 +276,13 @@ subcommand_pipelines(int argc, char *argv[])
 			char *endptr = NULL;
 			count = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
-				err(1, "ci: cannot parse argument to -n");
+				err(1, "gcli: error: cannot parse argument to -n");
 		} break;
 		case 'p': {
 			char *endptr = NULL;
 			pid = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
-				err(1, "ci: cannot parse argument to -p");
+				err(1, "gcli: error: cannot parse argument to -p");
 			if (pid < 0) {
 				errx(1, "gcli: error: pipeline id must be a positive number");
 			}
@@ -291,7 +291,7 @@ subcommand_pipelines(int argc, char *argv[])
 			char *endptr = NULL;
 			jid = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
-				err(1, "ci: cannot parse argument to -j");
+				err(1, "gcli: error: cannot parse argument to -j");
 			if (jid < 0) {
 				errx(1, "gcli: error: job id must be a positive number");
 			}

@@ -56,7 +56,7 @@ resolve_worktree_gitdir_if_needed(char *dotgit)
 	char *newdir = NULL;
 
 	if (stat(dotgit, &sb) < 0)
-		err(1, "stat");
+		err(1, "gcli: stat");
 
 	/* Real .git directory */
 	if (S_ISDIR(sb.st_mode))
@@ -64,7 +64,7 @@ resolve_worktree_gitdir_if_needed(char *dotgit)
 
 	f = fopen(dotgit, "r");
 	if (!f)
-		err(1, "fopen");
+		err(1, "gcli: fopen");
 
 	while (!ferror(f) && !feof(f)) {
 		char *key, *value;
@@ -95,7 +95,7 @@ resolve_worktree_gitdir_if_needed(char *dotgit)
 	}
 
 	if (newdir == NULL)
-		errx(1, "error: .git is a file but does not contain a gitdir pointer");
+		errx(1, "gcli: error: .git is a file but does not contain a gitdir pointer");
 
 	fclose(f);
 
@@ -118,7 +118,7 @@ find_file_in_dotgit(char const *fname)
 
 	curr_dir_path = getcwd(NULL, 128);
 	if (!curr_dir_path)
-		err(1, "getcwd");
+		err(1, "gcli: getcwd");
 
 	/* Here we are trying to traverse upwards through the directory
 	 * tree, searching for a directory called .git.
@@ -126,7 +126,7 @@ find_file_in_dotgit(char const *fname)
 	do {
 		curr_dir = opendir(curr_dir_path);
 		if (!curr_dir)
-			err(1, "opendir");
+			err(1, "gcli: opendir");
 
 		/* Read entries of the directory */
 		while ((ent = readdir(curr_dir))) {
@@ -162,7 +162,7 @@ find_file_in_dotgit(char const *fname)
 
 			curr_dir_path = realpath(tmp, NULL);
 			if (!curr_dir_path)
-				err(1, "error: realpath at %s", tmp);
+				err(1, "gcli: error: realpath at %s", tmp);
 
 			free(tmp);
 
@@ -189,7 +189,7 @@ find_file_in_dotgit(char const *fname)
 	/* Now search for the file in the found .git directory */
 	curr_dir = opendir(dotgit);
 	if (!curr_dir)
-		err(1, "opendir");
+		err(1, "gcli: opendir");
 
 	while ((ent = readdir(curr_dir))) {
 		/* skip over . and .. directory entries */
@@ -215,7 +215,7 @@ find_file_in_dotgit(char const *fname)
 		}
 	}
 
-	errx(1, "error: .git without a config file");
+	errx(1, "gcli: error: .git without a config file");
 	return NULL;
 }
 
@@ -240,7 +240,7 @@ gcli_gitconfig_get_current_branch(void)
 
 	int len = sn_mmap_file(HEAD, &mmap_pointer);
 	if (len < 0)
-		err(1, "mmap");
+		err(1, "gcli: mmap");
 
 	buffer = sn_sv_from_parts(mmap_pointer, len);
 
@@ -350,7 +350,7 @@ gitconfig_parse_remote(sn_sv section_title, sn_sv entry)
 	while ((entry = sn_sv_trim_front(entry)).length > 0) {
 		if (sn_sv_has_prefix(entry, "url")) {
 			if (remotes_size == MAX_REMOTES)
-				errx(1, "error: too many remotes");
+				errx(1, "gcli: error: too many remotes");
 
 			struct gcli_gitremote *const remote = &remotes[remotes_size++];
 
@@ -406,7 +406,7 @@ gcli_gitconfig_read_gitconfig(void)
 
 		/* TODO: Git Config files support comments */
 		if (*buffer.data != '[')
-			errx(1, "error: invalid git config");
+			errx(1, "gcli: error: invalid git config");
 
 		sn_sv section_title = sn_sv_chop_until(&buffer, ']');
 		section_title.length -= 1;
@@ -432,7 +432,7 @@ gcli_gitconfig_add_fork_remote(char const *org, char const *repo)
 	FILE *remote_list = popen("git remote", "r");
 
 	if (!remote_list)
-		err(1, "popen");
+		err(1, "gcli: popen");
 
 	/* TODO: Output informational messages */
 	/* Rename possibly existing origin remote to point at the
@@ -450,9 +450,9 @@ gcli_gitconfig_add_fork_remote(char const *org, char const *repo)
 				waitpid(pid, &status, 0);
 
 				if (!(WIFEXITED(status) && (WEXITSTATUS(status) == 0)))
-					errx(1, "git child process failed");
+					errx(1, "gcli: git child process failed");
 			} else {
-				err(1, "fork");
+				err(1, "gcli: fork");
 			}
 
 			break;
@@ -475,9 +475,9 @@ gcli_gitconfig_add_fork_remote(char const *org, char const *repo)
 			waitpid(pid, &status, 0);
 
 			if (!(WIFEXITED(status) && (WEXITSTATUS(status) == 0)))
-				errx(1, "git child process failed");
+				errx(1, "gcli: git child process failed");
 		} else {
-			err(1, "fork");
+			err(1, "gcli: fork");
 		}
 	}
 }
@@ -523,11 +523,11 @@ gcli_gitconfig_repo_by_remote(
 			}
 		}
 
-		errx(1, "error: no such remote: %s", remote_name);
+		errx(1, "gcli: error: no such remote: %s", remote_name);
 	}
 
 	if (!remotes_size)
-		errx(1, "error: no remotes to auto-detect forge");
+		errx(1, "gcli: error: no remotes to auto-detect forge");
 
 	*owner = sn_sv_to_cstr(remotes[0].owner);
 	*repo  = sn_sv_to_cstr(remotes[0].repo);

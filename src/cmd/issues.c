@@ -104,7 +104,7 @@ gcli_print_issues(enum gcli_output_flags const flags,
 
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
-		errx(1, "could not init table printer");
+		errx(1, "gcli: could not init table printer");
 
 	/* Determine the correct number of items to print */
 	if (max < 0 || (size_t)(max) > list->issues_size)
@@ -249,7 +249,7 @@ create_issue(struct gcli_submit_issue_options opts, int always_yes)
 
 	if (!always_yes) {
 		if (!sn_yesno("Do you want to continue?"))
-			errx(1, "Submission aborted.");
+			errx(1, "gcli: Submission aborted.");
 	}
 
 	rc = gcli_issue_submit(g_clictx, opts);
@@ -725,7 +725,7 @@ handle_issues_actions(int argc, char *argv[],
 			int rc = gcli_issue_get_attachments(g_clictx, owner, repo, issue_id,
 			                                    &list);
 			if (rc < 0) {
-				errx(1, "error: failed to fetch attachments: %s",
+				errx(1, "gcli: error: failed to fetch attachments: %s",
 				     gcli_get_error(g_clictx));
 			}
 

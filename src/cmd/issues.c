@@ -51,7 +51,7 @@ usage(void)
 {
 	fprintf(stderr, "usage: gcli issues create [-o owner -r repo] [-y] title...\n");
 	fprintf(stderr, "       gcli issues [-o owner -r repo] [-a] [-n number] [-A author] [-L label]\n");
-	fprintf(stderr, "                   [-M milestone] [-s]\n");
+	fprintf(stderr, "                   [-M milestone] [-s] [search query...]\n");
 	fprintf(stderr, "       gcli issues [-o owner -r repo] -i issue actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
 	fprintf(stderr, "  -o owner           The repository owner\n");
@@ -471,12 +471,15 @@ subcommand_issues(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-
 	check_owner_and_repo(&owner, &repo);
 
 	/* No issue number was given, so list all open issues */
 	if (issue_id < 0) {
-		if (gcli_get_issues(g_clictx, owner, repo, &details, n, &list) < 0)
+		/* Prepare search term if specified */
+		if (argc)
+			details.search_term = sn_join_with((char const *const *)argv, argc, " ");
+
+		if (gcli_issues_search(g_clictx, owner, repo, &details, n, &list) < 0)
 			errx(1, "gcli: error: could not get issues: %s", gcli_get_error(g_clictx));
 
 		gcli_print_issues(flags, &list, n);

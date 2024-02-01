@@ -124,9 +124,9 @@ parse_github_milestone(struct gcli_ctx *ctx, char const *owner,
 }
 
 int
-github_get_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                  struct gcli_issue_fetch_details const *details, int const max,
-                  struct gcli_issue_list *const out)
+github_issues_search(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                     struct gcli_issue_fetch_details const *details, int const max,
+                     struct gcli_issue_list *const out)
 {
 	char *url = NULL;
 	char *e_owner = NULL;

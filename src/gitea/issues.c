@@ -39,11 +39,11 @@
 #include <pdjson/pdjson.h>
 
 int
-gitea_get_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                 struct gcli_issue_fetch_details const *details, int const max,
-                 struct gcli_issue_list *const out)
+gitea_issues_search(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                    struct gcli_issue_fetch_details const *details, int const max,
+                    struct gcli_issue_list *const out)
 {
-	return github_get_issues(ctx, owner, repo, details, max, out);
+	return github_issues_search(ctx, owner, repo, details, max, out);
 }
 
 int

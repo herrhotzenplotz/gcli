@@ -73,11 +73,11 @@ gcli_issues_free(struct gcli_issue_list *const list)
 }
 
 int
-gcli_get_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                struct gcli_issue_fetch_details const *details, int const max,
-                struct gcli_issue_list *const out)
+gcli_issues_search(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                   struct gcli_issue_fetch_details const *details, int const max,
+                   struct gcli_issue_list *const out)
 {
-	gcli_null_check_call(get_issues, ctx, owner, repo, details, max, out);
+	gcli_null_check_call(search_issues, ctx, owner, repo, details, max, out);
 }
 
 int

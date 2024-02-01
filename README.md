@@ -1,7 +1,6 @@
 # GCLI
 
-Simple and portable CLI tool for interacting with GitHub, GitLab and
-Gitea from the command line.
+Portable CLI tool for interacting with Git(Hub|Lab|Tea) from the command line.
 
 ![](docs/screenshot.png)
 
@@ -12,9 +11,8 @@ unified tool for various git forges such as GitHub and GitLab because
 every forge does things differently yet all build on Git and
 purposefully break with its philosophy.
 
-Also, the official tool from Github is written in Go, which does
-manual [DNS
-resolution](https://github.com/golang/go/blob/master/src/net/dnsclient_unix.go#L49)
+Also, the official tool from Github is written in Go, which does manual
+[DNS resolution](https://github.com/golang/go/blob/master/src/net/dnsclient_unix.go#L49)
 which is a massive security vulnerability for people using Tor as it
 leaks your IP to the DNS server. This program builds upon libcurl,
 which obeys the operating system's DNS resolution mechanisms and thus

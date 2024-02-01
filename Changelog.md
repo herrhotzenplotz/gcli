@@ -35,6 +35,10 @@ This changelog does not follow semantic versioning.
   without changing the file. Several subcommands have been updated
   to also account for empty user messages.
 
+- Fixed incorrect colour when creating labels. In any forge the
+  provided colour code was converted incorrectly and always producing
+  the wrong colour.
+
 ### Changed
 
 - Internally a lot of code was using string views. Maintaining this

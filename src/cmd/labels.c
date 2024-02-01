@@ -169,6 +169,9 @@ subcommand_labels_create(int argc, char *argv[])
 			break;
 		case 'c': {
 			char *endptr = NULL;
+			if (strlen(optarg) != 6)
+				err(1, "gcli: error: colour must be a six-digit hexadecimal colour code");
+
 			label.colour = strtol(optarg, &endptr, 16);
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "labels: cannot parse colour");

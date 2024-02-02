@@ -13,6 +13,7 @@
 .Op Fl L Ar label
 .Op Fl M Ar milestone
 .Op Fl o Ar owner Fl r Ar repo
+.Op Ar "search-query"
 .Nm
 .Fl i Ar issue
 .Op Fl o Ar owner Fl r Ar repo
@@ -24,7 +25,7 @@
 .Sh DESCRIPTION
 Use
 .Nm
-to list, create, edit or delete issues in repositories in various
+to search, list, create, edit or delete issues in repositories in various
 .Xr git 1
 forges such as GitHub, GitLab and Gitea. Without any action specified,
 .Nm
@@ -129,6 +130,13 @@ List bug attachments. This action is only available on Bugzilla.
 Print a list of issues in the current project:
 .Bd -literal -offset indent
 $ gcli issues
+.Ed
+.Pp
+Search for issues containing
+.Dq crash
+in contour-terminal/contour on GitHub including closed issues:
+.Bd -literal -offset indent
+$ gcli -t github issues -o contour-terminal -r contour -a crash
 .Ed
 .Pp
 Report a new issue in the current project:

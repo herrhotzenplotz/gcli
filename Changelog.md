@@ -13,6 +13,17 @@ This changelog does not follow semantic versioning.
   Currently if now account has been specified it will default to
   the FreeBSD Bugzilla - this may however change in the future.
 
+- A search feature has been added to the issues subcommand. You can
+  now optionally provide trailing text to the issues subcommand
+  which will be used as a search term:
+
+  ```console
+  $ gcli issues -A herrhotzenplotz Segfault
+  ```
+
+  This will search for tickets authored by herrhotzenplotz containing
+  "Segfault".
+
 ### Fixed
 
 - Fixed a segmentation fault when getting a 404 on Gitlab. This bug

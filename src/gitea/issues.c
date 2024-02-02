@@ -40,10 +40,56 @@
 
 int
 gitea_issues_search(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                    struct gcli_issue_fetch_details const *details, int const max,
-                    struct gcli_issue_list *const out)
+                    struct gcli_issue_fetch_details const *details,
+                    int const max, struct gcli_issue_list *const out)
 {
-	return github_issues_search(ctx, owner, repo, details, max, out);
+	char *url = NULL, *e_owner = NULL, *e_repo = NULL, *e_author = NULL,
+	     *e_label = NULL, *e_milestone = NULL, *e_query = NULL;
+
+	if (details->milestone) {
+		char *tmp = gcli_urlencode(details->milestone);
+		e_milestone = sn_asprintf("&milestones=%s", tmp);
+		free(tmp);
+	}
+
+	if (details->author) {
+		char *tmp = gcli_urlencode(details->author);
+		e_author = sn_asprintf("&created_by=%s", tmp);
+		free(tmp);
+	}
+
+	if (details->label) {
+		char *tmp = gcli_urlencode(details->label);
+		e_label = sn_asprintf("&labels=%s", tmp);
+		free(tmp);
+	}
+
+	if (details->search_term) {
+		char *tmp = gcli_urlencode(details->search_term);
+		e_query = sn_asprintf("&q=%s", tmp);
+		free(tmp);
+	}
+
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/repos/%s/%s/issues?state=%s%s%s%s%s",
+	                  gcli_get_apibase(ctx),
+	                  e_owner, e_repo,
+	                  details->all ? "all" : "open",
+	                  e_author ? e_author : "",
+	                  e_label ? e_label : "",
+	                  e_milestone ? e_milestone : "",
+	                  e_query ? e_query : "");
+
+	free(e_query);
+	free(e_milestone);
+	free(e_author);
+	free(e_label);
+	free(e_owner);
+	free(e_repo);
+
+	return github_fetch_issues(ctx, url, max, out);
 }
 
 int

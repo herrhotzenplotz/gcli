@@ -40,9 +40,9 @@
 int gitlab_fetch_issues(struct gcli_ctx *ctx, char *url, int max,
                         struct gcli_issue_list *out);
 
-int gitlab_get_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                      struct gcli_issue_fetch_details const *details, int max,
-                      struct gcli_issue_list *out);
+int gitlab_issues_search(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                         struct gcli_issue_fetch_details const *details,
+                         int max, struct gcli_issue_list *out);
 
 int gitlab_get_issue_summary(struct gcli_ctx *ctx, char const *owner,
                              char const *repo, gcli_id issue_number,

@@ -24,3 +24,7 @@ object of struct gcli_issue with
 	 "milestone"    => use parse_github_issue_milestone);
 
 parser github_issues is array of struct gcli_issue use parse_github_issue;
+
+parser github_issue_search_result is
+object of struct gcli_issue_list with
+	("items" => issues as array of gcli_issue use parse_github_issue);

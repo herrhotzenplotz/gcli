@@ -46,7 +46,8 @@ bugzilla_get_bugs(struct gcli_ctx *ctx, char const *product, char const *compone
                   struct gcli_issue_fetch_details const *details, int const max,
                   struct gcli_issue_list *out)
 {
-	char *url, *e_product = NULL, *e_component = NULL, *e_author = NULL;
+	char *url, *e_product = NULL, *e_component = NULL, *e_author = NULL,
+	     *e_query = NULL;
 	struct gcli_fetch_buffer buffer = {0};
 	int rc = 0;
 
@@ -68,17 +69,25 @@ bugzilla_get_bugs(struct gcli_ctx *ctx, char const *product, char const *compone
 		free(tmp);
 	}
 
+	if (details->search_term) {
+		char *tmp = gcli_urlencode(details->search_term);
+		e_query = sn_asprintf("&quicksearch=%s", tmp);
+		free(tmp);
+	}
+
 	/* TODO: handle the max = -1 case */
 	/* Note(Nico): Most of the options here are not very well
 	 * documented. Specifically the order= parameter I have figured out by
 	 * reading the code and trying things until it worked. */
-	url = sn_asprintf("%s/rest/bug?order=bug_id%%20DESC%%2C&limit=%d%s%s%s%s",
+	url = sn_asprintf("%s/rest/bug?order=bug_id%%20DESC%%2C&limit=%d%s%s%s%s%s",
 	                  gcli_get_apibase(ctx), max,
 	                  details->all ? "&status=All" : "&status=Open&status=New",
 	                  e_product ? e_product : "",
 	                  e_component ? e_component : "",
-	                  e_author ? e_author : "");
+	                  e_author ? e_author : "",
+	                  e_query ? e_query : "");
 
+	free(e_query);
 	free(e_product);
 	free(e_component);
 	free(e_author);

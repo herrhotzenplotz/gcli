@@ -83,11 +83,12 @@ struct gcli_issue_fetch_details {
 	char const *author;         /* filter issues by this author*/
 	char const *label;          /* filter by the given label */
 	char const *milestone;      /* filter by the given milestone */
+	char const *search_term;    /* a search term or NULL if unspecified */
 };
 
-int gcli_get_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                    struct gcli_issue_fetch_details const *details, int max,
-                    struct gcli_issue_list *out);
+int gcli_issues_search(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                       struct gcli_issue_fetch_details const *details, int max,
+                       struct gcli_issue_list *out);
 
 void gcli_issues_free(struct gcli_issue_list *);
 

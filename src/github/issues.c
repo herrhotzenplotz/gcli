@@ -123,10 +123,65 @@ parse_github_milestone(struct gcli_ctx *ctx, char const *owner,
 	return get_milestone_id(ctx, owner, repo, milestone, out);
 }
 
-int
-github_get_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                  struct gcli_issue_fetch_details const *details, int const max,
-                  struct gcli_issue_list *const out)
+/* Search issues with a search term */
+static int
+search_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
+              struct gcli_issue_fetch_details const *details, int const max,
+              struct gcli_issue_list *const out)
+{
+	char *url = NULL, *query_string = NULL, *e_query_string = NULL,
+	     *milestone = NULL, *author = NULL, *label = NULL;
+	int rc = 0;
+	struct gcli_fetch_buffer buffer = {0};
+	struct json_stream stream = {0};
+
+	(void) max;
+
+	if (details->milestone)
+		milestone = sn_asprintf("milestone:%s", details->milestone);
+
+	if (details->author)
+		author = sn_asprintf("author:%s", details->author);
+
+	if (details->label)
+		label = sn_asprintf("label:%s", details->label);
+
+	query_string = sn_asprintf("repo:%s/%s is:issue%s %s %s %s %s", owner, repo,
+	                           details->all ? "" : " is:open",
+	                           milestone ? milestone : "", author ? author : "",
+	                           label ? label : "", details->search_term);
+	e_query_string = gcli_urlencode(query_string);
+
+	url = sn_asprintf("%s/search/issues?q=%s", gcli_get_apibase(ctx),
+	                  e_query_string);
+
+	free(milestone);
+	free(author);
+	free(label);
+	free(query_string);
+	free(e_query_string);
+
+	rc = gcli_fetch(ctx, url, NULL, &buffer);
+	if (rc < 0)
+		goto error_fetch;
+
+	json_open_buffer(&stream, buffer.data, buffer.length);
+	rc = parse_github_issue_search_result(ctx, &stream, out);
+
+	json_close(&stream);
+	free(buffer.data);
+
+error_fetch:
+	free(url);
+
+	return rc;
+}
+
+/* Optimised routine for issues without a search term */
+static int
+get_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
+           struct gcli_issue_fetch_details const *details, int const max,
+           struct gcli_issue_list *const out)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -177,6 +232,18 @@ github_get_issues(struct gcli_ctx *ctx, char const *owner, char const *repo,
 	free(e_repo);
 
 	return github_fetch_issues(ctx, url, max, out);
+}
+
+int
+github_issues_search(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                     struct gcli_issue_fetch_details const *details,
+                     int const max, struct gcli_issue_list *const out)
+{
+
+	if (details->search_term)
+		return search_issues(ctx, owner, repo, details, max, out);
+	else
+		return get_issues(ctx, owner, repo, details, max, out);
 }
 
 int

@@ -99,7 +99,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Get a list of issues on the given repo */
-	int (*get_issues)(
+	int (*search_issues)(
 		struct gcli_ctx *ctx,
 		char const *owner,
 		char const *repo,

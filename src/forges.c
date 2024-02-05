@@ -89,7 +89,7 @@ github_forge_descriptor =
 
 	/* Issues */
 	.get_issue_summary         = github_get_issue_summary,
-	.get_issues                = github_get_issues,
+	.search_issues             = github_issues_search,
 	.issue_add_labels          = github_issue_add_labels,
 	.issue_assign              = github_issue_assign,
 	.issue_clear_milestone     = github_issue_clear_milestone,
@@ -184,7 +184,7 @@ gitlab_forge_descriptor =
 
 	/* Issues */
 	.get_issue_summary         = gitlab_get_issue_summary,
-	.get_issues                = gitlab_get_issues,
+	.search_issues             = gitlab_issues_search,
 	.issue_add_labels          = gitlab_issue_add_labels,
 	.issue_assign              = gitlab_issue_assign,
 	.issue_clear_milestone     = gitlab_issue_clear_milestone,
@@ -276,7 +276,7 @@ gitea_forge_descriptor =
 
 	/* Issues */
 	.get_issue_summary         = gitea_get_issue_summary,
-	.get_issues                = gitea_get_issues,
+	.search_issues             = gitea_issues_search,
 	.issue_add_labels          = gitea_issue_add_labels,
 	.issue_assign              = gitea_issue_assign,
 	.issue_clear_milestone     = gitea_issue_clear_milestone,
@@ -360,7 +360,7 @@ static struct gcli_forge_descriptor const
 bugzilla_forge_descriptor =
 {
 	/* Issues */
-	.get_issues                = bugzilla_get_bugs,
+	.search_issues             = bugzilla_get_bugs,
 	.get_issue_summary         = bugzilla_get_bug,
 	.get_issue_comments        = bugzilla_bug_get_comments,
 	.get_issue_attachments     = bugzilla_bug_get_attachments,

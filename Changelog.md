@@ -10,8 +10,8 @@ This changelog does not follow semantic versioning.
 - Preliminary (and thus experimental) support for Bugzilla has been
   added. For this a new yet undocumented `attachments` subcommand
   has been introduced.
-  Currently if now account has been specified it will default to
-  the FreeBSD Bugzilla - this may however change in the future.
+  Currently if no account has been specified it will default to the
+  FreeBSD Bugzilla - this may however change in the future.
 
 - A search feature has been added to the issues subcommand. You can
   now optionally provide trailing text to the issues subcommand

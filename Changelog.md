@@ -59,6 +59,8 @@ This changelog does not follow semantic versioning.
   provided colour code was converted incorrectly and always producing
   the wrong colour.
 
+- Fixed a segmentation fault when listing Github gists
+
 ### Changed
 
 - Internally a lot of code was using string views. Maintaining this

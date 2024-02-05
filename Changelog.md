@@ -2,8 +2,7 @@
 
 This changelog does not follow semantic versioning.
 
-
-## UNRELEASED
+## 2.2.0 (2024-Feb-05)
 
 ### Added
 

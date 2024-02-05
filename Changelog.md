@@ -59,6 +59,13 @@ This changelog does not follow semantic versioning.
   provided colour code was converted incorrectly and always producing
   the wrong colour.
 
+- Fixed a segmentation fault when listing Github gists
+
+- Fixed possible JSON escape bug when creating a Github Gist
+
+- Fixed gcli reporting incorrect libcurl version in the User-Agent
+  header when performing HTTP requests.
+
 ### Changed
 
 - Internally a lot of code was using string views. Maintaining this

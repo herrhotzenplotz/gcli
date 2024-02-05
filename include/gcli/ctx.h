@@ -38,6 +38,7 @@
  * data */
 struct gcli_ctx {
 	CURL *curl;
+	char *curl_useragent;
 	void *usrdata;
 
 	char *last_error;

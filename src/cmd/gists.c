@@ -150,11 +150,11 @@ gcli_print_gists_short(enum gcli_output_flags const flags,
 	size_t n;
 	gcli_tbl table;
 	struct gcli_tblcoldef cols[] = {
-		{ .name = "ID",          .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_COLOUREXPL },
-		{ .name = "OWNER",       .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_BOLD },
-		{ .name = "DATE",        .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
-		{ .name = "FILES",       .type = GCLI_TBLCOLTYPE_INT, .flags = GCLI_TBLCOL_JUSTIFYR },
-		{ .name = "DESCRIPTION", .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
+		{ .name = "ID",          .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_COLOUREXPL },
+		{ .name = "OWNER",       .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_BOLD },
+		{ .name = "DATE",        .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "FILES",       .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "DESCRIPTION", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
 	if (max < 0 || (size_t)(max) > list->gists_size)
@@ -242,9 +242,9 @@ subcommand_gist_get(int argc, char *argv[])
 static int
 subcommand_gist_create(int argc, char *argv[])
 {
-	int            ch;
-	struct gcli_new_gist  opts = {0};
-	char const    *file = NULL;
+	char const *file = NULL;
+	int ch;
+	struct gcli_new_gist opts = {0};
 
 	struct option const options[] = {
 		{ .name    = "file",
@@ -303,9 +303,9 @@ subcommand_gist_create(int argc, char *argv[])
 static int
 subcommand_gist_delete(int argc, char *argv[])
 {
-	int         ch;
-	bool        always_yes = false;
-	char const *gist_id    = NULL;
+	bool always_yes = false;
+	char const *gist_id = NULL;
+	int ch;
 
 	struct option const options[] = {
 		{ .name    = "yes",
@@ -352,11 +352,11 @@ static struct {
 int
 subcommand_gists(int argc, char *argv[])
 {
-	int                     ch;
-	char const             *user  = NULL;
-	struct gcli_gist_list          gists = {0};
-	int                     count = 30;
-	enum gcli_output_flags  flags = 0;
+	char const *user = NULL;
+	enum gcli_output_flags flags = 0;
+	int ch;
+	int count = 30;
+	struct gcli_gist_list gists = {0};
 
 	/* Make sure we are looking at a GitHub forge */
 	if (gcli_config_get_forge_type(g_clictx) != GCLI_FORGE_GITHUB) {

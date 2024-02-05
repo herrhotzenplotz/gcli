@@ -64,7 +64,11 @@ gcli_curl_ctx_destroy(struct gcli_ctx *ctx)
 {
 	if (ctx->curl)
 		curl_easy_cleanup(ctx->curl);
+
 	ctx->curl = NULL;
+
+	free(ctx->curl_useragent);
+	ctx->curl_useragent = NULL;
 }
 
 /* Ensures a clean cURL handle. Call this whenever you wanna use the
@@ -72,12 +76,20 @@ gcli_curl_ctx_destroy(struct gcli_ctx *ctx)
 static int
 gcli_curl_ensure(struct gcli_ctx *ctx)
 {
+
 	if (ctx->curl) {
 		curl_easy_reset(ctx->curl);
 	} else {
 	    ctx->curl = curl_easy_init();
 	    if (!ctx->curl)
 		    return gcli_error(ctx, "failed to initialise curl context");
+	}
+
+	if (!ctx->curl_useragent) {
+		curl_version_info_data const *ver;
+
+		ver = curl_version_info(CURLVERSION_NOW);
+		ctx->curl_useragent = sn_asprintf("curl/%s", ver->version);
 	}
 
 	return 0;
@@ -171,7 +183,7 @@ gcli_curl_test_success(struct gcli_ctx *ctx, char const *url)
 	curl_easy_setopt(ctx->curl, CURLOPT_BUFFERSIZE, 102400L);
 	curl_easy_setopt(ctx->curl, CURLOPT_NOPROGRESS, 1L);
 	curl_easy_setopt(ctx->curl, CURLOPT_MAXREDIRS, 50L);
-	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, "curl/7.78.0");
+	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, ctx->curl_useragent);
 #if defined(CURL_HTTP_VERSION_2TLS)
 	curl_easy_setopt(
 		ctx->curl, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
@@ -240,7 +252,7 @@ gcli_curl(struct gcli_ctx *ctx, FILE *stream, char const *url,
 	curl_easy_setopt(ctx->curl, CURLOPT_MAXREDIRS, 50L);
 	curl_easy_setopt(ctx->curl, CURLOPT_FTP_SKIP_PASV_IP, 1L);
 	curl_easy_setopt(ctx->curl, CURLOPT_HTTPHEADER, headers);
-	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, "curl/7.78.0");
+	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, ctx->curl_useragent);
 #if defined(CURL_HTTP_VERSION_2TLS)
 	curl_easy_setopt(
 		ctx->curl, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
@@ -400,7 +412,7 @@ gcli_fetch_with_method(
 		curl_easy_setopt(ctx->curl, CURLOPT_POSTFIELDS, data);
 
 	curl_easy_setopt(ctx->curl, CURLOPT_HTTPHEADER, headers);
-	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, "curl/7.79.1");
+	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, ctx->curl_useragent);
 	curl_easy_setopt(ctx->curl, CURLOPT_CUSTOMREQUEST, method);
 	curl_easy_setopt(ctx->curl, CURLOPT_TCP_KEEPALIVE, 1L);
 	curl_easy_setopt(ctx->curl, CURLOPT_WRITEDATA, buf);
@@ -490,7 +502,7 @@ gcli_post_upload(struct gcli_ctx *ctx, char const *url, char const *content_type
 	curl_easy_setopt(ctx->curl, CURLOPT_POSTFIELDSIZE, (long)buffer_size);
 
 	curl_easy_setopt(ctx->curl, CURLOPT_HTTPHEADER, headers);
-	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, "curl/7.79.1");
+	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, ctx->curl_useragent);
 	curl_easy_setopt(ctx->curl, CURLOPT_WRITEDATA, out);
 	curl_easy_setopt(ctx->curl, CURLOPT_WRITEFUNCTION, fetch_write_callback);
 

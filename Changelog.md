@@ -66,6 +66,9 @@ This changelog does not follow semantic versioning.
 - Fixed gcli reporting incorrect libcurl version in the User-Agent
   header when performing HTTP requests.
 
+- Fixed possible segmentation fault when no token was configured in
+  gcli configuration file.
+
 ### Changed
 
 - Internally a lot of code was using string views. Maintaining this

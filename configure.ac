@@ -3,14 +3,14 @@
 
 AC_PREREQ([2.69])
 AC_INIT([gcli],
-        [2.2.0],
+        [2.3.0-devel],
         [~herrhotzenplotz/gcli-discuss@lists.sr.ht],
         [gcli],
         [https://herrhotzenplotz.de/gcli])
 AM_INIT_AUTOMAKE([1.0 foreign subdir-objects dist-bzip2 dist-xz -Wall])
 
 dnl Release Date.
-PACKAGE_DATE="2024-Feb-05"
+PACKAGE_DATE="UNRELEASED"
 AC_SUBST([PACKAGE_DATE])
 
 dnl Silent by default.

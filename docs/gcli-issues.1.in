@@ -11,6 +11,7 @@
 .Op Fl s
 .Op Fl A Ar author
 .Op Fl L Ar label
+.Op Fl M Ar milestone
 .Op Fl o Ar owner Fl r Ar repo
 .Nm
 .Fl i Ar issue
@@ -49,6 +50,8 @@ option.
 Only list issues authored by the given user.
 .It Fl L , Fl -label Ar label
 Filter issues by the given label. This option may only be specfied once.
+.It Fl M , Fl -milestone Ar milestone
+Filter issues by the given milestone. This option may only be specfied once.
 .It Fl n , -count Ar n
 Fetch at least
 .Ar n
@@ -130,7 +133,7 @@ $ gcli issues
 .Pp
 Report a new issue in the current project:
 .Bd -literal -offset indent
-$ gcli create issues "summary here"
+$ gcli issues create "summary here"
 .Ed
 .Pp
 Print both a summary and comments of issue 1 in herrhotzenplotz/gcli:

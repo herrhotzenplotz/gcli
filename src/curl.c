@@ -492,7 +492,10 @@ gcli_post_upload(struct gcli_ctx *ctx, char const *url, char const *content_type
 	headers = curl_slist_append(
 		headers,
 		"Accept: application/vnd.github.v3+json");
-	headers = curl_slist_append(headers, auth_header);
+
+	if (auth_header)
+		headers = curl_slist_append(headers, auth_header);
+
 	headers = curl_slist_append(headers, contenttype_header);
 	headers = curl_slist_append(headers, contentsize_header);
 
@@ -558,7 +561,9 @@ gcli_curl_gitea_upload_attachment(struct gcli_ctx *ctx, char const *url,
 	headers = curl_slist_append(
 		headers,
 		"Accept: application/json");
-	headers = curl_slist_append(headers, auth_header);
+
+	if (auth_header)
+		headers = curl_slist_append(headers, auth_header);
 
 	/* The docs say we should be using this mime thing. */
 	mime = curl_mime_init(ctx->curl);

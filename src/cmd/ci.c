@@ -59,10 +59,10 @@ usage(void)
 }
 
 void
-github_print_checks(github_check_list const *const list)
+github_print_checks(struct github_check_list const *const list)
 {
 	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
+	struct gcli_tblcoldef cols[] = {
 		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_ID,     .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "STATUS",     .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 		{ .name = "CONCLUSION", .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
@@ -78,7 +78,7 @@ github_print_checks(github_check_list const *const list)
 
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
-		errx(1, "error: could not init table");
+		errx(1, "gcli: error: could not init table");
 
 	for (size_t i = 0; i < list->checks_size; ++i) {
 		gcli_tbl_add_row(table, list->checks[i].id, list->checks[i].status,
@@ -93,7 +93,7 @@ int
 github_checks(char const *const owner, char const *const repo,
               char const *const ref, int const max)
 {
-	github_check_list list = {0};
+	struct github_check_list list = {0};
 	int rc = 0;
 
 	rc = github_get_checks(g_clictx, owner, repo, ref, max, &list);
@@ -149,13 +149,13 @@ subcommand_ci(int argc, char *argv[])
 	/* Check that we have exactly one left argument and print proper
 	 * error messages */
 	if (argc < 1) {
-		fprintf(stderr, "error: missing ref\n");
+		fprintf(stderr, "gcli: error: missing ref\n");
 		usage();
 		return EXIT_FAILURE;
 	}
 
 	if (argc > 1) {
-		fprintf(stderr, "error: stray arguments\n");
+		fprintf(stderr, "gcli: error: stray arguments\n");
 		usage();
 		return EXIT_FAILURE;
 	}
@@ -168,11 +168,11 @@ subcommand_ci(int argc, char *argv[])
 	/* Make sure we are actually talking about a github remote because
 	 * we might be incorrectly inferring it */
 	if (gcli_config_get_forge_type(g_clictx) != GCLI_FORGE_GITHUB)
-		errx(1, "error: The ci subcommand only works for GitHub. "
+		errx(1, "gcli: error: The ci subcommand only works for GitHub. "
 		     "Use gcli -t github ... to force a GitHub remote.");
 
 	if (github_checks(owner, repo, ref, count) < 0)
-		errx(1, "error: failed to get github checks: %s",
+		errx(1, "gcli: error: failed to get github checks: %s",
 		     gcli_get_error(g_clictx));
 
 

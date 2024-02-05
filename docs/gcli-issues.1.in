@@ -11,7 +11,9 @@
 .Op Fl s
 .Op Fl A Ar author
 .Op Fl L Ar label
+.Op Fl M Ar milestone
 .Op Fl o Ar owner Fl r Ar repo
+.Op Ar "search-query"
 .Nm
 .Fl i Ar issue
 .Op Fl o Ar owner Fl r Ar repo
@@ -23,7 +25,7 @@
 .Sh DESCRIPTION
 Use
 .Nm
-to list, create, edit or delete issues in repositories in various
+to search, list, create, edit or delete issues in repositories in various
 .Xr git 1
 forges such as GitHub, GitLab and Gitea. Without any action specified,
 .Nm
@@ -49,6 +51,8 @@ option.
 Only list issues authored by the given user.
 .It Fl L , Fl -label Ar label
 Filter issues by the given label. This option may only be specfied once.
+.It Fl M , Fl -milestone Ar milestone
+Filter issues by the given milestone. This option may only be specfied once.
 .It Fl n , -count Ar n
 Fetch at least
 .Ar n
@@ -119,6 +123,8 @@ action that prints the list of comments associated with the issue.
 .It Cm title Ar new-title
 Change the title of the issue to
 .Ar new-title .
+.It Cm attachments
+List bug attachments. This action is only available on Bugzilla.
 .El
 .Sh EXAMPLES
 Print a list of issues in the current project:
@@ -126,9 +132,16 @@ Print a list of issues in the current project:
 $ gcli issues
 .Ed
 .Pp
+Search for issues containing
+.Dq crash
+in contour-terminal/contour on GitHub including closed issues:
+.Bd -literal -offset indent
+$ gcli -t github issues -o contour-terminal -r contour -a crash
+.Ed
+.Pp
 Report a new issue in the current project:
 .Bd -literal -offset indent
-$ gcli create issues "summary here"
+$ gcli issues create "summary here"
 .Ed
 .Pp
 Print both a summary and comments of issue 1 in herrhotzenplotz/gcli:

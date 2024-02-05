@@ -36,7 +36,7 @@
 
 #include <gcli/labels.h>
 
-void gcli_labels_print(gcli_label_list const *list, int max);
+void gcli_labels_print(struct gcli_label_list const *list, int max);
 
 int subcommand_labels(int argc, char *argv[]);
 

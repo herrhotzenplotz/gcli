@@ -29,6 +29,7 @@
 
 #include <gcli/github/comments.h>
 #include <gcli/github/config.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
@@ -36,39 +37,48 @@
 #include <templates/github/comments.h>
 
 int
-github_perform_submit_comment(gcli_ctx *ctx, gcli_submit_comment_opts opts,
-                              gcli_fetch_buffer *out)
+github_perform_submit_comment(struct gcli_ctx *ctx,
+                              struct gcli_submit_comment_opts opts,
+                              struct gcli_fetch_buffer *out)
 {
 	int rc = 0;
+	struct gcli_jsongen gen = {0};
 	char *e_owner = gcli_urlencode(opts.owner);
 	char *e_repo = gcli_urlencode(opts.repo);
+	char *payload = NULL, *url = NULL;
 
-	char *post_fields = sn_asprintf(
-		"{ \"body\": \""SV_FMT"\" }",
-		SV_ARGS(opts.message));
-	char *url         = sn_asprintf(
-		"%s/repos/%s/%s/issues/%d/comments",
-		gcli_get_apibase(ctx),
-		e_owner, e_repo, opts.target_id);
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "body");
+		gcli_jsongen_string(&gen, opts.message);
+	}
+	gcli_jsongen_end_object(&gen);
 
-	rc = gcli_fetch_with_method(ctx, "POST", url, post_fields, NULL, out);
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
 
-	free(post_fields);
+	url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid"/comments",
+	                  gcli_get_apibase(ctx), e_owner, e_repo, opts.target_id);
+
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, out);
+
+	free(payload);
+	free(url);
 	free(e_owner);
 	free(e_repo);
-	free(url);
 
 	return rc;
 }
 
 int
-github_get_comments(gcli_ctx *ctx, char const *owner, char const *repo,
-                    gcli_id const issue, gcli_comment_list *const out)
+github_get_comments(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                    gcli_id const issue, struct gcli_comment_list *const out)
 {
 	char *e_owner = NULL;
 	char *e_repo = NULL;
 	char *url = NULL;
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &out->comments,
 		.sizep = &out->comments_size,
 		.parse = (parsefn)parse_github_comments,

@@ -31,36 +31,36 @@
 #include <gcli/milestones.h>
 
 int
-gcli_get_milestones(gcli_ctx *ctx, char const *const owner,
+gcli_get_milestones(struct gcli_ctx *ctx, char const *const owner,
                     char const *const repo, int const max,
-                    gcli_milestone_list *const out)
+                    struct gcli_milestone_list *const out)
 {
-	return gcli_forge(ctx)->get_milestones(ctx, owner, repo, max, out);
+	gcli_null_check_call(get_milestones, ctx, owner, repo, max, out);
 }
 
 int
-gcli_get_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                   gcli_id const milestone, gcli_milestone *const out)
+gcli_get_milestone(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                   gcli_id const milestone, struct gcli_milestone *const out)
 {
-	return gcli_forge(ctx)->get_milestone(ctx, owner, repo, milestone, out);
+	gcli_null_check_call(get_milestone, ctx, owner, repo, milestone, out);
 }
 
 int
-gcli_create_milestone(gcli_ctx *ctx,
+gcli_create_milestone(struct gcli_ctx *ctx,
                       struct gcli_milestone_create_args const *args)
 {
-	return gcli_forge(ctx)->create_milestone(ctx, args);
+	gcli_null_check_call(create_milestone, ctx, args);
 }
 
 int
-gcli_delete_milestone(gcli_ctx *ctx, char const *const owner,
+gcli_delete_milestone(struct gcli_ctx *ctx, char const *const owner,
                       char const *const repo, gcli_id const milestone)
 {
-	return gcli_forge(ctx)->delete_milestone(ctx, owner, repo, milestone);
+	gcli_null_check_call(delete_milestone, ctx, owner, repo, milestone);
 }
 
 void
-gcli_free_milestone(gcli_milestone *const it)
+gcli_free_milestone(struct gcli_milestone *const it)
 {
 	free(it->title);
 	it->title = NULL;
@@ -78,7 +78,7 @@ gcli_free_milestone(gcli_milestone *const it)
 }
 
 void
-gcli_free_milestones(gcli_milestone_list *const it)
+gcli_free_milestones(struct gcli_milestone_list *const it)
 {
 	for (size_t i = 0; i < it->milestones_size; ++i)
 		gcli_free_milestone(&it->milestones[i]);
@@ -89,19 +89,19 @@ gcli_free_milestones(gcli_milestone_list *const it)
 }
 
 int
-gcli_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
+gcli_milestone_get_issues(struct  gcli_ctx *ctx, char const *const owner,
                           char const *const repo, gcli_id const milestone,
-                          gcli_issue_list *const out)
+                          struct gcli_issue_list *const out)
 {
-	return gcli_forge(ctx)->get_milestone_issues(
-		ctx, owner, repo, milestone, out);
+	gcli_null_check_call(get_milestone_issues, ctx, owner, repo, milestone,
+	                     out);
 }
 
 int
-gcli_milestone_set_duedate(gcli_ctx *ctx, char const *const owner,
+gcli_milestone_set_duedate(struct  gcli_ctx *ctx, char const *const owner,
                            char const *const repo, gcli_id const milestone,
                            char const *const date)
 {
-	return gcli_forge(ctx)->milestone_set_duedate(
-		ctx, owner, repo, milestone, date);
+	gcli_null_check_call(milestone_set_duedate, ctx, owner, repo,
+	                     milestone, date);
 }

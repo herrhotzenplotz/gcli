@@ -61,6 +61,7 @@ dist_man_MANS = \
 	docs/gcli.5
 
 gcli_SOURCES = \
+	include/gcli/cmd/attachments.h src/cmd/attachments.c \
 	include/gcli/cmd/ci.h src/cmd/ci.c \
 	include/gcli/cmd/cmdconfig.h src/cmd/cmdconfig.c \
 	include/gcli/cmd/cmd.h src/cmd/cmd.c \
@@ -119,7 +120,9 @@ TEMPLATES = \
 	templates/gitlab/status.t \
 	templates/gitlab/snippets.t \
 	templates/gitea/milestones.t \
-	templates/gitea/status.t
+	templates/gitea/status.t \
+	templates/bugzilla/api.t \
+	templates/bugzilla/bugs.t
 
 headerdir = $(prefix)
 nobase_header_HEADERS = include/gcli/gcli.h include/gcli/comments.h	\
@@ -136,6 +139,8 @@ libgcli_la_SOURCES = \
 	include/gcli/ctx.h src/ctx.c \
 	include/gcli/gcli.h src/gcli.c \
 	include/gcli/date_time.h src/date_time.c \
+	src/attachments.c include/gcli/attachments.h \
+	src/base64.c include/gcli/base64.h \
 	src/comments.c include/gcli/comments.h \
 	src/curl.c include/gcli/curl.h \
 	src/forges.c include/gcli/forges.h \
@@ -145,6 +150,7 @@ libgcli_la_SOURCES = \
 	src/json_util.c include/gcli/json_util.h \
 	src/labels.c include/gcli/labels.h \
 	src/milestones.c include/gcli/milestones.h \
+	src/nvlist.c include/gcli/nvlist.h \
 	src/pulls.c include/gcli/pulls.h \
 	src/releases.c include/gcli/releases.h \
 	src/repos.c include/gcli/repos.h \
@@ -189,6 +195,11 @@ libgcli_la_SOURCES = \
 	src/gitea/sshkeys.c include/gcli/gitea/sshkeys.h \
 	src/gitea/status.c include/gcli/gitea/status.h \
 	src/gitea/milestones.c include/gcli/gitea/milestones.h \
+	src/bugzilla/api.c include/gcli/bugzilla/api.h \
+	src/bugzilla/attachments.c include/gcli/bugzilla/attachments.h \
+	src/bugzilla/bugs.c include/gcli/bugzilla/bugs.h \
+	src/bugzilla/bugs-parser.c include/gcli/bugzilla/bugs-parser.h \
+	src/bugzilla/config.c include/gcli/bugzilla/config.h \
 	$(TEMPLATES)
 
 libgcli_la_CPPFLAGS = \
@@ -218,6 +229,8 @@ check_PROGRAMS = \
 	tests/github-parse-tests$(EXEEXT) \
 	tests/gitlab-parse-tests$(EXEEXT) \
 	tests/gitea-parse-tests$(EXEEXT) \
+	tests/bugzilla-parse-tests$(EXEEXT) \
+	tests/base64-tests$(EXEEXT) \
 	tests/url-encode$(EXEEXT) \
 	tests/pretty_print_test$(EXEEXT) \
 	tests/test-jsongen$(EXEEXT)
@@ -251,6 +264,18 @@ tests_gitlab_parse_tests_LDADD = \
 tests_gitea_parse_tests_SOURCES = \
 	tests/gitea-parse-tests.c
 tests_gitea_parse_tests_LDADD = \
+	libgcli.la libpdjson.la libsn.la \
+	$(LIBATFC_LDFLAGS)
+
+tests_bugzilla_parse_tests_SOURCES = \
+	tests/bugzilla-parse-tests.c
+tests_bugzilla_parse_tests_LDADD = \
+	libgcli.la libpdjson.la libsn.la \
+	$(LIBATFC_LDFLAGS)
+
+tests_base64_tests_SOURCES = \
+	tests/base64-tests.c
+tests_base64_tests_LDADD = \
 	libgcli.la libpdjson.la libsn.la \
 	$(LIBATFC_LDFLAGS)
 
@@ -291,6 +316,9 @@ EXTRA_DIST += tests/samples/github_simple_comment.json	\
 	tests/samples/gitlab_simple_repo.json		\
 	tests/samples/gitlab_simple_snippet.json	\
 	tests/samples/github_simple_check.json		\
-	tests/samples/gitea_simple_notification.json
+	tests/samples/gitea_simple_notification.json    \
+	tests/samples/bugzilla_attachments.json         \
+	tests/samples/bugzilla_comments.json            \
+	tests/samples/bugzilla_simple_bug.json
 
 endif

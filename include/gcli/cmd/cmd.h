@@ -38,7 +38,7 @@
 
 #include <sn/sn.h>
 
-extern gcli_ctx *g_clictx;
+extern struct gcli_ctx *g_clictx;
 
 static inline char *
 shift(int *argc, char ***argv)
@@ -51,6 +51,7 @@ shift(int *argc, char ***argv)
 }
 
 void version(void);
+void longversion(void);
 void copyright(void);
 void check_owner_and_repo(const char **owner, const char **repo);
 

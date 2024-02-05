@@ -152,19 +152,23 @@ gcli_state_colour_str(char const *it)
 static const struct { char const *name; int code; }
 	state_colour_table[] =
 {
-	{ .name = "open",      .code = GCLI_COLOR_GREEN   },
-	{ .name = "active",    .code = GCLI_COLOR_GREEN   },
-	{ .name = "success",   .code = GCLI_COLOR_GREEN   },
-	{ .name = "APPROVED",  .code = GCLI_COLOR_GREEN   },
-	{ .name = "merged",    .code = GCLI_COLOR_MAGENTA },
-	{ .name = "closed",    .code = GCLI_COLOR_RED     },
-	{ .name = "failed",    .code = GCLI_COLOR_RED     },
-	{ .name = "canceled",  .code = GCLI_COLOR_RED     }, /* orthography has left the channel */
-	{ .name = "failure",   .code = GCLI_COLOR_RED     },
-	{ .name = "running",   .code = GCLI_COLOR_BLUE    },
-	{ .name = "created",   .code = GCLI_COLOR_BLUE    },
-	{ .name = "COMMENTED", .code = GCLI_COLOR_BLUE    },
-	{ .name = "pending",   .code = GCLI_COLOR_CYAN    },
+	{ .name = "open",        .code = GCLI_COLOR_GREEN   },
+	{ .name = "Open",        .code = GCLI_COLOR_GREEN   },
+	{ .name = "active",      .code = GCLI_COLOR_GREEN   },
+	{ .name = "success",     .code = GCLI_COLOR_GREEN   },
+	{ .name = "APPROVED",    .code = GCLI_COLOR_GREEN   },
+	{ .name = "merged",      .code = GCLI_COLOR_MAGENTA },
+	{ .name = "closed",      .code = GCLI_COLOR_RED     },
+	{ .name = "Closed",      .code = GCLI_COLOR_RED     },
+	{ .name = "failed",      .code = GCLI_COLOR_RED     },
+	{ .name = "canceled",    .code = GCLI_COLOR_RED     }, /* orthography has left the channel */
+	{ .name = "failure",     .code = GCLI_COLOR_RED     },
+	{ .name = "running",     .code = GCLI_COLOR_BLUE    },
+	{ .name = "created",     .code = GCLI_COLOR_BLUE    },
+	{ .name = "New",         .code = GCLI_COLOR_BLUE    },
+	{ .name = "COMMENTED",   .code = GCLI_COLOR_BLUE    },
+	{ .name = "pending",     .code = GCLI_COLOR_CYAN    },
+	{ .name = "In Progress", .code = GCLI_COLOR_CYAN    },
 };
 
 char const *

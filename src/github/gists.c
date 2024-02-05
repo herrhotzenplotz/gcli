@@ -31,6 +31,7 @@
 #include <gcli/cmd/table.h>
 #include <gcli/curl.h>
 #include <gcli/github/gists.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
 #include <gcli/github/config.h>
@@ -41,8 +42,8 @@
 
 /* /!\ Before changing this, see comment in gists.h /!\ */
 int
-parse_github_gist_files_idiot_hack(gcli_ctx *ctx, json_stream *stream,
-                                   gcli_gist *const gist)
+parse_github_gist_files_idiot_hack(struct gcli_ctx *ctx, json_stream *stream,
+                                   struct gcli_gist *const gist)
 {
 	(void) ctx;
 
@@ -56,7 +57,7 @@ parse_github_gist_files_idiot_hack(gcli_ctx *ctx, json_stream *stream,
 
 	while ((next = json_next(stream)) == JSON_STRING) {
 		gist->files = realloc(gist->files, sizeof(*gist->files) * (gist->files_size + 1));
-		gcli_gist_file *it = &gist->files[gist->files_size++];
+		struct gcli_gist_file *it = &gist->files[gist->files_size++];
 		if (parse_github_gist_file(ctx, stream, it) < 0)
 			return -1;
 	}
@@ -68,11 +69,11 @@ parse_github_gist_files_idiot_hack(gcli_ctx *ctx, json_stream *stream,
 }
 
 int
-gcli_get_gists(gcli_ctx *ctx, char const *user, int const max,
-               gcli_gist_list *const list)
+gcli_get_gists(struct gcli_ctx *ctx, char const *user, int const max,
+               struct gcli_gist_list *const list)
 {
 	char *url = NULL;
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &list->gists,
 		.sizep = &list->gists_size,
 		.parse = (parsefn)(parse_github_gists),
@@ -88,10 +89,10 @@ gcli_get_gists(gcli_ctx *ctx, char const *user, int const max,
 }
 
 int
-gcli_get_gist(gcli_ctx *ctx, char const *gist_id, gcli_gist *out)
+gcli_get_gist(struct gcli_ctx *ctx, char const *gist_id, struct gcli_gist *out)
 {
 	char *url = NULL;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	int rc = 0;
 
 	url = sn_asprintf("%s/gists/%s", gcli_get_apibase(ctx), gist_id);
@@ -115,36 +116,49 @@ gcli_get_gist(gcli_ctx *ctx, char const *gist_id, gcli_gist *out)
 }
 
 #define READ_SZ 4096
-static size_t
-read_file(FILE *f, char **out)
+static char *
+read_file(FILE *f)
 {
 	size_t size = 0;
-
-	*out = NULL;
+	char *out = NULL;
 
 	while (!feof(f) && !ferror(f)) {
-		*out = realloc(*out, size + READ_SZ);
-		size_t bytes_read = fread(*out + size, 1, READ_SZ, f);
+		out = realloc(out, size + READ_SZ);
+		size_t bytes_read = fread(out + size, 1, READ_SZ, f);
 		if (bytes_read == 0)
 			break;
+
 		size += bytes_read;
 	}
 
-	return size;
+	if (out) {
+		out = realloc(out, size + 1);
+		out[size] = '\0';
+	}
+
+	if (ferror(f)) {
+		free(out);
+		out = NULL;
+	}
+
+	return out;
 }
 
 int
-gcli_create_gist(gcli_ctx *ctx, gcli_new_gist opts)
+gcli_create_gist(struct gcli_ctx *ctx, struct gcli_new_gist opts)
 {
-	char *url = NULL;
+	char *content = NULL;
 	char *post_data = NULL;
-	gcli_fetch_buffer fetch_buffer = {0};
-	sn_sv read_buffer = {0};
-	sn_sv content = {0};
+	char *url = NULL;
 	int rc = 0;
+	struct gcli_fetch_buffer fetch_buffer = {0};
+	struct gcli_jsongen gen = {0};
 
-	read_buffer.length = read_file(opts.file, &read_buffer.data);
-	content = gcli_json_escape(read_buffer);
+	/* Read in the file content. this may come from stdin this we don't know
+	 * the size in advance. */
+	content = read_file(opts.file);
+	if (content == NULL)
+		return gcli_error(ctx, "failed to read from input file");
 
 	/* This API is documented very badly. In fact, I dug up how you're
 	 * supposed to do this from
@@ -163,19 +177,40 @@ gcli_create_gist(gcli_ctx *ctx, gcli_new_gist opts)
 	 *  }
 	 * }
 	 */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "description");
+		gcli_jsongen_string(&gen, opts.gist_description);
 
-	/* TODO: Escape gist_description and file_name */
+		gcli_jsongen_objmember(&gen, "public");
+		gcli_jsongen_bool(&gen, true);
+
+		gcli_jsongen_objmember(&gen, "files");
+		gcli_jsongen_begin_object(&gen);
+		{
+			gcli_jsongen_objmember(&gen, opts.file_name);
+			gcli_jsongen_begin_object(&gen);
+			{
+				gcli_jsongen_objmember(&gen, "content");
+				gcli_jsongen_string(&gen, content);
+			}
+			gcli_jsongen_end_object(&gen);
+		}
+		gcli_jsongen_end_object(&gen);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	post_data = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* Generate URL */
 	url = sn_asprintf("%s/gists", gcli_get_apibase(ctx));
-	post_data = sn_asprintf(
-		"{\"description\":\"%s\",\"public\":true,\"files\":"
-		"{\"%s\": {\"content\":\""SV_FMT"\"}}}",
-		opts.gist_description,
-		opts.file_name,
-		SV_ARGS(content));
 
+	/* Perferm fetch */
 	rc = gcli_fetch_with_method(ctx, "POST", url, post_data, NULL, &fetch_buffer);
 
-	free(read_buffer.data);
+	free(content);
 	free(fetch_buffer.data);
 	free(url);
 	free(post_data);
@@ -184,10 +219,10 @@ gcli_create_gist(gcli_ctx *ctx, gcli_new_gist opts)
 }
 
 int
-gcli_delete_gist(gcli_ctx *ctx, char const *gist_id)
+gcli_delete_gist(struct gcli_ctx *ctx, char const *gist_id)
 {
 	char *url = NULL;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	int rc = 0;
 
 	url = sn_asprintf("%s/gists/%s", gcli_get_apibase(ctx), gist_id);
@@ -201,20 +236,20 @@ gcli_delete_gist(gcli_ctx *ctx, char const *gist_id)
 }
 
 void
-gcli_gist_free(gcli_gist *g)
+gcli_gist_free(struct gcli_gist *g)
 {
-	free(g->id.data);
-	free(g->owner.data);
-	free(g->url.data);
-	free(g->date.data);
-	free(g->git_pull_url.data);
-	free(g->description.data);
+	free(g->id);
+	free(g->owner);
+	free(g->url);
+	free(g->date);
+	free(g->git_pull_url);
+	free(g->description);
 
 	for (size_t j = 0; j < g->files_size; ++j) {
-		free(g->files[j].filename.data);
-		free(g->files[j].language.data);
-		free(g->files[j].url.data);
-		free(g->files[j].type.data);
+		free(g->files[j].filename);
+		free(g->files[j].language);
+		free(g->files[j].url);
+		free(g->files[j].type);
 	}
 
 	free(g->files);
@@ -223,7 +258,7 @@ gcli_gist_free(gcli_gist *g)
 }
 
 void
-gcli_gists_free(gcli_gist_list *const list)
+gcli_gists_free(struct gcli_gist_list *const list)
 {
 	for (size_t i = 0; i < list->gists_size; ++i)
 		gcli_gist_free(&list->gists[i]);

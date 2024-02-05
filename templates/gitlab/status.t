@@ -1,11 +1,11 @@
 include "gcli/gitlab/status.h";
 
 parser gitlab_project is
-object of gcli_notification with
+object of struct gcli_notification with
 	("path_with_namespace" => repository as string);
 
 parser gitlab_todo is
-object of gcli_notification with
+object of struct gcli_notification with
 	("updated_at"  => date as string,
 	 "action_name" => reason as string,
 	 "id"          => id as int_to_string,
@@ -14,4 +14,4 @@ object of gcli_notification with
 	 "project"     => use parse_gitlab_project);
 
 parser gitlab_todos is
-array of gcli_notification use parse_gitlab_todo;
+array of struct gcli_notification use parse_gitlab_todo;

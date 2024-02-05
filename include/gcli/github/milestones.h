@@ -32,23 +32,25 @@
 
 #include <gcli/milestones.h>
 
-int github_get_milestones(gcli_ctx *ctx, char const *owner, char const *repo,
-                          int max, gcli_milestone_list *out);
+int github_get_milestones(struct gcli_ctx *ctx, char const *owner,
+                          char const *repo, int max,
+                          struct gcli_milestone_list *out);
 
-int github_get_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                         gcli_id milestone, gcli_milestone *out);
+int github_get_milestone(struct gcli_ctx *ctx, char const *owner,
+                         char const *repo, gcli_id milestone,
+                         struct gcli_milestone *out);
 
-int github_create_milestone(gcli_ctx *ctx,
+int github_create_milestone(struct gcli_ctx *ctx,
                             struct gcli_milestone_create_args const *args);
 
-int github_delete_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                            gcli_id milestone);
+int github_delete_milestone(struct gcli_ctx *ctx, char const *owner,
+                            char const *repo, gcli_id milestone);
 
-int github_milestone_get_issues(gcli_ctx *ctx, char const *owner,
+int github_milestone_get_issues(struct gcli_ctx *ctx, char const *owner,
                                 char const *repo, gcli_id milestone,
-                                gcli_issue_list *out);
+                                struct gcli_issue_list *out);
 
-int github_milestone_set_duedate(gcli_ctx *ctx, char const *owner,
+int github_milestone_set_duedate(struct gcli_ctx *ctx, char const *owner,
                                  char const *repo, gcli_id milestone,
                                  char const *date);
 

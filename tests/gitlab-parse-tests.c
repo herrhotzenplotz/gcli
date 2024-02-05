@@ -16,16 +16,16 @@
 #include "gcli_tests.h"
 
 static gcli_forge_type
-get_gitlab_forge_type(gcli_ctx *ctx)
+get_gitlab_forge_type(struct gcli_ctx *ctx)
 {
 	(void) ctx;
 	return GCLI_FORGE_GITLAB;
 }
 
-static gcli_ctx *
+static struct gcli_ctx *
 test_context(void)
 {
-	gcli_ctx *ctx;
+	struct gcli_ctx *ctx;
 	ATF_REQUIRE(gcli_init(&ctx, get_gitlab_forge_type, NULL, NULL) == NULL);
 	return ctx;
 }
@@ -46,10 +46,10 @@ open_sample(char const *const name)
 ATF_TC_WITHOUT_HEAD(gitlab_simple_merge_request);
 ATF_TC_BODY(gitlab_simple_merge_request, tc)
 {
-	json_stream stream = {0};
-	gcli_ctx *ctx = test_context();
+	struct json_stream stream = {0};
+	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_merge_request.json");
-	gcli_pull pull = {0};
+	struct gcli_pull pull = {0};
 
 	json_open_stream(&stream, f);
 	ATF_REQUIRE(parse_gitlab_mr(ctx, &stream, &pull) == 0);
@@ -86,28 +86,28 @@ ATF_TC_BODY(gitlab_simple_merge_request, tc)
 ATF_TC_WITHOUT_HEAD(gitlab_simple_issue);
 ATF_TC_BODY(gitlab_simple_issue, tc)
 {
-	json_stream stream = {0};
-	gcli_ctx *ctx = test_context();
+	struct json_stream stream = {0};
+	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_issue.json");
-	gcli_issue issue = {0};
+	struct gcli_issue issue = {0};
 
 	json_open_stream(&stream, f);
 	ATF_REQUIRE(parse_gitlab_issue(ctx, &stream, &issue) == 0);
 
 	ATF_CHECK(issue.number == 193);
-	ATF_CHECK_SV_EQTO(issue.title, "Make notifications API use a list struct containing both the ptr and size");
-	ATF_CHECK_SV_EQTO(issue.created_at, "2023-08-13T18:43:05.766Z");
-	ATF_CHECK_SV_EQTO(issue.author, "herrhotzenplotz");
-	ATF_CHECK_SV_EQTO(issue.state, "closed");
+	ATF_CHECK_STREQ(issue.title, "Make notifications API use a list struct containing both the ptr and size");
+	ATF_CHECK_STREQ(issue.created_at, "2023-08-13T18:43:05.766Z");
+	ATF_CHECK_STREQ(issue.author, "herrhotzenplotz");
+	ATF_CHECK_STREQ(issue.state, "closed");
 	ATF_CHECK(issue.comments == 2);
 	ATF_CHECK(issue.locked == false);
-	ATF_CHECK_SV_EQTO(issue.body, "That would make some of the code much cleaner");
+	ATF_CHECK_STREQ(issue.body, "That would make some of the code much cleaner");
 	ATF_CHECK(issue.labels_size == 1);
-	ATF_CHECK_SV_EQTO(issue.labels[0], "good-first-issue");
+	ATF_CHECK_STREQ(issue.labels[0], "good-first-issue");
 	ATF_CHECK(issue.assignees == NULL);
 	ATF_CHECK(issue.assignees_size == 0);
 	ATF_CHECK(issue.is_pr == 0);
-	ATF_CHECK(sn_sv_null(issue.milestone));
+	ATF_CHECK(issue.milestone == NULL);
 
 	json_close(&stream);
 	gcli_issue_free(&issue);
@@ -117,10 +117,10 @@ ATF_TC_BODY(gitlab_simple_issue, tc)
 ATF_TC_WITHOUT_HEAD(gitlab_simple_label);
 ATF_TC_BODY(gitlab_simple_label, tc)
 {
-	json_stream stream = {0};
-	gcli_ctx *ctx = test_context();
+	struct json_stream stream = {0};
+	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_label.json");
-	gcli_label label = {0};
+	struct gcli_label label = {0};
 
 	json_open_stream(&stream, f);
 	ATF_REQUIRE(parse_gitlab_label(ctx, &stream, &label) == 0);
@@ -138,10 +138,10 @@ ATF_TC_BODY(gitlab_simple_label, tc)
 ATF_TC_WITHOUT_HEAD(gitlab_simple_release);
 ATF_TC_BODY(gitlab_simple_release, tc)
 {
-	json_stream stream = {0};
-	gcli_ctx *ctx = test_context();
+	struct json_stream stream = {0};
+	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_release.json");
-	gcli_release release = {0};
+	struct gcli_release release = {0};
 
 	json_open_stream(&stream, f);
 	ATF_REQUIRE(parse_gitlab_release(ctx, &stream, &release) == 0);
@@ -152,7 +152,7 @@ ATF_TC_BODY(gitlab_simple_release, tc)
 	gitlab_fixup_release_assets(ctx, &release);
 
 	/* NOTE(Nico): on gitlab this is the tag name */
-	ATF_CHECK_SV_EQTO(release.id, "1.2.0");
+	ATF_CHECK_STREQ(release.id, "1.2.0");
 	ATF_CHECK(release.assets_size == 4);
 	{
 		ATF_CHECK_STREQ(release.assets[0].name, "gcli-1.2.0.zip");
@@ -175,11 +175,11 @@ ATF_TC_BODY(gitlab_simple_release, tc)
 		                "https://gitlab.com/herrhotzenplotz/gcli/-/archive/1.2.0/gcli-1.2.0.tar");
 	}
 
-	ATF_CHECK_SV_EQTO(release.name, "1.2.0");
-	ATF_CHECK_SV_EQTO(release.body, "# Version 1.2.0\n\nThis is version 1.2.0 of gcli.\n\n## Notes\n\nPlease test and report bugs.\n\nYou can download autotoolized tarballs at: https://herrhotzenplotz.de/gcli/releases/gcli-1.2.0/\n\n## Bug Fixes\n\n- Fix compile error when providing --with-libcurl without any arguments\n- Fix memory leaks in string processing functions\n- Fix missing nul termination in read-file function\n- Fix segmentation fault when clearing the milestone of a PR on Gitea\n- Fix missing documentation for milestone action in issues and pulls\n- Set the 'merged' flag properly when showing Gitlab merge requests\n\n## New features\n\n- Add a config subcommand for managing ssh keys (see gcli-config(1))\n- Show number of comments/notes in list of issues and PRs\n- Add support for milestone management in pull requests\n");
-	ATF_CHECK_SV_EQTO(release.author, "herrhotzenplotz");
-	ATF_CHECK_SV_EQTO(release.date, "2023-08-11T07:56:06.371Z");
-	ATF_CHECK(sn_sv_null(release.upload_url));
+	ATF_CHECK_STREQ(release.name, "1.2.0");
+	ATF_CHECK_STREQ(release.body, "# Version 1.2.0\n\nThis is version 1.2.0 of gcli.\n\n## Notes\n\nPlease test and report bugs.\n\nYou can download autotoolized tarballs at: https://herrhotzenplotz.de/gcli/releases/gcli-1.2.0/\n\n## Bug Fixes\n\n- Fix compile error when providing --with-libcurl without any arguments\n- Fix memory leaks in string processing functions\n- Fix missing nul termination in read-file function\n- Fix segmentation fault when clearing the milestone of a PR on Gitea\n- Fix missing documentation for milestone action in issues and pulls\n- Set the 'merged' flag properly when showing Gitlab merge requests\n\n## New features\n\n- Add a config subcommand for managing ssh keys (see gcli-config(1))\n- Show number of comments/notes in list of issues and PRs\n- Add support for milestone management in pull requests\n");
+	ATF_CHECK_STREQ(release.author, "herrhotzenplotz");
+	ATF_CHECK_STREQ(release.date, "2023-08-11T07:56:06.371Z");
+	ATF_CHECK(release.upload_url == NULL);
 	ATF_CHECK(release.draft == false);
 	ATF_CHECK(release.prerelease == false);
 
@@ -191,17 +191,17 @@ ATF_TC_BODY(gitlab_simple_release, tc)
 ATF_TC_WITHOUT_HEAD(gitlab_simple_fork);
 ATF_TC_BODY(gitlab_simple_fork, tc)
 {
-	json_stream stream = {0};
-	gcli_ctx *ctx = test_context();
+	struct json_stream stream = {0};
+	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_fork.json");
-	gcli_fork fork = {0};
+	struct gcli_fork fork = {0};
 
 	json_open_stream(&stream, f);
 	ATF_REQUIRE(parse_gitlab_fork(ctx, &stream, &fork) == 0);
 
-	ATF_CHECK_SV_EQTO(fork.full_name, "gjnoonan/gcli");
-	ATF_CHECK_SV_EQTO(fork.owner, "gjnoonan");
-	ATF_CHECK_SV_EQTO(fork.date, "2022-10-02T13:54:20.517Z");
+	ATF_CHECK_STREQ(fork.full_name, "gjnoonan/gcli");
+	ATF_CHECK_STREQ(fork.owner, "gjnoonan");
+	ATF_CHECK_STREQ(fork.date, "2022-10-02T13:54:20.517Z");
 	ATF_CHECK(fork.forks == 0);
 
 	json_close(&stream);
@@ -212,10 +212,10 @@ ATF_TC_BODY(gitlab_simple_fork, tc)
 ATF_TC_WITHOUT_HEAD(gitlab_simple_milestone);
 ATF_TC_BODY(gitlab_simple_milestone, tc)
 {
-	json_stream stream = {0};
-	gcli_ctx *ctx = test_context();
+	struct json_stream stream = {0};
+	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_milestone.json");
-	gcli_milestone milestone = {0};
+	struct gcli_milestone milestone = {0};
 
 	json_open_stream(&stream, f);
 	ATF_REQUIRE(parse_gitlab_milestone(ctx, &stream, &milestone) == 0);
@@ -241,10 +241,10 @@ ATF_TC_BODY(gitlab_simple_milestone, tc)
 ATF_TC_WITHOUT_HEAD(gitlab_simple_pipeline);
 ATF_TC_BODY(gitlab_simple_pipeline, tc)
 {
-	json_stream stream = {0};
-	gcli_ctx *ctx = test_context();
+	struct json_stream stream = {0};
+	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_pipeline.json");
-	gitlab_pipeline pipeline = {0};
+	struct gitlab_pipeline pipeline = {0};
 
 	json_open_stream(&stream, f);
 	ATF_REQUIRE(parse_gitlab_pipeline(ctx, &stream, &pipeline) == 0);
@@ -265,20 +265,20 @@ ATF_TC_BODY(gitlab_simple_pipeline, tc)
 ATF_TC_WITHOUT_HEAD(gitlab_simple_repo);
 ATF_TC_BODY(gitlab_simple_repo, tc)
 {
-	json_stream stream = {0};
-	gcli_ctx *ctx = test_context();
+	struct json_stream stream = {0};
+	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_repo.json");
-	gcli_repo repo = {0};
+	struct gcli_repo repo = {0};
 
 	json_open_stream(&stream, f);
 	ATF_REQUIRE(parse_gitlab_repo(ctx, &stream, &repo) == 0);
 
 	ATF_CHECK(repo.id == 34707535);
-	ATF_CHECK_SV_EQTO(repo.full_name, "herrhotzenplotz/gcli");
-	ATF_CHECK_SV_EQTO(repo.name, "gcli");
-	ATF_CHECK_SV_EQTO(repo.owner, "herrhotzenplotz");
-	ATF_CHECK_SV_EQTO(repo.date, "2022-03-22T16:57:59.891Z");
-	ATF_CHECK_SV_EQTO(repo.visibility, "public");
+	ATF_CHECK_STREQ(repo.full_name, "herrhotzenplotz/gcli");
+	ATF_CHECK_STREQ(repo.name, "gcli");
+	ATF_CHECK_STREQ(repo.owner, "herrhotzenplotz");
+	ATF_CHECK_STREQ(repo.date, "2022-03-22T16:57:59.891Z");
+	ATF_CHECK_STREQ(repo.visibility, "public");
 	ATF_CHECK(repo.is_fork == false);
 
 	json_close(&stream);
@@ -289,10 +289,10 @@ ATF_TC_BODY(gitlab_simple_repo, tc)
 ATF_TC_WITHOUT_HEAD(gitlab_simple_snippet);
 ATF_TC_BODY(gitlab_simple_snippet, tc)
 {
-	json_stream stream = {0};
-	gcli_ctx *ctx = test_context();
+	struct json_stream stream = {0};
+	struct gcli_ctx *ctx = test_context();
 	FILE *f = open_sample("gitlab_simple_snippet.json");
-	gcli_gitlab_snippet snippet = {0};
+	struct gcli_gitlab_snippet snippet = {0};
 
 	json_open_stream(&stream, f);
 	ATF_REQUIRE(parse_gitlab_snippet(ctx, &stream, &snippet) == 0);

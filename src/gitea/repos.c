@@ -35,27 +35,28 @@
 #include <assert.h>
 
 int
-gitea_get_repos(gcli_ctx *ctx, char const *owner, int const max,
-                gcli_repo_list *const list)
+gitea_get_repos(struct gcli_ctx *ctx, char const *owner, int const max,
+                struct gcli_repo_list *const list)
 {
 	return github_get_repos(ctx, owner, max, list);
 }
 
 int
-gitea_get_own_repos(gcli_ctx *ctx, int const max, gcli_repo_list *const list)
+gitea_get_own_repos(struct gcli_ctx *ctx, int const max,
+                    struct gcli_repo_list *const list)
 {
 	return github_get_own_repos(ctx, max, list);
 }
 
 int
-gitea_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *options,
-                  gcli_repo *const out)
+gitea_repo_create(struct gcli_ctx *ctx, struct gcli_repo_create_options const *options,
+                  struct gcli_repo *const out)
 {
 	return github_repo_create(ctx, options, out);
 }
 
 int
-gitea_repo_delete(gcli_ctx *ctx, char const *owner, char const *repo)
+gitea_repo_delete(struct gcli_ctx *ctx, char const *owner, char const *repo)
 {
 	return github_repo_delete(ctx, owner, repo);
 }
@@ -63,7 +64,7 @@ gitea_repo_delete(gcli_ctx *ctx, char const *owner, char const *repo)
 /* Unlike Github and Gitlab, Gitea only supports private or non-private
  * (thus public) repositories. Separate implementation required. */
 int
-gitea_repo_set_visibility(gcli_ctx *ctx, char const *const owner,
+gitea_repo_set_visibility(struct gcli_ctx *ctx, char const *const owner,
                           char const *const repo, gcli_repo_visibility vis)
 {
 	char *url;

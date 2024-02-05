@@ -38,6 +38,7 @@
 #include <gcli/comments.h>
 #include <gcli/json_util.h>
 
+#include <assert.h>
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
@@ -57,9 +58,9 @@ usage(void)
 }
 
 static void
-comment_init(gcli_ctx *ctx, FILE *f, void *_data)
+comment_init(struct gcli_ctx *ctx, FILE *f, void *_data)
 {
-	gcli_submit_comment_opts *info = _data;
+	struct gcli_submit_comment_opts *info = _data;
 	const char *target_type = NULL;
 
 	switch (info->target_type) {
@@ -75,6 +76,10 @@ comment_init(gcli_ctx *ctx, FILE *f, void *_data)
 		case GCLI_FORGE_GITLAB:
 			target_type = "Merge Request";
 			break;
+		case GCLI_FORGE_BUGZILLA:
+			/* FIXME think about this one */
+			assert(0 && "unreachable");
+			break;
 		}
 	} break;
 	}
@@ -84,27 +89,32 @@ comment_init(gcli_ctx *ctx, FILE *f, void *_data)
 		"! Enter your comment above, save and exit.\n"
 		"! All lines with a leading '!' are discarded and will not\n"
 		"! appear in your comment.\n"
-		"! COMMENT IN : %s/%s %s #%d\n",
+		"! COMMENT IN : %s/%s %s #%"PRIid"\n",
 		info->owner, info->repo, target_type, info->target_id);
 }
 
-static sn_sv
-gcli_comment_get_message(gcli_submit_comment_opts *info)
+static char *
+gcli_comment_get_message(struct gcli_submit_comment_opts *info)
 {
 	return gcli_editor_get_user_message(g_clictx, comment_init, info);
 }
 
 static int
-comment_submit(gcli_submit_comment_opts opts, int always_yes)
+comment_submit(struct gcli_submit_comment_opts opts, int always_yes)
 {
-	sn_sv const message = gcli_comment_get_message(&opts);
-	opts.message = gcli_json_escape(message);
 	int rc = 0;
+	char *message;
+
+	message = gcli_comment_get_message(&opts);
+	opts.message = message;
+
+	if (message == NULL)
+		errx(1, "gcli: empty message. aborting.");
 
 	fprintf(
 		stdout,
-		"You will be commenting the following in %s/%s #%d:\n"SV_FMT"\n",
-		opts.owner, opts.repo, opts.target_id, SV_ARGS(message));
+		"You will be commenting the following in %s/%s #%"PRIid":\n%s\n",
+		opts.owner, opts.repo, opts.target_id, opts.message);
 
 	if (!always_yes) {
 		if (!sn_yesno("Is this okay?"))
@@ -113,8 +123,8 @@ comment_submit(gcli_submit_comment_opts opts, int always_yes)
 
 	rc = gcli_comment_submit(g_clictx, opts);
 
-	free(message.data);
-	free(opts.message.data);
+	free(message);
+	opts.message = NULL;
 
 	return rc;
 }
@@ -122,7 +132,7 @@ comment_submit(gcli_submit_comment_opts opts, int always_yes)
 int
 gcli_issue_comments(char const *owner, char const *repo, int const issue)
 {
-	gcli_comment_list list = {0};
+	struct gcli_comment_list list = {0};
 	int rc = 0;
 
 	rc = gcli_get_issue_comments(g_clictx, owner, repo, issue, &list);
@@ -138,7 +148,7 @@ gcli_issue_comments(char const *owner, char const *repo, int const issue)
 int
 gcli_pull_comments(char const *owner, char const *repo, int const pull)
 {
-	gcli_comment_list list = {0};
+	struct gcli_comment_list list = {0};
 	int rc = 0;
 
 	rc = gcli_get_pull_comments(g_clictx, owner, repo, pull, &list);
@@ -152,7 +162,7 @@ gcli_pull_comments(char const *owner, char const *repo, int const pull)
 }
 
 void
-gcli_print_comment_list(gcli_comment_list const *const list)
+gcli_print_comment_list(struct gcli_comment_list const *const list)
 {
 	for (size_t i = 0; i < list->comments_size; ++i) {
 		printf("AUTHOR : %s%s%s\n"
@@ -213,7 +223,7 @@ subcommand_comment(int argc, char *argv[])
 				char *endptr;
 				target_id = strtoul(optarg, &endptr, 10);
 				if (endptr != optarg + strlen(optarg))
-					err(1, "error: Cannot parse issue/PR number");
+					err(1, "gcli: error: Cannot parse issue/PR number");
 			} break;
 		case 'y':
 			always_yes = true;
@@ -230,12 +240,12 @@ subcommand_comment(int argc, char *argv[])
 	check_owner_and_repo(&owner, &repo);
 
 	if (target_id < 0) {
-		fprintf(stderr, "error: missing issue/PR number (use -i/-p)\n");
+		fprintf(stderr, "gcli: error: missing issue/PR number (use -i/-p)\n");
 		usage();
 		return EXIT_FAILURE;
 	}
 
-	rc = comment_submit((gcli_submit_comment_opts) {
+	rc = comment_submit((struct gcli_submit_comment_opts) {
 			.owner = owner,
 			.repo = repo,
 			.target_type = target_type,
@@ -243,7 +253,7 @@ subcommand_comment(int argc, char *argv[])
 		always_yes);
 
 	if (rc < 0)
-		errx(1, "error: failed to submit comment: %s", gcli_get_error(g_clictx));
+		errx(1, "gcli: error: failed to submit comment: %s", gcli_get_error(g_clictx));
 
 	return EXIT_SUCCESS;
 }

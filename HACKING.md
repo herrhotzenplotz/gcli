@@ -134,14 +134,17 @@ Please use the BSD Style conventions for formatting your code. This means:
   This allows to search for the implementation of a function through a
   simple `grep -rn '^foo' .`.
 
-- typedef structs separately from their definitions
-
-        typedef struct foo foo;
+- Use struct tags for structs, do not typedef them
 
         struct foo {
             int bar;
             char const *baz;
         };
+
+        static void
+        foodoo(struct foo const *const bar)
+        {
+        }
 
 - Indent with tabs, align with spaces
 

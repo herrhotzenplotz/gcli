@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021, 2022, 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -70,7 +70,12 @@
 #include <gcli/gitea/sshkeys.h>
 #include <gcli/gitea/status.h>
 
-static gcli_forge_descriptor const
+#include <gcli/bugzilla/api.h>
+#include <gcli/bugzilla/attachments.h>
+#include <gcli/bugzilla/bugs.h>
+#include <gcli/bugzilla/config.h>
+
+static struct gcli_forge_descriptor const
 github_forge_descriptor =
 {
 	/* Comments */
@@ -84,7 +89,7 @@ github_forge_descriptor =
 
 	/* Issues */
 	.get_issue_summary         = github_get_issue_summary,
-	.get_issues                = github_get_issues,
+	.search_issues             = github_issues_search,
 	.issue_add_labels          = github_issue_add_labels,
 	.issue_assign              = github_issue_assign,
 	.issue_clear_milestone     = github_issue_clear_milestone,
@@ -94,6 +99,9 @@ github_forge_descriptor =
 	.issue_set_milestone       = github_issue_set_milestone,
 	.issue_set_title           = github_issue_set_title,
 	.perform_submit_issue      = github_perform_submit_issue,
+	.issue_quirks              = GCLI_ISSUE_QUIRKS_PROD_COMP
+	                           | GCLI_ISSUE_QUIRKS_URL
+	                           | GCLI_ISSUE_QUIRKS_ATTACHMENTS,
 
 	/* Milestones */
 	.create_milestone          = github_create_milestone,
@@ -159,10 +167,11 @@ github_forge_descriptor =
 	.milestone_quirks          = GCLI_MILESTONE_QUIRKS_EXPIRED
 	                           | GCLI_MILESTONE_QUIRKS_DUEDATE
 	                           | GCLI_MILESTONE_QUIRKS_PULLS,
-	.pull_summary_quirks       = GCLI_PRS_QUIRK_COVERAGE,
+	.pull_summary_quirks       = GCLI_PRS_QUIRK_COVERAGE
+	                           | GCLI_PRS_QUIRK_AUTOMERGE,
 };
 
-static gcli_forge_descriptor const
+static struct gcli_forge_descriptor const
 gitlab_forge_descriptor =
 {
 	/* Comments */
@@ -176,7 +185,7 @@ gitlab_forge_descriptor =
 
 	/* Issues */
 	.get_issue_summary         = gitlab_get_issue_summary,
-	.get_issues                = gitlab_get_issues,
+	.search_issues             = gitlab_issues_search,
 	.issue_add_labels          = gitlab_issue_add_labels,
 	.issue_assign              = gitlab_issue_assign,
 	.issue_clear_milestone     = gitlab_issue_clear_milestone,
@@ -186,6 +195,9 @@ gitlab_forge_descriptor =
 	.issue_set_milestone       = gitlab_issue_set_milestone,
 	.issue_set_title           = gitlab_issue_set_title,
 	.perform_submit_issue      = gitlab_perform_submit_issue,
+	.issue_quirks              = GCLI_ISSUE_QUIRKS_PROD_COMP
+	                           | GCLI_ISSUE_QUIRKS_URL
+	                           | GCLI_ISSUE_QUIRKS_ATTACHMENTS,
 
 	/* Milestones */
 	.create_milestone          = gitlab_create_milestone,
@@ -251,7 +263,7 @@ gitlab_forge_descriptor =
 	                           | GCLI_PRS_QUIRK_MERGED,
 };
 
-static gcli_forge_descriptor const
+static struct gcli_forge_descriptor const
 gitea_forge_descriptor =
 {
 	/* Comments */
@@ -265,7 +277,7 @@ gitea_forge_descriptor =
 
 	/* Issues */
 	.get_issue_summary         = gitea_get_issue_summary,
-	.get_issues                = gitea_get_issues,
+	.search_issues             = gitea_issues_search,
 	.issue_add_labels          = gitea_issue_add_labels,
 	.issue_assign              = gitea_issue_assign,
 	.issue_clear_milestone     = gitea_issue_clear_milestone,
@@ -275,6 +287,9 @@ gitea_forge_descriptor =
 	.issue_set_milestone       = gitea_issue_set_milestone,
 	.issue_set_title           = gitea_issue_set_title,
 	.perform_submit_issue      = gitea_submit_issue,
+	.issue_quirks              = GCLI_ISSUE_QUIRKS_PROD_COMP
+	                           | GCLI_ISSUE_QUIRKS_URL
+	                           | GCLI_ISSUE_QUIRKS_ATTACHMENTS,
 
 	/* Milestones */
 	.create_milestone          = gitea_create_milestone,
@@ -337,13 +352,34 @@ gitea_forge_descriptor =
 	                           | GCLI_MILESTONE_QUIRKS_PULLS,
 	.pull_summary_quirks       = GCLI_PRS_QUIRK_COMMITS
 	                           | GCLI_PRS_QUIRK_ADDDEL
+	                           | GCLI_PRS_QUIRK_AUTOMERGE
 	                           | GCLI_PRS_QUIRK_DRAFT
 	                           | GCLI_PRS_QUIRK_CHANGES
 	                           | GCLI_PRS_QUIRK_COVERAGE,
 };
 
-gcli_forge_descriptor const *
-gcli_forge(gcli_ctx *ctx)
+static struct gcli_forge_descriptor const
+bugzilla_forge_descriptor =
+{
+	/* Issues */
+	.search_issues             = bugzilla_get_bugs,
+	.get_issue_summary         = bugzilla_get_bug,
+	.get_issue_comments        = bugzilla_bug_get_comments,
+	.get_issue_attachments     = bugzilla_bug_get_attachments,
+	.perform_submit_issue      = bugzilla_bug_submit,
+	.issue_quirks              = GCLI_ISSUE_QUIRKS_COMMENTS
+	                           | GCLI_ISSUE_QUIRKS_LOCKED,
+
+	.attachment_get_content    = bugzilla_attachment_get_content,
+
+	/* Internal stuff */
+	.make_authheader           = bugzilla_make_authheader,
+	.get_api_error_string      = bugzilla_api_error_string,
+	.user_object_key           = "---dummy---",
+};
+
+struct gcli_forge_descriptor const *
+gcli_forge(struct gcli_ctx *ctx)
 {
 	switch (ctx->get_forge_type(ctx)) {
 	case GCLI_FORGE_GITHUB:
@@ -352,6 +388,8 @@ gcli_forge(gcli_ctx *ctx)
 		return &gitlab_forge_descriptor;
 	case GCLI_FORGE_GITEA:
 		return &gitea_forge_descriptor;
+	case GCLI_FORGE_BUGZILLA:
+		return &bugzilla_forge_descriptor;
 	default:
 		errx(1,
 		     "error: cannot determine forge type. try forcing an account "

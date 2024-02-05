@@ -115,8 +115,9 @@ Forcefully override the forge type. Set
 to
 .Sq github ,
 .Sq gitlab
+.Sq gitea ,
 or
-.Sq gitea
+.Sq bugzilla
 to connect to the corresponding services.
 .El
 .Pp

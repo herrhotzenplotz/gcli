@@ -41,17 +41,19 @@
 static sn_sv
 sv_append(sn_sv this, sn_sv const that)
 {
-	this.data = realloc(this.data, this.length + that.length);
+	/* Allocate one byte more as we're going to manually zero-terminate the result
+	 * down in get_message */
+	this.data = realloc(this.data, this.length + that.length + 1);
 	memcpy(this.data + this.length, that.data, that.length);
 	this.length += that.length;
 
 	return this;
 }
 
-sn_sv
+char *
 gcli_editor_get_user_message(
-	gcli_ctx *ctx,
-	void (*file_initializer)(gcli_ctx *, FILE *, void *),
+	struct gcli_ctx *ctx,
+	void (*file_initializer)(struct gcli_ctx *, FILE *, void *),
 	void *user_data)
 {
 	char *editor     = getenv("EDITOR");
@@ -64,8 +66,8 @@ gcli_editor_get_user_message(
 			     "file or set the EDITOR environment variable.");
 	}
 
-	char   filename[31] = "/tmp/gcli_message.XXXXXXX\0";
-	int    fd           = mkstemp(filename);
+	char filename[31] = "/tmp/gcli_message.XXXXXXX\0";
+	int fd = mkstemp(filename);
 
 	FILE *file = fdopen(fd, "w");
 	file_initializer(ctx, file, user_data);
@@ -119,5 +121,10 @@ gcli_editor_get_user_message(
 	munmap(file_content, len);
 	unlink(filename);
 
-	return result;
+	/* When the input is empty, the data pointer is going to be NULL.
+	 * Do not access it in this case. */
+	if (result.length)
+		result.data[result.length] = '\0';
+
+	return result.data;
 }

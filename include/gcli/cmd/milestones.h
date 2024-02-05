@@ -36,10 +36,10 @@
 
 #include <gcli/milestones.h>
 
-void gcli_print_milestones(gcli_ctx *ctx, gcli_milestone_list const *it,
+void gcli_print_milestones(struct gcli_ctx *ctx, struct gcli_milestone_list const *it,
                            int max);
 
-void gcli_print_milestone(gcli_ctx *ctx, gcli_milestone const *it);
+void gcli_print_milestone(struct gcli_ctx *ctx, struct gcli_milestone const *it);
 
 int subcommand_milestones(int argc, char *argv[]);
 

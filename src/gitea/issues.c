@@ -32,102 +32,167 @@
 #include <gcli/gitea/issues.h>
 #include <gcli/gitea/labels.h>
 #include <gcli/github/issues.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 #include <gcli/labels.h>
 
 #include <pdjson/pdjson.h>
 
 int
-gitea_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
-                 gcli_issue_fetch_details const *details, int const max,
-                 gcli_issue_list *const out)
+gitea_issues_search(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                    struct gcli_issue_fetch_details const *details,
+                    int const max, struct gcli_issue_list *const out)
 {
-	return github_get_issues(ctx, owner, repo, details, max, out);
+	char *url = NULL, *e_owner = NULL, *e_repo = NULL, *e_author = NULL,
+	     *e_label = NULL, *e_milestone = NULL, *e_query = NULL;
+
+	if (details->milestone) {
+		char *tmp = gcli_urlencode(details->milestone);
+		e_milestone = sn_asprintf("&milestones=%s", tmp);
+		free(tmp);
+	}
+
+	if (details->author) {
+		char *tmp = gcli_urlencode(details->author);
+		e_author = sn_asprintf("&created_by=%s", tmp);
+		free(tmp);
+	}
+
+	if (details->label) {
+		char *tmp = gcli_urlencode(details->label);
+		e_label = sn_asprintf("&labels=%s", tmp);
+		free(tmp);
+	}
+
+	if (details->search_term) {
+		char *tmp = gcli_urlencode(details->search_term);
+		e_query = sn_asprintf("&q=%s", tmp);
+		free(tmp);
+	}
+
+	e_owner = gcli_urlencode(owner);
+	e_repo  = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/repos/%s/%s/issues?state=%s%s%s%s%s",
+	                  gcli_get_apibase(ctx),
+	                  e_owner, e_repo,
+	                  details->all ? "all" : "open",
+	                  e_author ? e_author : "",
+	                  e_label ? e_label : "",
+	                  e_milestone ? e_milestone : "",
+	                  e_query ? e_query : "");
+
+	free(e_query);
+	free(e_milestone);
+	free(e_author);
+	free(e_label);
+	free(e_owner);
+	free(e_repo);
+
+	return github_fetch_issues(ctx, url, max, out);
 }
 
 int
-gitea_get_issue_summary(gcli_ctx *ctx, char const *owner, char const *repo,
-                        gcli_id const issue_number, gcli_issue *const out)
+gitea_get_issue_summary(struct gcli_ctx *ctx, char const *owner,
+                        char const *repo, gcli_id const issue_number,
+                        struct gcli_issue *const out)
 {
 	return github_get_issue_summary(ctx, owner, repo, issue_number, out);
 }
 
 int
-gitea_submit_issue(gcli_ctx *ctx, gcli_submit_issue_options opts,
-                   gcli_fetch_buffer *const out)
+gitea_submit_issue(struct gcli_ctx *ctx, struct gcli_submit_issue_options opts,
+                   struct gcli_fetch_buffer *const out)
 {
 	return github_perform_submit_issue(ctx,opts, out);
 }
 
 /* Gitea has closed, Github has close ... go figure */
 static int
-gitea_issue_patch_state(gcli_ctx *ctx, char const *owner, char const *repo,
+gitea_issue_patch_state(struct gcli_ctx *ctx, char const *owner, char const *repo,
                         int const issue_number, char const *const state)
 {
-	char *url = NULL;
-	char *data = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
+	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
+
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "state");
+		gcli_jsongen_string(&gen, state);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/repos/%s/%s/issues/%d", gcli_get_apibase(ctx),
 	                  e_owner, e_repo, issue_number);
-	data = sn_asprintf("{ \"state\": \"%s\"}", state);
 
-	rc = gcli_fetch_with_method(ctx, "PATCH", url, data, NULL, NULL);
-
-	free(data);
-	free(url);
 	free(e_owner);
 	free(e_repo);
+
+	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
+
+	free(payload);
+	free(url);
 
 	return rc;
 }
 
 int
-gitea_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
+gitea_issue_close(struct gcli_ctx *ctx, char const *owner, char const *repo,
                   gcli_id const issue_number)
 {
 	return gitea_issue_patch_state(ctx, owner, repo, issue_number, "closed");
 }
 
 int
-gitea_issue_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
+gitea_issue_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
                    gcli_id const issue_number)
 {
 	return gitea_issue_patch_state(ctx, owner, repo, issue_number, "open");
 }
 
 int
-gitea_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
+gitea_issue_assign(struct gcli_ctx *ctx, char const *owner, char const *repo,
                    gcli_id const issue_number, char const *const assignee)
 {
-	sn_sv escaped_assignee = SV_NULL;
-	char *post_fields = NULL;
-	char *url = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
+	char *url = NULL, *e_owner = NULL, *e_repo = NULL, *payload = NULL;
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
-	escaped_assignee = gcli_json_escape(SV((char *)assignee));
-	post_fields = sn_asprintf("{ \"assignees\": [\""SV_FMT"\"] }",
-	                          SV_ARGS(escaped_assignee));
+	/* Generate payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "assignees");
+		gcli_jsongen_begin_array(&gen);
+		gcli_jsongen_string(&gen, assignee);
+		gcli_jsongen_end_array(&gen);
+	}
+	gcli_jsongen_end_object(&gen);
 
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* Generate URL */
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
 	url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid, gcli_get_apibase(ctx),
 	                  e_owner, e_repo, issue_number);
 
-	rc = gcli_fetch_with_method(ctx, "PATCH", url, post_fields, NULL, NULL);
-
-	free(escaped_assignee.data);
-	free(post_fields);
 	free(e_owner);
 	free(e_repo);
+
+	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
+
+	free(payload);
 	free(url);
 
 	return rc;
@@ -136,7 +201,7 @@ gitea_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
 /* Return the stringified id of the given label */
 static char *
 get_id_of_label(char const *label_name,
-                gcli_label_list const *const list)
+                struct gcli_label_list const *const list)
 {
 	for (size_t i = 0; i < list->labels_size; ++i)
 		if (strcmp(list->labels[i].name, label_name) == 0)
@@ -154,10 +219,10 @@ free_id_list(char *list[], size_t const list_size)
 }
 
 static char **
-label_names_to_ids(gcli_ctx *ctx, char const *owner, char const *repo,
+label_names_to_ids(struct gcli_ctx *ctx, char const *owner, char const *repo,
                    char const *const names[], size_t const names_size)
 {
-	gcli_label_list list = {0};
+	struct gcli_label_list list = {0};
 	char **ids = NULL;
 	size_t ids_size = 0;
 
@@ -184,13 +249,12 @@ out:
 }
 
 int
-gitea_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+gitea_issue_add_labels(struct gcli_ctx *ctx, char const *owner, char const *repo,
                        gcli_id const issue, char const *const labels[],
                        size_t const labels_size)
 {
-	char *list = NULL;
-	char *data = NULL;
-	char *url = NULL;
+	char *payload = NULL, *url = NULL, *e_owner = NULL, *e_repo = NULL;
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
 	/* First, convert to ids */
@@ -199,30 +263,46 @@ gitea_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 		return -1;
 
 	/* Construct json payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "labels");
+		gcli_jsongen_begin_array(&gen);
+		for (size_t i = 0; i < labels_size; ++i) {
+			gcli_jsongen_string(&gen, ids[i]);
+		}
+		gcli_jsongen_end_array(&gen);
+	}
+	gcli_jsongen_end_object(&gen);
 
-	/* Note: http://www.c-faq.com/ansi/constmismatch.html */
-	list = sn_join_with((char const **)ids, labels_size, ",");
-	data = sn_asprintf("{ \"labels\": [%s] }", list);
-
-	url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid"/labels", gcli_get_apibase(ctx),
-	                  owner, repo, issue);
-
-	rc = gcli_fetch_with_method(ctx, "POST", url, data, NULL, NULL);
-
-	free(list);
-	free(data);
-	free(url);
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
 	free_id_list(ids, labels_size);
+
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid"/labels",
+	                  gcli_get_apibase(ctx), e_owner, e_repo, issue);
+
+	free(e_owner);
+	free(e_repo);
+
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
+
+	free(payload);
+	free(url);
 
 	return rc;
 }
 
 int
-gitea_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                          gcli_id const issue, char const *const labels[],
-                          size_t const labels_size)
+gitea_issue_remove_labels(struct gcli_ctx *ctx, char const *owner,
+                          char const *repo, gcli_id const issue,
+                          char const *const labels[], size_t const labels_size)
 {
 	int rc = 0;
+	char *e_owner, *e_repo;
 	/* Unfortunately the gitea api does not give us an endpoint to
 	 * delete labels from an issue in bulk. So, just iterate over the
 	 * given labels and delete them one after another. */
@@ -230,11 +310,15 @@ gitea_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 	if (!ids)
 		return -1;
 
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
 	for (size_t i = 0; i < labels_size; ++i) {
 		char *url = NULL;
 
 		url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid"/labels/%s",
-		                  gcli_get_apibase(ctx), owner, repo, issue, ids[i]);
+		                  gcli_get_apibase(ctx), e_owner, e_repo, issue,
+		                  ids[i]);
 		rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
 		free(url);
@@ -243,13 +327,16 @@ gitea_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
 			break;
 	}
 
+	free(e_owner);
+	free(e_repo);
+
 	free_id_list(ids, labels_size);
 
 	return rc;
 }
 
 int
-gitea_issue_set_milestone(gcli_ctx *ctx, char const *const owner,
+gitea_issue_set_milestone(struct gcli_ctx *ctx, char const *const owner,
                           char const *const repo, gcli_id const issue,
                           gcli_id const milestone)
 {
@@ -257,14 +344,14 @@ gitea_issue_set_milestone(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-gitea_issue_clear_milestone(gcli_ctx *ctx, char const *owner,
+gitea_issue_clear_milestone(struct gcli_ctx *ctx, char const *owner,
                             char const *repo, gcli_id issue)
 {
 	return github_issue_set_milestone(ctx, owner, repo, issue, 0);
 }
 
 int
-gitea_issue_set_title(gcli_ctx *ctx, char const *const owner,
+gitea_issue_set_title(struct gcli_ctx *ctx, char const *const owner,
                       char const *const repo, gcli_id const issue,
                       char const *const new_title)
 {

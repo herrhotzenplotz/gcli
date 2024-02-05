@@ -37,43 +37,48 @@
 #include <gcli/curl.h>
 #include <gcli/issues.h>
 
-int gitlab_fetch_issues(gcli_ctx *ctx, char *url, int max,
-                        gcli_issue_list *out);
+int gitlab_fetch_issues(struct gcli_ctx *ctx, char *url, int max,
+                        struct gcli_issue_list *out);
 
-int gitlab_get_issues(gcli_ctx *ctx, char const *owner, char const *repo,
-                      gcli_issue_fetch_details const *details, int max,
-                      gcli_issue_list *out);
+int gitlab_issues_search(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                         struct gcli_issue_fetch_details const *details,
+                         int max, struct gcli_issue_list *out);
 
-int gitlab_get_issue_summary(gcli_ctx *ctx, char const *owner, char const *repo,
-                             gcli_id issue_number, gcli_issue *out);
+int gitlab_get_issue_summary(struct gcli_ctx *ctx, char const *owner,
+                             char const *repo, gcli_id issue_number,
+                             struct gcli_issue *out);
 
-int gitlab_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
-                       gcli_id issue_number);
+int gitlab_issue_close(struct gcli_ctx *ctx, char const *owner,
+                       char const *repo, gcli_id issue_number);
 
-int gitlab_issue_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
-                        gcli_id issue_number);
+int gitlab_issue_reopen(struct gcli_ctx *ctx, char const *owner,
+                        char const *repo, gcli_id issue_number);
 
-int gitlab_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
-                        gcli_id issue_number, char const *assignee);
+int gitlab_issue_assign(struct gcli_ctx *ctx, char const *owner,
+                        char const *repo, gcli_id issue_number,
+                        char const *assignee);
 
-int gitlab_perform_submit_issue(gcli_ctx *ctx, gcli_submit_issue_options opts,
-                                gcli_fetch_buffer *out);
+int gitlab_perform_submit_issue(struct gcli_ctx *ctx,
+                                struct gcli_submit_issue_options opts,
+                                struct gcli_fetch_buffer *out);
 
-int gitlab_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                            gcli_id issue, char const *const labels[],
-                            size_t labels_size);
+int gitlab_issue_add_labels(struct gcli_ctx *ctx, char const *owner,
+                            char const *repo, gcli_id issue,
+                            char const *const labels[], size_t labels_size);
 
-int gitlab_issue_remove_labels(gcli_ctx *ctx, char const *owner,
+int gitlab_issue_remove_labels(struct gcli_ctx *ctx, char const *owner,
                                char const *repo, gcli_id issue,
                                char const *const labels[], size_t labels_size);
 
-int gitlab_issue_set_milestone(gcli_ctx *ctx, char const *owner,
-                               char const *repo, gcli_id issue, gcli_id milestone);
+int gitlab_issue_set_milestone(struct gcli_ctx *ctx, char const *owner,
+                               char const *repo, gcli_id issue,
+                               gcli_id milestone);
 
-int gitlab_issue_clear_milestone(gcli_ctx *ctx, char const *owner,
+int gitlab_issue_clear_milestone(struct gcli_ctx *ctx, char const *owner,
                                  char const *repo, gcli_id issue);
 
-int gitlab_issue_set_title(gcli_ctx *ctx, char const *owner, char const *repo,
-                           gcli_id issue, char const *new_title);
+int gitlab_issue_set_title(struct gcli_ctx *ctx, char const *owner,
+                           char const *repo, gcli_id issue,
+                           char const *new_title);
 
 #endif /* GITLAB_ISSUES_H */

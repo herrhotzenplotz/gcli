@@ -36,12 +36,12 @@
 #include <templates/gitea/status.h>
 
 int
-gitea_get_notifications(gcli_ctx *ctx, int const max,
-                        gcli_notification_list *const out)
+gitea_get_notifications(struct gcli_ctx *ctx, int const max,
+                        struct gcli_notification_list *const out)
 {
 	char *url = NULL;
 
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &out->notifications,
 		.sizep = &out->notifications_size,
 		.parse = (parsefn)(parse_gitea_notifications),
@@ -53,7 +53,7 @@ gitea_get_notifications(gcli_ctx *ctx, int const max,
 }
 
 int
-gitea_notification_mark_as_read(gcli_ctx *ctx, char const *id)
+gitea_notification_mark_as_read(struct gcli_ctx *ctx, char const *id)
 {
 	return github_notification_mark_as_read(ctx, id);
 }

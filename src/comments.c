@@ -37,7 +37,7 @@
 #include <sn/sn.h>
 
 void
-gcli_comment_free(gcli_comment *const it)
+gcli_comment_free(struct gcli_comment *const it)
 {
 	free(it->author);
 	free(it->date);
@@ -45,7 +45,7 @@ gcli_comment_free(gcli_comment *const it)
 }
 
 void
-gcli_comments_free(gcli_comment_list *const list)
+gcli_comments_free(struct gcli_comment_list *const list)
 {
 	for (size_t i = 0; i < list->comments_size; ++i)
 		gcli_comment_free(&list->comments[i]);
@@ -56,21 +56,21 @@ gcli_comments_free(gcli_comment_list *const list)
 }
 
 int
-gcli_get_issue_comments(gcli_ctx *ctx, char const *owner, char const *repo,
-                        int const issue, gcli_comment_list *out)
+gcli_get_issue_comments(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                        gcli_id const issue, struct gcli_comment_list *out)
 {
-	return gcli_forge(ctx)->get_issue_comments(ctx, owner, repo, issue, out);
+	gcli_null_check_call(get_issue_comments, ctx, owner, repo, issue, out);
 }
 
 int
-gcli_get_pull_comments(gcli_ctx *ctx, char const *owner, char const *repo,
-                       int const pull, gcli_comment_list *out)
+gcli_get_pull_comments(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                       gcli_id const pull, struct gcli_comment_list *out)
 {
-	return gcli_forge(ctx)->get_pull_comments(ctx, owner, repo, pull, out);
+	gcli_null_check_call(get_pull_comments, ctx, owner, repo, pull, out);
 }
 
 int
-gcli_comment_submit(gcli_ctx *ctx, gcli_submit_comment_opts opts)
+gcli_comment_submit(struct gcli_ctx *ctx, struct gcli_submit_comment_opts opts)
 {
-	return gcli_forge(ctx)->perform_submit_comment(ctx, opts, NULL);
+	gcli_null_check_call(perform_submit_comment, ctx, opts, NULL);
 }

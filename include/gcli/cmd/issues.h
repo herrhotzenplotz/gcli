@@ -37,11 +37,11 @@
 #include <gcli/issues.h>
 
 void gcli_print_issues(enum gcli_output_flags const flags,
-                       gcli_issue_list const *const list, int const max);
+                       struct gcli_issue_list const *const list, int const max);
 
-void gcli_issue_print_summary(gcli_issue const *const it);
+void gcli_issue_print_summary(struct gcli_issue const *const it);
 
-void gcli_issue_print_op(gcli_issue const *const it);
+void gcli_issue_print_op(struct gcli_issue const *const it);
 
 int subcommand_issues(int argc, char *argv[]);
 

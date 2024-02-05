@@ -1,0 +1,53 @@
+{
+  "bugs": [
+    {
+      "platform": "Any",
+      "target_milestone": "---",
+      "op_sys": "Any",
+      "summary": "[aha] [scsi] Toshiba MK156FB scsi drive does not work with 2.0 kernel",
+      "blocks": [],
+      "last_change_time": "2016-08-11T10:54:59Z",
+      "priority": "Normal",
+      "resolution": "FIXED",
+      "is_cc_accessible": true,
+      "deadline": null,
+      "classification": "Unclassified",
+      "is_creator_accessible": true,
+      "dupe_of": null,
+      "id": 1,
+      "see_also": [],
+      "status": "Closed",
+      "groups": [],
+      "is_open": false,
+      "whiteboard": "",
+      "assigned_to": "core@FreeBSD.org",
+      "assigned_to_detail": {
+        "name": "core@FreeBSD.org",
+        "real_name": "FreeBSD Core Team",
+        "id": 3,
+        "email": "core@FreeBSD.org"
+      },
+      "keywords": [],
+      "alias": [],
+      "cc_detail": [],
+      "url": "",
+      "cc": [],
+      "version": "Unspecified",
+      "is_confirmed": true,
+      "component": "kern",
+      "creator_detail": {
+        "name": "root@hclb.demon.co.uk",
+        "real_name": "Dave Evans",
+        "email": "root@hclb.demon.co.uk",
+        "id": 22
+      },
+      "depends_on": [],
+      "creation_time": "1994-09-14T09:10:01Z",
+      "severity": "Affects Only Me",
+      "flags": [],
+      "qa_contact": "",
+      "creator": "root@hclb.demon.co.uk",
+      "product": "Base System"
+    }
+  ]
+}

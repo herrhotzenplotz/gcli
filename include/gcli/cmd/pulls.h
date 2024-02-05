@@ -36,19 +36,19 @@
 
 #include <gcli/pulls.h>
 
-void gcli_print_pulls(enum gcli_output_flags flags, gcli_pull_list const *list,
+void gcli_print_pulls(enum gcli_output_flags flags, struct gcli_pull_list const *list,
                       int max);
 
 int gcli_print_pull_diff(FILE *stream, char const *owner, char const *reponame,
                          int pr_number);
 
-void gcli_print_pull(gcli_pull const *pull);
+void gcli_print_pull(struct gcli_pull const *pull);
 
-void gcli_pull_print_op(gcli_pull const *pull);
+void gcli_pull_print_op(struct gcli_pull const *pull);
 
 int gcli_pull_checks(char const *owner, char const *repo, int pr_number);
 
-void gcli_print_commits(gcli_commit_list const *const list);
+void gcli_print_commits(struct gcli_commit_list const *const list);
 
 int subcommand_pulls(int argc, char *argv[]);
 

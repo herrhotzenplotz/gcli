@@ -35,21 +35,21 @@
 #include <stdlib.h>
 
 int
-gcli_get_releases(gcli_ctx *ctx, char const *owner, char const *repo,
-                  int const max, gcli_release_list *const list)
+gcli_get_releases(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                  int const max, struct gcli_release_list *const list)
 {
-	return gcli_forge(ctx)->get_releases(ctx, owner, repo, max, list);
+	gcli_null_check_call(get_releases, ctx, owner, repo, max, list);
 }
 
 void
-gcli_release_free(gcli_release *release)
+gcli_release_free(struct gcli_release *release)
 {
-	free(release->id.data);
-	free(release->name.data);
-	free(release->body.data);
-	free(release->author.data);
-	free(release->date.data);
-	free(release->upload_url.data);
+	free(release->id);
+	free(release->name);
+	free(release->body);
+	free(release->author);
+	free(release->date);
+	free(release->upload_url);
 
 	for (size_t i = 0; i < release->assets_size; ++i) {
 		free(release->assets[i].name);
@@ -60,7 +60,7 @@ gcli_release_free(gcli_release *release)
 }
 
 void
-gcli_free_releases(gcli_release_list *const list)
+gcli_free_releases(struct gcli_release_list *const list)
 {
 	for (size_t i = 0; i < list->releases_size; ++i) {
 		gcli_release_free(&list->releases[i]);
@@ -73,14 +73,14 @@ gcli_free_releases(gcli_release_list *const list)
 }
 
 int
-gcli_create_release(gcli_ctx *ctx, gcli_new_release const *release)
+gcli_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *release)
 {
-	return gcli_forge(ctx)->create_release(ctx, release);
+	gcli_null_check_call(create_release, ctx, release);
 }
 
 int
-gcli_release_push_asset(gcli_ctx *ctx, gcli_new_release *const release,
-                        gcli_release_asset_upload const asset)
+gcli_release_push_asset(struct gcli_ctx *ctx, struct gcli_new_release *const release,
+                        struct gcli_release_asset_upload const asset)
 {
 	if (release->assets_size == GCLI_RELEASE_MAX_ASSETS)
 		return gcli_error(ctx, "too many assets");
@@ -91,8 +91,8 @@ gcli_release_push_asset(gcli_ctx *ctx, gcli_new_release *const release,
 }
 
 int
-gcli_delete_release(gcli_ctx *ctx, char const *const owner,
+gcli_delete_release(struct gcli_ctx *ctx, char const *const owner,
                     char const *const repo, char const *const id)
 {
-	return gcli_forge(ctx)->delete_release(ctx, owner, repo, id);
+	gcli_null_check_call(delete_release, ctx, owner, repo, id);
 }

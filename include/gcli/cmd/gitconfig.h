@@ -36,8 +36,6 @@
 
 #include <sn/sn.h>
 
-typedef struct gcli_gitremote gcli_gitremote;
-
 struct gcli_gitremote {
 	sn_sv name;
 	sn_sv owner;
@@ -50,7 +48,7 @@ sn_sv gcli_gitconfig_get_current_branch(void);
 
 void gcli_gitconfig_add_fork_remote(char const *org, char const *repo);
 
-int gcli_gitconfig_get_forgetype(gcli_ctx *ctx, char const *remote_name);
+int gcli_gitconfig_get_forgetype(struct gcli_ctx *ctx, char const *remote_name);
 
 int gcli_gitconfig_repo_by_remote(char const *remote_name,
                                   char const **owner,

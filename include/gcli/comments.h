@@ -41,39 +41,37 @@
 
 #include <sn/sn.h>
 
-typedef struct gcli_comment gcli_comment;
-typedef struct gcli_comment_list gcli_comment_list;
-typedef struct gcli_submit_comment_opts gcli_submit_comment_opts;
-
 struct gcli_comment {
 	char *author;               /* Login name of the comment author */
 	char *date;                 /* Creation date of the comment     */
-	int id;                     /* id of the comment                */
+	gcli_id id;                 /* id of the comment                */
 	char *body;                 /* Raw text of the comment          */
 };
 
 struct gcli_comment_list {
-	gcli_comment *comments;     /* List of comments */
-	size_t comments_size;       /* Size of the list */
+	struct gcli_comment *comments;     /* List of comments */
+	size_t comments_size;              /* Size of the list */
 };
 
 struct gcli_submit_comment_opts {
 	enum comment_target_type { ISSUE_COMMENT, PR_COMMENT }  target_type;
 	char const *owner, *repo;
-	int target_id;
-	sn_sv message;
+	gcli_id target_id;
+	char const *message;
 };
 
-void gcli_comments_free(gcli_comment_list *list);
+void gcli_comments_free(struct gcli_comment_list *list);
 
-void gcli_comment_free(gcli_comment *const it);
+void gcli_comment_free(struct gcli_comment *const it);
 
-int gcli_get_issue_comments(gcli_ctx *ctx, char const *owner, char const *repo,
-                            int issue, gcli_comment_list *out);
+int gcli_get_issue_comments(struct gcli_ctx *ctx, char const *owner,
+                            char const *repo, gcli_id issue,
+                            struct gcli_comment_list *out);
 
-int gcli_get_pull_comments(gcli_ctx *ctx, char const *owner, char const *repo,
-                           int issue, gcli_comment_list *out);
+int gcli_get_pull_comments(struct gcli_ctx *ctx, char const *owner,
+                           char const *repo, gcli_id issue,
+                           struct gcli_comment_list *out);
 
-int gcli_comment_submit(gcli_ctx *ctx, gcli_submit_comment_opts opts);
+int gcli_comment_submit(struct gcli_ctx *ctx, struct gcli_submit_comment_opts opts);
 
 #endif /* COMMENTS_H */

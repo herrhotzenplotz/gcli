@@ -69,7 +69,7 @@ usage(void)
 
 static void
 gcli_print_release(enum gcli_output_flags const flags,
-                   gcli_release const *const it)
+                   struct gcli_release const *const it)
 {
 	gcli_dict dict;
 
@@ -77,10 +77,10 @@ gcli_print_release(enum gcli_output_flags const flags,
 
 	dict = gcli_dict_begin();
 
-	gcli_dict_add(dict,        "ID",         0, 0, SV_FMT, SV_ARGS(it->id));
-	gcli_dict_add(dict,        "NAME",       0, 0, SV_FMT, SV_ARGS(it->name));
-	gcli_dict_add(dict,        "AUTHOR",     0, 0, SV_FMT, SV_ARGS(it->author));
-	gcli_dict_add(dict,        "DATE",       0, 0, SV_FMT, SV_ARGS(it->date));
+	gcli_dict_add(dict,        "ID",         0, 0, "%s", it->id);
+	gcli_dict_add(dict,        "NAME",       0, 0, "%s", it->name);
+	gcli_dict_add(dict,        "AUTHOR",     0, 0, "%s", it->author);
+	gcli_dict_add(dict,        "DATE",       0, 0, "%s", it->date);
 	gcli_dict_add_string(dict, "DRAFT",      0, 0, sn_bool_yesno(it->draft));
 	gcli_dict_add_string(dict, "PRERELEASE", 0, 0, sn_bool_yesno(it->prerelease));
 	gcli_dict_add_string(dict, "ASSETS",     0, 0, "");
@@ -94,9 +94,9 @@ gcli_print_release(enum gcli_output_flags const flags,
 	gcli_dict_end(dict);
 
 	/* body */
-	if (it->body.length) {
+	if (it->body) {
 		putchar('\n');
-		pretty_print(it->body.data, 13, 80, stdout);
+		pretty_print(it->body, 13, 80, stdout);
 	}
 
 	putchar('\n');
@@ -104,7 +104,7 @@ gcli_print_release(enum gcli_output_flags const flags,
 
 static void
 gcli_releases_print_long(enum gcli_output_flags const flags,
-                         gcli_release_list const *const list, int const max)
+                         struct gcli_release_list const *const list, int const max)
 {
 	int n;
 
@@ -125,16 +125,17 @@ gcli_releases_print_long(enum gcli_output_flags const flags,
 
 static void
 gcli_releases_print_short(enum gcli_output_flags const flags,
-                          gcli_release_list const *const list, int const max)
+                          struct gcli_release_list const *const list,
+                          int const max)
 {
 	size_t n;
 	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
-		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
-		{ .name = "DATE",       .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
-		{ .name = "DRAFT",      .type = GCLI_TBLCOLTYPE_BOOL, .flags = 0 },
-		{ .name = "PRERELEASE", .type = GCLI_TBLCOLTYPE_BOOL, .flags = 0 },
-		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
+	struct gcli_tblcoldef cols[] = {
+		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "DATE",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "DRAFT",      .type = GCLI_TBLCOLTYPE_BOOL,   .flags = 0 },
+		{ .name = "PRERELEASE", .type = GCLI_TBLCOLTYPE_BOOL,   .flags = 0 },
+		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
 	if (max < 0 || (size_t)(max) > list->releases_size)
@@ -144,7 +145,7 @@ gcli_releases_print_short(enum gcli_output_flags const flags,
 
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
-		errx(1, "error: could not init table");
+		errx(1, "gcli: error: could not init table");
 
 	if (flags & OUTPUT_SORTED) {
 		for (size_t i = 0; i < n; ++i) {
@@ -171,7 +172,7 @@ gcli_releases_print_short(enum gcli_output_flags const flags,
 
 void
 gcli_releases_print(enum gcli_output_flags const flags,
-                    gcli_release_list const *const list, int const max)
+                    struct gcli_release_list const *const list, int const max)
 {
 	if (list->releases_size == 0) {
 		puts("No releases");
@@ -185,9 +186,9 @@ gcli_releases_print(enum gcli_output_flags const flags,
 }
 
 static void
-releasemsg_init(gcli_ctx *ctx, FILE *f, void *_data)
+releasemsg_init(struct gcli_ctx *ctx, FILE *f, void *_data)
 {
-	gcli_new_release const *info = _data;
+	struct gcli_new_release const *info = _data;
 
 	(void) ctx;
 
@@ -202,8 +203,8 @@ releasemsg_init(gcli_ctx *ctx, FILE *f, void *_data)
 		info->owner, info->repo, info->tag, info->name);
 }
 
-static sn_sv
-get_release_message(gcli_new_release const *info)
+static char *
+get_release_message(struct gcli_new_release const *info)
 {
 	return gcli_editor_get_user_message(g_clictx, releasemsg_init,
 	                                    (void *)info);
@@ -212,9 +213,9 @@ get_release_message(gcli_new_release const *info)
 static int
 subcommand_releases_create(int argc, char *argv[])
 {
-	gcli_new_release release    = {0};
-	int              ch;
-	bool             always_yes = false;
+	struct gcli_new_release release = {0};
+	int ch;
+	bool always_yes = false;
 
 	struct option const options[] = {
 		{ .name    = "yes",
@@ -281,13 +282,15 @@ subcommand_releases_create(int argc, char *argv[])
 			release.owner = optarg;
 			break;
 		case 'a': {
-			gcli_release_asset_upload asset = {
+			struct gcli_release_asset_upload asset = {
 				.path  = optarg,
 				.name  = optarg,
 				.label = "unused",
 			};
-			if (gcli_release_push_asset(g_clictx, &release, asset) < 0)
-				errx(1, "failed to add asset: %s", gcli_get_error(g_clictx));
+			if (gcli_release_push_asset(g_clictx, &release, asset) < 0) {
+				errx(1, "gcli: error: failed to add asset: %s",
+				     gcli_get_error(g_clictx));
+			}
 		} break;
 		case 'y': {
 			always_yes = true;
@@ -305,19 +308,23 @@ subcommand_releases_create(int argc, char *argv[])
 
 	/* make sure we have a tag for the release */
 	if (!release.tag) {
-		fprintf(stderr, "error: releases create: missing tag name\n");
+		fprintf(stderr, "gcli: error: releases create: missing tag name\n");
 		usage();
 		return EXIT_FAILURE;
 	}
 
 	release.body = get_release_message(&release);
+	if (release.body == NULL)
+		errx(1, "gcli: empty message. aborting.");
 
 	if (!always_yes)
 		if (!sn_yesno("Do you want to create this release?"))
-			errx(1, "Aborted by user");
+			errx(1, "gcli: Aborted by user");
 
-	if (gcli_create_release(g_clictx, &release) < 0)
-		errx(1, "failed to create release: %s", gcli_get_error(g_clictx));
+	if (gcli_create_release(g_clictx, &release) < 0) {
+		errx(1, "gcli: error: failed to create release: %s",
+		     gcli_get_error(g_clictx));
+	}
 
 	return EXIT_SUCCESS;
 }
@@ -370,17 +377,19 @@ subcommand_releases_delete(int argc, char *argv[])
 
 	/* make sure the user supplied the release id */
 	if (argc != 1) {
-		fprintf(stderr, "error: releases delete: missing release id\n");
+		fprintf(stderr, "gcli: error: releases delete: missing release id\n");
 		usage();
 		return EXIT_FAILURE;
 	}
 
 	if (!always_yes)
 		if (!sn_yesno("Are you sure you want to delete this release?"))
-			errx(1, "Aborted by user");
+			errx(1, "gcli: Aborted by user");
 
-	if (gcli_delete_release(g_clictx, owner, repo, argv[0]) < 0)
-		errx(1, "failed to delete the release: %s", gcli_get_error(g_clictx));
+	if (gcli_delete_release(g_clictx, owner, repo, argv[0]) < 0) {
+		errx(1, "gcli: error: failed to delete the release: %s",
+		     gcli_get_error(g_clictx));
+	}
 
 	return EXIT_SUCCESS;
 }
@@ -396,12 +405,12 @@ static struct {
 int
 subcommand_releases(int argc, char *argv[])
 {
-	int                     ch;
-	int                     count    = 30;
-	char const             *owner    = NULL;
-	char const             *repo     = NULL;
-	gcli_release_list       releases = {0};
-	enum gcli_output_flags  flags    = 0;
+	int ch;
+	int count = 30;
+	char const *owner = NULL;
+	char const *repo = NULL;
+	struct gcli_release_list releases = {0};
+	enum gcli_output_flags flags = 0;
 
 	if (argc > 1) {
 		for (size_t i = 0; i < ARRAY_SIZE(releases_subcommands); ++i) {
@@ -448,10 +457,10 @@ subcommand_releases(int argc, char *argv[])
 			char *endptr = NULL;
 			count        = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
-				err(1, "releases: cannot parse release count");
+				err(1, "gcli: error: cannot parse release count");
 
 			if (count == 0)
-				errx(1, "error: number of releases must not be zero");
+				errx(1, "gcli: error: number of releases must not be zero");
 
 		} break;
 		case 's':
@@ -472,15 +481,17 @@ subcommand_releases(int argc, char *argv[])
 
 	/* sanity check */
 	if (argc > 0) {
-		fprintf(stderr, "error: stray arguments\n");
+		fprintf(stderr, "gcli: error: stray arguments\n");
 		usage();
 		return EXIT_FAILURE;
 	}
 
 	check_owner_and_repo(&owner, &repo);
 
-	if (gcli_get_releases(g_clictx, owner, repo, count, &releases) < 0)
-		errx(1, "error: could not get releases: %s", gcli_get_error(g_clictx));
+	if (gcli_get_releases(g_clictx, owner, repo, count, &releases) < 0) {
+		errx(1, "gcli: error: could not get releases: %s",
+		     gcli_get_error(g_clictx));
+	}
 
 	gcli_releases_print(flags, &releases, count);
 

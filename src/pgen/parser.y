@@ -48,7 +48,7 @@ static void footer_dump(void);
 %}
 
 %token PARSER IS OBJECT WITH AS USE FATARROW INCLUDE
-%token OPAREN CPAREN SEMICOLON ARRAY OF COMMA SELECT
+%token OPAREN CPAREN SEMICOLON ARRAY OF COMMA SELECT STRUCT
 
 %union {
 	struct strlit       strlit;
@@ -91,8 +91,17 @@ objparser:    PARSER IDENT IS OBJECT OF IDENT WITH OPAREN obj_entries CPAREN
               {
                   $$.kind = OBJPARSER_ENTRIES;
                   $$.name = $2.text;
+                  $$.is_struct = false;
                   $$.returntype = $6.text;
                   $$.entries = $9;
+              }
+         |    PARSER IDENT IS OBJECT OF STRUCT IDENT WITH OPAREN obj_entries CPAREN
+              {
+                  $$.kind = OBJPARSER_ENTRIES;
+                  $$.name = $2.text;
+                  $$.is_struct = true;
+                  $$.returntype = $7.text;
+                  $$.entries = $10;
               }
          |    PARSER IDENT IS OBJECT OF IDENT SELECT STRLIT AS IDENT
               {
@@ -107,8 +116,16 @@ objparser:    PARSER IDENT IS OBJECT OF IDENT WITH OPAREN obj_entries CPAREN
 arrayparser:    PARSER IDENT IS ARRAY OF IDENT USE IDENT
                 {
                     $$.name = $2.text;
+                    $$.is_struct = false;
                     $$.returntype = $6.text;
                     $$.parser = $8.text;
+                }
+           |    PARSER IDENT IS ARRAY OF STRUCT IDENT USE IDENT
+                {
+                    $$.name = $2.text;
+                    $$.is_struct = true;
+                    $$.returntype = $7.text;
+                    $$.parser = $9.text;
                 }
            ;
 

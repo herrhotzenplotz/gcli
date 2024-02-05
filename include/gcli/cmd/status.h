@@ -38,7 +38,7 @@
 #include <gcli/status.h>
 
 int gcli_status(int count);
-void gcli_print_notifications(gcli_notification_list const *);
+void gcli_print_notifications(struct gcli_notification_list const *);
 int subcommand_status(int argc, char *argv[]);
 
 #endif /* GCLI_CMD_STATUS_H */

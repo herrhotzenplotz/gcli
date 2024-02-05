@@ -45,16 +45,16 @@
 #include "gcli_tests.h"
 
 static gcli_forge_type
-get_github_forge_type(gcli_ctx *ctx)
+get_github_forge_type(struct gcli_ctx *ctx)
 {
 	(void) ctx;
 	return GCLI_FORGE_GITHUB;
 }
 
-static gcli_ctx *
+static struct gcli_ctx *
 test_context(void)
 {
-	gcli_ctx *ctx;
+	struct gcli_ctx *ctx;
 	ATF_REQUIRE(gcli_init(&ctx, get_github_forge_type, NULL, NULL) == NULL);
 	return ctx;
 }
@@ -74,10 +74,10 @@ open_sample(char const *const name)
 ATF_TC_WITHOUT_HEAD(simple_github_issue);
 ATF_TC_BODY(simple_github_issue, tc)
 {
-	gcli_issue issue = {0};
+	struct gcli_issue issue = {0};
 	FILE *f;
-	json_stream stream;
-	gcli_ctx *ctx = test_context();
+	struct json_stream stream;
+	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_issue.json"));
 	json_open_stream(&stream, f);
@@ -85,18 +85,18 @@ ATF_TC_BODY(simple_github_issue, tc)
 	ATF_REQUIRE(parse_github_issue(ctx, &stream, &issue) == 0);
 
 	ATF_CHECK(issue.number = 115);
-	ATF_CHECK_SV_EQTO(issue.title, "consider removing FILE *out from printing functions");
-	ATF_CHECK_SV_EQTO(issue.created_at, "2022-03-22T16:06:10Z");
-	ATF_CHECK_SV_EQTO(issue.author, "herrhotzenplotz");
-	ATF_CHECK_SV_EQTO(issue.state, "closed");
+	ATF_CHECK_STREQ(issue.title, "consider removing FILE *out from printing functions");
+	ATF_CHECK_STREQ(issue.created_at, "2022-03-22T16:06:10Z");
+	ATF_CHECK_STREQ(issue.author, "herrhotzenplotz");
+	ATF_CHECK_STREQ(issue.state, "closed");
 	ATF_CHECK(issue.comments == 0);
 	ATF_CHECK(issue.locked == false);
 
-	ATF_CHECK_SV_EQTO(issue.body,
-		          "We use these functions with ghcli only anyways. In "
-		          "the GUI stuff we use the datastructures returned by "
-		          "the api directly. And If we output, it is stdout "
-		          "everywhere.\n");
+	ATF_CHECK_STREQ(issue.body,
+		        "We use these functions with ghcli only anyways. In "
+		        "the GUI stuff we use the datastructures returned by "
+		        "the api directly. And If we output, it is stdout "
+		        "everywhere.\n");
 
 	ATF_CHECK(issue.labels_size == 0);
 	ATF_CHECK(issue.labels == NULL);
@@ -105,7 +105,7 @@ ATF_TC_BODY(simple_github_issue, tc)
 	ATF_CHECK(issue.assignees == NULL);
 
 	ATF_CHECK(issue.is_pr == 0);
-	ATF_CHECK(sn_sv_null(issue.milestone));
+	ATF_CHECK(!issue.milestone);
 
 	json_close(&stream);
 	gcli_issue_free(&issue);
@@ -115,10 +115,10 @@ ATF_TC_BODY(simple_github_issue, tc)
 ATF_TC_WITHOUT_HEAD(simple_github_pull);
 ATF_TC_BODY(simple_github_pull, tc)
 {
-	gcli_pull pull = {0};
+	struct gcli_pull pull = {0};
 	FILE *f;
-	json_stream stream;
-	gcli_ctx *ctx = test_context();
+	struct json_stream stream;
+	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_pull.json"));
 	json_open_stream(&stream, f);
@@ -155,10 +155,10 @@ ATF_TC_BODY(simple_github_pull, tc)
 ATF_TC_WITHOUT_HEAD(simple_github_label);
 ATF_TC_BODY(simple_github_label, tc)
 {
-	gcli_label label = {0};
+	struct gcli_label label = {0};
 	FILE *f;
-	json_stream stream;
-	gcli_ctx *ctx = test_context();
+	struct json_stream stream;
+	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_label.json"));
 	json_open_stream(&stream, f);
@@ -178,10 +178,10 @@ ATF_TC_BODY(simple_github_label, tc)
 ATF_TC_WITHOUT_HEAD(simple_github_milestone);
 ATF_TC_BODY(simple_github_milestone, tc)
 {
-	gcli_milestone milestone = {0};
+	struct gcli_milestone milestone = {0};
 	FILE *f;
-	json_stream stream;
-	gcli_ctx *ctx = test_context();
+	struct json_stream stream;
+	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_milestone.json"));
 	json_open_stream(&stream, f);
@@ -207,24 +207,24 @@ ATF_TC_BODY(simple_github_milestone, tc)
 ATF_TC_WITHOUT_HEAD(simple_github_release);
 ATF_TC_BODY(simple_github_release, tc)
 {
-	gcli_release release = {0};
+	struct gcli_release release = {0};
 	FILE *f;
-	json_stream stream;
-	gcli_ctx *ctx = test_context();
+	struct json_stream stream;
+	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_release.json"));
 	json_open_stream(&stream, f);
 
 	ATF_REQUIRE(parse_github_release(ctx, &stream, &release) == 0);
 
-	ATF_CHECK_SV_EQTO(release.id, "116031718");
+	ATF_CHECK_STREQ(release.id, "116031718");
 	ATF_CHECK(release.assets_size == 0);
 	ATF_CHECK(release.assets == NULL);
-	ATF_CHECK_SV_EQTO(release.name, "1.2.0");
-	ATF_CHECK_SV_EQTO(release.body, "# Version 1.2.0\n\nThis is version 1.2.0 of gcli.\n\n## Notes\n\nPlease test and report bugs.\n\nYou can download autotoolized tarballs at: https://herrhotzenplotz.de/gcli/releases/gcli-1.2.0/\n\n## Bug Fixes\n\n- Fix compile error when providing --with-libcurl without any arguments\n- Fix memory leaks in string processing functions\n- Fix missing nul termination in read-file function\n- Fix segmentation fault when clearing the milestone of a PR on Gitea\n- Fix missing documentation for milestone action in issues and pulls\n- Set the 'merged' flag properly when showing Gitlab merge requests\n\n## New features\n\n- Add a config subcommand for managing ssh keys (see gcli-config(1))\n- Show number of comments/notes in list of issues and PRs\n- Add support for milestone management in pull requests\n");
-	ATF_CHECK_SV_EQTO(release.author, "herrhotzenplotz");
-	ATF_CHECK_SV_EQTO(release.date, "2023-08-11T07:42:37Z");
-	ATF_CHECK_SV_EQTO(release.upload_url, "https://uploads.github.com/repos/herrhotzenplotz/gcli/releases/116031718/assets{?name,label}");
+	ATF_CHECK_STREQ(release.name, "1.2.0");
+	ATF_CHECK_STREQ(release.body, "# Version 1.2.0\n\nThis is version 1.2.0 of gcli.\n\n## Notes\n\nPlease test and report bugs.\n\nYou can download autotoolized tarballs at: https://herrhotzenplotz.de/gcli/releases/gcli-1.2.0/\n\n## Bug Fixes\n\n- Fix compile error when providing --with-libcurl without any arguments\n- Fix memory leaks in string processing functions\n- Fix missing nul termination in read-file function\n- Fix segmentation fault when clearing the milestone of a PR on Gitea\n- Fix missing documentation for milestone action in issues and pulls\n- Set the 'merged' flag properly when showing Gitlab merge requests\n\n## New features\n\n- Add a config subcommand for managing ssh keys (see gcli-config(1))\n- Show number of comments/notes in list of issues and PRs\n- Add support for milestone management in pull requests\n");
+	ATF_CHECK_STREQ(release.author, "herrhotzenplotz");
+	ATF_CHECK_STREQ(release.date, "2023-08-11T07:42:37Z");
+	ATF_CHECK_STREQ(release.upload_url, "https://uploads.github.com/repos/herrhotzenplotz/gcli/releases/116031718/assets{?name,label}");
 	ATF_CHECK(release.draft == false);
 	ATF_CHECK(release.prerelease == false);
 
@@ -236,10 +236,10 @@ ATF_TC_BODY(simple_github_release, tc)
 ATF_TC_WITHOUT_HEAD(simple_github_repo);
 ATF_TC_BODY(simple_github_repo, tc)
 {
-	gcli_repo repo = {0};
+	struct gcli_repo repo = {0};
 	FILE *f;
-	json_stream stream;
-	gcli_ctx *ctx = test_context();
+	struct json_stream stream;
+	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_repo.json"));
 	json_open_stream(&stream, f);
@@ -247,11 +247,11 @@ ATF_TC_BODY(simple_github_repo, tc)
 	ATF_REQUIRE(parse_github_repo(ctx, &stream, &repo) == 0);
 
 	ATF_CHECK(repo.id == 415015197);
-	ATF_CHECK_SV_EQTO(repo.full_name, "herrhotzenplotz/gcli");
-	ATF_CHECK_SV_EQTO(repo.name, "gcli");
-	ATF_CHECK_SV_EQTO(repo.owner, "herrhotzenplotz");
-	ATF_CHECK_SV_EQTO(repo.date, "2021-10-08T14:20:15Z");
-	ATF_CHECK_SV_EQTO(repo.visibility, "public");
+	ATF_CHECK_STREQ(repo.full_name, "herrhotzenplotz/gcli");
+	ATF_CHECK_STREQ(repo.name, "gcli");
+	ATF_CHECK_STREQ(repo.owner, "herrhotzenplotz");
+	ATF_CHECK_STREQ(repo.date, "2021-10-08T14:20:15Z");
+	ATF_CHECK_STREQ(repo.visibility, "public");
 	ATF_CHECK(repo.is_fork == false);
 
 	json_close(&stream);
@@ -262,19 +262,19 @@ ATF_TC_BODY(simple_github_repo, tc)
 ATF_TC_WITHOUT_HEAD(simple_github_fork);
 ATF_TC_BODY(simple_github_fork, tc)
 {
-	gcli_fork fork = {0};
+	struct gcli_fork fork = {0};
 	FILE *f;
-	json_stream stream;
-	gcli_ctx *ctx = test_context();
+	struct json_stream stream;
+	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_fork.json"));
 	json_open_stream(&stream, f);
 
 	ATF_REQUIRE(parse_github_fork(ctx, &stream, &fork) == 0);
 
-	ATF_CHECK_SV_EQTO(fork.full_name, "gjnoonan/quick-lint-js");
-	ATF_CHECK_SV_EQTO(fork.owner, "gjnoonan");
-	ATF_CHECK_SV_EQTO(fork.date, "2023-05-11T05:37:41Z");
+	ATF_CHECK_STREQ(fork.full_name, "gjnoonan/quick-lint-js");
+	ATF_CHECK_STREQ(fork.owner, "gjnoonan");
+	ATF_CHECK_STREQ(fork.date, "2023-05-11T05:37:41Z");
 	ATF_CHECK(fork.forks == 0);
 
 	json_close(&stream);
@@ -285,10 +285,10 @@ ATF_TC_BODY(simple_github_fork, tc)
 ATF_TC_WITHOUT_HEAD(simple_github_comment);
 ATF_TC_BODY(simple_github_comment, tc)
 {
-	gcli_comment comment = {0};
+	struct gcli_comment comment = {0};
 	FILE *f;
-	json_stream stream;
-	gcli_ctx *ctx = test_context();
+	struct json_stream stream;
+	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_comment.json"));
 	json_open_stream(&stream, f);
@@ -308,10 +308,10 @@ ATF_TC_BODY(simple_github_comment, tc)
 ATF_TC_WITHOUT_HEAD(simple_github_check);
 ATF_TC_BODY(simple_github_check, tc)
 {
-    gcli_github_check check = {0};
+    struct gcli_github_check check = {0};
 	FILE *f;
-	json_stream stream;
-	gcli_ctx *ctx = test_context();
+	struct json_stream stream;
+	struct gcli_ctx *ctx = test_context();
 
 	ATF_REQUIRE(f = open_sample("github_simple_check.json"));
 	json_open_stream(&stream, f);

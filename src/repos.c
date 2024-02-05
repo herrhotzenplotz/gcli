@@ -35,25 +35,25 @@
 #include <stdlib.h>
 
 int
-gcli_get_repos(gcli_ctx *ctx, char const *owner, int const max,
-               gcli_repo_list *const out)
+gcli_get_repos(struct gcli_ctx *ctx, char const *owner, int const max,
+               struct gcli_repo_list *const out)
 {
-	return gcli_forge(ctx)->get_repos(ctx, owner, max, out);
+	gcli_null_check_call(get_repos, ctx, owner, max, out);
 }
 
 void
-gcli_repo_free(gcli_repo *it)
+gcli_repo_free(struct gcli_repo *it)
 {
-	free(it->full_name.data);
-	free(it->name.data);
-	free(it->owner.data);
-	free(it->date.data);
-	free(it->visibility.data);
+	free(it->full_name);
+	free(it->name);
+	free(it->owner);
+	free(it->date);
+	free(it->visibility);
 	memset(it, 0, sizeof(*it));
 }
 
 void
-gcli_repos_free(gcli_repo_list *const list)
+gcli_repos_free(struct gcli_repo_list *const list)
 {
 	for (size_t i = 0; i < list->repos_size; ++i) {
 		gcli_repo_free(&list->repos[i]);
@@ -66,21 +66,21 @@ gcli_repos_free(gcli_repo_list *const list)
 }
 
 int
-gcli_repo_delete(gcli_ctx *ctx, char const *owner, char const *repo)
+gcli_repo_delete(struct gcli_ctx *ctx, char const *owner, char const *repo)
 {
-	return gcli_forge(ctx)->repo_delete(ctx, owner, repo);
+	gcli_null_check_call(repo_delete, ctx, owner, repo);
 }
 
 int
-gcli_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *options,
-                 gcli_repo *out)
+gcli_repo_create(struct gcli_ctx *ctx, struct gcli_repo_create_options const *options,
+                 struct gcli_repo *out)
 {
-	return gcli_forge(ctx)->repo_create(ctx, options, out);
+	gcli_null_check_call(repo_create, ctx, options, out);
 }
 
 int
-gcli_repo_set_visibility(gcli_ctx *ctx, char const *const owner,
+gcli_repo_set_visibility(struct gcli_ctx *ctx, char const *const owner,
                          char const *const repo, gcli_repo_visibility vis)
 {
-	return gcli_forge(ctx)->repo_set_visibility(ctx, owner, repo, vis);
+	gcli_null_check_call(repo_set_visibility, ctx, owner, repo, vis);
 }

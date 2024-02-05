@@ -41,29 +41,29 @@
 #include <templates/gitlab/sshkeys.h>
 
 int
-gitlab_get_sshkeys(gcli_ctx *ctx, gcli_sshkey_list *list)
+gitlab_get_sshkeys(struct gcli_ctx *ctx, struct gcli_sshkey_list *list)
 {
 	char *url;
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &list->keys,
 		.sizep = &list->keys_size,
 		.max = -1,
 		.parse = (parsefn)(parse_gitlab_sshkeys),
 	};
 
-	*list = (gcli_sshkey_list) {0};
+	*list = (struct gcli_sshkey_list) {0};
 	url = sn_asprintf("%s/user/keys", gcli_get_apibase(ctx));
 
 	return gcli_fetch_list(ctx, url, &fl);
 }
 
 int
-gitlab_add_sshkey(gcli_ctx *ctx, char const *const title,
-                  char const *const pubkey, gcli_sshkey *const out)
+gitlab_add_sshkey(struct gcli_ctx *ctx, char const *const title,
+                  char const *const pubkey, struct gcli_sshkey *const out)
 {
 	char *url, *payload;
 	char *e_title, *e_key;
-	gcli_fetch_buffer buf = {0};
+	struct gcli_fetch_buffer buf = {0};
 	int rc = 0;
 
 	url = sn_asprintf("%s/user/keys", gcli_get_apibase(ctx));
@@ -79,11 +79,11 @@ gitlab_add_sshkey(gcli_ctx *ctx, char const *const title,
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, &buf);
 	if (rc == 0 && out) {
-		json_stream str;
+		struct json_stream stream = {0};
 
-		json_open_buffer(&str, buf.data, buf.length);
-		parse_gitlab_sshkey(ctx, &str, out);
-		json_close(&str);
+		json_open_buffer(&stream, buf.data, buf.length);
+		parse_gitlab_sshkey(ctx, &stream, out);
+		json_close(&stream);
 	}
 
 	free(buf.data);
@@ -92,7 +92,7 @@ gitlab_add_sshkey(gcli_ctx *ctx, char const *const title,
 }
 
 int
-gitlab_delete_sshkey(gcli_ctx *ctx, gcli_id id)
+gitlab_delete_sshkey(struct gcli_ctx *ctx, gcli_id id)
 {
 	char *url;
 	int rc = 0;

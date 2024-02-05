@@ -41,7 +41,6 @@
 
 #include <sn/sn.h>
 
-typedef struct gcli_tblcoldef gcli_tblcoldef;
 typedef void *gcli_tbl;
 
 typedef void *gcli_dict;
@@ -81,7 +80,7 @@ struct gcli_tblcoldef {
 };
 
 /* Init a table printer */
-gcli_tbl gcli_tbl_begin(gcli_tblcoldef const *cols,
+gcli_tbl gcli_tbl_begin(struct gcli_tblcoldef const *cols,
                         size_t cols_size);
 
 /* Print the table contents and free all the resources allocated in

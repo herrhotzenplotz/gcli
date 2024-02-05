@@ -36,13 +36,13 @@
 #include <gcli/cmd/table.h>
 
 int
-gcli_sshkeys_get_keys(gcli_ctx *ctx, gcli_sshkey_list *out)
+gcli_sshkeys_get_keys(struct gcli_ctx *ctx, struct gcli_sshkey_list *out)
 {
-	return gcli_forge(ctx)->get_sshkeys(ctx, out);
+	gcli_null_check_call(get_sshkeys, ctx, out);
 }
 
 void
-gcli_sshkeys_free_keys(gcli_sshkey_list *list)
+gcli_sshkeys_free_keys(struct gcli_sshkey_list *list)
 {
 	for (size_t i = 0; i < list->keys_size; ++i) {
 		free(list->keys[i].title);
@@ -57,24 +57,29 @@ gcli_sshkeys_free_keys(gcli_sshkey_list *list)
 }
 
 int
-gcli_sshkeys_add_key(gcli_ctx *ctx, char const *title,
-                     char const *public_key_path, gcli_sshkey *out)
+gcli_sshkeys_add_key(struct gcli_ctx *ctx, char const *title,
+                     char const *public_key_path, struct gcli_sshkey *out)
 {
 	int rc;
 	char *buffer;
+	struct gcli_forge_descriptor const *const forge = gcli_forge(ctx);
+
+	if (forge->add_sshkey == NULL) {
+		return gcli_error(ctx, "ssh_add_key is not supported by this forge");
+	}
 
 	rc = sn_read_file(public_key_path, &buffer);
 	if (rc < 0)
 		return rc;
 
-	rc = gcli_forge(ctx)->add_sshkey(ctx, title, buffer, out);
+	rc = forge->add_sshkey(ctx, title, buffer, out);
 	free(buffer);
 
 	return rc;
 }
 
 int
-gcli_sshkeys_delete_key(gcli_ctx *ctx, gcli_id const id)
+gcli_sshkeys_delete_key(struct gcli_ctx *ctx, gcli_id const id)
 {
-	return gcli_forge(ctx)->delete_sshkey(ctx, id);
+	gcli_null_check_call(delete_sshkey, ctx, id);
 }

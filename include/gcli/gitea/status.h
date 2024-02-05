@@ -32,9 +32,9 @@
 
 #include <gcli/status.h>
 
-int gitea_get_notifications(gcli_ctx *ctx, int max,
-                            gcli_notification_list *out);
+int gitea_get_notifications(struct gcli_ctx *ctx, int max,
+                            struct gcli_notification_list *out);
 
-int gitea_notification_mark_as_read(gcli_ctx *ctx, char const *id);
+int gitea_notification_mark_as_read(struct gcli_ctx *ctx, char const *id);
 
 #endif /* GITEA_STATUS_H */

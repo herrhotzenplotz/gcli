@@ -35,26 +35,34 @@
 #include <pdjson/pdjson.h>
 
 char const *
-gitlab_api_error_string(gcli_ctx *ctx, gcli_fetch_buffer *const buf)
+gitlab_api_error_string(struct gcli_ctx *ctx, struct gcli_fetch_buffer *const buf)
 {
-	char *msg;
+	char *msg = NULL;
 	int rc;
-	json_stream stream = {0};
+	struct json_stream stream = {0};
 
 	json_open_buffer(&stream, buf->data, buf->length);
 	rc = parse_gitlab_get_error(ctx, &stream, &msg);
 	json_close(&stream);
 
-	if (rc < 0)
-		return strdup("no error message: failed to parse error response");
-	else
+	if (rc < 0 || msg == NULL) {
+		if (sn_verbose()) {
+			return sn_asprintf("Could not parse Gitlab error response. "
+			                   "The response was:\n\n%.*s\n",
+			                   (int)buf->length, buf->data);
+		} else {
+			return strdup("no error message: failed to parse error response. "
+			              "Please run the gcli query with verbose mode again.");
+		}
+	} else {
 		return msg;
+	}
 }
 
 int
-gitlab_user_id(gcli_ctx *ctx, char const *user_name)
+gitlab_user_id(struct gcli_ctx *ctx, char const *user_name)
 {
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	struct json_stream stream = {0};
 	char *url = NULL;
 	char *e_username;

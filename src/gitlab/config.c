@@ -32,7 +32,7 @@
 #include <sn/sn.h>
 
 char *
-gitlab_make_authheader(gcli_ctx *ctx, char const *token)
+gitlab_make_authheader(struct gcli_ctx *ctx, char const *token)
 {
 	(void) ctx;
 	return sn_asprintf("PRIVATE-TOKEN: %s", token);

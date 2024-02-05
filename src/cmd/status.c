@@ -54,7 +54,7 @@ usage(void)
 int
 gcli_status(int const count)
 {
-	gcli_notification_list list = {0};
+	struct gcli_notification_list list = {0};
 	int rc = 0;
 
 	rc = gcli_get_notifications(g_clictx, count, &list);
@@ -68,7 +68,7 @@ gcli_status(int const count)
 }
 
 void
-gcli_print_notifications(gcli_notification_list const *const list)
+gcli_print_notifications(struct gcli_notification_list const *const list)
 {
 	for (size_t i = 0; i < list->notifications_size; ++i) {
 		printf("%s - %s - %s - %s",
@@ -112,7 +112,7 @@ subcommand_status(int argc, char *argv[])
 		case 'n': {
 			count = strtol(optarg, &endptr, 10);
 			if (endptr != optarg + strlen(optarg))
-				err(1, "status: cannot parse parameter to -n");
+				err(1, "gcli: error: cannot parse parameter to -n");
 		} break;
 		case 'm': {
 			mark = 1;
@@ -130,22 +130,22 @@ subcommand_status(int argc, char *argv[])
 		gcli_status(count);
 	} else {
 		if (count != 30)
-			warnx("ignoring -n/--count argument");
+			warnx("gcli: ignoring -n/--count argument");
 
 		if (argc > 1) {
-			fprintf(stderr, "error: too many arguments for marking notifications\n");
+			fprintf(stderr, "gcli: error: too many arguments for marking notifications\n");
 			usage();
 			return EXIT_FAILURE;
 		}
 
 		if (argc < 1) {
-			fprintf(stderr, "error: missing notification id to mark as read\n");
+			fprintf(stderr, "gcli: error: missing notification id to mark as read\n");
 			usage();
 			return EXIT_FAILURE;
 		}
 
 		if (gcli_notification_mark_as_read(g_clictx, argv[0]) < 0)
-			errx(1, "error: failed to mark the notification as read: %s",
+			errx(1, "gcli: error: failed to mark the notification as read: %s",
 			     gcli_get_error(g_clictx));
 	}
 

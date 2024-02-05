@@ -37,10 +37,11 @@
 #include <gcli/comments.h>
 #include <gcli/curl.h>
 
-int github_perform_submit_comment(gcli_ctx *ctx, gcli_submit_comment_opts opts,
-                                  gcli_fetch_buffer *out);
+int github_perform_submit_comment(struct gcli_ctx *ctx,
+                                  struct gcli_submit_comment_opts opts,
+                                  struct gcli_fetch_buffer *out);
 
-int github_get_comments(gcli_ctx *ctx, char const *owner, char const *repo,
-                        gcli_id issue, gcli_comment_list *out);
+int github_get_comments(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                        gcli_id issue, struct gcli_comment_list *out);
 
 #endif /* GITHUB_COMMENTS_H */

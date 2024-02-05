@@ -72,7 +72,7 @@ usage(void)
 int
 gitlab_mr_pipelines(char const *owner, char const *repo, int const mr_id)
 {
-	gitlab_pipeline_list list = {0};
+	struct gitlab_pipeline_list list = {0};
 	int rc = 0;
 
 	rc = gitlab_get_mr_pipelines(g_clictx, owner, repo, mr_id, &list);
@@ -85,10 +85,10 @@ gitlab_mr_pipelines(char const *owner, char const *repo, int const mr_id)
 }
 
 void
-gitlab_print_pipelines(gitlab_pipeline_list const *const list)
+gitlab_print_pipelines(struct gitlab_pipeline_list const *const list)
 {
 	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
+	struct gcli_tblcoldef cols[] = {
 		{ .name = "ID",      .type = GCLI_TBLCOLTYPE_ID,     .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "STATUS",  .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
 		{ .name = "CREATED", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
@@ -103,7 +103,7 @@ gitlab_print_pipelines(gitlab_pipeline_list const *const list)
 
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
-		errx(1, "error: could not init table");
+		errx(1, "gcli: error: could not init table");
 
 	for (size_t i = 0; i < list->pipelines_size; ++i) {
 		gcli_tbl_add_row(table,
@@ -120,7 +120,7 @@ gitlab_print_pipelines(gitlab_pipeline_list const *const list)
 int
 gitlab_pipelines(char const *owner, char const *repo, int const count)
 {
-	gitlab_pipeline_list pipelines = {0};
+	struct gitlab_pipeline_list pipelines = {0};
 	int rc = 0;
 
 	rc = gitlab_get_pipelines(g_clictx, owner, repo, count, &pipelines);
@@ -134,10 +134,10 @@ gitlab_pipelines(char const *owner, char const *repo, int const count)
 }
 
 void
-gitlab_print_jobs(gitlab_job_list const *const list)
+gitlab_print_jobs(struct gitlab_job_list const *const list)
 {
 	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
+	struct gcli_tblcoldef cols[] = {
 		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_ID,     .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 		{ .name = "STATUS",     .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
@@ -154,7 +154,7 @@ gitlab_print_jobs(gitlab_job_list const *const list)
 
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
-		errx(1, "error: could not initialize table");
+		errx(1, "gcli: error: could not initialize table");
 
 	for (size_t i = 0; i < list->jobs_size; ++i) {
 		gcli_tbl_add_row(table,
@@ -174,7 +174,7 @@ int
 gitlab_pipeline_jobs(char const *owner, char const *repo,
                      long const id, int const count)
 {
-	gitlab_job_list jobs = {0};
+	struct gitlab_job_list jobs = {0};
 	int rc = 0;
 
 	rc = gitlab_get_pipeline_jobs(g_clictx, owner, repo, id, count, &jobs);
@@ -188,7 +188,7 @@ gitlab_pipeline_jobs(char const *owner, char const *repo,
 }
 
 void
-gitlab_print_job_status(gitlab_job const *const job)
+gitlab_print_job_status(struct gitlab_job const *const job)
 {
 	gcli_dict printer;
 
@@ -213,7 +213,7 @@ gitlab_print_job_status(gitlab_job const *const job)
 int
 gitlab_job_status(char const *owner, char const *repo, long const jid)
 {
-	gitlab_job job = {0};
+	struct gitlab_job job = {0};
 	int rc = 0;
 
 	rc = gitlab_get_job(g_clictx, owner, repo, jid, &job);
@@ -276,24 +276,24 @@ subcommand_pipelines(int argc, char *argv[])
 			char *endptr = NULL;
 			count = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
-				err(1, "ci: cannot parse argument to -n");
+				err(1, "gcli: error: cannot parse argument to -n");
 		} break;
 		case 'p': {
 			char *endptr = NULL;
 			pid = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
-				err(1, "ci: cannot parse argument to -p");
+				err(1, "gcli: error: cannot parse argument to -p");
 			if (pid < 0) {
-				errx(1, "error: pipeline id must be a positive number");
+				errx(1, "gcli: error: pipeline id must be a positive number");
 			}
 		} break;
 		case 'j': {
 			char *endptr = NULL;
 			jid = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
-				err(1, "ci: cannot parse argument to -j");
+				err(1, "gcli: error: cannot parse argument to -j");
 			if (jid < 0) {
-				errx(1, "error: job id must be a positive number");
+				errx(1, "gcli: error: job id must be a positive number");
 			}
 		} break;
 		case '?':
@@ -307,7 +307,7 @@ subcommand_pipelines(int argc, char *argv[])
 	argv += optind;
 
 	if (pid > 0 && jid > 0) {
-		fprintf(stderr, "error: -p and -j are mutually exclusive\n");
+		fprintf(stderr, "gcli: error: -p and -j are mutually exclusive\n");
 		usage();
 		return EXIT_FAILURE;
 	}
@@ -317,7 +317,7 @@ subcommand_pipelines(int argc, char *argv[])
 	/* Make sure we are actually talking about a gitlab remote because
 	 * we might be incorrectly inferring it */
 	if (gcli_config_get_forge_type(g_clictx) != GCLI_FORGE_GITLAB)
-		errx(1, "error: The pipelines subcommand only works for GitLab. "
+		errx(1, "gcli: error: The pipelines subcommand only works for GitLab. "
 		     "Use gcli -t gitlab ... to force a GitLab remote.");
 
 	/* If the user specified a pipeline id, print the jobs of that
@@ -325,14 +325,15 @@ subcommand_pipelines(int argc, char *argv[])
 	if (pid >= 0) {
 		/* Make sure we are interpreting things correctly */
 		if (argc != 0) {
-			fprintf(stderr, "error: stray arguments\n");
+			fprintf(stderr, "gcli: error: stray arguments\n");
 			usage();
 			return EXIT_FAILURE;
 		}
 
-		if (gitlab_pipeline_jobs(owner, repo, pid, count) < 0)
-			errx(1, "error: failed to get pipeline jobs: %s",
+		if (gitlab_pipeline_jobs(owner, repo, pid, count) < 0) {
+			errx(1, "gcli: error: failed to get pipeline jobs: %s",
 			     gcli_get_error(g_clictx));
+		}
 		return EXIT_SUCCESS;
 	}
 
@@ -341,14 +342,15 @@ subcommand_pipelines(int argc, char *argv[])
 	if (jid < 0) {
 		/* Make sure we are interpreting things correctly */
 		if (argc != 0) {
-			fprintf(stderr, "error: stray arguments\n");
+			fprintf(stderr, "gcli: error: stray arguments\n");
 			usage();
 			return EXIT_FAILURE;
 		}
 
-		if (gitlab_pipelines(owner, repo, count) < 0)
-			errx(1, "error: failed to get pipelines: %s",
+		if (gitlab_pipelines(owner, repo, count) < 0) {
+			errx(1, "gcli: error: failed to get pipelines: %s",
 			     gcli_get_error(g_clictx));
+		}
 
 		return EXIT_SUCCESS;
 	}
@@ -368,7 +370,7 @@ subcommand_pipelines(int argc, char *argv[])
 
 	/* Check if the user missed out on supplying actions */
 	if (argc == 0) {
-		fprintf(stderr, "error: no actions supplied\n");
+		fprintf(stderr, "gcli: error: no actions supplied\n");
 		usage();
 		exit(EXIT_FAILURE);
 	}
@@ -383,14 +385,15 @@ next_action:
 			char const *outfile = "artifacts.zip";
 			if (argc && strcmp(argv[0], "-o") == 0) {
 				if (argc < 2)
-					errx(1, "error: -o is missing the output filename");
+					errx(1, "gcli: error: -o is missing the output filename");
 				outfile = argv[1];
 				argc -= 2;
 				argv += 2;
 			}
-			if (gitlab_job_download_artifacts(g_clictx, owner, repo, jid, outfile) < 0)
-				errx(1, "error: failed to download file: %s",
+			if (gitlab_job_download_artifacts(g_clictx, owner, repo, jid, outfile) < 0) {
+				errx(1, "gcli: error: failed to download file: %s",
 				     gcli_get_error(g_clictx));
+			}
 			goto next_action;
 		}
 
@@ -398,12 +401,12 @@ next_action:
 		for (size_t i = 0; i < ARRAY_SIZE(job_actions); ++i) {
 			if (strcmp(action, job_actions[i].name) == 0) {
 				if (job_actions[i].fn(owner, repo, jid) < 0)
-					errx(1, "error: failed to perform action '%s'", action);
+					errx(1, "gcli: error: failed to perform action '%s'", action);
 				goto next_action;
 			}
 		}
 
-		fprintf(stderr, "error: unknown action '%s'\n", action);
+		fprintf(stderr, "gcli: error: unknown action '%s'\n", action);
 		usage();
 		return EXIT_FAILURE;
 	}

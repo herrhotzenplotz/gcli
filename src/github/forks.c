@@ -37,21 +37,21 @@
 #include <templates/github/forks.h>
 
 int
-github_get_forks(gcli_ctx *ctx, char const *owner, char const *repo,
-                 int const max, gcli_fork_list *const list)
+github_get_forks(struct  gcli_ctx *ctx, char const *owner, char const *repo,
+                 int const max, struct gcli_fork_list *const list)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
 	char *e_repo = NULL;
 
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &list->forks,
 		.sizep = &list->forks_size,
 		.max = max,
 		.parse = (parsefn)(parse_github_forks),
 	};
 
-	*list = (gcli_fork_list) {0};
+	*list = (struct gcli_fork_list) {0};
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -68,7 +68,7 @@ github_get_forks(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-github_fork_create(gcli_ctx *ctx, char const *owner, char const *repo,
+github_fork_create(struct gcli_ctx *ctx, char const *owner, char const *repo,
                    char const *_in)
 {
 	char *url = NULL;

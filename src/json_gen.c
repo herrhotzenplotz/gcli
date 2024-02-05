@@ -39,14 +39,14 @@
 #include <string.h>
 
 static void
-grow_buffer(gcli_jsongen *gen)
+grow_buffer(struct gcli_jsongen *gen)
 {
 	gen->buffer_capacity *= 2;
 	gen->buffer = realloc(gen->buffer, gen->buffer_capacity);
 }
 
 int
-gcli_jsongen_init(gcli_jsongen *gen)
+gcli_jsongen_init(struct gcli_jsongen *gen)
 {
 	/* This will allocate a 32 byte buffer. We can optimise
 	 * this for better allocation speed by analysing some statistics
@@ -63,7 +63,7 @@ gcli_jsongen_init(gcli_jsongen *gen)
 }
 
 void
-gcli_jsongen_free(gcli_jsongen *gen)
+gcli_jsongen_free(struct gcli_jsongen *gen)
 {
 	free(gen->buffer);
 	gen->buffer = NULL;
@@ -74,7 +74,7 @@ gcli_jsongen_free(gcli_jsongen *gen)
 }
 
 char *
-gcli_jsongen_to_string(gcli_jsongen *gen)
+gcli_jsongen_to_string(struct gcli_jsongen *gen)
 {
 	char *buf = calloc(gen->buffer_size + 1, 1);
 
@@ -82,14 +82,14 @@ gcli_jsongen_to_string(gcli_jsongen *gen)
 }
 
 static void
-fit(gcli_jsongen *gen, size_t const n_chars)
+fit(struct gcli_jsongen *gen, size_t const n_chars)
 {
 	while (gen->buffer_capacity - gen->buffer_size < n_chars)
 		grow_buffer(gen);
 }
 
 static int
-push_scope(gcli_jsongen *gen, int const scope)
+push_scope(struct gcli_jsongen *gen, int const scope)
 {
 	if (gen->scopes_size >= (sizeof(gen->scopes) / sizeof(*gen->scopes)))
 		return -1;
@@ -100,7 +100,7 @@ push_scope(gcli_jsongen *gen, int const scope)
 }
 
 static int
-pop_scope(gcli_jsongen *gen)
+pop_scope(struct gcli_jsongen *gen)
 {
 	if (gen->scopes_size == 0)
 		return -1;
@@ -109,13 +109,13 @@ pop_scope(gcli_jsongen *gen)
 }
 
 static bool
-is_array_or_object_scope(gcli_jsongen *gen)
+is_array_or_object_scope(struct gcli_jsongen *gen)
 {
 	return !!gen->scopes_size;
 }
 
 static void
-append_str(gcli_jsongen *gen, char const *str)
+append_str(struct gcli_jsongen *gen, char const *str)
 {
 	size_t const len = strlen(str);
 	fit(gen, len);
@@ -124,7 +124,7 @@ append_str(gcli_jsongen *gen, char const *str)
 }
 
 static void
-put_comma_if_needed(gcli_jsongen *gen)
+put_comma_if_needed(struct gcli_jsongen *gen)
 {
 	if (!gen->await_object_value && !gen->first_elem && is_array_or_object_scope(gen))
 		append_str(gen, ", ");
@@ -133,7 +133,7 @@ put_comma_if_needed(gcli_jsongen *gen)
 }
 
 static bool
-is_object_scope(gcli_jsongen *gen)
+is_object_scope(struct gcli_jsongen *gen)
 {
 	if (gen->scopes_size == 0)
 		return false;
@@ -142,7 +142,7 @@ is_object_scope(gcli_jsongen *gen)
 }
 
 int
-gcli_jsongen_begin_object(gcli_jsongen *gen)
+gcli_jsongen_begin_object(struct gcli_jsongen *gen)
 {
 	/* Cannot put a json object into a json object key */
 	if (is_object_scope(gen) && !gen->await_object_value)
@@ -161,7 +161,7 @@ gcli_jsongen_begin_object(gcli_jsongen *gen)
 }
 
 int
-gcli_jsongen_end_object(gcli_jsongen *gen)
+gcli_jsongen_end_object(struct gcli_jsongen *gen)
 {
 	if (pop_scope(gen) != GCLI_JSONGEN_OBJECT)
 		return -1;
@@ -175,7 +175,7 @@ gcli_jsongen_end_object(gcli_jsongen *gen)
 }
 
 int
-gcli_jsongen_begin_array(gcli_jsongen *gen)
+gcli_jsongen_begin_array(struct gcli_jsongen *gen)
 {
 	/* Cannot put a json array into a json object key */
 	if (is_object_scope(gen) && !gen->await_object_value)
@@ -194,7 +194,7 @@ gcli_jsongen_begin_array(gcli_jsongen *gen)
 }
 
 int
-gcli_jsongen_end_array(gcli_jsongen *gen)
+gcli_jsongen_end_array(struct gcli_jsongen *gen)
 {
 	if (pop_scope(gen) != GCLI_JSONGEN_ARRAY)
 		return -1;
@@ -208,7 +208,7 @@ gcli_jsongen_end_array(gcli_jsongen *gen)
 }
 
 static void
-append_vstrf(gcli_jsongen *gen, char const *const fmt, va_list vp)
+append_vstrf(struct gcli_jsongen *gen, char const *const fmt, va_list vp)
 {
 	va_list vp_copy;
 	size_t len;
@@ -223,7 +223,7 @@ append_vstrf(gcli_jsongen *gen, char const *const fmt, va_list vp)
 }
 
 static void
-append_strf(gcli_jsongen *gen, char const *const fmt, ...)
+append_strf(struct gcli_jsongen *gen, char const *const fmt, ...)
 {
 	va_list ap;
 
@@ -233,7 +233,7 @@ append_strf(gcli_jsongen *gen, char const *const fmt, ...)
 }
 
 int
-gcli_jsongen_objmember(gcli_jsongen *gen, char const *const key)
+gcli_jsongen_objmember(struct gcli_jsongen *gen, char const *const key)
 {
 	if (!is_object_scope(gen))
 		return -1;
@@ -252,7 +252,7 @@ gcli_jsongen_objmember(gcli_jsongen *gen, char const *const key)
 }
 
 int
-gcli_jsongen_number(gcli_jsongen *gen, long long const number)
+gcli_jsongen_number(struct gcli_jsongen *gen, long long const number)
 {
 	put_comma_if_needed(gen);
 	append_strf(gen, "%lld", number);
@@ -264,7 +264,32 @@ gcli_jsongen_number(gcli_jsongen *gen, long long const number)
 }
 
 int
-gcli_jsongen_string(gcli_jsongen *gen, char const *value)
+gcli_jsongen_id(struct gcli_jsongen *gen, gcli_id const id)
+{
+	put_comma_if_needed(gen);
+	append_strf(gen, "%"PRIid, id);
+
+	gen->await_object_value = false;
+	gen->first_elem = false;
+
+	return 0;
+}
+
+int
+gcli_jsongen_bool(struct gcli_jsongen *gen, bool const value)
+{
+	put_comma_if_needed(gen);
+
+	append_strf(gen, "%s", value ? "true" : "false");
+
+	gen->await_object_value = false;
+	gen->first_elem = false;
+
+	return 0;
+}
+
+int
+gcli_jsongen_string(struct gcli_jsongen *gen, char const *value)
 {
 	put_comma_if_needed(gen);
 	char *const e_value = gcli_json_escape_cstr(value);
@@ -280,7 +305,7 @@ gcli_jsongen_string(gcli_jsongen *gen, char const *value)
 }
 
 int
-gcli_jsongen_null(gcli_jsongen *gen)
+gcli_jsongen_null(struct gcli_jsongen *gen)
 {
 	put_comma_if_needed(gen);
 	append_str(gen, "null");

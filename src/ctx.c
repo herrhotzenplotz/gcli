@@ -88,15 +88,22 @@ gcli_get_apibase(struct gcli_ctx *ctx)
 }
 
 char *
+gcli_get_token(struct gcli_ctx *ctx)
+{
+	return ctx->get_token(ctx);
+}
+
+char *
 gcli_get_authheader(struct gcli_ctx *ctx)
 {
 	char *hdr = NULL;
-	char *token = ctx->get_token(ctx);
+	char *token = gcli_get_token(ctx);
 
-	if (token) {
+	if (token && gcli_forge(ctx)->make_authheader) {
 		hdr = gcli_forge(ctx)->make_authheader(ctx, token);
-		free(token);
 	}
+
+	free(token);
 
 	return hdr;
 }

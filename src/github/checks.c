@@ -41,10 +41,10 @@
 #include <pdjson/pdjson.h>
 
 int
-github_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
-                  char const *ref, int const max, github_check_list *const out)
+github_get_checks(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                  char const *ref, int const max, struct github_check_list *const out)
 {
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	char *url = NULL, *next_url = NULL;
 	int rc = 0;
 
@@ -78,7 +78,7 @@ github_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 void
-gcli_github_check_free(gcli_github_check *check)
+gcli_github_check_free(struct gcli_github_check *check)
 {
 	free(check->name);
 	free(check->status);
@@ -88,7 +88,7 @@ gcli_github_check_free(gcli_github_check *check)
 }
 
 void
-github_free_checks(github_check_list *const list)
+github_free_checks(struct github_check_list *const list)
 {
 	for (size_t i = 0; i < list->checks_size; ++i) {
 		gcli_github_check_free(&list->checks[i]);

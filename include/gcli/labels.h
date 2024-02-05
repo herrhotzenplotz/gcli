@@ -40,9 +40,6 @@
 
 #include <gcli/gcli.h>
 
-typedef struct gcli_label gcli_label;
-typedef struct gcli_label_list gcli_label_list;
-
 struct gcli_label {
 	gcli_id id;
 	char *name;
@@ -51,21 +48,21 @@ struct gcli_label {
 };
 
 struct gcli_label_list {
-	gcli_label *labels;
+	struct gcli_label *labels;
 	size_t labels_size;
 };
 
-int gcli_get_labels(gcli_ctx *ctx, char const *owner, char const *reponame,
-                    int max, gcli_label_list *out);
+int gcli_get_labels(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                    int max, struct gcli_label_list *out);
 
-void gcli_free_label(gcli_label *label);
+void gcli_free_label(struct gcli_label *label);
 
-void gcli_free_labels(gcli_label_list *labels);
+void gcli_free_labels(struct gcli_label_list *labels);
 
-int gcli_create_label(gcli_ctx *ctx, char const *owner, char const *repo,
-                      gcli_label *label);
+int gcli_create_label(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                      struct gcli_label *label);
 
-int gcli_delete_label(gcli_ctx *ctx, char const *owner, char const *repo,
+int gcli_delete_label(struct gcli_ctx *ctx, char const *owner, char const *repo,
                       char const *label);
 
 #endif /* LABELS_H */

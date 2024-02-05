@@ -36,25 +36,25 @@
 #include <sn/sn.h>
 
 int
-gitea_get_labels(gcli_ctx *ctx, char const *owner, char const *reponame,
-                 int max, gcli_label_list *const list)
+gitea_get_labels(struct gcli_ctx *ctx, char const *owner, char const *reponame,
+                 int max, struct gcli_label_list *const list)
 {
 	return github_get_labels(ctx, owner, reponame, max, list);
 }
 
 int
-gitea_create_label(gcli_ctx *ctx, char const *owner, char const *repo,
-                   gcli_label *const label)
+gitea_create_label(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                   struct gcli_label *const label)
 {
 	return github_create_label(ctx, owner, repo, label);
 }
 
 int
-gitea_delete_label(gcli_ctx *ctx, char const *owner, char const *repo,
+gitea_delete_label(struct gcli_ctx *ctx, char const *owner, char const *repo,
                    char const *label)
 {
 	char *url = NULL;
-	gcli_label_list list = {0};
+	struct gcli_label_list list = {0};
 	int id = -1;
 	int rc = 0;
 

@@ -29,6 +29,7 @@
 
 #include <gcli/gitlab/config.h>
 #include <gcli/gitlab/repos.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
@@ -39,13 +40,13 @@
 #include <assert.h>
 
 int
-gitlab_get_repo(gcli_ctx *ctx, char const *owner, char const *repo,
-                gcli_repo *const out)
+gitlab_get_repo(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                struct gcli_repo *const out)
 {
 	/* GET /projects/:id */
 	char *url = NULL;
-	gcli_fetch_buffer buffer = {0};
-	json_stream stream = {0};
+	struct gcli_fetch_buffer buffer = {0};
+	struct json_stream stream = {0};
 	char *e_owner = {0};
 	char *e_repo = {0};
 	int rc;
@@ -73,31 +74,27 @@ gitlab_get_repo(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 static void
-gitlab_repos_fixup_missing_visibility(gcli_repo_list *const list)
+gitlab_repos_fixup_missing_visibility(struct gcli_repo_list *const list)
 {
-	static char const public[] = "public";
-	static size_t const public_len = sizeof(public) - 1;
+	static char const *const public = "public";
 
 	/* Gitlab does not return a visibility field in the repo object on
 	 * unauthenticated API requests. We fix up the missing field here
 	 * assuming that the repository must be public. */
 	for (size_t i = 0; i < list->repos_size; ++i) {
-		if (sn_sv_null(list->repos[i].visibility))
-			list->repos[i].visibility = (sn_sv) {
-				.data = strdup(public),
-				.length = public_len,
-			};
+		if (!list->repos[i].visibility)
+			list->repos[i].visibility = strdup(public);
 	}
 }
 
 int
-gitlab_get_repos(gcli_ctx *ctx, char const *owner, int const max,
-                 gcli_repo_list *const list)
+gitlab_get_repos(struct gcli_ctx *ctx, char const *owner, int const max,
+                 struct gcli_repo_list *const list)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
 	int rc = 0;
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &list->repos,
 		.sizep = &list->repos_size,
 		.parse = (parsefn)(parse_gitlab_repos),
@@ -117,7 +114,7 @@ gitlab_get_repos(gcli_ctx *ctx, char const *owner, int const max,
 }
 
 int
-gitlab_repo_delete(gcli_ctx *ctx, char const *owner, char const *repo)
+gitlab_repo_delete(struct gcli_ctx *ctx, char const *owner, char const *repo)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -140,26 +137,37 @@ gitlab_repo_delete(gcli_ctx *ctx, char const *owner, char const *repo)
 }
 
 int
-gitlab_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *options,
-                   gcli_repo *out)
+gitlab_repo_create(struct gcli_ctx *ctx, struct gcli_repo_create_options const *options,
+                   struct gcli_repo *out)
 {
-	char *url, *data;
-	gcli_fetch_buffer buffer = {0};
-	json_stream stream = {0};
+	char *url, *payload;
+	struct gcli_fetch_buffer buffer = {0};
+	struct gcli_jsongen gen = {0};
 	int rc;
+	struct json_stream stream = {0};
 
 	/* Request preparation */
 	url = sn_asprintf("%s/projects", gcli_get_apibase(ctx));
-	/* TODO: escape the repo name and the description */
-	data = sn_asprintf("{\"name\": \""SV_FMT"\","
-	                   " \"description\": \""SV_FMT"\","
-	                   " \"visibility\": \"%s\" }",
-	                   SV_ARGS(options->name),
-	                   SV_ARGS(options->description),
-	                   options->private ? "private" : "public");
+
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "name");
+		gcli_jsongen_string(&gen, options->name);
+
+		gcli_jsongen_objmember(&gen, "description");
+		gcli_jsongen_string(&gen, options->description);
+
+		gcli_jsongen_objmember(&gen, "visibility");
+		gcli_jsongen_string(&gen, options->private ? "private" : "public");
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
 
 	/* Fetch and parse result */
-	rc = gcli_fetch_with_method(ctx, "POST", url, data, NULL, out ? &buffer : NULL);
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, out ? &buffer : NULL);
 	if (rc == 0 && out) {
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		parse_gitlab_repo(ctx, &stream, out);
@@ -168,14 +176,14 @@ gitlab_repo_create(gcli_ctx *ctx, gcli_repo_create_options const *options,
 	}
 
 	free(buffer.data);
-	free(data);
+	free(payload);
 	free(url);
 
 	return rc;
 }
 
 int
-gitlab_repo_set_visibility(gcli_ctx *ctx, char const *const owner,
+gitlab_repo_set_visibility(struct gcli_ctx *ctx, char const *const owner,
                            char const *const repo, gcli_repo_visibility vis)
 {
 	char *url;

@@ -38,6 +38,6 @@
 
 #include <sn/sn.h>
 
-char *github_make_authheader(gcli_ctx *ctx, char const *token);
+char *github_make_authheader(struct gcli_ctx *ctx, char const *token);
 
 #endif /* GITHUB_CONFIG_H */

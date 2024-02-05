@@ -31,15 +31,15 @@
 #include <gcli/github/comments.h>
 
 int
-gitea_get_comments(gcli_ctx *ctx, char const *owner, char const *repo,
-                   gcli_id const issue, gcli_comment_list *const out)
+gitea_get_comments(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                   gcli_id const issue, struct gcli_comment_list *const out)
 {
 	return github_get_comments(ctx, owner, repo, issue, out);
 }
 
 int
-gitea_perform_submit_comment(gcli_ctx *ctx, gcli_submit_comment_opts opts,
-                             gcli_fetch_buffer *const out)
+gitea_perform_submit_comment(struct gcli_ctx *ctx, struct gcli_submit_comment_opts opts,
+                             struct gcli_fetch_buffer *const out)
 {
 	return github_perform_submit_comment(ctx, opts, out);
 }

@@ -43,12 +43,12 @@
 #include <time.h>
 
 int
-github_get_milestones(gcli_ctx *ctx, char const *const owner,
+github_get_milestones(struct gcli_ctx *ctx, char const *const owner,
                       char const *const repo, int const max,
-                      gcli_milestone_list *const out)
+                      struct gcli_milestone_list *const out)
 {
 	char *url, *e_owner, *e_repo;
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &out->milestones,
 		.sizep = &out->milestones_size,
 		.parse = (parsefn)parse_github_milestones,
@@ -69,12 +69,12 @@ github_get_milestones(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-github_get_milestone(gcli_ctx *ctx, char const *const owner,
+github_get_milestone(struct gcli_ctx *ctx, char const *const owner,
                      char const *const repo, gcli_id const milestone,
-                     gcli_milestone *const out)
+                     struct gcli_milestone *const out)
 {
 	char *url, *e_owner, *e_repo;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	int rc = 0;
 
 	e_owner = gcli_urlencode(owner);
@@ -88,7 +88,7 @@ github_get_milestone(gcli_ctx *ctx, char const *const owner,
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc == 0) {
-		json_stream stream = {0};
+		struct json_stream stream = {0};
 
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		parse_github_milestone(ctx, &stream, out);
@@ -102,9 +102,9 @@ github_get_milestone(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-github_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
+github_milestone_get_issues(struct gcli_ctx *ctx, char const *const owner,
                             char const *const repo, gcli_id const milestone,
-                            gcli_issue_list *const out)
+                            struct gcli_issue_list *const out)
 {
 	char *url, *e_owner, *e_repo;
 
@@ -122,7 +122,7 @@ github_milestone_get_issues(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-github_create_milestone(gcli_ctx *ctx,
+github_create_milestone(struct gcli_ctx *ctx,
                         struct gcli_milestone_create_args const *args)
 {
 	char *url, *e_owner, *e_repo;
@@ -162,7 +162,7 @@ github_create_milestone(gcli_ctx *ctx,
 }
 
 int
-github_delete_milestone(gcli_ctx *ctx, char const *const owner,
+github_delete_milestone(struct gcli_ctx *ctx, char const *const owner,
                         char const *const repo, gcli_id const milestone)
 {
 	char *url, *e_owner, *e_repo;
@@ -186,7 +186,7 @@ github_delete_milestone(gcli_ctx *ctx, char const *const owner,
 }
 
 int
-github_milestone_set_duedate(gcli_ctx *ctx, char const *const owner,
+github_milestone_set_duedate(struct gcli_ctx *ctx, char const *const owner,
                              char const *const repo, gcli_id const milestone,
                              char const *const date)
 {

@@ -89,31 +89,31 @@ language_fmt(char const *it)
 }
 
 static void
-print_gist_file(gcli_gist_file const *const file)
+print_gist_file(struct gcli_gist_file const *const file)
 {
 	printf("      • %-15.15s  %-8.8s  %-s\n",
-	       language_fmt(file->language.data),
+	       language_fmt(file->language),
 	       human_readable_size(file->size),
-	       file->filename.data);
+	       file->filename);
 }
 
 static void
-print_gist(enum gcli_output_flags const flags, gcli_gist const *const gist)
+print_gist(enum gcli_output_flags const flags, struct gcli_gist const *const gist)
 {
 	(void) flags;
 
-	printf("   ID : %s"SV_FMT"%s\n"
-	       "OWNER : %s"SV_FMT"%s\n"
-	       "DESCR : "SV_FMT"\n"
-	       " DATE : "SV_FMT"\n"
-	       "  URL : "SV_FMT"\n"
-	       " PULL : "SV_FMT"\n",
-	       gcli_setcolour(GCLI_COLOR_YELLOW), SV_ARGS(gist->id), gcli_resetcolour(),
-	       gcli_setbold(), SV_ARGS(gist->owner), gcli_resetbold(),
-	       SV_ARGS(gist->description),
-	       SV_ARGS(gist->date),
-	       SV_ARGS(gist->url),
-	       SV_ARGS(gist->git_pull_url));
+	printf("   ID : %s%s%s\n"
+	       "OWNER : %s%s%s\n"
+	       "DESCR : %s\n"
+	       " DATE : %s\n"
+	       "  URL : %s\n"
+	       " PULL : %s\n",
+	       gcli_setcolour(GCLI_COLOR_YELLOW), gist->id, gcli_resetcolour(),
+	       gcli_setbold(), gist->owner, gcli_resetbold(),
+	       gist->description,
+	       gist->date,
+	       gist->url,
+	       gist->git_pull_url);
 	printf("FILES : %-15.15s  %-8.8s  %-s\n",
 	       "LANGUAGE", "SIZE", "FILENAME");
 
@@ -125,7 +125,7 @@ print_gist(enum gcli_output_flags const flags, gcli_gist const *const gist)
 
 static void
 gcli_print_gists_long(enum gcli_output_flags const flags,
-                      gcli_gist_list const *const list, int const max)
+                      struct gcli_gist_list const *const list, int const max)
 {
 	size_t n;
 
@@ -145,16 +145,16 @@ gcli_print_gists_long(enum gcli_output_flags const flags,
 
 static void
 gcli_print_gists_short(enum gcli_output_flags const flags,
-                       gcli_gist_list const *const list, int const max)
+                       struct gcli_gist_list const *const list, int const max)
 {
 	size_t n;
 	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
-		{ .name = "ID",          .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_COLOUREXPL },
-		{ .name = "OWNER",       .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_BOLD },
-		{ .name = "DATE",        .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
-		{ .name = "FILES",       .type = GCLI_TBLCOLTYPE_INT, .flags = GCLI_TBLCOL_JUSTIFYR },
-		{ .name = "DESCRIPTION", .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
+	struct gcli_tblcoldef cols[] = {
+		{ .name = "ID",          .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_COLOUREXPL },
+		{ .name = "OWNER",       .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_BOLD },
+		{ .name = "DATE",        .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "FILES",       .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "DESCRIPTION", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
 	if (max < 0 || (size_t)(max) > list->gists_size)
@@ -164,7 +164,7 @@ gcli_print_gists_short(enum gcli_output_flags const flags,
 
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
-		errx(1, "error: could not init table");
+		errx(1, "gcli: error: could not init table");
 
 	if (flags & OUTPUT_SORTED) {
 		for (size_t i = 0; i < n; ++i) {
@@ -191,7 +191,7 @@ gcli_print_gists_short(enum gcli_output_flags const flags,
 
 void
 gcli_print_gists(enum gcli_output_flags const flags,
-                 gcli_gist_list const *const list, int const max)
+                 struct gcli_gist_list const *const list, int const max)
 {
 	if (list->gists_size == 0) {
 		puts("No Gists");
@@ -211,28 +211,28 @@ subcommand_gist_get(int argc, char *argv[])
 
 	char const *gist_id = shift(&argc, &argv);
 	char const *file_name = shift(&argc, &argv);
-	gcli_gist gist = {0};
-	gcli_gist_file *file = NULL;
+	struct gcli_gist gist = {0};
+	struct gcli_gist_file *file = NULL;
 
 	if (gcli_get_gist(g_clictx, gist_id, &gist) < 0)
-		errx(1, "error: failed to get gist: %s", gcli_get_error(g_clictx));
+		errx(1, "gcli: error: failed to get gist: %s", gcli_get_error(g_clictx));
 
 	for (size_t f = 0; f < gist.files_size; ++f) {
-		if (sn_sv_eq_to(gist.files[f].filename, file_name)) {
+		if (strcmp(gist.files[f].filename, file_name) == 0) {
 			file = &gist.files[f];
 			break;
 		}
 	}
 
 	if (!file)
-		errx(1, "error: gists get: %s: no such file in gist with id %s",
+		errx(1, "gcli: error: %s: no such file in gist with id %s",
 		     file_name, gist_id);
 
 	if (isatty(STDOUT_FILENO) && (file->size >= 4 * 1024 * 1024))
-		errx(1, "error: File is bigger than 4 MiB, refusing to print to stdout.");
+		errx(1, "gcli: error: File is bigger than 4 MiB, refusing to print to stdout.");
 
-	if (gcli_curl(g_clictx, stdout, file->url.data, file->type.data) < 0)
-		errx(1, "error: failed to fetch gist: %s", gcli_get_error(g_clictx));
+	if (gcli_curl(g_clictx, stdout, file->url, file->type) < 0)
+		errx(1, "gcli: error: failed to fetch gist: %s", gcli_get_error(g_clictx));
 
 	gcli_gist_free(&gist);
 
@@ -242,9 +242,9 @@ subcommand_gist_get(int argc, char *argv[])
 static int
 subcommand_gist_create(int argc, char *argv[])
 {
-	int            ch;
-	gcli_new_gist  opts = {0};
-	char const    *file = NULL;
+	char const *file = NULL;
+	int ch;
+	struct gcli_new_gist opts = {0};
 
 	struct option const options[] = {
 		{ .name    = "file",
@@ -277,7 +277,7 @@ subcommand_gist_create(int argc, char *argv[])
 	argv += optind;
 
 	if (argc != 1) {
-		fprintf(stderr, "error: gists create: missing file name for gist\n");
+		fprintf(stderr, "gcli: error: missing file name for gist\n");
 		usage();
 		return EXIT_FAILURE;
 	}
@@ -286,7 +286,7 @@ subcommand_gist_create(int argc, char *argv[])
 
 	if (file) {
 		if ((opts.file = fopen(file, "r")) == NULL)
-			err(1, "error: gists create: cannot open file");
+			err(1, "gcli: error: cannot open file");
 	} else {
 		opts.file = stdin;
 	}
@@ -295,7 +295,7 @@ subcommand_gist_create(int argc, char *argv[])
 		opts.gist_description = "gcli paste";
 
 	if (gcli_create_gist(g_clictx, opts) < 0)
-		errx(1, "error: failed to create gist: %s", gcli_get_error(g_clictx));
+		errx(1, "gcli: error: failed to create gist: %s", gcli_get_error(g_clictx));
 
 	return EXIT_SUCCESS;
 }
@@ -303,9 +303,9 @@ subcommand_gist_create(int argc, char *argv[])
 static int
 subcommand_gist_delete(int argc, char *argv[])
 {
-	int         ch;
-	bool        always_yes = false;
-	char const *gist_id    = NULL;
+	bool always_yes = false;
+	char const *gist_id = NULL;
+	int ch;
 
 	struct option const options[] = {
 		{ .name    = "yes",
@@ -333,7 +333,7 @@ subcommand_gist_delete(int argc, char *argv[])
 	gist_id = shift(&argc, &argv);
 
 	if (!always_yes && !sn_yesno("Are you sure you want to delete this gist?"))
-		errx(1, "Aborted by user");
+		errx(1, "gcli: Aborted by user");
 
 	gcli_delete_gist(g_clictx, gist_id);
 
@@ -352,15 +352,15 @@ static struct {
 int
 subcommand_gists(int argc, char *argv[])
 {
-	int                     ch;
-	char const             *user  = NULL;
-	gcli_gist_list          gists = {0};
-	int                     count = 30;
-	enum gcli_output_flags  flags = 0;
+	char const *user = NULL;
+	enum gcli_output_flags flags = 0;
+	int ch;
+	int count = 30;
+	struct gcli_gist_list gists = {0};
 
 	/* Make sure we are looking at a GitHub forge */
 	if (gcli_config_get_forge_type(g_clictx) != GCLI_FORGE_GITHUB) {
-		errx(1, "error: The gists subcommand only works for Github "
+		errx(1, "gcli: error: The gists subcommand only works for Github "
 		     "forges. Please use either -a or -t to force using a "
 		     "Github account.");
 	}
@@ -421,7 +421,7 @@ subcommand_gists(int argc, char *argv[])
 	argv += optind;
 
 	if (gcli_get_gists(g_clictx, user, count, &gists) < 0)
-		errx(1, "error: failed to get gists: %s", gcli_get_error(g_clictx));
+		errx(1, "gcli: error: failed to get gists: %s", gcli_get_error(g_clictx));
 
 	gcli_print_gists(flags, &gists, count);
 	gcli_gists_free(&gists);

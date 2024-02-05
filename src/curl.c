@@ -60,18 +60,23 @@ gcli_curl_isalnum(char const c)
 
 /* XXX move to gcli_ctx destructor */
 void
-gcli_curl_ctx_destroy(gcli_ctx *ctx)
+gcli_curl_ctx_destroy(struct gcli_ctx *ctx)
 {
 	if (ctx->curl)
 		curl_easy_cleanup(ctx->curl);
+
 	ctx->curl = NULL;
+
+	free(ctx->curl_useragent);
+	ctx->curl_useragent = NULL;
 }
 
 /* Ensures a clean cURL handle. Call this whenever you wanna use the
  * ctx->curl */
 static int
-gcli_curl_ensure(gcli_ctx *ctx)
+gcli_curl_ensure(struct gcli_ctx *ctx)
 {
+
 	if (ctx->curl) {
 		curl_easy_reset(ctx->curl);
 	} else {
@@ -80,14 +85,21 @@ gcli_curl_ensure(gcli_ctx *ctx)
 		    return gcli_error(ctx, "failed to initialise curl context");
 	}
 
+	if (!ctx->curl_useragent) {
+		curl_version_info_data const *ver;
+
+		ver = curl_version_info(CURLVERSION_NOW);
+		ctx->curl_useragent = sn_asprintf("curl/%s", ver->version);
+	}
+
 	return 0;
 }
 
 /* Check the given curl code for an OK result. If not, print an
  * appropriate error message and exit */
 static int
-gcli_curl_check_api_error(gcli_ctx *ctx, CURLcode code, char const *url,
-                          gcli_fetch_buffer *const result)
+gcli_curl_check_api_error(struct gcli_ctx *ctx, CURLcode code, char const *url,
+                          struct gcli_fetch_buffer *const result)
 {
 	long status_code = 0;
 
@@ -108,7 +120,7 @@ gcli_curl_check_api_error(gcli_ctx *ctx, CURLcode code, char const *url,
 	return 0;
 }
 
-/* Callback for writing data into the gcli_fetch_buffer passed by
+/* Callback for writing data into the struct gcli_fetch_buffer passed by
  * calling routines */
 static size_t
 fetch_write_callback(char *in, size_t size, size_t nmemb, void *data)
@@ -116,7 +128,7 @@ fetch_write_callback(char *in, size_t size, size_t nmemb, void *data)
 	/* the user may have passed null indicating that we do not care
 	 * about the result body of the request. */
 	if (data) {
-		gcli_fetch_buffer *out = data;
+		struct gcli_fetch_buffer *out = data;
 
 		out->data = realloc(out->data, out->length + size * nmemb);
 		memcpy(&(out->data[out->length]), in, size * nmemb);
@@ -129,10 +141,10 @@ fetch_write_callback(char *in, size_t size, size_t nmemb, void *data)
 /* Plain HTTP get request.
  *
  * pagination_next returns the next url to query for paged results.
- * Results are placed into the gcli_fetch_buffer. */
+ * Results are placed into the struct gcli_fetch_buffer. */
 int
-gcli_fetch(gcli_ctx *ctx, char const *url, char **const pagination_next,
-           gcli_fetch_buffer *out)
+gcli_fetch(struct gcli_ctx *ctx, char const *url, char **const pagination_next,
+           struct gcli_fetch_buffer *out)
 {
 	return gcli_fetch_with_method(ctx, "GET", url, NULL, pagination_next, out);
 }
@@ -141,7 +153,7 @@ static int
 gcli_report_progress(void *_ctx, double dltotal, double dlnow,
                      double ultotal, double ulnow)
 {
-	gcli_ctx *ctx = _ctx;
+	struct gcli_ctx *ctx = _ctx;
 
 	(void) dltotal;
 	(void) dlnow;
@@ -156,10 +168,10 @@ gcli_report_progress(void *_ctx, double dltotal, double dlnow,
 
 /* Check the given url for a successful query */
 int
-gcli_curl_test_success(gcli_ctx *ctx, char const *url)
+gcli_curl_test_success(struct gcli_ctx *ctx, char const *url)
 {
 	CURLcode ret;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	long status_code;
 	bool is_success = true;
 	int rc = 0;
@@ -171,7 +183,7 @@ gcli_curl_test_success(gcli_ctx *ctx, char const *url)
 	curl_easy_setopt(ctx->curl, CURLOPT_BUFFERSIZE, 102400L);
 	curl_easy_setopt(ctx->curl, CURLOPT_NOPROGRESS, 1L);
 	curl_easy_setopt(ctx->curl, CURLOPT_MAXREDIRS, 50L);
-	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, "curl/7.78.0");
+	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, ctx->curl_useragent);
 #if defined(CURL_HTTP_VERSION_2TLS)
 	curl_easy_setopt(
 		ctx->curl, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
@@ -213,11 +225,12 @@ gcli_curl_test_success(gcli_ctx *ctx, char const *url)
  *
  * content_type may be NULL. */
 int
-gcli_curl(gcli_ctx *ctx, FILE *stream, char const *url, char const *content_type)
+gcli_curl(struct gcli_ctx *ctx, FILE *stream, char const *url,
+          char const *content_type)
 {
 	CURLcode ret;
 	struct curl_slist *headers;
-	gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_buffer buffer = {0};
 	char *auth_header = NULL;
 	int rc = 0;
 
@@ -230,7 +243,8 @@ gcli_curl(gcli_ctx *ctx, FILE *stream, char const *url, char const *content_type
 		headers = curl_slist_append(headers, content_type);
 
 	auth_header = gcli_get_authheader(ctx);
-	headers = curl_slist_append(headers, auth_header);
+	if (auth_header)
+		headers = curl_slist_append(headers, auth_header);
 
 	curl_easy_setopt(ctx->curl, CURLOPT_URL, url);
 	curl_easy_setopt(ctx->curl, CURLOPT_BUFFERSIZE, 102400L);
@@ -238,7 +252,7 @@ gcli_curl(gcli_ctx *ctx, FILE *stream, char const *url, char const *content_type
 	curl_easy_setopt(ctx->curl, CURLOPT_MAXREDIRS, 50L);
 	curl_easy_setopt(ctx->curl, CURLOPT_FTP_SKIP_PASV_IP, 1L);
 	curl_easy_setopt(ctx->curl, CURLOPT_HTTPHEADER, headers);
-	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, "curl/7.78.0");
+	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, ctx->curl_useragent);
 #if defined(CURL_HTTP_VERSION_2TLS)
 	curl_easy_setopt(
 		ctx->curl, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
@@ -350,17 +364,17 @@ parse_link_header(char *_header)
  * will be set to NULL. */
 int
 gcli_fetch_with_method(
-	gcli_ctx *ctx,
-	char const *method,         /* HTTP method. e.g. POST, GET, DELETE etc. */
-	char const *url,            /* Endpoint                                 */
-	char const *data,           /* Form data                                */
-	char **const pagination_next, /* Next URL for pagination                  */
-	gcli_fetch_buffer *const out) /* output buffer                            */
+	struct gcli_ctx *ctx,
+	char const *method,                  /* HTTP method. e.g. POST, GET, DELETE etc. */
+	char const *url,                     /* Endpoint */
+	char const *data,                    /* Form data */
+	char **const pagination_next,        /* Next URL for pagination */
+	struct gcli_fetch_buffer *const out) /* output buffer */
 {
 	CURLcode ret;
 	struct curl_slist *headers;
-	gcli_fetch_buffer tmp = {0}; /* used for error codes when out is NULL */
-	gcli_fetch_buffer *buf = NULL;
+	struct gcli_fetch_buffer tmp = {0}; /* used for error codes when out is NULL */
+	struct gcli_fetch_buffer *buf = NULL;
 	char *link_header = NULL;
 	int rc = 0;
 
@@ -386,7 +400,7 @@ gcli_fetch_with_method(
 	 * user is not interested in the result we use a temporary buffer
 	 * for proper error reporting. */
 	if (out) {
-		*out = (gcli_fetch_buffer) {0};
+		*out = (struct gcli_fetch_buffer) {0};
 		buf = out;
 	} else {
 		buf = &tmp;
@@ -398,7 +412,7 @@ gcli_fetch_with_method(
 		curl_easy_setopt(ctx->curl, CURLOPT_POSTFIELDS, data);
 
 	curl_easy_setopt(ctx->curl, CURLOPT_HTTPHEADER, headers);
-	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, "curl/7.79.1");
+	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, ctx->curl_useragent);
 	curl_easy_setopt(ctx->curl, CURLOPT_CUSTOMREQUEST, method);
 	curl_easy_setopt(ctx->curl, CURLOPT_TCP_KEEPALIVE, 1L);
 	curl_easy_setopt(ctx->curl, CURLOPT_WRITEDATA, buf);
@@ -453,9 +467,9 @@ gcli_fetch_with_method(
  * content_type may not be NULL.
  */
 int
-gcli_post_upload(gcli_ctx *ctx, char const *url, char const *content_type,
+gcli_post_upload(struct gcli_ctx *ctx, char const *url, char const *content_type,
                  void *buffer, size_t const buffer_size,
-                 gcli_fetch_buffer *const out)
+                 struct gcli_fetch_buffer *const out)
 {
 	CURLcode ret;
 	struct curl_slist *headers;
@@ -478,7 +492,10 @@ gcli_post_upload(gcli_ctx *ctx, char const *url, char const *content_type,
 	headers = curl_slist_append(
 		headers,
 		"Accept: application/vnd.github.v3+json");
-	headers = curl_slist_append(headers, auth_header);
+
+	if (auth_header)
+		headers = curl_slist_append(headers, auth_header);
+
 	headers = curl_slist_append(headers, contenttype_header);
 	headers = curl_slist_append(headers, contentsize_header);
 
@@ -488,7 +505,7 @@ gcli_post_upload(gcli_ctx *ctx, char const *url, char const *content_type,
 	curl_easy_setopt(ctx->curl, CURLOPT_POSTFIELDSIZE, (long)buffer_size);
 
 	curl_easy_setopt(ctx->curl, CURLOPT_HTTPHEADER, headers);
-	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, "curl/7.79.1");
+	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, ctx->curl_useragent);
 	curl_easy_setopt(ctx->curl, CURLOPT_WRITEDATA, out);
 	curl_easy_setopt(ctx->curl, CURLOPT_WRITEFUNCTION, fetch_write_callback);
 
@@ -521,9 +538,9 @@ gcli_post_upload(gcli_ctx *ctx, char const *url, char const *content_type,
  *  code.
  */
 int
-gcli_curl_gitea_upload_attachment(gcli_ctx *ctx, char const *url,
+gcli_curl_gitea_upload_attachment(struct gcli_ctx *ctx, char const *url,
                                   char const *filename,
-                                  gcli_fetch_buffer *const out)
+                                  struct gcli_fetch_buffer *const out)
 {
 	CURLcode ret;
 	curl_mime *mime;
@@ -544,7 +561,9 @@ gcli_curl_gitea_upload_attachment(gcli_ctx *ctx, char const *url,
 	headers = curl_slist_append(
 		headers,
 		"Accept: application/json");
-	headers = curl_slist_append(headers, auth_header);
+
+	if (auth_header)
+		headers = curl_slist_append(headers, auth_header);
 
 	/* The docs say we should be using this mime thing. */
 	mime = curl_mime_init(ctx->curl);
@@ -624,7 +643,7 @@ gcli_urlencode(char const *input)
 }
 
 char *
-gcli_urldecode(gcli_ctx *ctx, char const *input)
+gcli_urldecode(struct gcli_ctx *ctx, char const *input)
 {
 	char *curlresult, *result;
 
@@ -656,13 +675,13 @@ gcli_urldecode(gcli_ctx *ctx, char const *input)
  *
  * If max is -1 then everything will be fetched. */
 int
-gcli_fetch_list(gcli_ctx *ctx, char *url, gcli_fetch_list_ctx *fl)
+gcli_fetch_list(struct gcli_ctx *ctx, char *url, struct gcli_fetch_list_ctx *fl)
 {
 	char *next_url = NULL;
 	int rc;
 
 	do {
-		gcli_fetch_buffer buffer = {0};
+		struct gcli_fetch_buffer buffer = {0};
 
 		rc = gcli_fetch(ctx, url, &next_url, &buffer);
 		if (rc == 0) {

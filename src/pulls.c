@@ -38,7 +38,7 @@
 #include <assert.h>
 
 void
-gcli_pulls_free(gcli_pull_list *const it)
+gcli_pulls_free(struct gcli_pull_list *const it)
 {
 	for (size_t i = 0; i < it->pulls_size; ++i)
 		gcli_pull_free(&it->pulls[i]);
@@ -50,29 +50,30 @@ gcli_pulls_free(gcli_pull_list *const it)
 }
 
 int
-gcli_get_pulls(gcli_ctx *ctx, char const *owner, char const *repo,
-               gcli_pull_fetch_details const *const details, int const max,
-               gcli_pull_list *const out)
+gcli_get_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
+               struct gcli_pull_fetch_details const *const details, int const max,
+               struct gcli_pull_list *const out)
 {
-	return gcli_forge(ctx)->get_pulls(ctx, owner, repo, details, max, out);
+	gcli_null_check_call(get_pulls, ctx, owner, repo, details, max, out);
 }
 
 int
-gcli_pull_get_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
+gcli_pull_get_diff(struct gcli_ctx *ctx, FILE *stream, char const *owner,
                    char const *reponame, gcli_id const pr_number)
 {
-	return gcli_forge(ctx)->pull_get_diff(ctx, stream, owner, reponame, pr_number);
+	gcli_null_check_call(pull_get_diff, ctx, stream, owner, reponame,
+	                     pr_number);
 }
 
 int
-gcli_pull_get_commits(gcli_ctx *ctx, char const *owner, char const *repo,
-                      gcli_id const pr_number, gcli_commit_list *const out)
+gcli_pull_get_commits(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                      gcli_id const pr_number, struct gcli_commit_list *const out)
 {
-	return gcli_forge(ctx)->get_pull_commits(ctx, owner, repo, pr_number, out);
+	gcli_null_check_call(get_pull_commits, ctx, owner, repo, pr_number, out);
 }
 
 void
-gcli_commits_free(gcli_commit_list *list)
+gcli_commits_free(struct gcli_commit_list *list)
 {
 	for (size_t i = 0; i < list->commits_size; ++i) {
 		free(list->commits[i].sha);
@@ -90,7 +91,7 @@ gcli_commits_free(gcli_commit_list *list)
 }
 
 void
-gcli_pull_free(gcli_pull *const it)
+gcli_pull_free(struct gcli_pull *const it)
 {
 	free(it->author);
 	free(it->state);
@@ -104,36 +105,37 @@ gcli_pull_free(gcli_pull *const it)
 	free(it->base_sha);
 	free(it->milestone);
 	free(it->coverage);
+	free(it->node_id);
 
 	for (size_t i = 0; i < it->labels_size; ++i)
-		free(it->labels[i].data);
+		free(it->labels[i]);
 
 	free(it->labels);
 }
 
 int
-gcli_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
-              gcli_id const pr_number, gcli_pull *const out)
+gcli_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
+              gcli_id const pr_number, struct gcli_pull *const out)
 {
-	return gcli_forge(ctx)->get_pull(ctx, owner, repo, pr_number, out);
+	gcli_null_check_call(get_pull, ctx, owner, repo, pr_number, out);
 }
 
 int
-gcli_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
-                     gcli_id const pr_number, gcli_pull_checks_list *out)
+gcli_pull_get_checks(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                     gcli_id const pr_number, struct gcli_pull_checks_list *out)
 {
-	return gcli_forge(ctx)->get_pull_checks(ctx, owner, repo, pr_number, out);
+	gcli_null_check_call(get_pull_checks, ctx, owner, repo, pr_number, out);
 }
 
 void
-gcli_pull_checks_free(gcli_pull_checks_list *list)
+gcli_pull_checks_free(struct gcli_pull_checks_list *list)
 {
 	switch (list->forge_type) {
 	case GCLI_FORGE_GITHUB:
-		github_free_checks((github_check_list *)list);
+		github_free_checks((struct github_check_list *)list);
 		break;
 	case GCLI_FORGE_GITLAB:
-		gitlab_pipelines_free((gitlab_pipeline_list *)list);
+		gitlab_pipelines_free((struct gitlab_pipeline_list *)list);
 		break;
 	default:
 		assert(0 && "unreachable");
@@ -141,84 +143,92 @@ gcli_pull_checks_free(gcli_pull_checks_list *list)
 }
 
 int
-gcli_pull_submit(gcli_ctx *ctx, gcli_submit_pull_options opts)
+gcli_pull_submit(struct gcli_ctx *ctx, struct gcli_submit_pull_options opts)
 {
-	return gcli_forge(ctx)->perform_submit_pull(ctx, opts);
+	if (opts.automerge) {
+		int const q = gcli_forge(ctx)->pull_summary_quirks;
+		if (q & GCLI_PRS_QUIRK_AUTOMERGE)
+			return gcli_error(ctx, "forge does not support auto-merge");
+	}
+
+	gcli_null_check_call(perform_submit_pull, ctx, opts);
 }
 
 int
-gcli_pull_merge(gcli_ctx *ctx, char const *owner, char const *reponame,
+gcli_pull_merge(struct gcli_ctx *ctx, char const *owner, char const *reponame,
                 gcli_id const pr_number, enum gcli_merge_flags flags)
 {
-	return gcli_forge(ctx)->pull_merge(ctx, owner, reponame, pr_number, flags);
+	gcli_null_check_call(pull_merge, ctx, owner, reponame, pr_number,
+	                     flags);
 }
 
 int
-gcli_pull_close(gcli_ctx *ctx, char const *owner, char const *reponame,
+gcli_pull_close(struct gcli_ctx *ctx, char const *owner, char const *reponame,
                 gcli_id const pr_number)
 {
-	return gcli_forge(ctx)->pull_close(ctx, owner, reponame, pr_number);
+	gcli_null_check_call(pull_close, ctx, owner, reponame, pr_number);
 }
 
 int
-gcli_pull_reopen(gcli_ctx *ctx, char const *owner, char const *reponame,
+gcli_pull_reopen(struct gcli_ctx *ctx, char const *owner, char const *reponame,
                  gcli_id const pr_number)
 {
-	return gcli_forge(ctx)->pull_reopen(ctx, owner, reponame, pr_number);
+	gcli_null_check_call(pull_reopen, ctx, owner, reponame, pr_number);
 }
 
 int
-gcli_pull_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
+gcli_pull_add_labels(struct gcli_ctx *ctx, char const *owner, char const *repo,
                      gcli_id const pr_number, char const *const labels[],
                      size_t const labels_size)
 {
-	return gcli_forge(ctx)->pull_add_labels(
-		ctx, owner, repo, pr_number, labels, labels_size);
+	gcli_null_check_call(pull_add_labels, ctx, owner, repo, pr_number,
+	                     labels, labels_size);
 }
 
 int
-gcli_pull_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                        gcli_id const pr_number, char const *const labels[],
-                        size_t const labels_size)
+gcli_pull_remove_labels(struct gcli_ctx *ctx, char const *owner,
+                        char const *repo, gcli_id const pr_number,
+                        char const *const labels[], size_t const labels_size)
 {
-	return gcli_forge(ctx)->pull_remove_labels(
-		ctx, owner, repo, pr_number, labels, labels_size);
+	gcli_null_check_call(pull_remove_labels, ctx, owner, repo, pr_number,
+	                     labels, labels_size);
 }
 
 int
-gcli_pull_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                        gcli_id const pr_number, int milestone_id)
+gcli_pull_set_milestone(struct gcli_ctx *ctx, char const *owner,
+                        char const *repo, gcli_id const pr_number,
+                        int milestone_id)
 {
-	return gcli_forge(ctx)->pull_set_milestone(
-		ctx, owner, repo, pr_number, milestone_id);
+	gcli_null_check_call(pull_set_milestone, ctx, owner, repo, pr_number,
+	                     milestone_id);
 }
 
 int
-gcli_pull_clear_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                          gcli_id const pr_number)
+gcli_pull_clear_milestone(struct gcli_ctx *ctx, char const *owner,
+                          char const *repo, gcli_id const pr_number)
 {
-	return gcli_forge(ctx)->pull_clear_milestone(ctx, owner, repo, pr_number);
+	gcli_null_check_call(pull_clear_milestone, ctx, owner, repo, pr_number);
 }
 
 int
-gcli_pull_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
-                       gcli_id pr_number, char const *username)
+gcli_pull_add_reviewer(struct gcli_ctx *ctx, char const *owner,
+                       char const *repo, gcli_id pr_number, char const *username)
 {
-	return gcli_forge(ctx)->pull_add_reviewer(
-		ctx, owner, repo, pr_number, username);
+	gcli_null_check_call(pull_add_reviewer, ctx, owner, repo, pr_number,
+	                     username);
 }
 
 int
-gcli_pull_get_patch(gcli_ctx *ctx, FILE *out, char const *owner, char const *repo,
-                    gcli_id pull_id)
+gcli_pull_get_patch(struct gcli_ctx *ctx, FILE *out, char const *owner,
+                    char const *repo, gcli_id pull_id)
 {
-	return gcli_forge(ctx)->pull_get_patch(ctx, out, owner, repo, pull_id);
+	gcli_null_check_call(pull_get_patch, ctx, out, owner, repo, pull_id);
 }
 
 int
-gcli_pull_set_title(gcli_ctx *ctx, char const *const owner,
+gcli_pull_set_title(struct gcli_ctx *ctx, char const *const owner,
                     char const *const repo, gcli_id const pull,
                     char const *new_title)
 {
-	return gcli_forge(ctx)->pull_set_title(ctx, owner, repo, pull, new_title);
+	gcli_null_check_call(pull_set_title, ctx, owner, repo, pull, new_title);
 }

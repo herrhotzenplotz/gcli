@@ -58,7 +58,7 @@ usage(void)
 
 static void
 gcli_print_snippet(enum gcli_output_flags const flags,
-                   gcli_gitlab_snippet const *const it)
+                   struct gcli_gitlab_snippet const *const it)
 {
 	gcli_dict dict;
 
@@ -79,7 +79,7 @@ gcli_print_snippet(enum gcli_output_flags const flags,
 
 static void
 gcli_print_snippets_long(enum gcli_output_flags const flags,
-                         gcli_gitlab_snippet_list const *const list, int const max)
+                         struct gcli_gitlab_snippet_list const *const list, int const max)
 {
 	int n;
 
@@ -100,12 +100,12 @@ gcli_print_snippets_long(enum gcli_output_flags const flags,
 
 static void
 gcli_print_snippets_short(enum gcli_output_flags const flags,
-                          gcli_gitlab_snippet_list const *const list,
+                          struct gcli_gitlab_snippet_list const *const list,
                           int const max)
 {
 	int n;
 	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
+	struct gcli_tblcoldef cols[] = {
 		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_ID,     .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "DATE",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 		{ .name = "VISIBILITY", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
@@ -122,7 +122,7 @@ gcli_print_snippets_short(enum gcli_output_flags const flags,
 	/* Fill table */
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
-		errx(1, "error: could not init table");
+		errx(1, "gcli: error: could not init table");
 
 	if (flags & OUTPUT_SORTED) {
 		for (int i = 0; i < n; ++i)
@@ -147,7 +147,7 @@ gcli_print_snippets_short(enum gcli_output_flags const flags,
 
 void
 gcli_snippets_print(enum gcli_output_flags const flags,
-                    gcli_gitlab_snippet_list const *const list, int const max)
+                    struct gcli_gitlab_snippet_list const *const list, int const max)
 {
 	if (list->snippets_size == 0) {
 		puts("No Snippets");
@@ -167,7 +167,7 @@ subcommand_snippet_get(int argc, char *argv[])
 	argv += 1;
 
 	if (!argc) {
-		fprintf(stderr, "error: get snippets: expected ID of snippet to fetch\n");
+		fprintf(stderr, "gcli: error: expected ID of snippet to fetch\n");
 		usage();
 		return EXIT_FAILURE;
 	}
@@ -175,13 +175,13 @@ subcommand_snippet_get(int argc, char *argv[])
 	char *snippet_id = shift(&argc, &argv);
 
 	if (argc) {
-		fprintf(stderr, "error: stray arguments\n");
+		fprintf(stderr, "gcli: error: stray arguments\n");
 		usage();
 		return EXIT_FAILURE;
 	}
 
 	if (gcli_snippet_get(g_clictx, snippet_id, stdout) < 0)
-		errx(1, "error: failed to fetch snippet contents: %s",
+		errx(1, "gcli: error: failed to fetch snippet contents: %s",
 		     gcli_get_error(g_clictx));
 
 	return EXIT_SUCCESS;
@@ -194,7 +194,7 @@ subcommand_snippet_delete(int argc, char *argv[])
 	argv += 1;
 
 	if (!argc) {
-		fprintf(stderr, "error: delete snippets: expected ID of snippet to delete\n");
+		fprintf(stderr, "gcli: error: expected ID of snippet to delete\n");
 		usage();
 		return EXIT_FAILURE;
 	}
@@ -202,13 +202,13 @@ subcommand_snippet_delete(int argc, char *argv[])
 	char *snippet_id = shift(&argc, &argv);
 
 	if (argc) {
-		fprintf(stderr, "error: delete snippet: trailing options\n");
+		fprintf(stderr, "gcli: error: trailing options\n");
 		usage();
 		return EXIT_FAILURE;
 	}
 
 	if (gcli_snippet_delete(g_clictx, snippet_id) < 0)
-		errx(1, "error: failed to delete snippet: %s",
+		errx(1, "gcli: error: failed to delete snippet: %s",
 		     gcli_get_error(g_clictx));
 
 	return EXIT_SUCCESS;
@@ -226,7 +226,7 @@ int
 subcommand_snippets(int argc, char *argv[])
 {
 	int ch;
-	gcli_gitlab_snippet_list list = {0};
+	struct gcli_gitlab_snippet_list list = {0};
 	int count = 30;
 	enum gcli_output_flags flags = 0;
 
@@ -261,10 +261,10 @@ subcommand_snippets(int argc, char *argv[])
 			count = strtol(optarg, &endptr, 10);
 
 			if (endptr != (optarg + strlen(optarg)))
-				err(1, "snippets: cannot parse snippets count");
+				err(1, "gcli: error: cannot parse snippets count");
 
 			if (count == 0)
-				errx(1, "error: snippets count must not be zero");
+				errx(1, "gcli: error: snippets count must not be zero");
 		} break;
 		case 's':
 			flags |= OUTPUT_SORTED;
@@ -283,7 +283,7 @@ subcommand_snippets(int argc, char *argv[])
 	argv += optind;
 
 	if (gcli_snippets_get(g_clictx, count, &list) < 0)
-		errx(1, "error: failed to fetch snippets: %s",
+		errx(1, "gcli: error: failed to fetch snippets: %s",
 		     gcli_get_error(g_clictx));
 
 	gcli_snippets_print(flags, &list, count);

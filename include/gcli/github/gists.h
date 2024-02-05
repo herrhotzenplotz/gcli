@@ -39,32 +39,27 @@
 #include <pdjson/pdjson.h>
 #include <sn/sn.h>
 
-typedef struct gcli_gist      gcli_gist;
-typedef struct gcli_gist_list gcli_gist_list;
-typedef struct gcli_gist_file gcli_gist_file;
-typedef struct gcli_new_gist  gcli_new_gist;
-
 struct gcli_gist_file {
-	sn_sv filename;
-	sn_sv language;
-	sn_sv url;
-	sn_sv type;
+	char *filename;
+	char *language;
+	char *url;
+	char *type;
 	size_t size;
 };
 
 struct gcli_gist_list {
-	gcli_gist *gists;
+	struct gcli_gist *gists;
 	size_t gists_size;
 };
 
 struct gcli_gist {
-	sn_sv id;
-	sn_sv owner;
-	sn_sv url;
-	sn_sv date;
-	sn_sv git_pull_url;
-	sn_sv description;
-	gcli_gist_file *files;
+	char *id;
+	char *owner;
+	char *url;
+	char *date;
+	char *git_pull_url;
+	char *description;
+	struct gcli_gist_file *files;
 	size_t files_size;
 };
 
@@ -74,17 +69,18 @@ struct gcli_new_gist {
 	char const *gist_description;
 };
 
-int gcli_get_gists(gcli_ctx *ctx, char const *user, int max,
-                   gcli_gist_list *list);
+int gcli_get_gists(struct gcli_ctx *ctx, char const *user, int max,
+                   struct gcli_gist_list *list);
 
-int gcli_get_gist(gcli_ctx *ctx, char const *gist_id, gcli_gist *out);
+int gcli_get_gist(struct gcli_ctx *ctx, char const *gist_id,
+                  struct gcli_gist *out);
 
-int gcli_create_gist(gcli_ctx *ctx, gcli_new_gist);
+int gcli_create_gist(struct gcli_ctx *ctx, struct gcli_new_gist);
 
-int gcli_delete_gist(gcli_ctx *ctx, char const *gist_id);
+int gcli_delete_gist(struct gcli_ctx *ctx, char const *gist_id);
 
-void gcli_gists_free(gcli_gist_list *list);
-void gcli_gist_free(gcli_gist *g);
+void gcli_gists_free(struct gcli_gist_list *list);
+void gcli_gist_free(struct gcli_gist *g);
 
 /**
  * NOTE(Nico): Because of idiots designing a web API, we get a list of
@@ -92,7 +88,8 @@ void gcli_gist_free(gcli_gist *g);
  * file names. The objects describing the files obviously contain the
  * file name again. Whatever...here's a hack. Blame GitHub.
  */
-int parse_github_gist_files_idiot_hack(gcli_ctx *ctx, json_stream *stream,
-                                       gcli_gist *gist);
+int parse_github_gist_files_idiot_hack(struct gcli_ctx *ctx,
+                                       struct json_stream *stream,
+                                       struct gcli_gist *gist);
 
 #endif /* GCLI_GITHUB_GISTS_H */

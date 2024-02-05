@@ -49,54 +49,34 @@
 #define get_double(ctx, input, out)        get_double_(ctx, input, out, __func__)
 #define get_parse_int(ctx, input, out)     get_parse_int_(ctx, input, out, __func__)
 #define get_bool(ctx, input, out)          get_bool_(ctx, input, out, __func__)
+#define get_bool_relaxed(ctx, input, out)  get_bool_relaxed_(ctx, input, out, __func__)
 #define get_string(ctx, input, out)        get_string_(ctx, input, out, __func__)
 #define get_sv(ctx, input, out)            get_sv_(ctx, input, out, __func__)
 #define get_user(ctx, input, out)          get_user_(ctx, input, out, __func__)
 #define get_label(ctx, input, out)         get_label_(ctx, input, out, __func__)
 #define get_is_string(ctx, input, out)     ((void)ctx, (*out = json_next(input) == JSON_STRING), 1)
-#define get_int_to_sv(ctx, input, out)     get_int_to_sv_(ctx, input, out, __func__)
 #define get_int_to_string(ctx, input, out) get_int_to_string_(ctx, input, out, __func__)
 
-int get_int_(gcli_ctx *ctx, json_stream *input, int *out, char const *function);
-int get_id_(gcli_ctx *ctx, json_stream *input, gcli_id *out, char const *function);
-int get_long_(gcli_ctx *ctx, json_stream *input, long *out, char const *function);
-int get_size_t_(gcli_ctx *ctx, json_stream *input, size_t *out, char const *function);
-int get_double_(gcli_ctx *ctx, json_stream *input, double *out, char const *function);
-int get_parse_int_(gcli_ctx *ctx, json_stream *input, long *out, char const *function);
-int get_bool_(gcli_ctx *ctx, json_stream *input, bool *out, char const *function);
-int get_string_(gcli_ctx *ctx, json_stream *input, char **out, char const *function);
-int get_sv_(gcli_ctx *ctx, json_stream *input, sn_sv *out, char const *function);
-int get_user_(gcli_ctx *ctx, json_stream *input, char **out, char const *function);
-int get_label_(gcli_ctx *ctx, json_stream *input, char const **out, char const *function);
-int get_github_style_colour(gcli_ctx *ctx, json_stream *input, uint32_t *out);
-int get_gitlab_style_colour(gcli_ctx *ctx, json_stream *input, uint32_t *out);
-int get_github_is_pr(gcli_ctx *ctx, json_stream *input, int *out);
-int get_gitlab_can_be_merged(gcli_ctx *ctx, json_stream *input, bool *out);
-int get_gitea_visibility(gcli_ctx *ctx, json_stream *input, sn_sv *out);
-int get_int_to_sv_(gcli_ctx *ctx, json_stream *input, sn_sv *out,
-                   char const *function);
+int get_int_(struct gcli_ctx *ctx, json_stream *input, int *out, char const *function);
+int get_id_(struct gcli_ctx *ctx, json_stream *input, gcli_id *out, char const *function);
+int get_long_(struct gcli_ctx *ctx, json_stream *input, long *out, char const *function);
+int get_size_t_(struct gcli_ctx *ctx, json_stream *input, size_t *out, char const *function);
+int get_double_(struct gcli_ctx *ctx, json_stream *input, double *out, char const *function);
+int get_parse_int_(struct gcli_ctx *ctx, json_stream *input, long *out, char const *function);
+int get_bool_(struct gcli_ctx *ctx, json_stream *input, bool *out, char const *function);
+int get_bool_relaxed_(struct gcli_ctx *ctx, json_stream *input, bool *out, char const *function);
+int get_string_(struct gcli_ctx *ctx, json_stream *input, char **out, char const *function);
+int get_sv_(struct gcli_ctx *ctx, json_stream *input, sn_sv *out, char const *function);
+int get_user_(struct gcli_ctx *ctx, json_stream *input, char **out, char const *function);
+int get_label_(struct gcli_ctx *ctx, json_stream *input, char const **out, char const *function);
+int get_github_style_colour(struct gcli_ctx *ctx, json_stream *input, uint32_t *out);
+int get_gitlab_style_colour(struct gcli_ctx *ctx, json_stream *input, uint32_t *out);
+int get_github_is_pr(struct gcli_ctx *ctx, json_stream *input, int *out);
+int get_gitlab_can_be_merged(struct gcli_ctx *ctx, json_stream *input, bool *out);
+int get_gitea_visibility(struct gcli_ctx *ctx, json_stream *input, char **out);
 sn_sv gcli_json_escape(sn_sv);
 #define     gcli_json_escape_cstr(x) (gcli_json_escape(SV((char *)(x))).data)
-int gcli_json_advance(gcli_ctx *ctx, json_stream *input, char const *fmt, ...);
-
-static inline int
-get_user_sv(gcli_ctx *ctx, json_stream *input, sn_sv *out)
-{
-	char *user_str;
-	int rc = get_user(ctx, input, &user_str);
-	if (rc < 0)
-		return rc;
-
-	*out = SV(user_str);
-
-	return 0;
-}
-
-static inline int
-parse_user(gcli_ctx *ctx, json_stream *input, sn_sv *out)
-{
-    return get_user_sv(ctx, input, out);
-}
+int gcli_json_advance(struct gcli_ctx *ctx, json_stream *input, char const *fmt, ...);
 
 static inline char const *
 gcli_json_bool(bool it)
@@ -105,7 +85,7 @@ gcli_json_bool(bool it)
 }
 
 static inline int
-get_int_to_string_(gcli_ctx *ctx, json_stream *input, char **out,
+get_int_to_string_(struct gcli_ctx *ctx, json_stream *input, char **out,
                    char const *const fn)
 {
 	int rc;
@@ -135,11 +115,5 @@ get_int_to_string_(gcli_ctx *ctx, json_stream *input, char **out,
 			break; \
 		} \
 	} while (0)
-
-static inline int
-parse_sv(gcli_ctx *ctx, json_stream *stream, sn_sv *out)
-{
-    return get_sv(ctx, stream, out);
-}
 
 #endif /* JSON_UTIL_H */

@@ -67,15 +67,15 @@ usage(void)
 
 void
 gcli_print_repos(enum gcli_output_flags const flags,
-                 gcli_repo_list const *const list, int const max)
+                 struct gcli_repo_list const *const list, int const max)
 {
 	size_t n;
 	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
-		{ .name = "FORK",     .type = GCLI_TBLCOLTYPE_BOOL, .flags = 0 },
-		{ .name = "VISBLTY",  .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
-		{ .name = "DATE",     .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
-		{ .name = "FULLNAME", .type = GCLI_TBLCOLTYPE_SV,   .flags = 0 },
+	struct gcli_tblcoldef cols[] = {
+		{ .name = "FORK",     .type = GCLI_TBLCOLTYPE_BOOL,   .flags = 0 },
+		{ .name = "VISBLTY",  .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "DATE",     .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "FULLNAME", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
 	if (list->repos_size == 0) {
@@ -92,7 +92,7 @@ gcli_print_repos(enum gcli_output_flags const flags,
 	/* init table */
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
-		errx(1, "error: could not init table");
+		errx(1, "gcli: error: could not init table");
 
 	/* put data into table */
 	if (flags & OUTPUT_SORTED) {
@@ -116,17 +116,17 @@ gcli_print_repos(enum gcli_output_flags const flags,
 }
 
 void
-gcli_repo_print(gcli_repo const *it)
+gcli_repo_print(struct gcli_repo const *it)
 {
 	gcli_dict dict;
 
 	dict = gcli_dict_begin();
 	gcli_dict_add(dict, "ID",         0, 0, "%"PRIid, it->id);
-	gcli_dict_add(dict, "FULL NAME",  0, 0, SV_FMT, SV_ARGS(it->full_name));
-	gcli_dict_add(dict, "NAME",       0, 0, SV_FMT, SV_ARGS(it->name));
-	gcli_dict_add(dict, "OWNER",      0, 0, SV_FMT, SV_ARGS(it->owner));
-	gcli_dict_add(dict, "DATE",       0, 0, SV_FMT, SV_ARGS(it->date));
-	gcli_dict_add(dict, "VISIBILITY", 0, 0, SV_FMT, SV_ARGS(it->visibility));
+	gcli_dict_add(dict, "FULL NAME",  0, 0, "%s", it->full_name);
+	gcli_dict_add(dict, "NAME",       0, 0, "%s", it->name);
+	gcli_dict_add(dict, "OWNER",      0, 0, "%s", it->owner);
+	gcli_dict_add(dict, "DATE",       0, 0, "%s", it->date);
+	gcli_dict_add(dict, "VISIBILITY", 0, 0, "%s", it->visibility);
 	gcli_dict_add(dict, "IS FORK",    0, 0, "%s", sn_bool_yesno(it->is_fork));
 
 	gcli_dict_end(dict);
@@ -136,8 +136,8 @@ static int
 subcommand_repos_create(int argc, char *argv[])
 {
 	int ch;
-	gcli_repo_create_options create_options = {0};
-	gcli_repo repo = {0};
+	struct gcli_repo_create_options create_options = {0};
+	struct gcli_repo repo = {0};
 
 	const struct option options[] = {
 		{ .name    = "repo",
@@ -158,10 +158,10 @@ subcommand_repos_create(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "r:d:p", options, NULL)) != -1) {
 		switch (ch) {
 		case 'r':
-			create_options.name = SV(optarg);
+			create_options.name = optarg;
 			break;
 		case 'd':
-			create_options.description = SV(optarg);
+			create_options.description = optarg;
 			break;
 		case 'p':
 			create_options.private = true;
@@ -176,16 +176,18 @@ subcommand_repos_create(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	if (sn_sv_null(create_options.name)) {
+	if (!create_options.name) {
 		fprintf(stderr,
-		        "name cannot be empty. please set a repository "
+		        "gcli: name cannot be empty. please set a repository "
 		        "name with -r/--name\n");
 		usage();
 		return EXIT_FAILURE;
 	}
 
-	if (gcli_repo_create(g_clictx, &create_options, &repo) < 0)
-		errx(1, "error: failed to create repository: %s", gcli_get_error(g_clictx));
+	if (gcli_repo_create(g_clictx, &create_options, &repo) < 0) {
+		errx(1, "gcli: error: failed to create repository: %s",
+		     gcli_get_error(g_clictx));
+	}
 
 	gcli_repo_print(&repo);
 	gcli_repo_free(&repo);
@@ -248,7 +250,7 @@ action_set_visibility(char const *const owner, char const *const repo,
 	int rc;
 
 	if (*argc < 2) {
-		fprintf(stderr, "error: missing visibility level\n");
+		fprintf(stderr, "gcli: error: missing visibility level\n");
 		return 1;
 	}
 
@@ -258,12 +260,12 @@ action_set_visibility(char const *const owner, char const *const repo,
 
 	visblty = parse_visibility(visblty_str);
 	if (visblty < 0) {
-		fprintf(stderr, "error: bad visibility level »%s«\n", visblty_str);
+		fprintf(stderr, "gcli: error: bad visibility level »%s«\n", visblty_str);
 		return 1;
 	}
 
 	if ((rc = gcli_repo_set_visibility(g_clictx, owner, repo, visblty)) < 0) {
-		fprintf(stderr, "error: failed to set visibility: %s\n",
+		fprintf(stderr, "gcli: error: failed to set visibility: %s\n",
 		        gcli_get_error(g_clictx));
 		return 1;
 	}
@@ -299,7 +301,7 @@ subcommand_repos(int argc, char *argv[])
 	int ch, n = 30;
 	char const *owner = NULL;
 	char const *repo = NULL;
-	gcli_repo_list repos = {0};
+	struct gcli_repo_list repos = {0};
 	enum gcli_output_flags flags = 0;
 
 	/* detect whether we wanna create a repo */
@@ -343,10 +345,10 @@ subcommand_repos(int argc, char *argv[])
 			char *endptr = NULL;
 			n = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
-				err(1, "repos: cannot parse repo count");
+				err(1, "gcli: error: cannot parse repo count");
 
 			if (n == 0)
-				errx(1, "error: number of repos must not be zero");
+				errx(1, "gcli: error: number of repos must not be zero");
 		} break;
 		case '?':
 		default:
@@ -364,7 +366,7 @@ subcommand_repos(int argc, char *argv[])
 		int rc = 0;
 
 		if (repo) {
-			fprintf(stderr, "error: repos: no actions specified\n");
+			fprintf(stderr, "gcli: error: no actions specified\n");
 			usage();
 			return EXIT_FAILURE;
 		}
@@ -376,14 +378,17 @@ subcommand_repos(int argc, char *argv[])
 		 * gcli_get_repos. This is bad since that causes segfaults down the
 		 * line. (https://github.com/herrhotzenplotz/gcli/issues/118) */
 		if (!owner) {
-			fprintf(stderr, "error: no account specified or no default account"
-			        " configured. use -o to provide an explicit account name.\n");
+			fprintf(stderr, "gcli: error: no account specified or no default"
+			        " account configured. use -o to provide an explicit"
+			        " account name.\n");
 			return EXIT_FAILURE;
 		}
 
 		rc = gcli_get_repos(g_clictx, owner, n, &repos);
-		if (rc < 0)
-			errx(1, "error: failed to fetch repos: %s", gcli_get_error(g_clictx));
+		if (rc < 0) {
+			errx(1, "gcli: error: failed to fetch repos: %s",
+			     gcli_get_error(g_clictx));
+		}
 
 		gcli_print_repos(flags, &repos, n);
 		gcli_repos_free(&repos);
@@ -395,7 +400,7 @@ subcommand_repos(int argc, char *argv[])
 			int rc = 0;
 
 			if (!action) {
-				fprintf(stderr, "error: unrecognised action »%s«\n", argv[0]);
+				fprintf(stderr, "gcli: error: unrecognised action »%s«\n", argv[0]);
 				return EXIT_FAILURE;
 			}
 

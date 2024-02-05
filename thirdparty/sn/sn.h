@@ -46,9 +46,9 @@
 #endif
 
 enum {
-    VERBOSITY_NORMAL  = 0,
-    VERBOSITY_QUIET   = 1,
-    VERBOSITY_VERBOSE = 2,
+	VERBOSITY_NORMAL  = 0,
+	VERBOSITY_QUIET   = 1,
+	VERBOSITY_VERBOSE = 2,
 };
 
 /* mostly concerning warn(x) */
@@ -58,19 +58,19 @@ int  sn_getverbosity(void);
 static inline int
 sn_verbose(void)
 {
-    return sn_getverbosity() == VERBOSITY_VERBOSE;
+	return sn_getverbosity() == VERBOSITY_VERBOSE;
 }
 
 static inline int
 sn_normal(void)
 {
-    return sn_getverbosity() == VERBOSITY_NORMAL;
+	return sn_getverbosity() == VERBOSITY_NORMAL;
 }
 
 static inline int
 sn_quiet(void)
 {
-    return sn_getverbosity() == VERBOSITY_QUIET;
+	return sn_getverbosity() == VERBOSITY_QUIET;
 }
 
 /* error functions */
@@ -109,15 +109,15 @@ char *sn_strip_suffix(char *it, const char *suffix);
 void pretty_print(const char *input, int indent, int maxlinelen, FILE *out);
 
 /* io file mapping */
-int  sn_mmap_file(const char *path, void **buffer);
-int  sn_read_file(char const *path, char **buffer);
+int sn_mmap_file(const char *path, void **buffer);
+int sn_read_file(char const *path, char **buffer);
 
 /* stringview */
 typedef struct sn_sv sn_sv;
 
 struct sn_sv {
-    char   *data;
-    size_t  length;
+	char *data;
+	size_t length;
 };
 
 #define SV(x) (sn_sv) { .data = x, .length = strlen(x) }
@@ -128,23 +128,32 @@ struct sn_sv {
 static inline sn_sv
 sn_sv_from_parts(char *buf, size_t len)
 {
-    return (sn_sv) { .data = buf, .length = len };
+	return (sn_sv) { .data = buf, .length = len };
 }
 
-sn_sv  sn_sv_trim_front(sn_sv);
-sn_sv  sn_sv_trim(sn_sv);
-sn_sv  sn_sv_chop_until(sn_sv *, char);
-bool   sn_sv_has_prefix(sn_sv, const char *);
-bool   sn_sv_eq(const sn_sv, const sn_sv);
-bool   sn_sv_eq_to(const sn_sv, const char *);
-sn_sv  sn_sv_fmt(const char *fmt, ...) PRINTF_FORMAT(1, 2);
-char  *sn_sv_to_cstr(sn_sv);
-sn_sv  sn_sv_strip_suffix(sn_sv, const char *suffix);
+sn_sv sn_sv_trim_front(sn_sv);
+sn_sv sn_sv_trim(sn_sv);
+sn_sv sn_sv_chop_until(sn_sv *, char);
+bool sn_sv_has_prefix(sn_sv, const char *);
+bool sn_sv_eq(const sn_sv, const sn_sv);
+bool sn_sv_eq_to(const sn_sv, const char *);
+sn_sv sn_sv_fmt(const char *fmt, ...) PRINTF_FORMAT(1, 2);
+char *sn_sv_to_cstr(sn_sv);
+sn_sv sn_sv_strip_suffix(sn_sv, const char *suffix);
 
 static inline bool
 sn_sv_null(sn_sv it)
 {
-    return it.data == NULL && it.length == 0;
+	return it.data == NULL && it.length == 0;
+}
+
+static inline bool
+sn_strempty(char const *const str)
+{
+	if (str == NULL)
+		return true;
+
+	return *str == '\0';
 }
 
 /* interactive user functions */
@@ -153,7 +162,7 @@ bool sn_yesno(const char *fmt, ...) PRINTF_FORMAT(1, 2);
 static inline const char *
 sn_bool_yesno(bool x)
 {
-    return x ? "yes" : "no";
+	return x ? "yes" : "no";
 }
 
 char *sn_join_with(char const *const items[], size_t const items_size, char const *sep);

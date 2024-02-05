@@ -56,14 +56,15 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: gcli pulls create [-o owner -r repo] [-f from]\n");
-	fprintf(stderr, "                         [-t to] [-d] [-l label] pull-request-title\n");
+	fprintf(stderr, "                         [-t to] [-d] [-a] [-l label] pull-request-title\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] [-a] [-A author] [-n number]\n");
 	fprintf(stderr, "                  [-L label] [-M milestone] [-s]\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] -i pull-id actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
 	fprintf(stderr, "  -o owner        The repository owner\n");
 	fprintf(stderr, "  -r repo         The repository name\n");
-	fprintf(stderr, "  -a              Fetch everything including closed and merged PRs\n");
+	fprintf(stderr, "  -a              When listing PRs, show everything including closed and merged PRs.\n");
+	fprintf(stderr, "                  When creating a PR enable automerge.\n");
 	fprintf(stderr, "  -A author       Filter pull requests by the given author\n");
 	fprintf(stderr, "  -L label        Filter pull requests by the given label\n");
 	fprintf(stderr, "  -M milestone    Filter pull requests by the given milestone\n");
@@ -103,11 +104,11 @@ usage(void)
 
 void
 gcli_print_pulls(enum gcli_output_flags const flags,
-                 gcli_pull_list const *const list, int const max)
+                 struct gcli_pull_list const *const list, int const max)
 {
 	int n;
 	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
+	struct gcli_tblcoldef cols[] = {
 		{ .name = "NUMBER",  .type = GCLI_TBLCOLTYPE_ID,     .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "STATE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
 		{ .name = "MERGED",  .type = GCLI_TBLCOLTYPE_BOOL,   .flags = 0 },
@@ -130,7 +131,7 @@ gcli_print_pulls(enum gcli_output_flags const flags,
 	/* Fill the table */
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
-		errx(1, "error: cannot init table");
+		errx(1, "gcli: error: cannot init table");
 
 	if (flags & OUTPUT_SORTED) {
 		for (int i = 0; i < n; ++i) {
@@ -172,10 +173,10 @@ gcli_pull_print_patch(FILE *stream, char const *owner, char const *reponame,
 }
 
 void
-gcli_pull_print(gcli_pull const *const it)
+gcli_pull_print(struct gcli_pull const *const it)
 {
 	gcli_dict dict;
-	gcli_forge_descriptor const *const forge = gcli_forge(g_clictx);
+	struct gcli_forge_descriptor const *const forge = gcli_forge(g_clictx);
 	int const quirks = forge->pull_summary_quirks;
 
 	dict = gcli_dict_begin();
@@ -208,6 +209,9 @@ gcli_pull_print(gcli_pull const *const it)
 	if ((quirks & GCLI_PRS_QUIRK_CHANGES) == 0)
 		gcli_dict_add(dict, "CHANGED", 0, 0, "%d", it->changed_files);
 
+	if ((quirks & GCLI_PRS_QUIRK_AUTOMERGE) == 0)
+		gcli_dict_add_string(dict, "AUTOMERGE", 0, 0, sn_bool_yesno(it->automerge));
+
 	if ((quirks & GCLI_PRS_QUIRK_MERGED) == 0)
 		gcli_dict_add_string(dict, "MERGED", 0, 0, sn_bool_yesno(it->merged));
 
@@ -219,7 +223,9 @@ gcli_pull_print(gcli_pull const *const it)
 		gcli_dict_add_string(dict, "COVERAGE", 0, 0, it->coverage);
 
 	if (it->labels_size) {
-		gcli_dict_add_sv_list(dict, "LABELS", it->labels, it->labels_size);
+		gcli_dict_add_string_list(dict, "LABELS",
+		                          (char const *const *)it->labels,
+		                          it->labels_size);
 	} else {
 		gcli_dict_add_string(dict, "LABELS", 0, 0, "none");
 	}
@@ -237,21 +243,21 @@ gcli_pull_print(gcli_pull const *const it)
 }
 
 void
-gcli_pull_print_op(gcli_pull const *const pull)
+gcli_pull_print_op(struct gcli_pull const *const pull)
 {
 	if (pull->body)
 		pretty_print(pull->body, 4, 80, stdout);
 }
 
 static void
-gcli_print_checks_list(gcli_pull_checks_list const *const list)
+gcli_print_checks_list(struct gcli_pull_checks_list const *const list)
 {
 	switch (list->forge_type) {
 	case GCLI_FORGE_GITHUB:
-		github_print_checks((github_check_list const *)(list));
+		github_print_checks((struct github_check_list const *)(list));
 		break;
 	case GCLI_FORGE_GITLAB:
-		gitlab_print_pipelines((gitlab_pipeline_list const*)(list));
+		gitlab_print_pipelines((struct gitlab_pipeline_list const*)(list));
 		break;
 	default:
 		assert(0 && "unreachable");
@@ -261,7 +267,7 @@ gcli_print_checks_list(gcli_pull_checks_list const *const list)
 int
 gcli_pull_checks(char const *owner, char const *repo, int pr_number)
 {
-	gcli_pull_checks_list list = {0};
+	struct gcli_pull_checks_list list = {0};
 	gcli_forge_type t = gcli_config_get_forge_type(g_clictx);
 
 	list.forge_type = t;
@@ -304,10 +310,10 @@ cut_newline(char const *const _it)
 }
 
 void
-gcli_print_commits(gcli_commit_list const *const list)
+gcli_print_commits(struct gcli_commit_list const *const list)
 {
 	gcli_tbl table;
-	gcli_tblcoldef cols[] = {
+	struct gcli_tblcoldef cols[] = {
 		{ .name = "SHA",     .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_COLOUREXPL },
 		{ .name = "AUTHOR",  .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_BOLD },
 		{ .name = "EMAIL",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
@@ -322,7 +328,7 @@ gcli_print_commits(gcli_commit_list const *const list)
 
 	table = gcli_tbl_begin(cols, ARRAY_SIZE(cols));
 	if (!table)
-		errx(1, "error: could not initialize table");
+		errx(1, "gcli: error: could not initialize table");
 
 	for (size_t i = 0; i < list->commits_size; ++i) {
 		char *message = cut_newline(list->commits[i].message);
@@ -341,7 +347,7 @@ int
 gcli_pull_commits(char const *owner, char const *repo,
                   int const pr_number)
 {
-	gcli_commit_list commits = {0};
+	struct gcli_commit_list commits = {0};
 	int rc = 0;
 
 	rc = gcli_pull_get_commits(g_clictx, owner, repo, pr_number, &commits);
@@ -355,53 +361,51 @@ gcli_pull_commits(char const *owner, char const *repo,
 }
 
 static void
-pull_init_user_file(gcli_ctx *ctx, FILE *stream, void *_opts)
+pull_init_user_file(struct gcli_ctx *ctx, FILE *stream, void *_opts)
 {
-	gcli_submit_pull_options *opts = _opts;
+	struct gcli_submit_pull_options *opts = _opts;
 
 	(void) ctx;
 	fprintf(
 		stream,
-		"! PR TITLE : "SV_FMT"\n"
+		"! PR TITLE : %s\n"
 		"! Enter PR comments above.\n"
 		"! All lines starting with '!' will be discarded.\n",
-		SV_ARGS(opts->title));
+		opts->title);
 }
 
-static sn_sv
-gcli_pull_get_user_message(gcli_submit_pull_options *opts)
+static char *
+gcli_pull_get_user_message(struct gcli_submit_pull_options *opts)
 {
 	return gcli_editor_get_user_message(g_clictx, pull_init_user_file, opts);
 }
 
 static int
-create_pull(gcli_submit_pull_options opts, int always_yes)
+create_pull(struct gcli_submit_pull_options opts, int always_yes)
 {
 	opts.body = gcli_pull_get_user_message(&opts);
 
 	fprintf(stdout,
 	        "The following PR will be created:\n"
 	        "\n"
-	        "TITLE   : "SV_FMT"\n"
-	        "BASE    : "SV_FMT"\n"
-	        "HEAD    : "SV_FMT"\n"
+	        "TITLE   : %s\n"
+	        "BASE    : %s\n"
+	        "HEAD    : %s\n"
 	        "IN      : %s/%s\n"
-	        "MESSAGE :\n"SV_FMT"\n",
-	        SV_ARGS(opts.title),SV_ARGS(opts.to),
-	        SV_ARGS(opts.from),
-	        opts.owner, opts.repo,
-	        SV_ARGS(opts.body));
+	        "MESSAGE :\n%s\n",
+	        opts.title, opts.to, opts.from,
+	        opts.owner, opts.repo, opts.body ? opts.body : "No message.");
 
 	fputc('\n', stdout);
 
 	if (!always_yes)
 		if (!sn_yesno("Do you want to continue?"))
-			errx(1, "PR aborted.");
+			errx(1, "gcli: PR aborted.");
 
 	return gcli_pull_submit(g_clictx, opts);
 }
 
-static sn_sv
+static char const *
 pr_try_derive_head(void)
 {
 	char const *account;
@@ -409,19 +413,20 @@ pr_try_derive_head(void)
 
 	if ((account = gcli_config_get_account_name(g_clictx)) == NULL) {
 		errx(1,
-		     "error: Cannot derive PR head. Please specify --from or set the\n"
-		     "       account in the users gcli config file.\n"
-		     "note:  %s",
+		     "gcli: error: Cannot derive PR head. Please specify --from or set the"
+		     " account in the users gcli config file.\n"
+		     "gcli: note:  %s",
 		     gcli_get_error(g_clictx));
 	}
 
-	if (!(branch = gcli_gitconfig_get_current_branch()).length)
+	if (!(branch = gcli_gitconfig_get_current_branch()).length) {
 		errx(1,
-		     "error: Cannot derive PR head. Please specify --from or, if you\n"
-		     "       are in »detached HEAD« state, checkout the branch you \n"
-		     "       want to pull request.\n");
+		     "gcli: error: Cannot derive PR head. Please specify --from or, if you"
+		     " are in »detached HEAD« state, checkout the branch you"
+		     " want to pull request.");
+	}
 
-	return sn_sv_fmt("%s:"SV_FMT, account, SV_ARGS(branch));
+	return sn_asprintf("%s:"SV_FMT, account, SV_ARGS(branch));
 }
 
 static int
@@ -429,7 +434,7 @@ subcommand_pull_create(int argc, char *argv[])
 {
 	/* we'll use getopt_long here to parse the arguments */
 	int ch;
-	gcli_submit_pull_options opts   = {0};
+	struct gcli_submit_pull_options opts   = {0};
 	int always_yes = 0;
 
 	const struct option options[] = {
@@ -457,16 +462,20 @@ subcommand_pull_create(int argc, char *argv[])
 		  .has_arg = required_argument,
 		  .flag = NULL,
 		  .val = 'l' },
+		{ .name = "automerge",
+		  .has_arg = required_argument,
+		  .flag = NULL,
+		  .val = 'a' },
 		{0},
 	};
 
-	while ((ch = getopt_long(argc, argv, "yf:t:do:r:l:", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "ayf:t:do:r:l:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'f':
-			opts.from  = SV(optarg);
+			opts.from = optarg;
 			break;
 		case 't':
-			opts.to    = SV(optarg);
+			opts.to = optarg;
 			break;
 		case 'd':
 			opts.draft = 1;
@@ -485,6 +494,9 @@ subcommand_pull_create(int argc, char *argv[])
 		case 'y':
 			always_yes = 1;
 			break;
+		case 'a':
+			opts.automerge = true;
+			break;
 		default:
 			usage();
 			return EXIT_FAILURE;
@@ -494,29 +506,31 @@ subcommand_pull_create(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	if (!opts.from.length)
+	if (!opts.from)
 		opts.from = pr_try_derive_head();
 
-	if (!opts.to.length) {
-		opts.to = gcli_config_get_base(g_clictx);
-		if (opts.to.length == 0)
+	if (!opts.to) {
+		sn_sv base = gcli_config_get_base(g_clictx);
+		if (base.length == 0)
 			errx(1,
-			     "error: PR base is missing. Please either specify "
+			     "gcli: error: PR base is missing. Please either specify "
 			     "--to branch-name or set pr.base in .gcli.");
+
+		opts.to = sn_sv_to_cstr(base);
 	}
 
 	check_owner_and_repo(&opts.owner, &opts.repo);
 
 	if (argc != 1) {
-		fprintf(stderr, "error: Missing title to PR\n");
+		fprintf(stderr, "gcli: error: Missing title to PR\n");
 		usage();
 		return EXIT_FAILURE;
 	}
 
-	opts.title = SV(argv[0]);
+	opts.title = argv[0];
 
 	if (create_pull(opts, always_yes) < 0)
-		errx(1, "error: failed to submit pull request: %s",
+		errx(1, "gcli: error: failed to submit pull request: %s",
 		     gcli_get_error(g_clictx));
 
 	free(opts.labels);
@@ -536,11 +550,11 @@ subcommand_pulls(int argc, char *argv[])
 	char *endptr = NULL;
 	char const *owner = NULL;
 	char const *repo = NULL;
-	gcli_pull_list pulls = {0};
+	struct gcli_pull_list pulls = {0};
 	int ch = 0;
 	int pr = -1;
 	int n = 30;                 /* how many prs to fetch at least */
-	gcli_pull_fetch_details details = {0};
+	struct gcli_pull_fetch_details details = {0};
 	enum gcli_output_flags flags = 0;
 
 	/* detect whether we wanna create a PR */
@@ -601,21 +615,21 @@ subcommand_pulls(int argc, char *argv[])
 		case 'i': {
 			pr = strtoul(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
-				err(1, "error: cannot parse pr number »%s«", optarg);
+				err(1, "gcli: error: cannot parse pr number »%s«", optarg);
 
 			if (pr <= 0)
-				errx(1, "error: pr number is out of range");
+				errx(1, "gcli: error: pr number is out of range");
 		} break;
 		case 'n': {
 			n = strtoul(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
-				err(1, "error: cannot parse pr count »%s«", optarg);
+				err(1, "gcli: error: cannot parse pr count »%s«", optarg);
 
 			if (n < -1)
-				errx(1, "error: pr count is out of range");
+				errx(1, "gcli: error: pr count is out of range");
 
 			if (n == 0)
-				errx(1, "error: pr count must not be zero");
+				errx(1, "gcli: error: pr count must not be zero");
 		} break;
 		case 'a': {
 			details.all = true;
@@ -648,7 +662,7 @@ subcommand_pulls(int argc, char *argv[])
 	 * open PRs and exit */
 	if (pr < 0) {
 		if (gcli_get_pulls(g_clictx, owner, repo, &details, n, &pulls) < 0)
-			errx(1, "error: could not fetch pull requests: %s",
+			errx(1, "gcli: error: could not fetch pull requests: %s",
 			     gcli_get_error(g_clictx));
 
 		gcli_print_pulls(flags, &pulls, n);
@@ -659,7 +673,7 @@ subcommand_pulls(int argc, char *argv[])
 
 	/* If a PR number was given, require -a to be unset */
 	if (details.all || details.author) {
-		fprintf(stderr, "error: -a and -A cannot be combined with operations on a PR\n");
+		fprintf(stderr, "gcli: error: -a and -A cannot be combined with operations on a PR\n");
 		usage();
 		return EXIT_FAILURE;
 	}
@@ -678,7 +692,7 @@ struct action_ctx {
 	 * we'll fetch the summary only if a command requires it. Then
 	 * we'll proceed to actually handling it. */
 	int fetched_pull;
-	gcli_pull pull;
+	struct gcli_pull pull;
 };
 
 /** Helper routine for fetching a PR if required */
@@ -689,7 +703,7 @@ action_ctx_ensure_pull(struct action_ctx *ctx)
 		return;
 
 	if (gcli_get_pull(g_clictx, ctx->owner, ctx->repo, ctx->pr, &ctx->pull) < 0)
-		errx(1, "error: failed to fetch pull request data: %s",
+		errx(1, "gcli: error: failed to fetch pull request data: %s",
 		     gcli_get_error(g_clictx));
 
 	ctx->fetched_pull = 1;
@@ -711,13 +725,13 @@ action_all(struct action_ctx *ctx)
 	/* Commits */
 	puts("\nCOMMITS");
 	if (gcli_pull_commits(ctx->owner, ctx->repo, ctx->pr) < 0)
-		errx(1, "error: failed to fetch pull request checks: %s",
+		errx(1, "gcli: error: failed to fetch pull request checks: %s",
 		     gcli_get_error(g_clictx));
 
 	/* Checks */
 	puts("\nCHECKS");
 	if (gcli_pull_checks(ctx->owner, ctx->repo, ctx->pr) < 0)
-		errx(1, "error: failed to fetch pull request checks: %s",
+		errx(1, "gcli: error: failed to fetch pull request checks: %s",
 		     gcli_get_error(g_clictx));
 }
 
@@ -751,34 +765,38 @@ action_commits(struct action_ctx *const ctx)
 static void
 action_diff(struct action_ctx *const ctx)
 {
-	if (gcli_pull_print_diff(stdout, ctx->owner, ctx->repo, ctx->pr) < 0)
-		errx(1, "error: failed to fetch diff: %s",
+	if (gcli_pull_print_diff(stdout, ctx->owner, ctx->repo, ctx->pr) < 0) {
+		errx(1, "gcli: error: failed to fetch diff: %s",
 		     gcli_get_error(g_clictx));
+	}
 }
 
 static void
 action_patch(struct action_ctx *const ctx)
 {
-	if (gcli_pull_print_patch(stdout, ctx->owner, ctx->repo, ctx->pr) < 0)
-		errx(1, "error: failed to fetch patch: %s",
+	if (gcli_pull_print_patch(stdout, ctx->owner, ctx->repo, ctx->pr) < 0) {
+		errx(1, "gcli: error: failed to fetch patch: %s",
 		     gcli_get_error(g_clictx));
+	}
 }
 
 /* aliased to notes */
 static void
 action_comments(struct action_ctx *const ctx)
 {
-	if (gcli_pull_comments(ctx->owner, ctx->repo, ctx->pr) < 0)
-		errx(1, "error: failed to fetch pull comments: %s",
+	if (gcli_pull_comments(ctx->owner, ctx->repo, ctx->pr) < 0) {
+		errx(1, "gcli: error: failed to fetch pull comments: %s",
 		     gcli_get_error(g_clictx));
+	}
 }
 
 static void
 action_ci(struct action_ctx *const ctx)
 {
-	if (gcli_pull_checks(ctx->owner, ctx->repo, ctx->pr) < 0)
-		errx(1, "error: failed to fetch pull request checks: %s",
+	if (gcli_pull_checks(ctx->owner, ctx->repo, ctx->pr) < 0) {
+		errx(1, "gcli: error: failed to fetch pull request checks: %s",
 		     gcli_get_error(g_clictx));
+	}
 }
 
 static void
@@ -808,25 +826,28 @@ action_merge(struct action_ctx *const ctx)
 		}
 	}
 
-	if (gcli_pull_merge(g_clictx, ctx->owner, ctx->repo, ctx->pr, flags) < 0)
-		errx(1, "error: failed to merge pull request: %s",
+	if (gcli_pull_merge(g_clictx, ctx->owner, ctx->repo, ctx->pr, flags) < 0) {
+		errx(1, "gcli: error: failed to merge pull request: %s",
 		     gcli_get_error(g_clictx));
+	}
 }
 
 static void
 action_close(struct action_ctx *const ctx)
 {
-	if (gcli_pull_close(g_clictx, ctx->owner, ctx->repo, ctx->pr) < 0)
-		errx(1, "error: failed to close pull request: %s",
+	if (gcli_pull_close(g_clictx, ctx->owner, ctx->repo, ctx->pr) < 0) {
+		errx(1, "gcli: error: failed to close pull request: %s",
 		     gcli_get_error(g_clictx));
+	}
 }
 
 static void
 action_reopen(struct action_ctx *const ctx)
 {
-	if (gcli_pull_reopen(g_clictx, ctx->owner, ctx->repo, ctx->pr) < 0)
-		errx(1, "error: failed to reopen pull request: %s",
+	if (gcli_pull_reopen(g_clictx, ctx->owner, ctx->repo, ctx->pr) < 0) {
+		errx(1, "gcli: error: failed to reopen pull request: %s",
 		     gcli_get_error(g_clictx));
+	}
 }
 
 static void
@@ -839,7 +860,7 @@ action_labels(struct action_ctx *const ctx)
 	int rc = 0;
 
 	if (ctx->argc == 0) {
-		fprintf(stderr, "error: expected label action\n");
+		fprintf(stderr, "gcli: error: expected label action\n");
 		usage();
 		exit(EXIT_FAILURE);
 	}
@@ -861,16 +882,20 @@ action_labels(struct action_ctx *const ctx)
 	if (add_labels_size) {
 		rc = gcli_pull_add_labels(g_clictx, ctx->owner, ctx->repo, ctx->pr,
 		                          add_labels, add_labels_size);
-		if (rc < 0)
-			errx(1, "error: failed to add labels: %s", gcli_get_error(g_clictx));
+		if (rc < 0) {
+			errx(1, "gcli: error: failed to add labels: %s",
+			     gcli_get_error(g_clictx));
+		}
 	}
 
 	if (remove_labels_size) {
 		rc = gcli_pull_remove_labels(g_clictx, ctx->owner, ctx->repo, ctx->pr,
 		                             remove_labels, remove_labels_size);
 
-		if (rc < 0)
-			errx(1, "error: failed to remove labels: %s", gcli_get_error(g_clictx));
+		if (rc < 0) {
+			errx(1, "gcli: error: failed to remove labels: %s",
+			     gcli_get_error(g_clictx));
+		}
 	}
 
 	free(add_labels);
@@ -893,9 +918,10 @@ action_milestone(struct action_ctx *const ctx)
 	ctx->argv += 1;
 
 	if (strcmp(arg, "-d") == 0) {
-		if (gcli_pull_clear_milestone(g_clictx, ctx->owner, ctx->repo, ctx->pr) < 0)
-			errx(1, "error: failed to clear milestone: %s",
+		if (gcli_pull_clear_milestone(g_clictx, ctx->owner, ctx->repo, ctx->pr) < 0) {
+			errx(1, "gcli: error: failed to clear milestone: %s",
 			     gcli_get_error(g_clictx));
+		}
 
 	} else {
 		int milestone_id = 0;
@@ -904,15 +930,16 @@ action_milestone(struct action_ctx *const ctx)
 
 		milestone_id = strtoul(arg, &endptr, 10);
 		if (endptr != arg + strlen(arg)) {
-			fprintf(stderr, "error: cannot parse milestone id »%s«\n", arg);
+			fprintf(stderr, "gcli: error: cannot parse milestone id »%s«\n", arg);
 			exit(EXIT_FAILURE);
 		}
 
 		rc = gcli_pull_set_milestone(g_clictx, ctx->owner, ctx->repo, ctx->pr,
 		                             milestone_id);
-		if (rc < 0)
-			errx(1, "error: failed to set milestone: %s",
+		if (rc < 0) {
+			errx(1, "gcli: error: failed to set milestone: %s",
 			     gcli_get_error(g_clictx));
+		}
 	}
 }
 
@@ -922,15 +949,17 @@ action_request_review(struct action_ctx *const ctx)
 	int rc;
 
 	if (ctx->argc < 2) {
-		fprintf(stderr, "error: missing user name for reviewer\n");
+		fprintf(stderr, "gcli: error: missing user name for reviewer\n");
 		usage();
 		exit(EXIT_FAILURE);
 	}
 
 	rc = gcli_pull_add_reviewer(g_clictx, ctx->owner, ctx->repo, ctx->pr,
 	                            ctx->argv[1]);
-	if (rc < 0)
-		errx(1, "error: failed to request review: %s", gcli_get_error(g_clictx));
+	if (rc < 0) {
+		errx(1, "gcli: error: failed to request review: %s",
+		     gcli_get_error(g_clictx));
+	}
 
 	ctx->argc -= 1;
 	ctx->argv += 1;
@@ -942,7 +971,7 @@ action_title(struct action_ctx *const ctx)
 	int rc = 0;
 
 	if (ctx->argc < 2) {
-		fprintf(stderr, "error: missing title\n");
+		fprintf(stderr, "gcli: error: missing title\n");
 		usage();
 		exit(EXIT_FAILURE);
 	}
@@ -950,7 +979,7 @@ action_title(struct action_ctx *const ctx)
 	rc = gcli_pull_set_title(g_clictx, ctx->owner, ctx->repo, ctx->pr,
 	                         ctx->argv[1]);
 	if (rc < 0) {
-		errx(1, "error: failed to update review title: %s",
+		errx(1, "gcli: error: failed to update review title: %s",
 		     gcli_get_error(g_clictx));
 	}
 
@@ -1010,7 +1039,7 @@ handle_pull_actions(int argc, char *argv[], char const *owner, char const *repo,
 
 	/* Check if the user missed out on supplying actions */
 	if (argc == 0) {
-		fprintf(stderr, "error: no actions supplied\n");
+		fprintf(stderr, "gcli: error: no actions supplied\n");
 		usage();
 		exit(EXIT_FAILURE);
 	}
@@ -1029,7 +1058,7 @@ handle_pull_actions(int argc, char *argv[], char const *owner, char const *repo,
 			/* At this point we found an unknown action / stray
 			 * options on the command line. Error out in this case. */
 
-			fprintf(stderr, "error: unknown action %s\n", action);
+			fprintf(stderr, "gcli: error: unknown action %s\n", action);
 			usage();
 
 			return EXIT_FAILURE;

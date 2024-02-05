@@ -34,43 +34,47 @@
 #include <config.h>
 #endif
 
-#include <sn/sn.h>
 #include <gcli/gcli.h>
+#include <gcli/nvlist.h>
+
+#include <sn/sn.h>
 #include <stdio.h>
 #include <stdbool.h>
 
-typedef struct gcli_issue gcli_issue;
-typedef struct gcli_submit_issue_options gcli_submit_issue_options;
-typedef struct gcli_issue_list gcli_issue_list;
-typedef struct gcli_issue_fetch_details gcli_issue_fetch_details;
+#include <gcli/attachments.h>
 
 struct gcli_issue {
 	gcli_id number;
-	sn_sv title;
-	sn_sv created_at;
-	sn_sv author;
-	sn_sv state;
+	char *title;
+	char *product;     /* only on Bugzilla */
+	char *component;   /* only on Bugzilla */
+	char *url;         /* only on Bugzilla */
+	char *created_at;
+	char *author;
+	char *state;
 	int comments;
 	bool locked;
-	sn_sv body;
-	sn_sv *labels;
+	char *body;
+	char **labels;
 	size_t labels_size;
-	sn_sv *assignees;
+	char **assignees;
 	size_t assignees_size;
 	/* workaround for GitHub where PRs are also issues */
 	int is_pr;
-	sn_sv milestone;
+	char *milestone;
 };
 
 struct gcli_submit_issue_options {
 	char const *owner;
 	char const *repo;
-	sn_sv title;
-	sn_sv body;
+	char *title;
+	char *body;
+
+	struct gcli_nvlist extra;
 };
 
 struct gcli_issue_list {
-	gcli_issue *issues;
+	struct gcli_issue *issues;
 	size_t issues_size;
 };
 
@@ -79,45 +83,51 @@ struct gcli_issue_fetch_details {
 	char const *author;         /* filter issues by this author*/
 	char const *label;          /* filter by the given label */
 	char const *milestone;      /* filter by the given milestone */
+	char const *search_term;    /* a search term or NULL if unspecified */
 };
 
-int gcli_get_issues(gcli_ctx *ctx, char const *owner, char const *reponame,
-                    gcli_issue_fetch_details const *details, int max,
-                    gcli_issue_list *out);
+int gcli_issues_search(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                       struct gcli_issue_fetch_details const *details, int max,
+                       struct gcli_issue_list *out);
 
-void gcli_issues_free(gcli_issue_list *);
+void gcli_issues_free(struct gcli_issue_list *);
 
-int gcli_get_issue(gcli_ctx *ctx, char const *owner, char const *reponame,
-                   gcli_id issue_number, gcli_issue *out);
+int gcli_get_issue(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                   gcli_id issue_number, struct gcli_issue *out);
 
-void gcli_issue_free(gcli_issue *it);
+void gcli_issue_free(struct gcli_issue *it);
 
-int gcli_issue_close(gcli_ctx *ctx, char const *owner, char const *repo,
+int gcli_issue_close(struct gcli_ctx *ctx, char const *owner, char const *repo,
                      gcli_id issue_number);
 
-int gcli_issue_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
+int gcli_issue_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
                       gcli_id issue_number);
 
-int gcli_issue_submit(gcli_ctx *ctx, gcli_submit_issue_options);
+int gcli_issue_submit(struct gcli_ctx *ctx, struct gcli_submit_issue_options);
 
-int gcli_issue_assign(gcli_ctx *ctx, char const *owner, char const *repo,
+int gcli_issue_assign(struct gcli_ctx *ctx, char const *owner, char const *repo,
                       gcli_id issue_number, char const *assignee);
 
-int gcli_issue_add_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                          gcli_id issue_number, char const *const labels[],
-                          size_t labels_size);
+int gcli_issue_add_labels(struct gcli_ctx *ctx, char const *owner,
+                          char const *repo, gcli_id issue_number,
+                          char const *const labels[], size_t labels_size);
 
-int gcli_issue_remove_labels(gcli_ctx *ctx, char const *owner, char const *repo,
-                             gcli_id issue_number, char const *const labels[],
-                             size_t labels_size);
+int gcli_issue_remove_labels(struct gcli_ctx *ctx, char const *owner,
+                             char const *repo, gcli_id issue_number,
+                             char const *const labels[], size_t labels_size);
 
-int gcli_issue_set_milestone(gcli_ctx *ctx, char const *owner, char const *repo,
-                             gcli_id issue, int milestone);
+int gcli_issue_set_milestone(struct gcli_ctx *ctx, char const *owner,
+                             char const *repo, gcli_id issue, int milestone);
 
-int gcli_issue_clear_milestone(gcli_ctx *cxt, char const *owner,
+int gcli_issue_clear_milestone(struct gcli_ctx *cxt, char const *owner,
                                char const *repo, gcli_id issue);
 
-int gcli_issue_set_title(gcli_ctx *ctx, char const *owner, char const *repo,
-                         gcli_id issue, char const *new_title);
+int gcli_issue_set_title(struct gcli_ctx *ctx, char const *owner,
+                         char const *repo, gcli_id issue,
+                         char const *new_title);
+
+int gcli_issue_get_attachments(struct gcli_ctx *ctx, char const *owner,
+                               char const *repo, gcli_id issue,
+                               struct gcli_attachment_list *attachments);
 
 #endif /* ISSUES_H */

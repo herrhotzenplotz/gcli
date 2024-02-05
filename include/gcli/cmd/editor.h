@@ -36,11 +36,9 @@
 
 #include <gcli/gcli.h>
 
-#include <sn/sn.h>
-
-sn_sv gcli_editor_get_user_message(
-	gcli_ctx *ctx,
-	void (*initializer)(gcli_ctx *, FILE *, void *),
+char *gcli_editor_get_user_message(
+	struct gcli_ctx *ctx,
+	void (*initializer)(struct gcli_ctx *, FILE *, void *),
 	void *user_data);
 
 #endif /* GCLI_CMD_EDITOR_H */

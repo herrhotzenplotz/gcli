@@ -53,22 +53,22 @@
  * allocation. */
 
 static bool
-pull_has_label(gcli_pull const *p, char const *const label)
+pull_has_label(struct gcli_pull const *p, char const *const label)
 {
 	for (size_t i = 0; i < p->labels_size; ++i) {
-		if (sn_sv_eq_to(p->labels[i], label))
+		if (strcmp(p->labels[i], label) == 0)
 			return true;
 	}
 	return false;
 }
 
 static void
-github_pulls_filter(gcli_pull **listp, size_t *sizep,
-                    gcli_pull_fetch_details const *details)
+github_pulls_filter(struct gcli_pull **listp, size_t *sizep,
+                    struct gcli_pull_fetch_details const *details)
 {
 	for (size_t i = *sizep; i > 0; --i) {
-		gcli_pull *pulls = *listp;
-		gcli_pull *pull = &pulls[i-1];
+		struct gcli_pull *pulls = *listp;
+		struct gcli_pull *pull = &pulls[i-1];
 		bool should_remove = false;
 
 		if (details->author && strcmp(details->author, pull->author))
@@ -91,11 +91,11 @@ github_pulls_filter(gcli_pull **listp, size_t *sizep,
 }
 
 static int
-github_fetch_pulls(gcli_ctx *ctx, char *url,
-                   gcli_pull_fetch_details const *details, int max,
-                   gcli_pull_list *const list)
+github_fetch_pulls(struct gcli_ctx *ctx, char *url,
+                   struct gcli_pull_fetch_details const *details, int max,
+                   struct gcli_pull_list *const list)
 {
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &list->pulls,
 		.sizep = &list->pulls_size,
 		.parse = (parsefn)(parse_github_pulls),
@@ -108,9 +108,9 @@ github_fetch_pulls(gcli_ctx *ctx, char *url,
 }
 
 int
-github_get_pulls(gcli_ctx *ctx, char const *owner, char const *repo,
-                 gcli_pull_fetch_details const *const details,
-                 int const max, gcli_pull_list *const list)
+github_get_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                 struct gcli_pull_fetch_details const *const details,
+                 int const max, struct gcli_pull_list *const list)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -131,7 +131,7 @@ github_get_pulls(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-github_pull_get_patch(gcli_ctx *ctx, FILE *stream, char const *owner,
+github_pull_get_patch(struct gcli_ctx *ctx, FILE *stream, char const *owner,
                       char const *repo, gcli_id const pr_number)
 {
 	char *url = NULL;
@@ -156,7 +156,7 @@ github_pull_get_patch(gcli_ctx *ctx, FILE *stream, char const *owner,
 }
 
 int
-github_pull_get_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
+github_pull_get_diff(struct gcli_ctx *ctx, FILE *stream, char const *owner,
                      char const *repo, gcli_id const pr_number)
 {
 	char *url = NULL;
@@ -183,10 +183,10 @@ github_pull_get_diff(gcli_ctx *ctx, FILE *stream, char const *owner,
 /* TODO: figure out a way to get rid of the 3 consecutive urlencode
  * calls */
 static int
-github_pull_delete_head_branch(gcli_ctx *ctx, char const *owner,
+github_pull_delete_head_branch(struct gcli_ctx *ctx, char const *owner,
                                char const *repo, gcli_id const pr_number)
 {
-	gcli_pull pull = {0};
+	struct gcli_pull pull = {0};
 	char *url, *e_owner, *e_repo;
 	char const *head_branch;
 	int rc = 0;
@@ -213,7 +213,7 @@ github_pull_delete_head_branch(gcli_ctx *ctx, char const *owner,
 }
 
 int
-github_pull_merge(gcli_ctx *ctx, char const *owner, char const *repo,
+github_pull_merge(struct gcli_ctx *ctx, char const *owner, char const *repo,
                   gcli_id const pr_number, enum gcli_merge_flags const flags)
 {
 	char *url = NULL;
@@ -245,119 +245,175 @@ github_pull_merge(gcli_ctx *ctx, char const *owner, char const *repo,
 	return rc;
 }
 
-int
-github_pull_close(gcli_ctx *ctx, char const *owner, char const *repo,
-                  gcli_id const pr_number)
+static int
+github_pull_patch_state(struct gcli_ctx *const ctx, char const *const owner,
+                        char const *const repo, gcli_id const pr,
+                        char const *const new_state)
 {
-	char *url = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
-	char *data = NULL;
+	char *url = NULL, *e_owner = NULL, *e_repo = NULL, *payload = NULL;
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
+	/* Generate payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "state");
+		gcli_jsongen_string(&gen, new_state);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* Generate URL */
 	e_owner = gcli_urlencode(owner);
 	e_repo = gcli_urlencode(repo);
 
-	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%"PRIid,
-		gcli_get_apibase(ctx),
-		e_owner, e_repo, pr_number);
-	data = sn_asprintf("{ \"state\": \"closed\"}");
+	url = sn_asprintf("%s/repos/%s/%s/pulls/%"PRIid, gcli_get_apibase(ctx),
+	                  e_owner, e_repo, pr);
 
-	rc = gcli_fetch_with_method(ctx, "PATCH", url, data, NULL, NULL);
-
-	free(url);
 	free(e_repo);
 	free(e_owner);
-	free(data);
+
+	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
+
+	free(url);
+	free(payload);
 
 	return rc;
 }
 
 int
-github_pull_reopen(gcli_ctx *ctx, char const *owner, char const *repo,
-                   gcli_id const pr_number)
+github_pull_close(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                  gcli_id const pr)
 {
-	char *url = NULL;
-	char *data = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
-	int rc = 0;
+	return github_pull_patch_state(ctx, owner, repo, pr, "closed");
+}
 
-	e_owner = gcli_urlencode(owner);
-	e_repo = gcli_urlencode(repo);
+int
+github_pull_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                   gcli_id const pr)
+{
+	return github_pull_patch_state(ctx, owner, repo, pr, "open");
+}
 
-	url  = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%"PRIid,
-		gcli_get_apibase(ctx),
-		e_owner, e_repo, pr_number);
-	data = sn_asprintf("{ \"state\": \"open\"}");
+static int
+github_pull_set_automerge(struct gcli_ctx *const ctx, char const *const node_id)
+{
+	char *url, *query, *payload;
+	int rc;
+	char const *const fmt =
+		"mutation updateAutomergeState {\n"
+		"   enablePullRequestAutoMerge(input: {\n"
+		"       pullRequestId: \"%s\",\n"
+		"       mergeMethod: MERGE\n"
+		"   }) {\n"
+		"      clientMutationId\n"
+		"   }\n"
+		"}\n";
 
-	rc = gcli_fetch_with_method(ctx, "PATCH", url, data, NULL, NULL);
+	struct gcli_jsongen gen = {0};
 
+	query = sn_asprintf(fmt, node_id);
+
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "query");
+		gcli_jsongen_string(&gen, query);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+	free(query);
+
+	url = sn_asprintf("%s/graphql", gcli_get_apibase(ctx));
+
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
+
+	free(payload);
 	free(url);
-	free(data);
-	free(e_owner);
-	free(e_repo);
 
 	return rc;
 }
 
 int
-github_perform_submit_pull(gcli_ctx *ctx, gcli_submit_pull_options opts)
+github_perform_submit_pull(struct gcli_ctx *ctx, struct gcli_submit_pull_options opts)
 {
-	sn_sv e_head, e_base, e_title, e_body;
-	gcli_fetch_buffer fetch_buffer = {0};
-	struct json_stream json = {0};
-	gcli_pull pull = {0};
+	char *url = NULL, *payload = NULL, *e_owner = NULL, *e_repo = NULL;
+	struct gcli_fetch_buffer fetch_buffer = {0};
+	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
-	e_head  = gcli_json_escape(opts.from);
-	e_base  = gcli_json_escape(opts.to);
-	e_title = gcli_json_escape(opts.title);
-	e_body  = gcli_json_escape(opts.body);
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "head");
+		gcli_jsongen_string(&gen, opts.from);
 
-	char *post_fields = sn_asprintf(
-		"{\"head\":\""SV_FMT"\",\"base\":\""SV_FMT"\", "
-		"\"title\": \""SV_FMT"\", \"body\": \""SV_FMT"\" }",
-		SV_ARGS(e_head),
-		SV_ARGS(e_base),
-		SV_ARGS(e_title),
-		SV_ARGS(e_body));
-	char *url = sn_asprintf(
-		"%s/repos/%s/%s/pulls",
-		gcli_get_apibase(ctx),
-		opts.owner, opts.repo);
+		gcli_jsongen_objmember(&gen, "base");
+		gcli_jsongen_string(&gen, opts.to);
 
-	rc = gcli_fetch_with_method(ctx, "POST", url, post_fields, NULL,
-	                            &fetch_buffer);
+		gcli_jsongen_objmember(&gen, "title");
+		gcli_jsongen_string(&gen, opts.title);
+
+		/* Body is optional and will be NULL if unset */
+		if (opts.body) {
+			gcli_jsongen_objmember(&gen, "body");
+			gcli_jsongen_string(&gen, opts.body);
+		}
+	}
+	gcli_jsongen_end_object(&gen);
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	e_owner = gcli_urlencode(opts.owner);
+	e_repo = gcli_urlencode(opts.repo);
+
+	url = sn_asprintf("%s/repos/%s/%s/pulls", gcli_get_apibase(ctx), e_owner,
+	                  e_repo);
+
+	free(e_owner);
+	free(e_repo);
+
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, &fetch_buffer);
 
 	/* Add labels if requested. GitHub doesn't allow us to do this all
 	 * with one request. */
-	if (rc == 0 && opts.labels_size) {
+	if (rc == 0 && (opts.labels_size || opts.automerge)) {
+		struct json_stream json = {0};
+		struct gcli_pull pull = {0};
+
 		json_open_buffer(&json, fetch_buffer.data, fetch_buffer.length);
 		parse_github_pull(ctx, &json, &pull);
 
-		github_issue_add_labels(ctx, opts.owner, opts.repo, pull.id,
-		                        opts.labels, opts.labels_size);
+		if (opts.labels_size) {
+			rc = github_issue_add_labels(ctx, opts.owner, opts.repo, pull.id,
+			                             (char const *const *)opts.labels,
+			                             opts.labels_size);
+		}
+
+		if (rc == 0 && opts.automerge) {
+			/* pull.id is the global pull request ID */
+			rc = github_pull_set_automerge(ctx, pull.node_id);
+		}
 
 		gcli_pull_free(&pull);
 		json_close(&json);
 	}
 
+
 	free(fetch_buffer.data);
-	free(e_head.data);
-	free(e_base.data);
-	free(e_title.data);
-	free(e_body.data);
-	free(post_fields);
+	free(payload);
 	free(url);
 
 	return rc;
 }
 
 static void
-filter_commit_short_sha(gcli_commit **listp, size_t *sizep, void *_data)
+filter_commit_short_sha(struct gcli_commit **listp, size_t *sizep, void *_data)
 {
 	(void) _data;
 
@@ -366,14 +422,15 @@ filter_commit_short_sha(gcli_commit **listp, size_t *sizep, void *_data)
 }
 
 int
-github_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
-                        gcli_id const pr_number, gcli_commit_list *const out)
+github_get_pull_commits(struct gcli_ctx *ctx, char const *owner,
+                        char const *repo, gcli_id const pr,
+                        struct gcli_commit_list *const out)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
 	char *e_repo = NULL;
 
-	gcli_fetch_list_ctx fl = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &out->commits,
 		.sizep = &out->commits_size,
 		.max = -1,
@@ -384,10 +441,8 @@ github_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%"PRIid"/commits",
-		gcli_get_apibase(ctx),
-		e_owner, e_repo, pr_number);
+	url = sn_asprintf("%s/repos/%s/%s/pulls/%"PRIid"/commits",
+	                  gcli_get_apibase(ctx), e_owner, e_repo, pr);
 
 	free(e_owner);
 	free(e_repo);
@@ -396,28 +451,25 @@ github_get_pull_commits(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-github_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
-                gcli_id const pr_number, gcli_pull *const out)
+github_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                gcli_id const pr, struct gcli_pull *const out)
 {
 	int rc = 0;
-	gcli_fetch_buffer json_buffer = {0};
-	char *url = NULL;
-	char *e_owner = NULL;
-	char *e_repo = NULL;
+	struct gcli_fetch_buffer json_buffer = {0};
+	char *url = NULL, *e_owner = NULL, *e_repo = NULL;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf(
-		"%s/repos/%s/%s/pulls/%"PRIid,
-		gcli_get_apibase(ctx),
-		e_owner, e_repo, pr_number);
+	url = sn_asprintf("%s/repos/%s/%s/pulls/%"PRIid, gcli_get_apibase(ctx),
+	                  e_owner, e_repo, pr);
+
 	free(e_owner);
 	free(e_repo);
 
 	rc = gcli_fetch(ctx, url, NULL, &json_buffer);
 	if (rc == 0) {
-		json_stream stream = {0};
+		struct json_stream stream = {0};
 
 		json_open_buffer(&stream, json_buffer.data, json_buffer.length);
 		parse_github_pull(ctx, &stream, out);
@@ -431,8 +483,8 @@ github_get_pull(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-github_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
-                       gcli_id const pr_number, gcli_pull_checks_list *out)
+github_pull_get_checks(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                       gcli_id const pr_number, struct gcli_pull_checks_list *out)
 {
 	char refname[64] = {0};
 
@@ -441,16 +493,17 @@ github_pull_get_checks(gcli_ctx *ctx, char const *owner, char const *repo,
 	snprintf(refname, sizeof refname, "refs%%2Fpull%%2F%"PRIid"%%2Fhead", pr_number);
 
 	return github_get_checks(ctx, owner, repo, refname, -1,
-	                         (github_check_list *)out);
+	                         (struct github_check_list *)out);
 }
 
 int
-github_pull_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
-                         gcli_id pr_number, char const *username)
+github_pull_add_reviewer(struct gcli_ctx *ctx, char const *owner,
+                         char const *repo, gcli_id pr_number,
+                         char const *username)
 {
 	int rc = 0;
 	char *url, *payload, *e_owner, *e_repo;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 
 	/* URL-encode repo and owner */
 	e_owner = gcli_urlencode(owner);
@@ -487,12 +540,12 @@ github_pull_add_reviewer(gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-github_pull_set_title(gcli_ctx *ctx, char const *owner, char const *repo,
+github_pull_set_title(struct gcli_ctx *ctx, char const *owner, char const *repo,
                       gcli_id pull, char const *new_title)
 {
 	char *url, *e_owner, *e_repo, *payload;
 	int rc;
-	gcli_jsongen gen = {0};
+	struct gcli_jsongen gen = {0};
 
 	/* Generate the url */
 	e_owner = gcli_urlencode(owner);

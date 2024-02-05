@@ -105,6 +105,7 @@ gcli_pull_free(struct gcli_pull *const it)
 	free(it->base_sha);
 	free(it->milestone);
 	free(it->coverage);
+	free(it->node_id);
 
 	for (size_t i = 0; i < it->labels_size; ++i)
 		free(it->labels[i]);
@@ -144,6 +145,12 @@ gcli_pull_checks_free(struct gcli_pull_checks_list *list)
 int
 gcli_pull_submit(struct gcli_ctx *ctx, struct gcli_submit_pull_options opts)
 {
+	if (opts.automerge) {
+		int const q = gcli_forge(ctx)->pull_summary_quirks;
+		if (q & GCLI_PRS_QUIRK_AUTOMERGE)
+			return gcli_error(ctx, "forge does not support auto-merge");
+	}
+
 	gcli_null_check_call(perform_submit_pull, ctx, opts);
 }
 

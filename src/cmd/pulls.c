@@ -56,14 +56,15 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: gcli pulls create [-o owner -r repo] [-f from]\n");
-	fprintf(stderr, "                         [-t to] [-d] [-l label] pull-request-title\n");
+	fprintf(stderr, "                         [-t to] [-d] [-a] [-l label] pull-request-title\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] [-a] [-A author] [-n number]\n");
 	fprintf(stderr, "                  [-L label] [-M milestone] [-s]\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] -i pull-id actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
 	fprintf(stderr, "  -o owner        The repository owner\n");
 	fprintf(stderr, "  -r repo         The repository name\n");
-	fprintf(stderr, "  -a              Fetch everything including closed and merged PRs\n");
+	fprintf(stderr, "  -a              When listing PRs, show everything including closed and merged PRs.\n");
+	fprintf(stderr, "                  When creating a PR enable automerge.\n");
 	fprintf(stderr, "  -A author       Filter pull requests by the given author\n");
 	fprintf(stderr, "  -L label        Filter pull requests by the given label\n");
 	fprintf(stderr, "  -M milestone    Filter pull requests by the given milestone\n");
@@ -207,6 +208,9 @@ gcli_pull_print(struct gcli_pull const *const it)
 
 	if ((quirks & GCLI_PRS_QUIRK_CHANGES) == 0)
 		gcli_dict_add(dict, "CHANGED", 0, 0, "%d", it->changed_files);
+
+	if ((quirks & GCLI_PRS_QUIRK_AUTOMERGE) == 0)
+		gcli_dict_add_string(dict, "AUTOMERGE", 0, 0, sn_bool_yesno(it->automerge));
 
 	if ((quirks & GCLI_PRS_QUIRK_MERGED) == 0)
 		gcli_dict_add_string(dict, "MERGED", 0, 0, sn_bool_yesno(it->merged));
@@ -458,10 +462,14 @@ subcommand_pull_create(int argc, char *argv[])
 		  .has_arg = required_argument,
 		  .flag = NULL,
 		  .val = 'l' },
+		{ .name = "automerge",
+		  .has_arg = required_argument,
+		  .flag = NULL,
+		  .val = 'a' },
 		{0},
 	};
 
-	while ((ch = getopt_long(argc, argv, "yf:t:do:r:l:", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "ayf:t:do:r:l:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'f':
 			opts.from = optarg;
@@ -485,6 +493,9 @@ subcommand_pull_create(int argc, char *argv[])
 			break;
 		case 'y':
 			always_yes = 1;
+			break;
+		case 'a':
+			opts.automerge = true;
 			break;
 		default:
 			usage();

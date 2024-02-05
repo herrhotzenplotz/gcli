@@ -24,6 +24,15 @@ This changelog does not follow semantic versioning.
   This will search for tickets authored by herrhotzenplotz containing
   "Segfault".
 
+- Added partial support for auto-merge. When creating a pull request
+  on Gitlab and Github you can set an automerge flag. Whenever this
+  automerge flag is set a pull request will be merged once all the
+  pipelines/checks on the pull request pass.
+
+  This feature is not fully documented yet as there are bugs in it,
+  especially on Gitlab there are flaws. Please consider this feature
+  unstable and experimental.
+
 ### Fixed
 
 - Fixed a segmentation fault when getting a 404 on Gitlab. This bug

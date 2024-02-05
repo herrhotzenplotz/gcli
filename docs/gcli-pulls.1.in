@@ -67,7 +67,11 @@ option above - the same reasoning applies to this option.
 List all PRs, including closed and merged ones. Cannot be combined
 with actions. This does not affect the
 .Fl n
-option.
+option. Note that this flag has a different meaning in the
+.Cm create
+subcommand. See
+.Sx SUBCOMMANDS
+for more information.
 .It Fl n , -count Ar n
 Fetch at least
 .Ar n
@@ -105,6 +109,8 @@ the commits that are to be merged into the target repository. You may
 omit this flag and gcli will try to infer this information.
 .It Fl y , -yes
 Do not ask for confirmation before creating the PR. Assume yes.
+.It Fl a , -automerge
+Enable the automerge feature when creating the PR.
 .It Ar "PR Title..."
 The title of the Pull Request or Merge Request.
 .El

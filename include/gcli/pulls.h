@@ -59,6 +59,7 @@ struct gcli_pull {
 	char *milestone;
 	gcli_id id;
 	gcli_id number;
+	char *node_id;              /* Github: GraphQL compat */
 	int comments;
 	int additions;
 	int deletions;
@@ -76,6 +77,7 @@ struct gcli_pull {
 	bool merged;
 	bool mergeable;
 	bool draft;
+	bool automerge;
 };
 
 struct gcli_commit {
@@ -98,6 +100,7 @@ struct gcli_submit_pull_options {
 	char **labels;
 	size_t labels_size;
 	int draft;
+	bool automerge;           /** Automatically merge the PR when a pipeline passes */
 };
 
 struct gcli_pull_fetch_details {

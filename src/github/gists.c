@@ -31,6 +31,7 @@
 #include <gcli/cmd/table.h>
 #include <gcli/curl.h>
 #include <gcli/github/gists.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
 #include <gcli/github/config.h>
@@ -115,36 +116,49 @@ gcli_get_gist(struct gcli_ctx *ctx, char const *gist_id, struct gcli_gist *out)
 }
 
 #define READ_SZ 4096
-static size_t
-read_file(FILE *f, char **out)
+static char *
+read_file(FILE *f)
 {
 	size_t size = 0;
-
-	*out = NULL;
+	char *out = NULL;
 
 	while (!feof(f) && !ferror(f)) {
-		*out = realloc(*out, size + READ_SZ);
-		size_t bytes_read = fread(*out + size, 1, READ_SZ, f);
+		out = realloc(out, size + READ_SZ);
+		size_t bytes_read = fread(out + size, 1, READ_SZ, f);
 		if (bytes_read == 0)
 			break;
+
 		size += bytes_read;
 	}
 
-	return size;
+	if (out) {
+		out = realloc(out, size + 1);
+		out[size] = '\0';
+	}
+
+	if (ferror(f)) {
+		free(out);
+		out = NULL;
+	}
+
+	return out;
 }
 
 int
 gcli_create_gist(struct gcli_ctx *ctx, struct gcli_new_gist opts)
 {
-	char *url = NULL;
+	char *content = NULL;
 	char *post_data = NULL;
-	struct gcli_fetch_buffer fetch_buffer = {0};
-	sn_sv read_buffer = {0};
-	sn_sv content = {0};
+	char *url = NULL;
 	int rc = 0;
+	struct gcli_fetch_buffer fetch_buffer = {0};
+	struct gcli_jsongen gen = {0};
 
-	read_buffer.length = read_file(opts.file, &read_buffer.data);
-	content = gcli_json_escape(read_buffer);
+	/* Read in the file content. this may come from stdin this we don't know
+	 * the size in advance. */
+	content = read_file(opts.file);
+	if (content == NULL)
+		return gcli_error(ctx, "failed to read from input file");
 
 	/* This API is documented very badly. In fact, I dug up how you're
 	 * supposed to do this from
@@ -163,19 +177,40 @@ gcli_create_gist(struct gcli_ctx *ctx, struct gcli_new_gist opts)
 	 *  }
 	 * }
 	 */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "description");
+		gcli_jsongen_string(&gen, opts.gist_description);
 
-	/* TODO: Escape gist_description and file_name */
+		gcli_jsongen_objmember(&gen, "public");
+		gcli_jsongen_bool(&gen, true);
+
+		gcli_jsongen_objmember(&gen, "files");
+		gcli_jsongen_begin_object(&gen);
+		{
+			gcli_jsongen_objmember(&gen, opts.file_name);
+			gcli_jsongen_begin_object(&gen);
+			{
+				gcli_jsongen_objmember(&gen, "content");
+				gcli_jsongen_string(&gen, content);
+			}
+			gcli_jsongen_end_object(&gen);
+		}
+		gcli_jsongen_end_object(&gen);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	post_data = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* Generate URL */
 	url = sn_asprintf("%s/gists", gcli_get_apibase(ctx));
-	post_data = sn_asprintf(
-		"{\"description\":\"%s\",\"public\":true,\"files\":"
-		"{\"%s\": {\"content\":\""SV_FMT"\"}}}",
-		opts.gist_description,
-		opts.file_name,
-		SV_ARGS(content));
 
+	/* Perferm fetch */
 	rc = gcli_fetch_with_method(ctx, "POST", url, post_data, NULL, &fetch_buffer);
 
-	free(read_buffer.data);
+	free(content);
 	free(fetch_buffer.data);
 	free(url);
 	free(post_data);

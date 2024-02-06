@@ -33,6 +33,9 @@ consider using the link above.
 There are official packages available:
 
 - [FreeBSD](https://freshports.org/devel/gcli)
+- [Debian Testing](https://packages.debian.org/trixie/gcli)
+- [ArchLinux AUR](https://aur.archlinux.org/packages/gcli)
+- [NixPkgs Unstable](https://search.nixos.org/packages?channel=unstable&show=gcli&from=0&size=50&sort=relevance&type=packages&query=gcli)
 
 ### Dependencies
 

@@ -103,7 +103,8 @@ It contains a list of key-value pairs. Allowed keys are:
 Name of a branch that the changes should be merged into by default.
 Usually this is one of
 .Em master ,
-.Em main or
+.Em main
+or
 .Em trunk .
 .It pr.upstream
 Name of the upstream repository to submit the pull request to by default.

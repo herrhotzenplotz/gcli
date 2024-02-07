@@ -8,6 +8,10 @@ This changelog does not follow semantic versioning.
 
 ### Fixed
 
+- gcli was incorrectly using an environment variable *XDG_CONFIG_DIR*.
+  This variable has now been fixed to be *XDG_CONFIG_HOME*.
+  Submitted by: Jakub Wilk
+
 ### Changed
 
 ### Removed

@@ -389,11 +389,11 @@ ensure_config(struct gcli_ctx *ctx)
 
 	cfg->inited = true;
 
-	file_path = getenv("XDG_CONFIG_PATH");
+	file_path = getenv("XDG_CONFIG_HOME");
 	if (!file_path) {
 		file_path = getenv("HOME");
 		if (!file_path) {
-			warnx("Neither XDG_CONFIG_PATH nor HOME set in env");
+			warnx("Neither XDG_CONFIG_HOME nor HOME set in env");
 			return cfg;
 		}
 

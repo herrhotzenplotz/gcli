@@ -153,12 +153,12 @@ Operate on the given numeric identifier.
 Other options specific to the context are documented in the respective
 man pages.
 .Sh ENVIRONMENT
-.Bl -tag -width XDG_CONFIG_DIR
+.Bl -tag -width XDG_CONFIG_HOME
 .It Ev EDITOR
 If the gcli config file does not name an editor,
 .Nm
 may use this editor.
-.It Ev XDG_CONFIG_DIR
+.It Ev XDG_CONFIG_HOME
 There should be a subdirectory called gcli in the directory this
 environment variable points to where
 .Nm
@@ -183,8 +183,8 @@ escape sequences. See
 (--colours).
 .El
 .Sh FILES
-.Bl -tag -width ${XDG_CONFIG_DIR}/gcli/config -compact
-.It Pa ${XDG_CONFIG_DIR}/gcli/config
+.Bl -tag -width ${XDG_CONFIG_HOME}/gcli/config -compact
+.It Pa ${XDG_CONFIG_HOME}/gcli/config
 The user configuration file for gcli. It contains account definitions
 as well as sensible default values. See
 .Xr gcli 5 .

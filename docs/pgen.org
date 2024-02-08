@@ -69,7 +69,7 @@
 			 "things" => things as array of thing use parse_thing);
    #+end_src
 
-   This will generate two functions with the follwing signatures:
+   This will generate two functions with the following signatures:
 
    #+begin_src shell :exports results :results output
 	 ../pgen -th <<EOF

@@ -50,9 +50,9 @@ option.
 .It Fl A , Fl -author Ar user
 Only list issues authored by the given user.
 .It Fl L , Fl -label Ar label
-Filter issues by the given label. This option may only be specfied once.
+Filter issues by the given label. This option may only be specified once.
 .It Fl M , Fl -milestone Ar milestone
-Filter issues by the given milestone. This option may only be specfied once.
+Filter issues by the given milestone. This option may only be specified once.
 .It Fl n , -count Ar n
 Fetch at least
 .Ar n

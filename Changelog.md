@@ -6,6 +6,9 @@ This changelog does not follow semantic versioning.
 
 ### Added
 
+- It is now possible to build gcli against libgcli as a DLL on cygwin.
+  Submitted by: Daisuke Fujimura
+
 ### Fixed
 
 - gcli was incorrectly using an environment variable *XDG_CONFIG_DIR*.

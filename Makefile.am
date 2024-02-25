@@ -41,6 +41,7 @@ bin_PROGRAMS = gcli$(EXEEXT)
 gcli_LDADD = libgcli.la
 
 libgcli_la_LIBADD = libpdjson.la libsn.la
+libgcli_la_LDFLAGS = -no-undefined
 
 dist_man_MANS = \
 	docs/gcli-api.1 \

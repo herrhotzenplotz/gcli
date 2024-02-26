@@ -15,6 +15,8 @@ This changelog does not follow semantic versioning.
   This variable has now been fixed to be *XDG_CONFIG_HOME*.
   Submitted by: Jakub Wilk
 
+- Fixed a segmentation fault when listing forks
+
 ### Changed
 
 ### Removed

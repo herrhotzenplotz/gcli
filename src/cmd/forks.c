@@ -68,10 +68,10 @@ gcli_print_forks(enum gcli_output_flags const flags,
 	size_t n;
 	gcli_tbl table;
 	struct gcli_tblcoldef cols[] = {
-		{ .name = "OWNER",    .type = GCLI_TBLCOLTYPE_SV,  .flags = GCLI_TBLCOL_BOLD },
-		{ .name = "DATE",     .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
-		{ .name = "FORKS",    .type = GCLI_TBLCOLTYPE_INT, .flags = GCLI_TBLCOL_JUSTIFYR },
-		{ .name = "FULLNAME", .type = GCLI_TBLCOLTYPE_SV,  .flags = 0 },
+		{ .name = "OWNER",    .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_BOLD },
+		{ .name = "DATE",     .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
+		{ .name = "FORKS",    .type = GCLI_TBLCOLTYPE_INT,    .flags = GCLI_TBLCOL_JUSTIFYR },
+		{ .name = "FULLNAME", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
 	if (list->forks_size == 0) {

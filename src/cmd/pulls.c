@@ -661,7 +661,7 @@ subcommand_pulls(int argc, char *argv[])
 	/* In case no explicit PR number was specified, list all
 	 * open PRs and exit */
 	if (pr < 0) {
-		if (gcli_get_pulls(g_clictx, owner, repo, &details, n, &pulls) < 0)
+		if (gcli_search_pulls(g_clictx, owner, repo, &details, n, &pulls) < 0)
 			errx(1, "gcli: error: could not fetch pull requests: %s",
 			     gcli_get_error(g_clictx));
 

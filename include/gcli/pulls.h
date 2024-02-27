@@ -124,9 +124,9 @@ struct gcli_pull_checks_list {
 	int forge_type;
 };
 
-int gcli_get_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                   struct gcli_pull_fetch_details const *details, int max,
-                   struct gcli_pull_list *out);
+int gcli_search_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                      struct gcli_pull_fetch_details const *details, int max,
+                      struct gcli_pull_list *out);
 
 void gcli_pull_free(struct gcli_pull *it);
 

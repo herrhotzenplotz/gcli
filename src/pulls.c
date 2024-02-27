@@ -50,11 +50,11 @@ gcli_pulls_free(struct gcli_pull_list *const it)
 }
 
 int
-gcli_get_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
-               struct gcli_pull_fetch_details const *const details, int const max,
-               struct gcli_pull_list *const out)
+gcli_search_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                  struct gcli_pull_fetch_details const *const details,
+                  int const max, struct gcli_pull_list *const out)
 {
-	gcli_null_check_call(get_pulls, ctx, owner, repo, details, max, out);
+	gcli_null_check_call(search_pulls, ctx, owner, repo, details, max, out);
 }
 
 int

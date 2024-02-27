@@ -279,7 +279,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Get a list of PRs/MRs on the given repo */
-	int (*get_pulls)(
+	int (*search_pulls)(
 		struct gcli_ctx *ctx,
 		char const *owner,
 		char const *reponame,

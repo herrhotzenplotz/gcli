@@ -104,10 +104,11 @@ struct gcli_submit_pull_options {
 };
 
 struct gcli_pull_fetch_details {
-	bool all;
-	char const *author;
-	char const *label;
-	char const *milestone;
+	bool all;               /** Ignore status of the pull requests */
+	char const *author;     /** Author of the pull request or NULL */
+	char const *label;      /** a label attached to the pull request or NULL */
+	char const *milestone;  /** a milestone this pull request is a part of or NULL */
+	char const *search_term; /** some text to match in the pull request or NULL */
 };
 
 /** Generic list of checks ran on a pull request

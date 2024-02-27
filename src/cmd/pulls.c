@@ -58,7 +58,7 @@ usage(void)
 	fprintf(stderr, "usage: gcli pulls create [-o owner -r repo] [-f from]\n");
 	fprintf(stderr, "                         [-t to] [-d] [-a] [-l label] pull-request-title\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] [-a] [-A author] [-n number]\n");
-	fprintf(stderr, "                  [-L label] [-M milestone] [-s]\n");
+	fprintf(stderr, "                  [-L label] [-M milestone] [-s] [search-terms...]\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] -i pull-id actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
 	fprintf(stderr, "  -o owner        The repository owner\n");
@@ -563,7 +563,7 @@ subcommand_pulls(int argc, char *argv[])
 		return subcommand_pull_create(argc, argv);
 	}
 
-	const struct option options[] = {
+	struct option const options[] = {
 		{ .name    = "all",
 		  .has_arg = no_argument,
 		  .flag    = NULL,
@@ -661,12 +661,23 @@ subcommand_pulls(int argc, char *argv[])
 	/* In case no explicit PR number was specified, list all
 	 * open PRs and exit */
 	if (pr < 0) {
+		char *search_term = NULL;
+
+		/* Trailing arguments indicate a search term */
+		if (argc)
+			search_term = sn_join_with((char const *const *)argv, argc, " ");
+
+		details.search_term = search_term;
+
 		if (gcli_search_pulls(g_clictx, owner, repo, &details, n, &pulls) < 0)
 			errx(1, "gcli: error: could not fetch pull requests: %s",
 			     gcli_get_error(g_clictx));
 
 		gcli_print_pulls(flags, &pulls, n);
 		gcli_pulls_free(&pulls);
+
+		free(search_term);
+		details.search_term = search_term = NULL;
 
 		return EXIT_SUCCESS;
 	}

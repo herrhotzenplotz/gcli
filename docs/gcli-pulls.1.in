@@ -13,6 +13,7 @@
 .Op Fl s
 .Op Fl n Ar n
 .Op Fl o Ar owner Fl r Ar repo
+.Op Ar search-terms...
 .Nm
 .Fl i Ar pr
 .Op Fl o Ar owner Fl r Ar repo

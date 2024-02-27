@@ -107,10 +107,64 @@ github_fetch_pulls(struct gcli_ctx *ctx, char *url,
 	return gcli_fetch_list(ctx, url, &fl);
 }
 
-int
-github_get_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                 struct gcli_pull_fetch_details const *const details,
-                 int const max, struct gcli_pull_list *const list)
+static int
+search_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
+             struct gcli_pull_fetch_details const *const details,
+             int const max, struct gcli_pull_list *const out)
+{
+	char *url = NULL, *query_string = NULL, *e_query_string = NULL,
+	     *milestone = NULL, *author = NULL, *label = NULL;
+	int rc = 0;
+	struct gcli_fetch_buffer buffer = {0};
+	struct json_stream stream = {0};
+
+	(void) max;
+
+	if (details->milestone)
+		milestone = sn_asprintf("milestone:%s", details->milestone);
+
+	if (details->author)
+		author = sn_asprintf("author:%s", details->author);
+
+	if (details->label)
+		label = sn_asprintf("label:%s", details->label);
+
+	query_string = sn_asprintf("repo:%s/%s is:pull-request%s %s %s %s %s",
+	                           owner, repo,
+	                           details->all ? "" : " is:open",
+	                           milestone ? milestone : "", author ? author : "",
+	                           label ? label : "", details->search_term);
+	e_query_string = gcli_urlencode(query_string);
+
+	url = sn_asprintf("%s/search/issues?q=%s", gcli_get_apibase(ctx),
+	                  e_query_string);
+
+	free(milestone);
+	free(author);
+	free(label);
+	free(query_string);
+	free(e_query_string);
+
+	rc = gcli_fetch(ctx, url, NULL, &buffer);
+	if (rc < 0)
+		goto error_fetch;
+
+	json_open_buffer(&stream, buffer.data, buffer.length);
+	rc = parse_github_pull_search_result(ctx, &stream, out);
+
+	json_close(&stream);
+	free(buffer.data);
+
+error_fetch:
+	free(url);
+
+	return rc;
+}
+
+static int
+list_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
+           struct gcli_pull_fetch_details const *const details,
+           int const max, struct gcli_pull_list *const list)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -128,6 +182,17 @@ github_get_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
 	free(e_repo);
 
 	return github_fetch_pulls(ctx, url, details, max, list);
+}
+
+int
+github_search_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                    struct gcli_pull_fetch_details const *const details,
+                    int const max, struct gcli_pull_list *const list)
+{
+	if (details->search_term)
+		return search_pulls(ctx, owner, repo, details, max, list);
+	else
+		return list_pulls(ctx, owner, repo, details, max, list);
 }
 
 int

@@ -38,7 +38,7 @@ gitea_get_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
                 struct gcli_pull_fetch_details const *const details, int const max,
                 struct gcli_pull_list *const out)
 {
-	return github_get_pulls(ctx, owner, repo, details, max, out);
+	return github_search_pulls(ctx, owner, repo, details, max, out);
 }
 
 int

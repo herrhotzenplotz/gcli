@@ -159,11 +159,6 @@ tablerow_add_cell(struct gcli_tbl *const table,
 		row->cells[col].text = strdup(it);
 		cell_size = strlen(it);
 	} break;
-	case GCLI_TBLCOLTYPE_SV: {
-		sn_sv src = va_arg(*vp, sn_sv);
-		row->cells[col].text = sn_sv_to_cstr(src);
-		cell_size = src.length;
-	} break;
 	case GCLI_TBLCOLTYPE_DOUBLE: {
 		row->cells[col].text = sn_asprintf("%lf", va_arg(*vp, double));
 		cell_size = strlen(row->cells[col].text);

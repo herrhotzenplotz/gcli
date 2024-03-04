@@ -381,9 +381,9 @@ gcli_pull_get_user_message(struct gcli_submit_pull_options *opts)
 }
 
 static int
-create_pull(struct gcli_submit_pull_options opts, int always_yes)
+create_pull(struct gcli_submit_pull_options *const opts, int always_yes)
 {
-	opts.body = gcli_pull_get_user_message(&opts);
+	opts->body = gcli_pull_get_user_message(opts);
 
 	fprintf(stdout,
 	        "The following PR will be created:\n"
@@ -393,8 +393,8 @@ create_pull(struct gcli_submit_pull_options opts, int always_yes)
 	        "HEAD    : %s\n"
 	        "IN      : %s/%s\n"
 	        "MESSAGE :\n%s\n",
-	        opts.title, opts.to, opts.from,
-	        opts.owner, opts.repo, opts.body ? opts.body : "No message.");
+	        opts->title, opts->to, opts->from,
+	        opts->owner, opts->repo, opts->body ? opts->body : "No message.");
 
 	fputc('\n', stdout);
 
@@ -529,7 +529,7 @@ subcommand_pull_create(int argc, char *argv[])
 
 	opts.title = argv[0];
 
-	if (create_pull(opts, always_yes) < 0)
+	if (create_pull(&opts, always_yes) < 0)
 		errx(1, "gcli: error: failed to submit pull request: %s",
 		     gcli_get_error(g_clictx));
 

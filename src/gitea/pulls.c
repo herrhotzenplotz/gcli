@@ -112,7 +112,7 @@ gitea_get_pull_commits(struct gcli_ctx *ctx, char const *owner,
 }
 
 int
-gitea_pull_submit(struct gcli_ctx *ctx, struct gcli_submit_pull_options opts)
+gitea_pull_submit(struct gcli_ctx *ctx, struct gcli_submit_pull_options *opts)
 {
 	warnx("In case the following process errors out, see: "
 	      "https://github.com/go-gitea/gitea/issues/20175");

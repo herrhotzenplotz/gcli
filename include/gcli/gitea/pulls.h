@@ -49,7 +49,7 @@ int gitea_get_pull_commits(struct gcli_ctx *ctx, char const *owner,
                            char const *repo, gcli_id pr_number,
                            struct gcli_commit_list *out);
 
-int gitea_pull_submit(struct gcli_ctx *ctx, struct gcli_submit_pull_options opts);
+int gitea_pull_submit(struct gcli_ctx *ctx, struct gcli_submit_pull_options *opts);
 
 int gitea_pull_merge(struct gcli_ctx *ctx, char const *owner, char const *repo,
                      gcli_id pr_number, enum gcli_merge_flags flags);

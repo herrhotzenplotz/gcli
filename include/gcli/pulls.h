@@ -151,7 +151,7 @@ void gcli_commits_free(struct gcli_commit_list *list);
 int gcli_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
                   gcli_id pr_number, struct gcli_pull *out);
 
-int gcli_pull_submit(struct gcli_ctx *ctx, struct gcli_submit_pull_options);
+int gcli_pull_submit(struct gcli_ctx *ctx, struct gcli_submit_pull_options *);
 
 enum gcli_merge_flags {
 	GCLI_PULL_MERGE_SQUASH = 0x1, /* squash commits when merging */

@@ -9,6 +9,17 @@ This changelog does not follow semantic versioning.
 - It is now possible to build gcli against libgcli as a DLL on cygwin.
   Submitted by: Daisuke Fujimura
 
+- The pulls subcommand now allows searching for pull requests with
+  a given search term. The search terms can be appended to the
+  regular pull subcommand for listing PRs:
+
+  ```console
+  $ gcli pulls -L bug segmentation fault
+  ```
+
+  The above will search for pull requests containing »segmentation
+  fault« and the label »bug«.
+
 ### Fixed
 
 - gcli was incorrectly using an environment variable *XDG_CONFIG_DIR*.

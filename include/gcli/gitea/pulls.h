@@ -37,9 +37,10 @@
 #include <gcli/curl.h>
 #include <gcli/pulls.h>
 
-int gitea_get_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                    struct gcli_pull_fetch_details const *details, int max,
-                    struct gcli_pull_list *out);
+int gitea_search_pulls(struct gcli_ctx *ctx, char const *owner,
+                       char const *repo,
+                       struct gcli_pull_fetch_details const *details,
+                       int const max, struct gcli_pull_list *const out);
 
 int gitea_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
                    gcli_id pr_number, struct gcli_pull *out);

@@ -110,8 +110,9 @@ gitea_get_issue_summary(struct gcli_ctx *ctx, char const *owner,
 }
 
 int
-gitea_submit_issue(struct gcli_ctx *ctx, struct gcli_submit_issue_options *opts,
-                   struct gcli_fetch_buffer *const out)
+gitea_submit_issue(struct gcli_ctx *const ctx,
+                   struct gcli_submit_issue_options *const opts,
+                   struct gcli_issue *const out)
 {
 	return github_perform_submit_issue(ctx, opts, out);
 }

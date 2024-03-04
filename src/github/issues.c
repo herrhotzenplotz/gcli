@@ -322,12 +322,13 @@ github_issue_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-github_perform_submit_issue(struct gcli_ctx *ctx,
-                            struct gcli_submit_issue_options *opts,
-                            struct gcli_fetch_buffer *out)
+github_perform_submit_issue(struct gcli_ctx *const ctx,
+                            struct gcli_submit_issue_options *const opts,
+                            struct gcli_issue *const out)
 {
 	char *e_owner = NULL, *e_repo = NULL, *payload = NULL, *url = NULL;
 	struct gcli_jsongen gen = {0};
+	struct gcli_fetch_buffer buffer = {0}, *_buffer = NULL;
 	int rc = 0;
 
 	/* Generate Payload */
@@ -358,8 +359,20 @@ github_perform_submit_issue(struct gcli_ctx *ctx,
 	free(e_owner);
 	free(e_repo);
 
-	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, out);
+	/* only read the resulting data if the issue data has been requested */
+	if (out)
+		_buffer = &buffer;
 
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, _buffer);
+	if (out && rc == 0) {
+		struct json_stream stream = {0};
+
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		rc = parse_github_issue(ctx, &stream, out);
+		json_close(&stream);
+	}
+
+	free(buffer.data);
 	free(payload);
 	free(url);
 

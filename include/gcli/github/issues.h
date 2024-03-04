@@ -56,7 +56,7 @@ int github_issue_reopen(struct gcli_ctx *ctx, char const *owner,
 
 int github_perform_submit_issue(struct gcli_ctx *ctx,
                                 struct gcli_submit_issue_options *opts,
-                                struct gcli_fetch_buffer *out);
+                                struct gcli_issue *out);
 
 int github_issue_assign(struct gcli_ctx *ctx, char const *owner,
                         char const *repo, gcli_id issue_number,

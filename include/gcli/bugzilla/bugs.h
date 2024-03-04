@@ -56,7 +56,8 @@ int bugzilla_bug_get_attachments(struct gcli_ctx *ctx, char const *const product
                                  gcli_id const bug_id,
                                  struct gcli_attachment_list *const out);
 
-int bugzilla_bug_submit(struct gcli_ctx *ctx, struct gcli_submit_issue_options opts,
+int bugzilla_bug_submit(struct gcli_ctx *ctx,
+                        struct gcli_submit_issue_options *opts,
                         struct gcli_fetch_buffer *out);
 
 #endif /* GCLI_BUGZILLA_BUGS_H */

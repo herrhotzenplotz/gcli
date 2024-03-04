@@ -284,13 +284,14 @@ add_extra_options(struct gcli_nvlist const *list, struct gcli_jsongen *gen)
 }
 
 int
-bugzilla_bug_submit(struct gcli_ctx *ctx, struct gcli_submit_issue_options opts,
+bugzilla_bug_submit(struct gcli_ctx *ctx,
+                    struct gcli_submit_issue_options *opts,
                     struct gcli_fetch_buffer *out)
 {
 	char *payload = NULL, *url = NULL;
 	char *token; /* bugzilla wants the api token as a parameter in the url or the json payload */
-	char const *product = opts.owner, *component = opts.repo,
-	           *summary = opts.title, *description = opts.body;
+	char const *product = opts->owner, *component = opts->repo,
+	           *summary = opts->title, *description = opts->body;
 	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
@@ -338,7 +339,7 @@ bugzilla_bug_submit(struct gcli_ctx *ctx, struct gcli_submit_issue_options opts,
 		gcli_jsongen_objmember(&gen, "api_key");
 		gcli_jsongen_string(&gen, token);
 
-		add_extra_options(&opts.extra, &gen);
+		add_extra_options(&opts->extra, &gen);
 	}
 	gcli_jsongen_end_object(&gen);
 

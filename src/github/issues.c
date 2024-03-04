@@ -322,7 +322,8 @@ github_issue_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-github_perform_submit_issue(struct gcli_ctx *ctx, struct gcli_submit_issue_options opts,
+github_perform_submit_issue(struct gcli_ctx *ctx,
+                            struct gcli_submit_issue_options *opts,
                             struct gcli_fetch_buffer *out)
 {
 	char *e_owner = NULL, *e_repo = NULL, *payload = NULL, *url = NULL;
@@ -334,12 +335,12 @@ github_perform_submit_issue(struct gcli_ctx *ctx, struct gcli_submit_issue_optio
 	gcli_jsongen_begin_object(&gen);
 	{
 		gcli_jsongen_objmember(&gen, "title");
-		gcli_jsongen_string(&gen, opts.title);
+		gcli_jsongen_string(&gen, opts->title);
 
 		/* Body can be omitted and is NULL in that case */
-		if (opts.body) {
+		if (opts->body) {
 			gcli_jsongen_objmember(&gen, "body");
-			gcli_jsongen_string(&gen, opts.body);
+			gcli_jsongen_string(&gen, opts->body);
 		}
 	}
 	gcli_jsongen_begin_object(&gen);
@@ -348,8 +349,8 @@ github_perform_submit_issue(struct gcli_ctx *ctx, struct gcli_submit_issue_optio
 	gcli_jsongen_free(&gen);
 
 	/* Generate URL */
-	e_owner = gcli_urlencode(opts.owner);
-	e_repo = gcli_urlencode(opts.repo);
+	e_owner = gcli_urlencode(opts->owner);
+	e_repo = gcli_urlencode(opts->repo);
 
 	url = sn_asprintf("%s/repos/%s/%s/issues", gcli_get_apibase(ctx), e_owner,
 	                  e_repo);

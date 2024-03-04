@@ -103,7 +103,7 @@ int gcli_issue_close(struct gcli_ctx *ctx, char const *owner, char const *repo,
 int gcli_issue_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
                       gcli_id issue_number);
 
-int gcli_issue_submit(struct gcli_ctx *ctx, struct gcli_submit_issue_options);
+int gcli_issue_submit(struct gcli_ctx *ctx, struct gcli_submit_issue_options *);
 
 int gcli_issue_assign(struct gcli_ctx *ctx, char const *owner, char const *repo,
                       gcli_id issue_number, char const *assignee);

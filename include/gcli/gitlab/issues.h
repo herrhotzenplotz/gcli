@@ -59,7 +59,7 @@ int gitlab_issue_assign(struct gcli_ctx *ctx, char const *owner,
                         char const *assignee);
 
 int gitlab_perform_submit_issue(struct gcli_ctx *ctx,
-                                struct gcli_submit_issue_options opts,
+                                struct gcli_submit_issue_options *opts,
                                 struct gcli_fetch_buffer *out);
 
 int gitlab_issue_add_labels(struct gcli_ctx *ctx, char const *owner,

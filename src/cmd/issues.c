@@ -230,11 +230,11 @@ gcli_issue_get_user_message(struct gcli_submit_issue_options *opts)
 }
 
 static int
-create_issue(struct gcli_submit_issue_options opts, int always_yes)
+create_issue(struct gcli_submit_issue_options *opts, int always_yes)
 {
 	int rc;
 
-	opts.body = gcli_issue_get_user_message(&opts);
+	opts->body = gcli_issue_get_user_message(opts);
 
 	printf("The following issue will be created:\n"
 	       "\n"
@@ -242,8 +242,8 @@ create_issue(struct gcli_submit_issue_options opts, int always_yes)
 	       "OWNER   : %s\n"
 	       "REPO    : %s\n"
 	       "MESSAGE :\n%s\n",
-	       opts.title, opts.owner, opts.repo,
-	       opts.body ? opts.body : "No message");
+	       opts->title, opts->owner, opts->repo,
+	       opts->body ? opts->body : "No message");
 
 	putchar('\n');
 
@@ -254,8 +254,8 @@ create_issue(struct gcli_submit_issue_options opts, int always_yes)
 
 	rc = gcli_issue_submit(g_clictx, opts);
 
-	free(opts.body);
-	free(opts.body);
+	free(opts->body);
+	free(opts->body);
 
 	return rc;
 }
@@ -345,7 +345,7 @@ subcommand_issue_create(int argc, char *argv[])
 
 	opts.title = argv[0];
 
-	if (create_issue(opts, always_yes) < 0)
+	if (create_issue(&opts, always_yes) < 0)
 		errx(1, "gcli: error: failed to submit issue: %s",
 		     gcli_get_error(g_clictx));
 

@@ -36,6 +36,7 @@
 #include <gcli/cmd/comment.h>
 #include <gcli/cmd/editor.h>
 #include <gcli/cmd/gitconfig.h>
+#include <gcli/cmd/interactive.h>
 #include <gcli/cmd/pipelines.h>
 #include <gcli/cmd/pulls.h>
 #include <gcli/cmd/table.h>
@@ -56,7 +57,7 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: gcli pulls create [-o owner -r repo] [-f from]\n");
-	fprintf(stderr, "                         [-t to] [-d] [-a] [-l label] pull-request-title\n");
+	fprintf(stderr, "                         [-t to] [-d] [-a] [-l label] [pull-request-title]\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] [-a] [-A author] [-n number]\n");
 	fprintf(stderr, "                  [-L label] [-M milestone] [-s] [search-terms...]\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] -i pull-id actions...\n");
@@ -429,6 +430,76 @@ pr_try_derive_head(void)
 	return sn_asprintf("%s:"SV_FMT, account, SV_ARGS(branch));
 }
 
+static char *
+derive_head(void)
+{
+	char const *account;
+	sn_sv branch  = {0};
+
+	if ((account = gcli_config_get_account_name(g_clictx)) == NULL)
+		return NULL;
+
+	branch = gcli_gitconfig_get_current_branch();
+	if (branch.length == 0)
+		return NULL;
+
+	return sn_asprintf("%s:"SV_FMT, account, SV_ARGS(branch));
+}
+
+/** Interactive version of the create subcommand */
+static int
+subcommand_pull_create_interactive(struct gcli_submit_pull_options *const opts)
+{
+	char const *deflt_owner = NULL, *deflt_repo = NULL;
+	int rc = 0;
+
+	gcli_config_get_repo(g_clictx, &deflt_owner, &deflt_repo);
+
+	/* PR Source */
+	if (!opts->from) {
+		char *tmp = NULL;
+
+		tmp = derive_head();
+		opts->from = gcli_cmd_prompt("From (owner:branch)", tmp);
+		free(tmp);
+		tmp = NULL;
+	}
+
+	/* PR Target */
+	if (!opts->owner)
+		opts->owner = gcli_cmd_prompt("Owner", deflt_owner);
+
+	if (!opts->repo)
+		opts->repo = gcli_cmd_prompt("Repository", deflt_repo);
+
+	if (!opts->to) {
+		char *tmp = NULL;
+		sn_sv base;
+
+		base = gcli_config_get_base(g_clictx);
+		if (base.length != 0)
+			tmp = sn_sv_to_cstr(base);
+
+		opts->to = gcli_cmd_prompt("To Branch", tmp);
+
+		free(tmp);
+		tmp = NULL;
+	}
+
+	/* Meta */
+	opts->title = gcli_cmd_prompt("Title", NULL);
+	opts->automerge = sn_yesno("Enable automerge?");
+
+	/* create_pull is going to pop up the editor */
+	rc = create_pull(opts, false);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: %s\n", gcli_get_error(g_clictx));
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
 static int
 subcommand_pull_create(int argc, char *argv[])
 {
@@ -505,6 +576,9 @@ subcommand_pull_create(int argc, char *argv[])
 
 	argc -= optind;
 	argv += optind;
+
+	if (argc == 0)
+		return subcommand_pull_create_interactive(&opts);
 
 	if (!opts.from)
 		opts.from = pr_try_derive_head();

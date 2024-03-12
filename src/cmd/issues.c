@@ -33,6 +33,7 @@
 #include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/comment.h>
 #include <gcli/cmd/editor.h>
+#include <gcli/cmd/interactive.h>
 #include <gcli/cmd/table.h>
 
 #include <gcli/comments.h>
@@ -49,7 +50,7 @@
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: gcli issues create [-o owner -r repo] [-y] title...\n");
+	fprintf(stderr, "usage: gcli issues create [-o owner -r repo] [-y] [title...]\n");
 	fprintf(stderr, "       gcli issues [-o owner -r repo] [-a] [-n number] [-A author] [-L label]\n");
 	fprintf(stderr, "                   [-M milestone] [-s] [search query...]\n");
 	fprintf(stderr, "       gcli issues [-o owner -r repo] -i issue actions...\n");
@@ -261,6 +262,31 @@ create_issue(struct gcli_submit_issue_options *opts, int always_yes)
 }
 
 static int
+subcommand_issue_create_interactive(struct gcli_submit_issue_options *const opts)
+{
+	char const *deflt_owner = NULL, *deflt_repo = NULL;
+	int rc = 0;
+
+	gcli_config_get_repo(g_clictx, &deflt_owner, &deflt_repo);
+
+	if (!opts->owner)
+		opts->owner = gcli_cmd_prompt("Owner", deflt_owner);
+
+	if (!opts->repo)
+		opts->repo = gcli_cmd_prompt("Repository", deflt_repo);
+
+	opts->title = gcli_cmd_prompt("Title", NULL);
+
+	rc = create_issue(opts, false);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: %s\n", gcli_get_error(g_clictx));
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
 parse_submit_issue_option(struct gcli_submit_issue_options *opts)
 {
 	char *hd = strdup(optarg);
@@ -334,6 +360,9 @@ subcommand_issue_create(int argc, char *argv[])
 
 	argc -= optind;
 	argv += optind;
+
+	if (argc == 0)
+		return subcommand_issue_create_interactive(&opts);
 
 	check_owner_and_repo(&opts.owner, &opts.repo);
 

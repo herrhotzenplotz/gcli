@@ -22,6 +22,7 @@
 .Cm create
 .Op Fl o Ar owner Fl r Ar repo
 .Op Fl y
+.Op Ar issue-title
 .Sh DESCRIPTION
 Use
 .Nm
@@ -74,6 +75,9 @@ for the specified
 .It Cm create
 Create a new issue in the given or autodetected repository. The
 editor will come up and ask you to enter an issue message.
+.Pp
+When the issue title is omitted gcli will interactively prompt you
+for all the details to create an issue.
 .Pp
 The following flags can be specified:
 .Bl -tag -width indent
@@ -139,7 +143,15 @@ in contour-terminal/contour on GitHub including closed issues:
 $ gcli -t github issues -o contour-terminal -r contour -a crash
 .Ed
 .Pp
-Report a new issue in the current project:
+Report a new issue in the current project; interactively asking for
+details:
+.Bd -literal -offset indent
+$ gcli issues create
+.Ed
+.Pp
+Report a new issue titled
+.Dq summary here
+in the current project:
 .Bd -literal -offset indent
 $ gcli issues create "summary here"
 .Ed

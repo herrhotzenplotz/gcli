@@ -42,6 +42,9 @@ if ! test -z "${CCACHE}"; then
 	CC="${CCACHE} ${CC}"
 fi
 
+dnl ####################################################################################
+dnl LIBCURL
+dnl ####################################################################################
 dnl Go looking for libcurl
 OPT_LIBCURL=check
 AC_ARG_WITH([libcurl],
@@ -62,6 +65,39 @@ AC_CHECK_HEADER([curl/curl.h],,[AC_MSG_ERROR([Cannot find libcurl headers])])
 
 dnl FIXME find a better way for this
 dnl AC_CHECK_LIB([curl],[curl_easy_init],,[AC_MSG_ERROR([-lcurl doesn not contain curl_easy_init])])
+
+dnl ####################################################################################
+dnl LIBEDIT
+dnl ####################################################################################
+dnl Check for libedit
+OPT_LIBEDIT=check
+AC_ARG_WITH([libedit],
+            [AS_HELP_STRING([--with-libedit],
+                            [Use libedit at the given prefix for interactive editing])],
+            OPT_LIBEDIT=$withval,
+            OPT_LIBEDIT=no
+)
+
+HAVE_LIBEDIT=0
+if test "x$OPT_LIBEDIT" = "xyes" || test "x$OPT_LIBEDIT" = "xcheck"; then
+	HAVE_LIBEDIT=1
+
+	PKG_CHECK_MODULES([LIBEDIT], [libedit],,[AC_MSG_ERROR([Could not find libedit])])
+	CFLAGS="$LIBEDIT_CFLAGS $CFLAGS"
+	LDFLAGS="$LIBEDIT_LIBS $LDFLAGS"
+elif ! test "x$OPT_LIBEDIT" = "xno"; then
+	CPPFLAGS="-I$OPT_LIBEDIT/include $CPPFLAGS"
+	LDFLAGS="-L$OPT_LIBEDIT/lib $LDFLAGS"
+fi
+
+if test $HAVE_LIBEDIT -eq 1; then
+	AC_CHECK_HEADER([histedit.h],,[AC_MSG_ERROR([Cannot find libedit headers])])
+fi
+AC_DEFINE_UNQUOTED([HAVE_LIBEDIT], [$HAVE_LIBEDIT], [Define if we link against libedit])
+
+dnl ####################################################################################
+dnl TEST SUITE STUFF
+dnl ####################################################################################
 
 dnl For the test suite we require libatf-c and Kyua
 OPT_LIBATFC=check

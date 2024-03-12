@@ -30,44 +30,109 @@
 #include <gcli/cmd/interactive.h>
 
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
+#if defined(HAVE_LIBEDIT)
+#   if HAVE_LIBEDIT
+#       include <histedit.h>
+#       define USE_EDITLINE 1
+#   else
+#       define USE_EDITLINE 0
+#   endif
+#else
+#   define USE_EDITLINE 0
+#endif
+
+#if USE_EDITLINE
+static char *
+el_prompt_fn(EditLine *el_ctx)
+{
+	char *prompt = NULL;
+	if (el_get(el_ctx, EL_CLIENTDATA, &prompt) < 0)
+		return strdup(">");
+	else
+		return prompt;
+}
+#endif
+
+/* Actual implementation for reading in the line */
+static char *
+get_input_line(char *const prompt)
+{
+#if USE_EDITLINE
+	static EditLine *el_ctx = NULL;
+	char const *txt = NULL;
+	char *result = NULL;
+	int len = 0;
+
+	if (!el_ctx) {
+		el_ctx = el_init("gcli", stdin, stdout, stderr);
+		el_set(el_ctx, EL_PROMPT, el_prompt_fn);
+		el_set(el_ctx, EL_EDITOR, "emacs");
+	}
+
+	el_set(el_ctx, EL_CLIENTDATA, prompt);
+
+	txt = el_gets(el_ctx, &len);
+	bool const is_error = txt == NULL || len < 0;
+	bool const is_empty = len == 1 && txt[0] == '\n';
+	if (is_error || is_empty)
+		return NULL;
+
+	result = strdup(txt);
+	result[len - 1] = '\0';
+
+	return result;
+
+#else
+	char buf[256] = {0}; /* nobody types more than 256 characters, amirite? */
+
+	fputs(prompt, stdout);
+	fflush(stdout);
+	fgets(buf, sizeof buf, stdin);
+
+	if (buf[0] == '\n')
+		return NULL;
+
+	buf[strlen(buf)-1] = '\0';
+	return strdup(buf);
+#endif
+}
+
 /** Prompt for input with an optional default
  *
- * This function prompts for user input. The prompt can be specified using a
- * format string. An optional default value can be specified. If the default
- * value is NULL the user will be repeatedly prompted until the input
- * is non-empty. */
+ * This function prompts for user input, possibly with editline
+ * capabilities. The prompt can be specified using a format string.
+ * An optional default value can be specified. If the default value
+ * is NULL the user will be repeatedly prompted until the input is
+ * non-empty. */
 char *
 gcli_cmd_prompt(char const *const fmt, char const *const deflt, ...)
 {
-	char buf[256] = {0}; /* nobody types more than 256 characters, amirite? */
 	va_list vp;
+	char *result;
+	char prompt[256] = {0};
+	size_t prompt_len;
 
-ask_again:
 	va_start(vp, deflt);
-	vfprintf(stdout, fmt, vp);
+	vsnprintf(prompt, sizeof(prompt), fmt, vp);
 	va_end(vp);
 
-	if (deflt)
-		fprintf(stdout, " [%s]: ", deflt);
-	else
-		fprintf(stdout, ": ");
-
-	fflush(stdout);
-
-	fgets(buf, sizeof buf, stdin);
-
-	if (buf[0] == '\n') {
-		if (deflt)
-			return strdup(deflt);
-
-		memset(buf, 0, sizeof(buf));
-		goto ask_again;
+	prompt_len = strlen(prompt);
+	if (deflt) {
+		snprintf(prompt + prompt_len, sizeof(prompt) - prompt_len, " [%s]: ", deflt);
+	} else {
+		strncat(prompt, ": ", sizeof(prompt) - prompt_len - 1);
 	}
 
-	buf[strlen(buf)-1] = '\0';
+	do {
+		result = get_input_line(prompt);
+	} while (deflt == NULL && result == NULL);
 
-	return strdup(buf);
+	if (result == NULL)
+		result = strdup(deflt);
+
+	return result;
 }

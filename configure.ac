@@ -86,6 +86,8 @@ if test "x$OPT_LIBEDIT" = "xyes" || test "x$OPT_LIBEDIT" = "xcheck"; then
 	CFLAGS="$LIBEDIT_CFLAGS $CFLAGS"
 	LDFLAGS="$LIBEDIT_LIBS $LDFLAGS"
 elif ! test "x$OPT_LIBEDIT" = "xno"; then
+	HAVE_LIBEDIT=1
+
 	CPPFLAGS="-I$OPT_LIBEDIT/include $CPPFLAGS"
 	LDFLAGS="-L$OPT_LIBEDIT/lib $LDFLAGS"
 fi
@@ -94,6 +96,43 @@ if test $HAVE_LIBEDIT -eq 1; then
 	AC_CHECK_HEADER([histedit.h],,[AC_MSG_ERROR([Cannot find libedit headers])])
 fi
 AC_DEFINE_UNQUOTED([HAVE_LIBEDIT], [$HAVE_LIBEDIT], [Define if we link against libedit])
+
+dnl ####################################################################################
+dnl READLINE (second option)
+dnl ####################################################################################
+if ! test $HAVE_LIBEDIT -eq 1; then
+	OPT_READLINE=check
+	AC_ARG_WITH([readline],
+	            [AS_HELP_STRING([--with-readline],
+	                            [Use readline at the given prefix for interactive editing.
+                                     When libedit is available this option is a no-op.])],
+	            OPT_READLINE=$withval,
+	            OPT_READLINE=no
+	)
+
+	HAVE_READLINE=0
+	if test "x$OPT_READLINE" = "xyes" || test "x$OPT_READLINE" = "xcheck"; then
+		HAVE_READLINE=1
+		# FIXME: This is an ugly hack because the readline headers are
+		#        not C99 clean. Clang seems to not like them and causes
+		#        the configure script to fail.
+		CFLAGS="${CFLAGS} -Wno-strict-prototypes"
+
+		PKG_CHECK_MODULES([READLINE], [readline],,[AC_MSG_ERROR([Could not find readline])])
+		CFLAGS="$READLINE_CFLAGS $CFLAGS"
+		LDFLAGS="$READLINE_LIBS $LDFLAGS"
+	elif ! test "x$OPT_READLINE" = "xno"; then
+		HAVE_READLINE=1
+
+		CPPFLAGS="-I$OPT_READLINE/include $CPPFLAGS"
+		LDFLAGS="-L$OPT_READLINE/lib $LDFLAGS"
+	fi
+
+	if test $HAVE_READLINE -eq 1; then
+		AC_CHECK_HEADER([readline/readline.h],,[AC_MSG_ERROR([Cannot find readline headers])])
+	fi
+	AC_DEFINE_UNQUOTED([HAVE_READLINE], [$HAVE_READLINE], [Define if we link against readline])
+fi
 
 dnl ####################################################################################
 dnl TEST SUITE STUFF

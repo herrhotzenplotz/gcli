@@ -32,6 +32,7 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #if defined(HAVE_LIBEDIT)
@@ -43,6 +44,17 @@
 #   endif
 #else
 #   define USE_EDITLINE 0
+#endif
+
+#if !USE_EDITLINE && defined(HAVE_READLINE)
+#   if HAVE_READLINE
+#       include <readline/readline.h>
+#       define USE_READLINE 1
+#   else
+#       define USE_READLINE 0
+#   endif
+#else
+#   define USE_READLINE 0
 #endif
 
 #if USE_EDITLINE
@@ -83,6 +95,18 @@ get_input_line(char *const prompt)
 
 	result = strdup(txt);
 	result[len - 1] = '\0';
+
+	return result;
+
+#elif USE_READLINE
+	char *result = readline(prompt);
+
+	/* readline() returns an empty string if the input is empty. Our interface
+	 * returns NULL if the input was empty */
+	if (result == NULL || result[0] == '\0') {
+		free(result);
+		result = NULL;
+	}
 
 	return result;
 

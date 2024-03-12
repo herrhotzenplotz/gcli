@@ -30,6 +30,7 @@
 #include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/gitconfig.h>
 
+#include <gcli/ctx.h>
 #include <gcli/gcli.h>
 #include <sn/sn.h>
 
@@ -507,29 +508,34 @@ gcli_gitconfig_get_forgetype(struct gcli_ctx *ctx, char const *const remote_name
 }
 
 int
-gcli_gitconfig_repo_by_remote(
-	char const *const  remote_name,
-	char const **const owner,
-	char const **const repo)
+gcli_gitconfig_repo_by_remote(struct gcli_ctx *ctx, char const *const remote,
+                              char const **const owner, char const **const repo,
+                              int *const forge)
 {
 	gcli_gitconfig_read_gitconfig();
 
-	if (remote_name) {
+	if (remote) {
 		for (size_t i = 0; i < remotes_size; ++i) {
-			if (sn_sv_eq_to(remotes[i].name, remote_name)) {
+			if (sn_sv_eq_to(remotes[i].name, remote)) {
 				*owner = sn_sv_to_cstr(remotes[i].owner);
 				*repo  = sn_sv_to_cstr(remotes[i].repo);
-				return remotes[i].forge_type;
+				if (forge)
+					*forge = remotes[i].forge_type;
+
+				return 0;
 			}
 		}
 
-		errx(1, "gcli: error: no such remote: %s", remote_name);
+		return gcli_error(ctx, "no such remote: %s", remote);
 	}
 
 	if (!remotes_size)
-		errx(1, "gcli: error: no remotes to auto-detect forge");
+		return gcli_error(ctx, "no remotes to auto-detect forge");
 
 	*owner = sn_sv_to_cstr(remotes[0].owner);
 	*repo  = sn_sv_to_cstr(remotes[0].repo);
-	return remotes[0].forge_type;
+	if (forge)
+		*forge = remotes[0].forge_type;
+
+	return 0;
 }

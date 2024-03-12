@@ -50,8 +50,8 @@ void gcli_gitconfig_add_fork_remote(char const *org, char const *repo);
 
 int gcli_gitconfig_get_forgetype(struct gcli_ctx *ctx, char const *remote_name);
 
-int gcli_gitconfig_repo_by_remote(char const *remote_name,
-                                  char const **owner,
-                                  char const **repo);
+int gcli_gitconfig_repo_by_remote(struct gcli_ctx *ctx, char const *const remote_name,
+                                  char const **const owner, char const **const repo,
+                                  int *const forge);
 
 #endif /* GCLI_CMD_GITCONFIG_H */

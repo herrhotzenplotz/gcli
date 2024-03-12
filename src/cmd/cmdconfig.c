@@ -32,6 +32,7 @@
 #include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/gitconfig.h>
 
+#include <gcli/ctx.h>
 #include <gcli/forges.h>
 #include <gcli/gitea/config.h>
 #include <gcli/github/config.h>
@@ -896,7 +897,7 @@ gcli_config_get_forge_type(struct gcli_ctx *ctx)
 	return result;
 }
 
-void
+int
 gcli_config_get_repo(struct gcli_ctx *ctx, char const **const owner,
                      char const **const repo)
 {
@@ -906,30 +907,33 @@ gcli_config_get_repo(struct gcli_ctx *ctx, char const **const owner,
 	cfg = ensure_config(ctx);
 
 	if (cfg->override_remote) {
-		int const forge = gcli_gitconfig_repo_by_remote(
-			cfg->override_remote, owner, repo);
+		int forge = 0, rc = 0;
+
+		rc = gcli_gitconfig_repo_by_remote(ctx, cfg->override_remote, owner,
+		                                   repo, &forge);
+
+		if (rc < 0)
+			return rc;
 
 		if (forge >= 0) {
 			if ((int)(gcli_config_get_forge_type(ctx)) != forge)
-				errx(1, "gcli: error: forge types are inconsistent");
+				return gcli_error(ctx, "forge types are inconsistent");
 		}
 
-		return;
+		return 0;
 	}
 
 	if ((upstream = gcli_config_get_upstream(ctx)).length != 0) {
 		sn_sv const owner_sv = sn_sv_chop_until(&upstream, '/');
-		sn_sv const repo_sv  = sn_sv_from_parts(
-			upstream.data + 1,
-			upstream.length - 1);
+		sn_sv const repo_sv = sn_sv_from_parts(upstream.data + 1, upstream.length - 1);
 
 		*owner = sn_sv_to_cstr(owner_sv);
 		*repo  = sn_sv_to_cstr(repo_sv);
 
-		return;
+		return 0;
 	}
 
-	gcli_gitconfig_repo_by_remote(NULL, owner, repo);
+	return gcli_gitconfig_repo_by_remote(ctx, NULL, owner, repo, NULL);
 }
 
 int

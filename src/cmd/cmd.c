@@ -78,8 +78,11 @@ check_owner_and_repo(const char **owner, const char **repo)
 	if ((*owner == NULL) != (*repo == NULL))
 		errx(1, "gcli: error: missing either explicit owner or repo");
 
-	if (*owner == NULL)
-		gcli_config_get_repo(g_clictx, owner, repo);
+	if (*owner == NULL) {
+		int rc = gcli_config_get_repo(g_clictx, owner, repo);
+		if (rc < 0)
+			errx(1, "gcli: error: %s", gcli_get_error(g_clictx));
+	}
 }
 
 /* Parses (and updates) the given argument list into two seperate lists:

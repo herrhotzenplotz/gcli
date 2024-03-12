@@ -48,7 +48,7 @@ dnl ############################################################################
 dnl Go looking for libcurl
 OPT_LIBCURL=check
 AC_ARG_WITH([libcurl],
-[AS_HELP_STRING([--with-libcurl],
+[AS_HELP_STRING([--with-libcurl[[=DIR]]],
                 [Give an alternate path to libcurl.])],
 OPT_LIBCURL=$withval
 )
@@ -72,7 +72,7 @@ dnl ############################################################################
 dnl Check for libedit
 OPT_LIBEDIT=check
 AC_ARG_WITH([libedit],
-            [AS_HELP_STRING([--with-libedit],
+            [AS_HELP_STRING([--with-libedit[[=DIR]]],
                             [Use libedit at the given prefix for interactive editing])],
             OPT_LIBEDIT=$withval,
             OPT_LIBEDIT=no
@@ -103,7 +103,7 @@ dnl ############################################################################
 if ! test $HAVE_LIBEDIT -eq 1; then
 	OPT_READLINE=check
 	AC_ARG_WITH([readline],
-	            [AS_HELP_STRING([--with-readline],
+	            [AS_HELP_STRING([--with-readline[[=DIR]]],
 	                            [Use readline at the given prefix for interactive editing.
                                      When libedit is available this option is a no-op.])],
 	            OPT_READLINE=$withval,
@@ -141,7 +141,7 @@ dnl ############################################################################
 dnl For the test suite we require libatf-c and Kyua
 OPT_LIBATFC=check
 AC_ARG_WITH([libatf-c],
-[AS_HELP_STRING([--with-libatf-c],
+[AS_HELP_STRING([--with-libatf-c[[=DIR]]],
                 [Give an alternate path to libatf-c.])],
 OPT_LIBATFC=$withval
 )

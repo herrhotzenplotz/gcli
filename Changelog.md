@@ -28,6 +28,8 @@ This changelog does not follow semantic versioning.
 
 - Fixed a segmentation fault when listing forks
 
+- Fixed error when submitting a comment on Gitlab issues
+
 ### Changed
 
 ### Removed

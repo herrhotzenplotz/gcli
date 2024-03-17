@@ -247,57 +247,84 @@ do_test: $(check_PROGRAMS) tests/Kyuafile
 
 tests_json_escape_SOURCES = \
 	tests/json-escape.c
+tests_json_escape_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(LIBATFC_CFLAGS)
 tests_json_escape_LDADD = \
 	libgcli.la libpdjson.la libsn.la \
-	$(LIBATFC_LDFLAGS)
+	$(LIBATFC_LIBS)
 
 tests_github_parse_tests_SOURCES = \
 	tests/github-parse-tests.c
+tests_github_parse_tests_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(LIBATFC_CFLAGS)
 tests_github_parse_tests_LDADD = \
 	libgcli.la libpdjson.la libsn.la \
-	$(LIBATFC_LDFLAGS)
+	$(LIBATFC_LIBS)
 
 tests_gitlab_parse_tests_SOURCES = \
 	tests/gitlab-parse-tests.c
+tests_gitlab_parse_tests_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(LIBATFC_CFLAGS)
 tests_gitlab_parse_tests_LDADD = \
 	libgcli.la libpdjson.la libsn.la \
-	$(LIBATFC_LDFLAGS)
+	$(LIBATFC_LIBS)
 
 tests_gitea_parse_tests_SOURCES = \
 	tests/gitea-parse-tests.c
+tests_gitea_parse_tests_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(LIBATFC_CFLAGS)
 tests_gitea_parse_tests_LDADD = \
 	libgcli.la libpdjson.la libsn.la \
-	$(LIBATFC_LDFLAGS)
+	$(LIBATFC_LIBS)
 
 tests_bugzilla_parse_tests_SOURCES = \
 	tests/bugzilla-parse-tests.c
+tests_bugzilla_parse_tests_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(LIBATFC_CFLAGS)
 tests_bugzilla_parse_tests_LDADD = \
 	libgcli.la libpdjson.la libsn.la \
-	$(LIBATFC_LDFLAGS)
+	$(LIBATFC_LIBS)
 
 tests_base64_tests_SOURCES = \
 	tests/base64-tests.c
+tests_base64_tests_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(LIBATFC_CFLAGS)
 tests_base64_tests_LDADD = \
 	libgcli.la libpdjson.la libsn.la \
-	$(LIBATFC_LDFLAGS)
+	$(LIBATFC_LIBS)
 
 tests_url_encode_SOURCES = \
 	tests/url-encode.c
+tests_url_encode_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(LIBATFC_CFLAGS)
 tests_url_encode_LDADD = \
 	libgcli.la libpdjson.la libsn.la \
-	$(LIBATFC_LDFLAGS)
+	$(LIBATFC_LIBS)
 
 tests_pretty_print_test_SOURCES = \
 	tests/pretty_print_test.c
+tests_pretty_print_test_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(LIBATFC_CFLAGS)
 tests_pretty_print_test_LDADD = \
 	libsn.la \
-	$(LIBATFC_LDFLAGS)
+	$(LIBATFC_LIBS)
 
 tests_test_jsongen_SOURCES = \
 	tests/test-jsongen.c
+tests_test_jsongen_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(LIBATFC_CFLAGS)
 tests_test_jsongen_LDADD = \
 	libgcli.la \
-	$(LIBATFC_LDFLAGS)
+	$(LIBATFC_LIBS)
 
 EXTRA_DIST += tests/samples/github_simple_comment.json	\
 	tests/samples/github_simple_fork.json		\

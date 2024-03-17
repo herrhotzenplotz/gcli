@@ -150,23 +150,32 @@ HAVE_ATFC=no
 if test "x$OPT_LIBATFC" = "xcheck" || test "x$OPT_LIBATFC" = "xyes"
 then
         PKG_CHECK_MODULES([LIBATFC], [atf-c], [HAVE_ATFC=yes],[HAVE_ATFC=no])
-        CFLAGS="$LIBATFC_CFLAGS $CFLAGS"
-        LDFLAGS="$LIBATFC_LIBS $LDFLAGS"
 elif test "x$OPT_LIBATFC" = "xno"
 then
         HAVE_ATFC=no
 else
-        CPPFLAGS="-I$OPT_LIBATFC/include $CPPFLAGS"
-        LDFLAGS="-L$OPT_LIBATFC/lib $LDFLAGS"
+        LIBATFC_CFLAGS="-I$OPT_LIBATFC/include"
+        LIBATFC_LIBS="-L$OPT_LIBATFC/lib"
         HAVE_ATFC=yes
 fi
 
-AS_IF([test "x$HAVE_ATFC" = "xyes"],
-      [AC_CHECK_HEADER([atf-c.h],,[AC_MSG_ERROR([Cannot find libatf-c headers])])
-       HAVE_ATFC=yes])
+if test "x$HAVE_ATFC" = "xyes"; then
+	AC_SUBST([LIBATFC_CFLAGS])
+	AC_SUBST([LIBATFC_LIBS])
 
-dnl FIXME find a better way to do this
-dnl       AC_CHECK_LIB([atf-c],[atf_no_error],,[AC_MSG_ERROR([-latf-c doesn not contain atf_no_error])])
+	_OLD_CFLAGS="$CFLAGS"
+	_OLD_LDFLAGS="$LDFLAGS"
+
+	CFLAGS="$CFLAGS $LIBATFC_CFLAGS"
+	LDFLAGS="$LDFLAGS $LIBATFC_LIBS"
+
+	AC_CHECK_HEADER([atf-c.h],,[AC_MSG_ERROR([Cannot find libatf-c headers])])
+
+	CFLAGS="$_OLD_CFLAGS"
+	LDFLAGS="$_OLD_LDFLAGS"
+
+	HAVE_ATFC=yes
+fi
 
 AC_CHECK_PROG([KYUA], [kyua], [kyua])
 AC_CHECK_PROGS([REALPATH], [realpath grealpath], [])

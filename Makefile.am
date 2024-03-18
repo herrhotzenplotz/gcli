@@ -13,6 +13,7 @@ AM_CFLAGS = -Wno-gnu-zero-variadic-macro-arguments
 noinst_PROGRAMS = pgen$(EXEEXT)
 pgen_SOURCES = \
 	include/gcli/pgen.h \
+	thirdparty/sn/sn.c \
 	src/pgen/dump_c.c \
 	src/pgen/dump_h.c \
 	src/pgen/dump_plain.c \
@@ -20,13 +21,13 @@ pgen_SOURCES = \
 	src/pgen/lexer.l
 
 lib_LTLIBRARIES = libgcli.la
-noinst_LTLIBRARIES = libsn.la libpdjson.la
+noinst_LTLIBRARIES = libpdjson.la
 
 # For testing puproses I'll reenable parallel builds. If it breaks again, uncomment.
 # .NOTPARALLEL: pgen$(EXEEXT) $(builddir)/src/pgen/parser.c $(builddir)/src/pgen/parser.h $(builddir)/src/pgen/lexer.c
 src/pgen/lexer.c: src/pgen/parser.h
 
-libgcli_la_DEPENDENCIES = pgen$(EXEEXT) libpdjson.la libsn.la
+libgcli_la_DEPENDENCIES = pgen$(EXEEXT) libpdjson.la
 
 $(BUILT_SOURCES): pgen$(EXEEXT)
 
@@ -40,7 +41,7 @@ SUFFIXES = .t
 bin_PROGRAMS = gcli$(EXEEXT)
 gcli_LDADD = libgcli.la
 
-libgcli_la_LIBADD = libpdjson.la libsn.la
+libgcli_la_LIBADD = libpdjson.la
 libgcli_la_LDFLAGS = -no-undefined
 
 dist_man_MANS = \
@@ -86,10 +87,6 @@ gcli_SOURCES = \
 	include/gcli/cmd/interactive.h src/cmd/interactive.c \
 	src/cmd/api.c \
 	src/cmd/gcli.c
-
-libsn_la_SOURCES = \
-	thirdparty/sn/sn.c \
-	thirdparty/sn/sn.h
 
 libpdjson_la_SOURCES = \
 	thirdparty/pdjson/pdjson.c \
@@ -202,7 +199,8 @@ libgcli_la_SOURCES = \
 	src/bugzilla/bugs.c include/gcli/bugzilla/bugs.h \
 	src/bugzilla/bugs-parser.c include/gcli/bugzilla/bugs-parser.h \
 	src/bugzilla/config.c include/gcli/bugzilla/config.h \
-	$(TEMPLATES)
+	$(TEMPLATES) \
+	thirdparty/sn/sn.c thirdparty/sn/sn.h
 
 libgcli_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
@@ -251,7 +249,7 @@ tests_json_escape_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(LIBATFC_CFLAGS)
 tests_json_escape_LDADD = \
-	libgcli.la libpdjson.la libsn.la \
+	libgcli.la libpdjson.la \
 	$(LIBATFC_LIBS)
 
 tests_github_parse_tests_SOURCES = \
@@ -260,7 +258,7 @@ tests_github_parse_tests_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(LIBATFC_CFLAGS)
 tests_github_parse_tests_LDADD = \
-	libgcli.la libpdjson.la libsn.la \
+	libgcli.la libpdjson.la \
 	$(LIBATFC_LIBS)
 
 tests_gitlab_parse_tests_SOURCES = \
@@ -269,7 +267,7 @@ tests_gitlab_parse_tests_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(LIBATFC_CFLAGS)
 tests_gitlab_parse_tests_LDADD = \
-	libgcli.la libpdjson.la libsn.la \
+	libgcli.la libpdjson.la \
 	$(LIBATFC_LIBS)
 
 tests_gitea_parse_tests_SOURCES = \
@@ -278,7 +276,7 @@ tests_gitea_parse_tests_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(LIBATFC_CFLAGS)
 tests_gitea_parse_tests_LDADD = \
-	libgcli.la libpdjson.la libsn.la \
+	libgcli.la libpdjson.la \
 	$(LIBATFC_LIBS)
 
 tests_bugzilla_parse_tests_SOURCES = \
@@ -287,7 +285,7 @@ tests_bugzilla_parse_tests_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(LIBATFC_CFLAGS)
 tests_bugzilla_parse_tests_LDADD = \
-	libgcli.la libpdjson.la libsn.la \
+	libgcli.la libpdjson.la \
 	$(LIBATFC_LIBS)
 
 tests_base64_tests_SOURCES = \
@@ -296,7 +294,7 @@ tests_base64_tests_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(LIBATFC_CFLAGS)
 tests_base64_tests_LDADD = \
-	libgcli.la libpdjson.la libsn.la \
+	libgcli.la libpdjson.la \
 	$(LIBATFC_LIBS)
 
 tests_url_encode_SOURCES = \
@@ -305,16 +303,16 @@ tests_url_encode_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(LIBATFC_CFLAGS)
 tests_url_encode_LDADD = \
-	libgcli.la libpdjson.la libsn.la \
+	libgcli.la libpdjson.la \
 	$(LIBATFC_LIBS)
 
 tests_pretty_print_test_SOURCES = \
-	tests/pretty_print_test.c
+	tests/pretty_print_test.c \
+	thirdparty/sn/sn.c thirdparty/sn/sn.h
 tests_pretty_print_test_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(LIBATFC_CFLAGS)
 tests_pretty_print_test_LDADD = \
-	libsn.la \
 	$(LIBATFC_LIBS)
 
 tests_test_jsongen_SOURCES = \

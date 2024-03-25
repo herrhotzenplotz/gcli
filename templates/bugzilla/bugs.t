@@ -77,3 +77,6 @@ array of struct gcli_attachment use parse_bugzilla_bug_attachment;
 parser bugzilla_attachment_content is
 object of struct gcli_attachment with
 	("attachments" => use parse_bugzilla_attachment_content_only_first);
+
+parser bugzilla_bug_creation_result is
+object of gcli_id select "id" as id;

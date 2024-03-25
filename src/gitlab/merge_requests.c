@@ -84,6 +84,7 @@ gitlab_get_mrs(struct gcli_ctx *ctx, char const *owner, char const *repo,
 	char *e_author = NULL;
 	char *e_label = NULL;
 	char *e_milestone = NULL;
+	char *e_search = NULL;
 
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
@@ -109,14 +110,25 @@ gitlab_get_mrs(struct gcli_ctx *ctx, char const *owner, char const *repo,
 		free(tmp);
 	}
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests%s%s%s%s",
+	if (details->search_term) {
+		char *tmp = gcli_urlencode(details->search_term);
+		bool const need_qmark = details->all && !details->author &&
+			!details->label && !details->milestone;
+
+		e_search = sn_asprintf("%csearch=%s", need_qmark ? '?' : '&', tmp);
+		free(tmp);
+	}
+
+	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests%s%s%s%s%s",
 	                  gcli_get_apibase(ctx),
 	                  e_owner, e_repo,
 	                  details->all ? "" : "?state=opened",
 	                  e_author ? e_author : "",
 	                  e_label ? e_label : "",
-	                  e_milestone ? e_milestone : "");
+	                  e_milestone ? e_milestone : "",
+	                  e_search ? e_search : "");
 
+	free(e_search);
 	free(e_milestone);
 	free(e_label);
 	free(e_author);
@@ -503,7 +515,7 @@ gitlab_mr_wait_until_mergeable(struct gcli_ctx *ctx, char const *const e_owner,
 }
 
 int
-gitlab_perform_submit_mr(struct gcli_ctx *ctx, struct gcli_submit_pull_options opts)
+gitlab_perform_submit_mr(struct gcli_ctx *ctx, struct gcli_submit_pull_options *opts)
 {
 	/* Note: this doesn't really allow merging into repos with
 	 * different names. We need to figure out a way to make this
@@ -516,8 +528,8 @@ gitlab_perform_submit_mr(struct gcli_ctx *ctx, struct gcli_submit_pull_options o
 	struct gcli_jsongen gen = {0};
 	struct gcli_repo target = {0};
 
-	target_branch = opts.to;
-	source_owner = strdup(opts.from);
+	target_branch = opts->to;
+	source_owner = strdup(opts->from);
 	source_branch = strchr(source_owner, ':');
 	if (source_branch == NULL)
 		return gcli_error(ctx, "bad merge request source: expected 'owner:branch'");
@@ -525,7 +537,7 @@ gitlab_perform_submit_mr(struct gcli_ctx *ctx, struct gcli_submit_pull_options o
 	*source_branch++ = '\0';
 
 	/* Figure out the project id */
-	rc = gitlab_get_repo(ctx, opts.owner, opts.repo, &target);
+	rc = gitlab_get_repo(ctx, opts->owner, opts->repo, &target);
 	if (rc < 0)
 		return rc;
 
@@ -540,23 +552,23 @@ gitlab_perform_submit_mr(struct gcli_ctx *ctx, struct gcli_submit_pull_options o
 		gcli_jsongen_string(&gen, target_branch);
 
 		gcli_jsongen_objmember(&gen, "title");
-		gcli_jsongen_string(&gen, opts.title);
+		gcli_jsongen_string(&gen, opts->title);
 
 		/* description is optional and will be NULL if unset */
-		if (opts.body) {
+		if (opts->body) {
 			gcli_jsongen_objmember(&gen, "description");
-			gcli_jsongen_string(&gen, opts.body);
+			gcli_jsongen_string(&gen, opts->body);
 		}
 
 		gcli_jsongen_objmember(&gen, "target_project_id");
 		gcli_jsongen_number(&gen, target.id);
 
-		if (opts.labels_size) {
+		if (opts->labels_size) {
 			gcli_jsongen_objmember(&gen, "labels");
 
 			gcli_jsongen_begin_array(&gen);
-			for (size_t i = 0; i < opts.labels_size; ++i)
-				gcli_jsongen_string(&gen, opts.labels[i]);
+			for (size_t i = 0; i < opts->labels_size; ++i)
+				gcli_jsongen_string(&gen, opts->labels[i]);
 			gcli_jsongen_end_array(&gen);
 		}
 	}
@@ -567,7 +579,7 @@ gitlab_perform_submit_mr(struct gcli_ctx *ctx, struct gcli_submit_pull_options o
 
 	/* generate url */
 	e_owner = gcli_urlencode(source_owner);
-	e_repo = gcli_urlencode(opts.repo);
+	e_repo = gcli_urlencode(opts->repo);
 
 	url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests", gcli_get_apibase(ctx),
 	                  e_owner, e_repo);
@@ -577,7 +589,7 @@ gitlab_perform_submit_mr(struct gcli_ctx *ctx, struct gcli_submit_pull_options o
 
 	/* if that succeeded and the user wants automerge, parse the result and
 	 * set the automerge flag */
-	if (rc == 0 && opts.automerge) {
+	if (rc == 0 && opts->automerge) {
 		struct json_stream stream = {0};
 		struct gcli_pull pull = {0};
 
@@ -592,7 +604,7 @@ gitlab_perform_submit_mr(struct gcli_ctx *ctx, struct gcli_submit_pull_options o
 		if (rc < 0)
 			goto out;
 
-		rc = gitlab_mr_set_automerge(ctx, opts.owner, opts.repo, pull.number);
+		rc = gitlab_mr_set_automerge(ctx, opts->owner, opts->repo, pull.number);
 
 	out:
 		gcli_pull_free(&pull);

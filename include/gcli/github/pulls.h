@@ -37,9 +37,9 @@
 #include <gcli/curl.h>
 #include <gcli/pulls.h>
 
-int github_get_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                     struct gcli_pull_fetch_details const *details, int max,
-                     struct gcli_pull_list *out);
+int github_search_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                        struct gcli_pull_fetch_details const *details, int max,
+                        struct gcli_pull_list *out);
 
 int github_pull_get_diff(struct  gcli_ctx *ctx, FILE *stream, char const *owner,
                          char const *reponame, gcli_id pr_number);
@@ -61,7 +61,8 @@ int github_pull_reopen(struct gcli_ctx *ctx, char const *owner,
 int github_pull_close(struct gcli_ctx *ctx, char const *owner, char const *repo,
                       gcli_id pr_number);
 
-int github_perform_submit_pull(struct gcli_ctx *ctx, struct gcli_submit_pull_options opts);
+int github_perform_submit_pull(struct gcli_ctx *ctx,
+                               struct gcli_submit_pull_options *opts);
 
 int github_get_pull_commits(struct gcli_ctx *ctx, char const *owner,
                             char const *repo, gcli_id pr_number,

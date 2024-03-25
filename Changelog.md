@@ -2,6 +2,56 @@
 
 This changelog does not follow semantic versioning.
 
+## 2.3.0 (2024-Mar-25)
+
+### Added
+
+- It is now possible to build gcli against libgcli as a DLL on cygwin.
+  Submitted by: Daisuke Fujimura
+
+- The pulls subcommand now allows searching for pull requests with
+  a given search term. The search terms can be appended to the
+  regular pull subcommand for listing PRs:
+
+  ```console
+  $ gcli pulls -L bug segmentation fault
+  ```
+
+  The above will search for pull requests containing »segmentation
+  fault« and the label »bug«.
+
+- An interactive mode for creating both PRs and issues has been added.
+  You can now interactively create pull requests and issues by omitting their title:
+
+  ```console
+  $ gcli issues create
+  Owner [herrhotzenplotz]:
+  Repository [gcli]:
+  Title: foo
+  The following issue will be created:
+
+  TITLE   : foo
+  OWNER   : herrhotzenplotz
+  REPO    : gcli
+  MESSAGE :
+  No message
+
+  Do you want to continue? [yN]
+  ```
+
+### Fixed
+
+- gcli was incorrectly using an environment variable *XDG_CONFIG_DIR*.
+  This variable has now been fixed to be *XDG_CONFIG_HOME*.
+  Submitted by: Jakub Wilk
+
+- Fixed a segmentation fault when listing forks
+
+- Fixed error when submitting a comment on Gitlab issues
+
+- The build on Haiku has been fixed. GCLI can now be compiled and
+  used on this platform.
+
 ## 2.2.0 (2024-Feb-05)
 
 ### Added

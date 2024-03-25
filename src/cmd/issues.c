@@ -33,6 +33,7 @@
 #include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/comment.h>
 #include <gcli/cmd/editor.h>
+#include <gcli/cmd/interactive.h>
 #include <gcli/cmd/table.h>
 
 #include <gcli/comments.h>
@@ -49,7 +50,7 @@
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: gcli issues create [-o owner -r repo] [-y] title...\n");
+	fprintf(stderr, "usage: gcli issues create [-o owner -r repo] [-y] [title...]\n");
 	fprintf(stderr, "       gcli issues [-o owner -r repo] [-a] [-n number] [-A author] [-L label]\n");
 	fprintf(stderr, "                   [-M milestone] [-s] [search query...]\n");
 	fprintf(stderr, "       gcli issues [-o owner -r repo] -i issue actions...\n");
@@ -230,11 +231,11 @@ gcli_issue_get_user_message(struct gcli_submit_issue_options *opts)
 }
 
 static int
-create_issue(struct gcli_submit_issue_options opts, int always_yes)
+create_issue(struct gcli_submit_issue_options *opts, int always_yes)
 {
 	int rc;
 
-	opts.body = gcli_issue_get_user_message(&opts);
+	opts->body = gcli_issue_get_user_message(opts);
 
 	printf("The following issue will be created:\n"
 	       "\n"
@@ -242,8 +243,8 @@ create_issue(struct gcli_submit_issue_options opts, int always_yes)
 	       "OWNER   : %s\n"
 	       "REPO    : %s\n"
 	       "MESSAGE :\n%s\n",
-	       opts.title, opts.owner, opts.repo,
-	       opts.body ? opts.body : "No message");
+	       opts->title, opts->owner, opts->repo,
+	       opts->body ? opts->body : "No message");
 
 	putchar('\n');
 
@@ -254,10 +255,35 @@ create_issue(struct gcli_submit_issue_options opts, int always_yes)
 
 	rc = gcli_issue_submit(g_clictx, opts);
 
-	free(opts.body);
-	free(opts.body);
+	free(opts->body);
+	free(opts->body);
 
 	return rc;
+}
+
+static int
+subcommand_issue_create_interactive(struct gcli_submit_issue_options *const opts)
+{
+	char const *deflt_owner = NULL, *deflt_repo = NULL;
+	int rc = 0;
+
+	gcli_config_get_repo(g_clictx, &deflt_owner, &deflt_repo);
+
+	if (!opts->owner)
+		opts->owner = gcli_cmd_prompt("Owner", deflt_owner);
+
+	if (!opts->repo)
+		opts->repo = gcli_cmd_prompt("Repository", deflt_repo);
+
+	opts->title = gcli_cmd_prompt("Title", NULL);
+
+	rc = create_issue(opts, false);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: %s\n", gcli_get_error(g_clictx));
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
 }
 
 static int
@@ -335,6 +361,9 @@ subcommand_issue_create(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
+	if (argc == 0)
+		return subcommand_issue_create_interactive(&opts);
+
 	check_owner_and_repo(&opts.owner, &opts.repo);
 
 	if (argc != 1) {
@@ -345,7 +374,7 @@ subcommand_issue_create(int argc, char *argv[])
 
 	opts.title = argv[0];
 
-	if (create_issue(opts, always_yes) < 0)
+	if (create_issue(&opts, always_yes) < 0)
 		errx(1, "gcli: error: failed to submit issue: %s",
 		     gcli_get_error(g_clictx));
 

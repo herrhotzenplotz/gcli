@@ -28,7 +28,7 @@ command).
 .Pp
 The default behaviour of
 .Nm
-can be overriden to accomodate more nuanced use cases. Manual
+can be overridden to accommodate more nuanced use cases. Manual
 overrides must be passed before subcommands and their options.
 .Sh SUBCOMMANDS
 Most of these subcommands are documented in dedicated man pages.
@@ -104,7 +104,7 @@ unless stdout is not a tty. See
 This is useful in combination with modern pagers such as
 .Xr less 1 .
 .It Fl q , -quiet
-Supresses most output of
+Suppresses most output of
 .Nm .
 .It Fl v , -verbose
 Be very verbose. This means that warnings about missing config files
@@ -153,12 +153,12 @@ Operate on the given numeric identifier.
 Other options specific to the context are documented in the respective
 man pages.
 .Sh ENVIRONMENT
-.Bl -tag -width XDG_CONFIG_DIR
+.Bl -tag -width XDG_CONFIG_HOME
 .It Ev EDITOR
 If the gcli config file does not name an editor,
 .Nm
 may use this editor.
-.It Ev XDG_CONFIG_DIR
+.It Ev XDG_CONFIG_HOME
 There should be a subdirectory called gcli in the directory this
 environment variable points to where
 .Nm
@@ -183,8 +183,8 @@ escape sequences. See
 (--colours).
 .El
 .Sh FILES
-.Bl -tag -width ${XDG_CONFIG_DIR}/gcli/config -compact
-.It Pa ${XDG_CONFIG_DIR}/gcli/config
+.Bl -tag -width ${XDG_CONFIG_HOME}/gcli/config -compact
+.It Pa ${XDG_CONFIG_HOME}/gcli/config
 The user configuration file for gcli. It contains account definitions
 as well as sensible default values. See
 .Xr gcli 5 .

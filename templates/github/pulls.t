@@ -63,5 +63,9 @@ object of struct gcli_pull with
 
 parser github_pr_merge_message is object of char* select "message" as string;
 
-parser github_pulls is array of struct gcli_pull
-	use parse_github_pull;
+parser github_pulls is
+array of struct gcli_pull use parse_github_pull;
+
+parser github_pull_search_result is
+object of struct gcli_pull_list with
+	("items" => pulls as array of gcli_pull use parse_github_pull);

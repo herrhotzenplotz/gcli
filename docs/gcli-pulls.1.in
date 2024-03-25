@@ -13,6 +13,7 @@
 .Op Fl s
 .Op Fl n Ar n
 .Op Fl o Ar owner Fl r Ar repo
+.Op Ar search-terms...
 .Nm
 .Fl i Ar pr
 .Op Fl o Ar owner Fl r Ar repo
@@ -23,7 +24,7 @@
 .Op Fl t Ar branch
 .Op Fl f Ar owner:branch
 .Op Fl y
-.Ar "PR title..."
+.Op Ar "PR title..."
 .Sh DESCRIPTION
 Use
 .Nm
@@ -92,6 +93,9 @@ on the specified
 .It Cm create
 Create a new PR in the given or autodetected repository. The editor
 will come up and ask you to enter the PR message.
+.Pp
+When the title is omitted gcli will interactively prompt the various
+options listed below, including the title.
 .Pp
 The following flags can be specified:
 .Bl -tag -width indent
@@ -182,6 +186,11 @@ Change the title of the pull request to
 Print a list of open PRs in the current project:
 .Bd -literal -offset indent
 $ gcli pulls
+.Ed
+.Pp
+Create a new PR and let gcli interactively prompt you for details:
+.Bd -literal -offset indent
+$ gcli pr create
 .Ed
 .Pp
 Create a new PR in the current Project, the head is the currently

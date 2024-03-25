@@ -20,7 +20,7 @@ issues on GitHub and Gitea, making the
 .Fl i
 and
 .Fl p
-flags exchangable without changing the overall effect of creating the
+flags exchangeable without changing the overall effect of creating the
 comment.
 .Nm
 will open an editor, either specified in your environment through

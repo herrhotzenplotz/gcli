@@ -104,10 +104,11 @@ struct gcli_submit_pull_options {
 };
 
 struct gcli_pull_fetch_details {
-	bool all;
-	char const *author;
-	char const *label;
-	char const *milestone;
+	bool all;               /** Ignore status of the pull requests */
+	char const *author;     /** Author of the pull request or NULL */
+	char const *label;      /** a label attached to the pull request or NULL */
+	char const *milestone;  /** a milestone this pull request is a part of or NULL */
+	char const *search_term; /** some text to match in the pull request or NULL */
 };
 
 /** Generic list of checks ran on a pull request
@@ -124,9 +125,9 @@ struct gcli_pull_checks_list {
 	int forge_type;
 };
 
-int gcli_get_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                   struct gcli_pull_fetch_details const *details, int max,
-                   struct gcli_pull_list *out);
+int gcli_search_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                      struct gcli_pull_fetch_details const *details, int max,
+                      struct gcli_pull_list *out);
 
 void gcli_pull_free(struct gcli_pull *it);
 
@@ -150,7 +151,7 @@ void gcli_commits_free(struct gcli_commit_list *list);
 int gcli_get_pull(struct gcli_ctx *ctx, char const *owner, char const *repo,
                   gcli_id pr_number, struct gcli_pull *out);
 
-int gcli_pull_submit(struct gcli_ctx *ctx, struct gcli_submit_pull_options);
+int gcli_pull_submit(struct gcli_ctx *ctx, struct gcli_submit_pull_options *);
 
 enum gcli_merge_flags {
 	GCLI_PULL_MERGE_SQUASH = 0x1, /* squash commits when merging */

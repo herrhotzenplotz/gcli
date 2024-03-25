@@ -36,6 +36,7 @@
 #include <gcli/cmd/comment.h>
 #include <gcli/cmd/editor.h>
 #include <gcli/cmd/gitconfig.h>
+#include <gcli/cmd/interactive.h>
 #include <gcli/cmd/pipelines.h>
 #include <gcli/cmd/pulls.h>
 #include <gcli/cmd/table.h>
@@ -56,9 +57,9 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: gcli pulls create [-o owner -r repo] [-f from]\n");
-	fprintf(stderr, "                         [-t to] [-d] [-a] [-l label] pull-request-title\n");
+	fprintf(stderr, "                         [-t to] [-d] [-a] [-l label] [pull-request-title]\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] [-a] [-A author] [-n number]\n");
-	fprintf(stderr, "                  [-L label] [-M milestone] [-s]\n");
+	fprintf(stderr, "                  [-L label] [-M milestone] [-s] [search-terms...]\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] -i pull-id actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
 	fprintf(stderr, "  -o owner        The repository owner\n");
@@ -381,9 +382,9 @@ gcli_pull_get_user_message(struct gcli_submit_pull_options *opts)
 }
 
 static int
-create_pull(struct gcli_submit_pull_options opts, int always_yes)
+create_pull(struct gcli_submit_pull_options *const opts, int always_yes)
 {
-	opts.body = gcli_pull_get_user_message(&opts);
+	opts->body = gcli_pull_get_user_message(opts);
 
 	fprintf(stdout,
 	        "The following PR will be created:\n"
@@ -393,8 +394,8 @@ create_pull(struct gcli_submit_pull_options opts, int always_yes)
 	        "HEAD    : %s\n"
 	        "IN      : %s/%s\n"
 	        "MESSAGE :\n%s\n",
-	        opts.title, opts.to, opts.from,
-	        opts.owner, opts.repo, opts.body ? opts.body : "No message.");
+	        opts->title, opts->to, opts->from,
+	        opts->owner, opts->repo, opts->body ? opts->body : "No message.");
 
 	fputc('\n', stdout);
 
@@ -427,6 +428,76 @@ pr_try_derive_head(void)
 	}
 
 	return sn_asprintf("%s:"SV_FMT, account, SV_ARGS(branch));
+}
+
+static char *
+derive_head(void)
+{
+	char const *account;
+	sn_sv branch  = {0};
+
+	if ((account = gcli_config_get_account_name(g_clictx)) == NULL)
+		return NULL;
+
+	branch = gcli_gitconfig_get_current_branch();
+	if (branch.length == 0)
+		return NULL;
+
+	return sn_asprintf("%s:"SV_FMT, account, SV_ARGS(branch));
+}
+
+/** Interactive version of the create subcommand */
+static int
+subcommand_pull_create_interactive(struct gcli_submit_pull_options *const opts)
+{
+	char const *deflt_owner = NULL, *deflt_repo = NULL;
+	int rc = 0;
+
+	gcli_config_get_repo(g_clictx, &deflt_owner, &deflt_repo);
+
+	/* PR Source */
+	if (!opts->from) {
+		char *tmp = NULL;
+
+		tmp = derive_head();
+		opts->from = gcli_cmd_prompt("From (owner:branch)", tmp);
+		free(tmp);
+		tmp = NULL;
+	}
+
+	/* PR Target */
+	if (!opts->owner)
+		opts->owner = gcli_cmd_prompt("Owner", deflt_owner);
+
+	if (!opts->repo)
+		opts->repo = gcli_cmd_prompt("Repository", deflt_repo);
+
+	if (!opts->to) {
+		char *tmp = NULL;
+		sn_sv base;
+
+		base = gcli_config_get_base(g_clictx);
+		if (base.length != 0)
+			tmp = sn_sv_to_cstr(base);
+
+		opts->to = gcli_cmd_prompt("To Branch", tmp);
+
+		free(tmp);
+		tmp = NULL;
+	}
+
+	/* Meta */
+	opts->title = gcli_cmd_prompt("Title", NULL);
+	opts->automerge = sn_yesno("Enable automerge?");
+
+	/* create_pull is going to pop up the editor */
+	rc = create_pull(opts, false);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: %s\n", gcli_get_error(g_clictx));
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
 }
 
 static int
@@ -506,6 +577,9 @@ subcommand_pull_create(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
+	if (argc == 0)
+		return subcommand_pull_create_interactive(&opts);
+
 	if (!opts.from)
 		opts.from = pr_try_derive_head();
 
@@ -529,7 +603,7 @@ subcommand_pull_create(int argc, char *argv[])
 
 	opts.title = argv[0];
 
-	if (create_pull(opts, always_yes) < 0)
+	if (create_pull(&opts, always_yes) < 0)
 		errx(1, "gcli: error: failed to submit pull request: %s",
 		     gcli_get_error(g_clictx));
 
@@ -563,7 +637,7 @@ subcommand_pulls(int argc, char *argv[])
 		return subcommand_pull_create(argc, argv);
 	}
 
-	const struct option options[] = {
+	struct option const options[] = {
 		{ .name    = "all",
 		  .has_arg = no_argument,
 		  .flag    = NULL,
@@ -661,12 +735,23 @@ subcommand_pulls(int argc, char *argv[])
 	/* In case no explicit PR number was specified, list all
 	 * open PRs and exit */
 	if (pr < 0) {
-		if (gcli_get_pulls(g_clictx, owner, repo, &details, n, &pulls) < 0)
+		char *search_term = NULL;
+
+		/* Trailing arguments indicate a search term */
+		if (argc)
+			search_term = sn_join_with((char const *const *)argv, argc, " ");
+
+		details.search_term = search_term;
+
+		if (gcli_search_pulls(g_clictx, owner, repo, &details, n, &pulls) < 0)
 			errx(1, "gcli: error: could not fetch pull requests: %s",
 			     gcli_get_error(g_clictx));
 
 		gcli_print_pulls(flags, &pulls, n);
 		gcli_pulls_free(&pulls);
+
+		free(search_term);
+		details.search_term = search_term = NULL;
 
 		return EXIT_SUCCESS;
 	}

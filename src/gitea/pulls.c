@@ -33,12 +33,67 @@
 
 #include <gcli/json_gen.h>
 
+#include <templates/github/pulls.h>
+
 int
-gitea_get_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
-                struct gcli_pull_fetch_details const *const details, int const max,
-                struct gcli_pull_list *const out)
+gitea_search_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                   struct gcli_pull_fetch_details const *details,
+                   int const max, struct gcli_pull_list *const out)
 {
-	return github_get_pulls(ctx, owner, repo, details, max, out);
+	char *url = NULL, *e_owner = NULL, *e_repo = NULL, *e_author = NULL,
+	     *e_label = NULL, *e_milestone = NULL, *e_query = NULL;
+
+	struct gcli_fetch_list_ctx fl = {
+		.listp = &out->pulls,
+		.sizep = &out->pulls_size,
+		.parse = (parsefn)(parse_github_pulls),
+		.max = max,
+	};
+
+	if (details->milestone) {
+		char *tmp = gcli_urlencode(details->milestone);
+		e_milestone = sn_asprintf("&milestones=%s", tmp);
+		free(tmp);
+	}
+
+	if (details->author) {
+		char *tmp = gcli_urlencode(details->author);
+		e_author = sn_asprintf("&created_by=%s", tmp);
+		free(tmp);
+	}
+
+	if (details->label) {
+		char *tmp = gcli_urlencode(details->label);
+		e_label = sn_asprintf("&labels=%s", tmp);
+		free(tmp);
+	}
+
+	if (details->search_term) {
+		char *tmp = gcli_urlencode(details->search_term);
+		e_query = sn_asprintf("&q=%s", tmp);
+		free(tmp);
+	}
+
+	e_owner = gcli_urlencode(owner);
+	e_repo = gcli_urlencode(repo);
+
+	url = sn_asprintf("%s/repos/%s/%s/issues?type=pulls&state=%s%s%s%s%s",
+	                  gcli_get_apibase(ctx),
+	                  e_owner, e_repo,
+	                  details->all ? "all" : "open",
+	                  e_author ? e_author : "",
+	                  e_label ? e_label : "",
+	                  e_milestone ? e_milestone : "",
+	                  e_query ? e_query : "");
+
+	free(e_query);
+	free(e_milestone);
+	free(e_author);
+	free(e_label);
+	free(e_owner);
+	free(e_repo);
+
+	return gcli_fetch_list(ctx, url, &fl);
 }
 
 int
@@ -57,7 +112,7 @@ gitea_get_pull_commits(struct gcli_ctx *ctx, char const *owner,
 }
 
 int
-gitea_pull_submit(struct gcli_ctx *ctx, struct gcli_submit_pull_options opts)
+gitea_pull_submit(struct gcli_ctx *ctx, struct gcli_submit_pull_options *opts)
 {
 	warnx("In case the following process errors out, see: "
 	      "https://github.com/go-gitea/gitea/issues/20175");

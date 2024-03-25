@@ -3,14 +3,14 @@
 
 AC_PREREQ([2.69])
 AC_INIT([gcli],
-        [2.2.0],
+        [2.3.0],
         [~herrhotzenplotz/gcli-discuss@lists.sr.ht],
         [gcli],
         [https://herrhotzenplotz.de/gcli])
 AM_INIT_AUTOMAKE([1.0 foreign subdir-objects dist-bzip2 dist-xz -Wall])
 
 dnl Release Date.
-PACKAGE_DATE="2024-Feb-05"
+PACKAGE_DATE="2024-May-25"
 AC_SUBST([PACKAGE_DATE])
 
 dnl Silent by default.
@@ -42,10 +42,13 @@ if ! test -z "${CCACHE}"; then
 	CC="${CCACHE} ${CC}"
 fi
 
+dnl ####################################################################################
+dnl LIBCURL
+dnl ####################################################################################
 dnl Go looking for libcurl
 OPT_LIBCURL=check
 AC_ARG_WITH([libcurl],
-[AS_HELP_STRING([--with-libcurl],
+[AS_HELP_STRING([--with-libcurl[[=DIR]]],
                 [Give an alternate path to libcurl.])],
 OPT_LIBCURL=$withval
 )
@@ -63,10 +66,82 @@ AC_CHECK_HEADER([curl/curl.h],,[AC_MSG_ERROR([Cannot find libcurl headers])])
 dnl FIXME find a better way for this
 dnl AC_CHECK_LIB([curl],[curl_easy_init],,[AC_MSG_ERROR([-lcurl doesn not contain curl_easy_init])])
 
+dnl ####################################################################################
+dnl LIBEDIT
+dnl ####################################################################################
+dnl Check for libedit
+OPT_LIBEDIT=check
+AC_ARG_WITH([libedit],
+            [AS_HELP_STRING([--with-libedit[[=DIR]]],
+                            [Use libedit at the given prefix for interactive editing])],
+            OPT_LIBEDIT=$withval,
+            OPT_LIBEDIT=no
+)
+
+HAVE_LIBEDIT=0
+if test "x$OPT_LIBEDIT" = "xyes" || test "x$OPT_LIBEDIT" = "xcheck"; then
+	HAVE_LIBEDIT=1
+
+	PKG_CHECK_MODULES([LIBEDIT], [libedit],,[AC_MSG_ERROR([Could not find libedit])])
+	CFLAGS="$LIBEDIT_CFLAGS $CFLAGS"
+	LDFLAGS="$LIBEDIT_LIBS $LDFLAGS"
+elif ! test "x$OPT_LIBEDIT" = "xno"; then
+	HAVE_LIBEDIT=1
+
+	CPPFLAGS="-I$OPT_LIBEDIT/include $CPPFLAGS"
+	LDFLAGS="-L$OPT_LIBEDIT/lib $LDFLAGS"
+fi
+
+if test $HAVE_LIBEDIT -eq 1; then
+	AC_CHECK_HEADER([histedit.h],,[AC_MSG_ERROR([Cannot find libedit headers])])
+fi
+AC_DEFINE_UNQUOTED([HAVE_LIBEDIT], [$HAVE_LIBEDIT], [Define if we link against libedit])
+
+dnl ####################################################################################
+dnl READLINE (second option)
+dnl ####################################################################################
+if ! test $HAVE_LIBEDIT -eq 1; then
+	OPT_READLINE=check
+	AC_ARG_WITH([readline],
+	            [AS_HELP_STRING([--with-readline[[=DIR]]],
+	                            [Use readline at the given prefix for interactive editing.
+                                     When libedit is available this option is a no-op.])],
+	            OPT_READLINE=$withval,
+	            OPT_READLINE=no
+	)
+
+	HAVE_READLINE=0
+	if test "x$OPT_READLINE" = "xyes" || test "x$OPT_READLINE" = "xcheck"; then
+		HAVE_READLINE=1
+		# FIXME: This is an ugly hack because the readline headers are
+		#        not C99 clean. Clang seems to not like them and causes
+		#        the configure script to fail.
+		CFLAGS="${CFLAGS} -Wno-strict-prototypes"
+
+		PKG_CHECK_MODULES([READLINE], [readline],,[AC_MSG_ERROR([Could not find readline])])
+		CFLAGS="$READLINE_CFLAGS $CFLAGS"
+		LDFLAGS="$READLINE_LIBS $LDFLAGS"
+	elif ! test "x$OPT_READLINE" = "xno"; then
+		HAVE_READLINE=1
+
+		CPPFLAGS="-I$OPT_READLINE/include $CPPFLAGS"
+		LDFLAGS="-L$OPT_READLINE/lib $LDFLAGS"
+	fi
+
+	if test $HAVE_READLINE -eq 1; then
+		AC_CHECK_HEADER([readline/readline.h],,[AC_MSG_ERROR([Cannot find readline headers])])
+	fi
+	AC_DEFINE_UNQUOTED([HAVE_READLINE], [$HAVE_READLINE], [Define if we link against readline])
+fi
+
+dnl ####################################################################################
+dnl TEST SUITE STUFF
+dnl ####################################################################################
+
 dnl For the test suite we require libatf-c and Kyua
 OPT_LIBATFC=check
 AC_ARG_WITH([libatf-c],
-[AS_HELP_STRING([--with-libatf-c],
+[AS_HELP_STRING([--with-libatf-c[[=DIR]]],
                 [Give an alternate path to libatf-c.])],
 OPT_LIBATFC=$withval
 )
@@ -75,23 +150,32 @@ HAVE_ATFC=no
 if test "x$OPT_LIBATFC" = "xcheck" || test "x$OPT_LIBATFC" = "xyes"
 then
         PKG_CHECK_MODULES([LIBATFC], [atf-c], [HAVE_ATFC=yes],[HAVE_ATFC=no])
-        CFLAGS="$LIBATFC_CFLAGS $CFLAGS"
-        LDFLAGS="$LIBATFC_LIBS $LDFLAGS"
 elif test "x$OPT_LIBATFC" = "xno"
 then
         HAVE_ATFC=no
 else
-        CPPFLAGS="-I$OPT_LIBATFC/include $CPPFLAGS"
-        LDFLAGS="-L$OPT_LIBATFC/lib $LDFLAGS"
+        LIBATFC_CFLAGS="-I$OPT_LIBATFC/include"
+        LIBATFC_LIBS="-L$OPT_LIBATFC/lib"
         HAVE_ATFC=yes
 fi
 
-AS_IF([test "x$HAVE_ATFC" = "xyes"],
-      [AC_CHECK_HEADER([atf-c.h],,[AC_MSG_ERROR([Cannot find libatf-c headers])])
-       HAVE_ATFC=yes])
+if test "x$HAVE_ATFC" = "xyes"; then
+	AC_SUBST([LIBATFC_CFLAGS])
+	AC_SUBST([LIBATFC_LIBS])
 
-dnl FIXME find a better way to do this
-dnl       AC_CHECK_LIB([atf-c],[atf_no_error],,[AC_MSG_ERROR([-latf-c doesn not contain atf_no_error])])
+	_OLD_CFLAGS="$CFLAGS"
+	_OLD_LDFLAGS="$LDFLAGS"
+
+	CFLAGS="$CFLAGS $LIBATFC_CFLAGS"
+	LDFLAGS="$LDFLAGS $LIBATFC_LIBS"
+
+	AC_CHECK_HEADER([atf-c.h],,[AC_MSG_ERROR([Cannot find libatf-c headers])])
+
+	CFLAGS="$_OLD_CFLAGS"
+	LDFLAGS="$_OLD_LDFLAGS"
+
+	HAVE_ATFC=yes
+fi
 
 AC_CHECK_PROG([KYUA], [kyua], [kyua])
 AC_CHECK_PROGS([REALPATH], [realpath grealpath], [])

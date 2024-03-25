@@ -207,27 +207,29 @@ gitlab_issue_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gitlab_perform_submit_issue(struct gcli_ctx *ctx, struct gcli_submit_issue_options opts,
-                            struct gcli_fetch_buffer *const out)
+gitlab_perform_submit_issue(struct gcli_ctx *const ctx,
+                            struct gcli_submit_issue_options *const opts,
+                            struct gcli_issue *const out)
 {
 	char *e_owner = NULL, *e_repo = NULL, *url = NULL, *payload = NULL;
-	struct gcli_jsongen gen = {0};
 	int rc = 0;
+	struct gcli_fetch_buffer buffer = {0}, *_buffer = NULL;
+	struct gcli_jsongen gen = {0};
 
-	e_owner = gcli_urlencode(opts.owner);
-	e_repo = gcli_urlencode(opts.repo);
+	e_owner = gcli_urlencode(opts->owner);
+	e_repo = gcli_urlencode(opts->repo);
 
 	gcli_jsongen_init(&gen);
 	gcli_jsongen_begin_object(&gen);
 	{
 		gcli_jsongen_objmember(&gen, "title");
-		gcli_jsongen_string(&gen, opts.title);
+		gcli_jsongen_string(&gen, opts->title);
 
 		/* The body may be NULL if empty. In this case we can omit the
 		 * body / description as it is not required by the API */
-		if (opts.body) {
+		if (opts->body) {
 			gcli_jsongen_objmember(&gen, "description");
-			gcli_jsongen_string(&gen, opts.body);
+			gcli_jsongen_string(&gen, opts->body);
 		}
 	}
 	gcli_jsongen_end_object(&gen);
@@ -241,8 +243,19 @@ gitlab_perform_submit_issue(struct gcli_ctx *ctx, struct gcli_submit_issue_optio
 	free(e_owner);
 	free(e_repo);
 
-	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, out);
+	if (out)
+		_buffer = &buffer;
 
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, _buffer);
+	if (rc == 0 && out) {
+		struct json_stream stream = {0};
+
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		rc = parse_gitlab_issue(ctx, &stream, out);
+		json_close(&stream);
+	}
+
+	free(buffer.data);
 	free(payload);
 	free(url);
 

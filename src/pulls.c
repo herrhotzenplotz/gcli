@@ -50,11 +50,11 @@ gcli_pulls_free(struct gcli_pull_list *const it)
 }
 
 int
-gcli_get_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
-               struct gcli_pull_fetch_details const *const details, int const max,
-               struct gcli_pull_list *const out)
+gcli_search_pulls(struct gcli_ctx *ctx, char const *owner, char const *repo,
+                  struct gcli_pull_fetch_details const *const details,
+                  int const max, struct gcli_pull_list *const out)
 {
-	gcli_null_check_call(get_pulls, ctx, owner, repo, details, max, out);
+	gcli_null_check_call(search_pulls, ctx, owner, repo, details, max, out);
 }
 
 int
@@ -143,9 +143,9 @@ gcli_pull_checks_free(struct gcli_pull_checks_list *list)
 }
 
 int
-gcli_pull_submit(struct gcli_ctx *ctx, struct gcli_submit_pull_options opts)
+gcli_pull_submit(struct gcli_ctx *ctx, struct gcli_submit_pull_options *opts)
 {
-	if (opts.automerge) {
+	if (opts->automerge) {
 		int const q = gcli_forge(ctx)->pull_summary_quirks;
 		if (q & GCLI_PRS_QUIRK_AUTOMERGE)
 			return gcli_error(ctx, "forge does not support auto-merge");

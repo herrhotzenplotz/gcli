@@ -165,8 +165,8 @@ struct gcli_forge_descriptor {
 	 * Submit an issue */
 	int (*perform_submit_issue)(
 		struct gcli_ctx *ctx,
-		struct gcli_submit_issue_options opts,
-		struct gcli_fetch_buffer *out);
+		struct gcli_submit_issue_options *opts,
+		struct gcli_issue *out);
 
 	/**
 	 * Change the title of an issue */
@@ -279,7 +279,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Get a list of PRs/MRs on the given repo */
-	int (*get_pulls)(
+	int (*search_pulls)(
 		struct gcli_ctx *ctx,
 		char const *owner,
 		char const *reponame,
@@ -341,7 +341,7 @@ struct gcli_forge_descriptor {
 	 * Submit PR/MR */
 	int (*perform_submit_pull)(
 		struct gcli_ctx *ctx,
-		struct gcli_submit_pull_options opts);
+		struct gcli_submit_pull_options *opts);
 
 	/**
 	 * Get a list of commits in the given PR/MR */

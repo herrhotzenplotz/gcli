@@ -284,14 +284,16 @@ add_extra_options(struct gcli_nvlist const *list, struct gcli_jsongen *gen)
 }
 
 int
-bugzilla_bug_submit(struct gcli_ctx *ctx, struct gcli_submit_issue_options opts,
-                    struct gcli_fetch_buffer *out)
+bugzilla_bug_submit(struct gcli_ctx *const ctx,
+                    struct gcli_submit_issue_options *const opts,
+                    struct gcli_issue *const out)
 {
 	char *payload = NULL, *url = NULL;
 	char *token; /* bugzilla wants the api token as a parameter in the url or the json payload */
-	char const *product = opts.owner, *component = opts.repo,
-	           *summary = opts.title, *description = opts.body;
+	char const *product = opts->owner, *component = opts->repo,
+	           *summary = opts->title, *description = opts->body;
 	struct gcli_jsongen gen = {0};
+	struct gcli_fetch_buffer buffer = {0}, *_buffer = NULL;
 	int rc = 0;
 
 	/* prepare data for payload generation */
@@ -338,7 +340,7 @@ bugzilla_bug_submit(struct gcli_ctx *ctx, struct gcli_submit_issue_options opts,
 		gcli_jsongen_objmember(&gen, "api_key");
 		gcli_jsongen_string(&gen, token);
 
-		add_extra_options(&opts.extra, &gen);
+		add_extra_options(&opts->extra, &gen);
 	}
 	gcli_jsongen_end_object(&gen);
 
@@ -347,8 +349,24 @@ bugzilla_bug_submit(struct gcli_ctx *ctx, struct gcli_submit_issue_options opts,
 
 	/* generate url and perform request */
 	url = sn_asprintf("%s/rest/bug", gcli_get_apibase(ctx));
-	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, out);
 
+	if (out)
+		_buffer = &buffer;
+
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, _buffer);
+	if (out && rc == 0) {
+		struct json_stream stream = {0};
+		gcli_id id = 0;
+
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		rc = parse_bugzilla_bug_creation_result(ctx, &stream, &id);
+		json_close(&stream);
+
+		if (rc == 0)
+			rc = bugzilla_get_bug(ctx, NULL, NULL, id, out);
+	}
+
+	free(buffer.data);
 	free(url);
 	free(payload);
 

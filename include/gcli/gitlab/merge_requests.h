@@ -90,7 +90,7 @@ int gitlab_get_pull_commits(struct gcli_ctx *ctx, char const *owner,
                             char const *repo, gcli_id mr_number,
                             struct gcli_commit_list *out);
 
-int gitlab_perform_submit_mr(struct gcli_ctx *ctx, struct gcli_submit_pull_options opts);
+int gitlab_perform_submit_mr(struct gcli_ctx *ctx, struct gcli_submit_pull_options *opts);
 
 int gitlab_mr_add_labels(struct gcli_ctx *ctx, char const *owner,
                          char const *repo, gcli_id mr_number,

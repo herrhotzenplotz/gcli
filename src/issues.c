@@ -103,7 +103,7 @@ gcli_issue_reopen(struct gcli_ctx *ctx, char const *owner, char const *repo,
 }
 
 int
-gcli_issue_submit(struct gcli_ctx *ctx, struct gcli_submit_issue_options opts)
+gcli_issue_submit(struct gcli_ctx *ctx, struct gcli_submit_issue_options *opts)
 {
 	gcli_null_check_call(perform_submit_issue, ctx, opts, NULL);
 }

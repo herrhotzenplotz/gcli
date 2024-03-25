@@ -66,7 +66,7 @@ gitlab_perform_submit_comment(struct gcli_ctx *ctx, struct gcli_submit_comment_o
 	payload = gcli_jsongen_to_string(&gen);
 	gcli_jsongen_free(&gen);
 
-	url = sn_asprintf("%s/project/%s%%2F%s/%s/%"PRIid"/notes",
+	url = sn_asprintf("%s/projects/%s%%2F%s/%s/%"PRIid"/notes",
 	                  gcli_get_apibase(ctx), e_owner, e_repo, type,
 	                  opts.target_id);
 

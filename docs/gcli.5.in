@@ -15,7 +15,7 @@ into the repository and provide these default values to other users
 as well.
 .Ss User Configuration File
 The user configuration file is located in
-.Pa ${XDG_CONFIG_DIR}/gcli/config .
+.Pa ${XDG_CONFIG_HOME}/gcli/config .
 On most systems this equal to
 .Pa ${HOME}/.config/gcli/config .
 .Pp
@@ -103,7 +103,8 @@ It contains a list of key-value pairs. Allowed keys are:
 Name of a branch that the changes should be merged into by default.
 Usually this is one of
 .Em master ,
-.Em main or
+.Em main
+or
 .Em trunk .
 .It pr.upstream
 Name of the upstream repository to submit the pull request to by default.

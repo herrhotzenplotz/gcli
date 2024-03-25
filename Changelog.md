@@ -20,6 +20,25 @@ This changelog does not follow semantic versioning.
   The above will search for pull requests containing »segmentation
   fault« and the label »bug«.
 
+- An interactive mode for creating both PRs and issues has been added.
+  You can now interactively create pull requests and issues by omitting their title:
+
+  ```console
+  $ gcli issues create
+  Owner [herrhotzenplotz]:
+  Repository [gcli]:
+  Title: foo
+  The following issue will be created:
+
+  TITLE   : foo
+  OWNER   : herrhotzenplotz
+  REPO    : gcli
+  MESSAGE :
+  No message
+
+  Do you want to continue? [yN]
+  ```
+
 ### Fixed
 
 - gcli was incorrectly using an environment variable *XDG_CONFIG_DIR*.
@@ -29,6 +48,9 @@ This changelog does not follow semantic versioning.
 - Fixed a segmentation fault when listing forks
 
 - Fixed error when submitting a comment on Gitlab issues
+
+- The build on Haiku has been fixed. GCLI can now be compiled and
+  used on this platform.
 
 ### Changed
 

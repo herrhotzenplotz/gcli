@@ -877,26 +877,79 @@ action_open(struct gcli_path const *const path,
         return GCLI_EX_OK;
 }
 
-struct gcli_cmd_actions issue_actions = {
+struct gcli_cmd_actions gcli_issue_actions = {
 	.fetch_item = (gcli_cmd_action_fetcher)gcli_get_issue,
 	.free_item = (gcli_cmd_action_freeer)gcli_issue_free,
 	.item_size = sizeof(struct gcli_issue),
 
 
 	.defs = {
-		{ .name = "all",         .needs_item = true,  .handler = (gcli_cmd_action_handler)action_all,         },
-		{ .name = "comments",    .needs_item = false, .handler = (gcli_cmd_action_handler)action_comments,    },
-		{ .name = "notes",       .needs_item = false, .handler = (gcli_cmd_action_handler)action_comments,    },
-		{ .name = "op",          .needs_item = true,  .handler = (gcli_cmd_action_handler)action_op,          },
-		{ .name = "status",      .needs_item = true,  .handler = (gcli_cmd_action_handler)action_status,      },
-		{ .name = "close",       .needs_item = false, .handler = (gcli_cmd_action_handler)action_close,       },
-		{ .name = "reopen",      .needs_item = false, .handler = (gcli_cmd_action_handler)action_reopen,      },
-		{ .name = "assign",      .needs_item = false, .handler = (gcli_cmd_action_handler)action_assign,      },
-		{ .name = "labels",      .needs_item = false, .handler = (gcli_cmd_action_handler)action_labels,      },
-		{ .name = "milestone",   .needs_item = false, .handler = (gcli_cmd_action_handler)action_milestone,   },
-		{ .name = "title",       .needs_item = false, .handler = (gcli_cmd_action_handler)action_title,       },
-		{ .name = "attachments", .needs_item = false, .handler = (gcli_cmd_action_handler)action_attachments, },
-		{ .name = "open",        .needs_item = true,  .handler = (gcli_cmd_action_handler)action_open,        },
+		{
+			.name = "all",
+			.needs_item = true,
+			.handler = (gcli_cmd_action_handler)action_all,
+		},
+		{
+			.name = "comments",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler)action_comments,
+			.use_pager = true,
+		},
+		{
+			.name = "notes",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler)action_comments,
+		},
+		{
+			.name = "op",
+			.needs_item = true,
+			.handler = (gcli_cmd_action_handler)action_op,
+		},
+		{
+			.name = "status",
+			.needs_item = true,
+			.handler = (gcli_cmd_action_handler)action_status,
+		},
+		{
+			.name = "close",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler)action_close,
+		},
+		{
+			.name = "reopen",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler)action_reopen,
+		},
+		{
+			.name = "assign",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler)action_assign,
+		},
+		{
+			.name = "labels",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler)action_labels,
+		},
+		{
+			.name = "milestone",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler)action_milestone,
+		},
+		{
+			.name = "title",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler)action_title,
+		},
+		{
+			.name = "attachments",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler)action_attachments,
+		},
+		{
+			.name = "open",
+			.needs_item = true,
+			.handler = (gcli_cmd_action_handler)action_open,
+		},
 	},
 };
 
@@ -913,7 +966,7 @@ handle_issues_actions(int argc, char *argv[],
 		return EXIT_FAILURE;
 	}
 
-	rc = gcli_cmd_actions_handle(&issue_actions, path, &argc, &argv);
+	rc = gcli_cmd_actions_handle(&gcli_issue_actions, path, &argc, &argv);
 	if (rc == GCLI_EX_USAGE) {
 		usage();
 	}

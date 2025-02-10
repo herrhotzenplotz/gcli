@@ -1283,7 +1283,7 @@ action_open(struct gcli_path const *const path,
 	return GCLI_EX_OK;
 }
 
-struct gcli_cmd_actions pull_actions = {
+struct gcli_cmd_actions gcli_pull_actions = {
 	.fetch_item = (gcli_cmd_action_fetcher)gcli_get_pull,
 	.free_item = (gcli_cmd_action_freeer)gcli_pull_free,
 	.item_size = sizeof(struct gcli_pull),
@@ -1323,11 +1323,13 @@ struct gcli_cmd_actions pull_actions = {
 			.name = "notes",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler) action_comments,
+			.use_pager = true,
 		},
 		{
 			.name = "comments",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler) action_comments,
+			.use_pager = true,
 		},
 		{
 			.name = "ci",
@@ -1393,7 +1395,7 @@ struct gcli_cmd_actions pull_actions = {
 static int
 handle_pull_actions(int argc, char *argv[], struct gcli_path const *const path)
 {
-	int const rc = gcli_cmd_actions_handle(&pull_actions, path, &argc, &argv);
+	int const rc = gcli_cmd_actions_handle(&gcli_pull_actions, path, &argc, &argv);
 
 	if (rc == GCLI_EX_USAGE)
 		usage();

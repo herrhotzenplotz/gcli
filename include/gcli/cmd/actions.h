@@ -75,6 +75,6 @@ struct gcli_cmd_actions {
 
 int gcli_cmd_actions_handle(struct gcli_cmd_actions const *actions,
                             struct gcli_path const *path,
-                            int *argc, char **argv[]);
+                            int *argc, char ***argv);
 
 #endif /* GCLI_CMD_ACTIONS_H */

@@ -52,7 +52,7 @@ find_action(struct gcli_cmd_actions const *const actions,
 int
 gcli_cmd_actions_handle(struct gcli_cmd_actions const *const actions,
                         struct gcli_path const *const path,
-                        int *argc, char **argv[])
+                        int *argc, char ***argv)
 {
 	void *item = NULL;
 	int rc = 0;

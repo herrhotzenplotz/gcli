@@ -77,4 +77,8 @@ int gcli_cmd_actions_handle(struct gcli_cmd_actions const *actions,
                             struct gcli_path const *path,
                             int *argc, char ***argv);
 
+int gcli_cmd_action_handle(struct gcli_cmd_actions const *actions,
+                           struct gcli_path const *path,
+                           char *cmd_input);
+
 #endif /* GCLI_CMD_ACTIONS_H */

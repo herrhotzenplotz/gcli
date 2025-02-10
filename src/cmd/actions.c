@@ -29,6 +29,7 @@
 
 #include <gcli/cmd/actions.h>
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/interactive.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -110,6 +111,96 @@ gcli_cmd_actions_handle(struct gcli_cmd_actions const *const actions,
 			break;
 
 		fputc('\n', stdout);
+	}
+
+	if (item) {
+		actions->free_item(item);
+		free(item);
+		item = NULL;
+	}
+
+	return rc;
+}
+
+struct into_pager_args {
+	int argc;
+	char **argv;
+	struct gcli_path const *path;
+	void *item;
+	struct gcli_cmd_action const *action;
+};
+
+static int
+into_pager_fn(void *data)
+{
+	struct into_pager_args *args = data;
+	return args->action->handler(
+		args->path,
+		args->item,
+		&args->argc,
+		&args->argv);
+}
+
+int
+gcli_cmd_action_handle(struct gcli_cmd_actions const *actions,
+                       struct gcli_path const *path,
+                       char *cmd_input)
+{
+	char *_argv[32]; /* storage */
+	char *argfront = cmd_input;
+	int argc = 0, rc = 0;
+	struct gcli_cmd_action const *action = NULL;
+	void *item = NULL;
+
+	char **argv = &_argv[0]; /* pointer to storage but type is corrected */
+
+	/* Split arguments by spaces and collect into argc/argv */
+	for (;;) {
+		char *argnext = strchr(argfront, ' ');
+
+		if (argc == ARRAY_SIZE(argv))
+			err(1, "gcli: error: too many arguments");
+
+		argv[argc++] = argfront;
+
+		if (!argnext)
+			break;
+
+		*argnext++ = '\0';
+		argfront = argnext;
+	}
+
+	action = find_action(actions, argv[0]);
+	if (action == NULL) {
+		fprintf(stderr, "gcli: error: no such action: %s\n", argv[0]);
+		return GCLI_EX_USAGE;
+	}
+
+	if (action->needs_item) {
+		item = calloc(1, actions->item_size);
+		if (item == NULL)
+			err(1, "calloc");
+
+		rc = actions->fetch_item(g_clictx, path, item);
+		if (rc < 0) {
+			fprintf(stderr, "gcli: error: failed to fetch item: %s\n",
+			        gcli_get_error(g_clictx));
+			return GCLI_EX_DATAERR;
+		}
+	}
+
+	if (action->use_pager) {
+		struct into_pager_args args = {
+			.argc = argc,
+			.argv = argv,
+			.path = path,
+			.item = item,
+			.action = action,
+		};
+
+		rc = gcli_cmd_into_pager(into_pager_fn, &args);
+	} else {
+		rc = action->handler(path, item, &argc, &argv);
 	}
 
 	if (item) {

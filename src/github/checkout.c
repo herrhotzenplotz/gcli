@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -49,7 +49,7 @@ github_pull_checkout(struct gcli_ctx *ctx, char const *const remote,
 	if (path->kind != GCLI_PATH_DEFAULT)
 		return gcli_error(ctx, "unsupported path kind for checkout");
 
-	pr_id = path->data.as_default.id;
+	pr_id = path->as_default.id;
 
 	remote_ref = sn_asprintf("refs/pull/%"PRIid"/head", pr_id);
 	local_ref = sn_asprintf("github/pr/%"PRIid, pr_id);

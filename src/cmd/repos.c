@@ -390,11 +390,9 @@ subcommand_repos(int argc, char *argv[])
 		gcli_repos_free(&repos);
 	} else {
 		struct gcli_path path = {
-			.data = {
-				.as_default = {
-					.owner = owner,
-					.repo = repo,
-				},
+			.as_default = {
+				.owner = owner,
+				.repo = repo,
 			},
 		};
 

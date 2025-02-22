@@ -130,33 +130,33 @@ check_path(struct gcli_path *path)
 	    path->kind == GCLI_PATH_DEFAULT) {
 
 		/* first case */
-		if (path->data.as_default.id == 0) {
-			char *const product = path->data.as_default.owner;
-			char *const component = path->data.as_default.repo;
+		if (path->as_default.id == 0) {
+			char *const product = path->as_default.owner;
+			char *const component = path->as_default.repo;
 
 			path->kind = GCLI_PATH_BUGZILLA;
-			path->data.as_bugzilla.product = product;
-			path->data.as_bugzilla.component = component;
+			path->as_bugzilla.product = product;
+			path->as_bugzilla.component = component;
 
 			return; /* no more checking required */
 		}
 
 		/* second case */
-		if (path->data.as_default.id != 0
-		    && path->data.as_default.owner == NULL
-		    && path->data.as_default.repo == NULL)
+		if (path->as_default.id != 0
+		    && path->as_default.owner == NULL
+		    && path->as_default.repo == NULL)
 		{
-			 gcli_id const id = path->data.as_default.id;
+			 gcli_id const id = path->as_default.id;
 			 path->kind = GCLI_PATH_ID;
-			 path->data.as_id = id;
+			 path->as_id = id;
 
 			 return;
 		}
 	}
 
 	check_owner_and_repo(
-		(char const **)&path->data.as_default.owner,
-		(char const **)&path->data.as_default.repo);
+		(char const **)&path->as_default.owner,
+		(char const **)&path->as_default.repo);
 }
 
 /* Parses (and updates) the given argument list into two seperate lists:

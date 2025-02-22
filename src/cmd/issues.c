@@ -456,17 +456,17 @@ subcommand_issues(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "+sn:o:r:i:aA:L:M:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
-			path.data.as_default.owner = optarg;
+			path.as_default.owner = optarg;
 			break;
 		case 'r':
-			path.data.as_default.repo = optarg;
+			path.as_default.repo = optarg;
 			break;
 		case 'i': {
-			path.data.as_default.id = strtol(optarg, &endptr, 10);
+			path.as_default.id = strtol(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "gcli: error: cannot parse issue number");
 
-			if (path.data.as_default.id == 0)
+			if (path.as_default.id == 0)
 				errx(1, "gcli: error: issue number is out of range");
 		} break;
 		case 'n': {
@@ -508,7 +508,7 @@ subcommand_issues(int argc, char *argv[])
 	check_path(&path);
 
 	/* No issue number was given, so list all open issues */
-	if (path.data.as_default.id == 0) {
+	if (path.as_default.id == 0) {
 		/* Prepare search term if specified */
 		if (argc)
 			details.search_term = sn_join_with((char const *const *)argv, argc, " ");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -110,10 +110,10 @@ subcommand_labels_delete(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "o:r:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
-			repo_path.data.as_default.owner = optarg;
+			repo_path.as_default.owner = optarg;
 			break;
 		case 'r':
-			repo_path.data.as_default.repo = optarg;
+			repo_path.as_default.repo = optarg;
 			break;
 		case '?':
 		default:
@@ -162,10 +162,10 @@ subcommand_labels_create(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "n:o:r:d:c:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
-			repo_path.data.as_default.owner = optarg;
+			repo_path.as_default.owner = optarg;
 			break;
 		case 'r':
-			repo_path.data.as_default.repo = optarg;
+			repo_path.as_default.repo = optarg;
 			break;
 		case 'c': {
 			char *endptr = NULL;
@@ -253,10 +253,10 @@ subcommand_labels(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "n:o:r:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
-			repo_path.data.as_default.owner = optarg;
+			repo_path.as_default.owner = optarg;
 			break;
 		case 'r':
-			repo_path.data.as_default.repo = optarg;
+			repo_path.as_default.repo = optarg;
 			break;
 		case 'n': {
 			char *endptr = NULL;

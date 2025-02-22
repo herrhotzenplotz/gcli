@@ -54,14 +54,14 @@ bugzilla_get_bugs(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	if (path->kind != GCLI_PATH_BUGZILLA)
 		return gcli_error(ctx, "unsupported path kind for bugzilla");
 
-	if (path->data.as_bugzilla.product) {
-		char *tmp = gcli_urlencode(path->data.as_bugzilla.product);
+	if (path->as_bugzilla.product) {
+		char *tmp = gcli_urlencode(path->as_bugzilla.product);
 		e_product = sn_asprintf("&product=%s", tmp);
 		free(tmp);
 	}
 
-	if (path->data.as_bugzilla.component) {
-		char *tmp = gcli_urlencode(path->data.as_bugzilla.component);
+	if (path->as_bugzilla.component) {
+		char *tmp = gcli_urlencode(path->as_bugzilla.component);
 		e_component = sn_asprintf("&component=%s", tmp);
 		free(tmp);
 	}
@@ -125,7 +125,7 @@ bugzilla_bug_get_comments(struct gcli_ctx *const ctx,
 		return gcli_error(ctx, "bad path kind for Bugzilla comments");
 
 	url = sn_asprintf("%s/rest/bug/%"PRIid"/comment?include_fields=_all",
-	                  gcli_get_apibase(ctx), path->data.as_id);
+	                  gcli_get_apibase(ctx), path->as_id);
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc < 0)
@@ -219,7 +219,7 @@ bugzilla_get_bug(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	if (path->kind != GCLI_PATH_ID)
 		return gcli_error(ctx, "Getting a single bug on Bugzilla requires an ID path");
 
-	bug_id = path->data.as_id;
+	bug_id = path->as_id;
 
 	url = sn_asprintf("%s/rest/bug?limit=1&id=%"PRIid, gcli_get_apibase(ctx), bug_id);
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
@@ -279,7 +279,7 @@ bugzilla_bug_get_attachments(struct gcli_ctx *ctx,
 		return gcli_error(ctx, "Getting bug attachments requires a ID path");
 
 	url = sn_asprintf("%s/rest/bug/%"PRIid"/attachment",
-	                  gcli_get_apibase(ctx), bug_path->data.as_id);
+	                  gcli_get_apibase(ctx), bug_path->as_id);
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc < 0)
@@ -404,7 +404,7 @@ bugzilla_bug_submit(struct gcli_ctx *const ctx,
 
 		json_open_buffer(&stream, buffer.data, buffer.length);
 		rc = parse_bugzilla_bug_creation_result(
-			ctx, &stream, &bug_id_path.data.as_id);
+			ctx, &stream, &bug_id_path.as_id);
 		json_close(&stream);
 
 		bug_id_path.kind = GCLI_PATH_ID;

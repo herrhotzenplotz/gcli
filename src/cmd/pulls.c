@@ -393,14 +393,14 @@ static char const *
 pull_request_target_owner(struct gcli_path const *const repo_path)
 {
 	assert(repo_path->kind == GCLI_PATH_DEFAULT);
-	return repo_path->data.as_default.owner;
+	return repo_path->as_default.owner;
 }
 
 static char const *
 pull_request_target_repo(struct gcli_path const *const repo_path)
 {
 	assert(repo_path->kind == GCLI_PATH_DEFAULT);
-	return repo_path->data.as_default.repo;
+	return repo_path->as_default.repo;
 }
 
 static int
@@ -492,12 +492,12 @@ subcommand_pull_create_interactive(struct gcli_submit_pull_options *const opts)
 	}
 
 	/* PR Target */
-	if (!opts->target_repo.data.as_default.owner)
-		opts->target_repo.data.as_default.owner =
+	if (!opts->target_repo.as_default.owner)
+		opts->target_repo.as_default.owner =
 			gcli_cmd_prompt("Owner", deflt_owner);
 
-	if (!opts->target_repo.data.as_default.repo)
-		opts->target_repo.data.as_default.repo =
+	if (!opts->target_repo.as_default.repo)
+		opts->target_repo.as_default.repo =
 			gcli_cmd_prompt("Repository", deflt_repo);
 
 	if (!opts->target_branch) {
@@ -600,10 +600,10 @@ subcommand_pull_create(int argc, char *argv[])
 			opts.draft = 1;
 			break;
 		case 'o':
-			opts.target_repo.data.as_default.owner = optarg;
+			opts.target_repo.as_default.owner = optarg;
 			break;
 		case 'r':
-			opts.target_repo.data.as_default.repo = optarg;
+			opts.target_repo.as_default.repo = optarg;
 			break;
 		case 'l': /* add a label */
 			opts.labels = realloc(
@@ -730,17 +730,17 @@ subcommand_pulls(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "+n:o:r:i:asA:L:M:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
-			pull.data.as_default.owner = optarg;
+			pull.as_default.owner = optarg;
 			break;
 		case 'r':
-			pull.data.as_default.repo = optarg;
+			pull.as_default.repo = optarg;
 			break;
 		case 'i': {
-			pull.data.as_default.id = strtoul(optarg, &endptr, 10);
+			pull.as_default.id = strtoul(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg)))
 				err(1, "gcli: error: cannot parse pr number »%s«", optarg);
 
-			if (pull.data.as_default.id == 0)
+			if (pull.as_default.id == 0)
 				errx(1, "gcli: error: pr number is out of range");
 		} break;
 		case 'n': {
@@ -783,7 +783,7 @@ subcommand_pulls(int argc, char *argv[])
 
 	/* In case no explicit PR number was specified, list all
 	 * open PRs and exit */
-	if (pull.data.as_default.id == 0) {
+	if (pull.as_default.id == 0) {
 		char *search_term = NULL;
 
 		/* Trailing arguments indicate a search term */

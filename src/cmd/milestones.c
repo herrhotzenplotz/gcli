@@ -435,10 +435,10 @@ subcommand_milestones(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "+o:r:n:i:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o': {
-			path.data.as_default.owner = optarg;
+			path.as_default.owner = optarg;
 		} break;
 		case 'r': {
-			path.data.as_default.repo = optarg;
+			path.as_default.repo = optarg;
 		} break;
 		case 'n': {
 			char *endptr;
@@ -448,7 +448,7 @@ subcommand_milestones(int argc, char *argv[])
 		} break;
 		case 'i': {
 			char *endptr;
-			path.data.as_default.id = strtoul(optarg, &endptr, 10);
+			path.as_default.id = strtoul(optarg, &endptr, 10);
 			if (endptr != optarg + strlen(optarg))
 				errx(1, "gcli: error: cannot parse milestone id");
 		} break;
@@ -464,7 +464,7 @@ subcommand_milestones(int argc, char *argv[])
 
 	check_path(&path);
 
-	if (path.data.as_default.id == 0) {
+	if (path.as_default.id == 0) {
 		struct gcli_milestone_list list = {0};
 
 		rc = gcli_get_milestones(g_clictx, &path, max, &list);

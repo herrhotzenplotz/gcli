@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -60,19 +60,19 @@ github_pull_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	case GCLI_PATH_DEFAULT: {
 		char *e_owner, *e_repo;
 
-		e_owner = gcli_urlencode(path->data.as_default.owner);
-		e_repo = gcli_urlencode(path->data.as_default.repo);
+		e_owner = gcli_urlencode(path->as_default.owner);
+		e_repo = gcli_urlencode(path->as_default.repo);
 
 		*url = sn_asprintf("%s/repos/%s/%s/pulls/%"PRIid"%s",
 		                   gcli_get_apibase(ctx),
-		                   e_owner, e_repo, path->data.as_default.id,
+		                   e_owner, e_repo, path->as_default.id,
 		                   suffix);
 
 		free(e_owner);
 		free(e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->data.as_url, suffix);
+		*url = sn_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path type for gitlab merge request");
@@ -179,8 +179,8 @@ search_pulls(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		label = sn_asprintf("label:%s", details->label);
 
 	query_string = sn_asprintf("repo:%s/%s is:pull-request%s %s %s %s %s",
-	                           path->data.as_default.owner,
-	                           path->data.as_default.repo,
+	                           path->as_default.owner,
+	                           path->as_default.repo,
 	                           details->all ? "" : " is:open",
 	                           milestone ? milestone : "", author ? author : "",
 	                           label ? label : "", details->search_term);
@@ -535,7 +535,7 @@ github_perform_submit_pull(struct gcli_ctx *ctx,
 		parse_github_pull(ctx, &json, &pull);
 
 		target_pull_path = opts->target_repo;
-		target_pull_path.data.as_default.id = pull.id;
+		target_pull_path.as_default.id = pull.id;
 
 		if (opts->labels_size) {
 			rc = github_issue_add_labels(
@@ -638,7 +638,7 @@ github_pull_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	/* This is kind of a hack, but it works!
 	 * Yes, even a few months later I agree that this is a hack. */
 	snprintf(refname, sizeof refname, "refs%%2Fpull%%2F%"PRIid"%%2Fhead",
-	         path->data.as_default.id);
+	         path->as_default.id);
 
 	return github_get_checks(ctx, path, refname, -1, (struct github_check_list *)out);
 }

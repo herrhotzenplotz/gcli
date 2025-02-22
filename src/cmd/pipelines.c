@@ -594,10 +594,10 @@ subcommand_pipelines(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "+n:o:r:p:j:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
-			path.data.as_default.owner = optarg;
+			path.as_default.owner = optarg;
 			break;
 		case 'r':
-			path.data.as_default.owner = optarg;
+			path.as_default.owner = optarg;
 			break;
 		case 'n': {
 			char *endptr = NULL;
@@ -609,7 +609,7 @@ subcommand_pipelines(int argc, char *argv[])
 		} break;
 		case 'p': {
 			char *endptr = NULL;
-			path.data.as_default.id = strtoul(optarg, &endptr, 10);
+			path.as_default.id = strtoul(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg))) {
 				fprintf(stderr, "gcli: error: cannot parse argument to -p\n");
 				return EXIT_FAILURE;
@@ -619,7 +619,7 @@ subcommand_pipelines(int argc, char *argv[])
 		} break;
 		case 'j': {
 			char *endptr = NULL;
-			path.data.as_default.id = strtoul(optarg, &endptr, 10);
+			path.as_default.id = strtoul(optarg, &endptr, 10);
 			if (endptr != (optarg + strlen(optarg))) {
 				fprintf(stderr, "gcli: error: cannot parse argument to -j\n");
 				return EXIT_FAILURE;

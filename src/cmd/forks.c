@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -141,10 +141,10 @@ subcommand_forks_create(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "yo:r:i:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
-			repo_path.data.as_default.owner = optarg;
+			repo_path.as_default.owner = optarg;
 			break;
 		case 'r':
-			repo_path.data.as_default.repo = optarg;
+			repo_path.as_default.repo = optarg;
 			break;
 		case 'i':
 			in = optarg;
@@ -179,7 +179,7 @@ subcommand_forks_create(int argc, char *argv[])
 		}
 	}
 
-	gcli_gitconfig_add_fork_remote(in, repo_path.data.as_default.repo);
+	gcli_gitconfig_add_fork_remote(in, repo_path.as_default.repo);
 
 	return EXIT_SUCCESS;
 }
@@ -227,10 +227,10 @@ subcommand_forks(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "n:o:r:ys", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
-			repo_path.data.as_default.owner = optarg;
+			repo_path.as_default.owner = optarg;
 			break;
 		case 'r':
-			repo_path.data.as_default.repo = optarg;
+			repo_path.as_default.repo = optarg;
 			break;
 		case 'y':
 			always_yes = true;

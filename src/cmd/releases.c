@@ -357,10 +357,10 @@ subcommand_releases_delete(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "yo:r:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
-			repo_path.data.as_default.owner = optarg;
+			repo_path.as_default.owner = optarg;
 			break;
 		case 'r':
-			repo_path.data.as_default.repo = optarg;
+			repo_path.as_default.repo = optarg;
 			break;
 		case 'y':
 			always_yes = true;
@@ -448,10 +448,10 @@ subcommand_releases(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "sn:o:r:l", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
-			repo_path.data.as_default.owner = optarg;
+			repo_path.as_default.owner = optarg;
 			break;
 		case 'r':
-			repo_path.data.as_default.repo = optarg;
+			repo_path.as_default.repo = optarg;
 			break;
 		case 'n': {
 			char *endptr = NULL;

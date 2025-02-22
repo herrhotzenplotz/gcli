@@ -56,8 +56,8 @@ github_milestones_make_url(struct gcli_ctx *const ctx,
 	case GCLI_PATH_DEFAULT: {
 		char *e_owner, *e_repo;
 
-		e_owner = gcli_urlencode(path->data.as_default.owner);
-		e_repo = gcli_urlencode(path->data.as_default.repo);
+		e_owner = gcli_urlencode(path->as_default.owner);
+		e_repo = gcli_urlencode(path->as_default.repo);
 
 		*url = sn_asprintf("%s/repos/%s/%s/milestones%s",
 		                   gcli_get_apibase(ctx),
@@ -67,8 +67,7 @@ github_milestones_make_url(struct gcli_ctx *const ctx,
 		free(e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s/milestones%s", path->data.as_url,
-		                   suffix);
+		*url = sn_asprintf("%s/milestones%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path kind for milestones");
@@ -116,18 +115,18 @@ github_milestone_make_url(struct gcli_ctx *ctx,
 	case GCLI_PATH_DEFAULT: {
 		char *e_owner, *e_repo;
 
-		e_owner = gcli_urlencode(path->data.as_default.owner);
-		e_repo = gcli_urlencode(path->data.as_default.repo);
+		e_owner = gcli_urlencode(path->as_default.owner);
+		e_repo = gcli_urlencode(path->as_default.repo);
 
 		*url = sn_asprintf("%s/repos/%s/%s/milestones/%"PRIid"%s",
 		                   gcli_get_apibase(ctx), e_owner, e_repo,
-		                   path->data.as_default.id, suffix);
+		                   path->as_default.id, suffix);
 
 		free(e_owner);
 		free(e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->data.as_url, suffix);
+		*url = sn_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path kind for milestones");
@@ -179,7 +178,7 @@ github_milestone_get_issues(struct gcli_ctx *ctx,
 
 	rc = github_repo_make_url(ctx, path, &url,
 	                          "/issues?milestone=%"PRIid"&state=all",
-	                          path->data.as_default.id);
+	                          path->as_default.id);
 	if (rc < 0)
 		return rc;
 

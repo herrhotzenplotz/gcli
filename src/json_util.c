@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -596,7 +596,7 @@ get_url_path_(struct gcli_ctx *ctx, struct json_stream *input,
 	copy = sn_strndup(it, len);
 
 	out->kind = GCLI_PATH_URL;
-	out->data.as_url = copy;
+	out->as_url = copy;
 
 	return rc;
 }
@@ -624,7 +624,7 @@ get_gitlab_notification_target_(struct gcli_ctx *ctx,
 					where);
 			}
 
-			out->data.as_pid_id.id = (gcli_id) json_get_number(input);
+			out->as_pid_id.id = (gcli_id) json_get_number(input);
 		} else if (strncmp("project_id", key, len) == 0) {
 			if (json_next(input) != JSON_NUMBER) {
 				return gcli_error(
@@ -633,7 +633,7 @@ get_gitlab_notification_target_(struct gcli_ctx *ctx,
 					where);
 			}
 
-			out->data.as_pid_id.project_id = (gcli_id) json_get_number(input);
+			out->as_pid_id.project_id = (gcli_id) json_get_number(input);
 		} else {
 			SKIP_OBJECT_VALUE(input);
 		}

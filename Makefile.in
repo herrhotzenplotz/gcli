@@ -152,6 +152,7 @@ LIBGCLI_SRCS = \
 	src/github/issues.c \
 	src/github/labels.c \
 	src/github/milestones.c \
+	src/github/path.c \
 	src/github/pulls.c \
 	src/github/releases.c \
 	src/github/repos.c \

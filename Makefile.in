@@ -188,6 +188,7 @@ LIBGCLI_SRCS = \
 	src/labels.c \
 	src/milestones.c \
 	src/nvlist.c \
+	src/path.c \
 	src/pulls.c \
 	src/releases.c \
 	src/repos.c \

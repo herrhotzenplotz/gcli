@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -72,4 +72,13 @@ gcli_get_error(struct gcli_ctx *ctx)
 		return ctx->last_error;
 	else
 		return "No error";
+}
+
+void
+gcli_clear_ptr(void *ptr)
+{
+	void **_ptr = ptr;
+
+	free(*_ptr);
+	*_ptr = NULL;
 }

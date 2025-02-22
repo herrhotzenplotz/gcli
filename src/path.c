@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,51 +27,36 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GCLI_H
-#define GCLI_H
+#include <gcli/path.h>
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include <assert.h>
+#include <stdlib.h>
 
-#include <inttypes.h>
-#include <stdbool.h>
-#include <stdint.h>
+void
+gcli_path_free(struct gcli_path *const path)
+{
+	switch (path->kind) {
+	case GCLI_PATH_DEFAULT:
+		gcli_clear_ptr(&path->as_default.owner);
+		gcli_clear_ptr(&path->as_default.repo);
+		break;
 
-enum gcli_output_flags {
-	OUTPUT_SORTED = (1 << 0),
-	OUTPUT_LONG   = (1 << 1),
-};
+	case GCLI_PATH_URL:
+		gcli_clear_ptr(&path->as_url);
+		break;
 
-typedef enum gcli_forge_type {
-	GCLI_FORGE_GITHUB,
-	GCLI_FORGE_GITLAB,
-	GCLI_FORGE_GITEA,
-	GCLI_FORGE_BUGZILLA,
-} gcli_forge_type;
+	case GCLI_PATH_BUGZILLA:
+		gcli_clear_ptr(&path->as_bugzilla.product);
+		gcli_clear_ptr(&path->as_bugzilla.component);
+		break;
 
-typedef uint64_t gcli_id;
+	case GCLI_PATH_ID:
+		break;
 
-#define PRIid PRIu64
+	case GCLI_PATH_PID_ID:
+		break;
 
-#ifdef IN_LIBGCLI
-#include <gcli/ctx.h>
-
-void gcli_clear_ptr(void *ptr);
-
-#endif /* IN_LIBGCLI */
-
-struct gcli_ctx;
-
-char const *gcli_init(struct gcli_ctx **,
-                      gcli_forge_type (*get_forge_type)(struct gcli_ctx *),
-                      char *(*get_authheader)(struct gcli_ctx *),
-                      char *(*get_apibase)(struct gcli_ctx *));
-
-void *gcli_get_userdata(struct gcli_ctx const *);
-void gcli_set_userdata(struct gcli_ctx *, void *usrdata);
-void gcli_set_progress_func(struct gcli_ctx *, void (*pfunc)(bool done));
-void gcli_destroy(struct gcli_ctx **ctx);
-char const *gcli_get_error(struct gcli_ctx *ctx);
-
-#endif /* GCLI_H */
+	default:
+		assert(0 && "unreachable");
+	}
+}

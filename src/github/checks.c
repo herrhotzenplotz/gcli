@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,6 +34,7 @@
 #include <gcli/curl.h>
 #include <gcli/github/checks.h>
 #include <gcli/github/checks.h>
+#include <gcli/github/path.h>
 #include <gcli/github/repos.h>
 #include <gcli/json_util.h>
 
@@ -46,10 +47,17 @@ github_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
                   char const *ref, int const max, struct github_check_list *const out)
 {
 	struct gcli_fetch_buffer buffer = {0};
+	struct gcli_path norm_path = {0};
 	char *url = NULL, *next_url = NULL;
 	int rc = 0;
 
 	assert(out);
+
+	/* we must normalise these paths to default paths. otherwise we'd get
+	 * bugs when a URL path to some item is passed in. */
+	rc = github_path_normalise(ctx, path, &norm_path);
+	if (rc < 0)
+		return rc;
 
 	rc = github_repo_make_url(ctx, path, &url, "/commits/%s/check-runs", ref);
 	if (rc < 0)
@@ -74,6 +82,8 @@ github_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	/* TODO: don't leak list on error */
 	free(next_url);
+
+	gcli_path_free(&norm_path);
 
 	return rc;
 }

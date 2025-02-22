@@ -32,6 +32,7 @@
 #include <gcli/github/checks.h>
 #include <gcli/github/config.h>
 #include <gcli/github/issues.h>
+#include <gcli/github/path.h>
 #include <gcli/github/pulls.h>
 #include <gcli/github/repos.h>
 #include <gcli/json_gen.h>
@@ -630,17 +631,33 @@ int
 github_pull_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
                        struct gcli_pull_checks_list *out)
 {
+	int rc = 0;
 	char refname[64] = {0};
+	struct gcli_path norm_path = {0};
+	struct gcli_path const *p = path;
 
-	if (path->kind != GCLI_PATH_DEFAULT)
-		return gcli_error(ctx, "unsupported path kind for GitHub Checks");
+	if (path->kind != GCLI_PATH_DEFAULT) {
+		rc = github_path_normalise(ctx, path, &norm_path);
+		if (rc < 0)
+			return rc;
+
+		p = &norm_path;
+	}
 
 	/* This is kind of a hack, but it works!
 	 * Yes, even a few months later I agree that this is a hack. */
 	snprintf(refname, sizeof refname, "refs%%2Fpull%%2F%"PRIid"%%2Fhead",
-	         path->as_default.id);
+	         p->as_default.id);
 
-	return github_get_checks(ctx, path, refname, -1, (struct github_check_list *)out);
+	rc = github_get_checks(ctx, p, refname, -1, (struct github_check_list *)out);
+
+	/* clean up normalised path if it has been normalised */
+	if (p == &norm_path) {
+		gcli_path_free(&norm_path);
+		p = NULL;
+	}
+
+	return rc;
 }
 
 int

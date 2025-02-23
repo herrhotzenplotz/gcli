@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -43,7 +43,6 @@ int gitlab_get_labels(struct gcli_ctx *ctx, struct gcli_path const *path,
 int gitlab_create_label(struct gcli_ctx *ctx, struct gcli_path const *path,
                         struct gcli_label *label);
 
-int gitlab_delete_label(struct gcli_ctx *ctx, struct gcli_path const *path,
-                        char const *label);
+int gitlab_delete_label(struct gcli_ctx *ctx, struct gcli_path const *path);
 
 #endif /* GITLAB_LABELS_H */

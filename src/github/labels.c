@@ -111,24 +111,63 @@ github_create_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	return rc;
 }
 
+static int
+github_label_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                      char **url, char const *const fmt, ...)
+{
+	int rc = 0;
+	va_list vp;
+	char *suffix = NULL;
+
+	va_start(vp, fmt);
+	suffix = sn_vasprintf(fmt, vp);
+	va_end(vp);
+
+	/* TODO: add support for ID-based label adressing which in turn
+	 * would resolve the id to a name. Yes it's inefficient but it's
+	 * what GitHub wants us to do. */
+	switch (path->kind) {
+	case GCLI_PATH_NAMED: {
+		char *e_owner, *e_repo, *e_label;
+
+		e_owner = gcli_urlencode(path->as_named.owner);
+		e_repo = gcli_urlencode(path->as_named.repo);
+		e_label = gcli_urlencode(path->as_named.id);
+
+		*url = sn_asprintf("%s/repos/%s/%s/labels/%s%s",
+		                   gcli_get_apibase(ctx), e_owner, e_repo,
+		                   e_label, suffix);
+
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
+		gcli_clear_ptr(&e_label);
+	} break;
+	case GCLI_PATH_URL: {
+		*url = sn_asprintf("%s%s", path->as_url, suffix);
+	} break;
+	default: {
+		rc = gcli_error(ctx, "unsupported path kind for GitHub labels");
+	} break;
+	}
+
+	gcli_clear_ptr(&suffix);
+
+	return rc;
+}
+
 int
-github_delete_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
-                    char const *label)
+github_delete_label(struct gcli_ctx *ctx, struct gcli_path const *const path)
 {
 	char *url = NULL;
-	char *e_label = NULL;
 	int rc = 0;
 
-	e_label = gcli_urlencode(label);
-
 	/* DELETE /repos/{owner}/{repo}/labels/{name} */
-	rc = github_repo_make_url(ctx, path, &url, "/labels/%s", e_label);
+	rc = github_label_make_url(ctx, path, &url, "");
 
 	if (rc == 0)
 		rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	free(url);
-	free(e_label);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

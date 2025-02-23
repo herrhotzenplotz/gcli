@@ -100,7 +100,7 @@ static int
 subcommand_labels_delete(int argc, char *argv[])
 {
 	int ch, rc;
-	struct gcli_path repo_path = {0};
+	struct gcli_path path = { .kind = GCLI_PATH_NAMED };
 	const struct option options[] = {
 		{.name = "repo",  .has_arg = required_argument, .val = 'r'},
 		{.name = "owner", .has_arg = required_argument, .val = 'o'},
@@ -110,10 +110,10 @@ subcommand_labels_delete(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "o:r:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
-			repo_path.as_default.owner = optarg;
+			path.as_named.owner = optarg;
 			break;
 		case 'r':
-			repo_path.as_default.repo = optarg;
+			path.as_named.repo = optarg;
 			break;
 		case '?':
 		default:
@@ -125,17 +125,20 @@ subcommand_labels_delete(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	check_path(&repo_path);
-
 	if (argc != 1) {
 		fprintf(stderr, "gcli: error: missing label to delete\n");
 		usage();
 		return EXIT_FAILURE;
 	}
 
-	rc = gcli_delete_label(g_clictx, &repo_path, argv[0]);
+	path.as_named.id = argv[0];
+	check_path(&path);
+
+	rc = gcli_delete_label(g_clictx, &path);
 	if (rc < 0) {
-		fprintf(stderr, "gcli: error: couldn't delete label\n");
+		fprintf(stderr, "gcli: error: couldn't delete label: %s\n",
+		        gcli_get_error(g_clictx));
+
 		return EXIT_FAILURE;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -112,22 +112,71 @@ gitlab_create_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	return rc;
 }
 
+static int
+gitlab_label_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                      char **url, char const *const fmt, ...)
+{
+	int rc = 0;
+	va_list vp;
+	char *suffix = NULL;
+
+	va_start(vp, fmt);
+	suffix = sn_vasprintf(fmt, vp);
+	va_end(vp);
+
+	switch (path->kind) {
+	case GCLI_PATH_DEFAULT: {
+		char *e_owner, *e_repo;
+
+		e_owner = gcli_urlencode(path->as_default.owner);
+		e_repo = gcli_urlencode(path->as_default.repo);
+
+		*url = sn_asprintf("%s/projects/%s%%2F%s/labels/%"PRIid"%s",
+		                   gcli_get_apibase(ctx), e_owner, e_repo,
+		                   path->as_default.id, suffix);
+
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
+	} break;
+	case GCLI_PATH_NAMED: {
+		char *e_owner, *e_repo, *e_label;
+
+		e_owner = gcli_urlencode(path->as_named.owner);
+		e_repo = gcli_urlencode(path->as_named.repo);
+		e_label = gcli_urlencode(path->as_named.id);
+
+		*url = sn_asprintf("%s/projects/%s%%2F%s/labels/%s%s",
+		                   gcli_get_apibase(ctx), e_owner, e_repo,
+		                   e_label, suffix);
+
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
+		gcli_clear_ptr(&e_label);
+	} break;
+	case GCLI_PATH_URL: {
+		*url = sn_asprintf("%s%s", path->as_url, suffix);
+	} break;
+	default: {
+		rc = gcli_error(ctx, "unsupported path kind for GitLab labels");
+	} break;
+	}
+
+	gcli_clear_ptr(&suffix);
+
+	return rc;
+}
+
 int
-gitlab_delete_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
-                    char const *label)
+gitlab_delete_label(struct gcli_ctx *ctx, struct gcli_path const *const path)
 {
 	char *url = NULL;
-	char *e_label = NULL;
 	int rc = 0;
 
-	e_label = gcli_urlencode(label);
-
-	rc = gitlab_repo_make_url(ctx, path, &url, "/labels/%s", e_label);
+	rc = gitlab_label_make_url(ctx, path, &url, "");
 	if (rc == 0)
 		rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	free(url);
-	free(e_label);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

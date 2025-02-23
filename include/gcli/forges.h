@@ -434,8 +434,7 @@ struct gcli_forge_descriptor {
 	 * Delete the given label */
 	int (*delete_label)(
 		struct gcli_ctx *ctx,
-		struct gcli_path const *path,
-		char const *label);
+		struct gcli_path const *path);
 
 	/**
 	 * Get a list of repos of the given owner */

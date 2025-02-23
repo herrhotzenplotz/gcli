@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -50,37 +50,112 @@ gitea_create_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	return github_create_label(ctx, path, label);
 }
 
-int
-gitea_delete_label(struct gcli_ctx *ctx,
-                   struct gcli_path const *const repo_path, char const *label)
+/* Resolve the label name to an ID. */
+static int
+gitea_get_label_id(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                   char const *const label_name, gcli_id *const id)
 {
-	char *url = NULL;
 	struct gcli_label_list list = {0};
-	int id = -1;
 	int rc = 0;
 
-	/* Gitea wants the id of the label, not its name. thus fetch all
-	 * the labels first to then find out what the id is we need. */
-	rc = gitea_get_labels(ctx, repo_path, -1, &list);
+	*id = 0;
+
+	rc = gitea_get_labels(ctx, path, -1, &list);
 	if (rc < 0)
 		return rc;
 
 	/* Search for the id */
 	for (size_t i = 0; i < list.labels_size; ++i) {
-		if (strcmp(list.labels[i].name, label) == 0) {
-			id = list.labels[i].id;
-			break;
+		if (strcmp(list.labels[i].name, label_name) == 0) {
+			*id = list.labels[i].id;
+			rc = 0;
+			goto done;
 		}
 	}
 
+	/* not found */
+	rc = gcli_error(ctx, "%s: no such label", label_name);
+
+done:
 	gcli_free_labels(&list);
 
-	/* did we find a label? */
-	if (id < 0)
-		return gcli_error(ctx, "label '%s' does not exist", label);
+	return rc;
+}
+
+static int
+gitea_label_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                     char **url, char const *const fmt, ...)
+{
+	char *suffix = NULL;
+	int rc = 0;
+	va_list vp;
+
+	va_start(vp, fmt);
+	suffix = sn_vasprintf(fmt, vp);
+	va_end(vp);
+
+	switch (path->kind) {
+	case GCLI_PATH_DEFAULT: {
+		char *e_owner = NULL, *e_repo = NULL;
+
+		e_owner = gcli_urlencode(path->as_default.owner);
+		e_repo  = gcli_urlencode(path->as_default.repo);
+
+		*url = sn_asprintf("%s/repos/%s/%s/labels/%"PRIid"%s",
+		                   gcli_get_apibase(ctx), e_owner, e_repo,
+		                   path->as_default.id, suffix);
+
+		free(e_owner);
+		free(e_repo);
+	} break;
+	case GCLI_PATH_NAMED: {
+		struct gcli_path repo_path = {0};
+		char *e_owner, *e_repo;
+		gcli_id id = 0;
+
+		/* prepare the path to the repository */
+		repo_path.kind = GCLI_PATH_DEFAULT;
+		repo_path.as_default.owner = path->as_named.owner;
+		repo_path.as_default.repo = path->as_named.repo;
+
+		/* resolve the id */
+		rc = gitea_get_label_id(ctx, &repo_path, path->as_named.id, &id);
+		if (rc < 0)
+			goto done;
+
+		/* now make the actual URL */
+		e_owner = gcli_urlencode(path->as_named.owner);
+		e_repo = gcli_urlencode(path->as_named.repo);
+
+		*url = sn_asprintf("%s/repos/%s/%s/labels/%"PRIid"%s",
+		                   gcli_get_apibase(ctx), e_owner, e_repo, id,
+		                   suffix);
+
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
+	} break;
+	case GCLI_PATH_URL: {
+		*url = sn_asprintf("%s%s", path->as_url, suffix);
+	} break;
+	default: {
+		rc = gcli_error(ctx, "unsupported path kind for Gitea issues");
+	} break;
+	}
+
+done:
+	gcli_clear_ptr(&suffix);
+
+	return rc;
+}
+
+int
+gitea_delete_label(struct gcli_ctx *ctx, struct gcli_path const *const path)
+{
+	char *url = NULL;
+	int rc = 0;
 
 	/* DELETE /repos/{owner}/{repo}/labels/{} */
-	rc = gitea_repo_make_url(ctx, repo_path, &url, "/labels/%d", id);
+	rc = gitea_label_make_url(ctx, path, &url, "");
 
 	if (rc == 0) {
 		rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);

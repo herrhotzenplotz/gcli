@@ -100,14 +100,27 @@ status_interactive_notification(struct gcli_notification const *const notif)
 	for (;;) {
 		int rc = 0;
 
-		user_input = gcli_cmd_prompt("Enter action or quit", GCLI_PROMPT_RESULT_MANDATORY);
+		user_input = gcli_cmd_prompt("Enter action, done or quit", GCLI_PROMPT_RESULT_MANDATORY);
 
+		/* plain quit action */
 		if (strcmp(user_input, "q") == 0 ||
 		    strcmp(user_input, "quit") == 0) {
 			free(user_input);
 			return;
 		}
 
+		/* mark as done and quit */
+		if (strcmp(user_input, "d") == 0 ||
+		    strcmp(user_input, "done") == 0) {
+			rc = gcli_notification_mark_as_read(g_clictx, notif->id);
+			if (rc < 0)
+				fprintf(stderr, "gcli: error: %s\n", gcli_get_error(g_clictx));
+
+			free(user_input);
+			return;
+		}
+
+		/* search and call action handler or error out */
 		rc = gcli_cmd_action_handle(actions, &notif->target, user_input);
 		if (rc < 0) {
 			fprintf(stderr, "gcli: error: %s\n", gcli_get_error(g_clictx));

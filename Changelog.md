@@ -20,6 +20,10 @@ This changelog does not follow semantic versioning.
 
   Requested by: Baptiste Daroussin <bapt@FreeBSD.org>
 
+- The interactive status prompt now has a command `done` that allows
+  you to mark a notification as done. When run on an action it will
+  return you to the list of notifications.
+
 ### Fixed
 
 - Fixed a printf formatting bug on 32-bit platforms in review tool.

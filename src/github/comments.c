@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,6 +30,7 @@
 #include <gcli/github/comments.h>
 #include <gcli/github/config.h>
 #include <gcli/github/issues.h>
+#include <gcli/github/path.h>
 #include <gcli/github/repos.h>
 #include <gcli/json_gen.h>
 #include <gcli/json_util.h>
@@ -89,12 +90,36 @@ github_get_comments(struct gcli_ctx *ctx, struct gcli_path const *const path,
 {
 	char *url = NULL;
 	int rc = 0;
+	struct gcli_path const *p = path;
+	struct gcli_path norm_path = {0};
 
-	rc = github_issue_make_url(ctx, path, &url, "/comments");
+	/* This routine can be called with paths to PRs too. However,
+	 * when called on a PR we get its review comments. We don't
+	 * want that. Return its issue comments (which is the
+	 * regular discussion) instead.
+	 * For this purpose forcefully convert the path to a default
+	 * style path and derive the correct url (to the underlying issue)
+	 * from that default path. */
+	if (path->kind != GCLI_PATH_DEFAULT) {
+		rc = github_path_normalise(ctx, path, &norm_path);
+		if (rc < 0)
+			return rc;
+
+		p = &norm_path;
+	}
+
+	/* issue URL from normalised path */
+	rc = github_issue_make_url(ctx, p, &url, "/comments");
 	if (rc < 0)
 		return rc;
 
-	return github_fetch_comments(ctx, url, out);
+	rc = github_fetch_comments(ctx, url, out);
+
+	/* free normalised path if it was used */
+	if (p == &norm_path)
+		gcli_path_free(&norm_path);
+
+	return rc;
 }
 
 static int

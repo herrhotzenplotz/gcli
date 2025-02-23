@@ -34,6 +34,9 @@ This changelog does not follow semantic versioning.
 
   Reported by: Baptiste Daroussin <bapt@FreeBSD.org>
 
+- The interactive status command now properly handles comments and
+  CI checks for GitHub PR notifications.
+
 ### Changed
 
 - The status subcommand provides an interactive mode for going through

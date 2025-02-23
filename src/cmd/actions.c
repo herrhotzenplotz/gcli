@@ -146,7 +146,8 @@ gcli_cmd_action_handle(struct gcli_cmd_actions const *actions,
                        struct gcli_path const *path,
                        char *cmd_input)
 {
-	char *_argv[32]; /* storage */
+	enum { argv_size = 32 };
+	char *_argv[argv_size]; /* storage */
 	char *argfront = cmd_input;
 	int argc = 0, rc = 0;
 	struct gcli_cmd_action const *action = NULL;
@@ -158,7 +159,7 @@ gcli_cmd_action_handle(struct gcli_cmd_actions const *actions,
 	for (;;) {
 		char *argnext = strchr(argfront, ' ');
 
-		if (argc == ARRAY_SIZE(argv))
+		if (argc == argv_size)
 			err(1, "gcli: error: too many arguments");
 
 		argv[argc++] = argfront;

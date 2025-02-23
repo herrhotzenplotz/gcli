@@ -36,6 +36,15 @@ This changelog does not follow semantic versioning.
 
 ### Changed
 
+- The status subcommand provides an interactive mode for going through
+  notifications.
+  This mode has been changed to reuse the actions of their respective
+  subcommands. You can pass the same options as documented in the
+  manual pages to the notification items.
+  These features are available for issues and pull requests as of now.
+  This means that if you select an issue notification you get a prompt
+  for actions on the respective issue.
+
 ### Removed
 
 ## 2.6.1 (2025-Jan-19)

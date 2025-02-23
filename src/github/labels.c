@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -122,7 +122,7 @@ github_delete_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	e_label = gcli_urlencode(label);
 
 	/* DELETE /repos/{owner}/{repo}/labels/{name} */
-	rc = github_repo_make_url(ctx, path, &url, "/lables/%s", e_label);
+	rc = github_repo_make_url(ctx, path, &url, "/labels/%s", e_label);
 
 	if (rc == 0)
 		rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);

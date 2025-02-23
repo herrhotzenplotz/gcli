@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -46,7 +46,7 @@ github_api_error_string(struct gcli_ctx *ctx, struct gcli_fetch_buffer *const bu
 	json_close(&stream);
 
 	if (rc < 0)
-		return strdup("no message: failed to parser error response");
+		return strdup("no message: failed to parse error response");
 	else
 		return msg;
 }

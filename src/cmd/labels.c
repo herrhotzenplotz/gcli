@@ -31,6 +31,7 @@
 
 #include <gcli/labels.h>
 
+#include <gcli/cmd/actions.h>
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/colour.h>
@@ -47,15 +48,18 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: gcli labels create [-o owner -r repo] -n name -c colour -d description\n");
-	fprintf(stderr, "       gcli labels delete [-o owner -r repo] id\n");
+	fprintf(stderr, "       gcli labels [-o owner -r repo] -i name actions...\n");
 	fprintf(stderr, "       gcli labels [-o owner -r repo] [-n number]\n");
 	fprintf(stderr, "OPTIONS:\n");
 	fprintf(stderr, "  -o owner        The repository owner\n");
 	fprintf(stderr, "  -r repo         The repository name\n");
+	fprintf(stderr, "  -i name         Name of the lable to perform actions on\n");
 	fprintf(stderr, "  -n number       Number of labels to fetch (-1 = everything)\n");
 	fprintf(stderr, "  -l name         Name of the new label\n");
 	fprintf(stderr, "  -c colour       Six digit hex code of the label's colour\n");
 	fprintf(stderr, "  -d description  A short description of the label\n");
+	fprintf(stderr, "ACTIONS:\n");
+	fprintf(stderr, "  delete          Delete the label\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
@@ -94,55 +98,6 @@ gcli_labels_print(struct gcli_label_list const *const list, int const max)
 	}
 
 	gcli_tbl_end(table);
-}
-
-static int
-subcommand_labels_delete(int argc, char *argv[])
-{
-	int ch, rc;
-	struct gcli_path path = { .kind = GCLI_PATH_NAMED };
-	const struct option options[] = {
-		{.name = "repo",  .has_arg = required_argument, .val = 'r'},
-		{.name = "owner", .has_arg = required_argument, .val = 'o'},
-		{0},
-	};
-
-	while ((ch = getopt_long(argc, argv, "o:r:", options, NULL)) != -1) {
-		switch (ch) {
-		case 'o':
-			path.as_named.owner = optarg;
-			break;
-		case 'r':
-			path.as_named.repo = optarg;
-			break;
-		case '?':
-		default:
-			usage();
-			return EXIT_FAILURE;
-		}
-	}
-
-	argc -= optind;
-	argv += optind;
-
-	if (argc != 1) {
-		fprintf(stderr, "gcli: error: missing label to delete\n");
-		usage();
-		return EXIT_FAILURE;
-	}
-
-	path.as_named.id = argv[0];
-	check_path(&path);
-
-	rc = gcli_delete_label(g_clictx, &path);
-	if (rc < 0) {
-		fprintf(stderr, "gcli: error: couldn't delete label: %s\n",
-		        gcli_get_error(g_clictx));
-
-		return EXIT_FAILURE;
-	}
-
-	return EXIT_SUCCESS;
 }
 
 static int
@@ -223,43 +178,86 @@ subcommand_labels_create(int argc, char *argv[])
 	return EXIT_SUCCESS;
 }
 
-static struct {
-	char const *name;
-	int (*fn)(int, char **);
-} labels_subcommands[] = {
-	{ .name = "delete", .fn = subcommand_labels_delete },
-	{ .name = "create", .fn = subcommand_labels_create },
+static int
+action_delete(struct gcli_path const *const path, void *item, int *argc, char **argv[])
+{
+	int rc = 0;
+
+	(void) item; /* unused */
+	(void) argc;
+	(void) argv;
+
+	rc = gcli_delete_label(g_clictx, path);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: couldn't delete label: %s\n",
+		        gcli_get_error(g_clictx));
+
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+struct gcli_cmd_actions label_actions = {
+	.fetch_item = NULL,
+	.free_item = NULL,
+	.item_size = sizeof(struct gcli_label),
+
+	.defs = {
+		{ .name = "delete", .needs_item = false, .handler = action_delete, },
+		{0},
+	},
 };
+
+static int
+list_issues(struct gcli_path const *const path, int count)
+{
+	struct gcli_label_list labels = {0};
+
+	if (gcli_get_labels(g_clictx, path, count, &labels) < 0) {
+		fprintf(stderr, "gcli: error: could not fetch list of labels: %s\n",
+		        gcli_get_error(g_clictx));
+
+		return EXIT_FAILURE;
+	}
+
+	gcli_labels_print(&labels, count);
+
+	gcli_free_labels(&labels);
+
+	return EXIT_SUCCESS;
+}
 
 int
 subcommand_labels(int argc, char *argv[])
 {
-	int count = 30;
-	int ch;
-	struct gcli_path repo_path = {0};
-	struct gcli_label_list labels = {0};
+	int count = 30, ch, rc;
+	struct gcli_path path = {0};
 
 	const struct option options[] = {
 		{.name = "repo",  .has_arg = required_argument, .flag = NULL, .val = 'r'},
 		{.name = "owner", .has_arg = required_argument, .flag = NULL, .val = 'o'},
+		{.name = "name",  .has_arg = required_argument, .flag = NULL, .val = 'i'},
 		{.name = "count", .has_arg = required_argument, .flag = NULL, .val = 'n'},
 		{0}
 	};
 
-	if (argc > 1) {
-		for (size_t i = 0; i < ARRAY_SIZE(labels_subcommands); ++i) {
-			if (strcmp(labels_subcommands[i].name, argv[1]) == 0)
-				return labels_subcommands[i].fn(argc - 1, argv + 1);
-		}
+	if (argc > 1 && strcmp("create", argv[1]) == 0) {
+		return subcommand_labels_create(argc - 1, argv + 1);
 	}
 
-	while ((ch = getopt_long(argc, argv, "n:o:r:", options, NULL)) != -1) {
+	path.kind = GCLI_PATH_NAMED;
+
+	while ((ch = getopt_long(argc, argv, "n:o:r:i:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
-			repo_path.as_default.owner = optarg;
+			path.as_named.owner = optarg;
 			break;
 		case 'r':
-			repo_path.as_default.repo = optarg;
+			path.as_named.repo = optarg;
+			break;
+		case 'i':
+			path.as_named.id = optarg;
 			break;
 		case 'n': {
 			char *endptr = NULL;
@@ -282,22 +280,16 @@ subcommand_labels(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	/* sanity check: we must have parsed everything by now */
-	if (argc > 0) {
-		fprintf(stderr, "gcli: error: stray arguments\n");
+	check_path(&path);
+
+	/* List labels if no id was given */
+	if (path.as_named.id == NULL)
+		return list_issues(&path, count);
+
+	/* otherwise handle actions */
+	rc = gcli_cmd_actions_handle(&label_actions, &path, &argc, &argv);
+	if (rc == GCLI_EX_USAGE)
 		usage();
-		return EXIT_FAILURE;
-	}
 
-	check_path(&repo_path);
-
-	if (gcli_get_labels(g_clictx, &repo_path, count, &labels) < 0)
-		errx(1, "gcli: error: could not fetch list of labels: %s",
-		     gcli_get_error(g_clictx));
-
-	gcli_labels_print(&labels, count);
-
-	gcli_free_labels(&labels);
-
-	return EXIT_SUCCESS;
+	return !!rc;
 }

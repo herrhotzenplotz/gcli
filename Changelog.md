@@ -24,6 +24,10 @@ This changelog does not follow semantic versioning.
   you to mark a notification as done. When run on an action it will
   return you to the list of notifications.
 
+- An `edit` action has been added to the issues subcommand.
+  This action allows you to edit the original post / body / message
+  of an issue, e.g. to update a TODO list checkmark.
+
 ### Fixed
 
 - Fixed a printf formatting bug on 32-bit platforms in review tool.

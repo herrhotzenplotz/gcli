@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -171,6 +171,13 @@ struct gcli_forge_descriptor {
 		struct gcli_ctx *ctx,
 		struct gcli_path const *issue_path,
 		struct gcli_attachment_list *out);
+
+	/**
+	 * Change the OP (original post) of the issue */
+	 int (*issue_set_op)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *issue_path,
+		char const *new_op);
 
 	/**
 	 * Dump the contents of the attachment to the given file */

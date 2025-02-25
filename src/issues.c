@@ -160,3 +160,11 @@ gcli_issue_get_attachments(struct gcli_ctx *ctx,
 {
 	gcli_null_check_call(get_issue_attachments, ctx, issue_path, out);
 }
+
+int
+gcli_issue_set_op(struct gcli_ctx *ctx,
+                  struct gcli_path const *const issue_path,
+                  char const *new_op)
+{
+	gcli_null_check_call(issue_set_op, ctx, issue_path, new_op);
+}

@@ -132,4 +132,7 @@ int gcli_issue_get_attachments(struct gcli_ctx *ctx,
                                struct gcli_path const *const path,
                                struct gcli_attachment_list *attachments);
 
+int gcli_issue_set_op(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                      char const *new_op);
+
 #endif /* ISSUES_H */

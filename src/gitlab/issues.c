@@ -500,3 +500,36 @@ gitlab_issue_set_title(struct gcli_ctx *ctx,
 
 	return rc;
 }
+
+int
+gitlab_issue_set_op(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                    char const *const new_op)
+{
+	char *url, *payload;
+	struct gcli_jsongen gen = {0};
+	int rc;
+
+	/* Generate url */
+	rc = gitlab_issue_make_url(ctx, path, &url, "");
+	if (rc < 0)
+		return rc;
+
+	/* Generate payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "description");
+		gcli_jsongen_string(&gen, new_op);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
+
+	free(url);
+	free(payload);
+
+	return rc;
+}

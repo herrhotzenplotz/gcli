@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -199,6 +199,7 @@ gitlab_forge_descriptor =
 	.issue_reopen              = gitlab_issue_reopen,
 	.issue_set_milestone       = gitlab_issue_set_milestone,
 	.issue_set_title           = gitlab_issue_set_title,
+	.issue_set_op              = gitlab_issue_set_op,
 	.perform_submit_issue      = gitlab_perform_submit_issue,
 	.issue_quirks              = GCLI_ISSUE_QUIRKS_PROD_COMP
 	                           | GCLI_ISSUE_QUIRKS_URL,

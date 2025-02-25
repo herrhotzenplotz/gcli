@@ -386,3 +386,11 @@ gitea_issue_set_title(struct gcli_ctx *ctx,
 {
 	return github_issue_set_title(ctx, issue_path, new_title);
 }
+
+int
+gitea_issue_set_op(struct gcli_ctx *ctx,
+                   struct gcli_path const *const path,
+                   char const *const new_op)
+{
+	return github_issue_set_op(ctx, path, new_op);
+}

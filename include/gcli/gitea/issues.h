@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -75,4 +75,7 @@ int gitea_issue_set_title(struct gcli_ctx *ctx,
                           struct gcli_path const *const issue_path,
                           char const *const new_title);
 
+int gitea_issue_set_op(struct gcli_ctx *ctx,
+                       struct gcli_path const *const path,
+                       char const *const new_op);
 #endif /* GITEA_ISSUES_H */

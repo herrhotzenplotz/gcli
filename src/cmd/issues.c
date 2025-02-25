@@ -85,6 +85,7 @@ usage(void)
 	fprintf(stderr, "  notes              Alias for comments\n");
 	fprintf(stderr, "  title <new-title>  Change the title of the issue\n");
 	fprintf(stderr, "  open               Open the issue in a web browser\n");
+	fprintf(stderr, "  edit               Edit the OP\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
@@ -877,6 +878,77 @@ action_open(struct gcli_path const *const path,
 	return GCLI_EX_OK;
 }
 
+/* wrapper for const-correctness */
+struct edit_issue_opts {
+	struct gcli_issue const *issues;
+};
+
+static void
+init_op_edit_file(struct gcli_ctx *ctx, FILE *stream, void *_opts)
+{
+	(void) ctx;
+	struct edit_issue_opts const *opts = _opts;
+	fprintf(
+		stream,
+		"%s\n"
+		"! Edit the original post as needed, save and exit.\n"
+		"! All lines starting with '!' will be discarded.\n"
+		"!\n"
+		"! vim: ft=markdown\n",
+		opts->issues->body);
+}
+
+static char *
+edit_op_message(struct gcli_issue const *issue)
+{
+	struct edit_issue_opts opts = { issue };
+	return gcli_editor_get_user_message(g_clictx, init_op_edit_file, &opts);
+}
+
+static int
+action_edit(struct gcli_path const *const path,
+            struct gcli_issue const *const issue,
+            int *argc, char **argv[])
+{
+	char *new_message;
+	int rc = GCLI_EX_OK;
+
+	(void) path;
+	(void) argc;
+	(void) argv;
+
+	/* let the user edit the message */
+	new_message = edit_op_message(issue);
+	if (new_message == NULL) {
+		fprintf(stderr, "gcli: error: failed to edit message file\n");
+		return GCLI_EX_DATAERR;
+	}
+
+	/* print it for double checking */
+	fprintf(stdout, "This is the final message:\n");
+	gcli_pretty_print(new_message, 4, 80, stdout);
+
+	/* final confirmation */
+	if (!sn_yesno("Do you want to continue?")) {
+		fprintf(stderr, "gcli: Submission aborted.\n");
+		rc = GCLI_EX_DATAERR;
+		goto done;
+	}
+
+	rc = gcli_issue_set_op(g_clictx, path, new_message);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to update original post: %s\n",
+		        gcli_get_error(g_clictx));
+
+		rc = GCLI_EX_DATAERR;
+		goto done;
+	}
+
+done:
+	free(new_message);
+	return rc;
+}
+
 struct gcli_cmd_actions gcli_issue_actions = {
 	.fetch_item = (gcli_cmd_action_fetcher)gcli_get_issue,
 	.free_item = (gcli_cmd_action_freeer)gcli_issue_free,
@@ -949,6 +1021,11 @@ struct gcli_cmd_actions gcli_issue_actions = {
 			.name = "open",
 			.needs_item = true,
 			.handler = (gcli_cmd_action_handler)action_open,
+		},
+		{
+			.name = "edit",
+			.needs_item = true,
+			.handler = (gcli_cmd_action_handler)action_edit,
 		},
 	},
 };

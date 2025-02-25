@@ -101,6 +101,7 @@ github_forge_descriptor =
 	.issue_reopen              = github_issue_reopen,
 	.issue_set_milestone       = github_issue_set_milestone,
 	.issue_set_title           = github_issue_set_title,
+	.issue_set_op              = github_issue_set_op,
 	.perform_submit_issue      = github_perform_submit_issue,
 	.issue_quirks              = GCLI_ISSUE_QUIRKS_PROD_COMP
 	                           | GCLI_ISSUE_QUIRKS_URL,

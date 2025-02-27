@@ -40,6 +40,9 @@
 int gitlab_get_labels(struct gcli_ctx *ctx, struct gcli_path const *path,
                       int max, struct gcli_label_list *out);
 
+int gitlab_get_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                     struct gcli_label *const out);
+
 int gitlab_create_label(struct gcli_ctx *ctx, struct gcli_path const *path,
                         struct gcli_label *label);
 

@@ -180,3 +180,30 @@ gitlab_delete_label(struct gcli_ctx *ctx, struct gcli_path const *const path)
 
 	return rc;
 }
+
+int
+gitlab_get_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                 struct gcli_label *const out)
+{
+	char *url;
+	int rc = 0;
+	struct gcli_fetch_buffer buffer = {0};
+	struct json_stream parser = {0};
+
+	rc = gitlab_label_make_url(ctx, path, &url, "");
+	if (rc < 0)
+		return rc;
+
+	rc = gcli_fetch(ctx, url, NULL, &buffer);
+	if (rc == 0) {
+		json_open_buffer(&parser, buffer.data, buffer.length);
+		json_set_streaming(&parser, true);
+		parse_gitlab_label(ctx, &parser, out);
+		json_close(&parser);
+	}
+
+	gcli_fetch_buffer_free(&buffer);
+	gcli_clear_ptr(&url);
+
+	return rc;
+}

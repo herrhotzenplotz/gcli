@@ -100,12 +100,18 @@ gcli_labels_print(struct gcli_label_list const *const list, int const max)
 	gcli_tbl_end(table);
 }
 
+static void
+gcli_label_print(struct gcli_label *const label)
+{
+	struct gcli_label_list labels = { .labels = label, .labels_size = 1 };
+	gcli_labels_print(&labels, 1);
+}
+
 static int
 subcommand_labels_create(int argc, char *argv[])
 {
 	int ch;
 	struct gcli_label label = {0};
-	struct gcli_label_list labels = { .labels = &label, .labels_size = 1 };
 	struct gcli_path repo_path = {0};
 
 	const struct option options[] = {
@@ -171,9 +177,7 @@ subcommand_labels_create(int argc, char *argv[])
 
 	/* only if we are not quieted */
 	if (!sn_quiet())
-		gcli_labels_print(&labels, 1);
-
-	gcli_free_label(&label);
+		gcli_label_print(&label);
 
 	return EXIT_SUCCESS;
 }

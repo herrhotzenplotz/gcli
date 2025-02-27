@@ -67,3 +67,10 @@ gcli_delete_label(struct gcli_ctx *ctx, struct gcli_path const *const path)
 {
 	gcli_null_check_call(delete_label, ctx, path);
 }
+
+int
+gcli_get_label(struct gcli_ctx *ctx, struct gcli_path const *path,
+               struct gcli_label *out)
+{
+	gcli_null_check_call(get_label, ctx, path, out);
+}

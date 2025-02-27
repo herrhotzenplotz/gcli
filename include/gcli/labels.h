@@ -56,6 +56,9 @@ struct gcli_label_list {
 int gcli_get_labels(struct gcli_ctx *ctx, struct gcli_path const *path,
                     int max, struct gcli_label_list *out);
 
+int gcli_get_label(struct gcli_ctx *ctx, struct gcli_path const *path,
+                   struct gcli_label *out);
+
 void gcli_free_label(struct gcli_label *label);
 
 void gcli_free_labels(struct gcli_label_list *labels);

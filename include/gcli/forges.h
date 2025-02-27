@@ -422,6 +422,13 @@ struct gcli_forge_descriptor {
 		struct gcli_label_list *out);
 
 	/**
+	 *  Get a single label */
+	int (*get_label)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *path,
+		struct gcli_label *out);
+
+	/**
 	 * Create the given label
 	 *
 	 * The ID will be filled in for you */

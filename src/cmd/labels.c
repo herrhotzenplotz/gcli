@@ -59,6 +59,7 @@ usage(void)
 	fprintf(stderr, "  -c colour       Six digit hex code of the label's colour\n");
 	fprintf(stderr, "  -d description  A short description of the label\n");
 	fprintf(stderr, "ACTIONS:\n");
+	fprintf(stderr, "  status          Show status information about the label\n");
 	fprintf(stderr, "  delete          Delete the label\n");
 	fprintf(stderr, "\n");
 	version();
@@ -196,19 +197,32 @@ action_delete(struct gcli_path const *const path, void *item, int *argc, char **
 		fprintf(stderr, "gcli: error: couldn't delete label: %s\n",
 		        gcli_get_error(g_clictx));
 
-		return EXIT_FAILURE;
+		return GCLI_EX_DATAERR;
 	}
 
-	return EXIT_SUCCESS;
+	return GCLI_EX_OK;
+}
+
+static int
+action_status(struct gcli_path const *const path, void *item, int *argc, char **argv[])
+{
+	(void) path;
+	(void) argc;
+	(void) argv;
+
+	gcli_label_print(item);
+
+	return GCLI_EX_OK;
 }
 
 struct gcli_cmd_actions label_actions = {
-	.fetch_item = NULL,
-	.free_item = NULL,
+	.fetch_item = (gcli_cmd_action_fetcher)gcli_get_label,
+	.free_item = (gcli_cmd_action_freeer)gcli_free_label,
 	.item_size = sizeof(struct gcli_label),
 
 	.defs = {
 		{ .name = "delete", .needs_item = false, .handler = action_delete, },
+		{ .name = "status", .needs_item = true,  .handler = action_status, },
 		{0},
 	},
 };

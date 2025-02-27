@@ -67,6 +67,8 @@ When given a specific label with
 .Fl i
 you can execute one or more of the following actions:
 .Bl -tag -width indent
+.It Cm status
+Print a short summary about the label.
 .It Cm delete
 Delete the given label.
 .El

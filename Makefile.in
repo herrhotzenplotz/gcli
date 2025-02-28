@@ -75,6 +75,11 @@ CCDEPFLAGS_unknown=
 CCDEPFLAGS=		$(CCDEPFLAGS_$(CCOM))
 CCDEPFLAGS_FOR_BUILD=	$(CCDEPFLAGS_$(CCOM_FOR_BUILD))
 
+########## Static Analysis Flags #############################
+CANALFLAGS_clang=	--analyze -Werror
+CANALFLAGS_gcc=		-fanalyzer -c -o /dev/null
+CANALFLAGS=		$(CANALFLAGS_$(CCOM))
+
 LIBCURL_CFLAGS=		@LIBCURL_CFLAGS@
 LIBCURL_LIBS=		@LIBCURL_LIBS@
 
@@ -116,7 +121,7 @@ LIBLOWDOWN_CPPFLAGS=	$(LIBLOWDOWN_CPPFLAGS_$(LIBLOWDOWN_FOUND))
 LIBCRYPTO_CFLAGS=	@LIBCRYPTO_CFLAGS@
 LIBCRYPTO_LIBS=		@LIBCRYPTO_LIBS@
 
-.PHONY: all all-auto clean clean-auto check check-auto install install-auto
+.PHONY: all all-auto clean clean-auto check check-auto install install-auto analyse analyse-auto
 all: Makefile
 	@$(MAKE) all-auto
 
@@ -128,6 +133,9 @@ check: Makefile
 
 install: Makefile
 	@$(MAKE) install-auto
+
+analyse: Makefile
+	@$(MAKE) analyse-auto
 
 all-auto: gcli manpages
 
@@ -399,6 +407,33 @@ $(TEST_PROGRAMS:=.c): $(TEMPLATE_HEADERS)
 
 check-auto: $(TEST_PROGRAMS)
 	$(KYUA) test --build-root ./tests --kyuafile @SRCDIR@/tests/Kyuafile
+
+#################### static analysis #######################################
+LIBGCLI_ANALYSE=	${LIBGCLI_SRCS:.c=.libgcli.analyse}
+GCLI_ANALYSE=		${GCLI_SRCS:.c=.gcli.analyse}
+ANALYSE_TARGETS=	$(LIBGCLI_ANALYSE) $(GCLI_ANALYSE)
+
+analyse-auto: $(ANALYSE_TARGETS)
+
+$(ANALYSE_TARGETS): $(TEMPLATE_HEADERS)
+
+.SUFFIXES: .c .libgcli.analyse .gcli.analyse
+.c.libgcli.analyse:
+	@mkdir -p $$(dirname $@)
+	$(CC) $(CFLAGS) $(CPPFLAGS) \
+		$(LIBCURL_CFLAGS) $(LIBCRYPTO_CFLAGS) \
+		$(LIBLOWDOWN_CFLAGS) $(LIBLOWDOWN_CPPFLAGS) \
+		-DIN_LIBGCLI=1 $(CANALFLAGS) $<
+
+.c.gcli.analyse:
+	@mkdir -p $$(dirname $@)
+	$(CC) $(CFLAGS) $(CPPFLAGS) \
+		$(LIBEDIT_CPPFLAGS) $(LIBREADLINE_CPPFLAGS) \
+		$(LIBCURL_CFLAGS) $(LIBEDIT_CFLAGS) \
+		$(LIBREADLINE_CFLAGS) $(LIBCRYPTO_CFLAGS) \
+		$(LIBLOWDOWN_CFLAGS) $(LIBLOWDOWN_CPPFLAGS) \
+		$(CANALFLAGS) $<
+
 
 #################### install target ########################################
 MANPAGES= \

@@ -199,9 +199,11 @@ github_get_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	return rc;
 }
 
-int
-github_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *const path,
-                       char const *const new_name)
+static int
+github_label_update_property(struct gcli_ctx *ctx,
+                             struct gcli_path const *const path,
+                             char const *const propname,
+                             char const *const val)
 {
 	char *url = NULL, *payload = NULL;
 	int rc = 0;
@@ -216,8 +218,8 @@ github_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	gcli_jsongen_init(&gen);
 	gcli_jsongen_begin_object(&gen);
 	{
-		gcli_jsongen_objmember(&gen, "new_name");
-		gcli_jsongen_string(&gen, new_name);
+		gcli_jsongen_objmember(&gen, propname);
+		gcli_jsongen_string(&gen, val);
 	}
 	gcli_jsongen_end_object(&gen);
 
@@ -231,4 +233,20 @@ github_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	gcli_clear_ptr(&payload);
 
 	return rc;
+}
+
+int
+github_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                       char const *const new_name)
+{
+	return github_label_update_property(ctx, path, "new_name", new_name);
+}
+
+int
+github_label_set_description(struct gcli_ctx *ctx,
+                             struct gcli_path const *const path,
+                             char const *const new_description)
+{
+	return github_label_update_property(
+		ctx, path, "description", new_description);
 }

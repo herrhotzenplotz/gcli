@@ -76,6 +76,10 @@ Change the name of the to the given
 Change the description of the label to
 .Ar new-description .
 You should wrap the description in quotes in case it contains spaces.
+.It Cm colour Ar hexcolour
+Change the colour of the label to the six-digit hexadecmial RGB
+colour code
+.Ar hexcolour .
 .It Cm delete
 Delete the given label.
 .El

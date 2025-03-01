@@ -62,6 +62,7 @@ usage(void)
 	fprintf(stderr, "  status          Show status information about the label\n");
 	fprintf(stderr, "  name            Change the name of the label\n");
 	fprintf(stderr, "  description     Change the description of the label\n");
+	fprintf(stderr, "  colour          Change the colour of the label\n");
 	fprintf(stderr, "  delete          Delete the label\n");
 	fprintf(stderr, "\n");
 	version();
@@ -111,6 +112,25 @@ gcli_label_print(struct gcli_label *const label)
 }
 
 static int
+parse_colour(char const *str, uint32_t *const out)
+{
+	char *endptr = NULL;
+
+	if (strlen(str) != 6) {
+		fprintf(stderr, "gcli: error: colour must be a six-digit hexadecimal colour code\n");
+		return -1;
+	}
+
+	*out = strtol(str, &endptr, 16);
+	if (endptr != (str + strlen(str))) {
+		fprintf(stderr, "gcli: error: cannot parse colour\n");
+		return -1;
+	}
+
+	return 0;
+}
+
+static int
 subcommand_labels_create(int argc, char *argv[])
 {
 	int ch;
@@ -135,13 +155,8 @@ subcommand_labels_create(int argc, char *argv[])
 			repo_path.as_default.repo = optarg;
 			break;
 		case 'c': {
-			char *endptr = NULL;
-			if (strlen(optarg) != 6)
-				err(1, "gcli: error: colour must be a six-digit hexadecimal colour code");
-
-			label.colour = strtol(optarg, &endptr, 16);
-			if (endptr != (optarg + strlen(optarg)))
-				err(1, "gcli: error: cannot parse colour");
+			if (parse_colour(optarg, &label.colour) < 0)
+				return EXIT_FAILURE;
 		} break;
 		case 'd': {
 			label.description = optarg;
@@ -279,6 +294,43 @@ action_description(struct gcli_path const *const path, void *item, int *argc,
 	return GCLI_EX_OK;
 }
 
+static int
+action_colour(struct gcli_path const *const path, void *item, int *argc,
+              char **argv[])
+{
+	char const *colour_str = NULL;
+	uint32_t colour;
+	int rc = 0;
+
+	(void) item; /* unused */
+
+	/* check that we have enough arguments */
+	if (*argc < 2) {
+		fprintf(stderr, "gcli: error: missing new colour\n");
+		return GCLI_EX_USAGE;
+	}
+
+	/* pop off new colour from argv */
+	colour_str = (*argv)[1];
+	*argv += 1;
+	*argc -= 1;
+
+	/* parse the colour into a uint32_t */
+	rc = parse_colour(colour_str, &colour);
+	if (rc < 0)
+		return GCLI_EX_USAGE;
+
+	rc = gcli_label_set_colour(g_clictx, path, colour);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to set colour: %s\n",
+		        gcli_get_error(g_clictx));
+
+		return GCLI_EX_DATAERR;
+	}
+
+	return GCLI_EX_OK;
+}
+
 struct gcli_cmd_actions label_actions = {
 	.fetch_item = (gcli_cmd_action_fetcher)gcli_get_label,
 	.free_item = (gcli_cmd_action_freeer)gcli_free_label,
@@ -288,6 +340,7 @@ struct gcli_cmd_actions label_actions = {
 		{ .name = "delete",      .needs_item = false, .handler = action_delete,      },
 		{ .name = "status",      .needs_item = true,  .handler = action_status,      },
 		{ .name = "name",        .needs_item = false, .handler = action_name,        },
+		{ .name = "colour",      .needs_item = false, .handler = action_colour,      },
 		{ .name = "description", .needs_item = false, .handler = action_description, },
 		{0},
 	},

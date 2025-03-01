@@ -48,4 +48,7 @@ int gitea_create_label(struct gcli_ctx *ctx, struct gcli_path const *path,
 
 int gitea_delete_label(struct gcli_ctx *ctx, struct gcli_path const *repo_path);
 
+int gitea_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *path,
+                          char const *new_name);
+
 #endif /* GITEA_LABELS_H */

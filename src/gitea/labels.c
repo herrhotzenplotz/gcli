@@ -31,6 +31,7 @@
 #include <gcli/gitea/labels.h>
 #include <gcli/gitea/repos.h>
 #include <gcli/github/labels.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
@@ -192,6 +193,40 @@ gitea_get_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	gcli_fetch_buffer_free(&buffer);
 	gcli_clear_ptr(&url);
+
+	return rc;
+}
+
+int
+gitea_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                      char const *const new_name)
+{
+	char *url = NULL, *payload = NULL;
+	int rc = 0;
+	struct gcli_jsongen gen = {0};
+
+	/* generate URL */
+	rc = gitea_label_make_url(ctx, path, &url, "");
+	if (rc < 0)
+		return rc;
+
+	/* generate payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "name");
+		gcli_jsongen_string(&gen, new_name);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* perform request */
+	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
+
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }

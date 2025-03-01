@@ -337,6 +337,7 @@ gitea_forge_descriptor =
 	.create_label              = gitea_create_label,
 	.delete_label              = gitea_delete_label,
 	.get_labels                = gitea_get_labels,
+	.get_label                 = gitea_get_label,
 
 	/* Repos */
 	.get_repos                 = gitea_get_repos,

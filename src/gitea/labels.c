@@ -36,6 +36,9 @@
 #include <pdjson/pdjson.h>
 #include <sn/sn.h>
 
+/* Recycle the GitHub parser for labels */
+#include <templates/github/labels.h>
+
 int
 gitea_get_labels(struct gcli_ctx *ctx, struct gcli_path const *const path,
                  int max, struct gcli_label_list *const list)
@@ -162,6 +165,33 @@ gitea_delete_label(struct gcli_ctx *ctx, struct gcli_path const *const path)
 	}
 
 	free(url);
+
+	return rc;
+}
+
+int
+gitea_get_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                struct gcli_label *const out)
+{
+	int rc = 0;
+	char *url = NULL;
+	struct gcli_fetch_buffer buffer = {0};
+
+	rc = gitea_label_make_url(ctx, path, &url, "");
+	if (rc < 0)
+		return rc;
+
+	rc = gcli_fetch(ctx, url, NULL, &buffer);
+	if (rc == 0) {
+		struct json_stream stream = {0};
+
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		parse_github_label(ctx, &stream, out);
+		json_close(&stream);
+	}
+
+	gcli_fetch_buffer_free(&buffer);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

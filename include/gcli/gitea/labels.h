@@ -37,6 +37,9 @@
 #include <gcli/labels.h>
 #include <gcli/path.h>
 
+int gitea_get_label(struct gcli_ctx *ctx, struct gcli_path const *path,
+                    struct gcli_label *out);
+
 int gitea_get_labels(struct gcli_ctx *ctx, struct gcli_path const *path,
                      int max, struct gcli_label_list *out);
 

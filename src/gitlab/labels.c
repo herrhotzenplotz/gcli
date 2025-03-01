@@ -208,23 +208,39 @@ gitlab_get_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	return rc;
 }
 
-int
-gitlab_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *const path,
-                       char const *const new_name)
+static int
+gitlab_label_update_property(struct gcli_ctx *ctx, struct gcli_path const *path,
+                             char const *const propname, char const *const val)
 {
-	char *e_name = NULL, *url = NULL;
+	char *e_val = NULL, *url = NULL;
 	int rc = 0;
 
-	e_name = gcli_urlencode(new_name);
+	e_val = gcli_urlencode(val);
 
-	rc = gitlab_label_make_url(ctx, path, &url, "?new_name=%s", e_name);
+	rc = gitlab_label_make_url(ctx, path, &url, "?%s=%s", propname, e_val);
 
 	if (rc == 0) {
 		rc = gcli_fetch_with_method(ctx, "PUT", url, NULL, NULL, NULL);
 	}
 
 	gcli_clear_ptr(&url);
-	gcli_clear_ptr(&e_name);
+	gcli_clear_ptr(&e_val);
 
 	return rc;
+}
+
+int
+gitlab_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                       char const *const new_name)
+{
+	return gitlab_label_update_property(ctx, path, "new_name", new_name);
+}
+
+int
+gitlab_label_set_description(struct gcli_ctx *ctx,
+                             struct gcli_path const *const path,
+                             char const *const new_description)
+{
+	return gitlab_label_update_property(
+		ctx, path, "description", new_description);
 }

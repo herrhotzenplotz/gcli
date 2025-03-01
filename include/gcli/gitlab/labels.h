@@ -51,4 +51,7 @@ int gitlab_delete_label(struct gcli_ctx *ctx, struct gcli_path const *path);
 int gitlab_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *path,
                            char const *new_name);
 
+int gitlab_label_set_description(struct gcli_ctx *ctx,
+                                 struct gcli_path const *path,
+                                 char const *new_description);
 #endif /* GITLAB_LABELS_H */

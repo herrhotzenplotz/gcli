@@ -74,4 +74,7 @@ int gcli_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *path,
 int gcli_label_set_description(struct gcli_ctx *ctx, struct gcli_path const *path,
                                char const *new_description);
 
+int gcli_label_set_colour(struct gcli_ctx *ctx, struct gcli_path const *path,
+                          uint32_t colour_rgb);
+
 #endif /* LABELS_H */

@@ -458,6 +458,13 @@ struct gcli_forge_descriptor {
 		char const *new_description);
 
 	/**
+	 *  change the colour of a label */
+	int (*label_set_colour)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *path,
+		uint32_t colour_rgb);
+
+	/**
 	 * Get a list of repos of the given owner */
 	int (*get_repos)(
 		struct gcli_ctx *ctx,

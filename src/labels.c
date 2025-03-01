@@ -89,3 +89,10 @@ gcli_label_set_description(struct gcli_ctx *ctx,
 {
 	gcli_null_check_call(label_set_description, ctx, path, new_description);
 }
+
+int
+gcli_label_set_colour(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                      uint32_t const colour)
+{
+	gcli_null_check_call(label_set_colour, ctx, path, colour);
+}

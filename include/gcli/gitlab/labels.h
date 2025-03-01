@@ -54,4 +54,8 @@ int gitlab_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *path,
 int gitlab_label_set_description(struct gcli_ctx *ctx,
                                  struct gcli_path const *path,
                                  char const *new_description);
+
+int gitlab_label_set_colour(struct gcli_ctx *ctx, struct gcli_path const *path,
+                            uint32_t colour);
+
 #endif /* GITLAB_LABELS_H */

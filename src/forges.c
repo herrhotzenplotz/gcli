@@ -346,6 +346,7 @@ gitea_forge_descriptor =
 	.get_label                 = gitea_get_label,
 	.label_set_title           = gitea_label_set_title,
 	.label_set_description     = gitea_label_set_description,
+	.label_set_colour          = gitea_label_set_colour,
 
 	/* Repos */
 	.get_repos                 = gitea_get_repos,

@@ -55,4 +55,7 @@ int gitea_label_set_description(struct gcli_ctx *ctx,
                                 struct gcli_path const *const path,
                                 char const *const description);
 
+int gitea_label_set_colour(struct gcli_ctx *ctx, struct gcli_path const *path,
+                           uint32_t colour);
+
 #endif /* GITEA_LABELS_H */

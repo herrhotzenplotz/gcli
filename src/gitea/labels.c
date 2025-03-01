@@ -246,3 +246,18 @@ gitea_label_set_description(struct gcli_ctx *ctx,
 	return gitea_label_update_property(
 		ctx, path, "description", description);
 }
+
+int
+gitea_label_set_colour(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                       uint32_t const colour)
+{
+	char *colour_string = NULL;
+	int rc = 0;
+
+	colour_string = sn_asprintf("#%06X", colour & 0xFFFFFF);
+	rc = gitea_label_update_property(ctx, path, "color", colour_string);
+
+	gcli_clear_ptr(&colour_string);
+
+	return rc;
+}

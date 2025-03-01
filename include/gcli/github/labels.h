@@ -48,4 +48,7 @@ int github_create_label(struct gcli_ctx *ctx, struct gcli_path const *path,
 
 int github_delete_label(struct gcli_ctx *ctx, struct gcli_path const *path);
 
+int github_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *path,
+                          char const *new_name);
+
 #endif /* GITHUB_LABELS_H */

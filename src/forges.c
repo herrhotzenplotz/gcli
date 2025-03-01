@@ -148,6 +148,7 @@ github_forge_descriptor =
 	.delete_label              = github_delete_label,
 	.get_labels                = github_get_labels,
 	.get_label                 = github_get_label,
+	.label_set_title           = github_label_set_title,
 
 	/* Repos */
 	.get_repos                 = github_get_repos,

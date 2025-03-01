@@ -198,3 +198,37 @@ github_get_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	return rc;
 }
+
+int
+github_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                       char const *const new_name)
+{
+	char *url = NULL, *payload = NULL;
+	int rc = 0;
+	struct gcli_jsongen gen = {0};
+
+	/* generate URL */
+	rc = github_label_make_url(ctx, path, &url, "");
+	if (rc < 0)
+		return rc;
+
+	/* generate payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "new_name");
+		gcli_jsongen_string(&gen, new_name);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* perform request */
+	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
+
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
+
+	return rc;
+}

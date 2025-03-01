@@ -56,6 +56,12 @@ This changelog does not follow semantic versioning.
   This means that if you select an issue notification you get a prompt
   for actions on the respective issue.
 
+- The labels subcommand now uses the action-style argument parser
+  to perform tasks on specific labels.
+  With this change a few new actions have been added for changing
+  the title, the colour or the description of a label.
+  Refer to the manual page `gcli-labels(1)` for more information.
+
 ### Removed
 
 ## 2.6.1 (2025-Jan-19)

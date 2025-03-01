@@ -61,6 +61,7 @@ usage(void)
 	fprintf(stderr, "ACTIONS:\n");
 	fprintf(stderr, "  status          Show status information about the label\n");
 	fprintf(stderr, "  name            Change the name of the label\n");
+	fprintf(stderr, "  description     Change the description of the label\n");
 	fprintf(stderr, "  delete          Delete the label\n");
 	fprintf(stderr, "\n");
 	version();
@@ -247,15 +248,47 @@ action_name(struct gcli_path const *const path, void *item, int *argc,
 	return GCLI_EX_OK;
 }
 
+static int
+action_description(struct gcli_path const *const path, void *item, int *argc,
+                   char **argv[])
+{
+	char const *new_description = NULL;
+	int rc = 0;
+
+	(void) item; /* unused */
+
+	/* check that we have enough arguments */
+	if (*argc < 2) {
+		fprintf(stderr, "gcli: error: missing new description\n");
+		return GCLI_EX_USAGE;
+	}
+
+	/* pop off new description from argv */
+	new_description = (*argv)[1];
+	*argv += 1;
+	*argc -= 1;
+
+	rc = gcli_label_set_description(g_clictx, path, new_description);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to set description: %s\n",
+		        gcli_get_error(g_clictx));
+
+		return GCLI_EX_DATAERR;
+	}
+
+	return GCLI_EX_OK;
+}
+
 struct gcli_cmd_actions label_actions = {
 	.fetch_item = (gcli_cmd_action_fetcher)gcli_get_label,
 	.free_item = (gcli_cmd_action_freeer)gcli_free_label,
 	.item_size = sizeof(struct gcli_label),
 
 	.defs = {
-		{ .name = "delete", .needs_item = false, .handler = action_delete, },
-		{ .name = "status", .needs_item = true,  .handler = action_status, },
-		{ .name = "name",   .needs_item = false, .handler = action_name,   },
+		{ .name = "delete",      .needs_item = false, .handler = action_delete,      },
+		{ .name = "status",      .needs_item = true,  .handler = action_status,      },
+		{ .name = "name",        .needs_item = false, .handler = action_name,        },
+		{ .name = "description", .needs_item = false, .handler = action_description, },
 		{0},
 	},
 };

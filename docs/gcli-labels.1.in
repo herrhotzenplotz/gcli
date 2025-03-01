@@ -72,6 +72,10 @@ Print a short summary about the label.
 .It Cm name Ar new-name
 Change the name of the to the given
 .Ar new-name .
+.It Cm description Ar new-description
+Change the description of the label to
+.Ar new-description .
+You should wrap the description in quotes in case it contains spaces.
 .It Cm delete
 Delete the given label.
 .El

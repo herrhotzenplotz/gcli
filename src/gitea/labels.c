@@ -197,9 +197,9 @@ gitea_get_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	return rc;
 }
 
-int
-gitea_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *const path,
-                      char const *const new_name)
+static int
+gitea_label_update_property(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                            char const *const propname, char const *const val)
 {
 	char *url = NULL, *payload = NULL;
 	int rc = 0;
@@ -214,8 +214,8 @@ gitea_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	gcli_jsongen_init(&gen);
 	gcli_jsongen_begin_object(&gen);
 	{
-		gcli_jsongen_objmember(&gen, "name");
-		gcli_jsongen_string(&gen, new_name);
+		gcli_jsongen_objmember(&gen, propname);
+		gcli_jsongen_string(&gen, val);
 	}
 	gcli_jsongen_end_object(&gen);
 
@@ -229,4 +229,20 @@ gitea_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	gcli_clear_ptr(&payload);
 
 	return rc;
+}
+
+int
+gitea_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                      char const *const new_name)
+{
+	return gitea_label_update_property(ctx, path, "name", new_name);
+}
+
+int
+gitea_label_set_description(struct gcli_ctx *ctx,
+                            struct gcli_path const *const path,
+                            char const *const description)
+{
+	return gitea_label_update_property(
+		ctx, path, "description", description);
 }

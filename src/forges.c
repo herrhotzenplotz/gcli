@@ -343,6 +343,7 @@ gitea_forge_descriptor =
 	.get_labels                = gitea_get_labels,
 	.get_label                 = gitea_get_label,
 	.label_set_title           = gitea_label_set_title,
+	.label_set_description     = gitea_label_set_description,
 
 	/* Repos */
 	.get_repos                 = gitea_get_repos,

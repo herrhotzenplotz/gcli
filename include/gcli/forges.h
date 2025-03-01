@@ -451,6 +451,13 @@ struct gcli_forge_descriptor {
 		char const *new_name);
 
 	/**
+	 *  change the description of a label */
+	int (*label_set_description)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *path,
+		char const *new_description);
+
+	/**
 	 * Get a list of repos of the given owner */
 	int (*get_repos)(
 		struct gcli_ctx *ctx,

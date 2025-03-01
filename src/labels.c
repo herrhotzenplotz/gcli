@@ -81,3 +81,11 @@ gcli_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *const path,
 {
 	gcli_null_check_call(label_set_title, ctx, path, new_name);
 }
+
+int
+gcli_label_set_description(struct gcli_ctx *ctx,
+                           struct gcli_path const *const path,
+                           char const *const new_description)
+{
+	gcli_null_check_call(label_set_description, ctx, path, new_description);
+}

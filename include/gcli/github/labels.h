@@ -55,4 +55,8 @@ int github_label_set_description(struct gcli_ctx *ctx,
                                  struct gcli_path const *path,
                                  char const *new_description);
 
+int github_label_set_colour(struct gcli_ctx *ctx,
+                            struct gcli_path const *path,
+                            uint32_t colour);
+
 #endif /* GITHUB_LABELS_H */

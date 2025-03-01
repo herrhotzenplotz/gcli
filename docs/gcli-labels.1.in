@@ -69,6 +69,9 @@ you can execute one or more of the following actions:
 .Bl -tag -width indent
 .It Cm status
 Print a short summary about the label.
+.It Cm name Ar new-name
+Change the name of the to the given
+.Ar new-name .
 .It Cm delete
 Delete the given label.
 .El

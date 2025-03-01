@@ -147,6 +147,10 @@ github_forge_descriptor =
 	.create_label              = github_create_label,
 	.delete_label              = github_delete_label,
 	.get_labels                = github_get_labels,
+	.get_label                 = github_get_label,
+	.label_set_title           = github_label_set_title,
+	.label_set_description     = github_label_set_description,
+	.label_set_colour          = github_label_set_colour,
 
 	/* Repos */
 	.get_repos                 = github_get_repos,
@@ -242,6 +246,10 @@ gitlab_forge_descriptor =
 	.create_label              = gitlab_create_label,
 	.delete_label              = gitlab_delete_label,
 	.get_labels                = gitlab_get_labels,
+	.get_label                 = gitlab_get_label,
+	.label_set_title           = gitlab_label_set_title,
+	.label_set_description     = gitlab_label_set_description,
+	.label_set_colour          = gitlab_label_set_colour,
 
 	/* Repos */
 	.get_repos                 = gitlab_get_repos,
@@ -335,6 +343,10 @@ gitea_forge_descriptor =
 	.create_label              = gitea_create_label,
 	.delete_label              = gitea_delete_label,
 	.get_labels                = gitea_get_labels,
+	.get_label                 = gitea_get_label,
+	.label_set_title           = gitea_label_set_title,
+	.label_set_description     = gitea_label_set_description,
+	.label_set_colour          = gitea_label_set_colour,
 
 	/* Repos */
 	.get_repos                 = gitea_get_repos,

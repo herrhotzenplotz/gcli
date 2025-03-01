@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,10 +40,22 @@
 int gitlab_get_labels(struct gcli_ctx *ctx, struct gcli_path const *path,
                       int max, struct gcli_label_list *out);
 
+int gitlab_get_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                     struct gcli_label *const out);
+
 int gitlab_create_label(struct gcli_ctx *ctx, struct gcli_path const *path,
                         struct gcli_label *label);
 
-int gitlab_delete_label(struct gcli_ctx *ctx, struct gcli_path const *path,
-                        char const *label);
+int gitlab_delete_label(struct gcli_ctx *ctx, struct gcli_path const *path);
+
+int gitlab_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *path,
+                           char const *new_name);
+
+int gitlab_label_set_description(struct gcli_ctx *ctx,
+                                 struct gcli_path const *path,
+                                 char const *new_description);
+
+int gitlab_label_set_colour(struct gcli_ctx *ctx, struct gcli_path const *path,
+                            uint32_t colour);
 
 #endif /* GITLAB_LABELS_H */

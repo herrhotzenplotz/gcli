@@ -40,6 +40,7 @@ struct gcli_path {
 		GCLI_PATH_BUGZILLA,
 		GCLI_PATH_ID,
 		GCLI_PATH_PID_ID,
+		GCLI_PATH_NAMED, /* owner, repo, string-id, required for Github labels */
 	} kind;
 
 	union {
@@ -61,6 +62,12 @@ struct gcli_path {
 
 		gcli_id as_id;
 		char *as_url;
+
+		struct {
+			char *owner;
+			char *repo;
+			char *id;
+		} as_named;
 	};
 };
 

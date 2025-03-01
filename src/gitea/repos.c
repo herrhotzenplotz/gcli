@@ -123,8 +123,20 @@ gitea_repo_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		*url = sn_asprintf("%s/repos/%s/%s%s", gcli_get_apibase(ctx),
 		                   e_owner, e_repo, suffix);
 
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
+	} break;
+	case GCLI_PATH_NAMED: {
+		char *e_owner, *e_repo;
+
+		e_owner = gcli_urlencode(path->as_named.owner);
+		e_repo = gcli_urlencode(path->as_named.repo);
+
+		*url = sn_asprintf("%s/repos/%s/%s%s", gcli_get_apibase(ctx),
+		                   e_owner, e_repo, suffix);
+
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
 		*url = sn_asprintf("%s%s", path->as_url, suffix);
@@ -134,7 +146,7 @@ gitea_repo_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	} break;
 	}
 
-	free(suffix);
+	gcli_clear_ptr(&suffix);
 
 	return rc;
 }

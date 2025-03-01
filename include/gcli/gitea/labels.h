@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,13 +37,25 @@
 #include <gcli/labels.h>
 #include <gcli/path.h>
 
+int gitea_get_label(struct gcli_ctx *ctx, struct gcli_path const *path,
+                    struct gcli_label *out);
+
 int gitea_get_labels(struct gcli_ctx *ctx, struct gcli_path const *path,
                      int max, struct gcli_label_list *out);
 
 int gitea_create_label(struct gcli_ctx *ctx, struct gcli_path const *path,
                        struct gcli_label *label);
 
-int gitea_delete_label(struct gcli_ctx *ctx, struct gcli_path const *repo_path,
-                       char const *label);
+int gitea_delete_label(struct gcli_ctx *ctx, struct gcli_path const *repo_path);
+
+int gitea_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *path,
+                          char const *new_name);
+
+int gitea_label_set_description(struct gcli_ctx *ctx,
+                                struct gcli_path const *const path,
+                                char const *const description);
+
+int gitea_label_set_colour(struct gcli_ctx *ctx, struct gcli_path const *path,
+                           uint32_t colour);
 
 #endif /* GITEA_LABELS_H */

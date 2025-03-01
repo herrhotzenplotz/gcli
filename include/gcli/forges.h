@@ -422,6 +422,13 @@ struct gcli_forge_descriptor {
 		struct gcli_label_list *out);
 
 	/**
+	 *  Get a single label */
+	int (*get_label)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *path,
+		struct gcli_label *out);
+
+	/**
 	 * Create the given label
 	 *
 	 * The ID will be filled in for you */
@@ -434,8 +441,28 @@ struct gcli_forge_descriptor {
 	 * Delete the given label */
 	int (*delete_label)(
 		struct gcli_ctx *ctx,
+		struct gcli_path const *path);
+
+	/**
+	 *  change the title of a label */
+	int (*label_set_title)(
+		struct gcli_ctx *ctx,
 		struct gcli_path const *path,
-		char const *label);
+		char const *new_name);
+
+	/**
+	 *  change the description of a label */
+	int (*label_set_description)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *path,
+		char const *new_description);
+
+	/**
+	 *  change the colour of a label */
+	int (*label_set_colour)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *path,
+		uint32_t colour_rgb);
 
 	/**
 	 * Get a list of repos of the given owner */

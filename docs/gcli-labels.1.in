@@ -14,9 +14,9 @@
 .Fl n Ar name
 .Fl c Ar colour
 .Nm
-.Cm delete
 .Op Fl o Ar owner Fl r Ar repo
-.Ar name\ or\ id
+.Fl i Ar name
+.Ar actions...
 .Sh DESCRIPTION
 Use
 .Nm
@@ -35,6 +35,9 @@ used in combination with
 Work in the given repository. This option can only be used in
 combination with
 .Fl o .
+.It Fl i , -name Ar name
+Execute actions on the label identified by
+.Ar name .
 .El
 .Pp
 .Sh SUBCOMMANDS
@@ -58,10 +61,27 @@ Set the colour of the label to the given
 .Ar code
 is expected to be a 6 digit hexadecimal RGB colour code.
 .El
+.El
+.Sh ACTIONS
+When given a specific label with
+.Fl i
+you can execute one or more of the following actions:
+.Bl -tag -width indent
+.It Cm status
+Print a short summary about the label.
+.It Cm name Ar new-name
+Change the name of the to the given
+.Ar new-name .
+.It Cm description Ar new-description
+Change the description of the label to
+.Ar new-description .
+You should wrap the description in quotes in case it contains spaces.
+.It Cm colour Ar hexcolour
+Change the colour of the label to the six-digit hexadecmial RGB
+colour code
+.Ar hexcolour .
 .It Cm delete
-Delete the specified label in the given or auto-detected repository.
-.Pp
-There are no flags for this subcommand.
+Delete the given label.
 .El
 .Sh EXAMPLES
 Print a list of all labels in the current project:
@@ -86,7 +106,7 @@ Delete the label
 in herrhotzenplotz/gcli and use the configured account
 .Sq gitlab :
 .Bd -literal -offset indent
-$ gcli -a gitlab labels delete -o herrhotzenplotz -r gcli foobar
+$ gcli -a gitlab labels -o herrhotzenplotz -r gcli -i foobar delete
 .Ed
 .Sh SEE ALSO
 .Xr git 1 ,

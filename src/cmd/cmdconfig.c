@@ -51,7 +51,7 @@
 struct gcli_config_section {
 	TAILQ_ENTRY(gcli_config_section) next;
 
-    struct gcli_config_entries entries;
+	struct gcli_config_entries entries;
 
 	sn_sv title;
 };

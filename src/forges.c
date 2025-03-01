@@ -244,6 +244,7 @@ gitlab_forge_descriptor =
 	.delete_label              = gitlab_delete_label,
 	.get_labels                = gitlab_get_labels,
 	.get_label                 = gitlab_get_label,
+	.label_set_title           = gitlab_label_set_title,
 
 	/* Repos */
 	.get_repos                 = gitlab_get_repos,

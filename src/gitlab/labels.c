@@ -207,3 +207,24 @@ gitlab_get_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	return rc;
 }
+
+int
+gitlab_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                       char const *const new_name)
+{
+	char *e_name = NULL, *url = NULL;
+	int rc = 0;
+
+	e_name = gcli_urlencode(new_name);
+
+	rc = gitlab_label_make_url(ctx, path, &url, "?new_name=%s", e_name);
+
+	if (rc == 0) {
+		rc = gcli_fetch_with_method(ctx, "PUT", url, NULL, NULL, NULL);
+	}
+
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&e_name);
+
+	return rc;
+}

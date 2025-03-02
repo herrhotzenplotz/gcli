@@ -75,6 +75,7 @@
 #include <gcli/bugzilla/api.h>
 #include <gcli/bugzilla/attachments.h>
 #include <gcli/bugzilla/bugs.h>
+#include <gcli/bugzilla/comment.h>
 #include <gcli/bugzilla/config.h>
 
 static struct gcli_forge_descriptor const
@@ -391,6 +392,8 @@ bugzilla_forge_descriptor =
 	.perform_submit_issue      = bugzilla_bug_submit,
 	.issue_quirks              = GCLI_ISSUE_QUIRKS_COMMENTS
 	                           | GCLI_ISSUE_QUIRKS_LOCKED,
+
+	.perform_submit_comment    = bugzilla_submit_comment,
 
 	.attachment_get_content    = bugzilla_attachment_get_content,
 

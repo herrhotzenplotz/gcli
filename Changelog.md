@@ -28,6 +28,8 @@ This changelog does not follow semantic versioning.
   This action allows you to edit the original post / body / message
   of an issue, e.g. to update a TODO list checkmark.
 
+- Comment submission has been implemented for Bugzilla.
+
 ### Fixed
 
 - Fixed a printf formatting bug on 32-bit platforms in review tool.

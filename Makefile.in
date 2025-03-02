@@ -144,6 +144,7 @@ LIBGCLI_SRCS = \
 	src/bugzilla/attachments.c \
 	src/bugzilla/bugs-parser.c \
 	src/bugzilla/bugs.c \
+	src/bugzilla/comment.c \
 	src/bugzilla/config.c \
 	src/gitea/comments.c \
 	src/gitea/config.c \

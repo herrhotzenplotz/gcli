@@ -33,12 +33,6 @@ die() {
 	exit 1
 }
 
-REALPATH=${REALPATH:-$(find_program realpath realpath grealpath)}
-[ $? -eq 0 ] || die "error: need realpath" # exit code of find_program()
-
-rel_srcdir="$(dirname ${0})"
-srcdir="$(${REALPATH} ${rel_srcdir})"
-
 tolower() {
 	tr '[:upper:]' '[:lower:]'
 }
@@ -226,6 +220,12 @@ while [ $# -gt 0 ]; do
 			;;
 	esac
 done
+
+REALPATH=${REALPATH:-$(find_program realpath realpath grealpath)}
+[ $? -eq 0 ] || die "error: need realpath" # exit code of find_program()
+
+rel_srcdir="$(dirname ${0})"
+srcdir="$(${REALPATH} ${rel_srcdir})"
 
 ###############################################################
 # COMPILERS

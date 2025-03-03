@@ -23,10 +23,10 @@ echo "Making GZIP tarball"
 git archive --format=tar --prefix=gcli-$VERSION/ @ \
 	| gzip -v > $DIR/gcli-$VERSION.tar.gz
 
-OLDDIR=$(pwd)
-cd $DIR
-echo "Calculating SHA256SUMS"
-sha256sum *.tar* > SHA256SUMS
-cd $OLDDIR
+(
+	cd $DIR
+	echo "Calculating SHA256SUMS"
+	sha256sum *.tar* > SHA256SUMS
+)
 
 echo "Release Tarballs are at $DIR"

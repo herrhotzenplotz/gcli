@@ -505,3 +505,15 @@ install-auto: manpages gcli
 			;;                                        \
 		esac                                              \
 	done
+
+###############################################################
+# Distcheck target
+distcheck: Makefile @SRCDIR@/configure
+	@$(MAKE) distcheck-auto
+
+distcheck-auto:
+	(cd @SRCDIR@ && @SRCDIR@/tools/gentarball.sh)
+	mkdir -p dist/.build-gcli-$(GCLI_VERSION)
+	(cd dist && tar -x -f @SRCDIR@/dist/gcli-$(GCLI_VERSION)/gcli-$(GCLI_VERSION).tar.gz && chmod -R a-w gcli-$(GCLI_VERSION))
+	(cd dist/.build-gcli-$(GCLI_VERSION) && ../gcli-$(GCLI_VERSION)/configure && $(MAKE) && $(MAKE) check)
+	(chmod -R a+w dist/gcli-$(GCLI_VERSION) && rm -fr dist/.build-gcli-$(GCLI_VERSION) dist/gcli-$(GCLI_VERSION))

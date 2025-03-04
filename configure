@@ -4,8 +4,8 @@
 
 CONFIGURE_CMD_ARGS="${*}"
 
-PACKAGE_VERSION="2.7.0"
-PACKAGE_DATE="04-Mar-2025"
+PACKAGE_VERSION="2.8.0-devel"
+PACKAGE_DATE="UNRELEASED"
 PACKAGE_STRING="gcli $PACKAGE_VERSION"
 PACKAGE_BUGREPORT="https://lists.sr.ht/~herrhotzenplotz/gcli-discuss"
 PACKAGE_URL="https://sr.ht/~herrhotzenplotz/gcli"

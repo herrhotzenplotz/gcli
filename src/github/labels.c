@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -111,24 +111,158 @@ github_create_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	return rc;
 }
 
+static int
+github_label_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                      char **url, char const *const fmt, ...)
+{
+	int rc = 0;
+	va_list vp;
+	char *suffix = NULL;
+
+	va_start(vp, fmt);
+	suffix = sn_vasprintf(fmt, vp);
+	va_end(vp);
+
+	/* TODO: add support for ID-based label adressing which in turn
+	 * would resolve the id to a name. Yes it's inefficient but it's
+	 * what GitHub wants us to do. */
+	switch (path->kind) {
+	case GCLI_PATH_NAMED: {
+		char *e_owner, *e_repo, *e_label;
+
+		e_owner = gcli_urlencode(path->as_named.owner);
+		e_repo = gcli_urlencode(path->as_named.repo);
+		e_label = gcli_urlencode(path->as_named.id);
+
+		*url = sn_asprintf("%s/repos/%s/%s/labels/%s%s",
+		                   gcli_get_apibase(ctx), e_owner, e_repo,
+		                   e_label, suffix);
+
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
+		gcli_clear_ptr(&e_label);
+	} break;
+	case GCLI_PATH_URL: {
+		*url = sn_asprintf("%s%s", path->as_url, suffix);
+	} break;
+	default: {
+		rc = gcli_error(ctx, "unsupported path kind for GitHub labels");
+	} break;
+	}
+
+	gcli_clear_ptr(&suffix);
+
+	return rc;
+}
+
 int
-github_delete_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
-                    char const *label)
+github_delete_label(struct gcli_ctx *ctx, struct gcli_path const *const path)
 {
 	char *url = NULL;
-	char *e_label = NULL;
 	int rc = 0;
 
-	e_label = gcli_urlencode(label);
-
 	/* DELETE /repos/{owner}/{repo}/labels/{name} */
-	rc = github_repo_make_url(ctx, path, &url, "/lables/%s", e_label);
+	rc = github_label_make_url(ctx, path, &url, "");
 
 	if (rc == 0)
 		rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	free(url);
-	free(e_label);
+	gcli_clear_ptr(&url);
+
+	return rc;
+}
+
+int
+github_get_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                 struct gcli_label *const out)
+{
+	int rc = 0;
+	char *url = NULL;
+	struct gcli_fetch_buffer buffer = {0};
+
+	rc = github_label_make_url(ctx, path, &url, "");
+	if (rc < 0)
+		return rc;
+
+	rc = gcli_fetch(ctx, url, NULL, &buffer);
+	if (rc == 0) {
+		struct json_stream stream = {0};
+
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		parse_github_label(ctx, &stream, out);
+		json_close(&stream);
+	}
+
+	gcli_fetch_buffer_free(&buffer);
+	gcli_clear_ptr(&url);
+
+	return rc;
+}
+
+static int
+github_label_update_property(struct gcli_ctx *ctx,
+                             struct gcli_path const *const path,
+                             char const *const propname,
+                             char const *const val)
+{
+	char *url = NULL, *payload = NULL;
+	int rc = 0;
+	struct gcli_jsongen gen = {0};
+
+	/* generate URL */
+	rc = github_label_make_url(ctx, path, &url, "");
+	if (rc < 0)
+		return rc;
+
+	/* generate payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, propname);
+		gcli_jsongen_string(&gen, val);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* perform request */
+	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
+
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
+
+	return rc;
+}
+
+int
+github_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                       char const *const new_name)
+{
+	return github_label_update_property(ctx, path, "new_name", new_name);
+}
+
+int
+github_label_set_description(struct gcli_ctx *ctx,
+                             struct gcli_path const *const path,
+                             char const *const new_description)
+{
+	return github_label_update_property(
+		ctx, path, "description", new_description);
+}
+
+int
+github_label_set_colour(struct gcli_ctx *ctx,
+                        struct gcli_path const *const path,
+                        uint32_t const colour)
+{
+	char *colour_string = NULL;
+	int rc = 0;
+
+	colour_string = sn_asprintf("%06X", colour & 0xFFFFFF);
+	rc = github_label_update_property(ctx, path, "color", colour_string);
+
+	gcli_clear_ptr(&colour_string);
 
 	return rc;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -71,12 +71,12 @@ gitlab_mr_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	case GCLI_PATH_DEFAULT: {
 		char *e_owner, *e_repo;
 
-		e_owner = gcli_urlencode(path->data.as_default.owner);
-		e_repo = gcli_urlencode(path->data.as_default.repo);
+		e_owner = gcli_urlencode(path->as_default.owner);
+		e_repo = gcli_urlencode(path->as_default.repo);
 
 		*url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid"%s",
 		                   gcli_get_apibase(ctx),
-		                   e_owner, e_repo, path->data.as_default.id,
+		                   e_owner, e_repo, path->as_default.id,
 		                   suffix);
 
 		free(e_owner);
@@ -85,12 +85,12 @@ gitlab_mr_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	case GCLI_PATH_PID_ID: {
 		*url = sn_asprintf("%s/projects/%"PRIid"/merge_requests/%"PRIid"%s",
 		                   gcli_get_apibase(ctx),
-		                   path->data.as_pid_id.project_id,
-		                   path->data.as_pid_id.id,
+		                   path->as_pid_id.project_id,
+		                   path->as_pid_id.id,
 		                   suffix);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->data.as_url, suffix);
+		*url = sn_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path type for gitlab merge request");
@@ -730,7 +730,7 @@ gitlab_perform_submit_mr(struct gcli_ctx *ctx, struct gcli_submit_pull_options *
 		rc = parse_gitlab_mr(ctx, &stream, &pull);
 		json_close(&stream);
 
-		target_mr_path.data.as_default.id = pull.id;
+		target_mr_path.as_default.id = pull.id;
 
 		if (rc < 0)
 			goto out;

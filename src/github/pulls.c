@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,6 +32,7 @@
 #include <gcli/github/checks.h>
 #include <gcli/github/config.h>
 #include <gcli/github/issues.h>
+#include <gcli/github/path.h>
 #include <gcli/github/pulls.h>
 #include <gcli/github/repos.h>
 #include <gcli/json_gen.h>
@@ -60,19 +61,19 @@ github_pull_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	case GCLI_PATH_DEFAULT: {
 		char *e_owner, *e_repo;
 
-		e_owner = gcli_urlencode(path->data.as_default.owner);
-		e_repo = gcli_urlencode(path->data.as_default.repo);
+		e_owner = gcli_urlencode(path->as_default.owner);
+		e_repo = gcli_urlencode(path->as_default.repo);
 
 		*url = sn_asprintf("%s/repos/%s/%s/pulls/%"PRIid"%s",
 		                   gcli_get_apibase(ctx),
-		                   e_owner, e_repo, path->data.as_default.id,
+		                   e_owner, e_repo, path->as_default.id,
 		                   suffix);
 
 		free(e_owner);
 		free(e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->data.as_url, suffix);
+		*url = sn_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path type for gitlab merge request");
@@ -179,8 +180,8 @@ search_pulls(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		label = sn_asprintf("label:%s", details->label);
 
 	query_string = sn_asprintf("repo:%s/%s is:pull-request%s %s %s %s %s",
-	                           path->data.as_default.owner,
-	                           path->data.as_default.repo,
+	                           path->as_default.owner,
+	                           path->as_default.repo,
 	                           details->all ? "" : " is:open",
 	                           milestone ? milestone : "", author ? author : "",
 	                           label ? label : "", details->search_term);
@@ -535,7 +536,7 @@ github_perform_submit_pull(struct gcli_ctx *ctx,
 		parse_github_pull(ctx, &json, &pull);
 
 		target_pull_path = opts->target_repo;
-		target_pull_path.data.as_default.id = pull.id;
+		target_pull_path.as_default.id = pull.id;
 
 		if (opts->labels_size) {
 			rc = github_issue_add_labels(
@@ -630,17 +631,33 @@ int
 github_pull_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
                        struct gcli_pull_checks_list *out)
 {
+	int rc = 0;
 	char refname[64] = {0};
+	struct gcli_path norm_path = {0};
+	struct gcli_path const *p = path;
 
-	if (path->kind != GCLI_PATH_DEFAULT)
-		return gcli_error(ctx, "unsupported path kind for GitHub Checks");
+	if (path->kind != GCLI_PATH_DEFAULT) {
+		rc = github_path_normalise(ctx, path, &norm_path);
+		if (rc < 0)
+			return rc;
+
+		p = &norm_path;
+	}
 
 	/* This is kind of a hack, but it works!
 	 * Yes, even a few months later I agree that this is a hack. */
 	snprintf(refname, sizeof refname, "refs%%2Fpull%%2F%"PRIid"%%2Fhead",
-	         path->data.as_default.id);
+	         p->as_default.id);
 
-	return github_get_checks(ctx, path, refname, -1, (struct github_check_list *)out);
+	rc = github_get_checks(ctx, p, refname, -1, (struct github_check_list *)out);
+
+	/* clean up normalised path if it has been normalised */
+	if (p == &norm_path) {
+		gcli_path_free(&norm_path);
+		p = NULL;
+	}
+
+	return rc;
 }
 
 int

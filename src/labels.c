@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -63,8 +63,36 @@ gcli_create_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
 }
 
 int
-gcli_delete_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
-                  char const *const label)
+gcli_delete_label(struct gcli_ctx *ctx, struct gcli_path const *const path)
 {
-	gcli_null_check_call(delete_label, ctx, path, label);
+	gcli_null_check_call(delete_label, ctx, path);
+}
+
+int
+gcli_get_label(struct gcli_ctx *ctx, struct gcli_path const *path,
+               struct gcli_label *out)
+{
+	gcli_null_check_call(get_label, ctx, path, out);
+}
+
+int
+gcli_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                     char const *const new_name)
+{
+	gcli_null_check_call(label_set_title, ctx, path, new_name);
+}
+
+int
+gcli_label_set_description(struct gcli_ctx *ctx,
+                           struct gcli_path const *const path,
+                           char const *const new_description)
+{
+	gcli_null_check_call(label_set_description, ctx, path, new_description);
+}
+
+int
+gcli_label_set_colour(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                      uint32_t const colour)
+{
+	gcli_null_check_call(label_set_colour, ctx, path, colour);
 }

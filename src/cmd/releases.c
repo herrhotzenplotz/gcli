@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -199,7 +199,9 @@ releasemsg_init(struct gcli_ctx *ctx, FILE *f, void *_data)
 		"! appear in the final release note.\n"
 		"!       IN : %s/%s\n"
 		"! TAG NAME : %s\n"
-		"!     NAME : %s\n",
+		"!     NAME : %s\n"
+		"!\n"
+		"! vim: ft=markdown\n",
 		info->owner, info->repo, info->tag, info->name);
 }
 
@@ -355,10 +357,10 @@ subcommand_releases_delete(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "yo:r:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
-			repo_path.data.as_default.owner = optarg;
+			repo_path.as_default.owner = optarg;
 			break;
 		case 'r':
-			repo_path.data.as_default.repo = optarg;
+			repo_path.as_default.repo = optarg;
 			break;
 		case 'y':
 			always_yes = true;
@@ -446,10 +448,10 @@ subcommand_releases(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "sn:o:r:l", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
-			repo_path.data.as_default.owner = optarg;
+			repo_path.as_default.owner = optarg;
 			break;
 		case 'r':
-			repo_path.data.as_default.repo = optarg;
+			repo_path.as_default.repo = optarg;
 			break;
 		case 'n': {
 			char *endptr = NULL;

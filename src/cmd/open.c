@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,35 +27,47 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GITEA_LABELS_H
-#define GITEA_LABELS_H
+#include <gcli/cmd/open.h>
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include <gcli/cmd/cmd.h>
+#include <gcli/cmd/cmdconfig.h>
 
-#include <gcli/labels.h>
-#include <gcli/path.h>
+#include <gcli/waitproc.h>
 
-int gitea_get_label(struct gcli_ctx *ctx, struct gcli_path const *path,
-                    struct gcli_label *out);
+#include <sn/sn.h>
 
-int gitea_get_labels(struct gcli_ctx *ctx, struct gcli_path const *path,
-                     int max, struct gcli_label_list *out);
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-int gitea_create_label(struct gcli_ctx *ctx, struct gcli_path const *path,
-                       struct gcli_label *label);
+int
+gcli_cmd_open_url(char const *const url)
+{
+	pid_t p;
+	int rc = 0;
+	char *open_program = NULL;
 
-int gitea_delete_label(struct gcli_ctx *ctx, struct gcli_path const *repo_path);
+	if (!url) {
+		fprintf(stderr, "gcli: error: got no url from forge\n");
+		return -1;
+	}
 
-int gitea_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *path,
-                          char const *new_name);
+	p = fork();
+	if (p < 0)
+		err(1, "fork");
 
-int gitea_label_set_description(struct gcli_ctx *ctx,
-                                struct gcli_path const *const path,
-                                char const *const description);
+	/* wait for the child */
+	if (p != 0)
+		return gcli_wait_proc_ok(g_clictx, p);
 
-int gitea_label_set_colour(struct gcli_ctx *ctx, struct gcli_path const *path,
-                           uint32_t colour);
+	/* look for an open-program */
+	open_program = gcli_config_get_url_open_program(g_clictx);
+	if (open_program == NULL)
+		open_program = "xdg-open";
 
-#endif /* GITEA_LABELS_H */
+        rc = execlp(open_program, open_program, url, NULL);
+	if (rc < 0)
+		exit(EXIT_FAILURE);
+
+	abort();
+}

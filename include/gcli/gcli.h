@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -56,6 +56,9 @@ typedef uint64_t gcli_id;
 
 #ifdef IN_LIBGCLI
 #include <gcli/ctx.h>
+
+void gcli_clear_ptr(void *ptr);
+
 #endif /* IN_LIBGCLI */
 
 struct gcli_ctx;

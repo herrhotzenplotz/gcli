@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -84,18 +84,18 @@ github_issue_make_url(struct gcli_ctx *const ctx,
 	case GCLI_PATH_DEFAULT: {
 		char *e_owner, *e_repo;
 
-		e_owner = gcli_urlencode(path->data.as_default.owner);
-		e_repo = gcli_urlencode(path->data.as_default.repo);
+		e_owner = gcli_urlencode(path->as_default.owner);
+		e_repo = gcli_urlencode(path->as_default.repo);
 
 		*url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid"%s",
 		                   gcli_get_apibase(ctx), e_owner, e_repo,
-		                   path->data.as_default.id, suffix);
+		                   path->as_default.id, suffix);
 
 		free(e_owner);
 		free(e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->data.as_url, suffix);
+		*url = sn_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path kind");
@@ -193,8 +193,8 @@ search_issues(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		label = sn_asprintf("label:%s", details->label);
 
 	query_string = sn_asprintf("repo:%s/%s is:issue%s %s %s %s %s",
-	                           path->data.as_default.owner,
-	                           path->data.as_default.repo,
+	                           path->as_default.owner,
+	                           path->as_default.repo,
 	                           details->all ? "" : " is:open",
 	                           milestone ? milestone : "", author ? author : "",
 	                           label ? label : "", details->search_term);
@@ -237,8 +237,8 @@ github_issues_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	case GCLI_PATH_DEFAULT: {
 		char *e_owner, *e_repo;
 
-		e_owner = gcli_urlencode(path->data.as_default.owner);
-		e_repo = gcli_urlencode(path->data.as_default.repo);
+		e_owner = gcli_urlencode(path->as_default.owner);
+		e_repo = gcli_urlencode(path->as_default.repo);
 		*out = sn_asprintf("%s/repos/%s/%s/issues%s",
 		                   gcli_get_apibase(ctx),
 		                   e_owner, e_repo, suffix);
@@ -246,7 +246,7 @@ github_issues_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		free(e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*out = sn_asprintf("%s%s", path->data.as_url, suffix);
+		*out = sn_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path kind for issue list");
@@ -612,6 +612,39 @@ github_issue_set_title(struct gcli_ctx *ctx,
 	{
 		gcli_jsongen_objmember(&gen, "title");
 		gcli_jsongen_string(&gen, new_title);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
+
+	free(payload);
+	free(url);
+
+	return rc;
+}
+
+int
+github_issue_set_op(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                    char const *const new_op)
+{
+	char *url, *payload;
+	struct gcli_jsongen gen = {0};
+	int rc;
+
+	/* Generate url */
+	rc = github_issue_make_url(ctx, path, &url, "");
+	if (rc < 0)
+		return rc;
+
+	/* Generate payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "body");
+		gcli_jsongen_string(&gen, new_op);
 	}
 	gcli_jsongen_end_object(&gen);
 

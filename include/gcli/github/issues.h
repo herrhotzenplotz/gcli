@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -81,5 +81,9 @@ int github_issue_clear_milestone(struct gcli_ctx *ctx,
 int github_issue_set_title(struct gcli_ctx *ctx,
                            struct gcli_path const *const issue_path,
                            char const *const new_title);
+
+int github_issue_set_op(struct gcli_ctx *ctx,
+                        struct gcli_path const *const path,
+                        char const *const new_op);
 
 #endif /* GCLI_ISSUES_H */

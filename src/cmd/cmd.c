@@ -62,7 +62,7 @@ copyright(void)
 {
 	fprintf(
 		stderr,
-		"Copyright 2021, 2022, 2023 Nico Sonack <nsonack@herrhotzenplotz.de>"
+		"Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>"
 		" and contributors.\n");
 }
 
@@ -113,9 +113,50 @@ check_owner_and_repo(const char **owner, const char **repo)
 void
 check_path(struct gcli_path *path)
 {
+	/* Two special cases for Bugzilla support:
+	 *
+	 * When no ID was specified with bugzilla we only have a combination of
+	 * product/component. in this case we force the path kind to BUGZILLA.
+	 *
+	 * The other case is a (possibly) missing product and component but an
+	 * ID was set. In this case we change the path kind to GCLI_PATH_ID.
+	 * We don't ignore product/component because that would be incorrect
+	 * and/or leak memory.
+	 *
+	 * For reasons of human error the juggling below is done such that if
+	 * someone by accident breaks the ABI of gcli_path this doesn't fall
+	 * apart. */
+	if (gcli_config_get_forge_type(g_clictx) == GCLI_FORGE_BUGZILLA &&
+	    path->kind == GCLI_PATH_DEFAULT) {
+
+		/* first case */
+		if (path->as_default.id == 0) {
+			char *const product = path->as_default.owner;
+			char *const component = path->as_default.repo;
+
+			path->kind = GCLI_PATH_BUGZILLA;
+			path->as_bugzilla.product = product;
+			path->as_bugzilla.component = component;
+
+			return; /* no more checking required */
+		}
+
+		/* second case */
+		if (path->as_default.id != 0
+		    && path->as_default.owner == NULL
+		    && path->as_default.repo == NULL)
+		{
+			 gcli_id const id = path->as_default.id;
+			 path->kind = GCLI_PATH_ID;
+			 path->as_id = id;
+
+			 return;
+		}
+	}
+
 	check_owner_and_repo(
-		(char const **)&path->data.as_default.owner,
-		(char const **)&path->data.as_default.repo);
+		(char const **)&path->as_default.owner,
+		(char const **)&path->as_default.repo);
 }
 
 /* Parses (and updates) the given argument list into two seperate lists:
@@ -132,24 +173,26 @@ parse_labels_options(int *argc, char ***argv,
 	size_t       add_labels_size = 0, remove_labels_size = 0;
 
 	/* Collect add/delete labels */
-	while (*argc > 0) {
-		if (strcmp(**argv, "add") == 0) {
-			shift(argc, argv);
+	while (*argc >= 3) {
+		char const *const action = (*argv)[1];
+		char const *const name = (*argv)[2];
 
+		if (strcmp(action, "add") == 0) {
 			add_labels = realloc(
 				add_labels,
 				(add_labels_size + 1) * sizeof(*add_labels));
-			add_labels[add_labels_size++] = shift(argc, argv);
-		} else if (strcmp(**argv, "remove") == 0) {
-			shift(argc, argv);
-
+			add_labels[add_labels_size++] = name;
+		} else if (strcmp(action, "remove") == 0) {
 			remove_labels = realloc(
 				remove_labels,
 				(remove_labels_size + 1) * sizeof(*remove_labels));
-			remove_labels[remove_labels_size++] = shift(argc, argv);
+			remove_labels[remove_labels_size++] = name;
 		} else {
 			break;
 		}
+
+		*argc -= 2;
+		*argv += 2;
 	}
 
 	*_add_labels      = add_labels;

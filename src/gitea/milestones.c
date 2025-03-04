@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -59,18 +59,18 @@ gitea_milestone_make_url(struct gcli_ctx *ctx,
 	case GCLI_PATH_DEFAULT: {
 		char *e_owner, *e_repo;
 
-		e_owner = gcli_urlencode(path->data.as_default.owner);
-		e_repo = gcli_urlencode(path->data.as_default.repo);
+		e_owner = gcli_urlencode(path->as_default.owner);
+		e_repo = gcli_urlencode(path->as_default.repo);
 
 		*url = sn_asprintf("%s/repos/%s/%s/milestones/%"PRIid"%s",
 		                   gcli_get_apibase(ctx), e_owner, e_repo,
-		                   path->data.as_default.id, suffix);
+		                   path->as_default.id, suffix);
 
 		free(e_owner);
 		free(e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->data.as_url, suffix);
+		*url = sn_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path kind for milestones");
@@ -151,7 +151,7 @@ gitea_milestone_get_issues(struct gcli_ctx *ctx,
 
 	rc = gitea_repo_make_url(ctx, path, &url,
 	                         "/issues?state=all&milestones=%"PRIid,
-	                         path->data.as_default.id);
+	                         path->as_default.id);
 	if (rc < 0)
 		return rc;
 

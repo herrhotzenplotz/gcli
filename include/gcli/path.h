@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2024-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,6 +40,7 @@ struct gcli_path {
 		GCLI_PATH_BUGZILLA,
 		GCLI_PATH_ID,
 		GCLI_PATH_PID_ID,
+		GCLI_PATH_NAMED, /* owner, repo, string-id, required for Github labels */
 	} kind;
 
 	union {
@@ -61,7 +62,13 @@ struct gcli_path {
 
 		gcli_id as_id;
 		char *as_url;
-	} data;
+
+		struct {
+			char *owner;
+			char *repo;
+			char *id;
+		} as_named;
+	};
 };
 
 void gcli_path_free(struct gcli_path *);

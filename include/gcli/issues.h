@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -64,6 +64,7 @@ struct gcli_issue {
 	/* workaround for GitHub where PRs are also issues */
 	int is_pr;
 	char *milestone;
+	char *web_url;
 };
 
 struct gcli_submit_issue_options {
@@ -130,5 +131,8 @@ int gcli_issue_set_title(struct gcli_ctx *ctx,
 int gcli_issue_get_attachments(struct gcli_ctx *ctx,
                                struct gcli_path const *const path,
                                struct gcli_attachment_list *attachments);
+
+int gcli_issue_set_op(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                      char const *new_op);
 
 #endif /* ISSUES_H */

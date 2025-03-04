@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -43,6 +43,7 @@ gcli_issue_free(struct gcli_issue *const it)
 	free(it->body);
 	free(it->url);
 	free(it->title);
+	free(it->web_url);
 
 	for (size_t i = 0; i < it->labels_size; ++i)
 		free(it->labels[i]);
@@ -158,4 +159,12 @@ gcli_issue_get_attachments(struct gcli_ctx *ctx,
                            struct gcli_attachment_list *out)
 {
 	gcli_null_check_call(get_issue_attachments, ctx, issue_path, out);
+}
+
+int
+gcli_issue_set_op(struct gcli_ctx *ctx,
+                  struct gcli_path const *const issue_path,
+                  char const *new_op)
+{
+	gcli_null_check_call(issue_set_op, ctx, issue_path, new_op);
 }

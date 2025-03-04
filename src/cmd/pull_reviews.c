@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -130,10 +130,10 @@ make_review_diff_file_name(struct gcli_path const *const path)
 
 	assert(path->kind == GCLI_PATH_DEFAULT);
 
-	hash ^= djb2((unsigned char const *)path->data.as_default.owner);
-	hash ^= djb2((unsigned char const *)path->data.as_default.repo);
+	hash ^= djb2((unsigned char const *)path->as_default.owner);
+	hash ^= djb2((unsigned char const *)path->as_default.repo);
 
-	return sn_asprintf("%lx_%lu.diff", hash, path->data.as_default.id);
+	return sn_asprintf("%lx_%"PRIid".diff", hash, path->as_default.id);
 }
 
 static char *

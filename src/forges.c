@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -75,6 +75,7 @@
 #include <gcli/bugzilla/api.h>
 #include <gcli/bugzilla/attachments.h>
 #include <gcli/bugzilla/bugs.h>
+#include <gcli/bugzilla/comment.h>
 #include <gcli/bugzilla/config.h>
 
 static struct gcli_forge_descriptor const
@@ -101,6 +102,7 @@ github_forge_descriptor =
 	.issue_reopen              = github_issue_reopen,
 	.issue_set_milestone       = github_issue_set_milestone,
 	.issue_set_title           = github_issue_set_title,
+	.issue_set_op              = github_issue_set_op,
 	.perform_submit_issue      = github_perform_submit_issue,
 	.issue_quirks              = GCLI_ISSUE_QUIRKS_PROD_COMP
 	                           | GCLI_ISSUE_QUIRKS_URL,
@@ -146,6 +148,10 @@ github_forge_descriptor =
 	.create_label              = github_create_label,
 	.delete_label              = github_delete_label,
 	.get_labels                = github_get_labels,
+	.get_label                 = github_get_label,
+	.label_set_title           = github_label_set_title,
+	.label_set_description     = github_label_set_description,
+	.label_set_colour          = github_label_set_colour,
 
 	/* Repos */
 	.get_repos                 = github_get_repos,
@@ -199,6 +205,7 @@ gitlab_forge_descriptor =
 	.issue_reopen              = gitlab_issue_reopen,
 	.issue_set_milestone       = gitlab_issue_set_milestone,
 	.issue_set_title           = gitlab_issue_set_title,
+	.issue_set_op              = gitlab_issue_set_op,
 	.perform_submit_issue      = gitlab_perform_submit_issue,
 	.issue_quirks              = GCLI_ISSUE_QUIRKS_PROD_COMP
 	                           | GCLI_ISSUE_QUIRKS_URL,
@@ -240,6 +247,10 @@ gitlab_forge_descriptor =
 	.create_label              = gitlab_create_label,
 	.delete_label              = gitlab_delete_label,
 	.get_labels                = gitlab_get_labels,
+	.get_label                 = gitlab_get_label,
+	.label_set_title           = gitlab_label_set_title,
+	.label_set_description     = gitlab_label_set_description,
+	.label_set_colour          = gitlab_label_set_colour,
 
 	/* Repos */
 	.get_repos                 = gitlab_get_repos,
@@ -293,6 +304,7 @@ gitea_forge_descriptor =
 	.issue_reopen              = gitea_issue_reopen,
 	.issue_set_milestone       = gitea_issue_set_milestone,
 	.issue_set_title           = gitea_issue_set_title,
+	.issue_set_op              = gitea_issue_set_op,
 	.perform_submit_issue      = gitea_submit_issue,
 	.issue_quirks              = GCLI_ISSUE_QUIRKS_PROD_COMP
 	                           | GCLI_ISSUE_QUIRKS_URL,
@@ -332,6 +344,10 @@ gitea_forge_descriptor =
 	.create_label              = gitea_create_label,
 	.delete_label              = gitea_delete_label,
 	.get_labels                = gitea_get_labels,
+	.get_label                 = gitea_get_label,
+	.label_set_title           = gitea_label_set_title,
+	.label_set_description     = gitea_label_set_description,
+	.label_set_colour          = gitea_label_set_colour,
 
 	/* Repos */
 	.get_repos                 = gitea_get_repos,
@@ -376,6 +392,8 @@ bugzilla_forge_descriptor =
 	.perform_submit_issue      = bugzilla_bug_submit,
 	.issue_quirks              = GCLI_ISSUE_QUIRKS_COMMENTS
 	                           | GCLI_ISSUE_QUIRKS_LOCKED,
+
+	.perform_submit_comment    = bugzilla_submit_comment,
 
 	.attachment_get_content    = bugzilla_attachment_get_content,
 

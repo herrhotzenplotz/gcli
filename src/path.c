@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,35 +27,36 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GITEA_LABELS_H
-#define GITEA_LABELS_H
-
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <gcli/labels.h>
 #include <gcli/path.h>
 
-int gitea_get_label(struct gcli_ctx *ctx, struct gcli_path const *path,
-                    struct gcli_label *out);
+#include <assert.h>
+#include <stdlib.h>
 
-int gitea_get_labels(struct gcli_ctx *ctx, struct gcli_path const *path,
-                     int max, struct gcli_label_list *out);
+void
+gcli_path_free(struct gcli_path *const path)
+{
+	switch (path->kind) {
+	case GCLI_PATH_DEFAULT:
+		gcli_clear_ptr(&path->as_default.owner);
+		gcli_clear_ptr(&path->as_default.repo);
+		break;
 
-int gitea_create_label(struct gcli_ctx *ctx, struct gcli_path const *path,
-                       struct gcli_label *label);
+	case GCLI_PATH_URL:
+		gcli_clear_ptr(&path->as_url);
+		break;
 
-int gitea_delete_label(struct gcli_ctx *ctx, struct gcli_path const *repo_path);
+	case GCLI_PATH_BUGZILLA:
+		gcli_clear_ptr(&path->as_bugzilla.product);
+		gcli_clear_ptr(&path->as_bugzilla.component);
+		break;
 
-int gitea_label_set_title(struct gcli_ctx *ctx, struct gcli_path const *path,
-                          char const *new_name);
+	case GCLI_PATH_ID:
+		break;
 
-int gitea_label_set_description(struct gcli_ctx *ctx,
-                                struct gcli_path const *const path,
-                                char const *const description);
+	case GCLI_PATH_PID_ID:
+		break;
 
-int gitea_label_set_colour(struct gcli_ctx *ctx, struct gcli_path const *path,
-                           uint32_t colour);
-
-#endif /* GITEA_LABELS_H */
+	default:
+		assert(0 && "unreachable");
+	}
+}

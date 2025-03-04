@@ -27,68 +27,61 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/gcli.h>
-#include <gcli/path.h>
-#include <gcli/waitproc.h>
+#include <gcli/bugzilla/comment.h>
 
-#include <sn/sn.h>
-
-#include <stdlib.h>
-#include <unistd.h>
+#include <gcli/curl.h>
+#include <gcli/json_gen.h>
 
 int
-github_pull_checkout(struct gcli_ctx *ctx, char const *const remote,
-                     struct gcli_path const *const path)
+bugzilla_submit_comment(struct gcli_ctx *ctx,
+                        struct gcli_submit_comment_opts const *const opts)
 {
-	/* FIXME: this is more than not ideal! */
-	char *remote_ref, *local_ref, *refspec;
-	int rc;
-	pid_t pid;
-	gcli_id pr_id;
+	char *url = NULL, *payload = NULL, *token = NULL;
+	int rc = 0;
+	struct gcli_jsongen gen = {0};
+	struct gcli_path const *const tgt = &opts->target;
 
-	if (path->kind != GCLI_PATH_DEFAULT)
-		return gcli_error(ctx, "unsupported path kind for checkout");
-
-	pr_id = path->as_default.id;
-
-	remote_ref = sn_asprintf("refs/pull/%"PRIid"/head", pr_id);
-	local_ref = sn_asprintf("github/pr/%"PRIid, pr_id);
-	refspec = sn_asprintf("%s:%s", remote_ref, local_ref);
-
-	pid = fork();
-	if (pid < 0)
-		return gcli_error(ctx, "could not fork");
-
-	if (pid == 0) {
-		rc = execlp("git", "git", "fetch", remote, refspec, NULL);
-		if (rc < 0)
-			exit(EXIT_FAILURE);
-
-		/* NOTREACHED */
+	if (tgt->kind != GCLI_PATH_ID) {
+		return gcli_error(
+			ctx,
+			"bad path kind for submitting Bugzilla comment"
+		);
 	}
 
-	rc = gcli_wait_proc_ok(ctx, pid);
-	if (rc < 0)
-		return rc;
+	/* grab a valid API token */
+	token = gcli_get_token(ctx);
+	if (!token)
+		return gcli_error(ctx, "creating comments on bugzilla requires a token");
 
-	free(remote_ref); remote_ref = NULL;
-	free(refspec); refspec = NULL;
+	/* construct URL */
+	url = sn_asprintf("%s/rest/bug/%"PRIid"/comment",
+	                  gcli_get_apibase(ctx), tgt->as_id);
 
-	pid = fork();
-	if (pid < 0)
-		return gcli_error(ctx, "could not fork");
+	/* construct payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "comment");
+		gcli_jsongen_string(&gen, opts->message);
 
-	if (pid == 0) {
-		rc = execlp("git", "git", "checkout", "--track", local_ref, NULL);
-		if (rc < 0)
-			exit(EXIT_FAILURE);
+		gcli_jsongen_objmember(&gen, "is_private");
+		gcli_jsongen_bool(&gen, false);
 
-		/* NOTREACHED */
+		gcli_jsongen_objmember(&gen, "api_key");
+		gcli_jsongen_string(&gen, token);
 	}
+	gcli_jsongen_end_object(&gen);
 
-	rc = gcli_wait_proc_ok(ctx, pid);
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
 
-	free(local_ref); local_ref = NULL;
+	/* perform request */
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
+
+	/* cleanup */
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&token);
 
 	return rc;
 }

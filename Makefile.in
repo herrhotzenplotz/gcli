@@ -53,6 +53,12 @@ CFLAGS=			$(CSTDFLAGS) $(COPTFLAGS) $(CFLAGS_$(CCOM)) -I@SRCDIR@/include -I@SRCD
 ENV_CFLAGS_FOR_BUILD=	@ENV_CFLAGS_FOR_BUILD@
 CFLAGS_FOR_BUILD=	$(CSTDFLAGS_FOR_BUILD) $(COPTFLAGS_FOR_BUILD) $(CFLAGS_$(CCOM)) -I@SRCDIR@/include -I@SRCDIR@/thirdparty -I. $(ENV_CFLAGS_FOR_BUILD)
 
+############## LDFLAGS  ######################
+ENV_LDFLAGS=		@ENV_LDFLAGS@
+LDFLAGS=		$(ENV_LDFLAGS)
+ENV_LDFLAGS_FOR_BUILD=	@ENV_LDFLAGS_FOR_BUILD@
+LDFLAGS_FOR_BUILD=	$(ENV_LDFLAGS_FOR_BUILD)
+
 ############## CPPFLAGS ######################
 ENV_CPPFLAGS=		@ENV_CPPFLAGS@
 CPPFLAGS=		-DHAVE_CONFIG_H=1 -DHAVE_SYS_QUEUE_H=1 -DHAVE_GETOPT_H=1 $(ENV_CPPFLAGS)
@@ -68,6 +74,11 @@ CCDEPFLAGS_sunstudio=	-xMD -xMF ${@:.o=.d}
 CCDEPFLAGS_unknown=
 CCDEPFLAGS=		$(CCDEPFLAGS_$(CCOM))
 CCDEPFLAGS_FOR_BUILD=	$(CCDEPFLAGS_$(CCOM_FOR_BUILD))
+
+########## Static Analysis Flags #############################
+CANALFLAGS_clang=	--analyze -Werror
+CANALFLAGS_gcc=		-fanalyzer -c -o /dev/null
+CANALFLAGS=		$(CANALFLAGS_$(CCOM))
 
 LIBCURL_CFLAGS=		@LIBCURL_CFLAGS@
 LIBCURL_LIBS=		@LIBCURL_LIBS@
@@ -110,7 +121,7 @@ LIBLOWDOWN_CPPFLAGS=	$(LIBLOWDOWN_CPPFLAGS_$(LIBLOWDOWN_FOUND))
 LIBCRYPTO_CFLAGS=	@LIBCRYPTO_CFLAGS@
 LIBCRYPTO_LIBS=		@LIBCRYPTO_LIBS@
 
-.PHONY: all all-auto clean clean-auto check check-auto install install-auto
+.PHONY: all all-auto clean clean-auto check check-auto install install-auto analyse analyse-auto
 all: Makefile
 	@$(MAKE) all-auto
 
@@ -123,6 +134,9 @@ check: Makefile
 install: Makefile
 	@$(MAKE) install-auto
 
+analyse: Makefile
+	@$(MAKE) analyse-auto
+
 all-auto: gcli manpages
 
 LIBGCLI_SRCS = \
@@ -130,6 +144,7 @@ LIBGCLI_SRCS = \
 	src/bugzilla/attachments.c \
 	src/bugzilla/bugs-parser.c \
 	src/bugzilla/bugs.c \
+	src/bugzilla/comment.c \
 	src/bugzilla/config.c \
 	src/gitea/comments.c \
 	src/gitea/config.c \
@@ -152,6 +167,7 @@ LIBGCLI_SRCS = \
 	src/github/issues.c \
 	src/github/labels.c \
 	src/github/milestones.c \
+	src/github/path.c \
 	src/github/pulls.c \
 	src/github/releases.c \
 	src/github/repos.c \
@@ -188,6 +204,7 @@ LIBGCLI_SRCS = \
 	src/labels.c \
 	src/milestones.c \
 	src/nvlist.c \
+	src/path.c \
 	src/pulls.c \
 	src/releases.c \
 	src/repos.c \
@@ -198,6 +215,7 @@ LIBGCLI_SRCS = \
 	thirdparty/sn/sn.c
 
 GCLI_SRCS= \
+	src/cmd/actions.c \
 	src/cmd/api.c \
 	src/cmd/attachments.c \
 	src/cmd/ci.c \
@@ -215,9 +233,10 @@ GCLI_SRCS= \
 	src/cmd/issues.c \
 	src/cmd/labels.c \
 	src/cmd/milestones.c \
+	src/cmd/open.c \
 	src/cmd/pipelines.c \
-	src/cmd/pulls.c \
 	src/cmd/pull_reviews.c \
+	src/cmd/pulls.c \
 	src/cmd/releases.c \
 	src/cmd/repos.c \
 	src/cmd/snippets.c \
@@ -272,6 +291,7 @@ Makefile: @SRCDIR@/configure @SRCDIR@/Makefile.in
 	env CC="${CC}" YACC="${YACC}" LEX="${LEX}" RM="${RM}" RANLIB="${RANLIB}" \
 		KYUA="${KYUA}" SHELL="${SHELL}" CFLAGS="${ENV_CFLAGS}" CPPFLAGS="${ENV_CPPFLAGS}" \
 		INSTALL="${INSTALL}" CC_FOR_BUILD="${CC_FOR_BUILD}" \
+		LDFLAGS="${ENV_LDFLAGS}" LDFLAGS_FOR_BUILD="${LDFLAGS_FOR_BUILD}" \
 		CFLAGS_FOR_BUILD="${ENV_CFLAGS_FOR_BUILD}" CPPFLAGS_FOR_BUILD="${ENV_CPPFLAGS_FOR_BUILD}" \
 		PKG_CONFIG="${ENV_PKG_CONFIG}" PKG_CONFIG_PATH="${ENV_PKG_CONFIG_PATH}" CCACHE="${CCACHE}" \
 		sh @SRCDIR@/configure @CONFIGURE_CMD_ARGS@
@@ -285,7 +305,8 @@ DEPS=	${LIBGCLI_OBJS:.o=.d} ${GCLI_OBJS:.o=.d} ${PGEN_OBJS:.o=.d}
 -include $(DEPS)
 
 pgen: $(PGEN_OBJS)
-	$(CCACHE) $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) -o pgen $(PGEN_OBJS)
+	$(CCACHE) $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) \
+		$(LDFLAGS_FOR_BUILD) -o pgen $(PGEN_OBJS)
 
 y.tab.c y.tab.h: @SRCDIR@/src/pgen/parser.y
 	$(YACC) -d @SRCDIR@/src/pgen/parser.y
@@ -388,6 +409,33 @@ $(TEST_PROGRAMS:=.c): $(TEMPLATE_HEADERS)
 check-auto: $(TEST_PROGRAMS)
 	$(KYUA) test --build-root ./tests --kyuafile @SRCDIR@/tests/Kyuafile
 
+#################### static analysis #######################################
+LIBGCLI_ANALYSE=	${LIBGCLI_SRCS:.c=.libgcli.analyse}
+GCLI_ANALYSE=		${GCLI_SRCS:.c=.gcli.analyse}
+ANALYSE_TARGETS=	$(LIBGCLI_ANALYSE) $(GCLI_ANALYSE)
+
+analyse-auto: $(ANALYSE_TARGETS)
+
+$(ANALYSE_TARGETS): $(TEMPLATE_HEADERS)
+
+.SUFFIXES: .c .libgcli.analyse .gcli.analyse
+.c.libgcli.analyse:
+	@mkdir -p $$(dirname $@)
+	$(CC) $(CFLAGS) $(CPPFLAGS) \
+		$(LIBCURL_CFLAGS) $(LIBCRYPTO_CFLAGS) \
+		$(LIBLOWDOWN_CFLAGS) $(LIBLOWDOWN_CPPFLAGS) \
+		-DIN_LIBGCLI=1 $(CANALFLAGS) $<
+
+.c.gcli.analyse:
+	@mkdir -p $$(dirname $@)
+	$(CC) $(CFLAGS) $(CPPFLAGS) \
+		$(LIBEDIT_CPPFLAGS) $(LIBREADLINE_CPPFLAGS) \
+		$(LIBCURL_CFLAGS) $(LIBEDIT_CFLAGS) \
+		$(LIBREADLINE_CFLAGS) $(LIBCRYPTO_CFLAGS) \
+		$(LIBLOWDOWN_CFLAGS) $(LIBLOWDOWN_CPPFLAGS) \
+		$(CANALFLAGS) $<
+
+
 #################### install target ########################################
 MANPAGES= \
 	docs/gcli-api.1 \
@@ -457,3 +505,15 @@ install-auto: manpages gcli
 			;;                                        \
 		esac                                              \
 	done
+
+###############################################################
+# Distcheck target
+distcheck: Makefile @SRCDIR@/configure
+	@$(MAKE) distcheck-auto
+
+distcheck-auto:
+	(cd @SRCDIR@ && @SRCDIR@/tools/gentarball.sh)
+	mkdir -p dist/.build-gcli-$(GCLI_VERSION)
+	(cd dist && tar -x -f @SRCDIR@/dist/gcli-$(GCLI_VERSION)/gcli-$(GCLI_VERSION).tar.gz && chmod -R a-w gcli-$(GCLI_VERSION))
+	(cd dist/.build-gcli-$(GCLI_VERSION) && ../gcli-$(GCLI_VERSION)/configure && $(MAKE) && $(MAKE) check)
+	(chmod -R a+w dist/gcli-$(GCLI_VERSION) && rm -fr dist/.build-gcli-$(GCLI_VERSION) dist/gcli-$(GCLI_VERSION))

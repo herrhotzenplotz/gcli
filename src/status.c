@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,11 +40,12 @@ gcli_get_notifications(struct gcli_ctx *ctx, int const max,
 void
 gcli_free_notification(struct gcli_notification *const notification)
 {
-	free(notification->id);
-	free(notification->title);
-	free(notification->reason);
-	free(notification->date);
-	free(notification->repository);
+	gcli_clear_ptr(&notification->id);
+	gcli_clear_ptr(&notification->title);
+	gcli_clear_ptr(&notification->reason);
+	gcli_clear_ptr(&notification->date);
+	gcli_clear_ptr(&notification->repository);
+	gcli_path_free(&notification->target);
 }
 
 void

@@ -51,7 +51,7 @@
 struct gcli_config_section {
 	TAILQ_ENTRY(gcli_config_section) next;
 
-    struct gcli_config_entries entries;
+	struct gcli_config_entries entries;
 
 	sn_sv title;
 };
@@ -711,6 +711,16 @@ gcli_config_get_pager(struct gcli_ctx *ctx)
 	ensure_config(ctx);
 
 	return sn_sv_to_cstr(gcli_config_find_by_key(ctx, "defaults", "pager"));
+}
+
+char *
+gcli_config_get_url_open_program(struct gcli_ctx *ctx)
+{
+	ensure_config(ctx);
+
+	return sn_sv_to_cstr(
+		gcli_config_find_by_key(ctx, "defaults", "url-open-program")
+	);
 }
 
 static char const *const

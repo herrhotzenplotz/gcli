@@ -8,7 +8,8 @@ object of struct gitlab_pipeline with
 	 "ref"        => ref as string,
 	 "sha"        => sha as string,
 	 "source"     => source as string,
-	 "id"         => id as id);
+	 "id"         => id as id,
+	 "web_url"    => web_url as string);
 
 parser gitlab_pipelines is
 array of struct gitlab_pipeline use parse_gitlab_pipeline;
@@ -30,7 +31,8 @@ object of struct gitlab_job with
 	 "runner"      => use parse_gitlab_job_runner,
 	 "duration"    => duration as double,
 	 "id"          => id as id,
-	 "coverage"    => coverage as double);
+	 "coverage"    => coverage as double,
+	 "web_url"     => web_url as string);
 
 parser gitlab_jobs is
 array of struct gitlab_job use parse_gitlab_job;

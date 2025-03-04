@@ -129,6 +129,12 @@ Change the title of the issue to
 .Ar new-title .
 .It Cm attachments
 List bug attachments. This action is only available on Bugzilla.
+.It Cm open
+Open the issue in a web browser using
+.Xr xdg-open 1 .
+.It Cm edit
+Open the original post in an editor for editing.
+After saving and exiting the editor the original post is updated when confirmed by the user.
 .El
 .Sh EXAMPLES
 Print a list of issues in the current project:

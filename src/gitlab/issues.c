@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -58,12 +58,12 @@ gitlab_issue_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	case GCLI_PATH_DEFAULT: {
 		char *e_owner, *e_repo;
 
-		e_owner = gcli_urlencode(path->data.as_default.owner);
-		e_repo = gcli_urlencode(path->data.as_default.repo);
+		e_owner = gcli_urlencode(path->as_default.owner);
+		e_repo = gcli_urlencode(path->as_default.repo);
 
 		*url = sn_asprintf("%s/projects/%s%%2F%s/issues/%"PRIid"%s",
 		                   gcli_get_apibase(ctx),
-		                   e_owner, e_repo, path->data.as_default.id,
+		                   e_owner, e_repo, path->as_default.id,
 		                   suffix);
 
 		free(e_owner);
@@ -72,12 +72,12 @@ gitlab_issue_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	case GCLI_PATH_PID_ID: {
 		*url = sn_asprintf("%s/projects/%"PRIid"/issues/%"PRIid"%s",
 		                   gcli_get_apibase(ctx),
-		                   path->data.as_pid_id.project_id,
-		                   path->data.as_pid_id.id,
+		                   path->as_pid_id.project_id,
+		                   path->as_pid_id.id,
 		                   suffix);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->data.as_url, suffix);
+		*url = sn_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path type for gitlab issue");
@@ -487,6 +487,39 @@ gitlab_issue_set_title(struct gcli_ctx *ctx,
 	{
 		gcli_jsongen_objmember(&gen, "title");
 		gcli_jsongen_string(&gen, new_title);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
+
+	free(url);
+	free(payload);
+
+	return rc;
+}
+
+int
+gitlab_issue_set_op(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                    char const *const new_op)
+{
+	char *url, *payload;
+	struct gcli_jsongen gen = {0};
+	int rc;
+
+	/* Generate url */
+	rc = gitlab_issue_make_url(ctx, path, &url, "");
+	if (rc < 0)
+		return rc;
+
+	/* Generate payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "description");
+		gcli_jsongen_string(&gen, new_op);
 	}
 	gcli_jsongen_end_object(&gen);
 

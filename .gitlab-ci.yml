@@ -6,10 +6,10 @@ alpine-amd64:
   stage: testing
   image: alpine:3.17
   script:
-    - apk add libcurl gcc make pkgconf musl-dev curl-dev flex bison libbsd-dev kyua atf-dev libedit-dev
+    - apk add libcurl gcc make pkgconf musl-dev curl-dev flex bison libbsd-dev kyua atf-dev libedit-dev git
     - ./configure --debug
     - make -j all
-    - make -j check
+    - make -j distcheck
 
 freebsd-arm64:
   stage: testing
@@ -19,7 +19,7 @@ freebsd-arm64:
   script:
     - ./configure --debug
     - make -j 4 all
-    - make -j 4 check
+    - make -j 4 distcheck
 
 dist:
   stage: dist
@@ -40,7 +40,7 @@ debian-amd64:
   image: debian:bookworm
   script:
     - apt-get update
-    - apt-get install -y --no-install-recommends build-essential libcurl4-openssl-dev pkgconf bison flex make libbsd-dev libatf-dev kyua libreadline-dev libssl-dev
+    - apt-get install -y --no-install-recommends build-essential libcurl4-openssl-dev pkgconf bison flex make libbsd-dev libatf-dev kyua libreadline-dev libssl-dev git
     - ./configure --debug
     - make -j all
-    - make -j check
+    - make -j distcheck

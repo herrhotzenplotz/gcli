@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -118,14 +118,16 @@ comment_init(struct gcli_ctx *ctx, FILE *f, void *_data)
 		f,
 		"! Enter your comment above, save and exit.\n"
 		"! All lines with a leading '!' are discarded and will not\n"
-		"! appear in your comment.\n");
+		"! appear in your comment.\n"
+		"!\n"
+		"! vim: ft=markdown\n");
 
 	/* XXX */
 	if (sctx->opts.target.kind == GCLI_PATH_DEFAULT) {
 		fprintf(f, "! COMMENT IN : %s/%s %s #%"PRIid"\n",
-		        sctx->opts.target.data.as_default.owner,
-		        sctx->opts.target.data.as_default.repo, target_type,
-		        sctx->opts.target.data.as_default.id);
+		        sctx->opts.target.as_default.owner,
+		        sctx->opts.target.as_default.repo, target_type,
+		        sctx->opts.target.as_default.id);
 	}
 }
 
@@ -259,10 +261,10 @@ subcommand_comment(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "yr:o:i:p:R:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'r':
-			sctx.opts.target.data.as_default.repo = optarg;
+			sctx.opts.target.as_default.repo = optarg;
 			break;
 		case 'o':
-			sctx.opts.target.data.as_default.owner = optarg;
+			sctx.opts.target.as_default.owner = optarg;
 			break;
 		case 'p':
 			sctx.opts.target_type = PR_COMMENT;
@@ -271,7 +273,7 @@ subcommand_comment(int argc, char *argv[])
 			sctx.opts.target_type = ISSUE_COMMENT;
 		parse_target_id: {
 				char *endptr;
-				sctx.opts.target.data.as_default.id = strtoul(optarg, &endptr, 10);
+				sctx.opts.target.as_default.id = strtoul(optarg, &endptr, 10);
 				if (endptr != optarg + strlen(optarg))
 					err(1, "gcli: error: Cannot parse issue/PR number");
 			} break;
@@ -295,7 +297,7 @@ subcommand_comment(int argc, char *argv[])
 
 	check_path(&sctx.opts.target);
 
-	if (!sctx.opts.target.data.as_default.id) {
+	if (!sctx.opts.target.as_default.id) {
 		fprintf(stderr, "gcli: error: missing issue/PR number (use -i/-p)\n");
 		usage();
 		return EXIT_FAILURE;

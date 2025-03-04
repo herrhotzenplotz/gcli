@@ -1,22 +1,15 @@
 # GCLI
 
-Portable CLI tool for interacting with Git(Hub|Lab|Tea) from the command line.
+Portable CLI tool for interacting with Git(Hub|Lab|Tea), Forgejo and Bugzilla from the command line.
 
 ![](docs/screenshot.png)
 
 ## Why?
 
-The official GitHub CLI tool only supports GitHub. I wanted a simple
-unified tool for various git forges such as GitHub and GitLab because
-every forge does things differently yet all build on Git and
-purposefully break with its philosophy.
-
-Also, the official tool from Github is written in Go, which does manual
-[DNS resolution](https://github.com/golang/go/blob/master/src/net/dnsclient_unix.go#L49)
-which is a massive security vulnerability for people using Tor as it
-leaks your IP to the DNS server. This program builds upon libcurl,
-which obeys the operating system's DNS resolution mechanisms and thus
-also works with Tor.
+The official GitHub CLI tool only supports GitHub.
+I wanted a simple unified tool for various git forges such as GitHub
+and GitLab because every forge does things differently yet all build
+on Git and purposefully break with its philosophy.
 
 ## Building
 
@@ -26,18 +19,11 @@ Recent tarballs can be downloaded here:
 
 [https://herrhotzenplotz.de/gcli/releases/](https://herrhotzenplotz.de/gcli/releases/)
 
-Please note that the tarballs provided by Github and Gitlab will not
-work without you having autoconf and automake installed. So please
-consider using the link above.
-
 There are official packages available:
 
-- [FreeBSD](https://freshports.org/devel/gcli)
-- [Debian Testing](https://packages.debian.org/trixie/gcli)
-- [ArchLinux AUR](https://aur.archlinux.org/packages/gcli)
-- [NixPkgs Unstable](https://search.nixos.org/packages?channel=unstable&show=gcli&from=0&size=50&sort=relevance&type=packages&query=gcli)
-- [NetBSD pkgsrc](https://pkgsrc.se/devel/gcli)
-- [MacPorts](https://ports.macports.org/port/gcli/)
+<a href="https://repology.org/project/gcli/versions">
+<img src="https://repology.org/badge/vertical-allrepos/gcli.svg" alt="Packaging status" align="right">
+</a>
 
 ### Dependencies
 
@@ -47,13 +33,20 @@ Required dependencies:
 - lex (flex is preferred)
 - C11 Compiler and linker
 - make
-- pkg-config
+- pkgconf or pkg-config
+
+Optional dependencies:
+
+- liblowdown
+- libedit
+- libreadline
 
 The test suite requires:
 - [Kyua](https://github.com/jmmv/kyua)
 - [ATF](https://github.com/jmmv/atf)
 
 ### Compile
+
 In order to perform a build, do:
 ```console
 $ ./configure [--prefix=/usr/local]
@@ -61,18 +54,19 @@ $ make
 # make [DESTDIR=/] install
 ```
 
-You may leave out `DESTDIR` and `--prefix=`. The above is the default
-value. The final installation destination is `$DESTDIR/$PREFIX/...`.
+You may leave out `DESTDIR` and `--prefix=`.
+The above is the default value.
+The final installation destination is `$DESTDIR/$PREFIX/...`.
 
-If you are unsure, consult the builtin configure help by running
-`./configure --help`.
+If you are unsure, consult the builtin configure help by running `./configure --help`.
 
 For more details also see [HACKING.md](HACKING.md).
 
 In case any of this does not work, please either report a bug, or
 submit a patch in case you managed to fix it.
 
-Tested Operating Systems so far:
+Incomplete list of tested operating systems:
+
 - FreeBSD 13.0-RELEASE amd64 and arm64
 - Solaris 10 and 11, sparc64
 - SunOS 5.11 i86pc (OmniOS)
@@ -89,18 +83,21 @@ Tested Operating Systems so far:
 - NetBSD 9.3 amd64, sparc64 and VAX
 
 Tested Compilers so far:
+
 - LLVM Clang (various versions)
 - GCC (various versions)
 - Oracle DeveloperStudio 12.6
 - IBM XL C/C++ V16.1.1 (Community Edition)
 
-## Support
+## Support / Community
 
-Please refer to the manual pages that come with gcli. You may want
-to start at `gcli(1)`. For further questions refer to the issues
-on Github and Gitlab or ask on IRC at #gcli on
-[Libera.Chat](https://libera.chat/). Alternatively you may also use
-the mailing list at
+Please refer to the manual pages that come with gcli.
+You may want to start at `gcli(1)`.
+For further questions refer to the issues on Github and Gitlab.
+
+Also, there's an IRC channel #gcli on [Libera.Chat](https://libera.chat/).
+
+Alternatively you may also use the mailing list at
 [https://lists.sr.ht/~herrhotzenplotz/gcli-discuss](https://lists.sr.ht/~herrhotzenplotz/gcli-discuss).
 
 ## Bugs and contributions
@@ -109,19 +106,14 @@ Please report bugs, issues and questions to
 [~herrhotzenplotz/gcli-discuss@lists.sr.ht](mailto:~herrhotzenplotz/gcli-discuss@lists.sr.ht)
 or on [GitLab](https://gitlab.com/herrhotzenplotz/gcli).
 
-You can also submit patches using git-send-email or Mercurial
-patchbomb to
+You can also submit patches using git-send-email or Mercurial patchbomb to
 [~herrhotzenplotz/gcli-devel@lists.sr.ht](mailto:~herrhotzenplotz/gcli-devl@lists.sr.ht).
 
 ## License
 
-BSD-2 CLAUSE (aka. FreeBSD License). Please see the LICENSE file
-attached.
+BSD-2 CLAUSE (aka. FreeBSD License). Please see the LICENSE file attached.
 
 ## Credits
 
 This program makes heavy use of both [libcurl](https://curl.haxx.se/)
 and [pdjson](https://github.com/skeeto/pdjson).
-
-herrhotzenplotz aka. Nico Sonack
-October 2021

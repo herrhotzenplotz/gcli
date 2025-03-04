@@ -2,6 +2,70 @@
 
 This changelog does not follow semantic versioning.
 
+## 2.7.0 (04-Mar-2025)
+
+### Added
+
+- A `open` action has been added to various subcommand actions.
+  This action allows you to open the item in a web browser.
+
+  The URL to open is passed to the configured program in
+  `url-open-program` in the global section. If this option
+  is not set it defaults to `xdg-open` which uses your default
+  browser.
+
+  This feature currently works for Github, Gitlab and Bugzilla.
+  I'm planning on implementing this for Gitea as well however some
+  considerations have to be taken into account first.
+
+  Requested by: Baptiste Daroussin <bapt@FreeBSD.org>
+
+- The interactive status prompt now has a command `done` that allows
+  you to mark a notification as done. When run on an action it will
+  return you to the list of notifications.
+
+- An `edit` action has been added to the issues subcommand.
+  This action allows you to edit the original post / body / message
+  of an issue, e.g. to update a TODO list checkmark.
+
+- Comment submission has been implemented for Bugzilla.
+
+### Fixed
+
+- Fixed a printf formatting bug on 32-bit platforms in review tool.
+
+  Submitted by: Artyom Sinyugin <writers@altlinux.org>
+
+- Fixed Bugzilla support
+
+  Bugzilla support was broken due to the path refactoring in 2.6.0.
+  This caused the backend to not properly recognise the options
+  passed to it. Compatibility has now been restored.
+
+  Reported by: Baptiste Daroussin <bapt@FreeBSD.org>
+
+- The interactive status command now properly handles comments and
+  CI checks for GitHub PR notifications.
+
+### Changed
+
+- The status subcommand provides an interactive mode for going through
+  notifications.
+  This mode has been changed to reuse the actions of their respective
+  subcommands. You can pass the same options as documented in the
+  manual pages to the notification items.
+  These features are available for issues and pull requests as of now.
+  This means that if you select an issue notification you get a prompt
+  for actions on the respective issue.
+
+- The labels subcommand now uses the action-style argument parser
+  to perform tasks on specific labels.
+  With this change a few new actions have been added for changing
+  the title, the colour or the description of a label.
+  Refer to the manual page `gcli-labels(1)` for more information.
+
+### Removed
+
 ## 2.6.1 (2025-Jan-19)
 
 ### Fixed

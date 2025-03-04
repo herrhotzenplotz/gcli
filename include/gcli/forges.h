@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -171,6 +171,13 @@ struct gcli_forge_descriptor {
 		struct gcli_ctx *ctx,
 		struct gcli_path const *issue_path,
 		struct gcli_attachment_list *out);
+
+	/**
+	 * Change the OP (original post) of the issue */
+	 int (*issue_set_op)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *issue_path,
+		char const *new_op);
 
 	/**
 	 * Dump the contents of the attachment to the given file */
@@ -415,6 +422,13 @@ struct gcli_forge_descriptor {
 		struct gcli_label_list *out);
 
 	/**
+	 *  Get a single label */
+	int (*get_label)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *path,
+		struct gcli_label *out);
+
+	/**
 	 * Create the given label
 	 *
 	 * The ID will be filled in for you */
@@ -427,8 +441,28 @@ struct gcli_forge_descriptor {
 	 * Delete the given label */
 	int (*delete_label)(
 		struct gcli_ctx *ctx,
+		struct gcli_path const *path);
+
+	/**
+	 *  change the title of a label */
+	int (*label_set_title)(
+		struct gcli_ctx *ctx,
 		struct gcli_path const *path,
-		char const *label);
+		char const *new_name);
+
+	/**
+	 *  change the description of a label */
+	int (*label_set_description)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *path,
+		char const *new_description);
+
+	/**
+	 *  change the colour of a label */
+	int (*label_set_colour)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *path,
+		uint32_t colour_rgb);
 
 	/**
 	 * Get a list of repos of the given owner */

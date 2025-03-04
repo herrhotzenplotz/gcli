@@ -2,7 +2,7 @@
 
 This changelog does not follow semantic versioning.
 
-## UNRELEASED
+## 2.7.0 (04-Mar-2025)
 
 ### Added
 

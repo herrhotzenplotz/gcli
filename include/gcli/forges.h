@@ -374,6 +374,13 @@ struct gcli_forge_descriptor {
 		char const *username);
 
 	/**
+	 * assign this pull request to the given user */
+	int (*pull_assign)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *path,
+		char const *username);
+
+	/**
 	 * Change the title of a pull request */
 	int (*pull_set_title)(
 		struct gcli_ctx *ctx,

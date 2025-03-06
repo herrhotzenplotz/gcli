@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -204,6 +204,9 @@ int gcli_pull_clear_milestone(struct gcli_ctx *ctx,
 
 int gcli_pull_add_reviewer(struct gcli_ctx *ctx, struct gcli_path const *path,
                            char const *username);
+
+int gcli_pull_assign(struct gcli_ctx *ctx, struct gcli_path const *path,
+                     char const *username);
 
 int gcli_pull_get_patch(struct gcli_ctx *ctx, FILE *out,
                         struct gcli_path const *path);

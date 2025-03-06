@@ -213,6 +213,13 @@ gcli_pull_add_reviewer(struct gcli_ctx *ctx, struct gcli_path const *const path,
 }
 
 int
+gcli_pull_assign(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                 char const *const username)
+{
+	gcli_null_check_call(pull_assign, ctx, path, username);
+}
+
+int
 gcli_pull_get_patch(struct gcli_ctx *ctx, FILE *out,
                     struct gcli_path const *const path)
 {

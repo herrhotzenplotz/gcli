@@ -100,6 +100,7 @@ usage(void)
 	fprintf(stderr, "  patch                  Display changes as patch series\n");
 	fprintf(stderr, "  title <new-title>      Change the title of the pull request\n");
 	fprintf(stderr, "  request-review <user>  Add <user> as a reviewer of the PR\n");
+	fprintf(stderr, "  assign <user>          Assign the PR to <user>\n");
 	fprintf(stderr, "  checkout               Do a git-checkout of this PR (GitHub- and GitLab only)\n");
 	fprintf(stderr, "  open                   Open the PR in a web browser\n");
 	if (gcli_config_enable_experimental(g_clictx))
@@ -1178,6 +1179,37 @@ action_request_review(struct gcli_path const *const path,
 }
 
 static int
+action_assign(struct gcli_path const *const path,
+              struct gcli_pull const *pull,
+              int *argc, char **argv[])
+{
+	char const *assignee;
+	int rc;
+
+	(void) pull;
+
+	if (*argc < 2) {
+		fprintf(stderr, "gcli: error: missing assignee\n");
+		return GCLI_EX_USAGE;
+	}
+
+	*argc -= 1;
+	*argv += 1;
+
+	assignee = **argv;
+
+	rc = gcli_pull_assign(g_clictx, path, assignee);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to assign: %s\n",
+		        gcli_get_error(g_clictx));
+
+		return GCLI_EX_DATAERR;
+	}
+
+	return GCLI_EX_OK;
+}
+
+static int
 action_title(struct gcli_path const *const path,
              struct gcli_pull *pull, int *argc, char **argv[])
 {
@@ -1365,6 +1397,11 @@ struct gcli_cmd_actions gcli_pull_actions = {
 			.name = "request-review",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler) action_request_review,
+		},
+		{
+			.name = "assign",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler) action_assign,
 		},
 		{
 			.name = "title",

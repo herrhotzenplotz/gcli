@@ -9,7 +9,7 @@ object of struct gcli_pull with
 	("id"       => head_pipeline_id as int,
 	 "coverage" => coverage as string);
 
-parser gitlab_reviewer is object of char* select "username" as string;
+parser gitlab_user_name is object of char* select "username" as string;
 
 parser gitlab_diff_refs is
 object of struct gcli_pull with
@@ -34,7 +34,8 @@ object of struct gcli_pull with
 	 "target_branch"                => base_label as string,
 	 "milestone"                    => use parse_gitlab_mr_milestone,
 	 "head_pipeline"                => use parse_gitlab_mr_head_pipeline,
-	 "reviewers"                    => reviewers as array of char* use parse_gitlab_reviewer,
+	 "assignees"                    => assignees as array of char* use parse_gitlab_user_name,
+	 "reviewers"                    => reviewers as array of char* use parse_gitlab_user_name,
 	 "diff_refs"                    => use parse_gitlab_diff_refs,
 	 "web_url"                      => web_url as string,
 	 "merge_when_pipeline_succeeds" => automerge as bool);

@@ -122,6 +122,7 @@ github_forge_descriptor =
 	.search_pulls              = github_search_pulls,
 	.perform_submit_pull       = github_perform_submit_pull,
 	.pull_add_reviewer         = github_pull_add_reviewer,
+	.pull_assign               = github_issue_assign,
 	.pull_close                = github_pull_close,
 	.pull_get_diff             = github_pull_get_diff,
 	.pull_get_patch            = github_pull_get_patch,

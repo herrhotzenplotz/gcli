@@ -52,11 +52,11 @@ object of struct gcli_commit with
 
 parser gitlab_commits is array of struct gcli_commit use parse_gitlab_commit;
 
-parser gitlab_reviewer_id is object of gcli_id select "id" as id;
+parser gitlab_user_id is object of gcli_id select "id" as id;
 
 parser gitlab_reviewer_ids is
-object of struct gitlab_reviewer_id_list with
-	("reviewers" => reviewers as array of gcli_id use parse_gitlab_reviewer_id);
+object of struct gitlab_user_id_list with
+	("reviewers" => users as array of gcli_id use parse_gitlab_user_id);
 
 parser gitlab_diff is
 object of struct gitlab_diff with

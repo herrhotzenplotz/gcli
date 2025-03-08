@@ -852,12 +852,11 @@ gitlab_mr_clear_milestone(struct gcli_ctx *ctx,
 	return gitlab_mr_set_milestone(ctx, mr_path, 0);
 }
 
-/* Helper function to fetch the list of user ids that are reviewers
- * of a merge requests. */
+/* generic helper function for extracting user id lists from a merge request */
 static int
 gitlab_mr_get_reviewers(struct gcli_ctx *ctx,
                         struct gcli_path const *const path,
-                        struct gitlab_reviewer_id_list *const out)
+                        struct gitlab_user_id_list *const out)
 {
 	char *url = NULL;
 	int rc = 0;
@@ -882,11 +881,10 @@ gitlab_mr_get_reviewers(struct gcli_ctx *ctx,
 }
 
 static void
-gitlab_reviewer_list_free(struct gitlab_reviewer_id_list *const list)
+gitlab_user_id_list_free(struct gitlab_user_id_list *const list)
 {
-	free(list->reviewers);
-	list->reviewers = NULL;
-	list->reviewers_size = 0;
+	gcli_clear_ptr(&list->users);
+	list->users_size = 0;
 }
 
 int
@@ -895,7 +893,7 @@ gitlab_mr_add_reviewer(struct gcli_ctx *ctx, struct gcli_path const *const path,
 {
 	char *url, *payload;
 	int uid, rc = 0;
-	struct gitlab_reviewer_id_list list = {0};
+	struct gitlab_user_id_list list = {0};
 	struct gcli_jsongen gen = {0};
 
 	/* Fetch list of already existing reviewers */
@@ -916,8 +914,8 @@ gitlab_mr_add_reviewer(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 		gcli_jsongen_begin_array(&gen);
 		{
-			for (size_t i = 0; i < list.reviewers_size; ++i)
-				gcli_jsongen_number(&gen, list.reviewers[i]);
+			for (size_t i = 0; i < list.users_size; ++i)
+				gcli_jsongen_number(&gen, list.users[i]);
 
 			/* Push new user id into list of user ids */
 			gcli_jsongen_number(&gen, uid);
@@ -941,7 +939,7 @@ gitlab_mr_add_reviewer(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	free(payload);
 
 bail_resolve_user_id:
-	gitlab_reviewer_list_free(&list);
+	gitlab_user_id_list_free(&list);
 
 bail_get_reviewers:
 

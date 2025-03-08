@@ -852,11 +852,19 @@ gitlab_mr_clear_milestone(struct gcli_ctx *ctx,
 	return gitlab_mr_set_milestone(ctx, mr_path, 0);
 }
 
+/* helper typedef to shorten down the type of this function pointer */
+typedef int (*user_id_list_parser)(
+	struct gcli_ctx *,
+	struct json_stream *,
+	struct gitlab_user_id_list *out);
+
 /* generic helper function for extracting user id lists from a merge request */
 static int
-gitlab_mr_get_reviewers(struct gcli_ctx *ctx,
-                        struct gcli_path const *const path,
-                        struct gitlab_user_id_list *const out)
+gitlab_mr_get_user_id_list(
+	struct gcli_ctx *ctx,
+	struct gcli_path const *const path,
+	user_id_list_parser parser,
+	struct gitlab_user_id_list *const out)
 {
 	char *url = NULL;
 	int rc = 0;
@@ -870,7 +878,10 @@ gitlab_mr_get_reviewers(struct gcli_ctx *ctx,
 	if (rc == 0) {
 		struct json_stream stream = {0};
 		json_open_buffer(&stream, buffer.data, buffer.length);
-		parse_gitlab_reviewer_ids(ctx, &stream, out);
+
+		/* use generic parser to extract data */
+		rc = parser(ctx, &stream, out);
+
 		json_close(&stream);
 	}
 
@@ -887,17 +898,23 @@ gitlab_user_id_list_free(struct gitlab_user_id_list *const list)
 	list->users_size = 0;
 }
 
-int
-gitlab_mr_add_reviewer(struct gcli_ctx *ctx, struct gcli_path const *const path,
-                       char const *username)
+/* helper function for adding a user to a list of users (e.g.
+ * assignees or reviewers */
+static int
+gitlab_mr_add_user_id(
+	struct gcli_ctx *ctx,
+	struct gcli_path const *const path, /* path to the MR */
+	user_id_list_parser const parser,   /* parser for extracting user ids */
+	char const *const field_name,       /* field in the POST payload */
+	char const *username)
 {
 	char *url, *payload;
 	int uid, rc = 0;
 	struct gitlab_user_id_list list = {0};
 	struct gcli_jsongen gen = {0};
 
-	/* Fetch list of already existing reviewers */
-	rc = gitlab_mr_get_reviewers(ctx, path, &list);
+	/* Fetch list of already existing users */
+	rc = gitlab_mr_get_user_id_list(ctx, path, parser, &list);
 	if (rc < 0)
 		goto bail_get_reviewers;
 
@@ -910,7 +927,7 @@ gitlab_mr_add_reviewer(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	gcli_jsongen_init(&gen);
 	gcli_jsongen_begin_object(&gen);
 	{
-		gcli_jsongen_objmember(&gen, "reviewer_ids");
+		gcli_jsongen_objmember(&gen, field_name);
 
 		gcli_jsongen_begin_array(&gen);
 		{
@@ -944,6 +961,14 @@ bail_resolve_user_id:
 bail_get_reviewers:
 
 	return rc;
+}
+
+int
+gitlab_mr_add_reviewer(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                       char const *const username)
+{
+	return gitlab_mr_add_user_id(ctx, path, parse_gitlab_reviewer_ids,
+	                             "reviewer_ids", username);
 }
 
 int

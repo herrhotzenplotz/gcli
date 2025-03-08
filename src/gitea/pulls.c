@@ -29,6 +29,7 @@
 
 #include <gcli/gitea/pulls.h>
 #include <gcli/gitea/repos.h>
+#include <gcli/gitea/issues.h>
 #include <gcli/github/issues.h>
 #include <gcli/github/pulls.h>
 
@@ -316,6 +317,14 @@ gitea_pull_add_reviewer(struct gcli_ctx *ctx,
                         char const *username)
 {
 	return github_pull_add_reviewer(ctx, path, username);
+}
+
+int
+gitea_pull_assign(struct gcli_ctx *ctx,
+                  struct gcli_path const *const path,
+                  char const *username)
+{
+	return gitea_issue_assign(ctx, path, username);
 }
 
 int

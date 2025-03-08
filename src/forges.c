@@ -327,6 +327,7 @@ gitea_forge_descriptor =
 	.perform_submit_pull       = gitea_pull_submit,
 	.pull_add_labels           = gitea_issue_add_labels,
 	.pull_add_reviewer         = gitea_pull_add_reviewer,
+	.pull_assign               = gitea_pull_assign,
 	.pull_clear_milestone      = gitea_pull_clear_milestone,
 	.pull_close                = gitea_pull_close,
 	.pull_get_diff             = gitea_pull_get_diff,

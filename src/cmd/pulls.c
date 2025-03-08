@@ -237,6 +237,12 @@ gcli_pull_print(struct gcli_pull const *const it)
 		gcli_dict_add_string(dict, "LABELS", 0, 0, "none");
 	}
 
+	if (it->assignees_size) {
+		gcli_dict_add_string_list(dict, "ASSIGNEES",
+		                          (char const *const *)it->assignees,
+		                          it->assignees_size);
+	}
+
 	if (it->reviewers_size) {
 		gcli_dict_add_string_list(dict, "REVIEWERS",
 		                          /* cast needed because of nested const */

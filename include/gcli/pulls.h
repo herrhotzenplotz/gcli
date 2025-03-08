@@ -79,6 +79,9 @@ struct gcli_pull {
 	char **reviewers;      /**< User names */
 	size_t reviewers_size; /**< Number of elements in the reviewers list */
 
+	char **assignees;
+	size_t assignees_size;
+
 	bool merged;
 	bool mergeable;
 	bool draft;

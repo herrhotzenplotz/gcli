@@ -116,6 +116,11 @@ gcli_pull_free(struct gcli_pull *const it)
 		gcli_clear_ptr(&it->reviewers[i]);
 
 	gcli_clear_ptr(&it->reviewers);
+
+	for (size_t i = 0; i < it->assignees_size; ++i)
+		gcli_clear_ptr(&it->assignees[i]);
+
+	gcli_clear_ptr(&it->assignees);
 }
 
 int

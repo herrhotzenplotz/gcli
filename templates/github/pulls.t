@@ -33,7 +33,7 @@ parser github_pull_milestone is
 object of struct gcli_pull with
 	("title" => milestone as string);
 
-parser github_reviewer is
+parser github_user is
 object of char* select "login" as string;
 
 parser github_pull is
@@ -59,7 +59,8 @@ object of struct gcli_pull with
 	 "head"          => use parse_github_pull_head,
 	 "base"          => use parse_github_branch_label,
 	 "milestone"     => use parse_github_pull_milestone,
-	 "requested_reviewers" => reviewers as array of char* use parse_github_reviewer,
+	 "requested_reviewers" => reviewers as array of char* use parse_github_user,
+	 "assignees"     => assignees as array of char* use parse_github_user,
 	 "html_url"      => web_url as string);
 
 parser github_pr_merge_message is object of char* select "message" as string;

@@ -92,24 +92,30 @@ gcli_commits_free(struct gcli_commit_list *list)
 void
 gcli_pull_free(struct gcli_pull *const it)
 {
-	free(it->author);
-	free(it->state);
-	free(it->title);
-	free(it->body);
-	free(it->commits_link);
-	free(it->head_label);
-	free(it->base_label);
-	free(it->head_sha);
-	free(it->base_sha);
-	free(it->milestone);
-	free(it->coverage);
-	free(it->node_id);
+	gcli_clear_ptr(&it->author);
+	gcli_clear_ptr(&it->state);
+	gcli_clear_ptr(&it->title);
+	gcli_clear_ptr(&it->body);
+	gcli_clear_ptr(&it->commits_link);
+	gcli_clear_ptr(&it->head_label);
+	gcli_clear_ptr(&it->base_label);
+	gcli_clear_ptr(&it->head_sha);
+	gcli_clear_ptr(&it->base_sha);
+	gcli_clear_ptr(&it->start_sha);
+	gcli_clear_ptr(&it->milestone);
+	gcli_clear_ptr(&it->coverage);
+	gcli_clear_ptr(&it->node_id);
+	gcli_clear_ptr(&it->web_url);
 
 	for (size_t i = 0; i < it->labels_size; ++i)
-		free(it->labels[i]);
+		gcli_clear_ptr(&it->labels[i]);
 
-	free(it->labels);
-	free(it->web_url);
+	gcli_clear_ptr(&it->labels);
+
+	for (size_t i = 0; i < it->reviewers_size; ++i)
+		gcli_clear_ptr(&it->reviewers[i]);
+
+	gcli_clear_ptr(&it->reviewers);
 }
 
 int

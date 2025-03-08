@@ -58,6 +58,10 @@ parser gitlab_reviewer_ids is
 object of struct gitlab_user_id_list with
 	("reviewers" => users as array of gcli_id use parse_gitlab_user_id);
 
+parser gitlab_assignee_ids is
+object of struct gitlab_user_id_list with
+	("assignees" => users as array of gcli_id use parse_gitlab_user_id);
+
 parser gitlab_diff is
 object of struct gitlab_diff with
 	("diff" => diff as string,

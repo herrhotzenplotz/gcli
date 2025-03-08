@@ -116,6 +116,9 @@ int gitlab_mr_clear_milestone(struct gcli_ctx *ctx,
 int gitlab_mr_add_reviewer(struct gcli_ctx *ctx, struct gcli_path const *path,
                            char const *username);
 
+int gitlab_mr_add_assignee(struct gcli_ctx *ctx, struct gcli_path const *path,
+                           char const *username);
+
 int gitlab_mr_set_title(struct gcli_ctx *ctx, struct gcli_path const *path,
                         char const *new_title);
 

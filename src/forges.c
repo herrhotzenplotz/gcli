@@ -226,6 +226,7 @@ gitlab_forge_descriptor =
 	.perform_submit_pull       = gitlab_perform_submit_mr,
 	.pull_add_labels           = gitlab_mr_add_labels,
 	.pull_add_reviewer         = gitlab_mr_add_reviewer,
+	.pull_assign               = gitlab_mr_add_assignee,
 	.pull_clear_milestone      = gitlab_mr_clear_milestone,
 	.pull_close                = gitlab_mr_close,
 	.pull_create_review        = gitlab_mr_create_review,

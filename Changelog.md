@@ -6,7 +6,14 @@ This changelog does not follow semantic versioning.
 
 ### Added
 
+- The pulls subcommand now supports assigning pull requests to
+  users. A new assign action has been added.
+
 ### Fixed
+
+- Parsing timestamps with timezone offsets now works properly.
+  This was an issue on Gitea forges where sometimes timestamps with
+  explicit timezone offsets were returned.
 
 ### Changed
 

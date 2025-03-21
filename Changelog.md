@@ -15,6 +15,16 @@ This changelog does not follow semantic versioning.
   This was an issue on Gitea forges where sometimes timestamps with
   explicit timezone offsets were returned.
 
+- Building on macOS has been fixed
+
+  Darwin doesn't have a separate library for the POSIX real-time
+  extensions. Trying to link with -lrt thus results in errors.
+
+  The configure script now explicitly checks for a host platform
+  apple-darwin and disables `-lrt` linkage in this case.
+
+  Reported by: botantony <https://gitlab.com/botantony>
+
 ### Changed
 
 ### Removed

@@ -121,6 +121,12 @@ LIBLOWDOWN_CPPFLAGS=	$(LIBLOWDOWN_CPPFLAGS_$(LIBLOWDOWN_FOUND))
 LIBCRYPTO_CFLAGS=	@LIBCRYPTO_CFLAGS@
 LIBCRYPTO_LIBS=		@LIBCRYPTO_LIBS@
 
+############### -lrt ############################################
+ENABLE_LIBRT=		@ENABLE_LIBRT@
+LIBRT_LIBS_1=		-lrt
+LIBRT_LIBS=		$(LIBRT_LIBS_$(ENABLE_LIBRT))
+#################################################################
+
 .PHONY: all all-auto clean clean-auto check check-auto install install-auto analyse analyse-auto
 all: Makefile
 	@$(MAKE) all-auto
@@ -331,7 +337,7 @@ gcli: libgcli.a $(GCLI_OBJS)
 		$(GCLI_OBJS) libgcli.a $(LIBCURL_LIBS) $(LIBEDIT_LIBS) \
 		$(LIBREADLINE_LIBS) $(LIBCRYPTO_LIBS) \
 		$(LIBLOWDOWN_LIBS) \
-		-lrt
+		$(LIBRT_LIBS)
 
 libgcli.a: $(LIBGCLI_OBJS)
 	$(CCACHE) $(AR) -rc libgcli.a $(LIBGCLI_OBJS)

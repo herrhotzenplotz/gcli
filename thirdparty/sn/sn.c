@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -406,8 +406,12 @@ sn_yesno(const char *fmt, ...)
 
 		if (c == 'y' || c == 'Y') {
 			result = true;
+			getchar();
 			break;
-		} else if (c == '\n' || c == 'n' || c == 'N') {
+		} else if (c == 'n' || c == 'N') {
+			getchar();
+			break;
+		} else if (c == '\n') {
 			break;
 		}
 

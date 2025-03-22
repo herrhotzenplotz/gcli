@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -65,7 +65,7 @@ error_parse:
 	gcli_fetch_buffer_free(&buffer);
 
 error_fetch:
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

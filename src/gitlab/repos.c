@@ -63,7 +63,7 @@ gitlab_get_repo(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	}
 
 	gcli_fetch_buffer_free(&buffer);
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -98,7 +98,7 @@ gitlab_get_repos(struct gcli_ctx *ctx, char const *owner, int const max,
 
 	e_owner = gcli_urlencode(owner);
 	url = sn_asprintf("%s/users/%s/projects", gcli_get_apibase(ctx), e_owner);
-	free(e_owner);
+	gcli_clear_ptr(&e_owner);
 
 	rc = gcli_fetch_list(ctx, url, &fl);
 
@@ -120,7 +120,7 @@ gitlab_repo_delete(struct gcli_ctx *ctx, struct gcli_path const *const path)
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -165,8 +165,8 @@ gitlab_repo_create(struct gcli_ctx *ctx, struct gcli_repo_create_options const *
 	}
 
 	gcli_fetch_buffer_free(&buffer);
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -201,8 +201,8 @@ gitlab_repo_set_visibility(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
 
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

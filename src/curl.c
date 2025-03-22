@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  * Copyright 2022 Aritra Sarkar <aritra1911@yahoo.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,8 +67,7 @@ gcli_curl_ctx_destroy(struct gcli_ctx *ctx)
 
 	ctx->curl = NULL;
 
-	free(ctx->curl_useragent);
-	ctx->curl_useragent = NULL;
+	gcli_clear_ptr(&ctx->curl_useragent);
 }
 
 /* Ensures a clean cURL handle. Call this whenever you wanna use the
@@ -282,7 +281,7 @@ gcli_curl(struct gcli_ctx *ctx, FILE *stream, char const *url,
 
 	curl_slist_free_all(headers);
 
-	free(auth_header);
+	gcli_clear_ptr(&auth_header);
 
 	return rc;
 }
@@ -442,7 +441,7 @@ gcli_fetch_with_method(
 		gcli_fetch_buffer_free(out);
 	}
 
-	free(link_header);
+	gcli_clear_ptr(&link_header);
 
 	curl_slist_free_all(headers);
 	headers = NULL;
@@ -452,7 +451,7 @@ gcli_fetch_with_method(
 	if (!out)
 		gcli_fetch_buffer_free(&tmp);
 
-	free(auth_header);
+	gcli_clear_ptr(&auth_header);
 
 	return rc;
 }
@@ -522,9 +521,9 @@ gcli_post_upload(struct gcli_ctx *ctx, char const *url, char const *content_type
 	curl_slist_free_all(headers);
 	headers = NULL;
 
-	free(auth_header);
-	free(contentsize_header);
-	free(contenttype_header);
+	gcli_clear_ptr(&auth_header);
+	gcli_clear_ptr(&contentsize_header);
+	gcli_clear_ptr(&contenttype_header);
 
 	return rc;
 }
@@ -600,7 +599,7 @@ gcli_curl_gitea_upload_attachment(struct gcli_ctx *ctx, char const *url,
 	curl_slist_free_all(headers);
 	headers = NULL;
 	curl_mime_free(mime);
-	free(auth_header);
+	gcli_clear_ptr(&auth_header);
 
 	return rc;
 }
@@ -693,14 +692,14 @@ gcli_fetch_list(struct gcli_ctx *ctx, char *url, struct gcli_fetch_list_ctx *fl)
 		}
 
 		gcli_fetch_buffer_free(&buffer);
-		free(url);
+		gcli_clear_ptr(&url);
 
 		if (rc < 0)
 			break;
 
 	} while ((url = next_url) && (fl->max == -1 || (int)(*fl->sizep) < fl->max));
 
-	free(next_url);
+	gcli_clear_ptr(&next_url);
 
 	return rc;
 }
@@ -711,7 +710,6 @@ gcli_fetch_buffer_free(struct gcli_fetch_buffer *const buffer)
 	if (!buffer)
 		return;
 
-	free(buffer->data);
-	buffer->data = NULL;
+	gcli_clear_ptr(&buffer->data);
 	buffer->length = 0;
 }

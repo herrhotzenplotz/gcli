@@ -62,8 +62,8 @@ gitea_pull_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		                   gcli_get_apibase(ctx), e_owner, e_repo,
 		                   path->as_default.id, suffix);
 
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
 		*url = sn_asprintf("%s%s", path->as_url, suffix);
@@ -73,7 +73,7 @@ gitea_pull_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	} break;
 	}
 
-	free(suffix);
+	gcli_clear_ptr(&suffix);
 
 	return rc;
 }
@@ -97,25 +97,25 @@ gitea_search_pulls(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	if (details->milestone) {
 		char *tmp = gcli_urlencode(details->milestone);
 		e_milestone = sn_asprintf("&milestones=%s", tmp);
-		free(tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->author) {
 		char *tmp = gcli_urlencode(details->author);
 		e_author = sn_asprintf("&created_by=%s", tmp);
-		free(tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->label) {
 		char *tmp = gcli_urlencode(details->label);
 		e_label = sn_asprintf("&labels=%s", tmp);
-		free(tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->search_term) {
 		char *tmp = gcli_urlencode(details->search_term);
 		e_query = sn_asprintf("&q=%s", tmp);
-		free(tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	rc = gitea_repo_make_url(ctx, path, &url,
@@ -126,10 +126,10 @@ gitea_search_pulls(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	                         e_milestone ? e_milestone : "",
 	                         e_query ? e_query : "");
 
-	free(e_query);
-	free(e_milestone);
-	free(e_author);
-	free(e_label);
+	gcli_clear_ptr(&e_query);
+	gcli_clear_ptr(&e_milestone);
+	gcli_clear_ptr(&e_author);
+	gcli_clear_ptr(&e_label);
 
 	if (rc < 0)
 		return rc;
@@ -206,8 +206,8 @@ gitea_pull_merge(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
 
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }
@@ -228,8 +228,8 @@ gitea_pulls_patch_state(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, data, NULL, NULL);
 
-	free(data);
-	free(url);
+	gcli_clear_ptr(&data);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -259,7 +259,7 @@ gitea_pull_get_patch(struct gcli_ctx *ctx, FILE *const stream,
 
 	rc = gcli_curl(ctx, stream, url, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -276,7 +276,7 @@ gitea_pull_get_diff(struct gcli_ctx *ctx, FILE *const stream,
 
 	rc = gcli_curl(ctx, stream, url, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

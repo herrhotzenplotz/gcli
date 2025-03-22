@@ -352,7 +352,7 @@ get_github_style_colour(struct gcli_ctx *ctx, json_stream *const input, uint32_t
 		return gcli_error(ctx, "%s: bad colour code returned by API",
 		                  colour_str);
 
-	free(colour_str);
+	gcli_clear_ptr(&colour_str);
 
 	*out = ((uint32_t)(colour)) << 8;
 	return 0;
@@ -374,7 +374,7 @@ get_gitlab_style_colour(struct gcli_ctx *ctx, json_stream *const input, uint32_t
 	if (endptr != (colour + 1 + strlen(colour + 1)))
 		return gcli_error(ctx, "%s: invalid colour code");
 
-	free(colour);
+	gcli_clear_ptr(&colour);
 
 	*out = ((uint32_t)(code) << 8);
 
@@ -405,7 +405,7 @@ get_gitlab_can_be_merged(struct gcli_ctx *ctx, json_stream *const input, bool *o
 		return rc;
 
 	*out = sn_sv_eq_to(tmp, "can_be_merged");
-	free(tmp.data);
+	gcli_clear_ptr(&tmp.data);
 
 	return rc;
 }
@@ -469,7 +469,7 @@ get_github_notification_target_type(struct gcli_ctx *ctx, json_stream *input,
 
 	}
 
-	free(tmp.data);
+	gcli_clear_ptr(&tmp.data);
 
 	return rc;
 }
@@ -504,7 +504,7 @@ get_gitlab_notification_target_type(struct gcli_ctx *ctx, json_stream *input,
 
 	}
 
-	free(tmp.data);
+	gcli_clear_ptr(&tmp.data);
 
 	return rc;
 }
@@ -539,7 +539,7 @@ get_gitea_notification_target_type(struct gcli_ctx *ctx, json_stream *input,
 
 	}
 
-	free(tmp.data);
+	gcli_clear_ptr(&tmp.data);
 
 	return rc;
 }
@@ -568,7 +568,7 @@ get_iso8601_time_(struct gcli_ctx *ctx, json_stream *input, time_t *out,
 
 	rc = gcli_parse_iso8601_date_time(ctx, copy, out);
 
-	free(copy);
+	gcli_clear_ptr(&copy);
 
 	return rc;
 }

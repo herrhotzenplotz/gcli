@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -74,8 +74,8 @@ gitlab_add_sshkey(struct gcli_ctx *ctx, char const *const title,
 	payload = sn_asprintf(
 		"{ \"title\": \"%s\", \"key\": \"%s\" }",
 		e_title, e_key);
-	free(e_title);
-	free(e_key);
+	gcli_clear_ptr(&e_title);
+	gcli_clear_ptr(&e_key);
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, &buf);
 	if (rc == 0 && out) {
@@ -86,7 +86,7 @@ gitlab_add_sshkey(struct gcli_ctx *ctx, char const *const title,
 		json_close(&stream);
 	}
 
-	free(buf.data);
+	gcli_clear_ptr(&buf.data);
 
 	return rc;
 }
@@ -100,7 +100,7 @@ gitlab_delete_sshkey(struct gcli_ctx *ctx, gcli_id id)
 	url = sn_asprintf("%s/user/keys/%"PRIid, gcli_get_apibase(ctx), id);
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

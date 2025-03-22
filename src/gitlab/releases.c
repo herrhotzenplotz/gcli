@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -142,13 +142,13 @@ gitlab_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *relea
 	url = sn_asprintf("%s/projects/%s%%2F%s/releases", gcli_get_apibase(ctx),
 	                  e_owner, e_repo);
 
-	free(e_owner);
-	free(e_repo);
+	gcli_clear_ptr(&e_owner);
+	gcli_clear_ptr(&e_repo);
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
 
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }
@@ -166,7 +166,7 @@ gitlab_delete_release(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

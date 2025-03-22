@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -66,7 +66,7 @@ gitlab_notification_mark_as_read(struct gcli_ctx *ctx, char const *id)
 	url = sn_asprintf("%s/todos/%s/mark_as_done", gcli_get_apibase(ctx), id);
 	rc = gcli_fetch_with_method(ctx, "POST", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

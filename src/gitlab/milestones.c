@@ -91,8 +91,8 @@ gitlab_milestone_make_url(struct gcli_ctx *ctx,
 		                   e_owner, e_repo, path->as_default.id,
 		                   suffix);
 
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
 		*url = sn_asprintf("%s%s", path->as_url, suffix);
@@ -102,7 +102,7 @@ gitlab_milestone_make_url(struct gcli_ctx *ctx,
 	} break;
 	}
 
-	free(suffix);
+	gcli_clear_ptr(&suffix);
 
 	return rc;
 }
@@ -128,7 +128,7 @@ gitlab_get_milestone(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	}
 
 	gcli_fetch_buffer_free(&buffer);
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -165,7 +165,7 @@ gitlab_create_milestone(struct gcli_ctx *ctx,
 	if (args->description) {
 		char *e_description = gcli_json_escape_cstr(args->description);
 		description = sn_asprintf(", \"description\": \"%s\"", e_description);
-		free(e_description);
+		gcli_clear_ptr(&e_description);
 	}
 
 	e_title = gcli_json_escape_cstr(args->title);
@@ -178,12 +178,12 @@ gitlab_create_milestone(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, json_body, NULL, NULL);
 
-	free(json_body);
-	free(description);
-	free(url);
-	free(e_title);
-	free(e_repo);
-	free(e_owner);
+	gcli_clear_ptr(&json_body);
+	gcli_clear_ptr(&description);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&e_title);
+	gcli_clear_ptr(&e_repo);
+	gcli_clear_ptr(&e_owner);
 
 	return rc;
 }
@@ -200,7 +200,7 @@ gitlab_delete_milestone(struct gcli_ctx *ctx, struct gcli_path const *const path
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -224,7 +224,7 @@ gitlab_milestone_set_duedate(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PUT", url, "", NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

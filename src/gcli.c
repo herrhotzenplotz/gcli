@@ -56,10 +56,9 @@ void
 gcli_destroy(struct gcli_ctx **ctx)
 {
 	if (ctx && *ctx) {
-		free((*ctx)->apibase);
+		gcli_clear_ptr(&(*ctx)->apibase);
 
-		free(*ctx);
-		*ctx = NULL;
+		gcli_clear_ptr(ctx);
 
 		/* TODO: other deinit stuff? */
 	}

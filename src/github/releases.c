@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -112,7 +112,7 @@ github_upload_release_asset(struct gcli_ctx *ctx, char const *url,
 		file_content.length,
 		&buffer);
 
-	free(req);
+	gcli_clear_ptr(&req);
 	gcli_fetch_buffer_free(&buffer);
 
 	return rc;
@@ -167,8 +167,8 @@ github_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *relea
 	url = sn_asprintf("%s/repos/%s/%s/releases", gcli_get_apibase(ctx),
 	                  e_owner, e_repo);
 
-	free(e_owner);
-	free(e_repo);
+	gcli_clear_ptr(&e_owner);
+	gcli_clear_ptr(&e_repo);
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, &buffer);
 	if (rc < 0)
@@ -191,9 +191,9 @@ github_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *relea
 out:
 	gcli_release_free(&response);
 	gcli_fetch_buffer_free(&buffer);
-	free(upload_url);
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&upload_url);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }
@@ -211,7 +211,7 @@ github_delete_release(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

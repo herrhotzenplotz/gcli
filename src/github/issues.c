@@ -91,8 +91,8 @@ github_issue_make_url(struct gcli_ctx *const ctx,
 		                   gcli_get_apibase(ctx), e_owner, e_repo,
 		                   path->as_default.id, suffix);
 
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
 		*url = sn_asprintf("%s%s", path->as_url, suffix);
@@ -102,7 +102,7 @@ github_issue_make_url(struct gcli_ctx *const ctx,
 	} break;
 	}
 
-	free(suffix);
+	gcli_clear_ptr(&suffix);
 
 	return rc;
 }
@@ -203,11 +203,11 @@ search_issues(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	url = sn_asprintf("%s/search/issues?q=%s", gcli_get_apibase(ctx),
 	                  e_query_string);
 
-	free(milestone);
-	free(author);
-	free(label);
-	free(query_string);
-	free(e_query_string);
+	gcli_clear_ptr(&milestone);
+	gcli_clear_ptr(&author);
+	gcli_clear_ptr(&label);
+	gcli_clear_ptr(&query_string);
+	gcli_clear_ptr(&e_query_string);
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc < 0)
@@ -220,7 +220,7 @@ search_issues(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	gcli_fetch_buffer_free(&buffer);
 
 error_fetch:
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -242,8 +242,8 @@ github_issues_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		*out = sn_asprintf("%s/repos/%s/%s/issues%s",
 		                   gcli_get_apibase(ctx),
 		                   e_owner, e_repo, suffix);
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
 		*out = sn_asprintf("%s%s", path->as_url, suffix);
@@ -279,13 +279,13 @@ get_issues(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	if (details->author) {
 		char *tmp = gcli_urlencode(details->author);
 		e_author = sn_asprintf("&creator=%s", tmp);
-		free(tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->label) {
 		char *tmp = gcli_urlencode(details->label);
 		e_label = sn_asprintf("&labels=%s", tmp);
-		free(tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	suffix = sn_asprintf(
@@ -297,10 +297,10 @@ get_issues(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	rc = github_issues_make_url(ctx, path, suffix, &url);
 
-	free(e_milestone);
-	free(e_author);
-	free(e_label);
-	free(suffix);
+	gcli_clear_ptr(&e_milestone);
+	gcli_clear_ptr(&e_author);
+	gcli_clear_ptr(&e_label);
+	gcli_clear_ptr(&suffix);
 
 	if (rc < 0)
 		return rc;
@@ -354,7 +354,7 @@ github_get_issue_summary(struct gcli_ctx *ctx, struct gcli_path const *const pat
 		return rc;
 
 	rc = github_fetch_issue(ctx, url, out);
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -375,8 +375,8 @@ github_issue_patch_state(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
 
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -428,8 +428,8 @@ github_perform_submit_issue(struct gcli_ctx *const ctx,
 	url = sn_asprintf("%s/repos/%s/%s/issues", gcli_get_apibase(ctx), e_owner,
 	                  e_repo);
 
-	free(e_owner);
-	free(e_repo);
+	gcli_clear_ptr(&e_owner);
+	gcli_clear_ptr(&e_repo);
 
 	/* only read the resulting data if the issue data has been requested */
 	if (out)
@@ -445,8 +445,8 @@ github_perform_submit_issue(struct gcli_ctx *const ctx,
 	}
 
 	gcli_fetch_buffer_free(&buffer);
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -480,8 +480,8 @@ github_issue_assign(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
 
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }
@@ -518,8 +518,8 @@ github_issue_add_labels(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, data, NULL, NULL);
 
-	free(url);
-	free(data);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&data);
 
 	return rc;
 }
@@ -543,8 +543,8 @@ github_issue_remove_labels(struct gcli_ctx *ctx,
 	if (rc == 0)
 		rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	free(url);
-	free(e_label);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&e_label);
 
 	return rc;
 }
@@ -565,8 +565,8 @@ github_issue_set_milestone(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, body, NULL, NULL);
 
-	free(body);
-	free(url);
+	gcli_clear_ptr(&body);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -587,7 +587,7 @@ github_issue_clear_milestone(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -620,8 +620,8 @@ github_issue_set_title(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
 
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -653,8 +653,8 @@ github_issue_set_op(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
 
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

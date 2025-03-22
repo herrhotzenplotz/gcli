@@ -95,7 +95,7 @@ github_user_is_org(struct gcli_ctx *ctx, char const *e_owner)
 {
 	char *url = sn_asprintf("%s/users/%s", gcli_get_apibase(ctx), e_owner);
 	int const rc = gcli_curl_test_success(ctx, url);
-	free(url);
+	gcli_clear_ptr(&url);
 
 	/* 0 = failed, 1 = success, -1 = error (just like a BOOL in Win32
 	 * /sarc). But to make the name of the function make sense, reverse
@@ -136,7 +136,7 @@ github_get_repos(struct gcli_ctx *ctx, char const *owner, int const max,
 		                  e_owner);
 	}
 
-	free(e_owner);
+	gcli_clear_ptr(&e_owner);
 
 	return gcli_fetch_list(ctx, url, &lf);
 }
@@ -170,7 +170,7 @@ github_repo_delete(struct gcli_ctx *ctx, struct gcli_path const *const path)
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -218,8 +218,8 @@ github_repo_create(struct gcli_ctx *ctx, struct gcli_repo_create_options const *
 
 	/* Cleanup */
 	gcli_fetch_buffer_free(&buffer);
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -254,8 +254,8 @@ github_repo_set_visibility(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
 
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

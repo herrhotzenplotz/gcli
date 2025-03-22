@@ -88,7 +88,7 @@ github_create_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		gcli_jsongen_objmember(&gen, "color");
 		gcli_jsongen_string(&gen, colour);
 
-		free(colour);
+		gcli_clear_ptr(&colour);
 		colour = NULL;
 	}
 	gcli_jsongen_end_object(&gen);
@@ -104,8 +104,8 @@ github_create_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		json_close(&stream);
 	}
 
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 	gcli_fetch_buffer_free(&buffer);
 
 	return rc;

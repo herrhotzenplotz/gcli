@@ -66,8 +66,8 @@ gitea_issue_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		                   gcli_get_apibase(ctx), e_owner, e_repo,
 		                   path->as_default.id, suffix);
 
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
 		*url = sn_asprintf("%s%s", path->as_url, suffix);
@@ -77,7 +77,7 @@ gitea_issue_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	} break;
 	}
 
-	free(suffix);
+	gcli_clear_ptr(&suffix);
 
 	return rc;
 }
@@ -101,25 +101,25 @@ gitea_issues_search(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	if (details->milestone) {
 		char *tmp = gcli_urlencode(details->milestone);
 		e_milestone = sn_asprintf("&milestones=%s", tmp);
-		free(tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->author) {
 		char *tmp = gcli_urlencode(details->author);
 		e_author = sn_asprintf("&created_by=%s", tmp);
-		free(tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->label) {
 		char *tmp = gcli_urlencode(details->label);
 		e_label = sn_asprintf("&labels=%s", tmp);
-		free(tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->search_term) {
 		char *tmp = gcli_urlencode(details->search_term);
 		e_query = sn_asprintf("&q=%s", tmp);
-		free(tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	rc = gitea_repo_make_url(ctx, path, &url,
@@ -130,10 +130,10 @@ gitea_issues_search(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	                         e_milestone ? e_milestone : "",
 	                         e_query ? e_query : "");
 
-	free(e_query);
-	free(e_milestone);
-	free(e_author);
-	free(e_label);
+	gcli_clear_ptr(&e_query);
+	gcli_clear_ptr(&e_milestone);
+	gcli_clear_ptr(&e_author);
+	gcli_clear_ptr(&e_label);
 
 	if (rc < 0)
 		return rc;
@@ -182,8 +182,8 @@ gitea_issue_patch_state(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
 
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -231,8 +231,8 @@ gitea_issue_assign(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
 
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -252,9 +252,9 @@ static void
 free_id_list(char *list[], size_t const list_size)
 {
 	for (size_t i = 0; i < list_size; ++i) {
-		free(list[i]);
+		gcli_clear_ptr(&list[i]);
 	}
-	free(list);
+	gcli_clear_ptr(&list);
 }
 
 static char **
@@ -325,8 +325,8 @@ gitea_issue_add_labels(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
 
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -353,7 +353,7 @@ gitea_issue_remove_labels(struct gcli_ctx *ctx,
 
 		rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-		free(url);
+		gcli_clear_ptr(&url);
 
 		if (rc < 0)
 			break;

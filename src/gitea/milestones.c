@@ -66,8 +66,8 @@ gitea_milestone_make_url(struct gcli_ctx *ctx,
 		                   gcli_get_apibase(ctx), e_owner, e_repo,
 		                   path->as_default.id, suffix);
 
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
 		*url = sn_asprintf("%s%s", path->as_url, suffix);
@@ -77,7 +77,7 @@ gitea_milestone_make_url(struct gcli_ctx *ctx,
 	} break;
 	}
 
-	free(suffix);
+	gcli_clear_ptr(&suffix);
 
 	return rc;
 }
@@ -126,7 +126,7 @@ gitea_get_milestone(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	}
 
 	gcli_fetch_buffer_free(&buffer);
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,12 +57,12 @@ gitlab_api_error_string(struct gcli_ctx *ctx, struct gcli_fetch_buffer *const bu
 		msg = NULL;
 	}
 
-	free(error_data.error_description);
-	free(error_data.message);
-	free(error_data.error);
+	gcli_clear_ptr(&error_data.error_description);
+	gcli_clear_ptr(&error_data.message);
+	gcli_clear_ptr(&error_data.error);
 
 	if (rc < 0 || msg == NULL) {
-		free(msg);
+		gcli_clear_ptr(&msg);
 
 		if (sn_verbose()) {
 			return sn_asprintf("Could not parse Gitlab error response. "
@@ -105,8 +105,8 @@ gitlab_user_id(struct gcli_ctx *ctx, char const *user_name)
 		}
 	}
 
-	free(e_username);
-	free(url);
+	gcli_clear_ptr(&e_username);
+	gcli_clear_ptr(&url);
 	gcli_fetch_buffer_free(&buffer);
 
 	return uid;

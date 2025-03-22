@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -52,7 +52,7 @@ gcli_error(struct gcli_ctx *ctx, char const *const fmt, ...)
 	va_end(vp);
 
 	if (ctx->last_error)
-		free(ctx->last_error);
+		gcli_clear_ptr(&ctx->last_error);
 
 	ctx->last_error = buf;
 
@@ -103,7 +103,7 @@ gcli_get_authheader(struct gcli_ctx *ctx)
 		hdr = gcli_forge(ctx)->make_authheader(ctx, token);
 	}
 
-	free(token);
+	gcli_clear_ptr(&token);
 
 	return hdr;
 }

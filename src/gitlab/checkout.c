@@ -76,8 +76,8 @@ gitlab_mr_checkout(struct gcli_ctx *ctx, char const *const remote,
 	if (rc < 0)
 		return rc;
 
-	free(remote_ref); remote_ref = NULL;
-	free(refspec); refspec = NULL;
+	gcli_clear_ptr(&remote_ref);
+	gcli_clear_ptr(&refspec);
 
 	pid = fork();
 	if (pid < 0)
@@ -93,7 +93,7 @@ gitlab_mr_checkout(struct gcli_ctx *ctx, char const *const remote,
 
 	rc = gcli_wait_proc_ok(ctx, pid);
 
-	free(local_ref); local_ref = NULL;
+	gcli_clear_ptr(&local_ref);
 
 	return rc;
 }

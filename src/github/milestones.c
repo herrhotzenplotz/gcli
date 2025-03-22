@@ -63,8 +63,8 @@ github_milestones_make_url(struct gcli_ctx *const ctx,
 		                   gcli_get_apibase(ctx),
 		                   e_owner, e_repo, suffix);
 
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
 		*url = sn_asprintf("%s/milestones%s", path->as_url, suffix);
@@ -122,8 +122,8 @@ github_milestone_make_url(struct gcli_ctx *ctx,
 		                   gcli_get_apibase(ctx), e_owner, e_repo,
 		                   path->as_default.id, suffix);
 
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
 		*url = sn_asprintf("%s%s", path->as_url, suffix);
@@ -133,7 +133,7 @@ github_milestone_make_url(struct gcli_ctx *ctx,
 	} break;
 	}
 
-	free(suffix);
+	gcli_clear_ptr(&suffix);
 
 	return rc;
 }
@@ -159,7 +159,7 @@ github_get_milestone(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		json_close(&stream);
 	}
 
-	free(url);
+	gcli_clear_ptr(&url);
 	gcli_fetch_buffer_free(&buffer);
 
 	return rc;
@@ -200,7 +200,7 @@ github_create_milestone(struct gcli_ctx *ctx,
 		/* This is fine :-) */
 		char *e_description = gcli_json_escape_cstr(args->description);
 		description = sn_asprintf(",\"description\": \"%s\"", e_description);
-		free(e_description);
+		gcli_clear_ptr(&e_description);
 	} else {
 		description = strdup("");
 	}
@@ -216,11 +216,11 @@ github_create_milestone(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, json_body, NULL, NULL);
 
-	free(json_body);
-	free(description);
-	free(url);
-	free(e_repo);
-	free(e_owner);
+	gcli_clear_ptr(&json_body);
+	gcli_clear_ptr(&description);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&e_repo);
+	gcli_clear_ptr(&e_owner);
 
 	return rc;
 }
@@ -238,7 +238,7 @@ github_delete_milestone(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -263,8 +263,8 @@ github_milestone_set_duedate(struct gcli_ctx *ctx,
 	payload = sn_asprintf("{ \"due_on\": \"%s\"}", norm_date);
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
 
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

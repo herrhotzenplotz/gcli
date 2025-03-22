@@ -64,8 +64,8 @@ github_perform_submit_comment(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
 
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -160,7 +160,7 @@ github_get_comment(struct gcli_ctx *ctx, struct gcli_path const *const target,
 
 	rc = github_fetch_comment(ctx, url, out);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

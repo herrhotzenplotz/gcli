@@ -109,8 +109,8 @@ gitea_label_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		                   gcli_get_apibase(ctx), e_owner, e_repo,
 		                   path->as_default.id, suffix);
 
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_NAMED: {
 		struct gcli_path repo_path = {0};
@@ -165,7 +165,7 @@ gitea_delete_label(struct gcli_ctx *ctx, struct gcli_path const *const path)
 		rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 	}
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

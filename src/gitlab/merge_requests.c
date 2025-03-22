@@ -79,8 +79,8 @@ gitlab_mr_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		                   e_owner, e_repo, path->as_default.id,
 		                   suffix);
 
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_PID_ID: {
 		*url = sn_asprintf("%s/projects/%"PRIid"/merge_requests/%"PRIid"%s",
@@ -97,7 +97,7 @@ gitlab_mr_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	} break;
 	}
 
-	free(suffix);
+	gcli_clear_ptr(&suffix);
 
 	return rc;
 }
@@ -140,21 +140,21 @@ gitlab_get_mrs(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		char *tmp = gcli_urlencode(details->author);
 		bool const need_qmark = details->all;
 		e_author = sn_asprintf("%cauthor_username=%s", need_qmark ? '?' : '&', tmp);
-		free(tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->label) {
 		char *tmp = gcli_urlencode(details->label);
 		bool const need_qmark = details->all && !details->author;
 		e_label = sn_asprintf("%clabels=%s", need_qmark ? '?' : '&', tmp);
-		free(tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->milestone) {
 		char *tmp = gcli_urlencode(details->milestone);
 		bool const need_qmark = details->all && !details->author && !details->label;
 		e_milestone = sn_asprintf("%cmilestone=%s", need_qmark ? '?' : '&', tmp);
-		free(tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->search_term) {
@@ -163,7 +163,7 @@ gitlab_get_mrs(struct gcli_ctx *ctx, struct gcli_path const *const path,
 			!details->label && !details->milestone;
 
 		e_search = sn_asprintf("%csearch=%s", need_qmark ? '?' : '&', tmp);
-		free(tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	rc = gitlab_repo_make_url(ctx, path, &url, "/merge_requests%s%s%s%s%s",
@@ -173,10 +173,10 @@ gitlab_get_mrs(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	                          e_milestone ? e_milestone : "",
 	                          e_search ? e_search : "");
 
-	free(e_search);
-	free(e_milestone);
-	free(e_label);
-	free(e_author);
+	gcli_clear_ptr(&e_search);
+	gcli_clear_ptr(&e_milestone);
+	gcli_clear_ptr(&e_label);
+	gcli_clear_ptr(&e_author);
 
 	if (rc < 0)
 		return rc;
@@ -187,11 +187,11 @@ gitlab_get_mrs(struct gcli_ctx *ctx, struct gcli_path const *const path,
 static void
 gitlab_free_diff(struct gitlab_diff *diff)
 {
-	free(diff->diff);
-	free(diff->old_path);
-	free(diff->new_path);
-	free(diff->a_mode);
-	free(diff->b_mode);
+	gcli_clear_ptr(&diff->diff);
+	gcli_clear_ptr(&diff->old_path);
+	gcli_clear_ptr(&diff->new_path);
+	gcli_clear_ptr(&diff->a_mode);
+	gcli_clear_ptr(&diff->b_mode);
 
 	memset(diff, 0, sizeof(*diff));
 }
@@ -203,8 +203,7 @@ gitlab_free_diffs(struct gitlab_diff_list *list)
 		gitlab_free_diff(&list->diffs[i]);
 	}
 
-	free(list->diffs);
-	list->diffs = NULL;
+	gcli_clear_ptr(&list->diffs);
 	list->diffs_size = 0;
 }
 
@@ -273,7 +272,7 @@ gitlab_make_commit_patch(struct gcli_ctx *ctx, FILE *stream,
 	gitlab_free_diffs(&list);
 
 err_fetch_diffs:
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -309,7 +308,7 @@ gitlab_mr_get_patch(struct gcli_ctx *ctx, FILE *stream,
 	}
 
 err_make_commit_patch:
-	free(base_sha_short);
+	gcli_clear_ptr(&base_sha_short);
 	gcli_commits_free(&commits);
 
 err_get_commit_list:
@@ -363,8 +362,8 @@ gitlab_mr_get_diff_version(struct gcli_ctx *ctx,
 		json_close(&stream);
 	}
 
-	free(url);
-	free(buffer.data);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&buffer.data);
 
 	return rc;
 }
@@ -449,7 +448,7 @@ gitlab_mr_set_automerge(struct gcli_ctx *const ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PUT", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -476,7 +475,7 @@ gitlab_mr_merge(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	rc = gcli_fetch_with_method(ctx, "PUT", url, data, NULL, &buffer);
 
 	gcli_fetch_buffer_free(&buffer);
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -502,7 +501,7 @@ gitlab_get_pull(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		json_close(&stream);
 	}
 
-	free(url);
+	gcli_clear_ptr(&url);
 	gcli_fetch_buffer_free(&buffer);
 
 	return rc;
@@ -559,8 +558,8 @@ gitlab_mr_patch_state(struct gcli_ctx *const ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
 
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }
@@ -617,7 +616,7 @@ gitlab_mr_wait_until_mergeable(struct gcli_ctx *ctx,
 		is_mergeable = pull.mergeable;
 
 		gcli_pull_free(&pull);
-	gcli_fetch_buffer_free(&buffer);
+		gcli_fetch_buffer_free(&buffer);
 
 		if (is_mergeable)
 			break;
@@ -626,7 +625,7 @@ gitlab_mr_wait_until_mergeable(struct gcli_ctx *ctx,
 		nanosleep(&ts, NULL);
 	}
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -747,9 +746,9 @@ gitlab_perform_submit_mr(struct gcli_ctx *ctx, struct gcli_submit_pull_options *
 
 	/* cleanup */
 	gcli_fetch_buffer_free(&buffer);
-	free(source_owner);
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&source_owner);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -781,12 +780,12 @@ gitlab_mr_update_labels(struct gcli_ctx *ctx,
 	payload = gcli_jsongen_to_string(&gen);
 
 	gcli_jsongen_free(&gen);
-	free(list);
+	gcli_clear_ptr(&list);
 
 	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
 
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }
@@ -834,8 +833,8 @@ gitlab_mr_set_milestone(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
 
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }
@@ -885,7 +884,7 @@ gitlab_mr_get_user_id_list(
 		json_close(&stream);
 	}
 
-	free(url);
+	gcli_clear_ptr(&url);
 	gcli_fetch_buffer_free(&buffer);
 
 	return rc;
@@ -952,8 +951,8 @@ gitlab_mr_add_user_id(
 		rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
 	}
 
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 bail_resolve_user_id:
 	gitlab_user_id_list_free(&list);
@@ -1010,8 +1009,8 @@ gitlab_mr_set_title(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
 
 	/* clean up */
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }
@@ -1055,7 +1054,7 @@ line_code(struct gcli_ctx *ctx, struct gcli_jsongen *const gen,
 	snprintf(tmp, sizeof(tmp), "%s_%d_%d", sha_digest, old, new);
 	gcli_jsongen_string(gen, tmp);
 
-	free(sha_digest);
+	gcli_clear_ptr(&sha_digest);
 
 	return 0;
 }
@@ -1158,10 +1157,10 @@ post_diff_comment(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
 
-	free(payload);
+	gcli_clear_ptr(&payload);
 
 err_jsongen_init:
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -1215,9 +1214,9 @@ gitlab_mr_create_review(struct gcli_ctx *ctx,
 void
 gitlab_mr_version_free(struct gitlab_mr_version *version)
 {
-	free(version->base_commit);
-	free(version->start_commit);
-	free(version->head_commit);
+	gcli_clear_ptr(&version->base_commit);
+	gcli_clear_ptr(&version->start_commit);
+	gcli_clear_ptr(&version->head_commit);
 }
 
 void
@@ -1227,9 +1226,7 @@ gitlab_mr_version_list_free(struct gitlab_mr_version_list *list)
 		gitlab_mr_version_free(&list->versions[i]);
 	}
 
-	free(list->versions);
-
-	list->versions = NULL;
+	gcli_clear_ptr(&list->versions);
 	list->versions_size = 0;
 }
 
@@ -1247,7 +1244,7 @@ gitlab_mr_request_update_approval(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, "{}", NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

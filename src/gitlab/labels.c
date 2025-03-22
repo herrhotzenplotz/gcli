@@ -86,7 +86,7 @@ gitlab_create_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		colour_string = sn_asprintf("#%06X", label->colour & 0xFFFFFF);
 		gcli_jsongen_objmember(&gen, "color");
 		gcli_jsongen_string(&gen, colour_string);
-		free(colour_string);
+		gcli_clear_ptr(&colour_string);
 
 		gcli_jsongen_objmember(&gen, "description");
 		gcli_jsongen_string(&gen, label->description);
@@ -105,8 +105,8 @@ gitlab_create_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		json_close(&stream);
 	}
 
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 	gcli_fetch_buffer_free(&buffer);
 
 	return rc;

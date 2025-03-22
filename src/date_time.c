@@ -121,7 +121,7 @@ gcli_parse_iso8601_date_time(struct gcli_ctx *ctx, char const *const input,
 
 		if (oldtz) {
 			setenv("TZ", oldtz, 1);
-			free(oldtz);
+			gcli_clear_ptr(&oldtz);
 		} else {
 			unsetenv("TZ");
 		}

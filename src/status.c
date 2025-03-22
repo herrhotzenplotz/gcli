@@ -55,8 +55,7 @@ gcli_free_notifications(struct gcli_notification_list *list)
 		gcli_free_notification(&list->notifications[i]);
 	}
 
-	free(list->notifications);
-	list->notifications = NULL;
+	gcli_clear_ptr(&list->notifications);
 	list->notifications_size = 0;
 }
 

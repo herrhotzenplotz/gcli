@@ -57,25 +57,25 @@ bugzilla_get_bugs(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	if (path->as_bugzilla.product) {
 		char *tmp = gcli_urlencode(path->as_bugzilla.product);
 		e_product = sn_asprintf("&product=%s", tmp);
-		free(tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	if (path->as_bugzilla.component) {
 		char *tmp = gcli_urlencode(path->as_bugzilla.component);
 		e_component = sn_asprintf("&component=%s", tmp);
-		free(tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->author) {
 		char *tmp = gcli_urlencode(details->author);
 		e_author = sn_asprintf("&creator=%s", tmp);
-		free(tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->search_term) {
 		char *tmp = gcli_urlencode(details->search_term);
 		e_query = sn_asprintf("&quicksearch=%s", tmp);
-		free(tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	/* TODO: handle the max = -1 case */
@@ -90,10 +90,10 @@ bugzilla_get_bugs(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	                  e_author ? e_author : "",
 	                  e_query ? e_query : "");
 
-	free(e_query);
-	free(e_product);
-	free(e_component);
-	free(e_author);
+	gcli_clear_ptr(&e_query);
+	gcli_clear_ptr(&e_product);
+	gcli_clear_ptr(&e_component);
+	gcli_clear_ptr(&e_author);
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc == 0) {
@@ -106,7 +106,7 @@ bugzilla_get_bugs(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	}
 
 	gcli_fetch_buffer_free(&buffer);
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -138,7 +138,7 @@ bugzilla_bug_get_comments(struct gcli_ctx *const ctx,
 	gcli_fetch_buffer_free(&buffer);
 
 error_fetch:
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -172,7 +172,7 @@ bugzilla_bug_get_comment(struct gcli_ctx *const ctx,
 	gcli_fetch_buffer_free(&buffer);
 
 error_fetch:
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 
@@ -200,7 +200,7 @@ bugzilla_bug_get_op(struct gcli_ctx *ctx, gcli_id const bug_id, char **out)
 	gcli_fetch_buffer_free(&buffer);
 
 error_fetch:
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -245,7 +245,7 @@ bugzilla_get_bug(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	/* don't use gcli_issues_free because it frees data behind pointers we
 	 * just copied */
-	free(list.issues);
+	gcli_clear_ptr(&list.issues);
 
 	/* insert the web-url which is not provided by the API ... */
 	out->web_url = sn_asprintf("%s/show_bug.cgi?id=%"PRIid,
@@ -260,7 +260,7 @@ error_parse:
 	gcli_fetch_buffer_free(&buffer);
 
 error_fetch:
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -292,7 +292,7 @@ bugzilla_bug_get_attachments(struct gcli_ctx *ctx,
 	gcli_fetch_buffer_free(&buffer);
 
 error_fetch:
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -413,11 +413,11 @@ bugzilla_bug_submit(struct gcli_ctx *const ctx,
 	}
 
 	gcli_fetch_buffer_free(&buffer);
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 err_jsongen_init:
-	free(token);
+	gcli_clear_ptr(&token);
 
 	return rc;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -110,7 +110,7 @@ gcli_get_gist(struct gcli_ctx *ctx, char const *gist_id, struct gcli_gist *out)
 	}
 
 	gcli_fetch_buffer_free(&buffer);
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -137,7 +137,7 @@ read_file(FILE *f)
 	}
 
 	if (ferror(f)) {
-		free(out);
+		gcli_clear_ptr(&out);
 		out = NULL;
 	}
 
@@ -211,9 +211,9 @@ gcli_create_gist(struct gcli_ctx *ctx, struct gcli_new_gist opts)
 	rc = gcli_fetch_with_method(ctx, "POST", url, post_data, NULL, &buffer);
 
 	gcli_fetch_buffer_free(&buffer);
-	free(content);
-	free(url);
-	free(post_data);
+	gcli_clear_ptr(&content);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&post_data);
 
 	return rc;
 }
@@ -230,7 +230,7 @@ gcli_delete_gist(struct gcli_ctx *ctx, char const *gist_id)
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, &buffer);
 
 	gcli_fetch_buffer_free(&buffer);
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -238,21 +238,21 @@ gcli_delete_gist(struct gcli_ctx *ctx, char const *gist_id)
 void
 gcli_gist_free(struct gcli_gist *g)
 {
-	free(g->id);
-	free(g->owner);
-	free(g->url);
-	free(g->date);
-	free(g->git_pull_url);
-	free(g->description);
+	gcli_clear_ptr(&g->id);
+	gcli_clear_ptr(&g->owner);
+	gcli_clear_ptr(&g->url);
+	gcli_clear_ptr(&g->date);
+	gcli_clear_ptr(&g->git_pull_url);
+	gcli_clear_ptr(&g->description);
 
 	for (size_t j = 0; j < g->files_size; ++j) {
-		free(g->files[j].filename);
-		free(g->files[j].language);
-		free(g->files[j].url);
-		free(g->files[j].type);
+		gcli_clear_ptr(&g->files[j].filename);
+		gcli_clear_ptr(&g->files[j].language);
+		gcli_clear_ptr(&g->files[j].url);
+		gcli_clear_ptr(&g->files[j].type);
 	}
 
-	free(g->files);
+	gcli_clear_ptr(&g->files);
 
 	memset(g, 0, sizeof(*g));
 }
@@ -263,8 +263,6 @@ gcli_gists_free(struct gcli_gist_list *const list)
 	for (size_t i = 0; i < list->gists_size; ++i)
 		gcli_gist_free(&list->gists[i]);
 
-	free(list->gists);
-
-	list->gists = NULL;
+	gcli_clear_ptr(&list->gists);
 	list->gists_size = 0;
 }

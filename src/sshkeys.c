@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -45,13 +45,12 @@ void
 gcli_sshkeys_free_keys(struct gcli_sshkey_list *list)
 {
 	for (size_t i = 0; i < list->keys_size; ++i) {
-		free(list->keys[i].title);
-		free(list->keys[i].key);
+		gcli_clear_ptr(&list->keys[i].title);
+		gcli_clear_ptr(&list->keys[i].key);
 	}
 
-	free(list->keys);
+	gcli_clear_ptr(&list->keys);
 
-	list->keys = NULL;
 	list->keys_size = 0;
 }
 
@@ -72,7 +71,7 @@ gcli_sshkeys_add_key(struct gcli_ctx *ctx, char const *title,
 		return rc;
 
 	rc = forge->add_sshkey(ctx, title, buffer, out);
-	free(buffer);
+	gcli_clear_ptr(&buffer);
 
 	return rc;
 }

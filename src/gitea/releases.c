@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -68,8 +68,8 @@ gitea_upload_release_asset(struct gcli_ctx *ctx, char *const url,
 
 	rc = gcli_curl_gitea_upload_attachment(ctx, request, asset.path, &buffer);
 
-	free(request);
-	free(e_assetname);
+	gcli_clear_ptr(&request);
+	gcli_clear_ptr(&e_assetname);
 	gcli_fetch_buffer_free(&buffer);
 
 	return rc;
@@ -145,11 +145,11 @@ gitea_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *releas
 	gcli_release_free(&response);
 out:
 	gcli_fetch_buffer_free(&buffer);
-	free(e_owner);
-	free(e_repo);
-	free(upload_url);
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&e_owner);
+	gcli_clear_ptr(&e_repo);
+	gcli_clear_ptr(&upload_url);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }

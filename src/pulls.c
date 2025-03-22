@@ -43,9 +43,7 @@ gcli_pulls_free(struct gcli_pull_list *const it)
 	for (size_t i = 0; i < it->pulls_size; ++i)
 		gcli_pull_free(&it->pulls[i]);
 
-	free(it->pulls);
-
-	it->pulls = NULL;
+	gcli_clear_ptr(&it->pulls);
 	it->pulls_size = 0;
 }
 
@@ -75,17 +73,15 @@ void
 gcli_commits_free(struct gcli_commit_list *list)
 {
 	for (size_t i = 0; i < list->commits_size; ++i) {
-		free(list->commits[i].sha);
-		free(list->commits[i].long_sha);
-		free(list->commits[i].message);
-		free(list->commits[i].date);
-		free(list->commits[i].author);
-		free(list->commits[i].email);
+		gcli_clear_ptr(&list->commits[i].sha);
+		gcli_clear_ptr(&list->commits[i].long_sha);
+		gcli_clear_ptr(&list->commits[i].message);
+		gcli_clear_ptr(&list->commits[i].date);
+		gcli_clear_ptr(&list->commits[i].author);
+		gcli_clear_ptr(&list->commits[i].email);
 	}
 
-	free(list->commits);
-
-	list->commits = NULL;
+	gcli_clear_ptr(&list->commits);
 	list->commits_size = 0;
 }
 

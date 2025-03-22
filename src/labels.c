@@ -40,8 +40,8 @@ gcli_get_labels(struct gcli_ctx *ctx, struct gcli_path const *const path,
 void
 gcli_free_label(struct gcli_label *const label)
 {
-	free(label->name);
-	free(label->description);
+	gcli_clear_ptr(&label->name);
+	gcli_clear_ptr(&label->description);
 }
 
 void
@@ -49,9 +49,9 @@ gcli_free_labels(struct gcli_label_list *const list)
 {
 	for (size_t i = 0; i < list->labels_size; ++i)
 		gcli_free_label(&list->labels[i]);
-	free(list->labels);
 
-	list->labels = NULL;
+	gcli_clear_ptr(&list->labels);
+
 	list->labels_size = 0;
 }
 

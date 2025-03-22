@@ -99,8 +99,8 @@ gitlab_pipeline_make_url(struct gcli_ctx *ctx,
 		                   path->as_default.id,
 		                   suffix);
 
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
 		*url = sn_asprintf("%s%s", path->as_url, suffix);
@@ -110,7 +110,7 @@ gitlab_pipeline_make_url(struct gcli_ctx *ctx,
 	} break;
 	}
 
-	free(suffix);
+	gcli_clear_ptr(&suffix);
 
 	return rc;
 }
@@ -139,7 +139,7 @@ gitlab_get_pipeline(struct gcli_ctx *ctx,
 		gcli_fetch_buffer_free(&buffer);
 	}
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -163,11 +163,11 @@ gitlab_get_mr_pipelines(struct gcli_ctx *ctx,
 void
 gitlab_pipeline_free(struct gitlab_pipeline *pipeline)
 {
-	free(pipeline->status);
-	free(pipeline->ref);
-	free(pipeline->sha);
-	free(pipeline->source);
-	free(pipeline->web_url);
+	gcli_clear_ptr(&pipeline->status);
+	gcli_clear_ptr(&pipeline->ref);
+	gcli_clear_ptr(&pipeline->sha);
+	gcli_clear_ptr(&pipeline->source);
+	gcli_clear_ptr(&pipeline->web_url);
 }
 
 void
@@ -176,9 +176,8 @@ gitlab_pipelines_free(struct gitlab_pipeline_list *const list)
 	for (size_t i = 0; i < list->pipelines_size; ++i) {
 		gitlab_pipeline_free(&list->pipelines[i]);
 	}
-	free(list->pipelines);
 
-	list->pipelines = NULL;
+	gcli_clear_ptr(&list->pipelines);
 	list->pipelines_size = 0;
 }
 
@@ -228,13 +227,13 @@ gitlab_get_pipeline_children(struct gcli_ctx *ctx,
 void
 gitlab_free_job(struct gitlab_job *const job)
 {
-	free(job->status);
-	free(job->stage);
-	free(job->name);
-	free(job->ref);
-	free(job->runner_name);
-	free(job->runner_description);
-	free(job->web_url);
+	gcli_clear_ptr(&job->status);
+	gcli_clear_ptr(&job->stage);
+	gcli_clear_ptr(&job->name);
+	gcli_clear_ptr(&job->ref);
+	gcli_clear_ptr(&job->runner_name);
+	gcli_clear_ptr(&job->runner_description);
+	gcli_clear_ptr(&job->web_url);
 }
 
 void
@@ -243,9 +242,7 @@ gitlab_free_jobs(struct gitlab_job_list *list)
 	for (size_t i = 0; i < list->jobs_size; ++i)
 		gitlab_free_job(&list->jobs[i]);
 
-	free(list->jobs);
-
-	list->jobs = NULL;
+	gcli_clear_ptr(&list->jobs);
 	list->jobs_size = 0;
 }
 
@@ -275,8 +272,8 @@ gitlab_job_make_url(struct gcli_ctx *ctx,
 		                   path->as_default.id,
 		                   suffix);
 
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
 		*url = sn_asprintf("%s%s", path->as_url, suffix);
@@ -286,7 +283,7 @@ gitlab_job_make_url(struct gcli_ctx *ctx,
 	} break;
 	}
 
-	free(suffix);
+	gcli_clear_ptr(&suffix);
 
 	return rc;
 }
@@ -304,7 +301,7 @@ gitlab_job_get_log(struct gcli_ctx *ctx, struct gcli_path const *const job_path,
 
 	rc = gcli_curl(ctx, stream, url, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -332,7 +329,7 @@ gitlab_get_job(struct gcli_ctx *ctx, struct gcli_path const *const job_path,
 	}
 
 	gcli_fetch_buffer_free(&buffer);
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -349,7 +346,7 @@ gitlab_job_cancel(struct gcli_ctx *ctx, struct gcli_path const *const path)
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -366,7 +363,7 @@ gitlab_job_retry(struct gcli_ctx *ctx, struct gcli_path const *const path)
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -393,7 +390,7 @@ gitlab_job_download_artifacts(struct gcli_ctx *ctx,
 	if (f)
 		fclose(f);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

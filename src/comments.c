@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,8 +39,8 @@
 void
 gcli_comment_free(struct gcli_comment *const it)
 {
-	free(it->author);
-	free(it->body);
+	gcli_clear_ptr(&it->author);
+	gcli_clear_ptr(&it->body);
 }
 
 void
@@ -49,8 +49,7 @@ gcli_comments_free(struct gcli_comment_list *const list)
 	for (size_t i = 0; i < list->comments_size; ++i)
 		gcli_comment_free(&list->comments[i]);
 
-	free(list->comments);
-	list->comments = NULL;
+	gcli_clear_ptr(&list->comments);
 	list->comments_size = 0;
 }
 

@@ -69,8 +69,8 @@ github_pull_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		                   e_owner, e_repo, path->as_default.id,
 		                   suffix);
 
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
 		*url = sn_asprintf("%s%s", path->as_url, suffix);
@@ -80,7 +80,7 @@ github_pull_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	} break;
 	}
 
-	free(suffix);
+	gcli_clear_ptr(&suffix);
 
 	return rc;
 }
@@ -190,11 +190,11 @@ search_pulls(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	url = sn_asprintf("%s/search/issues?q=%s", gcli_get_apibase(ctx),
 	                  e_query_string);
 
-	free(milestone);
-	free(author);
-	free(label);
-	free(query_string);
-	free(e_query_string);
+	gcli_clear_ptr(&milestone);
+	gcli_clear_ptr(&author);
+	gcli_clear_ptr(&label);
+	gcli_clear_ptr(&query_string);
+	gcli_clear_ptr(&e_query_string);
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc < 0)
@@ -207,7 +207,7 @@ search_pulls(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	gcli_fetch_buffer_free(&buffer);
 
 error_fetch:
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -253,7 +253,7 @@ github_pull_get_patch(struct gcli_ctx *ctx, FILE *stream,
 
 	rc = gcli_curl(ctx, stream, url, "Accept: application/vnd.github.v3.patch");
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -276,9 +276,9 @@ github_print_get_patch(struct gcli_ctx *ctx, FILE *stream, char const *owner,
 		e_owner, e_repo, pr_number);
 	rc = gcli_curl(ctx, stream, url, "Accept: application/vnd.github.v3.patch");
 
-	free(e_owner);
-	free(e_repo);
-	free(url);
+	gcli_clear_ptr(&e_owner);
+	gcli_clear_ptr(&e_repo);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -296,7 +296,7 @@ github_pull_get_diff(struct gcli_ctx *ctx, FILE *stream,
 
 	rc = gcli_curl(ctx, stream, url, "Accept: application/vnd.github.v3.diff");
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -324,7 +324,7 @@ github_pull_delete_head_branch(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 err_make_url:
 	gcli_pull_free(&pull);
@@ -351,7 +351,7 @@ github_pull_merge(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	if (rc == 0 && delete_source)
 		rc = github_pull_delete_head_branch(ctx, path);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -384,8 +384,8 @@ github_pull_patch_state(struct gcli_ctx *const ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
 
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }
@@ -431,14 +431,14 @@ github_pull_set_automerge(struct gcli_ctx *const ctx, char const *const node_id)
 
 	payload = gcli_jsongen_to_string(&gen);
 	gcli_jsongen_free(&gen);
-	free(query);
+	gcli_clear_ptr(&query);
 
 	url = sn_asprintf("%s/graphql", gcli_get_apibase(ctx));
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
 
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -478,8 +478,8 @@ github_pull_add_reviewers(struct gcli_ctx *ctx,
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
 
 	/* Cleanup */
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -562,8 +562,8 @@ github_perform_submit_pull(struct gcli_ctx *ctx,
 	}
 
 	gcli_fetch_buffer_free(&buffer);
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -621,7 +621,7 @@ github_get_pull(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		json_close(&stream);
 	}
 
-	free(url);
+	gcli_clear_ptr(&url);
 	gcli_fetch_buffer_free(&buffer);
 
 	return rc;
@@ -697,8 +697,8 @@ github_pull_set_title(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
 
 	/* Cleanup */
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -778,8 +778,8 @@ github_pull_create_review(struct gcli_ctx *ctx,
 	gcli_jsongen_free(&gen);
 
 bail:
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

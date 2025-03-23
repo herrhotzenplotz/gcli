@@ -52,7 +52,7 @@ parse_github_gist_files_idiot_hack(struct gcli_ctx *ctx, json_stream *stream,
 	gist->files = NULL;
 	gist->files_size = 0;
 
-	if ((next = json_next(stream)) != JSON_OBJECT)
+	if (json_next(stream) != JSON_OBJECT)
 		return gcli_error(ctx, "expected Gist Files Object");
 
 	while ((next = json_next(stream)) == JSON_STRING) {

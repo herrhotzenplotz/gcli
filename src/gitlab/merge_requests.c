@@ -254,8 +254,10 @@ gitlab_make_commit_patch(struct gcli_ctx *ctx, FILE *stream,
 		return rc;
 
 	rc = gcli_fetch_list(ctx, url, &fl);
-	if (rc < 0)
-		goto err_fetch_diffs;
+	if (rc < 0) {
+		gcli_clear_ptr(&url);
+		return rc;
+	}
 
 	fprintf(stream, "From %s Mon Sep 17 00:00:00 2001\n", commit->long_sha);
 	fprintf(stream, "From: %s <%s>\n", commit->author, commit->email);
@@ -270,9 +272,6 @@ gitlab_make_commit_patch(struct gcli_ctx *ctx, FILE *stream,
 	fprintf(stream, "--\n2.42.2\n\n\n");
 
 	gitlab_free_diffs(&list);
-
-err_fetch_diffs:
-	gcli_clear_ptr(&url);
 
 	return rc;
 }

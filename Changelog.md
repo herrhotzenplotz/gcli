@@ -25,6 +25,10 @@ This changelog does not follow semantic versioning.
 
   Reported by: botantony <https://gitlab.com/botantony>
 
+- Fixed a crash in jemalloc caused by a double-free in the patch action on Gitlab
+
+  This only occured in the case where multiple patches are in a merge request.
+
 ### Changed
 
 ### Removed

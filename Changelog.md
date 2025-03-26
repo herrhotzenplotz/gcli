@@ -29,6 +29,9 @@ This changelog does not follow semantic versioning.
 
   This only occured in the case where multiple patches are in a merge request.
 
+- Fixed incorrect argument parsing in the pipelines subcommand
+  leading to a nonsensical error message
+
 ### Changed
 
 ### Removed

@@ -21,6 +21,16 @@ freebsd-arm64:
     - make -j 4 all
     - make -j 4 distcheck
 
+freebsd-riscv64:
+  stage: testing
+  tags:
+    - freebsd
+    - riscv
+  script:
+    - ./configure --debug
+    - make -j 4 all
+    - make -j 4 distcheck
+
 dist:
   stage: dist
   image: alpine:3.18

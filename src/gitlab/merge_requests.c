@@ -441,7 +441,9 @@ gitlab_mr_set_automerge(struct gcli_ctx *const ctx,
 	char *url;
 	int rc;
 
-	rc = gitlab_mr_make_url(ctx, path, &url, "");
+	rc = gitlab_mr_make_url(
+		ctx, path, &url, "/merge?merge_when_pipeline_succeeds=true");
+
 	if (rc < 0)
 		return rc;
 
@@ -728,7 +730,7 @@ gitlab_perform_submit_mr(struct gcli_ctx *ctx, struct gcli_submit_pull_options *
 		rc = parse_gitlab_mr(ctx, &stream, &pull);
 		json_close(&stream);
 
-		target_mr_path.as_default.id = pull.id;
+		target_mr_path.as_default.id = pull.number;
 
 		if (rc < 0)
 			goto out;

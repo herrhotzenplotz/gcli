@@ -32,6 +32,9 @@ This changelog does not follow semantic versioning.
 - Fixed incorrect argument parsing in the pipelines subcommand
   leading to a nonsensical error message
 
+- Fixed broken automerge feature when creating merge requests on
+  Gitlab.
+
 ### Changed
 
 ### Removed

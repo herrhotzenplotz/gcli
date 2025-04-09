@@ -58,7 +58,10 @@ gitlab_get_milestones(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		.parse = (parsefn)(parse_gitlab_milestones),
 	};
 
-	rc = gitlab_repo_make_url(ctx, path, &url, "/milestones");
+	rc = gitlab_repo_make_url(
+		ctx, path, &url,
+		"/milestones?include_ancestors=true");
+
 	if (rc < 0)
 		return rc;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,6 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <gcli/cmd/cmd.h>
 #include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/gitconfig.h>
 
@@ -185,7 +186,7 @@ find_file_in_dotgit(char const *fname)
 
 			free(curr_dir_path);
 
-			curr_dir_path = realpath(tmp, NULL);
+			curr_dir_path = gcli_cmd_realpath(tmp);
 			if (!curr_dir_path)
 				err(1, "gcli: error: realpath at %s", tmp);
 

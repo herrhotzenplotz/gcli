@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -71,5 +71,7 @@ int subcommand_api(int argc, char *argv[]);
 
 void gcli_pretty_print(char const *input, int indent, int maxlinelen,
                        FILE *stream);
+
+char *gcli_cmd_realpath(char const *const restrict pathname);
 
 #endif /* GCLI_CMD_CMD_H */

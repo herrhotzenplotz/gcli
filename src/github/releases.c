@@ -119,7 +119,8 @@ github_upload_release_asset(struct gcli_ctx *ctx, char const *url,
 }
 
 int
-github_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *release)
+github_create_release(struct gcli_ctx *ctx,
+                      struct gcli_create_release_args const *release)
 {
 	char *url = NULL, *e_owner = NULL, *e_repo = NULL, *upload_url = NULL,
 	     *payload = NULL;

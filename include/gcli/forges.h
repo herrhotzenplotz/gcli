@@ -411,7 +411,7 @@ struct gcli_forge_descriptor {
 	 * Create a new release */
 	int (*create_release)(
 		struct gcli_ctx *ctx,
-		struct gcli_new_release const *release);
+		struct gcli_create_release_args const *release);
 
 	/**
 	 * Delete the release */

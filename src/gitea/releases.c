@@ -76,7 +76,8 @@ gitea_upload_release_asset(struct gcli_ctx *ctx, char *const url,
 }
 
 int
-gitea_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *release)
+gitea_create_release(struct gcli_ctx *ctx,
+                     struct gcli_create_release_args const *release)
 {
 	char *e_owner = NULL, *e_repo = NULL, *payload = NULL, *upload_url = NULL, *url = NULL;
 	struct gcli_fetch_buffer buffer = {0};

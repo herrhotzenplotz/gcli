@@ -92,7 +92,7 @@ gitlab_get_releases(struct gcli_ctx *ctx,
 }
 
 int
-gitlab_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *release)
+gitlab_create_release(struct gcli_ctx *ctx, struct gcli_create_release_args const *release)
 {
 	char *e_owner = NULL, *e_repo = NULL, *url = NULL, *payload = NULL;
 	struct gcli_jsongen gen = {0};

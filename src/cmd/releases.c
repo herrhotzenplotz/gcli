@@ -190,8 +190,7 @@ gcli_releases_print(enum gcli_output_flags const flags,
 static void
 releasemsg_init(struct gcli_ctx *ctx, FILE *f, void *_data)
 {
-	struct gcli_new_release *const info = _data;
-
+	struct gcli_create_release_args *const info = _data;
 	(void) ctx;
 
 	/* paste template if one has been specified */
@@ -218,7 +217,7 @@ releasemsg_init(struct gcli_ctx *ctx, FILE *f, void *_data)
 }
 
 static char *
-get_release_message(struct gcli_new_release const *info)
+get_release_message(struct gcli_create_release_args const *info)
 {
 	return gcli_editor_get_user_message(g_clictx, releasemsg_init,
 	                                    (void *)info);
@@ -227,7 +226,7 @@ get_release_message(struct gcli_new_release const *info)
 static int
 subcommand_releases_create(int argc, char *argv[])
 {
-	struct gcli_new_release release = {0};
+	struct gcli_create_release_args release = {0};
 	int ch, rc;
 	bool always_yes = false;
 
@@ -314,15 +313,12 @@ subcommand_releases_create(int argc, char *argv[])
 			always_yes = true;
 		} break;
 		case 'T': {
-			if (release.body) {
+			if (release.body)
 				errx(1, "gcli: error: cannot specify -T twice");
-			}
 
 			rc = sn_read_file(optarg, &release.body);
-			if (rc < 0) {
-				errx(1, "gcli: cannot open file '%s': %s",
-				     optarg, strerror(rc));
-			}
+			if (rc < 0)
+				errx(1, "gcli: cannot open file '%s'", optarg);
 		} break;
 		default:
 			usage();

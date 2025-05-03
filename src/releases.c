@@ -70,13 +70,15 @@ gcli_free_releases(struct gcli_release_list *const list)
 }
 
 int
-gcli_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *release)
+gcli_create_release(struct gcli_ctx *ctx,
+                    struct gcli_create_release_args const *release)
 {
 	gcli_null_check_call(create_release, ctx, release);
 }
 
 int
-gcli_release_push_asset(struct gcli_ctx *ctx, struct gcli_new_release *const release,
+gcli_release_push_asset(struct gcli_ctx *ctx,
+                        struct gcli_create_release_args *const release,
                         struct gcli_release_asset_upload const asset)
 {
 	if (release->assets_size == GCLI_RELEASE_MAX_ASSETS)

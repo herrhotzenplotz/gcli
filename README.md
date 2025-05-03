@@ -48,6 +48,7 @@ The test suite requires:
 ### Compile
 
 In order to perform a build, do:
+
 ```console
 $ ./configure [--prefix=/usr/local]
 $ make

@@ -18,6 +18,7 @@
 .Op Fl o Ar owner Fl r Ar repo
 .Op Fl d
 .Op Fl p
+.Op Fl T Pa template-file.md
 .Nm
 .Cm delete
 .Op Fl o Ar owner Fl r Ar repo
@@ -98,6 +99,17 @@ Do not ask for confirmation before creating the release. Assume yes.
 Mark this release as a draft.
 .It Fl p , -prerelease
 Mark this release as a prerelease.
+.It Fl T , -template Pa template-file.md
+Use the provided
+.Pa template-file.md
+as a template for the release message.
+Unless
+.Fl y
+has been specified, an editor will be opened to edit a copy of this
+file.
+Using this option together with
+.Fl y
+allows for completely automated creation of releases.
 .El
 .It Cm delete
 Delete a release.

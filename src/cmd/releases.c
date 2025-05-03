@@ -48,6 +48,7 @@ usage(void)
 	fprintf(stderr, "usage: gcli releases create [-o owner -r repo] [-n name] "
 	        "[-y] [-d] [-p] [-a asset]\n");
 	fprintf(stderr, "                            [-c commitish] [-t tag]\n");
+	fprintf(stderr, "                            [-T message-template.md]\n");
 	fprintf(stderr, "       gcli releases delete [-o owner -r repo] [-y] id\n");
 	fprintf(stderr, "       gcli releases [-o owner -r repo] [-n number] [-s] [-l]\n");
 	fprintf(stderr, "OPTIONS:\n");
@@ -62,6 +63,7 @@ usage(void)
 	fprintf(stderr, "  -p              Mark as a prerelease\n");
 	fprintf(stderr, "  -t tag          Name for new tag\n");
 	fprintf(stderr, "  -y              Do not ask for confirmation\n");
+	fprintf(stderr, "  -T path         Use the given file as a template file for the release message\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
@@ -188,9 +190,19 @@ gcli_releases_print(enum gcli_output_flags const flags,
 static void
 releasemsg_init(struct gcli_ctx *ctx, FILE *f, void *_data)
 {
-	struct gcli_new_release const *info = _data;
+	struct gcli_new_release *const info = _data;
 
 	(void) ctx;
+
+	/* paste template if one has been specified */
+	if (info->body) {
+		fputs(info->body, f);
+
+		/* clear out the template message, it's going to be
+		 * filled in by the caller */
+		free(info->body);
+		info->body = NULL;
+	}
 
 	fprintf(
 		f,
@@ -216,7 +228,7 @@ static int
 subcommand_releases_create(int argc, char *argv[])
 {
 	struct gcli_new_release release = {0};
-	int ch;
+	int ch, rc;
 	bool always_yes = false;
 
 	struct option const options[] = {
@@ -256,10 +268,14 @@ subcommand_releases_create(int argc, char *argv[])
 		  .has_arg = required_argument,
 		  .flag    = NULL,
 		  .val     = 'a' },
+		{ .name    = "template",
+		  .has_arg = required_argument,
+		  .flag    = NULL,
+		  .val     = 'T' },
 		{0},
 	};
 
-	while ((ch = getopt_long(argc, argv, "ydpn:t:c:r:o:a:",
+	while ((ch = getopt_long(argc, argv, "ydpn:t:c:r:o:a:T:",
 	                         options, NULL)) != -1) {
 		switch (ch) {
 		case 'd':
@@ -297,6 +313,17 @@ subcommand_releases_create(int argc, char *argv[])
 		case 'y': {
 			always_yes = true;
 		} break;
+		case 'T': {
+			if (release.body) {
+				errx(1, "gcli: error: cannot specify -T twice");
+			}
+
+			rc = sn_read_file(optarg, &release.body);
+			if (rc < 0) {
+				errx(1, "gcli: cannot open file '%s': %s",
+				     optarg, strerror(rc));
+			}
+		} break;
 		default:
 			usage();
 			return EXIT_FAILURE;
@@ -315,18 +342,33 @@ subcommand_releases_create(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	release.body = get_release_message(&release);
-	if (release.body == NULL)
-		errx(1, "gcli: empty message. aborting.");
+	/* -y without -T doesn't make sense */
+	if (always_yes && release.body == NULL) {
+		fprintf(stderr,
+		        "gcli: error: cannot have empty release message "
+		        "together with --yes\n");
 
-	if (!always_yes)
+		usage();
+		return EXIT_FAILURE;
+	}
+
+	/* interactive part, skip if non-interactive */
+	if (!always_yes) {
+		release.body = get_release_message(&release);
+		if (release.body == NULL)
+			errx(1, "gcli: empty message. aborting.");
+
 		if (!sn_yesno("Do you want to create this release?"))
 			errx(1, "gcli: Aborted by user");
+	}
 
 	if (gcli_create_release(g_clictx, &release) < 0) {
 		errx(1, "gcli: error: failed to create release: %s",
 		     gcli_get_error(g_clictx));
 	}
+
+	free(release.body);
+	release.body = NULL;
 
 	return EXIT_SUCCESS;
 }

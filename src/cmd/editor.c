@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -112,10 +112,10 @@ gcli_editor_get_user_message(
 
 	edit(ctx, filename);
 
-	void *file_content = NULL;
-	int len = sn_mmap_file(filename, &file_content);
+	char *file_content = NULL;
+	int len = sn_read_file(filename, &file_content);
 	if (len < 0)
-		err(1, "mmap");
+		err(1, "read_file");
 
 	sn_sv result = {0};
 	sn_sv buffer = sn_sv_from_parts(file_content, (size_t)len);
@@ -136,7 +136,7 @@ gcli_editor_get_user_message(
 		result = sv_append(result, line);
 	}
 
-	munmap(file_content, len);
+	free(file_content);
 	unlink(filename);
 
 	/* When the input is empty, the data pointer is going to be NULL.

@@ -9,6 +9,19 @@ This changelog does not follow semantic versioning.
 - The pulls subcommand now supports assigning pull requests to
   users. A new assign action has been added.
 
+- The releases create subcommand now has an option `-T`/`--template`.
+  This option allows you to pass a path to a file that is used
+  for the release notes. If combined with `--yes` the entire
+  command is non-interactive allowing you to use it from scripts.
+  If not combined with `--yes` an editor is opened with a copy of
+  the passed file, allowing you to use it as a template for further
+  editing.
+
+  See the manual page `gcli-releases(1)` for details and usage
+  examples.
+
+  Suggested by: xaizek <https://github.com/xaizek>
+
 ### Fixed
 
 - Parsing timestamps with timezone offsets now works properly.

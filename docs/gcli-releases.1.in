@@ -154,6 +154,17 @@ $ gcli releases create --owner herrhotzenplotz \\
   --commitish 0fed3c9 --asset foobar.tar.xz \\
   --asset barfoo.tar.gz --asset CHANGELOG
 .Ed
+.Pp
+Create a release called
+.Dq v2.8.0
+from a pre-existing tag. Read the release notes from the file
+.Pa relnotes.md
+and do not ask for confirmation.
+.Pp
+.Bd -literal -offset indent
+$ gcli releases create --tag v2.8.0 --name 'Version 2.8.0' \\
+  --commitish v2.8.0 --template relnotes.md --yes
+.Ed
 .Sh SEE ALSO
 .Xr git 1 ,
 .Xr gcli 1

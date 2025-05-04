@@ -203,17 +203,31 @@ releasemsg_init(struct gcli_ctx *ctx, FILE *f, void *_data)
 		info->body = NULL;
 	}
 
-	fprintf(
-		f,
-		"! Enter your release notes above, save and exit.\n"
-		"! All lines with a leading '!' are discarded and will not\n"
-		"! appear in the final release note.\n"
-		"!       IN : %s/%s\n"
-		"! TAG NAME : %s\n"
-		"!     NAME : %s\n"
-		"!\n"
-		"! vim: ft=markdown\n",
-		info->owner, info->repo, info->tag, info->name);
+	fprintf(f,
+	        "! Enter your release notes above, save and exit.\n"
+	        "! All lines with a leading '!' are discarded and will not\n"
+	        "! appear in the final release note.\n!\n");
+
+	if (info->repo_path.kind == GCLI_PATH_DEFAULT) {
+		fprintf(f,
+		        "!       IN : %s/%s\n",
+		        info->repo_path.as_default.owner,
+		        info->repo_path.as_default.repo);
+	}
+
+	fprintf(f,
+	        "! TAG NAME : %s\n",
+	        info->tag);
+
+	if (info->name) {
+		fprintf(f,
+		        "!     NAME : %s\n",
+		        info->name);
+	}
+
+	fprintf(f,
+	        "!\n"
+	        "! vim: ft=markdown\n");
 }
 
 static char *
@@ -293,10 +307,10 @@ subcommand_releases_create(int argc, char *argv[])
 			release.commitish = optarg;
 			break;
 		case 'r':
-			release.repo = optarg;
+			release.repo_path.as_default.repo = optarg;
 			break;
 		case 'o':
-			release.owner = optarg;
+			release.repo_path.as_default.owner = optarg;
 			break;
 		case 'a': {
 			struct gcli_release_asset_upload asset = {
@@ -329,7 +343,7 @@ subcommand_releases_create(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	check_owner_and_repo(&release.owner, &release.repo);
+	check_path(&release.repo_path);
 
 	/* make sure we have a tag for the release */
 	if (!release.tag) {

@@ -94,7 +94,7 @@ gitlab_get_releases(struct gcli_ctx *ctx,
 int
 gitlab_create_release(struct gcli_ctx *ctx, struct gcli_create_release_args const *release)
 {
-	char *e_owner = NULL, *e_repo = NULL, *url = NULL, *payload = NULL;
+	char *url = NULL, *payload = NULL;
 	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
@@ -135,17 +135,13 @@ gitlab_create_release(struct gcli_ctx *ctx, struct gcli_create_release_args cons
 	gcli_jsongen_free(&gen);
 
 	/* Generate URL */
-	e_owner = gcli_urlencode(release->owner);
-	e_repo = gcli_urlencode(release->repo);
+	rc = gitlab_repo_make_url(ctx, &release->repo_path, &url, "/releases");
 
-	/* https://docs.github.com/en/rest/reference/repos#create-a-release */
-	url = sn_asprintf("%s/projects/%s%%2F%s/releases", gcli_get_apibase(ctx),
-	                  e_owner, e_repo);
-
-	gcli_clear_ptr(&e_owner);
-	gcli_clear_ptr(&e_repo);
-
-	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
+	/* perform request */
+	if (rc == 0) {
+		rc = gcli_fetch_with_method(ctx, "POST", url, payload,
+		                            NULL, NULL);
+	}
 
 	gcli_clear_ptr(&url);
 	gcli_clear_ptr(&payload);

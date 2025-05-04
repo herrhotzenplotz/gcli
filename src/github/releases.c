@@ -122,12 +122,11 @@ int
 github_create_release(struct gcli_ctx *ctx,
                       struct gcli_create_release_args const *release)
 {
-	char *url = NULL, *e_owner = NULL, *e_repo = NULL, *upload_url = NULL,
-	     *payload = NULL;
+	char *url = NULL, *upload_url = NULL, *payload = NULL;
+	int rc = 0;
 	struct gcli_fetch_buffer buffer = {0};
 	struct gcli_jsongen gen = {0};
 	struct gcli_release response = {0};
-	int rc = 0;
 
 	/* Payload */
 	gcli_jsongen_init(&gen);
@@ -161,15 +160,9 @@ github_create_release(struct gcli_ctx *ctx,
 	payload = gcli_jsongen_to_string(&gen);
 	gcli_jsongen_free(&gen);
 
-	e_owner = gcli_urlencode(release->owner);
-	e_repo = gcli_urlencode(release->repo);
-
-	/* https://docs.github.com/en/rest/reference/repos#create-a-release */
-	url = sn_asprintf("%s/repos/%s/%s/releases", gcli_get_apibase(ctx),
-	                  e_owner, e_repo);
-
-	gcli_clear_ptr(&e_owner);
-	gcli_clear_ptr(&e_repo);
+	rc = github_repo_make_url(ctx, &release->repo_path, &url, "/releases");
+	if (rc < 0)
+		goto out;
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, &buffer);
 	if (rc < 0)
@@ -177,7 +170,7 @@ github_create_release(struct gcli_ctx *ctx,
 
 	github_parse_single_release(ctx, buffer, &response);
 
-    rc = github_get_upload_url(ctx, &response, &upload_url);
+	rc = github_get_upload_url(ctx, &response, &upload_url);
 	if (rc < 0)
 		goto out;
 

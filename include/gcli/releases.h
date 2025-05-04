@@ -70,8 +70,7 @@ struct gcli_release_asset_upload {
 
 #define GCLI_RELEASE_MAX_ASSETS 16
 struct gcli_create_release_args {
-	char const *owner;
-	char const *repo;
+	struct gcli_path repo_path;
 	char const *tag;
 	char const *name;
 	char *body;

@@ -34,7 +34,6 @@
 #include <gcli/gitlab/status.h>
 #include <gcli/json_util.h>
 
-#include <sn/sn.h>
 #include <pdjson/pdjson.h>
 
 #include <templates/gitlab/status.h>
@@ -52,7 +51,7 @@ gitlab_get_notifications(struct gcli_ctx *ctx, int const max,
 		.max = max,
 	};
 
-	url = sn_asprintf("%s/todos", gcli_get_apibase(ctx));
+	url = gcli_asprintf("%s/todos", gcli_get_apibase(ctx));
 
 	return gcli_fetch_list(ctx, url, &fl);
 }
@@ -63,7 +62,7 @@ gitlab_notification_mark_as_read(struct gcli_ctx *ctx, char const *id)
 	char *url = NULL;
 	int rc = 0;
 
-	url = sn_asprintf("%s/todos/%s/mark_as_done", gcli_get_apibase(ctx), id);
+	url = gcli_asprintf("%s/todos/%s/mark_as_done", gcli_get_apibase(ctx), id);
 	rc = gcli_fetch_with_method(ctx, "POST", url, NULL, NULL, NULL);
 
 	gcli_clear_ptr(&url);

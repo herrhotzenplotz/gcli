@@ -34,10 +34,13 @@
 #include <gcli/cmd/gitconfig.h>
 
 #include <gcli/ctx.h>
+#include <gcli/gcli.h>
 #include <gcli/forges.h>
 #include <gcli/gitea/config.h>
 #include <gcli/github/config.h>
 #include <gcli/gitlab/config.h>
+#include <gcli/port/string.h>
+#include <gcli/port/util.h>
 
 #include <assert.h>
 #include <ctype.h>
@@ -53,7 +56,7 @@ struct gcli_config_section {
 
 	struct gcli_config_entries entries;
 
-	sn_sv title;
+	gcli_sv title;
 };
 
 struct gcli_config {
@@ -68,18 +71,18 @@ struct gcli_config {
 	int no_markdown;            /* do not render markdown (when built with lowdown) */
 	int enable_experimental;    /* enable experimental features */
 
-	sn_sv  buffer;
-	void  *mmap_pointer;
-	bool   inited;
+	gcli_sv buffer;
+	char    *file_content;
+	bool    inited;
 };
 
 struct gcli_dotgcli {
 	struct gcli_config_entries entries;
 
-	sn_sv  buffer;
-	void  *mmap_pointer;
-	bool   has_been_searched_for;
-	bool   has_been_found;
+	gcli_sv buffer;
+	char    *file_content;
+	bool    has_been_searched_for;
+	bool    has_been_found;
 };
 
 struct cmd_ctx {
@@ -201,18 +204,18 @@ init_local_config(struct gcli_ctx *ctx)
 	dgcli->has_been_searched_for = true;
 	dgcli->has_been_found = true;
 
-	int len = sn_mmap_file(path, &dgcli->mmap_pointer);
+	int len = gcli_read_file(path, &dgcli->file_content);
 	if (len < 0)
 		err(1, "gcli: unable to open config file");
 
-	dgcli->buffer = sn_sv_from_parts(dgcli->mmap_pointer, len);
-	dgcli->buffer = sn_sv_trim_front(dgcli->buffer);
+	dgcli->buffer = gcli_sv_from_parts(dgcli->file_content, len);
+	dgcli->buffer = gcli_sv_trim_front(dgcli->buffer);
 
 	int curr_line = 1;
 	while (dgcli->buffer.length > 0) {
-		sn_sv line = sn_sv_chop_until(&dgcli->buffer, '\n');
+		gcli_sv line = gcli_sv_chop_until(&dgcli->buffer, '\n');
 
-		line = sn_sv_trim(line);
+		line = gcli_sv_trim(line);
 
 		if (line.length == 0)
 			errx(1, "gcli: %s:%d: Unexpected end of line",
@@ -220,14 +223,14 @@ init_local_config(struct gcli_ctx *ctx)
 
 		// Comments
 		if (line.data[0] == '#') {
-			dgcli->buffer = sn_sv_trim_front(dgcli->buffer);
+			dgcli->buffer = gcli_sv_trim_front(dgcli->buffer);
 			curr_line++;
 			continue;
 		}
 
-		sn_sv key = sn_sv_chop_until(&line, '=');
+		gcli_sv key = gcli_sv_chop_until(&line, '=');
 
-		key = sn_sv_trim(key);
+		key = gcli_sv_trim(key);
 
 		if (key.length == 0)
 			errx(1, "gcli: %s:%d: empty key", path, curr_line);
@@ -235,7 +238,7 @@ init_local_config(struct gcli_ctx *ctx)
 		line.data   += 1;
 		line.length -= 1;
 
-		sn_sv value = sn_sv_trim(line);
+		gcli_sv value = gcli_sv_trim(line);
 
 		struct gcli_config_entry *entry = calloc(1, sizeof(*entry));
 		TAILQ_INSERT_TAIL(&dgcli->entries, entry, next);
@@ -243,7 +246,7 @@ init_local_config(struct gcli_ctx *ctx)
 	    entry->key = key;
 	    entry->value = value;
 
-		dgcli->buffer = sn_sv_trim_front(dgcli->buffer);
+		dgcli->buffer = gcli_sv_trim_front(dgcli->buffer);
 		curr_line++;
 	}
 
@@ -251,7 +254,7 @@ init_local_config(struct gcli_ctx *ctx)
 }
 
 struct config_parser {
-	sn_sv buffer;
+	gcli_sv buffer;
 	int line;
 	char const *filename;
 };
@@ -281,7 +284,7 @@ again:
 not_whitespace:
 	if (input->buffer.data[0] == '#') {
 		/* This is a comment */
-		sn_sv_chop_until(&input->buffer, '\n');
+		gcli_sv_chop_until(&input->buffer, '\n');
 		goto again;
 	}
 }
@@ -293,7 +296,7 @@ parse_section_entry(struct config_parser *input,
 	struct gcli_config_entry *entry = calloc(1, sizeof(*entry));
 	TAILQ_INSERT_TAIL(&section->entries, entry, next);
 
-	sn_sv key = sn_sv_chop_until(&input->buffer, '=');
+	gcli_sv key = gcli_sv_chop_until(&input->buffer, '=');
 
 	if (key.length == 0)
 		errx(1, "gcli: %s:%d: empty key", input->filename, input->line);
@@ -301,13 +304,13 @@ parse_section_entry(struct config_parser *input,
 	input->buffer.data   += 1;
 	input->buffer.length -= 1;
 
-	sn_sv value = sn_sv_chop_until(&input->buffer, '\n');
+	gcli_sv value = gcli_sv_chop_until(&input->buffer, '\n');
 
-	entry->key   = sn_sv_trim(key);
-	entry->value = sn_sv_trim(value);
+	entry->key   = gcli_sv_trim(key);
+	entry->value = gcli_sv_trim(value);
 }
 
-static sn_sv
+static gcli_sv
 parse_section_title(struct config_parser *input)
 {
 	size_t len = 0;
@@ -319,7 +322,7 @@ parse_section_title(struct config_parser *input)
 	while (!isspace(input->buffer.data[len]) && input->buffer.data[len] != '{')
 		len++;
 
-	sn_sv title = sn_sv_from_parts(input->buffer.data, len);
+	gcli_sv title = gcli_sv_from_parts(input->buffer.data, len);
 	input->buffer.data   += len;
 	input->buffer.length -= len;
 
@@ -398,28 +401,28 @@ ensure_config(struct gcli_ctx *ctx)
 	if (!file_path) {
 		file_path = getenv("HOME");
 		if (!file_path) {
-			warnx("Neither XDG_CONFIG_HOME nor HOME set in env");
+			gcli_warnx(ctx, "Neither XDG_CONFIG_HOME nor HOME set in env");
 			return cfg;
 		}
 
 		/*
 		 * Code duplication to avoid leaking pointers */
-		file_path = sn_asprintf("%s/.config/gcli/config", file_path);
+		file_path = gcli_asprintf("%s/.config/gcli/config", file_path);
 	} else {
-		file_path = sn_asprintf("%s/gcli/config", file_path);
+		file_path = gcli_asprintf("%s/gcli/config", file_path);
 	}
 
 	if (access(file_path, R_OK) < 0) {
-		warn("gcli: cannot access config file at %s", file_path);
+		gcli_warn(ctx, "gcli: cannot access config file at %s", file_path);
 		return cfg;
 	}
 
-	int len = sn_mmap_file(file_path, &cfg->mmap_pointer);
+	int len = gcli_read_file(file_path, &cfg->file_content);
 	if (len < 0)
 		err(1, "gcli: unable to open config file");
 
-	cfg->buffer = sn_sv_from_parts(cfg->mmap_pointer, len);
-	cfg->buffer = sn_sv_trim_front(cfg->buffer);
+	cfg->buffer = gcli_sv_from_parts(cfg->file_content, len);
+	cfg->buffer = gcli_sv_trim_front(cfg->buffer);
 
 	parser.buffer   = cfg->buffer;
 	parser.line     = 1;
@@ -562,7 +565,7 @@ gcli_config_parse_args(struct gcli_ctx *ctx, int *argc, char ***argv)
 	};
 
 	/* by default we are not verbose */
-	sn_setverbosity(VERBOSITY_NORMAL);
+	gcli_setverbosity(g_clictx, GCLI_VERBOSITY_NORMAL);
 
 	/* Before we parse options, invalidate the override type so it
 	 * doesn't get confused later */
@@ -583,10 +586,10 @@ gcli_config_parse_args(struct gcli_ctx *ctx, int *argc, char ***argv)
 			cfg->force_colours = 1;
 		} break;
 		case 'q': {
-			sn_setverbosity(VERBOSITY_QUIET);
+			gcli_setverbosity(ctx, GCLI_VERBOSITY_QUIET);
 		} break;
 		case 'v': {
-			sn_setverbosity(VERBOSITY_VERBOSE);
+			gcli_setverbosity(ctx, GCLI_VERBOSITY_VERBOSE);
 		} break;
 		case 't': {
 			if (strcmp(optarg, "github") == 0) {
@@ -639,7 +642,7 @@ find_section(struct gcli_config *cfg, char const *name)
 	struct gcli_config_section *section;
 
 	TAILQ_FOREACH(section, &cfg->sections, next) {
-		if (sn_sv_eq_to(section->title, name))
+		if (gcli_sv_eq_to(section->title, name))
 			return section;
 	}
 	return NULL;
@@ -660,7 +663,7 @@ gcli_config_get_section_entries(struct gcli_ctx *ctx, char const *section_name)
 		return &s->entries;
 }
 
-sn_sv
+gcli_sv
 gcli_config_find_by_key(struct gcli_ctx *ctx, char const *section_name,
                         char const *key)
 {
@@ -671,26 +674,26 @@ gcli_config_find_by_key(struct gcli_ctx *ctx, char const *section_name,
 		find_section(cfg, section_name);
 
 	if (!section) {
-		warnx("gcli: no config section with name '%s'", section_name);
+		gcli_warnx(ctx, "gcli: no config section with name '%s'", section_name);
 		return SV_NULL;
 	}
 
 	TAILQ_FOREACH(entry, &section->entries, next) {
-		if (sn_sv_eq_to(entry->key, key))
+		if (gcli_sv_eq_to(entry->key, key))
 			return entry->value;
 	}
 
 	return SV_NULL;
 }
 
-static sn_sv
+static gcli_sv
 gcli_local_config_find_by_key(struct gcli_ctx *ctx, char const *const key)
 {
 	struct gcli_dotgcli *lcfg = ctx_dotgcli(ctx);
 	struct gcli_config_entry *entry;
 
 	TAILQ_FOREACH(entry, &lcfg->entries, next) {
-		if (sn_sv_eq_to(entry->key, key))
+		if (gcli_sv_eq_to(entry->key, key))
 			return entry->value;
 	}
 
@@ -702,7 +705,7 @@ gcli_config_get_editor(struct gcli_ctx *ctx)
 {
 	ensure_config(ctx);
 
-	return sn_sv_to_cstr(gcli_config_find_by_key(ctx, "defaults", "editor"));
+	return gcli_sv_to_cstr(gcli_config_find_by_key(ctx, "defaults", "editor"));
 }
 
 char *
@@ -710,7 +713,7 @@ gcli_config_get_pager(struct gcli_ctx *ctx)
 {
 	ensure_config(ctx);
 
-	return sn_sv_to_cstr(gcli_config_find_by_key(ctx, "defaults", "pager"));
+	return gcli_sv_to_cstr(gcli_config_find_by_key(ctx, "defaults", "pager"));
 }
 
 char *
@@ -718,7 +721,7 @@ gcli_config_get_url_open_program(struct gcli_ctx *ctx)
 {
 	ensure_config(ctx);
 
-	return sn_sv_to_cstr(
+	return gcli_sv_to_cstr(
 		gcli_config_find_by_key(ctx, "defaults", "url-open-program")
 	);
 }
@@ -734,12 +737,12 @@ static char *
 get_default_account(struct gcli_ctx *ctx, gcli_forge_type ftype)
 {
 	char const *const defaultname = default_account_entry_names[ftype];
-	sn_sv act = gcli_config_find_by_key(ctx, "defaults", defaultname);
+	gcli_sv act = gcli_config_find_by_key(ctx, "defaults", defaultname);
 
 	if (!act.length)
 		return NULL;
 
-	return sn_sv_to_cstr(act);
+	return gcli_sv_to_cstr(act);
 }
 
 static char *
@@ -772,7 +775,7 @@ gcli_config_get_apibase(struct gcli_ctx *ctx)
 	char *url = NULL;
 
 	if (acct) {
-		sn_sv url_sv = {0};
+		gcli_sv url_sv = {0};
 
 		url_sv = gcli_config_find_by_key(ctx, acct, "api-base");
 
@@ -781,11 +784,11 @@ gcli_config_get_apibase(struct gcli_ctx *ctx)
 		 * Above is correct behaviour. Below is bad/buggy behaviour.
 		 * Check for the second (buggy) option apibase and
 		 * use it if needed. */
-		if (sn_sv_null(url_sv))
+		if (gcli_sv_null(url_sv))
 			url_sv = gcli_config_find_by_key(ctx, acct, "apibase");
 
-		if (!sn_sv_null(url_sv))
-			url = sn_sv_to_cstr(url_sv);
+		if (!gcli_sv_null(url_sv))
+			url = gcli_sv_to_cstr(url_sv);
 	}
 
 	if (!url)
@@ -801,7 +804,7 @@ char *
 gcli_config_get_account_name(struct gcli_ctx *ctx)
 {
 	char *account = gcli_config_get_account(ctx);
-	sn_sv actname;
+	gcli_sv actname;
 
 	if (!account)
 		return NULL;
@@ -809,14 +812,14 @@ gcli_config_get_account_name(struct gcli_ctx *ctx)
 	actname = gcli_config_find_by_key(ctx, account, "account");
 	free(account);
 
-	return sn_sv_to_cstr(actname);
+	return gcli_sv_to_cstr(actname);
 }
 
 static char *
 get_account_token(struct gcli_ctx *ctx)
 {
 	char *account;
-	sn_sv token;
+	gcli_sv token;
 
 	account = gcli_config_get_account(ctx);
 	if (!account)
@@ -826,7 +829,7 @@ get_account_token(struct gcli_ctx *ctx)
 
 	free(account);
 
-	return sn_sv_to_cstr(token);
+	return gcli_sv_to_cstr(token);
 }
 
 char *
@@ -837,7 +840,7 @@ gcli_config_get_token(struct gcli_ctx *ctx)
 	return get_account_token(ctx);
 }
 
-sn_sv
+gcli_sv
 gcli_config_get_upstream(struct  gcli_ctx *ctx)
 {
 	init_local_config(ctx);
@@ -848,23 +851,23 @@ gcli_config_get_upstream(struct  gcli_ctx *ctx)
 bool
 gcli_config_pr_inhibit_delete_source_branch(struct gcli_ctx *ctx)
 {
-	sn_sv val;
+	gcli_sv val;
 
 	init_local_config(ctx);
 
 	val = gcli_local_config_find_by_key(ctx, "pr.inhibit-delete-source-branch");
 
-	return sn_sv_eq_to(val,	"yes");
+	return gcli_sv_eq_to(val,	"yes");
 }
 
 void
-gcli_config_get_upstream_parts(struct gcli_ctx *ctx, sn_sv *const owner,
-                               sn_sv *const repo)
+gcli_config_get_upstream_parts(struct gcli_ctx *ctx, gcli_sv *const owner,
+                               gcli_sv *const repo)
 {
 	ensure_config(ctx);
 
-	sn_sv upstream = gcli_config_get_upstream(ctx);
-	*owner = sn_sv_chop_until(&upstream, '/');
+	gcli_sv upstream = gcli_config_get_upstream(ctx);
+	*owner = gcli_sv_chop_until(&upstream, '/');
 
 	/* Sanity check: did we actually reach the '/'? */
 	if (*upstream.data != '/')
@@ -875,7 +878,7 @@ gcli_config_get_upstream_parts(struct gcli_ctx *ctx, sn_sv *const owner,
 	*repo            = upstream;
 }
 
-sn_sv
+gcli_sv
 gcli_config_get_base(struct gcli_ctx *ctx)
 {
 	init_local_config(ctx);
@@ -883,7 +886,7 @@ gcli_config_get_base(struct gcli_ctx *ctx)
 	return gcli_local_config_find_by_key(ctx, "pr.base");
 }
 
-sn_sv
+gcli_sv
 gcli_config_get_override_default_account(struct gcli_ctx *ctx)
 {
 	struct gcli_config *cfg;
@@ -909,12 +912,12 @@ gcli_config_get_forge_type_internal(struct gcli_ctx *ctx)
 	ensure_config(ctx);
 	init_local_config(ctx);
 
-	sn_sv entry = {0};
+	gcli_sv entry = {0};
 
 	if (cfg->override_default_account) {
 	    char const *section = cfg->override_default_account;
 		entry = gcli_config_find_by_key(ctx, section, "forge-type");
-		if (sn_sv_null(entry))
+		if (gcli_sv_null(entry))
 			errx(1,
 			     "gcli: error: given default override account not found or "
 			     "missing forge-type");
@@ -922,14 +925,14 @@ gcli_config_get_forge_type_internal(struct gcli_ctx *ctx)
 		entry = gcli_local_config_find_by_key(ctx, "forge-type");
 	}
 
-	if (!sn_sv_null(entry)) {
-		if (sn_sv_eq_to(entry, "github"))
+	if (!gcli_sv_null(entry)) {
+		if (gcli_sv_eq_to(entry, "github"))
 			return GCLI_FORGE_GITHUB;
-		else if (sn_sv_eq_to(entry, "gitlab"))
+		else if (gcli_sv_eq_to(entry, "gitlab"))
 			return GCLI_FORGE_GITLAB;
-		else if (sn_sv_eq_to(entry, "gitea"))
+		else if (gcli_sv_eq_to(entry, "gitea"))
 			return GCLI_FORGE_GITEA;
-		else if (sn_sv_eq_to(entry, "bugzilla"))
+		else if (gcli_sv_eq_to(entry, "bugzilla"))
 			return GCLI_FORGE_BUGZILLA;
 		else
 			errx(1, "gcli: unknown forge type "SV_FMT, SV_ARGS(entry));
@@ -950,7 +953,7 @@ gcli_config_get_forge_type(struct gcli_ctx *ctx)
 	gcli_forge_type const result = gcli_config_get_forge_type_internal(ctx);
 
 	/* print the type if verbose */
-	if (sn_verbose()) {
+	if (gcli_be_verbose(ctx)) {
 		static int have_printed_forge_type = 0;
 		static char const *const ftype_name[] = {
 			[GCLI_FORGE_GITHUB] = "GitHub",
@@ -992,7 +995,7 @@ int
 gcli_config_get_repo(struct gcli_ctx *ctx, char const **const owner,
                      char const **const repo)
 {
-	sn_sv upstream = {0};
+	gcli_sv upstream = {0};
 	struct gcli_config *cfg;
 
 	cfg = ensure_config(ctx);
@@ -1015,11 +1018,11 @@ gcli_config_get_repo(struct gcli_ctx *ctx, char const **const owner,
 	}
 
 	if ((upstream = gcli_config_get_upstream(ctx)).length != 0) {
-		sn_sv const owner_sv = sn_sv_chop_until(&upstream, '/');
-		sn_sv const repo_sv = sn_sv_from_parts(upstream.data + 1, upstream.length - 1);
+		gcli_sv const owner_sv = gcli_sv_chop_until(&upstream, '/');
+		gcli_sv const repo_sv = gcli_sv_from_parts(upstream.data + 1, upstream.length - 1);
 
-		*owner = sn_sv_to_cstr(owner_sv);
-		*repo  = sn_sv_to_cstr(repo_sv);
+		*owner = gcli_sv_to_cstr(owner_sv);
+		*repo  = gcli_sv_to_cstr(repo_sv);
 
 		return 0;
 	}
@@ -1065,11 +1068,11 @@ gcli_config_display_progress_spinner(struct gcli_ctx *ctx)
 	if (cfg->no_spinner)
 		return false;
 
-	sn_sv cfg_entry = gcli_config_find_by_key(ctx, "defaults", "disable-spinner");
-	if (sn_sv_null(cfg_entry))
+	gcli_sv cfg_entry = gcli_config_find_by_key(ctx, "defaults", "disable-spinner");
+	if (gcli_sv_null(cfg_entry))
 		return true;
 
-	if (string_means_true(sn_sv_to_cstr(cfg_entry)))
+	if (string_means_true(gcli_sv_to_cstr(cfg_entry)))
 		return false;
 
 	return true;
@@ -1086,11 +1089,11 @@ gcli_config_render_markdown(struct gcli_ctx *ctx)
 	if (cfg->no_markdown)
 		return false;
 
-	sn_sv cfg_entry = gcli_config_find_by_key(ctx, "defaults", "render-markdown");
-	if (sn_sv_null(cfg_entry))
+	gcli_sv cfg_entry = gcli_config_find_by_key(ctx, "defaults", "render-markdown");
+	if (gcli_sv_null(cfg_entry))
 		return true;
 
-	if (string_means_false(sn_sv_to_cstr(cfg_entry))) {
+	if (string_means_false(gcli_sv_to_cstr(cfg_entry))) {
 		cfg->no_markdown = true;
 		return false;
 	}
@@ -1109,9 +1112,9 @@ gcli_config_enable_experimental(struct gcli_ctx *ctx)
 	if (cfg->enable_experimental)
 		return true;
 
-	sn_sv cfg_entry = gcli_config_find_by_key(ctx, "defaults", "enable-experimental");
-	if (sn_sv_null(cfg_entry))
+	gcli_sv cfg_entry = gcli_config_find_by_key(ctx, "defaults", "enable-experimental");
+	if (gcli_sv_null(cfg_entry))
 		return false;
 
-	return string_means_true(sn_sv_to_cstr(cfg_entry));
+	return string_means_true(gcli_sv_to_cstr(cfg_entry));
 }

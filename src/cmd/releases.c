@@ -35,6 +35,7 @@
 #include <gcli/cmd/editor.h>
 
 #include <gcli/releases.h>
+#include <gcli/port/util.h>
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -83,8 +84,8 @@ gcli_print_release(enum gcli_output_flags const flags,
 	gcli_dict_add(dict,           "NAME",       0, 0, "%s", it->name);
 	gcli_dict_add(dict,           "AUTHOR",     0, 0, "%s", it->author);
 	gcli_dict_add_timestamp(dict, "DATE",       0, 0, it->date);
-	gcli_dict_add_string(dict,    "DRAFT",      0, 0, sn_bool_yesno(it->draft));
-	gcli_dict_add_string(dict,    "PRERELEASE", 0, 0, sn_bool_yesno(it->prerelease));
+	gcli_dict_add_string(dict,    "DRAFT",      0, 0, gcli_bool_yesno(it->draft));
+	gcli_dict_add_string(dict,    "PRERELEASE", 0, 0, gcli_bool_yesno(it->prerelease));
 	gcli_dict_add_string(dict,    "ASSETS",     0, 0, "");
 
 	/* asset urls */
@@ -330,7 +331,7 @@ subcommand_releases_create(int argc, char *argv[])
 			if (release.body)
 				errx(1, "gcli: error: cannot specify -T twice");
 
-			rc = sn_read_file(optarg, &release.body);
+			rc = gcli_read_file(optarg, &release.body);
 			if (rc < 0)
 				errx(1, "gcli: cannot open file '%s'", optarg);
 		} break;
@@ -368,7 +369,7 @@ subcommand_releases_create(int argc, char *argv[])
 		if (release.body == NULL)
 			errx(1, "gcli: empty message. aborting.");
 
-		if (!sn_yesno("Do you want to create this release?"))
+		if (!gcli_yesno("Do you want to create this release?"))
 			errx(1, "gcli: Aborted by user");
 	}
 
@@ -437,7 +438,7 @@ subcommand_releases_delete(int argc, char *argv[])
 	}
 
 	if (!always_yes)
-		if (!sn_yesno("Are you sure you want to delete this release?"))
+		if (!gcli_yesno("Are you sure you want to delete this release?"))
 			errx(1, "gcli: Aborted by user");
 
 	if (gcli_delete_release(g_clictx, &repo_path, argv[0]) < 0) {

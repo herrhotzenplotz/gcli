@@ -33,7 +33,6 @@
 #include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
-#include <sn/sn.h>
 
 #include <templates/gitlab/repos.h>
 
@@ -97,7 +96,7 @@ gitlab_get_repos(struct gcli_ctx *ctx, char const *owner, int const max,
 	};
 
 	e_owner = gcli_urlencode(owner);
-	url = sn_asprintf("%s/users/%s/projects", gcli_get_apibase(ctx), e_owner);
+	url = gcli_asprintf("%s/users/%s/projects", gcli_get_apibase(ctx), e_owner);
 	gcli_clear_ptr(&e_owner);
 
 	rc = gcli_fetch_list(ctx, url, &fl);
@@ -136,7 +135,7 @@ gitlab_repo_create(struct gcli_ctx *ctx, struct gcli_repo_create_options const *
 	struct json_stream stream = {0};
 
 	/* Request preparation */
-	url = sn_asprintf("%s/projects", gcli_get_apibase(ctx));
+	url = gcli_asprintf("%s/projects", gcli_get_apibase(ctx));
 
 	gcli_jsongen_init(&gen);
 	gcli_jsongen_begin_object(&gen);
@@ -197,7 +196,7 @@ gitlab_repo_set_visibility(struct gcli_ctx *ctx,
 	if (rc < 0)
 		return rc;
 
-	payload = sn_asprintf("{ \"visibility\": \"%s\" }", vis_str);
+	payload = gcli_asprintf("{ \"visibility\": \"%s\" }", vis_str);
 
 	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
 
@@ -216,7 +215,7 @@ gitlab_repo_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	va_list vp;
 
 	va_start(vp, suffix_fmt);
-	suffix = sn_vasprintf(suffix_fmt, vp);
+	suffix = gcli_vasprintf(suffix_fmt, vp);
 	va_end(vp);
 
 	switch (path->kind) {
@@ -226,9 +225,9 @@ gitlab_repo_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/projects/%s%%2F%s%s",
-		                   gcli_get_apibase(ctx), e_owner, e_repo,
-		                   suffix);
+		*url = gcli_asprintf("%s/projects/%s%%2F%s%s",
+		                     gcli_get_apibase(ctx), e_owner, e_repo,
+		                     suffix);
 
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
@@ -239,15 +238,15 @@ gitlab_repo_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		e_owner = gcli_urlencode(path->as_named.owner);
 		e_repo = gcli_urlencode(path->as_named.repo);
 
-		*url = sn_asprintf("%s/projects/%s%%2F%s%s",
-		                   gcli_get_apibase(ctx), e_owner, e_repo,
-		                   suffix);
+		*url = gcli_asprintf("%s/projects/%s%%2F%s%s",
+		                     gcli_get_apibase(ctx), e_owner, e_repo,
+		                     suffix);
 
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path type for gitlab repos");

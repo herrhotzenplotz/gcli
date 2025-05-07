@@ -31,7 +31,6 @@
 #include <gcli/github/issues.h>
 #include <gcli/issues.h>
 #include <gcli/json_util.h>
-#include <sn/sn.h>
 
 void
 gcli_issue_free(struct gcli_issue *const it)

@@ -33,6 +33,7 @@
 
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/cmdconfig.h>
+#include <gcli/port/util.h>
 #include <gcli/repos.h>
 
 #include <ctype.h>
@@ -213,7 +214,7 @@ delete_repo(bool always_yes, struct gcli_path const *const path)
 	bool delete = false;
 
 	if (!always_yes) {
-		delete = sn_yesno("Are you sure you want to delete the repo?");
+		delete = gcli_yesno("Are you sure you want to delete the repo?");
 	} else {
 		delete = true;
 	}

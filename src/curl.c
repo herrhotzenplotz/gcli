@@ -34,9 +34,9 @@
 #include <gcli/curl.h>
 #include <gcli/forges.h>
 #include <gcli/json_util.h>
+#include <gcli/port/err.h>
 
 #include <curl/curl.h>
-#include <sn/sn.h>
 #include <pdjson/pdjson.h>
 
 /* Hack for NetBSD's and Oracle Solaris broken isalnum implementation */
@@ -87,7 +87,7 @@ gcli_curl_ensure(struct gcli_ctx *ctx)
 		curl_version_info_data const *ver;
 
 		ver = curl_version_info(CURLVERSION_NOW);
-		ctx->curl_useragent = sn_asprintf("curl/%s", ver->version);
+		ctx->curl_useragent = gcli_asprintf("curl/%s", ver->version);
 	}
 
 	return 0;
@@ -293,16 +293,16 @@ fetch_header_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 	char **out = userdata;
 
 	size_t sz = size * nmemb;
-	sn_sv buffer = sn_sv_from_parts(ptr, sz);
-	sn_sv header_name = sn_sv_chop_until(&buffer, ':');
+	gcli_sv buffer = gcli_sv_from_parts(ptr, sz);
+	gcli_sv header_name = gcli_sv_chop_until(&buffer, ':');
 
 	/* Despite what the documentation says, this header is called
 	 * "link" not "Link". Webdev ftw /sarc */
-	if (sn_sv_eq_to(header_name, "link")) {
+	if (gcli_sv_eq_to(header_name, "link")) {
 		buffer.data += 1;
 		buffer.length -= 1;
-		buffer = sn_sv_trim_front(buffer);
-		*out = sn_strndup(buffer.data, buffer.length);
+		buffer = gcli_sv_trim_front(buffer);
+		*out = gcli_strndup(buffer.data, buffer.length);
 	}
 
 	return sz;
@@ -312,12 +312,12 @@ fetch_header_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 static char *
 parse_link_header(char *_header)
 {
-	sn_sv header = SV(_header);
-	sn_sv entry  = {0};
+	gcli_sv header = SV(_header);
+	gcli_sv entry  = {0};
 
 	/* Iterate through the comma-separated list of link relations */
-	while ((entry = sn_sv_chop_until(&header, ',')).length > 0) {
-		entry = sn_sv_trim(entry);
+	while ((entry = gcli_sv_chop_until(&header, ',')).length > 0) {
+		entry = gcli_sv_trim(entry);
 
 		/* the entries have semicolon-separated fields like so:
 		 * <url>; rel=\"next\"
@@ -327,14 +327,14 @@ parse_link_header(char *_header)
 		 * We're making lots of assumptions about the input data here
 		 * without sanity checking it. If it fails, we will know. Most
 		 * likely a segfault. */
-		sn_sv almost_url = sn_sv_chop_until(&entry, ';');
+		gcli_sv almost_url = gcli_sv_chop_until(&entry, ';');
 
-		if (sn_sv_eq_to(entry, "; rel=\"next\"")) {
+		if (gcli_sv_eq_to(entry, "; rel=\"next\"")) {
 			/* Skip the triangle brackets around the url */
 			almost_url.data += 1;
 			almost_url.length -= 2;
-			almost_url = sn_sv_trim(almost_url);
-			return sn_sv_to_cstr(almost_url);
+			almost_url = gcli_sv_trim(almost_url);
+			return gcli_sv_to_cstr(almost_url);
 		}
 
 		/* skip the comma if we have enough data */
@@ -381,7 +381,7 @@ gcli_fetch_with_method(
 
 	char *auth_header = gcli_get_authheader(ctx);
 
-	if (sn_verbose())
+	if (gcli_be_verbose(ctx))
 		fprintf(stderr, "info: cURL request %s %s...\n", method, url);
 
 	headers = NULL;
@@ -476,12 +476,12 @@ gcli_post_upload(struct gcli_ctx *ctx, char const *url, char const *content_type
 		return rc;
 
 	auth_header = gcli_get_authheader(ctx);
-	contenttype_header = sn_asprintf("Content-Type: %s",
-	                                 content_type);
-	contentsize_header = sn_asprintf("Content-Length: %zu",
-	                                 buffer_size);
+	contenttype_header = gcli_asprintf("Content-Type: %s",
+	                                   content_type);
+	contentsize_header = gcli_asprintf("Content-Length: %zu",
+	                                   buffer_size);
 
-	if (sn_verbose())
+	if (gcli_be_verbose(ctx))
 		fprintf(stderr, "info: cURL upload POST %s...\n", url);
 
 	headers = NULL;
@@ -550,7 +550,7 @@ gcli_curl_gitea_upload_attachment(struct gcli_ctx *ctx, char const *url,
 
 	auth_header = gcli_get_authheader(ctx);
 
-	if (sn_verbose())
+	if (gcli_be_verbose(ctx))
 		fprintf(stderr, "info: cURL upload POST %s...\n", url);
 
 	headers = NULL;
@@ -604,8 +604,8 @@ gcli_curl_gitea_upload_attachment(struct gcli_ctx *ctx, char const *url,
 	return rc;
 }
 
-sn_sv
-gcli_urlencode_sv(sn_sv const _input)
+gcli_sv
+gcli_urlencode_sv(gcli_sv const _input)
 {
 	size_t input_len;
 	size_t output_len;
@@ -628,13 +628,13 @@ gcli_urlencode_sv(sn_sv const _input)
 		}
 	}
 
-	return sn_sv_from_parts(output, output_len);
+	return gcli_sv_from_parts(output, output_len);
 }
 
 char *
 gcli_urlencode(char const *input)
 {
-	sn_sv encoded = gcli_urlencode_sv(SV((char *)input));
+	gcli_sv encoded = gcli_urlencode_sv(SV((char *)input));
 	return encoded.data;
 }
 

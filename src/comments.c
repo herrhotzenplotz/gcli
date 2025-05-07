@@ -34,7 +34,6 @@
 #include <gcli/forges.h>
 #include <gcli/github/comments.h>
 #include <gcli/json_util.h>
-#include <sn/sn.h>
 
 void
 gcli_comment_free(struct gcli_comment *const it)

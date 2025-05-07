@@ -41,14 +41,15 @@
 #include <gcli/cmd/colour.h>
 #include <gcli/cmd/editor.h>
 #include <gcli/diffutil.h>
+#include <gcli/port/string.h>
+#include <gcli/port/util.h>
 #include <gcli/pulls.h>
 
 static char *
 get_review_file_cache_dir(void)
 {
 	/* FIXME */
-	return sn_asprintf("%s/.cache/gcli/reviews",
-	                   getenv("HOME"));
+	return gcli_asprintf("%s/.cache/gcli/reviews", getenv("HOME"));
 }
 
 unsigned long
@@ -133,7 +134,7 @@ make_review_diff_file_name(struct gcli_path const *const path)
 	hash ^= djb2((unsigned char const *)path->as_default.owner);
 	hash ^= djb2((unsigned char const *)path->as_default.repo);
 
-	return sn_asprintf("%lx_%"PRIid".diff", hash, path->as_default.id);
+	return gcli_asprintf("%lx_%"PRIid".diff", hash, path->as_default.id);
 }
 
 static char *
@@ -141,7 +142,7 @@ get_review_diff_file_name(struct gcli_path const *const path)
 {
 	char *base = get_review_file_cache_dir();
 	char *file = make_review_diff_file_name(path);
-	char *file_path = sn_asprintf("%s/%s", base, file);
+	char *file_path = gcli_asprintf("%s/%s", base, file);
 	free(base);
 	free(file);
 
@@ -255,7 +256,7 @@ edit_diff(struct review_ctx *ctx)
 		fetch_patch(ctx);
 	} else {
 		/* The file exists, ask whether to open again or to delete and start over. */
-		if (sn_yesno("There seems to already be a review in progress. Start over?"))
+		if (gcli_yesno("There seems to already be a review in progress. Start over?"))
 			fetch_patch(ctx);
 	}
 

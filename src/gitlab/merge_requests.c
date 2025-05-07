@@ -64,7 +64,7 @@ gitlab_mr_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	va_list vp;
 
 	va_start(vp, suffix_fmt);
-	suffix = sn_vasprintf(suffix_fmt, vp);
+	suffix = gcli_vasprintf(suffix_fmt, vp);
 	va_end(vp);
 
 	switch (path->kind) {
@@ -74,23 +74,23 @@ gitlab_mr_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid"%s",
-		                   gcli_get_apibase(ctx),
-		                   e_owner, e_repo, path->as_default.id,
-		                   suffix);
+		*url = gcli_asprintf("%s/projects/%s%%2F%s/merge_requests/%"PRIid"%s",
+		                     gcli_get_apibase(ctx),
+		                     e_owner, e_repo, path->as_default.id,
+		                     suffix);
 
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_PID_ID: {
-		*url = sn_asprintf("%s/projects/%"PRIid"/merge_requests/%"PRIid"%s",
-		                   gcli_get_apibase(ctx),
-		                   path->as_pid_id.project_id,
-		                   path->as_pid_id.id,
-		                   suffix);
+		*url = gcli_asprintf("%s/projects/%"PRIid"/merge_requests/%"PRIid"%s",
+		                     gcli_get_apibase(ctx),
+		                     path->as_pid_id.project_id,
+		                     path->as_pid_id.id,
+		                     suffix);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path type for gitlab merge request");
@@ -139,21 +139,21 @@ gitlab_get_mrs(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	if (details->author) {
 		char *tmp = gcli_urlencode(details->author);
 		bool const need_qmark = details->all;
-		e_author = sn_asprintf("%cauthor_username=%s", need_qmark ? '?' : '&', tmp);
+		e_author = gcli_asprintf("%cauthor_username=%s", need_qmark ? '?' : '&', tmp);
 		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->label) {
 		char *tmp = gcli_urlencode(details->label);
 		bool const need_qmark = details->all && !details->author;
-		e_label = sn_asprintf("%clabels=%s", need_qmark ? '?' : '&', tmp);
+		e_label = gcli_asprintf("%clabels=%s", need_qmark ? '?' : '&', tmp);
 		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->milestone) {
 		char *tmp = gcli_urlencode(details->milestone);
 		bool const need_qmark = details->all && !details->author && !details->label;
-		e_milestone = sn_asprintf("%cmilestone=%s", need_qmark ? '?' : '&', tmp);
+		e_milestone = gcli_asprintf("%cmilestone=%s", need_qmark ? '?' : '&', tmp);
 		gcli_clear_ptr(&tmp);
 	}
 
@@ -162,7 +162,7 @@ gitlab_get_mrs(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		bool const need_qmark = details->all && !details->author &&
 			!details->label && !details->milestone;
 
-		e_search = sn_asprintf("%csearch=%s", need_qmark ? '?' : '&', tmp);
+		e_search = gcli_asprintf("%csearch=%s", need_qmark ? '?' : '&', tmp);
 		gcli_clear_ptr(&tmp);
 	}
 
@@ -294,7 +294,7 @@ gitlab_mr_get_patch(struct gcli_ctx *ctx, FILE *stream,
 	if (rc < 0)
 		goto err_get_commit_list;
 
-	base_sha_short = sn_strndup(pull.base_sha, 8);
+	base_sha_short = gcli_strndup(pull.base_sha, 8);
 	prev_commit_sha = base_sha_short;
 	for (size_t i = commits.commits_size; i > 0; --i) {
 		rc = gitlab_make_commit_patch(ctx, stream, path,
@@ -770,7 +770,7 @@ gitlab_mr_update_labels(struct gcli_ctx *ctx,
 		return rc;
 
 	/* Generate payload */
-	list = sn_join_with(labels, labels_size, ",");
+	list = gcli_join_with(labels, labels_size, ",");
 	gcli_jsongen_init(&gen);
 	gcli_jsongen_begin_object(&gen);
 	{

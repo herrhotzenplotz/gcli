@@ -77,7 +77,7 @@ github_issue_make_url(struct gcli_ctx *const ctx,
 	char *suffix = NULL;
 
 	va_start(vp, fmt);
-	suffix = sn_vasprintf(fmt, vp);
+	suffix = gcli_vasprintf(fmt, vp);
 	va_end(vp);
 
 	switch (path->kind) {
@@ -87,7 +87,7 @@ github_issue_make_url(struct gcli_ctx *const ctx,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid"%s",
+		*url = gcli_asprintf("%s/repos/%s/%s/issues/%"PRIid"%s",
 		                   gcli_get_apibase(ctx), e_owner, e_repo,
 		                   path->as_default.id, suffix);
 
@@ -95,7 +95,7 @@ github_issue_make_url(struct gcli_ctx *const ctx,
 		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path kind");
@@ -184,24 +184,27 @@ search_issues(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	/* Encode the various fields */
 	if (details->milestone)
-		milestone = sn_asprintf("milestone:%s", details->milestone);
+		milestone = gcli_asprintf("milestone:%s", details->milestone);
 
 	if (details->author)
-		author = sn_asprintf("author:%s", details->author);
+		author = gcli_asprintf("author:%s", details->author);
 
 	if (details->label)
-		label = sn_asprintf("label:%s", details->label);
+		label = gcli_asprintf("label:%s", details->label);
 
-	query_string = sn_asprintf("repo:%s/%s is:issue%s %s %s %s %s",
-	                           path->as_default.owner,
-	                           path->as_default.repo,
-	                           details->all ? "" : " is:open",
-	                           milestone ? milestone : "", author ? author : "",
-	                           label ? label : "", details->search_term);
+	query_string = gcli_asprintf("repo:%s/%s is:issue%s %s %s %s %s",
+	                             path->as_default.owner,
+	                             path->as_default.repo,
+	                             details->all ? "" : " is:open",
+	                             milestone ? milestone : "",
+	                             author ? author : "",
+	                             label ? label : "",
+	                             details->search_term);
+
 	e_query_string = gcli_urlencode(query_string);
 
-	url = sn_asprintf("%s/search/issues?q=%s", gcli_get_apibase(ctx),
-	                  e_query_string);
+	url = gcli_asprintf("%s/search/issues?q=%s", gcli_get_apibase(ctx),
+	                    e_query_string);
 
 	gcli_clear_ptr(&milestone);
 	gcli_clear_ptr(&author);
@@ -239,14 +242,14 @@ github_issues_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
-		*out = sn_asprintf("%s/repos/%s/%s/issues%s",
-		                   gcli_get_apibase(ctx),
-		                   e_owner, e_repo, suffix);
+		*out = gcli_asprintf("%s/repos/%s/%s/issues%s",
+		                     gcli_get_apibase(ctx),
+		                     e_owner, e_repo, suffix);
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*out = sn_asprintf("%s%s", path->as_url, suffix);
+		*out = gcli_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path kind for issue list");
@@ -273,22 +276,22 @@ get_issues(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		if (rc < 0)
 			return rc;
 
-		e_milestone = sn_asprintf("&milestone=%"PRIid, milestone_id);
+		e_milestone = gcli_asprintf("&milestone=%"PRIid, milestone_id);
 	}
 
 	if (details->author) {
 		char *tmp = gcli_urlencode(details->author);
-		e_author = sn_asprintf("&creator=%s", tmp);
+		e_author = gcli_asprintf("&creator=%s", tmp);
 		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->label) {
 		char *tmp = gcli_urlencode(details->label);
-		e_label = sn_asprintf("&labels=%s", tmp);
+		e_label = gcli_asprintf("&labels=%s", tmp);
 		gcli_clear_ptr(&tmp);
 	}
 
-	suffix = sn_asprintf(
+	suffix = gcli_asprintf(
 		"?state=%s%s%s%s",
 		details->all ? "all" : "open",
 		e_author ? e_author : "",
@@ -371,7 +374,7 @@ github_issue_patch_state(struct gcli_ctx *ctx,
 	if (rc < 0)
 		return rc;
 
-	payload = sn_asprintf("{ \"state\": \"%s\"}", state);
+	payload = gcli_asprintf("{ \"state\": \"%s\"}", state);
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
 
@@ -425,8 +428,8 @@ github_perform_submit_issue(struct gcli_ctx *const ctx,
 	e_owner = gcli_urlencode(opts->owner);
 	e_repo = gcli_urlencode(opts->repo);
 
-	url = sn_asprintf("%s/repos/%s/%s/issues", gcli_get_apibase(ctx), e_owner,
-	                  e_repo);
+	url = gcli_asprintf("%s/repos/%s/%s/issues", gcli_get_apibase(ctx),
+	                    e_owner, e_repo);
 
 	gcli_clear_ptr(&e_owner);
 	gcli_clear_ptr(&e_repo);
@@ -561,7 +564,7 @@ github_issue_set_milestone(struct gcli_ctx *ctx,
 	if (rc < 0)
 		return rc;
 
-	body = sn_asprintf("{ \"milestone\": %"PRIid" }", milestone);
+	body = gcli_asprintf("{ \"milestone\": %"PRIid" }", milestone);
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, body, NULL, NULL);
 

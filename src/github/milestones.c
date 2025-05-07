@@ -59,15 +59,15 @@ github_milestones_make_url(struct gcli_ctx *const ctx,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/repos/%s/%s/milestones%s",
-		                   gcli_get_apibase(ctx),
-		                   e_owner, e_repo, suffix);
+		*url = gcli_asprintf("%s/repos/%s/%s/milestones%s",
+		                     gcli_get_apibase(ctx),
+		                     e_owner, e_repo, suffix);
 
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s/milestones%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s/milestones%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path kind for milestones");
@@ -108,7 +108,7 @@ github_milestone_make_url(struct gcli_ctx *ctx,
 	va_list vp;
 
 	va_start(vp, suffix_fmt);
-	suffix = sn_vasprintf(suffix_fmt, vp);
+	suffix = gcli_vasprintf(suffix_fmt, vp);
 	va_end(vp);
 
 	switch (path->kind) {
@@ -118,15 +118,15 @@ github_milestone_make_url(struct gcli_ctx *ctx,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/repos/%s/%s/milestones/%"PRIid"%s",
-		                   gcli_get_apibase(ctx), e_owner, e_repo,
-		                   path->as_default.id, suffix);
+		*url = gcli_asprintf("%s/repos/%s/%s/milestones/%"PRIid"%s",
+		                     gcli_get_apibase(ctx), e_owner, e_repo,
+		                     path->as_default.id, suffix);
 
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path kind for milestones");
@@ -199,20 +199,20 @@ github_create_milestone(struct gcli_ctx *ctx,
 	if (args->description) {
 		/* This is fine :-) */
 		char *e_description = gcli_json_escape_cstr(args->description);
-		description = sn_asprintf(",\"description\": \"%s\"", e_description);
+		description = gcli_asprintf(",\"description\": \"%s\"", e_description);
 		gcli_clear_ptr(&e_description);
 	} else {
 		description = strdup("");
 	}
 
-	json_body = sn_asprintf(
+	json_body = gcli_asprintf(
 		"{"
 		"    \"title\"      : \"%s\""
 		"    %s"
 		"}", args->title, description);
 
-	url = sn_asprintf("%s/repos/%s/%s/milestones",
-	                  gcli_get_apibase(ctx), e_owner, e_repo);
+	url = gcli_asprintf("%s/repos/%s/%s/milestones",
+	                    gcli_get_apibase(ctx), e_owner, e_repo);
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, json_body, NULL, NULL);
 
@@ -260,7 +260,7 @@ github_milestone_set_duedate(struct gcli_ctx *ctx,
 	if (rc < 0)
 		return rc;
 
-	payload = sn_asprintf("{ \"due_on\": \"%s\"}", norm_date);
+	payload = gcli_asprintf("{ \"due_on\": \"%s\"}", norm_date);
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
 
 	gcli_clear_ptr(&payload);

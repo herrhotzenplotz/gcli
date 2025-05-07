@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,12 +37,11 @@
 #include <gcli/ctx.h>
 #include <gcli/curl.h>
 
+#include <gcli/port/string.h>
+
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#ifdef HAVE_GETOPT_H
-#include <getopt.h>
-#endif
 
 static void
 usage(void)
@@ -115,9 +114,9 @@ subcommand_api(int argc, char *argv[])
 	}
 
 	if (path[0] == '/')
-		url = sn_asprintf("%s%s", gcli_get_apibase(g_clictx), path);
+		url = gcli_asprintf("%s%s", gcli_get_apibase(g_clictx), path);
 	else
-		url = sn_asprintf("%s/%s", gcli_get_apibase(g_clictx), path);
+		url = gcli_asprintf("%s/%s", gcli_get_apibase(g_clictx), path);
 
 	if (do_all)
 		fetch_all(url);

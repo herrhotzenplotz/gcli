@@ -37,6 +37,7 @@
 
 #include <gcli/forges.h>
 #include <gcli/milestones.h>
+#include <gcli/port/util.h>
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -120,7 +121,7 @@ gcli_print_milestone(struct gcli_milestone const *const milestone)
 		gcli_dict_add_timestamp(dict, "DUE", 0, 0, milestone->due_date);
 
 	if ((quirks & GCLI_MILESTONE_QUIRKS_EXPIRED) == 0)
-		gcli_dict_add_string(dict, "EXPIRED", 0, 0, sn_bool_yesno(milestone->expired));
+		gcli_dict_add_string(dict, "EXPIRED", 0, 0, gcli_bool_yesno(milestone->expired));
 
 	if ((quirks & GCLI_MILESTONE_QUIRKS_NISSUES) == 0) {
 		gcli_dict_add(dict, "OPEN ISSUES", 0, 0, "%d", milestone->open_issues);

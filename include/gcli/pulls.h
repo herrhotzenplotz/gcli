@@ -41,7 +41,6 @@
 #include <gcli/diffutil.h>
 #include <gcli/gcli.h>
 #include <gcli/path.h>
-#include <sn/sn.h>
 
 struct gcli_pull_list {
 	struct gcli_pull *pulls;

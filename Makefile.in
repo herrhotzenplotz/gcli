@@ -217,8 +217,11 @@ LIBGCLI_SRCS = \
 	src/sshkeys.c \
 	src/status.c \
 	src/waitproc.c \
-	thirdparty/pdjson/pdjson.c \
-	thirdparty/sn/sn.c
+	src/port/err.c \
+	src/port/string.c \
+	src/port/sv.c \
+	src/port/util.c \
+	thirdparty/pdjson/pdjson.c
 
 GCLI_SRCS= \
 	src/cmd/actions.c \
@@ -282,10 +285,10 @@ TEMPLATES= \
 	templates/gitlab/status.t
 
 PGEN_SRCS= \
+	src/port/err.c \
 	src/pgen/dump_c.c \
 	src/pgen/dump_h.c \
 	src/pgen/dump_plain.c \
-	thirdparty/sn/sn.c \
 	lex.yy.c \
 	y.tab.c
 

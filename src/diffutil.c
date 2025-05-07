@@ -29,8 +29,7 @@
 
 #include <gcli/diffutil.h>
 #include <gcli/gcli.h>
-
-#include <sn/sn.h>
+#include <gcli/port/string.h>
 
 #include <assert.h>
 #include <string.h>
@@ -179,7 +178,7 @@ read_commit_hash_from_separator(struct token const *line, struct gcli_patch *out
 	if (!end_of_hash)
 		return -1;
 
-	out->commit_hash = sn_strndup(start_of_hash, end_of_hash - start_of_hash);
+	out->commit_hash = gcli_strndup(start_of_hash, end_of_hash - start_of_hash);
 	return 0;
 }
 

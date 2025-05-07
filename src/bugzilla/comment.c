@@ -32,6 +32,8 @@
 #include <gcli/curl.h>
 #include <gcli/json_gen.h>
 
+#include <gcli/port/string.h>
+
 int
 bugzilla_submit_comment(struct gcli_ctx *ctx,
                         struct gcli_submit_comment_opts const *const opts)
@@ -54,8 +56,8 @@ bugzilla_submit_comment(struct gcli_ctx *ctx,
 		return gcli_error(ctx, "creating comments on bugzilla requires a token");
 
 	/* construct URL */
-	url = sn_asprintf("%s/rest/bug/%"PRIid"/comment",
-	                  gcli_get_apibase(ctx), tgt->as_id);
+	url = gcli_asprintf("%s/rest/bug/%"PRIid"/comment",
+	                    gcli_get_apibase(ctx), tgt->as_id);
 
 	/* construct payload */
 	gcli_jsongen_init(&gen);

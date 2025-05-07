@@ -79,7 +79,7 @@ gitlab_milestone_make_url(struct gcli_ctx *ctx,
 	va_list vp;
 
 	va_start(vp, suffix_fmt);
-	suffix = sn_vasprintf(suffix_fmt, vp);
+	suffix = gcli_vasprintf(suffix_fmt, vp);
 	va_end(vp);
 
 	switch (path->kind) {
@@ -89,16 +89,16 @@ gitlab_milestone_make_url(struct gcli_ctx *ctx,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/projects/%s%%2F%s/milestones/%"PRIid"%s",
-		                   gcli_get_apibase(ctx),
-		                   e_owner, e_repo, path->as_default.id,
-		                   suffix);
+		*url = gcli_asprintf("%s/projects/%s%%2F%s/milestones/%"PRIid"%s",
+		                     gcli_get_apibase(ctx),
+		                     e_owner, e_repo, path->as_default.id,
+		                     suffix);
 
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "bad path kind for gitlab milestone");
@@ -161,23 +161,23 @@ gitlab_create_milestone(struct gcli_ctx *ctx,
 	e_owner = gcli_urlencode(args->owner);
 	e_repo = gcli_urlencode(args->repo);
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/milestones", gcli_get_apibase(ctx),
-	                  e_owner, e_repo);
+	url = gcli_asprintf("%s/projects/%s%%2F%s/milestones", gcli_get_apibase(ctx),
+	                    e_owner, e_repo);
 
 	/* Escape and prepare the description if needed */
 	if (args->description) {
 		char *e_description = gcli_json_escape_cstr(args->description);
-		description = sn_asprintf(", \"description\": \"%s\"", e_description);
+		description = gcli_asprintf(", \"description\": \"%s\"", e_description);
 		gcli_clear_ptr(&e_description);
 	}
 
 	e_title = gcli_json_escape_cstr(args->title);
 
-	json_body = sn_asprintf("{"
-	                        "    \"title\": \"%s\""
-	                        "    %s"
-	                        "}",
-	                        e_title, description ? description : "");
+	json_body = gcli_asprintf("{"
+	                          "    \"title\": \"%s\""
+	                          "    %s"
+	                          "}",
+	                          e_title, description ? description : "");
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, json_body, NULL, NULL);
 

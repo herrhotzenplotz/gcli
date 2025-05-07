@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,6 +36,9 @@
 
 #include <gcli/curl.h>
 #include <gcli/github/gists.h>
+#include <gcli/port/err.h>
+#include <gcli/port/string.h>
+#include <gcli/port/util.h>
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -68,15 +71,15 @@ static char const *
 human_readable_size(size_t const s)
 {
 	if (s < 1024)
-		return sn_asprintf("%zu B", s);
+		return gcli_asprintf("%zu B", s);
 
 	if (s < 1024 * 1024)
-		return sn_asprintf("%zu KiB", s / 1024);
+		return gcli_asprintf("%zu KiB", s / 1024);
 
 	if (s < 1024 * 1024 * 1024)
-		return sn_asprintf("%zu MiB", s / (1024 * 1024));
+		return gcli_asprintf("%zu MiB", s / (1024 * 1024));
 
-	return sn_asprintf("%zu GiB", s / (1024 * 1024 * 1024));
+	return gcli_asprintf("%zu GiB", s / (1024 * 1024 * 1024));
 }
 
 static inline char const *
@@ -332,7 +335,7 @@ subcommand_gist_delete(int argc, char *argv[])
 
 	gist_id = shift(&argc, &argv);
 
-	if (!always_yes && !sn_yesno("Are you sure you want to delete this gist?"))
+	if (!always_yes && !gcli_yesno("Are you sure you want to delete this gist?"))
 		errx(1, "gcli: Aborted by user");
 
 	gcli_delete_gist(g_clictx, gist_id);

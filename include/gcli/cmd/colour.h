@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,7 +38,7 @@
 
 #include <stdint.h>
 
-#include <sn/sn.h>
+#include <gcli/port/sv.h>
 
 #define GCLI_256COLOR_DONE 0x3F0FAF00
 #define GCLI_256COLOR_OPEN 0x04FF0100
@@ -58,7 +58,7 @@ enum {
 char const *gcli_setcolour256(uint32_t colourcode);
 char const *gcli_resetcolour(void);
 char const *gcli_setcolour(int colour);
-char const *gcli_state_colour_sv(sn_sv const state);
+char const *gcli_state_colour_sv(gcli_sv const state);
 char const *gcli_state_colour_str(char const *it);
 char const *gcli_setbold(void);
 char const *gcli_resetbold(void);

@@ -13,6 +13,7 @@
 
 #include <gcli/ctx.h>
 #include <gcli/gitlab/api.h>
+#include <gcli/port/util.h>
 
 #include "gcli_tests.h"
 
@@ -318,8 +319,8 @@ ATF_TC_BODY(gitlab_error_token_expired, tc)
 	struct gcli_fetch_buffer buffer = {0};
 	char const *errmsg = NULL;
 
-	buffer.length = sn_read_file(TESTSRCDIR"/samples/gitlab_token_expired.json",
-	                             &buffer.data);
+	buffer.length = gcli_read_file(TESTSRCDIR"/samples/gitlab_token_expired.json",
+	                               &buffer.data);
 
 	ATF_REQUIRE(buffer.length);
 	errmsg = gitlab_api_error_string(ctx, &buffer);
@@ -334,8 +335,8 @@ ATF_TC_BODY(gitlab_error_unauthorised, tc)
 	struct gcli_fetch_buffer buffer = {0};
 	char const *errmsg = NULL;
 
-	buffer.length = sn_read_file(TESTSRCDIR"/samples/gitlab_error_unauthorised.json",
-	                             &buffer.data);
+	buffer.length = gcli_read_file(TESTSRCDIR"/samples/gitlab_error_unauthorised.json",
+	                               &buffer.data);
 
 	ATF_REQUIRE(buffer.length);
 	errmsg = gitlab_api_error_string(ctx, &buffer);

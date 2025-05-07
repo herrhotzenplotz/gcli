@@ -41,6 +41,8 @@
 #include <gcli/comments.h>
 #include <gcli/forges.h>
 #include <gcli/issues.h>
+#include <gcli/port/string.h>
+#include <gcli/port/util.h>
 
 #include <errno.h>
 #include <stdlib.h>
@@ -150,7 +152,7 @@ gcli_print_issues(enum gcli_output_flags const flags,
 	gcli_tbl_end(table);
 
 	/* Inform the user that we pruned pull requests from the output */
-	if (pruned && sn_getverbosity() != VERBOSITY_QUIET)
+	if (pruned && gcli_getverbosity(g_clictx) != GCLI_VERBOSITY_QUIET)
 		fprintf(stderr, "info: %d pull requests pruned\n", pruned);
 }
 
@@ -177,16 +179,16 @@ gcli_issue_print_summary(struct gcli_issue const *const it)
 	gcli_dict_add(dict, "STATE", GCLI_TBLCOL_STATECOLOURED, 0,
 	              "%s", it->state);
 
-	if ((quirks & GCLI_ISSUE_QUIRKS_URL) == 0 && !sn_strempty(it->url))
+	if ((quirks & GCLI_ISSUE_QUIRKS_URL) == 0 && !gcli_strempty(it->url))
 		gcli_dict_add(dict, "URL", 0, 0, "%s", it->url);
 
 	if ((quirks & GCLI_ISSUE_QUIRKS_COMMENTS) == 0)
 		gcli_dict_add(dict, "COMMENTS", 0, 0, "%d", it->comments);
 
 	if ((quirks & GCLI_ISSUE_QUIRKS_LOCKED) == 0)
-		gcli_dict_add(dict, "LOCKED", 0, 0, "%s", sn_bool_yesno(it->locked));
+		gcli_dict_add(dict, "LOCKED", 0, 0, "%s", gcli_bool_yesno(it->locked));
 
-	if (!sn_strempty(it->milestone))
+	if (!gcli_strempty(it->milestone))
 		gcli_dict_add(dict, "MILESTONE", 0, 0, "%s", it->milestone);
 
 	if (it->labels_size) {
@@ -258,7 +260,7 @@ create_issue(struct gcli_submit_issue_options *opts, int always_yes)
 		puts("No message");
 
 	if (!always_yes) {
-		if (!sn_yesno("Do you want to continue?"))
+		if (!gcli_yesno("Do you want to continue?"))
 			errx(1, "gcli: Submission aborted.");
 	}
 
@@ -512,7 +514,7 @@ subcommand_issues(int argc, char *argv[])
 	if (path.as_default.id == 0) {
 		/* Prepare search term if specified */
 		if (argc)
-			details.search_term = sn_join_with((char const *const *)argv, argc, " ");
+			details.search_term = gcli_join_with((char const *const *)argv, argc, " ");
 
 		if (gcli_issues_search(g_clictx, &path, &details, n, &list) < 0)
 			errx(1, "gcli: error: could not get issues: %s", gcli_get_error(g_clictx));
@@ -929,7 +931,7 @@ action_edit(struct gcli_path const *const path,
 	gcli_pretty_print(new_message, 4, 80, stdout);
 
 	/* final confirmation */
-	if (!sn_yesno("Do you want to continue?")) {
+	if (!gcli_yesno("Do you want to continue?")) {
 		fprintf(stderr, "gcli: Submission aborted.\n");
 		rc = GCLI_EX_DATAERR;
 		goto done;

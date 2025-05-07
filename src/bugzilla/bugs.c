@@ -31,13 +31,13 @@
 
 #include <gcli/bugzilla/bugs.h>
 
-#include <sn/sn.h>
-
 #include <templates/bugzilla/bugs.h>
 
 #include <gcli/base64.h>
 #include <gcli/curl.h>
 #include <gcli/json_gen.h>
+
+#include <gcli/port/string.h>
 
 #include <assert.h>
 
@@ -56,25 +56,25 @@ bugzilla_get_bugs(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	if (path->as_bugzilla.product) {
 		char *tmp = gcli_urlencode(path->as_bugzilla.product);
-		e_product = sn_asprintf("&product=%s", tmp);
+		e_product = gcli_asprintf("&product=%s", tmp);
 		gcli_clear_ptr(&tmp);
 	}
 
 	if (path->as_bugzilla.component) {
 		char *tmp = gcli_urlencode(path->as_bugzilla.component);
-		e_component = sn_asprintf("&component=%s", tmp);
+		e_component = gcli_asprintf("&component=%s", tmp);
 		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->author) {
 		char *tmp = gcli_urlencode(details->author);
-		e_author = sn_asprintf("&creator=%s", tmp);
+		e_author = gcli_asprintf("&creator=%s", tmp);
 		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->search_term) {
 		char *tmp = gcli_urlencode(details->search_term);
-		e_query = sn_asprintf("&quicksearch=%s", tmp);
+		e_query = gcli_asprintf("&quicksearch=%s", tmp);
 		gcli_clear_ptr(&tmp);
 	}
 
@@ -82,13 +82,13 @@ bugzilla_get_bugs(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	/* Note(Nico): Most of the options here are not very well
 	 * documented. Specifically the order= parameter I have figured out by
 	 * reading the code and trying things until it worked. */
-	url = sn_asprintf("%s/rest/bug?order=bug_id%%20DESC%%2C&limit=%d%s%s%s%s%s",
-	                  gcli_get_apibase(ctx), max,
-	                  details->all ? "&status=All" : "&status=Open&status=New",
-	                  e_product ? e_product : "",
-	                  e_component ? e_component : "",
-	                  e_author ? e_author : "",
-	                  e_query ? e_query : "");
+	url = gcli_asprintf("%s/rest/bug?order=bug_id%%20DESC%%2C&limit=%d%s%s%s%s%s",
+	                    gcli_get_apibase(ctx), max,
+	                    details->all ? "&status=All" : "&status=Open&status=New",
+	                    e_product ? e_product : "",
+	                    e_component ? e_component : "",
+	                    e_author ? e_author : "",
+	                    e_query ? e_query : "");
 
 	gcli_clear_ptr(&e_query);
 	gcli_clear_ptr(&e_product);
@@ -124,8 +124,8 @@ bugzilla_bug_get_comments(struct gcli_ctx *const ctx,
 	if (path->kind != GCLI_PATH_ID)
 		return gcli_error(ctx, "bad path kind for Bugzilla comments");
 
-	url = sn_asprintf("%s/rest/bug/%"PRIid"/comment?include_fields=_all",
-	                  gcli_get_apibase(ctx), path->as_id);
+	url = gcli_asprintf("%s/rest/bug/%"PRIid"/comment?include_fields=_all",
+	                    gcli_get_apibase(ctx), path->as_id);
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc < 0)
@@ -158,8 +158,8 @@ bugzilla_bug_get_comment(struct gcli_ctx *const ctx,
 	(void) target;
 	(void) target_type;
 
-	url = sn_asprintf("%s/rest/bug/comment/%"PRIid"?include_fields=_all",
-	                  gcli_get_apibase(ctx), comment_id);
+	url = gcli_asprintf("%s/rest/bug/comment/%"PRIid"?include_fields=_all",
+	                    gcli_get_apibase(ctx), comment_id);
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc < 0)
@@ -186,8 +186,8 @@ bugzilla_bug_get_op(struct gcli_ctx *ctx, gcli_id const bug_id, char **out)
 	struct json_stream stream = {0};
 	char *url = NULL;
 
-	url = sn_asprintf("%s/rest/bug/%"PRIid"/comment?include_fields=_all",
-	                  gcli_get_apibase(ctx), bug_id);
+	url = gcli_asprintf("%s/rest/bug/%"PRIid"/comment?include_fields=_all",
+	                    gcli_get_apibase(ctx), bug_id);
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc < 0)
@@ -221,7 +221,7 @@ bugzilla_get_bug(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	bug_id = path->as_id;
 
-	url = sn_asprintf("%s/rest/bug?limit=1&id=%"PRIid, gcli_get_apibase(ctx), bug_id);
+	url = gcli_asprintf("%s/rest/bug?limit=1&id=%"PRIid, gcli_get_apibase(ctx), bug_id);
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 
 	if (rc < 0)
@@ -248,8 +248,8 @@ bugzilla_get_bug(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	gcli_clear_ptr(&list.issues);
 
 	/* insert the web-url which is not provided by the API ... */
-	out->web_url = sn_asprintf("%s/show_bug.cgi?id=%"PRIid,
-	                           gcli_get_apibase(ctx), bug_id);
+	out->web_url = gcli_asprintf("%s/show_bug.cgi?id=%"PRIid,
+	                             gcli_get_apibase(ctx), bug_id);
 
 	/* The OP is in the comments. Fetch it separately. */
 	rc = bugzilla_bug_get_op(ctx, bug_id, &out->body);
@@ -278,8 +278,8 @@ bugzilla_bug_get_attachments(struct gcli_ctx *ctx,
 	if (bug_path->kind != GCLI_PATH_ID)
 		return gcli_error(ctx, "Getting bug attachments requires a ID path");
 
-	url = sn_asprintf("%s/rest/bug/%"PRIid"/attachment",
-	                  gcli_get_apibase(ctx), bug_path->as_id);
+	url = gcli_asprintf("%s/rest/bug/%"PRIid"/attachment",
+	                    gcli_get_apibase(ctx), bug_path->as_id);
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc < 0)
@@ -392,7 +392,7 @@ bugzilla_bug_submit(struct gcli_ctx *const ctx,
 	gcli_jsongen_free(&gen);
 
 	/* generate url and perform request */
-	url = sn_asprintf("%s/rest/bug", gcli_get_apibase(ctx));
+	url = gcli_asprintf("%s/rest/bug", gcli_get_apibase(ctx));
 
 	if (out)
 		_buffer = &buffer;

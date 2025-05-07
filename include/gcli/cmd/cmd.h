@@ -39,7 +39,7 @@
 #include <gcli/gcli.h>
 #include <gcli/path.h>
 
-#include <sn/sn.h>
+#include <gcli/port/err.h>
 
 extern struct gcli_ctx *g_clictx;
 

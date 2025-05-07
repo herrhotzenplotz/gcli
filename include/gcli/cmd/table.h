@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,8 +39,8 @@
 #include <time.h>
 
 #include <gcli/gcli.h>
-
-#include <sn/sn.h>
+#include <gcli/port/port.h>
+#include <gcli/port/sv.h>
 
 typedef void *gcli_tbl;
 
@@ -103,7 +103,7 @@ int gcli_dict_add_string(gcli_dict list, char const *key, int flags,
 int gcli_dict_add_timestamp(gcli_dict list, char const *key, int flags,
                             uint32_t colour_args, time_t stamp);
 
-int gcli_dict_add_sv_list(gcli_dict dict, char const *key, sn_sv const *list,
+int gcli_dict_add_sv_list(gcli_dict dict, char const *key, gcli_sv const *list,
                           size_t list_size);
 
 int gcli_dict_add_string_list(gcli_dict dict, char const *const key,

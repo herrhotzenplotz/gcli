@@ -33,6 +33,7 @@
 #include <gcli/gitlab/repos.h>
 #include <gcli/json_gen.h>
 #include <gcli/json_util.h>
+#include <gcli/port/err.h>
 
 #include <templates/gitlab/releases.h>
 
@@ -100,13 +101,13 @@ gitlab_create_release(struct gcli_ctx *ctx, struct gcli_create_release_args cons
 
 	/* Warnings because unsupported on gitlab */
 	if (release->prerelease)
-		warnx("prereleases are not supported on GitLab, option ignored");
+		gcli_warnx(ctx, "prereleases are not supported on GitLab, option ignored");
 
 	if (release->draft)
-		warnx("draft releases are not supported on GitLab, option ignored");
+		gcli_warnx(ctx, "draft releases are not supported on GitLab, option ignored");
 
 	if (release->assets_size)
-		warnx("GitLab release asset uploads are not yet supported");
+		gcli_warnx(ctx, "GitLab release asset uploads are not yet supported");
 
 	/* Payload generation */
 	gcli_jsongen_init(&gen);

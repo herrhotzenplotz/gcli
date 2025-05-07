@@ -54,7 +54,7 @@ github_pull_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	va_list vp;
 
 	va_start(vp, fmt);
-	suffix = sn_vasprintf(fmt, vp);
+	suffix = gcli_vasprintf(fmt, vp);
 	va_end(vp);
 
 	switch (path->kind) {
@@ -64,16 +64,15 @@ github_pull_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/repos/%s/%s/pulls/%"PRIid"%s",
-		                   gcli_get_apibase(ctx),
-		                   e_owner, e_repo, path->as_default.id,
-		                   suffix);
+		*url = gcli_asprintf("%s/repos/%s/%s/pulls/%"PRIid"%s",
+		                     gcli_get_apibase(ctx), e_owner, e_repo,
+		                     path->as_default.id, suffix);
 
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path type for gitlab merge request");
@@ -171,24 +170,27 @@ search_pulls(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		                  "with search term on GitHub");
 
 	if (details->milestone)
-		milestone = sn_asprintf("milestone:%s", details->milestone);
+		milestone = gcli_asprintf("milestone:%s", details->milestone);
 
 	if (details->author)
-		author = sn_asprintf("author:%s", details->author);
+		author = gcli_asprintf("author:%s", details->author);
 
 	if (details->label)
-		label = sn_asprintf("label:%s", details->label);
+		label = gcli_asprintf("label:%s", details->label);
 
-	query_string = sn_asprintf("repo:%s/%s is:pull-request%s %s %s %s %s",
-	                           path->as_default.owner,
-	                           path->as_default.repo,
-	                           details->all ? "" : " is:open",
-	                           milestone ? milestone : "", author ? author : "",
-	                           label ? label : "", details->search_term);
+	query_string = gcli_asprintf("repo:%s/%s is:pull-request%s %s %s %s %s",
+	                             path->as_default.owner,
+	                             path->as_default.repo,
+	                             details->all ? "" : " is:open",
+	                             milestone ? milestone : "",
+	                             author ? author : "",
+	                             label ? label : "",
+	                             details->search_term);
+
 	e_query_string = gcli_urlencode(query_string);
 
-	url = sn_asprintf("%s/search/issues?q=%s", gcli_get_apibase(ctx),
-	                  e_query_string);
+	url = gcli_asprintf("%s/search/issues?q=%s", gcli_get_apibase(ctx),
+	                    e_query_string);
 
 	gcli_clear_ptr(&milestone);
 	gcli_clear_ptr(&author);
@@ -270,10 +272,11 @@ github_print_get_patch(struct gcli_ctx *ctx, FILE *stream, char const *owner,
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf(
+	url = gcli_asprintf(
 		"%s/repos/%s/%s/pulls/%"PRIid,
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, pr_number);
+
 	rc = gcli_curl(ctx, stream, url, "Accept: application/vnd.github.v3.patch");
 
 	gcli_clear_ptr(&e_owner);
@@ -419,7 +422,7 @@ github_pull_set_automerge(struct gcli_ctx *const ctx, char const *const node_id)
 
 	struct gcli_jsongen gen = {0};
 
-	query = sn_asprintf(fmt, node_id);
+	query = gcli_asprintf(fmt, node_id);
 
 	gcli_jsongen_init(&gen);
 	gcli_jsongen_begin_object(&gen);
@@ -433,7 +436,7 @@ github_pull_set_automerge(struct gcli_ctx *const ctx, char const *const node_id)
 	gcli_jsongen_free(&gen);
 	gcli_clear_ptr(&query);
 
-	url = sn_asprintf("%s/graphql", gcli_get_apibase(ctx));
+	url = gcli_asprintf("%s/graphql", gcli_get_apibase(ctx));
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
 
@@ -574,7 +577,7 @@ filter_commit_short_sha(struct gcli_commit **listp, size_t *sizep, void *_data)
 	(void) _data;
 
 	for (size_t i = 0; i < *sizep; ++i)
-		(*listp)[i].sha = sn_strndup((*listp)[i].long_sha, 8);
+		(*listp)[i].sha = gcli_strndup((*listp)[i].long_sha, 8);
 }
 
 int

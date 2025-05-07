@@ -38,6 +38,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <gcli/port/port.h>
+
 enum gcli_output_flags {
 	OUTPUT_SORTED = (1 << 0),
 	OUTPUT_LONG   = (1 << 1),
@@ -67,6 +69,20 @@ char const *gcli_init(struct gcli_ctx **,
                       gcli_forge_type (*get_forge_type)(struct gcli_ctx *),
                       char *(*get_authheader)(struct gcli_ctx *),
                       char *(*get_apibase)(struct gcli_ctx *));
+
+enum {
+	GCLI_VERBOSITY_NORMAL  = 0,
+	GCLI_VERBOSITY_QUIET   = 1,
+	GCLI_VERBOSITY_VERBOSE = 2,
+};
+
+void gcli_setverbosity(struct gcli_ctx *, int);
+int  gcli_getverbosity(struct gcli_ctx *);
+bool gcli_be_verbose(struct gcli_ctx *);
+bool gcli_be_quiet(struct gcli_ctx *);
+
+void gcli_warn(struct gcli_ctx *, char const *fmt, ...) PRINTF_FORMAT(2, 3);
+void gcli_warnx(struct gcli_ctx *, char const *fmt, ...) PRINTF_FORMAT(2, 3);
 
 void *gcli_get_userdata(struct gcli_ctx const *);
 void gcli_set_userdata(struct gcli_ctx *, void *usrdata);

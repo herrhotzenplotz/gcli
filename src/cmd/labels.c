@@ -29,6 +29,7 @@
 
 #include <config.h>
 
+#include <gcli/gcli.h>
 #include <gcli/labels.h>
 
 #include <gcli/cmd/actions.h>
@@ -194,7 +195,7 @@ subcommand_labels_create(int argc, char *argv[])
 	}
 
 	/* only if we are not quieted */
-	if (!sn_quiet())
+	if (!gcli_be_quiet(g_clictx))
 		gcli_label_print(&label);
 
 	return EXIT_SUCCESS;

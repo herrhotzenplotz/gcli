@@ -33,6 +33,9 @@
 #include <gcli/github/issues.h>
 #include <gcli/github/pulls.h>
 
+#include <gcli/port/err.h>
+#include <gcli/port/string.h>
+
 #include <gcli/json_gen.h>
 
 #include <templates/github/pulls.h>
@@ -48,7 +51,7 @@ gitea_pull_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	va_list vp;
 
 	va_start(vp, suffix_fmt);
-	suffix = sn_vasprintf(suffix_fmt, vp);
+	suffix = gcli_vasprintf(suffix_fmt, vp);
 	va_end(vp);
 
 	switch (path->kind) {
@@ -58,15 +61,15 @@ gitea_pull_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo  = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/repos/%s/%s/pulls/%"PRIid"%s",
-		                   gcli_get_apibase(ctx), e_owner, e_repo,
-		                   path->as_default.id, suffix);
+		*url = gcli_asprintf("%s/repos/%s/%s/pulls/%"PRIid"%s",
+		                     gcli_get_apibase(ctx), e_owner, e_repo,
+		                     path->as_default.id, suffix);
 
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path kind for Gitea pulls");
@@ -96,25 +99,25 @@ gitea_search_pulls(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	if (details->milestone) {
 		char *tmp = gcli_urlencode(details->milestone);
-		e_milestone = sn_asprintf("&milestones=%s", tmp);
+		e_milestone = gcli_asprintf("&milestones=%s", tmp);
 		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->author) {
 		char *tmp = gcli_urlencode(details->author);
-		e_author = sn_asprintf("&created_by=%s", tmp);
+		e_author = gcli_asprintf("&created_by=%s", tmp);
 		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->label) {
 		char *tmp = gcli_urlencode(details->label);
-		e_label = sn_asprintf("&labels=%s", tmp);
+		e_label = gcli_asprintf("&labels=%s", tmp);
 		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->search_term) {
 		char *tmp = gcli_urlencode(details->search_term);
-		e_query = sn_asprintf("&q=%s", tmp);
+		e_query = gcli_asprintf("&q=%s", tmp);
 		gcli_clear_ptr(&tmp);
 	}
 
@@ -169,8 +172,8 @@ gitea_get_pull_commits(struct gcli_ctx *ctx,
 int
 gitea_pull_submit(struct gcli_ctx *ctx, struct gcli_submit_pull_options *opts)
 {
-	warnx("In case the following process errors out, see: "
-	      "https://github.com/go-gitea/gitea/issues/20175");
+	gcli_warnx(ctx, "In case the following process errors out, see: "
+	                "https://github.com/go-gitea/gitea/issues/20175");
 	return github_perform_submit_pull(ctx, opts);
 }
 
@@ -224,7 +227,7 @@ gitea_pulls_patch_state(struct gcli_ctx *ctx,
 	if (rc < 0)
 		return rc;
 
-	data = sn_asprintf("{ \"state\": \"%s\"}", state);
+	data = gcli_asprintf("{ \"state\": \"%s\"}", state);
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, data, NULL, NULL);
 

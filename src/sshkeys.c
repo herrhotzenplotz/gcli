@@ -31,9 +31,10 @@
 #include <config.h>
 #endif
 
-#include <gcli/forges.h>
-#include <gcli/sshkeys.h>
 #include <gcli/cmd/table.h>
+#include <gcli/forges.h>
+#include <gcli/port/util.h>
+#include <gcli/sshkeys.h>
 
 int
 gcli_sshkeys_get_keys(struct gcli_ctx *ctx, struct gcli_sshkey_list *out)
@@ -66,7 +67,7 @@ gcli_sshkeys_add_key(struct gcli_ctx *ctx, char const *title,
 		return gcli_error(ctx, "ssh_add_key is not supported by this forge");
 	}
 
-	rc = sn_read_file(public_key_path, &buffer);
+	rc = gcli_read_file(public_key_path, &buffer);
 	if (rc < 0)
 		return rc;
 

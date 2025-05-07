@@ -65,7 +65,7 @@ gitea_upload_release_asset(struct gcli_ctx *ctx, char *const url,
 	int rc = 0;
 
 	e_assetname = gcli_urlencode(asset.name);
-	request = sn_asprintf("%s?name=%s", url, e_assetname);
+	request = gcli_asprintf("%s?name=%s", url, e_assetname);
 
 	rc = gcli_curl_gitea_upload_attachment(ctx, request, asset.path, &buffer);
 

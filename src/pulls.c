@@ -33,7 +33,6 @@
 #include <gcli/gitlab/pipelines.h>
 #include <gcli/json_util.h>
 #include <gcli/pulls.h>
-#include <sn/sn.h>
 
 #include <assert.h>
 

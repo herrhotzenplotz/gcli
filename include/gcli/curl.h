@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,8 +40,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <gcli/port/sv.h>
+
 #include <pdjson/pdjson.h>
-#include <sn/sn.h>
 
 typedef int (*parsefn)(struct gcli_ctx *, struct json_stream *stream,
                        void *list, size_t *listsize);
@@ -85,7 +86,7 @@ int gcli_curl_gitea_upload_attachment(struct gcli_ctx *ctx, char const *url,
 
 int gcli_curl_test_success(struct gcli_ctx *ctx, char const *url);
 char *gcli_urlencode(char const *);
-sn_sv gcli_urlencode_sv(sn_sv const);
+gcli_sv gcli_urlencode_sv(gcli_sv const);
 char *gcli_urldecode(struct gcli_ctx *ctx, char const *input);
 int gcli_fetch_list(struct gcli_ctx *ctx, char *url,
                     struct gcli_fetch_list_ctx *fctx);

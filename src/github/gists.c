@@ -81,9 +81,9 @@ gcli_get_gists(struct gcli_ctx *ctx, char const *user, int const max,
 	};
 
 	if (user)
-		url = sn_asprintf("%s/users/%s/gists", gcli_get_apibase(ctx), user);
+		url = gcli_asprintf("%s/users/%s/gists", gcli_get_apibase(ctx), user);
 	else
-		url = sn_asprintf("%s/gists", gcli_get_apibase(ctx));
+		url = gcli_asprintf("%s/gists", gcli_get_apibase(ctx));
 
 	return gcli_fetch_list(ctx, url, &fl);
 }
@@ -95,7 +95,7 @@ gcli_get_gist(struct gcli_ctx *ctx, char const *gist_id, struct gcli_gist *out)
 	struct gcli_fetch_buffer buffer = {0};
 	int rc = 0;
 
-	url = sn_asprintf("%s/gists/%s", gcli_get_apibase(ctx), gist_id);
+	url = gcli_asprintf("%s/gists/%s", gcli_get_apibase(ctx), gist_id);
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 
 	if (rc == 0) {
@@ -205,7 +205,7 @@ gcli_create_gist(struct gcli_ctx *ctx, struct gcli_new_gist opts)
 	gcli_jsongen_free(&gen);
 
 	/* Generate URL */
-	url = sn_asprintf("%s/gists", gcli_get_apibase(ctx));
+	url = gcli_asprintf("%s/gists", gcli_get_apibase(ctx));
 
 	/* Perferm fetch */
 	rc = gcli_fetch_with_method(ctx, "POST", url, post_data, NULL, &buffer);
@@ -225,7 +225,7 @@ gcli_delete_gist(struct gcli_ctx *ctx, char const *gist_id)
 	struct gcli_fetch_buffer buffer = {0};
 	int rc = 0;
 
-	url = sn_asprintf("%s/gists/%s", gcli_get_apibase(ctx), gist_id);
+	url = gcli_asprintf("%s/gists/%s", gcli_get_apibase(ctx), gist_id);
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, &buffer);
 

@@ -35,7 +35,6 @@
 #endif
 
 #include <gcli/gcli.h>
-#include <sn/sn.h>
 
 #include <time.h>
 

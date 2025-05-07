@@ -34,8 +34,6 @@
 
 #include <gcli/waitproc.h>
 
-#include <sn/sn.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

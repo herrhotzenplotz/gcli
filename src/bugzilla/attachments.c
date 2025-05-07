@@ -32,6 +32,8 @@
 #include <gcli/base64.h>
 #include <gcli/curl.h>
 
+#include <gcli/port/string.h>
+
 #include <templates/bugzilla/bugs.h>
 
 int
@@ -44,8 +46,8 @@ bugzilla_attachment_get_content(struct gcli_ctx *ctx, gcli_id attachment_id,
 	struct json_stream stream = {0};
 	struct gcli_attachment attachment = {0};
 
-	url = sn_asprintf("%s/rest/bug/attachment/%"PRIid,
-	                  gcli_get_apibase(ctx), attachment_id);
+	url = gcli_asprintf("%s/rest/bug/attachment/%"PRIid,
+	                    gcli_get_apibase(ctx), attachment_id);
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc < 0)

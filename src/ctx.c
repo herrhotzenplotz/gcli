@@ -30,9 +30,11 @@
 #include <gcli/forges.h>
 #include <gcli/gcli.h>
 
+#include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int
 gcli_error(struct gcli_ctx *ctx, char const *const fmt, ...)
@@ -106,4 +108,60 @@ gcli_get_authheader(struct gcli_ctx *ctx)
 	gcli_clear_ptr(&token);
 
 	return hdr;
+}
+
+bool
+gcli_be_verbose(struct gcli_ctx *ctx)
+{
+	return ctx->verbosity == GCLI_VERBOSITY_VERBOSE;
+}
+
+bool
+gcli_be_quiet(struct gcli_ctx *ctx)
+{
+	return ctx->verbosity == GCLI_VERBOSITY_QUIET;
+}
+
+int
+gcli_getverbosity(struct gcli_ctx *ctx)
+{
+	return ctx->verbosity;
+}
+
+void
+gcli_setverbosity(struct gcli_ctx *ctx, int v)
+{
+	ctx->verbosity = v;
+}
+
+void
+gcli_warn(struct gcli_ctx *ctx, char const *fmt, ...)
+{
+	if (!gcli_be_verbose(ctx))
+		return;
+
+	fputs("warning: ", stderr);
+	va_list ap;
+
+	va_start(ap, fmt);
+	vfprintf(stderr, fmt, ap);
+	va_end(ap);
+
+	fprintf(stderr, ": %s\n", strerror(errno));
+}
+
+void
+gcli_warnx(struct gcli_ctx *ctx, char const *fmt, ...)
+{
+	if (!gcli_be_verbose(ctx))
+		return;
+
+	fputs("warning: ", stderr);
+	va_list ap;
+
+	va_start(ap, fmt);
+	vfprintf(stderr, fmt, ap);
+	va_end(ap);
+
+	fputc('\n', stderr);
 }

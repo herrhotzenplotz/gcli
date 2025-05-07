@@ -28,8 +28,7 @@
  */
 
 #include <gcli/path.h>
-
-#include <sn/sn.h>
+#include <gcli/port/string.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -54,7 +53,7 @@ split_url(struct gcli_ctx *ctx, char const *const url,
 		goto bad;
 
 	/* if we found the repository, copy out the owner */
-	path->as_default.owner = sn_strndup(owner, repo - owner);
+	path->as_default.owner = gcli_strndup(owner, repo - owner);
 	repo += 1;
 
 	/* the type comes now, copy out the repo name first */
@@ -62,7 +61,7 @@ split_url(struct gcli_ctx *ctx, char const *const url,
 	if (id == NULL)
 		goto bad;
 
-	path->as_default.repo = sn_strndup(repo, id - repo);
+	path->as_default.repo = gcli_strndup(repo, id - repo);
 	id += 1;
 
 	id = strchr(id, '/');

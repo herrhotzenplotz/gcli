@@ -35,7 +35,6 @@
 #include <gcli/curl.h>
 #include <gcli/json_util.h>
 
-#include <sn/sn.h>
 #include <pdjson/pdjson.h>
 
 #include <templates/gitlab/sshkeys.h>
@@ -52,7 +51,7 @@ gitlab_get_sshkeys(struct gcli_ctx *ctx, struct gcli_sshkey_list *list)
 	};
 
 	*list = (struct gcli_sshkey_list) {0};
-	url = sn_asprintf("%s/user/keys", gcli_get_apibase(ctx));
+	url = gcli_asprintf("%s/user/keys", gcli_get_apibase(ctx));
 
 	return gcli_fetch_list(ctx, url, &fl);
 }
@@ -66,12 +65,12 @@ gitlab_add_sshkey(struct gcli_ctx *ctx, char const *const title,
 	struct gcli_fetch_buffer buf = {0};
 	int rc = 0;
 
-	url = sn_asprintf("%s/user/keys", gcli_get_apibase(ctx));
+	url = gcli_asprintf("%s/user/keys", gcli_get_apibase(ctx));
 
 	/* Prepare payload */
 	e_title = gcli_json_escape_cstr(title);
 	e_key = gcli_json_escape_cstr(pubkey);
-	payload = sn_asprintf(
+	payload = gcli_asprintf(
 		"{ \"title\": \"%s\", \"key\": \"%s\" }",
 		e_title, e_key);
 	gcli_clear_ptr(&e_title);
@@ -97,7 +96,7 @@ gitlab_delete_sshkey(struct gcli_ctx *ctx, gcli_id id)
 	char *url;
 	int rc = 0;
 
-	url = sn_asprintf("%s/user/keys/%"PRIid, gcli_get_apibase(ctx), id);
+	url = gcli_asprintf("%s/user/keys/%"PRIid, gcli_get_apibase(ctx), id);
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
 	gcli_clear_ptr(&url);

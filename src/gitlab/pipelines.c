@@ -39,7 +39,6 @@
 #include <gcli/pulls.h>
 
 #include <pdjson/pdjson.h>
-#include <sn/sn.h>
 
 #include <assert.h>
 
@@ -84,7 +83,7 @@ gitlab_pipeline_make_url(struct gcli_ctx *ctx,
 	va_list vp;
 
 	va_start(vp, suffix_fmt);
-	suffix = sn_vasprintf(suffix_fmt, vp);
+	suffix = gcli_vasprintf(suffix_fmt, vp);
 	va_end(vp);
 
 	switch (path->kind) {
@@ -94,16 +93,16 @@ gitlab_pipeline_make_url(struct gcli_ctx *ctx,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/projects/%s%%2F%s/pipelines/%"PRIid"%s",
-		                   gcli_get_apibase(ctx), e_owner, e_repo,
-		                   path->as_default.id,
-		                   suffix);
+		*url = gcli_asprintf("%s/projects/%s%%2F%s/pipelines/%"PRIid"%s",
+		                     gcli_get_apibase(ctx), e_owner, e_repo,
+		                     path->as_default.id,
+		                     suffix);
 
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path type for gitlab pipelines");
@@ -257,7 +256,7 @@ gitlab_job_make_url(struct gcli_ctx *ctx,
 	va_list vp;
 
 	va_start(vp, suffix_fmt);
-	suffix = sn_vasprintf(suffix_fmt, vp);
+	suffix = gcli_vasprintf(suffix_fmt, vp);
 	va_end(vp);
 
 	switch (path->kind) {
@@ -267,16 +266,16 @@ gitlab_job_make_url(struct gcli_ctx *ctx,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/projects/%s%%2F%s/jobs/%"PRIid"%s",
-		                   gcli_get_apibase(ctx), e_owner, e_repo,
-		                   path->as_default.id,
-		                   suffix);
+		*url = gcli_asprintf("%s/projects/%s%%2F%s/jobs/%"PRIid"%s",
+		                     gcli_get_apibase(ctx), e_owner, e_repo,
+		                     path->as_default.id,
+		                     suffix);
 
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path type for gitlab jobs");

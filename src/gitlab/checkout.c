@@ -29,9 +29,8 @@
 
 #include <gcli/gcli.h>
 #include <gcli/gitlab/checkout.h>
+#include <gcli/port/string.h>
 #include <gcli/waitproc.h>
-
-#include <sn/sn.h>
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -56,9 +55,9 @@ gitlab_mr_checkout(struct gcli_ctx *ctx, char const *const remote,
 
 	pr_id = path->as_default.id;
 
-	remote_ref = sn_asprintf("merge-requests/%"PRIid"/head", pr_id);
-	local_ref = sn_asprintf("gitlab/mr/%"PRIid, pr_id);
-	refspec = sn_asprintf("%s:%s", remote_ref, local_ref);
+	remote_ref = gcli_asprintf("merge-requests/%"PRIid"/head", pr_id);
+	local_ref = gcli_asprintf("gitlab/mr/%"PRIid, pr_id);
+	refspec = gcli_asprintf("%s:%s", remote_ref, local_ref);
 
 	pid = fork();
 	if (pid < 0)

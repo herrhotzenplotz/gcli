@@ -64,10 +64,10 @@ gitlab_api_error_string(struct gcli_ctx *ctx, struct gcli_fetch_buffer *const bu
 	if (rc < 0 || msg == NULL) {
 		gcli_clear_ptr(&msg);
 
-		if (sn_verbose()) {
-			return sn_asprintf("Could not parse Gitlab error response. "
-			                   "The response was:\n\n%.*s\n",
-			                   (int)buf->length, buf->data);
+		if (gcli_be_verbose(ctx)) {
+			return gcli_asprintf("Could not parse Gitlab error response. "
+			                     "The response was:\n\n%.*s\n",
+			                     (int)buf->length, buf->data);
 		} else {
 			return strdup("no error message: failed to parse error response. "
 			              "Please run the gcli query with verbose mode again.");
@@ -89,8 +89,8 @@ gitlab_user_id(struct gcli_ctx *ctx, char const *user_name)
 
 	e_username = gcli_urlencode(user_name);
 
-	url = sn_asprintf("%s/users?username=%s", gcli_get_apibase(ctx),
-	                  e_username);
+	url = gcli_asprintf("%s/users?username=%s", gcli_get_apibase(ctx),
+	                    e_username);
 
 	uid = gcli_fetch(ctx, url, NULL, &buffer);
 	if (uid == 0) {

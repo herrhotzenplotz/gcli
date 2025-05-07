@@ -34,7 +34,6 @@
 #include <gcli/cmd/table.h>
 
 #include <pdjson/pdjson.h>
-#include <sn/sn.h>
 
 #include <stdlib.h>
 
@@ -76,7 +75,7 @@ gcli_snippets_get(struct gcli_ctx *ctx, int const max,
 	};
 
 	*out = (struct gcli_gitlab_snippet_list) {0};
-	url = sn_asprintf("%s/snippets", gcli_get_apibase(ctx));
+	url = gcli_asprintf("%s/snippets", gcli_get_apibase(ctx));
 
 	return gcli_fetch_list(ctx, url, &fl);
 }
@@ -87,7 +86,7 @@ gcli_snippet_delete(struct  gcli_ctx *ctx, char const *snippet_id)
 	int rc = 0;
 	char *url;
 
-	url = sn_asprintf("%s/snippets/%s", gcli_get_apibase(ctx), snippet_id);
+	url = gcli_asprintf("%s/snippets/%s", gcli_get_apibase(ctx), snippet_id);
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
 	gcli_clear_ptr(&url);
@@ -99,9 +98,9 @@ int
 gcli_snippet_get(struct gcli_ctx *ctx, char const *snippet_id, FILE *stream)
 {
 	int rc = 0;
-	char *url = sn_asprintf("%s/snippets/%s/raw",
-	                        gcli_get_apibase(ctx),
-	                        snippet_id);
+	char *url = gcli_asprintf("%s/snippets/%s/raw",
+	                          gcli_get_apibase(ctx),
+	                          snippet_id);
 	rc = gcli_curl(ctx, stream, url, NULL);
 	gcli_clear_ptr(&url);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, 2023, 2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,6 +34,8 @@
 #include <gcli/cmd/status_interactive.h>
 
 #include <gcli/status.h>
+
+#include <string.h>
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -146,7 +148,7 @@ subcommand_status(int argc, char *argv[])
 
 	} else if (mark) {
 		if (count != 30)
-			warnx("gcli: ignoring -n/--count argument");
+			gcli_warnx(g_clictx, "gcli: ignoring -n/--count argument");
 
 		if (argc > 1) {
 			fprintf(stderr, "gcli: error: too many arguments for marking notifications\n");

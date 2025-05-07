@@ -43,6 +43,8 @@
 
 #include <stdarg.h>
 
+#include <gcli/port/string.h>
+
 int
 gitea_issue_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
                      char **url, char const *const suffix_fmt, ...)
@@ -52,7 +54,7 @@ gitea_issue_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	va_list vp;
 
 	va_start(vp, suffix_fmt);
-	suffix = sn_vasprintf(suffix_fmt, vp);
+	suffix = gcli_vasprintf(suffix_fmt, vp);
 	va_end(vp);
 
 	switch (path->kind) {
@@ -62,15 +64,15 @@ gitea_issue_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo  = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/repos/%s/%s/issues/%"PRIid"%s",
-		                   gcli_get_apibase(ctx), e_owner, e_repo,
-		                   path->as_default.id, suffix);
+		*url = gcli_asprintf("%s/repos/%s/%s/issues/%"PRIid"%s",
+		                     gcli_get_apibase(ctx), e_owner, e_repo,
+		                     path->as_default.id, suffix);
 
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path kind for Gitea issues");
@@ -100,25 +102,25 @@ gitea_issues_search(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	if (details->milestone) {
 		char *tmp = gcli_urlencode(details->milestone);
-		e_milestone = sn_asprintf("&milestones=%s", tmp);
+		e_milestone = gcli_asprintf("&milestones=%s", tmp);
 		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->author) {
 		char *tmp = gcli_urlencode(details->author);
-		e_author = sn_asprintf("&created_by=%s", tmp);
+		e_author = gcli_asprintf("&created_by=%s", tmp);
 		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->label) {
 		char *tmp = gcli_urlencode(details->label);
-		e_label = sn_asprintf("&labels=%s", tmp);
+		e_label = gcli_asprintf("&labels=%s", tmp);
 		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->search_term) {
 		char *tmp = gcli_urlencode(details->search_term);
-		e_query = sn_asprintf("&q=%s", tmp);
+		e_query = gcli_asprintf("&q=%s", tmp);
 		gcli_clear_ptr(&tmp);
 	}
 
@@ -244,7 +246,7 @@ get_id_of_label(char const *label_name,
 {
 	for (size_t i = 0; i < list->labels_size; ++i)
 		if (strcmp(list->labels[i].name, label_name) == 0)
-			return sn_asprintf("%"PRIid, list->labels[i].id);
+			return gcli_asprintf("%"PRIid, list->labels[i].id);
 	return NULL;
 }
 

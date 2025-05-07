@@ -78,6 +78,8 @@
 #include <gcli/bugzilla/comment.h>
 #include <gcli/bugzilla/config.h>
 
+#include <gcli/port/err.h>
+
 static struct gcli_forge_descriptor const
 github_forge_descriptor =
 {

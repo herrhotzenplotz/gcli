@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -49,11 +49,14 @@ struct gcli_ctx {
 	char *(*get_apibase)(struct gcli_ctx *);
 
 	void (*report_progress)(bool done);
+
+	int verbosity;
 };
 
 /* Error routine */
 int gcli_error(struct gcli_ctx *ctx, char const *const fmt, ...);
 
+/* mostly concerning warn(x) */
 char *gcli_get_apibase(struct gcli_ctx *ctx);
 char *gcli_get_authheader(struct gcli_ctx *ctx);
 char *gcli_get_token(struct gcli_ctx *ctx);

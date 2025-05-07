@@ -33,6 +33,7 @@
 #include <gcli/github/repos.h>
 #include <gcli/json_gen.h>
 #include <gcli/json_util.h>
+#include <gcli/port/util.h>
 #include <pdjson/pdjson.h>
 
 #include <assert.h>
@@ -83,7 +84,7 @@ github_get_upload_url(struct gcli_ctx *ctx, struct gcli_release *const it,
 		return gcli_error(ctx, "GitHub API returned an invalid upload url");
 
 	size_t len = delim - it->upload_url;
-	*out = sn_strndup(it->upload_url, len);
+	*out = gcli_strndup(it->upload_url, len);
 
 	return 0;
 }
@@ -93,16 +94,16 @@ github_upload_release_asset(struct gcli_ctx *ctx, char const *url,
                             struct gcli_release_asset_upload const asset)
 {
 	char *req = NULL;
-	sn_sv file_content = {0};
+	gcli_sv file_content = {0};
 	struct gcli_fetch_buffer buffer = {0};
 	int rc = 0;
 
-	file_content.length = sn_mmap_file(asset.path, (void **)&file_content.data);
+	file_content.length = gcli_read_file(asset.path, &file_content.data);
 	if (file_content.length == 0)
 		return -1;
 
 	/* TODO: URL escape this */
-	req = sn_asprintf("%s?name=%s", url, asset.name);
+	req = gcli_asprintf("%s?name=%s", url, asset.name);
 
 	rc = gcli_post_upload(
 		ctx,

@@ -33,7 +33,6 @@
 #include <gcli/github/status.h>
 #include <gcli/json_util.h>
 
-#include <sn/sn.h>
 #include <pdjson/pdjson.h>
 
 #include <templates/github/status.h>
@@ -51,7 +50,7 @@ github_get_notifications(struct gcli_ctx *ctx, int const max,
 		.max = max,
 	};
 
-	url = sn_asprintf("%s/notifications", gcli_get_apibase(ctx));
+	url = gcli_asprintf("%s/notifications", gcli_get_apibase(ctx));
 	return gcli_fetch_list(ctx, url, &fl);
 }
 
@@ -61,7 +60,7 @@ github_notification_mark_as_read(struct gcli_ctx *ctx, char const *id)
 	char *url = NULL;
 	int rc = 0;
 
-	url = sn_asprintf(
+	url = gcli_asprintf(
 		"%s/notifications/threads/%s",
 		gcli_get_apibase(ctx),
 		id);

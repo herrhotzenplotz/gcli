@@ -39,7 +39,7 @@
 
 #include <pdjson/pdjson.h>
 
-#include <stdarg.h>
+#include <gcli/port/string.h>
 
 int
 gitea_milestone_make_url(struct gcli_ctx *ctx,
@@ -52,7 +52,7 @@ gitea_milestone_make_url(struct gcli_ctx *ctx,
 	va_list vp;
 
 	va_start(vp, suffix_fmt);
-	suffix = sn_vasprintf(suffix_fmt, vp);
+	suffix = gcli_vasprintf(suffix_fmt, vp);
 	va_end(vp);
 
 	switch (path->kind) {
@@ -62,15 +62,15 @@ gitea_milestone_make_url(struct gcli_ctx *ctx,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/repos/%s/%s/milestones/%"PRIid"%s",
-		                   gcli_get_apibase(ctx), e_owner, e_repo,
-		                   path->as_default.id, suffix);
+		*url = gcli_asprintf("%s/repos/%s/%s/milestones/%"PRIid"%s",
+		                     gcli_get_apibase(ctx), e_owner, e_repo,
+		                     path->as_default.id, suffix);
 
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path kind for milestones");

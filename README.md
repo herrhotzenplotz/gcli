@@ -28,6 +28,7 @@ There are official packages available:
 ### Dependencies
 
 Required dependencies:
+
 - libcurl
 - yacc (System V yacc, Berkeley Yacc or Bison should suffice)
 - lex (flex is preferred)

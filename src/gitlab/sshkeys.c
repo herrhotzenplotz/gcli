@@ -33,6 +33,7 @@
 
 #include <gcli/gitlab/sshkeys.h>
 #include <gcli/curl.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
@@ -60,22 +61,30 @@ int
 gitlab_add_sshkey(struct gcli_ctx *ctx, char const *const title,
                   char const *const pubkey, struct gcli_sshkey *const out)
 {
-	char *url, *payload;
-	char *e_title, *e_key;
-	struct gcli_fetch_buffer buf = {0};
+	char *url = NULL, *payload = NULL;
 	int rc = 0;
+	struct gcli_fetch_buffer buf = {0};
+	struct gcli_jsongen gen = {0};
 
+	/* generate url */
 	url = gcli_asprintf("%s/user/keys", gcli_get_apibase(ctx));
 
 	/* Prepare payload */
-	e_title = gcli_json_escape_cstr(title);
-	e_key = gcli_json_escape_cstr(pubkey);
-	payload = gcli_asprintf(
-		"{ \"title\": \"%s\", \"key\": \"%s\" }",
-		e_title, e_key);
-	gcli_clear_ptr(&e_title);
-	gcli_clear_ptr(&e_key);
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "title");
+		gcli_jsongen_string(&gen, title);
 
+		gcli_jsongen_objmember(&gen, "key");
+		gcli_jsongen_string(&gen, pubkey);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* perform request */
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, &buf);
 	if (rc == 0 && out) {
 		struct json_stream stream = {0};
@@ -85,7 +94,9 @@ gitlab_add_sshkey(struct gcli_ctx *ctx, char const *const title,
 		json_close(&stream);
 	}
 
-	gcli_clear_ptr(&buf.data);
+	gcli_fetch_buffer_free(&buf);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

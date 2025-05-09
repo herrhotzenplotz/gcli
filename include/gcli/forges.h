@@ -222,6 +222,7 @@ struct gcli_forge_descriptor {
 	 * create a milestone */
 	int (*create_milestone)(
 		struct gcli_ctx *ctx,
+		struct gcli_path const *repo,
 		struct gcli_milestone_create_args const *args);
 
 	/**

@@ -133,9 +133,10 @@ gitea_get_milestone(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 int
 gitea_create_milestone(struct gcli_ctx *ctx,
+                       struct gcli_path const *repo,
                        struct gcli_milestone_create_args const *args)
 {
-	return github_create_milestone(ctx, args);
+	return github_create_milestone(ctx, repo, args);
 }
 
 int

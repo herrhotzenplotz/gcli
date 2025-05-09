@@ -46,9 +46,10 @@ gcli_get_milestone(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 int
 gcli_create_milestone(struct gcli_ctx *ctx,
+                      struct gcli_path const *const repo,
                       struct gcli_milestone_create_args const *args)
 {
-	gcli_null_check_call(create_milestone, ctx, args);
+	gcli_null_check_call(create_milestone, ctx, repo, args);
 }
 
 int

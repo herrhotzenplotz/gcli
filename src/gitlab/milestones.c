@@ -34,6 +34,7 @@
 #include <gcli/gitlab/merge_requests.h>
 #include <gcli/gitlab/milestones.h>
 #include <gcli/gitlab/repos.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
 #include <templates/gitlab/milestones.h>
@@ -153,40 +154,40 @@ gitlab_milestone_get_issues(struct gcli_ctx *ctx,
 
 int
 gitlab_create_milestone(struct gcli_ctx *ctx,
+                        struct gcli_path const *const path,
                         struct gcli_milestone_create_args const *args)
 {
-	char *url, *e_owner, *e_repo, *e_title, *json_body, *description = NULL;
+	char *url = NULL, *payload = NULL;
 	int rc = 0;
+	struct gcli_jsongen gen = {0};
 
-	e_owner = gcli_urlencode(args->owner);
-	e_repo = gcli_urlencode(args->repo);
+	/* build url */
+	rc = gitlab_repo_make_url(ctx, path, &url, "/milestones");
+	if (rc < 0)
+		return rc;
 
-	url = gcli_asprintf("%s/projects/%s%%2F%s/milestones", gcli_get_apibase(ctx),
-	                    e_owner, e_repo);
+	/* build payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "title");
+		gcli_jsongen_string(&gen, args->title);
 
-	/* Escape and prepare the description if needed */
-	if (args->description) {
-		char *e_description = gcli_json_escape_cstr(args->description);
-		description = gcli_asprintf(", \"description\": \"%s\"", e_description);
-		gcli_clear_ptr(&e_description);
+		if (args->description) {
+			gcli_jsongen_objmember(&gen, "description");
+			gcli_jsongen_string(&gen, args->description);
+		}
 	}
+	gcli_jsongen_end_object(&gen);
 
-	e_title = gcli_json_escape_cstr(args->title);
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
 
-	json_body = gcli_asprintf("{"
-	                          "    \"title\": \"%s\""
-	                          "    %s"
-	                          "}",
-	                          e_title, description ? description : "");
+	/* perform request */
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
 
-	rc = gcli_fetch_with_method(ctx, "POST", url, json_body, NULL, NULL);
-
-	gcli_clear_ptr(&json_body);
-	gcli_clear_ptr(&description);
 	gcli_clear_ptr(&url);
-	gcli_clear_ptr(&e_title);
-	gcli_clear_ptr(&e_repo);
-	gcli_clear_ptr(&e_owner);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }

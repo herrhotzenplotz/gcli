@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,6 +39,7 @@ int github_get_milestone(struct gcli_ctx *ctx, struct gcli_path const *path,
                          struct gcli_milestone *out);
 
 int github_create_milestone(struct gcli_ctx *ctx,
+                            struct gcli_path const *repo,
                             struct gcli_milestone_create_args const *args);
 
 int github_delete_milestone(struct gcli_ctx *ctx,

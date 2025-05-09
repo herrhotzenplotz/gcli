@@ -340,6 +340,8 @@ subcommand_milestone_create(int argc, char *argv[])
 {
 	int ch;
 	struct gcli_milestone_create_args args = {0};
+	struct gcli_path repo = {0};
+
 	struct option const options[] = {
 		{ .name = "owner",
 		  .has_arg = required_argument,
@@ -363,10 +365,10 @@ subcommand_milestone_create(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "+o:r:t:d:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
-			args.owner = optarg;
+			repo.as_default.owner = optarg;
 			break;
 		case 'r':
-			args.repo = optarg;
+			repo.as_default.repo = optarg;
 			break;
 		case 't':
 			args.title = optarg;
@@ -387,15 +389,15 @@ subcommand_milestone_create(int argc, char *argv[])
 	if (argc)
 		errx(1, "gcli: error: stray arguments");
 
-	/* make sure both are set or deduce them */
-	check_owner_and_repo(&args.owner, &args.repo);
+	/* make sure path is valid */
+	check_path(&repo);
 
 	/* enforce the user to at least provide a title */
 	if (!args.title)
 		errx(1, "gcli: error: missing milestone title");
 
 	/* actually create the milestone */
-	if (gcli_create_milestone(g_clictx, &args) < 0)
+	if (gcli_create_milestone(g_clictx, &repo, &args) < 0)
 		errx(1, "gcli: error: could not create milestone: %s",
 		     gcli_get_error(g_clictx));
 

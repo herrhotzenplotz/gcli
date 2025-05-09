@@ -33,6 +33,7 @@
 #include <gcli/date_time.h>
 #include <gcli/github/issues.h>
 #include <gcli/github/repos.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
 #include <templates/github/milestones.h>
@@ -187,40 +188,40 @@ github_milestone_get_issues(struct gcli_ctx *ctx,
 
 int
 github_create_milestone(struct gcli_ctx *ctx,
+                        struct gcli_path const *repo,
                         struct gcli_milestone_create_args const *args)
 {
-	char *url, *e_owner, *e_repo;
-	char *json_body, *description;
+	char *url, *payload;
 	int rc = 0;
+	struct gcli_jsongen gen = {0};
 
-	e_owner = gcli_urlencode(args->owner);
-	e_repo = gcli_urlencode(args->repo);
+	/* build url */
+	rc = github_repo_make_url(ctx, repo, &url, "/milestones");
+	if (rc < 0)
+		return rc;
 
-	if (args->description) {
-		/* This is fine :-) */
-		char *e_description = gcli_json_escape_cstr(args->description);
-		description = gcli_asprintf(",\"description\": \"%s\"", e_description);
-		gcli_clear_ptr(&e_description);
-	} else {
-		description = strdup("");
+	/* generate payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "title");
+		gcli_jsongen_string(&gen, args->title);
+
+		if (args->description) {
+			gcli_jsongen_objmember(&gen, "description");
+			gcli_jsongen_string(&gen, args->description);
+		}
 	}
+	gcli_jsongen_end_object(&gen);
 
-	json_body = gcli_asprintf(
-		"{"
-		"    \"title\"      : \"%s\""
-		"    %s"
-		"}", args->title, description);
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
 
-	url = gcli_asprintf("%s/repos/%s/%s/milestones",
-	                    gcli_get_apibase(ctx), e_owner, e_repo);
+	/* perform request */
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
 
-	rc = gcli_fetch_with_method(ctx, "POST", url, json_body, NULL, NULL);
-
-	gcli_clear_ptr(&json_body);
-	gcli_clear_ptr(&description);
+	gcli_clear_ptr(&payload);
 	gcli_clear_ptr(&url);
-	gcli_clear_ptr(&e_repo);
-	gcli_clear_ptr(&e_owner);
 
 	return rc;
 }

@@ -66,13 +66,8 @@ struct gcli_milestone_list {
 };
 
 struct gcli_milestone_create_args {
-	/* These are const because they are coming from either an mmapped
-	 * buffer or from command line arguments. They should never ever
-	 * get free()-ed */
-	char const *title;
-	char const *description;
-	char const *owner;
-	char const *repo;
+	char *title;
+	char *description;
 };
 
 int gcli_get_milestones(struct gcli_ctx *ctx, struct gcli_path const *path,
@@ -82,6 +77,7 @@ int gcli_get_milestone(struct gcli_ctx *ctx, struct gcli_path const *path,
                        struct gcli_milestone *out);
 
 int gcli_create_milestone(struct gcli_ctx *ctx,
+                          struct gcli_path const *repo_path,
                           struct gcli_milestone_create_args const *args);
 
 int gcli_delete_milestone(struct gcli_ctx *ctx,

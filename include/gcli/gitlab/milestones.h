@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,6 +40,7 @@ int gitlab_get_milestones(struct gcli_ctx *ctx, struct gcli_path const *path,
                           int max, struct gcli_milestone_list *const out);
 
 int gitlab_create_milestone(struct gcli_ctx *ctx,
+                            struct gcli_path const *repo,
                             struct gcli_milestone_create_args const *args);
 
 int gitlab_delete_milestone(struct gcli_ctx *ctx, struct gcli_path const *path);

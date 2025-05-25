@@ -31,33 +31,29 @@
 #include <gcli/github/issues.h>
 #include <gcli/issues.h>
 #include <gcli/json_util.h>
-#include <sn/sn.h>
 
 void
 gcli_issue_free(struct gcli_issue *const it)
 {
-	free(it->product);
-	free(it->component);
-	free(it->author);
-	free(it->state);
-	free(it->body);
-	free(it->url);
-	free(it->title);
-	free(it->web_url);
+	gcli_clear_ptr(&it->product);
+	gcli_clear_ptr(&it->component);
+	gcli_clear_ptr(&it->author);
+	gcli_clear_ptr(&it->state);
+	gcli_clear_ptr(&it->body);
+	gcli_clear_ptr(&it->url);
+	gcli_clear_ptr(&it->title);
+	gcli_clear_ptr(&it->web_url);
 
 	for (size_t i = 0; i < it->labels_size; ++i)
-		free(it->labels[i]);
+		gcli_clear_ptr(&it->labels[i]);
 
-	free(it->labels);
-	it->labels = NULL;
+	gcli_clear_ptr(&it->labels);
 
 	for (size_t i = 0; i < it->assignees_size; ++i)
-		free(it->assignees[i]);
+		gcli_clear_ptr(&it->assignees[i]);
 
-	free(it->assignees);
-	it->assignees = NULL;
-
-	free(it->milestone);
+	gcli_clear_ptr(&it->assignees);
+	gcli_clear_ptr(&it->milestone);
 }
 
 void
@@ -66,9 +62,7 @@ gcli_issues_free(struct gcli_issue_list *const list)
 	for (size_t i = 0; i < list->issues_size; ++i)
 		gcli_issue_free(&list->issues[i]);
 
-	free(list->issues);
-
-	list->issues = NULL;
+	gcli_clear_ptr(&list->issues);
 	list->issues_size = 0;
 }
 

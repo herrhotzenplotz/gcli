@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,9 +33,9 @@
 
 #include <gcli/gitlab/sshkeys.h>
 #include <gcli/curl.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
-#include <sn/sn.h>
 #include <pdjson/pdjson.h>
 
 #include <templates/gitlab/sshkeys.h>
@@ -52,7 +52,7 @@ gitlab_get_sshkeys(struct gcli_ctx *ctx, struct gcli_sshkey_list *list)
 	};
 
 	*list = (struct gcli_sshkey_list) {0};
-	url = sn_asprintf("%s/user/keys", gcli_get_apibase(ctx));
+	url = gcli_asprintf("%s/user/keys", gcli_get_apibase(ctx));
 
 	return gcli_fetch_list(ctx, url, &fl);
 }
@@ -61,22 +61,30 @@ int
 gitlab_add_sshkey(struct gcli_ctx *ctx, char const *const title,
                   char const *const pubkey, struct gcli_sshkey *const out)
 {
-	char *url, *payload;
-	char *e_title, *e_key;
-	struct gcli_fetch_buffer buf = {0};
+	char *url = NULL, *payload = NULL;
 	int rc = 0;
+	struct gcli_fetch_buffer buf = {0};
+	struct gcli_jsongen gen = {0};
 
-	url = sn_asprintf("%s/user/keys", gcli_get_apibase(ctx));
+	/* generate url */
+	url = gcli_asprintf("%s/user/keys", gcli_get_apibase(ctx));
 
 	/* Prepare payload */
-	e_title = gcli_json_escape_cstr(title);
-	e_key = gcli_json_escape_cstr(pubkey);
-	payload = sn_asprintf(
-		"{ \"title\": \"%s\", \"key\": \"%s\" }",
-		e_title, e_key);
-	free(e_title);
-	free(e_key);
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "title");
+		gcli_jsongen_string(&gen, title);
 
+		gcli_jsongen_objmember(&gen, "key");
+		gcli_jsongen_string(&gen, pubkey);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
+
+	/* perform request */
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, &buf);
 	if (rc == 0 && out) {
 		struct json_stream stream = {0};
@@ -86,7 +94,9 @@ gitlab_add_sshkey(struct gcli_ctx *ctx, char const *const title,
 		json_close(&stream);
 	}
 
-	free(buf.data);
+	gcli_fetch_buffer_free(&buf);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -97,10 +107,10 @@ gitlab_delete_sshkey(struct gcli_ctx *ctx, gcli_id id)
 	char *url;
 	int rc = 0;
 
-	url = sn_asprintf("%s/user/keys/%"PRIid, gcli_get_apibase(ctx), id);
+	url = gcli_asprintf("%s/user/keys/%"PRIid, gcli_get_apibase(ctx), id);
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

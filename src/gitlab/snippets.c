@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,7 +34,6 @@
 #include <gcli/cmd/table.h>
 
 #include <pdjson/pdjson.h>
-#include <sn/sn.h>
 
 #include <stdlib.h>
 
@@ -43,12 +42,12 @@
 void
 gcli_gitlab_snippet_free(struct gcli_gitlab_snippet *snippet)
 {
-	free(snippet->title);
-	free(snippet->filename);
-	free(snippet->date);
-	free(snippet->author);
-	free(snippet->visibility);
-	free(snippet->raw_url);
+	gcli_clear_ptr(&snippet->title);
+	gcli_clear_ptr(&snippet->filename);
+	gcli_clear_ptr(&snippet->date);
+	gcli_clear_ptr(&snippet->author);
+	gcli_clear_ptr(&snippet->visibility);
+	gcli_clear_ptr(&snippet->raw_url);
 }
 
 void
@@ -58,9 +57,7 @@ gcli_snippets_free(struct gcli_gitlab_snippet_list *const list)
 		gcli_gitlab_snippet_free(&list->snippets[i]);
 	}
 
-	free(list->snippets);
-
-	list->snippets = NULL;
+	gcli_clear_ptr(&list->snippets);
 	list->snippets_size = 0;
 }
 
@@ -78,7 +75,7 @@ gcli_snippets_get(struct gcli_ctx *ctx, int const max,
 	};
 
 	*out = (struct gcli_gitlab_snippet_list) {0};
-	url = sn_asprintf("%s/snippets", gcli_get_apibase(ctx));
+	url = gcli_asprintf("%s/snippets", gcli_get_apibase(ctx));
 
 	return gcli_fetch_list(ctx, url, &fl);
 }
@@ -89,10 +86,10 @@ gcli_snippet_delete(struct  gcli_ctx *ctx, char const *snippet_id)
 	int rc = 0;
 	char *url;
 
-	url = sn_asprintf("%s/snippets/%s", gcli_get_apibase(ctx), snippet_id);
+	url = gcli_asprintf("%s/snippets/%s", gcli_get_apibase(ctx), snippet_id);
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -101,11 +98,11 @@ int
 gcli_snippet_get(struct gcli_ctx *ctx, char const *snippet_id, FILE *stream)
 {
 	int rc = 0;
-	char *url = sn_asprintf("%s/snippets/%s/raw",
-	                        gcli_get_apibase(ctx),
-	                        snippet_id);
+	char *url = gcli_asprintf("%s/snippets/%s/raw",
+	                          gcli_get_apibase(ctx),
+	                          snippet_id);
 	rc = gcli_curl(ctx, stream, url, NULL);
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021,2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,18 +44,18 @@ gcli_get_releases(struct gcli_ctx *ctx, struct gcli_path const *const repo_path,
 void
 gcli_release_free(struct gcli_release *release)
 {
-	free(release->id);
-	free(release->name);
-	free(release->body);
-	free(release->author);
-	free(release->upload_url);
+	gcli_clear_ptr(&release->id);
+	gcli_clear_ptr(&release->name);
+	gcli_clear_ptr(&release->body);
+	gcli_clear_ptr(&release->author);
+	gcli_clear_ptr(&release->upload_url);
 
 	for (size_t i = 0; i < release->assets_size; ++i) {
-		free(release->assets[i].name);
-		free(release->assets[i].url);
+		gcli_clear_ptr(&release->assets[i].name);
+		gcli_clear_ptr(&release->assets[i].url);
 	}
 
-	free(release->assets);
+	gcli_clear_ptr(&release->assets);
 }
 
 void
@@ -65,20 +65,20 @@ gcli_free_releases(struct gcli_release_list *const list)
 		gcli_release_free(&list->releases[i]);
 	}
 
-	free(list->releases);
-
-	list->releases = NULL;
+	gcli_clear_ptr(&list->releases);
 	list->releases_size = 0;
 }
 
 int
-gcli_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *release)
+gcli_create_release(struct gcli_ctx *ctx,
+                    struct gcli_create_release_args const *release)
 {
 	gcli_null_check_call(create_release, ctx, release);
 }
 
 int
-gcli_release_push_asset(struct gcli_ctx *ctx, struct gcli_new_release *const release,
+gcli_release_push_asset(struct gcli_ctx *ctx,
+                        struct gcli_create_release_args *const release,
                         struct gcli_release_asset_upload const asset)
 {
 	if (release->assets_size == GCLI_RELEASE_MAX_ASSETS)

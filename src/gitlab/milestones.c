@@ -34,6 +34,7 @@
 #include <gcli/gitlab/merge_requests.h>
 #include <gcli/gitlab/milestones.h>
 #include <gcli/gitlab/repos.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
 #include <templates/gitlab/milestones.h>
@@ -58,7 +59,10 @@ gitlab_get_milestones(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		.parse = (parsefn)(parse_gitlab_milestones),
 	};
 
-	rc = gitlab_repo_make_url(ctx, path, &url, "/milestones");
+	rc = gitlab_repo_make_url(
+		ctx, path, &url,
+		"/milestones?include_ancestors=true");
+
 	if (rc < 0)
 		return rc;
 
@@ -76,7 +80,7 @@ gitlab_milestone_make_url(struct gcli_ctx *ctx,
 	va_list vp;
 
 	va_start(vp, suffix_fmt);
-	suffix = sn_vasprintf(suffix_fmt, vp);
+	suffix = gcli_vasprintf(suffix_fmt, vp);
 	va_end(vp);
 
 	switch (path->kind) {
@@ -86,23 +90,23 @@ gitlab_milestone_make_url(struct gcli_ctx *ctx,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/projects/%s%%2F%s/milestones/%"PRIid"%s",
-		                   gcli_get_apibase(ctx),
-		                   e_owner, e_repo, path->as_default.id,
-		                   suffix);
+		*url = gcli_asprintf("%s/projects/%s%%2F%s/milestones/%"PRIid"%s",
+		                     gcli_get_apibase(ctx),
+		                     e_owner, e_repo, path->as_default.id,
+		                     suffix);
 
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "bad path kind for gitlab milestone");
 	} break;
 	}
 
-	free(suffix);
+	gcli_clear_ptr(&suffix);
 
 	return rc;
 }
@@ -128,7 +132,7 @@ gitlab_get_milestone(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	}
 
 	gcli_fetch_buffer_free(&buffer);
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -150,40 +154,40 @@ gitlab_milestone_get_issues(struct gcli_ctx *ctx,
 
 int
 gitlab_create_milestone(struct gcli_ctx *ctx,
+                        struct gcli_path const *const path,
                         struct gcli_milestone_create_args const *args)
 {
-	char *url, *e_owner, *e_repo, *e_title, *json_body, *description = NULL;
+	char *url = NULL, *payload = NULL;
 	int rc = 0;
+	struct gcli_jsongen gen = {0};
 
-	e_owner = gcli_urlencode(args->owner);
-	e_repo = gcli_urlencode(args->repo);
+	/* build url */
+	rc = gitlab_repo_make_url(ctx, path, &url, "/milestones");
+	if (rc < 0)
+		return rc;
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/milestones", gcli_get_apibase(ctx),
-	                  e_owner, e_repo);
+	/* build payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "title");
+		gcli_jsongen_string(&gen, args->title);
 
-	/* Escape and prepare the description if needed */
-	if (args->description) {
-		char *e_description = gcli_json_escape_cstr(args->description);
-		description = sn_asprintf(", \"description\": \"%s\"", e_description);
-		free(e_description);
+		if (args->description) {
+			gcli_jsongen_objmember(&gen, "description");
+			gcli_jsongen_string(&gen, args->description);
+		}
 	}
+	gcli_jsongen_end_object(&gen);
 
-	e_title = gcli_json_escape_cstr(args->title);
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
 
-	json_body = sn_asprintf("{"
-	                        "    \"title\": \"%s\""
-	                        "    %s"
-	                        "}",
-	                        e_title, description ? description : "");
+	/* perform request */
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
 
-	rc = gcli_fetch_with_method(ctx, "POST", url, json_body, NULL, NULL);
-
-	free(json_body);
-	free(description);
-	free(url);
-	free(e_title);
-	free(e_repo);
-	free(e_owner);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }
@@ -200,7 +204,7 @@ gitlab_delete_milestone(struct gcli_ctx *ctx, struct gcli_path const *const path
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -224,7 +228,7 @@ gitlab_milestone_set_duedate(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PUT", url, "", NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

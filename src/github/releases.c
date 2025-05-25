@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,6 +33,7 @@
 #include <gcli/github/repos.h>
 #include <gcli/json_gen.h>
 #include <gcli/json_util.h>
+#include <gcli/port/util.h>
 #include <pdjson/pdjson.h>
 
 #include <assert.h>
@@ -83,7 +84,7 @@ github_get_upload_url(struct gcli_ctx *ctx, struct gcli_release *const it,
 		return gcli_error(ctx, "GitHub API returned an invalid upload url");
 
 	size_t len = delim - it->upload_url;
-	*out = sn_strndup(it->upload_url, len);
+	*out = gcli_strndup(it->upload_url, len);
 
 	return 0;
 }
@@ -93,16 +94,16 @@ github_upload_release_asset(struct gcli_ctx *ctx, char const *url,
                             struct gcli_release_asset_upload const asset)
 {
 	char *req = NULL;
-	sn_sv file_content = {0};
+	gcli_sv file_content = {0};
 	struct gcli_fetch_buffer buffer = {0};
 	int rc = 0;
 
-	file_content.length = sn_mmap_file(asset.path, (void **)&file_content.data);
+	file_content.length = gcli_read_file(asset.path, &file_content.data);
 	if (file_content.length == 0)
 		return -1;
 
 	/* TODO: URL escape this */
-	req = sn_asprintf("%s?name=%s", url, asset.name);
+	req = gcli_asprintf("%s?name=%s", url, asset.name);
 
 	rc = gcli_post_upload(
 		ctx,
@@ -112,21 +113,21 @@ github_upload_release_asset(struct gcli_ctx *ctx, char const *url,
 		file_content.length,
 		&buffer);
 
-	free(req);
+	gcli_clear_ptr(&req);
 	gcli_fetch_buffer_free(&buffer);
 
 	return rc;
 }
 
 int
-github_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *release)
+github_create_release(struct gcli_ctx *ctx,
+                      struct gcli_create_release_args const *release)
 {
-	char *url = NULL, *e_owner = NULL, *e_repo = NULL, *upload_url = NULL,
-	     *payload = NULL;
+	char *url = NULL, *upload_url = NULL, *payload = NULL;
+	int rc = 0;
 	struct gcli_fetch_buffer buffer = {0};
 	struct gcli_jsongen gen = {0};
 	struct gcli_release response = {0};
-	int rc = 0;
 
 	/* Payload */
 	gcli_jsongen_init(&gen);
@@ -160,15 +161,9 @@ github_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *relea
 	payload = gcli_jsongen_to_string(&gen);
 	gcli_jsongen_free(&gen);
 
-	e_owner = gcli_urlencode(release->owner);
-	e_repo = gcli_urlencode(release->repo);
-
-	/* https://docs.github.com/en/rest/reference/repos#create-a-release */
-	url = sn_asprintf("%s/repos/%s/%s/releases", gcli_get_apibase(ctx),
-	                  e_owner, e_repo);
-
-	free(e_owner);
-	free(e_repo);
+	rc = github_repo_make_url(ctx, &release->repo_path, &url, "/releases");
+	if (rc < 0)
+		goto out;
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, &buffer);
 	if (rc < 0)
@@ -176,7 +171,7 @@ github_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *relea
 
 	github_parse_single_release(ctx, buffer, &response);
 
-    rc = github_get_upload_url(ctx, &response, &upload_url);
+	rc = github_get_upload_url(ctx, &response, &upload_url);
 	if (rc < 0)
 		goto out;
 
@@ -191,9 +186,9 @@ github_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *relea
 out:
 	gcli_release_free(&response);
 	gcli_fetch_buffer_free(&buffer);
-	free(upload_url);
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&upload_url);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }
@@ -211,7 +206,7 @@ github_delete_release(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

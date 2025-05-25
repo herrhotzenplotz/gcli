@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,17 +34,15 @@
 #include <config.h>
 #endif
 
-#include <sn/sn.h>
-
 struct gcli_gitremote {
-	sn_sv name;
-	sn_sv owner;
-	sn_sv repo;
-	sn_sv url;
+	gcli_sv name;
+	gcli_sv owner;
+	gcli_sv repo;
+	gcli_sv url;
 	gcli_forge_type forge_type;
 };
 
-sn_sv gcli_gitconfig_get_current_branch(void);
+gcli_sv gcli_gitconfig_get_current_branch(void);
 
 void gcli_gitconfig_add_fork_remote(char const *org, char const *repo);
 

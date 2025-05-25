@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -89,8 +89,8 @@ gitlab_fork_create(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, post_data, NULL, NULL);
 
-	free(url);
-	free(post_data);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&post_data);
 
 	return rc;
 }

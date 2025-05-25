@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -66,8 +66,7 @@ gcli_jsongen_init(struct gcli_jsongen *gen)
 void
 gcli_jsongen_free(struct gcli_jsongen *gen)
 {
-	free(gen->buffer);
-	gen->buffer = NULL;
+	gcli_clear_ptr(&gen->buffer);
 	gen->buffer_size = 0;
 	gen->buffer_capacity = 0;
 
@@ -250,14 +249,14 @@ gcli_jsongen_objmember(struct gcli_jsongen *gen, char const *const key)
 	}
 
 	put_comma_if_needed(gen);
-	char *const e_key = gcli_json_escape_cstr(key);
+	char *e_key = gcli_json_escape_cstr(key);
 
 	append_strf(gen, "\"%s\": ", e_key);
 
 	gen->first_elem = false;
 	gen->await_object_value = true;
 
-	free(e_key);
+	gcli_clear_ptr(&e_key);
 
 	return 0;
 }
@@ -303,14 +302,14 @@ int
 gcli_jsongen_string(struct gcli_jsongen *gen, char const *value)
 {
 	put_comma_if_needed(gen);
-	char *const e_value = gcli_json_escape_cstr(value);
+	char *e_value = gcli_json_escape_cstr(value);
 
 	append_strf(gen, "\"%s\"", e_value);
 
 	gen->await_object_value = false;
 	gen->first_elem = false;
 
-	free(e_value);
+	gcli_clear_ptr(&e_value);
 
 	return 0;
 }

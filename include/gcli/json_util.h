@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,11 +38,12 @@
 
 #include <pdjson/pdjson.h>
 
-#include <sn/sn.h>
-
 #include <stdint.h>
 
 #include <gcli/status.h>
+
+#include <gcli/port/string.h>
+#include <gcli/port/sv.h>
 
 #define get_int(ctx, input, out)           get_int_(ctx, input, out, __func__)
 #define get_id(ctx, input, out)            get_id_(ctx, input, out, __func__)
@@ -71,7 +72,7 @@ int get_parse_int_(struct gcli_ctx *ctx, json_stream *input, long *out, char con
 int get_bool_(struct gcli_ctx *ctx, json_stream *input, bool *out, char const *function);
 int get_bool_relaxed_(struct gcli_ctx *ctx, json_stream *input, bool *out, char const *function);
 int get_string_(struct gcli_ctx *ctx, json_stream *input, char **out, char const *function);
-int get_sv_(struct gcli_ctx *ctx, json_stream *input, sn_sv *out, char const *function);
+int get_sv_(struct gcli_ctx *ctx, json_stream *input, gcli_sv *out, char const *function);
 int get_user_(struct gcli_ctx *ctx, json_stream *input, char **out, char const *function);
 int get_label_(struct gcli_ctx *ctx, json_stream *input, char const **out, char const *function);
 int get_iso8601_time_(struct gcli_ctx *ctx, json_stream *input, time_t *out, char const *function);
@@ -86,7 +87,7 @@ int get_gitea_notification_target_type(struct gcli_ctx *ctx, json_stream *input,
                                        enum gcli_notification_target_type *out);
 int get_gitlab_can_be_merged(struct gcli_ctx *ctx, json_stream *input, bool *out);
 int get_gitea_visibility(struct gcli_ctx *ctx, json_stream *input, char **out);
-sn_sv gcli_json_escape(sn_sv);
+gcli_sv gcli_json_escape(gcli_sv);
 #define     gcli_json_escape_cstr(x) (gcli_json_escape(SV((char *)(x))).data)
 int gcli_json_advance(struct gcli_ctx *ctx, json_stream *input, char const *fmt, ...);
 int get_url_path_(struct gcli_ctx *ctx, json_stream *input, struct gcli_path *out, char const *function);
@@ -109,7 +110,7 @@ get_int_to_string_(struct gcli_ctx *ctx, json_stream *input, char **out,
 	if (rc < 0)
 		return rc;
 
-	*out = sn_asprintf("%ld", val);
+	*out = gcli_asprintf("%ld", val);
 
 	return 0;
 }

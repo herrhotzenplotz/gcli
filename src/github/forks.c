@@ -70,9 +70,9 @@ github_fork_create(struct gcli_ctx *ctx,
 	bool is_org = false;
 
 	if (in) {
-		char *const e_in = gcli_urlencode(in);
+		char *e_in = gcli_urlencode(in);
 		rc = github_user_is_org(ctx, e_in);
-		free(e_in);
+		gcli_clear_ptr(&e_in);
 
 		if (rc < 0)
 			return rc;
@@ -101,8 +101,8 @@ github_fork_create(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, post_data, NULL, NULL);
 
-	free(url);
-	free(post_data);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&post_data);
 
 	return rc;
 }

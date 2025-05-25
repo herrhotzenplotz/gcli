@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -28,6 +28,7 @@
  */
 
 #include <gcli/gitea/releases.h>
+#include <gcli/gitea/repos.h>
 #include <gcli/github/releases.h>
 
 #include <gcli/curl.h>
@@ -64,21 +65,22 @@ gitea_upload_release_asset(struct gcli_ctx *ctx, char *const url,
 	int rc = 0;
 
 	e_assetname = gcli_urlencode(asset.name);
-	request = sn_asprintf("%s?name=%s", url, e_assetname);
+	request = gcli_asprintf("%s?name=%s", url, e_assetname);
 
 	rc = gcli_curl_gitea_upload_attachment(ctx, request, asset.path, &buffer);
 
-	free(request);
-	free(e_assetname);
+	gcli_clear_ptr(&request);
+	gcli_clear_ptr(&e_assetname);
 	gcli_fetch_buffer_free(&buffer);
 
 	return rc;
 }
 
 int
-gitea_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *release)
+gitea_create_release(struct gcli_ctx *ctx,
+                     struct gcli_create_release_args const *release)
 {
-	char *e_owner = NULL, *e_repo = NULL, *payload = NULL, *upload_url = NULL, *url = NULL;
+	char *payload = NULL, *upload_url = NULL, *url = NULL;
 	struct gcli_fetch_buffer buffer = {0};
 	struct gcli_jsongen gen = {0};
 	struct gcli_release response = {0};
@@ -117,12 +119,9 @@ gitea_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *releas
 	gcli_jsongen_free(&gen);
 
 	/* Generate URL */
-	e_owner = gcli_urlencode(release->owner);
-	e_repo = gcli_urlencode(release->repo);
-
-	/* https://docs.github.com/en/rest/reference/repos#create-a-release */
-	url = sn_asprintf("%s/repos/%s/%s/releases", gcli_get_apibase(ctx),
-	                  e_owner, e_repo);
+	rc = gitea_repo_make_url(ctx, &release->repo_path, &url, "/releases");
+	if (rc < 0)
+		goto out;
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, &buffer);
 	if (rc < 0)
@@ -130,9 +129,11 @@ gitea_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *releas
 
 	gitea_parse_release(ctx, &buffer, &response);
 
-	upload_url = sn_asprintf("%s/repos/%s/%s/releases/%s/assets",
-	                         gcli_get_apibase(ctx), e_owner, e_repo,
-	                         response.id);
+	/* create asset upload url */
+	rc = gitea_repo_make_url(ctx, &release->repo_path, &upload_url,
+	                         "/releases/%s/assets", response.id);
+	if (rc < 0)
+		goto out;
 
 	for (size_t i = 0; i < release->assets_size; ++i) {
 		printf("INFO : Uploading asset %s...\n", release->assets[i].path);
@@ -145,11 +146,9 @@ gitea_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *releas
 	gcli_release_free(&response);
 out:
 	gcli_fetch_buffer_free(&buffer);
-	free(e_owner);
-	free(e_repo);
-	free(upload_url);
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&upload_url);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,13 +33,12 @@
 
 #include <gcli/date_time.h>
 #include <gcli/gcli.h>
+#include <gcli/port/string.h>
 
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-
-#include <sn/sn.h>
 
 /* A row */
 struct gcli_tblrow;
@@ -143,15 +142,15 @@ tablerow_add_cell(struct gcli_tbl *const table,
 	/* Process the content */
 	switch (table->cols[col].type) {
 	case GCLI_TBLCOLTYPE_INT: {
-		row->cells[col].text = sn_asprintf("%d", va_arg(*vp, int));
+		row->cells[col].text = gcli_asprintf("%d", va_arg(*vp, int));
 		cell_size = strlen(row->cells[col].text);
 	} break;
 	case GCLI_TBLCOLTYPE_ID: {
-		row->cells[col].text = sn_asprintf("%"PRIid, va_arg(*vp, uint64_t));
+		row->cells[col].text = gcli_asprintf("%"PRIid, va_arg(*vp, uint64_t));
 		cell_size = strlen(row->cells[col].text);
 	} break;
 	case GCLI_TBLCOLTYPE_LONG: {
-		row->cells[col].text = sn_asprintf("%ld", va_arg(*vp, long));
+		row->cells[col].text = gcli_asprintf("%ld", va_arg(*vp, long));
 		cell_size = strlen(row->cells[col].text);
 	} break;
 	case GCLI_TBLCOLTYPE_STRING: {
@@ -162,7 +161,7 @@ tablerow_add_cell(struct gcli_tbl *const table,
 		cell_size = strlen(it);
 	} break;
 	case GCLI_TBLCOLTYPE_DOUBLE: {
-		row->cells[col].text = sn_asprintf("%lf", va_arg(*vp, double));
+		row->cells[col].text = gcli_asprintf("%lf", va_arg(*vp, double));
 		cell_size = strlen(row->cells[col].text);
 	} break;
 	case GCLI_TBLCOLTYPE_BOOL: {
@@ -454,7 +453,7 @@ gcli_dict_add_timestamp(gcli_dict list, char const *key, int flags,
 int
 gcli_dict_add_sv_list(gcli_dict dict,
                       char const *const key,
-                      sn_sv const *const list,
+                      gcli_sv const *const list,
                       size_t const list_size)
 {
 	size_t totalsize = 0;
@@ -487,7 +486,7 @@ int
 gcli_dict_add_string_list(gcli_dict dict, char const *const key,
                           char const *const *list, size_t const list_size)
 {
-	char *catted = sn_join_with(
+	char *catted = gcli_join_with(
 		(char const *const *)list, list_size, ", "); /* yolo */
 
 	/* Push the row into the state */

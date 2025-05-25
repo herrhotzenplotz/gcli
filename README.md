@@ -28,6 +28,7 @@ There are official packages available:
 ### Dependencies
 
 Required dependencies:
+
 - libcurl
 - yacc (System V yacc, Berkeley Yacc or Bison should suffice)
 - lex (flex is preferred)
@@ -48,6 +49,7 @@ The test suite requires:
 ### Compile
 
 In order to perform a build, do:
+
 ```console
 $ ./configure [--prefix=/usr/local]
 $ make

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -28,8 +28,8 @@
  */
 
 #include <gcli/diffutil.h>
-
-#include <sn/sn.h>
+#include <gcli/gcli.h>
+#include <gcli/port/string.h>
 
 #include <assert.h>
 #include <string.h>
@@ -178,7 +178,7 @@ read_commit_hash_from_separator(struct token const *line, struct gcli_patch *out
 	if (!end_of_hash)
 		return -1;
 
-	out->commit_hash = sn_strndup(start_of_hash, end_of_hash - start_of_hash);
+	out->commit_hash = gcli_strndup(start_of_hash, end_of_hash - start_of_hash);
 	return 0;
 }
 
@@ -624,12 +624,12 @@ gcli_parse_diff(struct gcli_diff_parser *parser, struct gcli_diff *out)
 		struct gcli_diff_hunk *hunk = calloc(1, sizeof(*hunk));
 
 		if (parse_hunk_range_info(parser, hunk) < 0) {
-			free(hunk);
+			gcli_clear_ptr(&hunk);
 			return -1;
 		}
 
 		if (read_hunk_body(parser, hunk) < 0) {
-			free(hunk);
+			gcli_clear_ptr(&hunk);
 			return -1;
 		}
 
@@ -688,42 +688,26 @@ gcli_parse_patch_series(struct gcli_diff_parser *parser,
 void
 gcli_free_diff_hunk(struct gcli_diff_hunk *hunk)
 {
-	free(hunk->context_info);
-	hunk->context_info = NULL;
-
-	free(hunk->body);
-	hunk->body = NULL;
+	gcli_clear_ptr(&hunk->context_info);
+	gcli_clear_ptr(&hunk->body);
 }
 
 void
 gcli_free_diff(struct gcli_diff *diff)
 {
-	free(diff->file_a);
-	diff->file_a = NULL;
-
-	free(diff->file_b);
-	diff->file_b = NULL;
-
-	free(diff->hash_a);
-	diff->hash_a = NULL;
-
-	free(diff->hash_b);
-	diff->hash_b = NULL;
-
-	free(diff->file_mode);
-	diff->file_mode = NULL;
-
-	free(diff->r_file);
-	diff->r_file = NULL;
-
-	free(diff->a_file);
-	diff->a_file = NULL;
+	gcli_clear_ptr(&diff->file_a);
+	gcli_clear_ptr(&diff->file_b);
+	gcli_clear_ptr(&diff->hash_a);
+	gcli_clear_ptr(&diff->hash_b);
+	gcli_clear_ptr(&diff->file_mode);
+	gcli_clear_ptr(&diff->r_file);
+	gcli_clear_ptr(&diff->a_file);
 
 	struct gcli_diff_hunk *h = TAILQ_FIRST(&diff->hunks);
 	while (h) {
 		struct gcli_diff_hunk *n = TAILQ_NEXT(h, next);
 		gcli_free_diff_hunk(h);
-		free(h);
+		gcli_clear_ptr(&h);
 		h = n;
 	}
 	TAILQ_INIT(&diff->hunks);
@@ -734,14 +718,13 @@ gcli_free_patch(struct gcli_patch *patch)
 {
 	struct gcli_diff *d, *n;
 
-	free(patch->prelude);
-	patch->prelude = NULL;
+	gcli_clear_ptr(&patch->prelude);
 
 	d = TAILQ_FIRST(&patch->diffs);
 	while (d) {
 		n = TAILQ_NEXT(d, next);
 		gcli_free_diff(d);
-		free(d);
+		gcli_clear_ptr(&d);
 		d = n;
 	}
 	TAILQ_INIT(&patch->diffs);
@@ -751,7 +734,7 @@ void
 gcli_free_diff_parser(struct gcli_diff_parser *parser)
 {
 	if (parser->buf_needs_free)
-		free((char *)parser->buf);
+		gcli_clear_ptr(&parser->buf);
 
 	memset(parser, 0, sizeof(*parser));
 }
@@ -1058,7 +1041,7 @@ gcli_free_patch_series(struct gcli_patch_series *series)
 	while (p) {
 		struct gcli_patch *n = TAILQ_NEXT(p, next);
 		gcli_free_patch(p);
-		free(p);
+		gcli_clear_ptr(&p);
 		p = n;
 	}
 	TAILQ_INIT(&series->patches);

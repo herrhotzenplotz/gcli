@@ -121,6 +121,12 @@ LIBLOWDOWN_CPPFLAGS=	$(LIBLOWDOWN_CPPFLAGS_$(LIBLOWDOWN_FOUND))
 LIBCRYPTO_CFLAGS=	@LIBCRYPTO_CFLAGS@
 LIBCRYPTO_LIBS=		@LIBCRYPTO_LIBS@
 
+############### -lrt ############################################
+ENABLE_LIBRT=		@ENABLE_LIBRT@
+LIBRT_LIBS_1=		-lrt
+LIBRT_LIBS=		$(LIBRT_LIBS_$(ENABLE_LIBRT))
+#################################################################
+
 .PHONY: all all-auto clean clean-auto check check-auto install install-auto analyse analyse-auto
 all: Makefile
 	@$(MAKE) all-auto
@@ -211,8 +217,11 @@ LIBGCLI_SRCS = \
 	src/sshkeys.c \
 	src/status.c \
 	src/waitproc.c \
-	thirdparty/pdjson/pdjson.c \
-	thirdparty/sn/sn.c
+	src/port/err.c \
+	src/port/string.c \
+	src/port/sv.c \
+	src/port/util.c \
+	thirdparty/pdjson/pdjson.c
 
 GCLI_SRCS= \
 	src/cmd/actions.c \
@@ -276,10 +285,10 @@ TEMPLATES= \
 	templates/gitlab/status.t
 
 PGEN_SRCS= \
+	src/port/err.c \
 	src/pgen/dump_c.c \
 	src/pgen/dump_h.c \
 	src/pgen/dump_plain.c \
-	thirdparty/sn/sn.c \
 	lex.yy.c \
 	y.tab.c
 
@@ -331,7 +340,7 @@ gcli: libgcli.a $(GCLI_OBJS)
 		$(GCLI_OBJS) libgcli.a $(LIBCURL_LIBS) $(LIBEDIT_LIBS) \
 		$(LIBREADLINE_LIBS) $(LIBCRYPTO_LIBS) \
 		$(LIBLOWDOWN_LIBS) \
-		-lrt
+		$(LIBRT_LIBS)
 
 libgcli.a: $(LIBGCLI_OBJS)
 	$(CCACHE) $(AR) -rc libgcli.a $(LIBGCLI_OBJS)

@@ -222,6 +222,7 @@ struct gcli_forge_descriptor {
 	 * create a milestone */
 	int (*create_milestone)(
 		struct gcli_ctx *ctx,
+		struct gcli_path const *repo,
 		struct gcli_milestone_create_args const *args);
 
 	/**
@@ -374,6 +375,13 @@ struct gcli_forge_descriptor {
 		char const *username);
 
 	/**
+	 * assign this pull request to the given user */
+	int (*pull_assign)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *path,
+		char const *username);
+
+	/**
 	 * Change the title of a pull request */
 	int (*pull_set_title)(
 		struct gcli_ctx *ctx,
@@ -404,7 +412,7 @@ struct gcli_forge_descriptor {
 	 * Create a new release */
 	int (*create_release)(
 		struct gcli_ctx *ctx,
-		struct gcli_new_release const *release);
+		struct gcli_create_release_args const *release);
 
 	/**
 	 * Delete the release */

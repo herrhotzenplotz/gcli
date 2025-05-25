@@ -78,6 +78,8 @@
 #include <gcli/bugzilla/comment.h>
 #include <gcli/bugzilla/config.h>
 
+#include <gcli/port/err.h>
+
 static struct gcli_forge_descriptor const
 github_forge_descriptor =
 {
@@ -122,6 +124,7 @@ github_forge_descriptor =
 	.search_pulls              = github_search_pulls,
 	.perform_submit_pull       = github_perform_submit_pull,
 	.pull_add_reviewer         = github_pull_add_reviewer,
+	.pull_assign               = github_issue_assign,
 	.pull_close                = github_pull_close,
 	.pull_get_diff             = github_pull_get_diff,
 	.pull_get_patch            = github_pull_get_patch,
@@ -226,6 +229,7 @@ gitlab_forge_descriptor =
 	.perform_submit_pull       = gitlab_perform_submit_mr,
 	.pull_add_labels           = gitlab_mr_add_labels,
 	.pull_add_reviewer         = gitlab_mr_add_reviewer,
+	.pull_assign               = gitlab_mr_add_assignee,
 	.pull_clear_milestone      = gitlab_mr_clear_milestone,
 	.pull_close                = gitlab_mr_close,
 	.pull_create_review        = gitlab_mr_create_review,
@@ -325,6 +329,7 @@ gitea_forge_descriptor =
 	.perform_submit_pull       = gitea_pull_submit,
 	.pull_add_labels           = gitea_issue_add_labels,
 	.pull_add_reviewer         = gitea_pull_add_reviewer,
+	.pull_assign               = gitea_pull_assign,
 	.pull_clear_milestone      = gitea_pull_clear_milestone,
 	.pull_close                = gitea_pull_close,
 	.pull_get_diff             = gitea_pull_get_diff,

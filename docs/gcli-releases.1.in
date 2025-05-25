@@ -18,6 +18,7 @@
 .Op Fl o Ar owner Fl r Ar repo
 .Op Fl d
 .Op Fl p
+.Op Fl T Pa template-file.md
 .Nm
 .Cm delete
 .Op Fl o Ar owner Fl r Ar repo
@@ -94,10 +95,21 @@ and be made available for download. You can specify this option
 multiple times to attach more than one asset to the release.
 .It Fl y , -yes
 Do not ask for confirmation before creating the release. Assume yes.
-.It Fl d , --draft
+.It Fl d , -draft
 Mark this release as a draft.
-.It Fl p , --prerelease
+.It Fl p , -prerelease
 Mark this release as a prerelease.
+.It Fl T , -template Pa template-file.md
+Use the provided
+.Pa template-file.md
+as a template for the release message.
+Unless
+.Fl y
+has been specified, an editor will be opened to edit a copy of this
+file.
+Using this option together with
+.Fl y
+allows for completely automated creation of releases.
 .El
 .It Cm delete
 Delete a release.
@@ -141,6 +153,17 @@ $ gcli releases create --owner herrhotzenplotz \\
   --repo gcli-playground --tag banana --name Foobar \\
   --commitish 0fed3c9 --asset foobar.tar.xz \\
   --asset barfoo.tar.gz --asset CHANGELOG
+.Ed
+.Pp
+Create a release called
+.Dq v2.8.0
+from a pre-existing tag. Read the release notes from the file
+.Pa relnotes.md
+and do not ask for confirmation.
+.Pp
+.Bd -literal -offset indent
+$ gcli releases create --tag v2.8.0 --name 'Version 2.8.0' \\
+  --commitish v2.8.0 --template relnotes.md --yes
 .Ed
 .Sh SEE ALSO
 .Xr git 1 ,

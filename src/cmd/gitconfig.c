@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,12 +27,14 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <gcli/cmd/cmd.h>
 #include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/gitconfig.h>
 
 #include <gcli/ctx.h>
 #include <gcli/gcli.h>
-#include <sn/sn.h>
+#include <gcli/port/string.h>
+#include <gcli/port/util.h>
 
 #include <ctype.h>
 #include <dirent.h>
@@ -105,7 +107,7 @@ resolve_worktree_gitdir_if_needed(char *dotgit)
 	 * in .git in a worktree. It contains the path to the real
 	 * .git directory */
 	{
-		char *other_path = sn_asprintf("%s/%s", newdir, "commondir");
+		char *other_path = gcli_asprintf("%s/%s", newdir, "commondir");
 		if ((f = fopen(other_path, "r"))) {
 			char buf[256] = {0};
 			char *tmp = newdir;
@@ -115,7 +117,7 @@ resolve_worktree_gitdir_if_needed(char *dotgit)
 			if (buf[len-1] == '\n')
 				buf[len-1] = '\0';
 
-			newdir = sn_asprintf("%s/%s", tmp, buf);
+			newdir = gcli_asprintf("%s/%s", tmp, buf);
 			free(tmp);
 
 			fclose(f);
@@ -185,7 +187,7 @@ find_file_in_dotgit(char const *fname)
 
 			free(curr_dir_path);
 
-			curr_dir_path = realpath(tmp, NULL);
+			curr_dir_path = gcli_cmd_realpath(tmp);
 			if (!curr_dir_path)
 				err(1, "gcli: error: realpath at %s", tmp);
 
@@ -195,7 +197,7 @@ find_file_in_dotgit(char const *fname)
 			if (strcmp("/", curr_dir_path) == 0) {
 				free(curr_dir_path);
 				closedir(curr_dir);
-				warnx("not a git repository");
+				gcli_warnx(g_clictx, "not a git repository");
 				return NULL;
 			}
 		}
@@ -250,12 +252,12 @@ gcli_find_gitconfig(void)
 	return find_file_in_dotgit("config");
 }
 
-sn_sv
+gcli_sv
 gcli_gitconfig_get_current_branch(void)
 {
 	char const *HEAD;
-	void       *mmap_pointer;
-	sn_sv       buffer;
+	char       *file_text;
+	gcli_sv     buffer;
 	char        prefix[] = "ref: refs/heads/";
 
 	HEAD = find_file_in_dotgit("HEAD");
@@ -263,19 +265,19 @@ gcli_gitconfig_get_current_branch(void)
 	if (!HEAD)
 		return SV_NULL;
 
-	int len = sn_mmap_file(HEAD, &mmap_pointer);
+	int len = gcli_read_file(HEAD, &file_text);
 	if (len < 0)
 		err(1, "gcli: mmap");
 
-	buffer = sn_sv_from_parts(mmap_pointer, len);
+	buffer = gcli_sv_from_parts(file_text, len);
 
-	if (sn_sv_has_prefix(buffer, prefix)) {
+	if (gcli_sv_has_prefix(buffer, prefix)) {
 		buffer.data   += sizeof(prefix) - 1;
 		buffer.length -= sizeof(prefix) - 1;
 
-		return sn_sv_trim(buffer);
+		return gcli_sv_trim(buffer);
 	} else {
-		munmap(mmap_pointer, len);
+		free(file_text);
 		return SV_NULL;
 	}
 }
@@ -284,31 +286,32 @@ static void
 http_extractor(struct gcli_gitremote *const remote, char const *prefix)
 {
 	size_t prefix_size = strlen(prefix);
-	sn_sv  pair        = remote->url;
+	gcli_sv  pair      = remote->url;
 
-	if (sn_sv_has_prefix(remote->url, "https://github.com/")) {
+	if (gcli_sv_has_prefix(remote->url, "https://github.com/")) {
 		prefix_size = sizeof("https://github.com/") - 1;
 		remote->forge_type = GCLI_FORGE_GITHUB;
-	} else if (sn_sv_has_prefix(remote->url, "https://gitlab.com/")) {
+	} else if (gcli_sv_has_prefix(remote->url, "https://gitlab.com/")) {
 		prefix_size = sizeof("https://gitlab.com/") - 1;
 		remote->forge_type = GCLI_FORGE_GITLAB;
-	} else if (sn_sv_has_prefix(remote->url, "https://codeberg.org/")) {
+	} else if (gcli_sv_has_prefix(remote->url, "https://codeberg.org/")) {
 		prefix_size = sizeof("https://codeberg.org/") - 1;
 		remote->forge_type = GCLI_FORGE_GITEA;
 	} else {
-		warnx("non-github, non-gitlab and non-codeberg https remotes are "
-		      "not supported and will likely cause bugs");
+		gcli_warnx(g_clictx,
+		           "non-github, non-gitlab and non-codeberg https "
+		           "remotes are not supported and will likely cause bugs");
 	}
 
 	pair.length -= prefix_size;
 	pair.data   += prefix_size;
 
-	remote->owner = sn_sv_chop_to_last(&pair, '/');
+	remote->owner = gcli_sv_chop_to_last(&pair, '/');
 
 	pair.data   += 1;
 	pair.length -= 1;
 
-	pair = sn_sv_strip_suffix(pair, ".git");
+	pair = gcli_sv_strip_suffix(pair, ".git");
 
 	remote->repo = pair;
 }
@@ -318,35 +321,35 @@ ssh_extractor(struct gcli_gitremote *const remote, char const *prefix)
 {
 	size_t prefix_size = strlen(prefix);
 
-	if (sn_sv_has_prefix(remote->url, "git@github.com"))
+	if (gcli_sv_has_prefix(remote->url, "git@github.com"))
 		remote->forge_type = GCLI_FORGE_GITHUB;
-	else if (sn_sv_has_prefix(remote->url, "git@gitlab.com"))
+	else if (gcli_sv_has_prefix(remote->url, "git@gitlab.com"))
 		remote->forge_type = GCLI_FORGE_GITLAB;
-	else if (sn_sv_has_prefix(remote->url, "git@codeberg.org"))
+	else if (gcli_sv_has_prefix(remote->url, "git@codeberg.org"))
 		remote->forge_type = GCLI_FORGE_GITEA;
 
-	sn_sv pair   = remote->url;
+	gcli_sv pair   = remote->url;
 	pair.length -= prefix_size;
 	pair.data   += prefix_size;
 
-	sn_sv_chop_until(&pair, ':');
+	gcli_sv_chop_until(&pair, ':');
 	pair.data   += 1;
 	pair.length -= 1;
 
 	/* sometimes we see port numbers in the SSH url */
 	if (isdigit(*pair.data)) {
-		sn_sv_chop_until(&pair, '/');
+		gcli_sv_chop_until(&pair, '/');
 
 		pair.data   += 1;
 		pair.length -= 1;
 	}
 
-	remote->owner = sn_sv_chop_to_last(&pair, '/');
+	remote->owner = gcli_sv_chop_to_last(&pair, '/');
 
 	pair.data   += 1;
 	pair.length -= 1;
 
-	pair = sn_sv_strip_suffix(pair, ".git");
+	pair = gcli_sv_strip_suffix(pair, ".git");
 
 	remote->repo = pair;
 }
@@ -361,27 +364,27 @@ struct forge_ex_def {
 };
 
 static void
-gitconfig_parse_remote(sn_sv section_title, sn_sv entry)
+gitconfig_parse_remote(gcli_sv section_title, gcli_sv entry)
 {
-	sn_sv remote_name = SV_NULL;
+	gcli_sv remote_name = SV_NULL;
 
 	/* If there is no remote name, just return and continue with the
 	 * next section. I don't exactly know why there even are such
 	 * sections and what they are useful for, but ok. */
-	if (sn_sv_eq_to(sn_sv_trim(section_title), "remote"))
+	if (gcli_sv_eq_to(gcli_sv_trim(section_title), "remote"))
 		return;
 
 	/* the remote name is wrapped in double quotes */
-	sn_sv_chop_until(&section_title, '"');
+	gcli_sv_chop_until(&section_title, '"');
 
 	/* skip the first quote */
 	section_title.data   += 1;
 	section_title.length -= 1;
 
-	remote_name = sn_sv_chop_until(&section_title, '"');
+	remote_name = gcli_sv_chop_until(&section_title, '"');
 
-	while ((entry = sn_sv_trim_front(entry)).length > 0) {
-		if (sn_sv_has_prefix(entry, "url")) {
+	while ((entry = gcli_sv_trim_front(entry)).length > 0) {
+		if (gcli_sv_has_prefix(entry, "url")) {
 			if (remotes_size == MAX_REMOTES)
 				errx(1, "gcli: error: too many remotes");
 
@@ -389,25 +392,25 @@ gitconfig_parse_remote(sn_sv section_title, sn_sv entry)
 
 			remote->name = remote_name;
 
-			sn_sv_chop_until(&entry, '=');
+			gcli_sv_chop_until(&entry, '=');
 
 			entry.data   += 1;
 			entry.length -= 1;
 
-			sn_sv url = sn_sv_trim(sn_sv_chop_until(&entry, '\n'));
+			gcli_sv url = gcli_sv_trim(gcli_sv_chop_until(&entry, '\n'));
 
 			remote->url        = url;
 			remote->forge_type = -1;
 
 			for (size_t i = 0; i < ARRAY_SIZE(url_extractors); ++i) {
-				if (sn_sv_has_prefix(url, url_extractors[i].prefix)) {
+				if (gcli_sv_has_prefix(url, url_extractors[i].prefix)) {
 					url_extractors[i].extractor(
 						remote,
 						url_extractors[i].prefix);
 				}
 			}
 		} else {
-			sn_sv_chop_until(&entry, '\n');
+			gcli_sv_chop_until(&entry, '\n');
 		}
 	}
 }
@@ -415,6 +418,8 @@ gitconfig_parse_remote(sn_sv section_title, sn_sv entry)
 static void
 gcli_gitconfig_read_gitconfig(void)
 {
+	char const *path = NULL;
+	gcli_sv buffer = {0};
 	static int has_read_gitconfig = 0;
 
 	if (has_read_gitconfig)
@@ -422,17 +427,14 @@ gcli_gitconfig_read_gitconfig(void)
 
 	has_read_gitconfig = 1;
 
-	char const *path   = NULL;
-	sn_sv       buffer = {0};
-
 	path = gcli_find_gitconfig();
 	if (!path)
 		return;
 
-	buffer.length = sn_mmap_file(path, (void **)&buffer.data);
+	buffer.length = gcli_read_file(path, &buffer.data);
 
 	while (buffer.length > 0) {
-		buffer = sn_sv_trim_front(buffer);
+		buffer = gcli_sv_trim_front(buffer);
 
 		if (buffer.length == 0)
 			break;
@@ -441,16 +443,16 @@ gcli_gitconfig_read_gitconfig(void)
 		if (*buffer.data != '[')
 			errx(1, "gcli: error: invalid git config");
 
-		sn_sv section_title = sn_sv_chop_until(&buffer, ']');
+		gcli_sv section_title = gcli_sv_chop_until(&buffer, ']');
 		section_title.length -= 1;
 		section_title.data   += 1;
 
 		buffer.length -= 2;
 		buffer.data   += 2;
 
-		sn_sv entry = sn_sv_chop_until(&buffer, '[');
+		gcli_sv entry = gcli_sv_chop_until(&buffer, '[');
 
-		if (sn_sv_has_prefix(section_title, "remote")) {
+		if (gcli_sv_has_prefix(section_title, "remote")) {
 			gitconfig_parse_remote(section_title, entry);
 		} else {
 			// @@@: skip section
@@ -498,7 +500,7 @@ gcli_gitconfig_add_fork_remote(char const *org, char const *repo)
 	{
 		pid_t pid = 0;
 		if ((pid = fork()) == 0) {
-			char const *remote_url = sn_asprintf(
+			char const *remote_url = gcli_asprintf(
 				"git@github.com:%s/%s",
 				org, repo);
 			printf("[INFO] git remote add origin %s\n", remote_url);
@@ -526,13 +528,13 @@ gcli_gitconfig_get_forgetype(struct gcli_ctx *ctx, char const *const remote_name
 
 	if (remote_name) {
 		for (size_t i = 0; i < remotes_size; ++i) {
-			if (sn_sv_eq_to(remotes[i].name, remote_name))
+			if (gcli_sv_eq_to(remotes[i].name, remote_name))
 				return remotes[i].forge_type;
 		}
 	}
 
 	if (!remotes_size) {
-		warn("no remotes to auto-detect forge");
+		gcli_warn(ctx, "no remotes to auto-detect forge");
 		return -1;
 	}
 
@@ -548,9 +550,9 @@ gcli_gitconfig_repo_by_remote(struct gcli_ctx *ctx, char const *const remote,
 
 	if (remote) {
 		for (size_t i = 0; i < remotes_size; ++i) {
-			if (sn_sv_eq_to(remotes[i].name, remote)) {
-				*owner = sn_sv_to_cstr(remotes[i].owner);
-				*repo  = sn_sv_to_cstr(remotes[i].repo);
+			if (gcli_sv_eq_to(remotes[i].name, remote)) {
+				*owner = gcli_sv_to_cstr(remotes[i].owner);
+				*repo  = gcli_sv_to_cstr(remotes[i].repo);
 				if (forge)
 					*forge = remotes[i].forge_type;
 
@@ -564,8 +566,8 @@ gcli_gitconfig_repo_by_remote(struct gcli_ctx *ctx, char const *const remote,
 	if (!remotes_size)
 		return gcli_error(ctx, "no remotes to auto-detect forge");
 
-	*owner = sn_sv_to_cstr(remotes[0].owner);
-	*repo  = sn_sv_to_cstr(remotes[0].repo);
+	*owner = gcli_sv_to_cstr(remotes[0].owner);
+	*repo  = gcli_sv_to_cstr(remotes[0].repo);
 	if (forge)
 		*forge = remotes[0].forge_type;
 
@@ -580,7 +582,7 @@ gcli_gitconfig_get_remote(struct gcli_ctx *ctx, gcli_forge_type const type,
 
 	for (size_t i = 0; i < remotes_size; ++i) {
 		if (remotes[i].forge_type == type) {
-			*remote = sn_sv_to_cstr(remotes[i].url);
+			*remote = gcli_sv_to_cstr(remotes[i].url);
 			return 0;
 		}
 	}

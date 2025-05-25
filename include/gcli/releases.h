@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,7 +35,6 @@
 #endif
 
 #include <gcli/gcli.h>
-#include <sn/sn.h>
 
 #include <time.h>
 
@@ -69,9 +68,8 @@ struct gcli_release_asset_upload {
 };
 
 #define GCLI_RELEASE_MAX_ASSETS 16
-struct gcli_new_release {
-	char const *owner;
-	char const *repo;
+struct gcli_create_release_args {
+	struct gcli_path repo_path;
 	char const *tag;
 	char const *name;
 	char *body;
@@ -87,9 +85,9 @@ int gcli_get_releases(struct gcli_ctx *ctx, struct gcli_path const *repo_path,
 
 void gcli_free_releases(struct gcli_release_list *);
 
-int gcli_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *);
+int gcli_create_release(struct gcli_ctx *ctx, struct gcli_create_release_args const *);
 
-int gcli_release_push_asset(struct gcli_ctx *, struct gcli_new_release *,
+int gcli_release_push_asset(struct gcli_ctx *, struct gcli_create_release_args *,
                             struct gcli_release_asset_upload);
 
 int gcli_delete_release(struct gcli_ctx *ctx, struct gcli_path const *repo_path,

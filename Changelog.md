@@ -2,6 +2,53 @@
 
 This changelog does not follow semantic versioning.
 
+## 2.8.0 (25-May-2025)
+
+### Added
+
+- The pulls subcommand now supports assigning pull requests to
+  users. A new assign action has been added.
+
+- The releases create subcommand now has an option `-T`/`--template`.
+  This option allows you to pass a path to a file that is used
+  for the release notes. If combined with `--yes` the entire
+  command is non-interactive allowing you to use it from scripts.
+  If not combined with `--yes` an editor is opened with a copy of
+  the passed file, allowing you to use it as a template for further
+  editing.
+
+  See the manual page `gcli-releases(1)` for details and usage
+  examples.
+
+  Suggested by: xaizek <https://github.com/xaizek>
+
+### Fixed
+
+- Parsing timestamps with timezone offsets now works properly.
+  This was an issue on Gitea forges where sometimes timestamps with
+  explicit timezone offsets were returned.
+
+- Building on macOS has been fixed
+
+  Darwin doesn't have a separate library for the POSIX real-time
+  extensions. Trying to link with -lrt thus results in errors.
+
+  The configure script now explicitly checks for a host platform
+  apple-darwin and disables `-lrt` linkage in this case.
+
+  Reported by: botantony <https://gitlab.com/botantony>
+
+- Fixed a crash in jemalloc caused by a double-free in the patch action on Gitlab
+
+  This only occured in the case where multiple patches are in a merge request.
+
+- Fixed incorrect argument parsing in the pipelines subcommand
+  leading to a nonsensical error message
+
+- Fixed broken automerge feature when creating merge requests on
+  Gitlab.
+
+
 ## 2.7.0 (04-Mar-2025)
 
 ### Added

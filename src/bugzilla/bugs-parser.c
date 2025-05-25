@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -93,7 +93,7 @@ parse_bugzilla_bug_comments_dictionary_skip_first(struct gcli_ctx *const ctx,
 	enum json_type next = JSON_NULL;
 	int rc = 0;
 
-	if ((next = json_next(stream)) != JSON_OBJECT)
+	if (json_next(stream) != JSON_OBJECT)
 		return gcli_error(ctx, "expected bugzilla comments dictionary");
 
 	while ((next = json_next(stream)) == JSON_STRING) {
@@ -116,7 +116,7 @@ parse_bugzilla_bug_comments_dictionary_only_first(struct gcli_ctx *const ctx,
 	enum json_type next = JSON_NULL;
 	int rc = 0;
 
-	if ((next = json_next(stream)) != JSON_OBJECT)
+	if (json_next(stream) != JSON_OBJECT)
 		return gcli_error(ctx, "expected bugzilla comments dictionary");
 
 	while ((next = json_next(stream)) == JSON_STRING) {
@@ -149,7 +149,7 @@ parse_bugzilla_bug_attachments_dict(struct gcli_ctx *ctx,
 	enum json_type next = JSON_NULL;
 	int rc = 0;
 
-	if ((next = json_next(stream)) != JSON_OBJECT)
+	if (json_next(stream) != JSON_OBJECT)
 		return gcli_error(ctx, "expected bugzilla attachments dictionary");
 
 	while ((next = json_next(stream)) == JSON_STRING) {
@@ -174,7 +174,7 @@ parse_bugzilla_attachment_content_only_first(struct gcli_ctx *ctx,
 	enum json_type next = JSON_NULL;
 	int rc = 0;
 
-	if ((next = json_next(stream)) != JSON_OBJECT)
+	if (json_next(stream) != JSON_OBJECT)
 		return gcli_error(ctx, "expected bugzilla attachments dictionary");
 
 	while ((next = json_next(stream)) == JSON_STRING) {
@@ -197,7 +197,7 @@ parse_bugzilla_single_comments_array_only_first(struct gcli_ctx *ctx,
 	enum json_type next = JSON_NULL;
 	int rc = 0;
 
-	if ((next = json_next(stream)) != JSON_OBJECT)
+	if (json_next(stream) != JSON_OBJECT)
 		return gcli_error(ctx, "expected bugzilla comments dictionary");
 
 	while ((next = json_next(stream)) == JSON_STRING) {

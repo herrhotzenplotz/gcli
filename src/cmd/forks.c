@@ -41,6 +41,7 @@
 #include <gcli/cmd/forks.h>
 #include <gcli/cmd/gitconfig.h>
 #include <gcli/cmd/table.h>
+#include <gcli/port/util.h>
 
 #include <gcli/forks.h>
 
@@ -168,7 +169,7 @@ subcommand_forks_create(int argc, char *argv[])
 		errx(1, "gcli: error: failed to fork repository: %s", gcli_get_error(g_clictx));
 
 	if (!always_yes) {
-		if (!sn_yesno("Do you want to add a remote for the fork?"))
+		if (!gcli_yesno("Do you want to add a remote for the fork?"))
 			return EXIT_SUCCESS;
 	}
 

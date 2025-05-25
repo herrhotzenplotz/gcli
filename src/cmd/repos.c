@@ -34,6 +34,7 @@
 #include <gcli/cmd/repos.h>
 #include <gcli/cmd/table.h>
 
+#include <gcli/port/util.h>
 #include <gcli/repos.h>
 
 #ifdef HAVE_GETOPT_H
@@ -127,7 +128,7 @@ gcli_repo_print(struct gcli_repo const *it)
 	gcli_dict_add(dict,           "OWNER",      0, 0, "%s", it->owner);
 	gcli_dict_add_timestamp(dict, "DATE",       0, 0, it->date);
 	gcli_dict_add(dict,           "VISIBILITY", 0, 0, "%s", it->visibility);
-	gcli_dict_add(dict,           "IS FORK",    0, 0, "%s", sn_bool_yesno(it->is_fork));
+	gcli_dict_add(dict,           "IS FORK",    0, 0, "%s", gcli_bool_yesno(it->is_fork));
 
 	gcli_dict_end(dict);
 }

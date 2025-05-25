@@ -35,7 +35,6 @@
 #include <gcli/json_util.h>
 
 #include <pdjson/pdjson.h>
-#include <sn/sn.h>
 
 /* Recycle the GitHub parser for labels */
 #include <templates/github/labels.h>
@@ -95,7 +94,7 @@ gitea_label_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	va_list vp;
 
 	va_start(vp, fmt);
-	suffix = sn_vasprintf(fmt, vp);
+	suffix = gcli_vasprintf(fmt, vp);
 	va_end(vp);
 
 	switch (path->kind) {
@@ -105,12 +104,12 @@ gitea_label_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo  = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/repos/%s/%s/labels/%"PRIid"%s",
-		                   gcli_get_apibase(ctx), e_owner, e_repo,
-		                   path->as_default.id, suffix);
+		*url = gcli_asprintf("%s/repos/%s/%s/labels/%"PRIid"%s",
+		                     gcli_get_apibase(ctx), e_owner, e_repo,
+		                     path->as_default.id, suffix);
 
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_NAMED: {
 		struct gcli_path repo_path = {0};
@@ -131,15 +130,15 @@ gitea_label_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		e_owner = gcli_urlencode(path->as_named.owner);
 		e_repo = gcli_urlencode(path->as_named.repo);
 
-		*url = sn_asprintf("%s/repos/%s/%s/labels/%"PRIid"%s",
-		                   gcli_get_apibase(ctx), e_owner, e_repo, id,
-		                   suffix);
+		*url = gcli_asprintf("%s/repos/%s/%s/labels/%"PRIid"%s",
+		                     gcli_get_apibase(ctx), e_owner, e_repo, id,
+		                     suffix);
 
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path kind for Gitea issues");
@@ -165,7 +164,7 @@ gitea_delete_label(struct gcli_ctx *ctx, struct gcli_path const *const path)
 		rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 	}
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -254,7 +253,7 @@ gitea_label_set_colour(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	char *colour_string = NULL;
 	int rc = 0;
 
-	colour_string = sn_asprintf("#%06X", colour & 0xFFFFFF);
+	colour_string = gcli_asprintf("#%06X", colour & 0xFFFFFF);
 	rc = gitea_label_update_property(ctx, path, "color", colour_string);
 
 	gcli_clear_ptr(&colour_string);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,6 +31,9 @@
 #include <gcli/cmd/colour.h>
 
 #include <gcli/cmd/cmdconfig.h>
+
+#include <gcli/port/string.h>
+#include <gcli/port/util.h>
 
 #include <stdlib.h>
 
@@ -81,10 +84,10 @@ gcli_setcolour256(uint32_t const code)
 	if (oldresult)
 		return oldresult;
 
-	result = sn_asprintf("\033[48;2;%02d;%02d;%02dm",
-	                     (code & 0xFF000000) >> 24,
-	                     (code & 0x00FF0000) >> 16,
-	                     (code & 0x0000FF00) >>  8);
+	result = gcli_asprintf("\033[48;2;%02d;%02d;%02dm",
+	                       (code & 0xFF000000) >> 24,
+	                       (code & 0x00FF0000) >> 16,
+	                       (code & 0x0000FF00) >>  8);
 
 	colour_cache_insert(code, result);
 
@@ -117,7 +120,7 @@ gcli_setcolour(int code)
 	case GCLI_COLOR_WHITE:   return "\033[37m";
 	case GCLI_COLOR_DEFAULT: return "\033[39m";
 	default:
-		sn_notreached;
+		gcli_notreached;
 	}
 	return NULL;
 }
@@ -172,11 +175,11 @@ static const struct { char const *name; int code; }
 };
 
 char const *
-gcli_state_colour_sv(sn_sv const state)
+gcli_state_colour_sv(gcli_sv const state)
 {
-	if (!sn_sv_null(state)) {
+	if (!gcli_sv_null(state)) {
 		for (size_t i = 0; i < ARRAY_SIZE(state_colour_table); ++i) {
-			if (sn_sv_has_prefix(state, state_colour_table[i].name))
+			if (gcli_sv_has_prefix(state, state_colour_table[i].name))
 				return gcli_setcolour(state_colour_table[i].code);
 		}
 	}

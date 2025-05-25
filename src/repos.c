@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,10 +44,10 @@ gcli_get_repos(struct gcli_ctx *ctx, char const *owner, int const max,
 void
 gcli_repo_free(struct gcli_repo *it)
 {
-	free(it->full_name);
-	free(it->name);
-	free(it->owner);
-	free(it->visibility);
+	gcli_clear_ptr(&it->full_name);
+	gcli_clear_ptr(&it->name);
+	gcli_clear_ptr(&it->owner);
+	gcli_clear_ptr(&it->visibility);
 	memset(it, 0, sizeof(*it));
 }
 
@@ -58,9 +58,7 @@ gcli_repos_free(struct gcli_repo_list *const list)
 		gcli_repo_free(&list->repos[i]);
 	}
 
-	free(list->repos);
-
-	list->repos = NULL;
+	gcli_clear_ptr(&list->repos);
 	list->repos_size = 0;
 }
 

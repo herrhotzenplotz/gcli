@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,26 +29,14 @@
 
 #include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/editor.h>
-
-#include <sn/sn.h>
+#include <gcli/port/err.h>
+#include <gcli/port/util.h>
 
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <sys/wait.h>
-
-static sn_sv
-sv_append(sn_sv this, sn_sv const that)
-{
-	/* Allocate one byte more as we're going to manually zero-terminate the result
-	 * down in get_message */
-	this.data = realloc(this.data, this.length + that.length + 1);
-	memcpy(this.data + this.length, that.data, that.length);
-	this.length += that.length;
-
-	return this;
-}
 
 static char *
 get_env_editor(void)
@@ -112,17 +100,17 @@ gcli_editor_get_user_message(
 
 	edit(ctx, filename);
 
-	void *file_content = NULL;
-	int len = sn_mmap_file(filename, &file_content);
+	char *file_content = NULL;
+	int len = gcli_read_file(filename, &file_content);
 	if (len < 0)
-		err(1, "mmap");
+		err(1, "read_file");
 
-	sn_sv result = {0};
-	sn_sv buffer = sn_sv_from_parts(file_content, (size_t)len);
-	buffer = sn_sv_trim_front(buffer);
+	gcli_sv result = {0};
+	gcli_sv buffer = gcli_sv_from_parts(file_content, (size_t)len);
+	buffer = gcli_sv_trim_front(buffer);
 
 	while (buffer.length > 0) {
-		sn_sv line = sn_sv_chop_until(&buffer, '\n');
+		gcli_sv line = gcli_sv_chop_until(&buffer, '\n');
 
 		if (buffer.length > 0) {
 			buffer.length -= 1;
@@ -133,10 +121,10 @@ gcli_editor_get_user_message(
 		if (line.length > 0 && line.data[0] == '!')
 			continue;
 
-		result = sv_append(result, line);
+		result = gcli_sv_append(result, line);
 	}
 
-	munmap(file_content, len);
+	free(file_content);
 	unlink(filename);
 
 	/* When the input is empty, the data pointer is going to be NULL.

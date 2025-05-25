@@ -597,7 +597,7 @@ subcommand_pipelines(int argc, char *argv[])
 			path.as_default.owner = optarg;
 			break;
 		case 'r':
-			path.as_default.owner = optarg;
+			path.as_default.repo = optarg;
 			break;
 		case 'n': {
 			char *endptr = NULL;

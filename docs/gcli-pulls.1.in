@@ -209,6 +209,9 @@ Change the title of the pull request to
 Review the pull request. See
 .Xr gcli-pulls-review 1
 for more details on this action.
+.It Cm assign Ar user
+Assign the pull request to the given
+.Ar user .
 .It Cm open
 Open the PR in a web browser using
 .Xr xdg-open 1 .

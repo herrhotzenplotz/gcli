@@ -29,9 +29,8 @@
 
 #include <gcli/gcli.h>
 #include <gcli/path.h>
+#include <gcli/port/string.h>
 #include <gcli/waitproc.h>
-
-#include <sn/sn.h>
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -51,9 +50,9 @@ github_pull_checkout(struct gcli_ctx *ctx, char const *const remote,
 
 	pr_id = path->as_default.id;
 
-	remote_ref = sn_asprintf("refs/pull/%"PRIid"/head", pr_id);
-	local_ref = sn_asprintf("github/pr/%"PRIid, pr_id);
-	refspec = sn_asprintf("%s:%s", remote_ref, local_ref);
+	remote_ref = gcli_asprintf("refs/pull/%"PRIid"/head", pr_id);
+	local_ref = gcli_asprintf("github/pr/%"PRIid, pr_id);
+	refspec = gcli_asprintf("%s:%s", remote_ref, local_ref);
 
 	pid = fork();
 	if (pid < 0)
@@ -71,8 +70,8 @@ github_pull_checkout(struct gcli_ctx *ctx, char const *const remote,
 	if (rc < 0)
 		return rc;
 
-	free(remote_ref); remote_ref = NULL;
-	free(refspec); refspec = NULL;
+	gcli_clear_ptr(&remote_ref);
+	gcli_clear_ptr(&refspec);
 
 	pid = fork();
 	if (pid < 0)
@@ -88,7 +87,7 @@ github_pull_checkout(struct gcli_ctx *ctx, char const *const remote,
 
 	rc = gcli_wait_proc_ok(ctx, pid);
 
-	free(local_ref); local_ref = NULL;
+	gcli_clear_ptr(&local_ref);
 
 	return rc;
 }

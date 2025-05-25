@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -72,7 +72,7 @@ int github_get_pull_commits(struct gcli_ctx *ctx, struct gcli_path const *path,
 int github_get_pull(struct gcli_ctx *ctx, struct gcli_path const *path,
                     struct gcli_pull *out);
 
-sn_sv github_pull_try_derive_head(void);
+gcli_sv github_pull_try_derive_head(void);
 
 int github_pull_add_reviewer(struct gcli_ctx *ctx, struct gcli_path const *path,
                              char const *username);

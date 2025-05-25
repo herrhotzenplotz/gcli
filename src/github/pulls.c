@@ -54,7 +54,7 @@ github_pull_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	va_list vp;
 
 	va_start(vp, fmt);
-	suffix = sn_vasprintf(fmt, vp);
+	suffix = gcli_vasprintf(fmt, vp);
 	va_end(vp);
 
 	switch (path->kind) {
@@ -64,23 +64,22 @@ github_pull_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/repos/%s/%s/pulls/%"PRIid"%s",
-		                   gcli_get_apibase(ctx),
-		                   e_owner, e_repo, path->as_default.id,
-		                   suffix);
+		*url = gcli_asprintf("%s/repos/%s/%s/pulls/%"PRIid"%s",
+		                     gcli_get_apibase(ctx), e_owner, e_repo,
+		                     path->as_default.id, suffix);
 
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path type for gitlab merge request");
 	} break;
 	}
 
-	free(suffix);
+	gcli_clear_ptr(&suffix);
 
 	return rc;
 }
@@ -171,30 +170,33 @@ search_pulls(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		                  "with search term on GitHub");
 
 	if (details->milestone)
-		milestone = sn_asprintf("milestone:%s", details->milestone);
+		milestone = gcli_asprintf("milestone:%s", details->milestone);
 
 	if (details->author)
-		author = sn_asprintf("author:%s", details->author);
+		author = gcli_asprintf("author:%s", details->author);
 
 	if (details->label)
-		label = sn_asprintf("label:%s", details->label);
+		label = gcli_asprintf("label:%s", details->label);
 
-	query_string = sn_asprintf("repo:%s/%s is:pull-request%s %s %s %s %s",
-	                           path->as_default.owner,
-	                           path->as_default.repo,
-	                           details->all ? "" : " is:open",
-	                           milestone ? milestone : "", author ? author : "",
-	                           label ? label : "", details->search_term);
+	query_string = gcli_asprintf("repo:%s/%s is:pull-request%s %s %s %s %s",
+	                             path->as_default.owner,
+	                             path->as_default.repo,
+	                             details->all ? "" : " is:open",
+	                             milestone ? milestone : "",
+	                             author ? author : "",
+	                             label ? label : "",
+	                             details->search_term);
+
 	e_query_string = gcli_urlencode(query_string);
 
-	url = sn_asprintf("%s/search/issues?q=%s", gcli_get_apibase(ctx),
-	                  e_query_string);
+	url = gcli_asprintf("%s/search/issues?q=%s", gcli_get_apibase(ctx),
+	                    e_query_string);
 
-	free(milestone);
-	free(author);
-	free(label);
-	free(query_string);
-	free(e_query_string);
+	gcli_clear_ptr(&milestone);
+	gcli_clear_ptr(&author);
+	gcli_clear_ptr(&label);
+	gcli_clear_ptr(&query_string);
+	gcli_clear_ptr(&e_query_string);
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc < 0)
@@ -207,7 +209,7 @@ search_pulls(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	gcli_fetch_buffer_free(&buffer);
 
 error_fetch:
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -253,7 +255,7 @@ github_pull_get_patch(struct gcli_ctx *ctx, FILE *stream,
 
 	rc = gcli_curl(ctx, stream, url, "Accept: application/vnd.github.v3.patch");
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -270,15 +272,16 @@ github_print_get_patch(struct gcli_ctx *ctx, FILE *stream, char const *owner,
 	e_owner = gcli_urlencode(owner);
 	e_repo  = gcli_urlencode(repo);
 
-	url = sn_asprintf(
+	url = gcli_asprintf(
 		"%s/repos/%s/%s/pulls/%"PRIid,
 		gcli_get_apibase(ctx),
 		e_owner, e_repo, pr_number);
+
 	rc = gcli_curl(ctx, stream, url, "Accept: application/vnd.github.v3.patch");
 
-	free(e_owner);
-	free(e_repo);
-	free(url);
+	gcli_clear_ptr(&e_owner);
+	gcli_clear_ptr(&e_repo);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -296,7 +299,7 @@ github_pull_get_diff(struct gcli_ctx *ctx, FILE *stream,
 
 	rc = gcli_curl(ctx, stream, url, "Accept: application/vnd.github.v3.diff");
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -324,7 +327,7 @@ github_pull_delete_head_branch(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 err_make_url:
 	gcli_pull_free(&pull);
@@ -351,7 +354,7 @@ github_pull_merge(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	if (rc == 0 && delete_source)
 		rc = github_pull_delete_head_branch(ctx, path);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -384,8 +387,8 @@ github_pull_patch_state(struct gcli_ctx *const ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
 
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }
@@ -419,7 +422,7 @@ github_pull_set_automerge(struct gcli_ctx *const ctx, char const *const node_id)
 
 	struct gcli_jsongen gen = {0};
 
-	query = sn_asprintf(fmt, node_id);
+	query = gcli_asprintf(fmt, node_id);
 
 	gcli_jsongen_init(&gen);
 	gcli_jsongen_begin_object(&gen);
@@ -431,14 +434,14 @@ github_pull_set_automerge(struct gcli_ctx *const ctx, char const *const node_id)
 
 	payload = gcli_jsongen_to_string(&gen);
 	gcli_jsongen_free(&gen);
-	free(query);
+	gcli_clear_ptr(&query);
 
-	url = sn_asprintf("%s/graphql", gcli_get_apibase(ctx));
+	url = gcli_asprintf("%s/graphql", gcli_get_apibase(ctx));
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
 
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -478,8 +481,8 @@ github_pull_add_reviewers(struct gcli_ctx *ctx,
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
 
 	/* Cleanup */
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -562,8 +565,8 @@ github_perform_submit_pull(struct gcli_ctx *ctx,
 	}
 
 	gcli_fetch_buffer_free(&buffer);
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -574,7 +577,7 @@ filter_commit_short_sha(struct gcli_commit **listp, size_t *sizep, void *_data)
 	(void) _data;
 
 	for (size_t i = 0; i < *sizep; ++i)
-		(*listp)[i].sha = sn_strndup((*listp)[i].long_sha, 8);
+		(*listp)[i].sha = gcli_strndup((*listp)[i].long_sha, 8);
 }
 
 int
@@ -621,7 +624,7 @@ github_get_pull(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		json_close(&stream);
 	}
 
-	free(url);
+	gcli_clear_ptr(&url);
 	gcli_fetch_buffer_free(&buffer);
 
 	return rc;
@@ -697,8 +700,8 @@ github_pull_set_title(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
 
 	/* Cleanup */
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -778,8 +781,8 @@ github_pull_create_review(struct gcli_ctx *ctx,
 	gcli_jsongen_free(&gen);
 
 bail:
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

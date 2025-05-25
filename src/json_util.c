@@ -30,7 +30,8 @@
 #include <gcli/date_time.h>
 #include <gcli/forges.h>
 #include <gcli/json_util.h>
-#include <sn/sn.h>
+#include <gcli/port/err.h>
+#include <gcli/port/sv.h>
 
 #include <assert.h>
 #include <string.h>
@@ -119,7 +120,7 @@ get_string_(struct gcli_ctx *ctx, json_stream *const input, char **out,
 	if (!it)
 		*out = strdup("<empty>");
 	else
-		*out = sn_strndup(it, len);
+		*out = gcli_strndup(it, len);
 
 	return 0;
 }
@@ -175,7 +176,7 @@ get_user_(struct gcli_ctx *ctx, json_stream *const input, char **out,
 				return gcli_error(ctx, "%s: login isn't a string", where);
 
 			char const *tmp = json_get_string(input, &len);
-			*out = sn_strndup(tmp, len);
+			*out = gcli_strndup(tmp, len);
 		} else {
 			json_next(input);
 		}
@@ -195,10 +196,10 @@ static struct {
 	{ .c = '"' , .with = "\\\"" },
 };
 
-sn_sv
-gcli_json_escape(sn_sv const it)
+gcli_sv
+gcli_json_escape(gcli_sv const it)
 {
-	sn_sv result = {0};
+	gcli_sv result = {0};
 
 	result.data = calloc(2 * it.length + 1, 1);
 	if (!result.data)
@@ -226,7 +227,7 @@ gcli_json_escape(sn_sv const it)
 }
 
 int
-get_sv_(struct gcli_ctx *ctx, json_stream *const input, sn_sv *out, char const *where)
+get_sv_(struct gcli_ctx *ctx, json_stream *const input, gcli_sv *out, char const *where)
 {
 	enum json_type type = json_next(input);
 	if (type == JSON_NULL) {
@@ -239,7 +240,7 @@ get_sv_(struct gcli_ctx *ctx, json_stream *const input, sn_sv *out, char const *
 
 	size_t len;
 	char const *it = json_get_string(input, &len);
-	char *copy = sn_strndup(it, len);
+	char *copy = gcli_strndup(it, len);
 	*out = SV(copy);
 
 	return 0;
@@ -262,7 +263,7 @@ get_label_(struct gcli_ctx *ctx, json_stream *const input, char const **out,
 				                  where);
 
 			*out = json_get_string(input, &len);
-			*out = sn_strndup(*out, len);
+			*out = gcli_strndup(*out, len);
 		} else {
 			json_next(input);
 		}
@@ -352,7 +353,7 @@ get_github_style_colour(struct gcli_ctx *ctx, json_stream *const input, uint32_t
 		return gcli_error(ctx, "%s: bad colour code returned by API",
 		                  colour_str);
 
-	free(colour_str);
+	gcli_clear_ptr(&colour_str);
 
 	*out = ((uint32_t)(colour)) << 8;
 	return 0;
@@ -374,7 +375,7 @@ get_gitlab_style_colour(struct gcli_ctx *ctx, json_stream *const input, uint32_t
 	if (endptr != (colour + 1 + strlen(colour + 1)))
 		return gcli_error(ctx, "%s: invalid colour code");
 
-	free(colour);
+	gcli_clear_ptr(&colour);
 
 	*out = ((uint32_t)(code) << 8);
 
@@ -397,15 +398,15 @@ get_gitea_visibility(struct gcli_ctx *ctx, json_stream *const input, char **out)
 int
 get_gitlab_can_be_merged(struct gcli_ctx *ctx, json_stream *const input, bool *out)
 {
-	sn_sv tmp;
+	gcli_sv tmp;
 	int rc = 0;
 
 	rc = get_sv(ctx, input, &tmp);
 	if (rc < 0)
 		return rc;
 
-	*out = sn_sv_eq_to(tmp, "can_be_merged");
-	free(tmp.data);
+	*out = gcli_sv_eq_to(tmp, "can_be_merged");
+	gcli_clear_ptr(&tmp.data);
 
 	return rc;
 }
@@ -428,7 +429,7 @@ get_github_is_pr(struct gcli_ctx *ctx, json_stream *input, int *out)
 }
 
 int
-get_int_to_sv_(struct gcli_ctx *ctx, json_stream *input, sn_sv *out,
+get_int_to_sv_(struct gcli_ctx *ctx, json_stream *input, gcli_sv *out,
                char const *function)
 {
 	int rc, val;
@@ -437,7 +438,7 @@ get_int_to_sv_(struct gcli_ctx *ctx, json_stream *input, sn_sv *out,
 	if (rc < 0)
 		return rc;
 
-	*out = sn_sv_fmt("%d", val);
+	*out = gcli_sv_fmt("%d", val);
 
 	return 0;
 }
@@ -446,20 +447,20 @@ int
 get_github_notification_target_type(struct gcli_ctx *ctx, json_stream *input,
                                     enum gcli_notification_target_type *out)
 {
-	sn_sv tmp;
+	gcli_sv tmp;
 	int rc = 0;
 
 	rc = get_sv(ctx, input, &tmp);
 	if (rc < 0)
 		return rc;
 
-	if (sn_sv_eq_to(tmp, "Issue")) {
+	if (gcli_sv_eq_to(tmp, "Issue")) {
 		*out = GCLI_NOTIFICATION_TARGET_ISSUE;
 
-	} else if (sn_sv_eq_to(tmp, "PullRequest")) {
+	} else if (gcli_sv_eq_to(tmp, "PullRequest")) {
 		*out = GCLI_NOTIFICATION_TARGET_PULL_REQUEST;
 
-	} else if (sn_sv_eq_to(tmp, "Release")) {
+	} else if (gcli_sv_eq_to(tmp, "Release")) {
 		*out = GCLI_NOTIFICATION_TARGET_RELEASE;
 
 	} else {
@@ -469,7 +470,7 @@ get_github_notification_target_type(struct gcli_ctx *ctx, json_stream *input,
 
 	}
 
-	free(tmp.data);
+	gcli_clear_ptr(&tmp.data);
 
 	return rc;
 }
@@ -478,23 +479,23 @@ int
 get_gitlab_notification_target_type(struct gcli_ctx *ctx, json_stream *input,
                                     enum gcli_notification_target_type *out)
 {
-	sn_sv tmp;
+	gcli_sv tmp;
 	int rc = 0;
 
 	rc = get_sv(ctx, input, &tmp);
 	if (rc < 0)
 		return rc;
 
-	if (sn_sv_eq_to(tmp, "Issue")) {
+	if (gcli_sv_eq_to(tmp, "Issue")) {
 		*out = GCLI_NOTIFICATION_TARGET_ISSUE;
 
-	} else if (sn_sv_eq_to(tmp, "MergeRequest")) {
+	} else if (gcli_sv_eq_to(tmp, "MergeRequest")) {
 		*out = GCLI_NOTIFICATION_TARGET_PULL_REQUEST;
 
-	} else if (sn_sv_eq_to(tmp, "Commit")) {
+	} else if (gcli_sv_eq_to(tmp, "Commit")) {
 		*out = GCLI_NOTIFICATION_TARGET_COMMIT;
 
-	} else if (sn_sv_eq_to(tmp, "Epic")) {
+	} else if (gcli_sv_eq_to(tmp, "Epic")) {
 		*out = GCLI_NOTIFICATION_TARGET_EPIC;
 
 	} else {
@@ -504,7 +505,7 @@ get_gitlab_notification_target_type(struct gcli_ctx *ctx, json_stream *input,
 
 	}
 
-	free(tmp.data);
+	gcli_clear_ptr(&tmp.data);
 
 	return rc;
 }
@@ -513,23 +514,23 @@ int
 get_gitea_notification_target_type(struct gcli_ctx *ctx, json_stream *input,
                                    enum gcli_notification_target_type *out)
 {
-	sn_sv tmp;
+	gcli_sv tmp;
 	int rc = 0;
 
 	rc = get_sv(ctx, input, &tmp);
 	if (rc < 0)
 		return rc;
 
-	if (sn_sv_eq_to(tmp, "Issue")) {
+	if (gcli_sv_eq_to(tmp, "Issue")) {
 		*out = GCLI_NOTIFICATION_TARGET_ISSUE;
 
-	} else if (sn_sv_eq_to(tmp, "Pull")) {
+	} else if (gcli_sv_eq_to(tmp, "Pull")) {
 		*out = GCLI_NOTIFICATION_TARGET_PULL_REQUEST;
 
-	} else if (sn_sv_eq_to(tmp, "Commit")) {
+	} else if (gcli_sv_eq_to(tmp, "Commit")) {
 		*out = GCLI_NOTIFICATION_TARGET_COMMIT;
 
-	} else if (sn_sv_eq_to(tmp, "Repository")) {
+	} else if (gcli_sv_eq_to(tmp, "Repository")) {
 		*out = GCLI_NOTIFICATION_TARGET_REPOSITORY;
 
 	} else {
@@ -539,7 +540,7 @@ get_gitea_notification_target_type(struct gcli_ctx *ctx, json_stream *input,
 
 	}
 
-	free(tmp.data);
+	gcli_clear_ptr(&tmp.data);
 
 	return rc;
 }
@@ -564,11 +565,11 @@ get_iso8601_time_(struct gcli_ctx *ctx, json_stream *input, time_t *out,
 		return gcli_error(ctx, "unexpected non-string field in %s", where);
 
 	it = json_get_string(input, &len);
-	copy = sn_strndup(it, len);
+	copy = gcli_strndup(it, len);
 
 	rc = gcli_parse_iso8601_date_time(ctx, copy, out);
 
-	free(copy);
+	gcli_clear_ptr(&copy);
 
 	return rc;
 }
@@ -593,7 +594,7 @@ get_url_path_(struct gcli_ctx *ctx, struct json_stream *input,
 		return gcli_error(ctx, "unexpected non-string field in %s", function);
 
 	it = json_get_string(input, &len);
-	copy = sn_strndup(it, len);
+	copy = gcli_strndup(it, len);
 
 	out->kind = GCLI_PATH_URL;
 	out->as_url = copy;

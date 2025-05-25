@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,7 +42,7 @@ int github_get_releases(struct gcli_ctx *ctx,
                         struct gcli_release_list *list);
 
 int github_create_release(struct gcli_ctx *ctx,
-                          struct gcli_new_release const *release);
+                          struct gcli_create_release_args const *release);
 
 int github_delete_release(struct gcli_ctx *ctx,
                           struct gcli_path const *repo_path,

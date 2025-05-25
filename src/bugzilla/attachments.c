@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,6 +32,8 @@
 #include <gcli/base64.h>
 #include <gcli/curl.h>
 
+#include <gcli/port/string.h>
+
 #include <templates/bugzilla/bugs.h>
 
 int
@@ -44,8 +46,8 @@ bugzilla_attachment_get_content(struct gcli_ctx *ctx, gcli_id attachment_id,
 	struct json_stream stream = {0};
 	struct gcli_attachment attachment = {0};
 
-	url = sn_asprintf("%s/rest/bug/attachment/%"PRIid,
-	                  gcli_get_apibase(ctx), attachment_id);
+	url = gcli_asprintf("%s/rest/bug/attachment/%"PRIid,
+	                    gcli_get_apibase(ctx), attachment_id);
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc < 0)
@@ -65,7 +67,7 @@ error_parse:
 	gcli_fetch_buffer_free(&buffer);
 
 error_fetch:
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

@@ -5,40 +5,40 @@
 ATF_TC_WITHOUT_HEAD(newlines);
 ATF_TC_BODY(newlines, tc)
 {
-	sn_sv const input = SV("\n\r");
-	sn_sv const escaped = gcli_json_escape(input);
+	gcli_sv const input = SV("\n\r");
+	gcli_sv const escaped = gcli_json_escape(input);
 
-	ATF_CHECK(sn_sv_eq_to(escaped, "\\n\\r"));
+	ATF_CHECK(gcli_sv_eq_to(escaped, "\\n\\r"));
 	free(escaped.data);
 }
 
 ATF_TC_WITHOUT_HEAD(tabs);
 ATF_TC_BODY(tabs, tc)
 {
-	sn_sv const input = SV("\t\t\t");
-	sn_sv const escaped = gcli_json_escape(input);
+	gcli_sv const input = SV("\t\t\t");
+	gcli_sv const escaped = gcli_json_escape(input);
 
-	ATF_CHECK(sn_sv_eq_to(escaped, "\\t\\t\\t"));
+	ATF_CHECK(gcli_sv_eq_to(escaped, "\\t\\t\\t"));
 	free(escaped.data);
 }
 
 ATF_TC_WITHOUT_HEAD(backslashes);
 ATF_TC_BODY(backslashes, tc)
 {
-	sn_sv const input = SV("\\");
-	sn_sv const escaped = gcli_json_escape(input);
+	gcli_sv const input = SV("\\");
+	gcli_sv const escaped = gcli_json_escape(input);
 
-	ATF_CHECK(sn_sv_eq_to(escaped, "\\\\"));
+	ATF_CHECK(gcli_sv_eq_to(escaped, "\\\\"));
 	free(escaped.data);
 }
 
 ATF_TC_WITHOUT_HEAD(torture);
 ATF_TC_BODY(torture, tc)
 {
-	sn_sv const input = SV("\n\r\n\n\n\t{}");
-	sn_sv const escaped = gcli_json_escape(input);
+	gcli_sv const input = SV("\n\r\n\n\n\t{}");
+	gcli_sv const escaped = gcli_json_escape(input);
 
-	ATF_CHECK(sn_sv_eq_to(escaped, "\\n\\r\\n\\n\\n\\t{}"));
+	ATF_CHECK(gcli_sv_eq_to(escaped, "\\n\\r\\n\\n\\n\\t{}"));
 	free(escaped.data);
 }
 

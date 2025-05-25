@@ -35,6 +35,7 @@
 #include <gcli/cmd/editor.h>
 
 #include <gcli/releases.h>
+#include <gcli/port/util.h>
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -48,6 +49,7 @@ usage(void)
 	fprintf(stderr, "usage: gcli releases create [-o owner -r repo] [-n name] "
 	        "[-y] [-d] [-p] [-a asset]\n");
 	fprintf(stderr, "                            [-c commitish] [-t tag]\n");
+	fprintf(stderr, "                            [-T message-template.md]\n");
 	fprintf(stderr, "       gcli releases delete [-o owner -r repo] [-y] id\n");
 	fprintf(stderr, "       gcli releases [-o owner -r repo] [-n number] [-s] [-l]\n");
 	fprintf(stderr, "OPTIONS:\n");
@@ -62,6 +64,7 @@ usage(void)
 	fprintf(stderr, "  -p              Mark as a prerelease\n");
 	fprintf(stderr, "  -t tag          Name for new tag\n");
 	fprintf(stderr, "  -y              Do not ask for confirmation\n");
+	fprintf(stderr, "  -T path         Use the given file as a template file for the release message\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
@@ -81,8 +84,8 @@ gcli_print_release(enum gcli_output_flags const flags,
 	gcli_dict_add(dict,           "NAME",       0, 0, "%s", it->name);
 	gcli_dict_add(dict,           "AUTHOR",     0, 0, "%s", it->author);
 	gcli_dict_add_timestamp(dict, "DATE",       0, 0, it->date);
-	gcli_dict_add_string(dict,    "DRAFT",      0, 0, sn_bool_yesno(it->draft));
-	gcli_dict_add_string(dict,    "PRERELEASE", 0, 0, sn_bool_yesno(it->prerelease));
+	gcli_dict_add_string(dict,    "DRAFT",      0, 0, gcli_bool_yesno(it->draft));
+	gcli_dict_add_string(dict,    "PRERELEASE", 0, 0, gcli_bool_yesno(it->prerelease));
 	gcli_dict_add_string(dict,    "ASSETS",     0, 0, "");
 
 	/* asset urls */
@@ -188,25 +191,48 @@ gcli_releases_print(enum gcli_output_flags const flags,
 static void
 releasemsg_init(struct gcli_ctx *ctx, FILE *f, void *_data)
 {
-	struct gcli_new_release const *info = _data;
-
+	struct gcli_create_release_args *const info = _data;
 	(void) ctx;
 
-	fprintf(
-		f,
-		"! Enter your release notes above, save and exit.\n"
-		"! All lines with a leading '!' are discarded and will not\n"
-		"! appear in the final release note.\n"
-		"!       IN : %s/%s\n"
-		"! TAG NAME : %s\n"
-		"!     NAME : %s\n"
-		"!\n"
-		"! vim: ft=markdown\n",
-		info->owner, info->repo, info->tag, info->name);
+	/* paste template if one has been specified */
+	if (info->body) {
+		fputs(info->body, f);
+
+		/* clear out the template message, it's going to be
+		 * filled in by the caller */
+		free(info->body);
+		info->body = NULL;
+	}
+
+	fprintf(f,
+	        "! Enter your release notes above, save and exit.\n"
+	        "! All lines with a leading '!' are discarded and will not\n"
+	        "! appear in the final release note.\n!\n");
+
+	if (info->repo_path.kind == GCLI_PATH_DEFAULT) {
+		fprintf(f,
+		        "!       IN : %s/%s\n",
+		        info->repo_path.as_default.owner,
+		        info->repo_path.as_default.repo);
+	}
+
+	fprintf(f,
+	        "! TAG NAME : %s\n",
+	        info->tag);
+
+	if (info->name) {
+		fprintf(f,
+		        "!     NAME : %s\n",
+		        info->name);
+	}
+
+	fprintf(f,
+	        "!\n"
+	        "! vim: ft=markdown\n");
 }
 
 static char *
-get_release_message(struct gcli_new_release const *info)
+get_release_message(struct gcli_create_release_args const *info)
 {
 	return gcli_editor_get_user_message(g_clictx, releasemsg_init,
 	                                    (void *)info);
@@ -215,8 +241,8 @@ get_release_message(struct gcli_new_release const *info)
 static int
 subcommand_releases_create(int argc, char *argv[])
 {
-	struct gcli_new_release release = {0};
-	int ch;
+	struct gcli_create_release_args release = {0};
+	int ch, rc;
 	bool always_yes = false;
 
 	struct option const options[] = {
@@ -256,10 +282,14 @@ subcommand_releases_create(int argc, char *argv[])
 		  .has_arg = required_argument,
 		  .flag    = NULL,
 		  .val     = 'a' },
+		{ .name    = "template",
+		  .has_arg = required_argument,
+		  .flag    = NULL,
+		  .val     = 'T' },
 		{0},
 	};
 
-	while ((ch = getopt_long(argc, argv, "ydpn:t:c:r:o:a:",
+	while ((ch = getopt_long(argc, argv, "ydpn:t:c:r:o:a:T:",
 	                         options, NULL)) != -1) {
 		switch (ch) {
 		case 'd':
@@ -278,10 +308,10 @@ subcommand_releases_create(int argc, char *argv[])
 			release.commitish = optarg;
 			break;
 		case 'r':
-			release.repo = optarg;
+			release.repo_path.as_default.repo = optarg;
 			break;
 		case 'o':
-			release.owner = optarg;
+			release.repo_path.as_default.owner = optarg;
 			break;
 		case 'a': {
 			struct gcli_release_asset_upload asset = {
@@ -297,6 +327,14 @@ subcommand_releases_create(int argc, char *argv[])
 		case 'y': {
 			always_yes = true;
 		} break;
+		case 'T': {
+			if (release.body)
+				errx(1, "gcli: error: cannot specify -T twice");
+
+			rc = gcli_read_file(optarg, &release.body);
+			if (rc < 0)
+				errx(1, "gcli: cannot open file '%s'", optarg);
+		} break;
 		default:
 			usage();
 			return EXIT_FAILURE;
@@ -306,7 +344,7 @@ subcommand_releases_create(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	check_owner_and_repo(&release.owner, &release.repo);
+	check_path(&release.repo_path);
 
 	/* make sure we have a tag for the release */
 	if (!release.tag) {
@@ -315,18 +353,33 @@ subcommand_releases_create(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	release.body = get_release_message(&release);
-	if (release.body == NULL)
-		errx(1, "gcli: empty message. aborting.");
+	/* -y without -T doesn't make sense */
+	if (always_yes && release.body == NULL) {
+		fprintf(stderr,
+		        "gcli: error: cannot have empty release message "
+		        "together with --yes\n");
 
-	if (!always_yes)
-		if (!sn_yesno("Do you want to create this release?"))
+		usage();
+		return EXIT_FAILURE;
+	}
+
+	/* interactive part, skip if non-interactive */
+	if (!always_yes) {
+		release.body = get_release_message(&release);
+		if (release.body == NULL)
+			errx(1, "gcli: empty message. aborting.");
+
+		if (!gcli_yesno("Do you want to create this release?"))
 			errx(1, "gcli: Aborted by user");
+	}
 
 	if (gcli_create_release(g_clictx, &release) < 0) {
 		errx(1, "gcli: error: failed to create release: %s",
 		     gcli_get_error(g_clictx));
 	}
+
+	free(release.body);
+	release.body = NULL;
 
 	return EXIT_SUCCESS;
 }
@@ -385,7 +438,7 @@ subcommand_releases_delete(int argc, char *argv[])
 	}
 
 	if (!always_yes)
-		if (!sn_yesno("Are you sure you want to delete this release?"))
+		if (!gcli_yesno("Are you sure you want to delete this release?"))
 			errx(1, "gcli: Aborted by user");
 
 	if (gcli_delete_release(g_clictx, &repo_path, argv[0]) < 0) {

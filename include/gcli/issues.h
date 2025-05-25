@@ -38,7 +38,6 @@
 #include <gcli/nvlist.h>
 #include <gcli/path.h>
 
-#include <sn/sn.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <time.h>

@@ -83,10 +83,10 @@ gitlab_create_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		gcli_jsongen_objmember(&gen, "name");
 		gcli_jsongen_string(&gen, label->name);
 
-		colour_string = sn_asprintf("#%06X", label->colour & 0xFFFFFF);
+		colour_string = gcli_asprintf("#%06X", label->colour & 0xFFFFFF);
 		gcli_jsongen_objmember(&gen, "color");
 		gcli_jsongen_string(&gen, colour_string);
-		free(colour_string);
+		gcli_clear_ptr(&colour_string);
 
 		gcli_jsongen_objmember(&gen, "description");
 		gcli_jsongen_string(&gen, label->description);
@@ -105,8 +105,8 @@ gitlab_create_label(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		json_close(&stream);
 	}
 
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 	gcli_fetch_buffer_free(&buffer);
 
 	return rc;
@@ -121,7 +121,7 @@ gitlab_label_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	char *suffix = NULL;
 
 	va_start(vp, fmt);
-	suffix = sn_vasprintf(fmt, vp);
+	suffix = gcli_vasprintf(fmt, vp);
 	va_end(vp);
 
 	switch (path->kind) {
@@ -131,9 +131,9 @@ gitlab_label_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/projects/%s%%2F%s/labels/%"PRIid"%s",
-		                   gcli_get_apibase(ctx), e_owner, e_repo,
-		                   path->as_default.id, suffix);
+		*url = gcli_asprintf("%s/projects/%s%%2F%s/labels/%"PRIid"%s",
+		                     gcli_get_apibase(ctx), e_owner, e_repo,
+		                     path->as_default.id, suffix);
 
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
@@ -145,16 +145,16 @@ gitlab_label_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		e_repo = gcli_urlencode(path->as_named.repo);
 		e_label = gcli_urlencode(path->as_named.id);
 
-		*url = sn_asprintf("%s/projects/%s%%2F%s/labels/%s%s",
-		                   gcli_get_apibase(ctx), e_owner, e_repo,
-		                   e_label, suffix);
+		*url = gcli_asprintf("%s/projects/%s%%2F%s/labels/%s%s",
+		                     gcli_get_apibase(ctx), e_owner, e_repo,
+		                     e_label, suffix);
 
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
 		gcli_clear_ptr(&e_label);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path kind for GitLab labels");
@@ -253,7 +253,7 @@ gitlab_label_set_colour(struct gcli_ctx *ctx,
 	char *colour_string = NULL;
 	int rc = 0;
 
-	colour_string = sn_asprintf("#%06X", colour & 0xFFFFFF);
+	colour_string = gcli_asprintf("#%06X", colour & 0xFFFFFF);
 	rc = gitlab_label_update_property(ctx, path, "color", colour_string);
 
 	gcli_clear_ptr(&colour_string);

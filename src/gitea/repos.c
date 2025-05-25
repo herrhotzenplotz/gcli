@@ -32,6 +32,8 @@
 
 #include <gcli/curl.h>
 
+#include <gcli/port/string.h>
+
 #include <assert.h>
 
 #include <stdarg.h>
@@ -91,12 +93,12 @@ gitea_repo_set_visibility(struct gcli_ctx *ctx,
 	if (rc < 0)
 		return rc;
 
-	payload = sn_asprintf("{ \"private\": %s }", is_private ? "true" : "false");
+	payload = gcli_asprintf("{ \"private\": %s }", is_private ? "true" : "false");
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
 
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -110,7 +112,7 @@ gitea_repo_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	va_list vp;
 
 	va_start(vp, fmt);
-	suffix = sn_vasprintf(fmt, vp);
+	suffix = gcli_vasprintf(fmt, vp);
 	va_end(vp);
 
 	switch (path->kind) {
@@ -120,8 +122,8 @@ gitea_repo_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/repos/%s/%s%s", gcli_get_apibase(ctx),
-		                   e_owner, e_repo, suffix);
+		*url = gcli_asprintf("%s/repos/%s/%s%s", gcli_get_apibase(ctx),
+		                     e_owner, e_repo, suffix);
 
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
@@ -132,14 +134,14 @@ gitea_repo_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		e_owner = gcli_urlencode(path->as_named.owner);
 		e_repo = gcli_urlencode(path->as_named.repo);
 
-		*url = sn_asprintf("%s/repos/%s/%s%s", gcli_get_apibase(ctx),
-		                   e_owner, e_repo, suffix);
+		*url = gcli_asprintf("%s/repos/%s/%s%s", gcli_get_apibase(ctx),
+		                     e_owner, e_repo, suffix);
 
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path kind for Gitea repo");

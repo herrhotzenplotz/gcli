@@ -73,7 +73,7 @@ github_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
 			json_close(&stream);
 		}
 
-		free(url);
+		gcli_clear_ptr(&url);
 		gcli_fetch_buffer_free(&buffer);
 
 		if (rc < 0)
@@ -81,7 +81,7 @@ github_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	} while ((url = next_url) && ((int)(out->checks_size) < max || max < 0));
 
 	/* TODO: don't leak list on error */
-	free(next_url);
+	gcli_clear_ptr(&next_url);
 
 	gcli_path_free(&norm_path);
 
@@ -91,11 +91,11 @@ github_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
 void
 gcli_github_check_free(struct gcli_github_check *check)
 {
-	free(check->name);
-	free(check->status);
-	free(check->conclusion);
-	free(check->started_at);
-	free(check->completed_at);
+	gcli_clear_ptr(&check->name);
+	gcli_clear_ptr(&check->status);
+	gcli_clear_ptr(&check->conclusion);
+	gcli_clear_ptr(&check->started_at);
+	gcli_clear_ptr(&check->completed_at);
 }
 
 void
@@ -105,7 +105,6 @@ github_free_checks(struct github_check_list *const list)
 		gcli_github_check_free(&list->checks[i]);
 	}
 
-	free(list->checks);
-	list->checks = NULL;
+	gcli_clear_ptr(&list->checks);
 	list->checks_size = 0;
 }

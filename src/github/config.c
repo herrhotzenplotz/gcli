@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -28,11 +28,11 @@
  */
 
 #include <gcli/github/config.h>
-#include <sn/sn.h>
+#include <gcli/port/string.h>
 
 char *
 github_make_authheader(struct gcli_ctx *ctx, char const *token)
 {
 	(void) ctx;
-	return sn_asprintf("Authorization: token %s", token);
+	return gcli_asprintf("Authorization: token %s", token);
 }

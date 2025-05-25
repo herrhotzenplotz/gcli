@@ -39,7 +39,7 @@
 
 #include <pdjson/pdjson.h>
 
-#include <stdarg.h>
+#include <gcli/port/string.h>
 
 int
 gitea_milestone_make_url(struct gcli_ctx *ctx,
@@ -52,7 +52,7 @@ gitea_milestone_make_url(struct gcli_ctx *ctx,
 	va_list vp;
 
 	va_start(vp, suffix_fmt);
-	suffix = sn_vasprintf(suffix_fmt, vp);
+	suffix = gcli_vasprintf(suffix_fmt, vp);
 	va_end(vp);
 
 	switch (path->kind) {
@@ -62,22 +62,22 @@ gitea_milestone_make_url(struct gcli_ctx *ctx,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/repos/%s/%s/milestones/%"PRIid"%s",
-		                   gcli_get_apibase(ctx), e_owner, e_repo,
-		                   path->as_default.id, suffix);
+		*url = gcli_asprintf("%s/repos/%s/%s/milestones/%"PRIid"%s",
+		                     gcli_get_apibase(ctx), e_owner, e_repo,
+		                     path->as_default.id, suffix);
 
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path kind for milestones");
 	} break;
 	}
 
-	free(suffix);
+	gcli_clear_ptr(&suffix);
 
 	return rc;
 }
@@ -126,16 +126,17 @@ gitea_get_milestone(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	}
 
 	gcli_fetch_buffer_free(&buffer);
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
 
 int
 gitea_create_milestone(struct gcli_ctx *ctx,
+                       struct gcli_path const *repo,
                        struct gcli_milestone_create_args const *args)
 {
-	return github_create_milestone(ctx, args);
+	return github_create_milestone(ctx, repo, args);
 }
 
 int

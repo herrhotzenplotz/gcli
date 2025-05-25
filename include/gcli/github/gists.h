@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,7 +37,6 @@
 #include <gcli/gcli.h>
 
 #include <pdjson/pdjson.h>
-#include <sn/sn.h>
 
 struct gcli_gist_file {
 	char *filename;

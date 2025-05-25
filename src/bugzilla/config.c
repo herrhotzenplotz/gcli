@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -28,7 +28,6 @@
  */
 
 #include <gcli/bugzilla/config.h>
-#include <sn/sn.h>
 
 char *
 bugzilla_make_authheader(struct gcli_ctx *ctx, char const *const token)

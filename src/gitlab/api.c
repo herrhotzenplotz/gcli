@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,17 +57,17 @@ gitlab_api_error_string(struct gcli_ctx *ctx, struct gcli_fetch_buffer *const bu
 		msg = NULL;
 	}
 
-	free(error_data.error_description);
-	free(error_data.message);
-	free(error_data.error);
+	gcli_clear_ptr(&error_data.error_description);
+	gcli_clear_ptr(&error_data.message);
+	gcli_clear_ptr(&error_data.error);
 
 	if (rc < 0 || msg == NULL) {
-		free(msg);
+		gcli_clear_ptr(&msg);
 
-		if (sn_verbose()) {
-			return sn_asprintf("Could not parse Gitlab error response. "
-			                   "The response was:\n\n%.*s\n",
-			                   (int)buf->length, buf->data);
+		if (gcli_be_verbose(ctx)) {
+			return gcli_asprintf("Could not parse Gitlab error response. "
+			                     "The response was:\n\n%.*s\n",
+			                     (int)buf->length, buf->data);
 		} else {
 			return strdup("no error message: failed to parse error response. "
 			              "Please run the gcli query with verbose mode again.");
@@ -89,8 +89,8 @@ gitlab_user_id(struct gcli_ctx *ctx, char const *user_name)
 
 	e_username = gcli_urlencode(user_name);
 
-	url = sn_asprintf("%s/users?username=%s", gcli_get_apibase(ctx),
-	                  e_username);
+	url = gcli_asprintf("%s/users?username=%s", gcli_get_apibase(ctx),
+	                    e_username);
 
 	uid = gcli_fetch(ctx, url, NULL, &buffer);
 	if (uid == 0) {
@@ -105,8 +105,8 @@ gitlab_user_id(struct gcli_ctx *ctx, char const *user_name)
 		}
 	}
 
-	free(e_username);
-	free(url);
+	gcli_clear_ptr(&e_username);
+	gcli_clear_ptr(&url);
 	gcli_fetch_buffer_free(&buffer);
 
 	return uid;

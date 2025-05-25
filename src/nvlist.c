@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -51,9 +51,9 @@ gcli_nvlist_free(struct gcli_nvlist *list)
 	while (p1 != NULL) {
 		p2 = TAILQ_NEXT(p1, next);
 
-		free(p1->key);
-		free(p1->value);
-		free(p1);
+		gcli_clear_ptr(&p1->key);
+		gcli_clear_ptr(&p1->value);
+		gcli_clear_ptr(&p1);
 
 		p1 = p2;
 	}

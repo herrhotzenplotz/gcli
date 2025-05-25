@@ -38,11 +38,10 @@
 #include <gcli/comments.h>
 #include <gcli/date_time.h>
 #include <gcli/json_util.h>
+#include <gcli/port/util.h>
 
 #include <assert.h>
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#endif
 
 static void
 usage(void)
@@ -153,7 +152,7 @@ comment_submit(struct submit_ctx *sctx, int always_yes)
 	gcli_pretty_print(sctx->opts.message, 4, 80, stdout);
 
 	if (!always_yes) {
-		if (!sn_yesno("Is this okay?"))
+		if (!gcli_yesno("Is this okay?"))
 			errx(1, "Aborted by user");
 	}
 

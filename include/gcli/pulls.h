@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,7 +41,6 @@
 #include <gcli/diffutil.h>
 #include <gcli/gcli.h>
 #include <gcli/path.h>
-#include <sn/sn.h>
 
 struct gcli_pull_list {
 	struct gcli_pull *pulls;
@@ -78,6 +77,9 @@ struct gcli_pull {
 
 	char **reviewers;      /**< User names */
 	size_t reviewers_size; /**< Number of elements in the reviewers list */
+
+	char **assignees;
+	size_t assignees_size;
 
 	bool merged;
 	bool mergeable;
@@ -204,6 +206,9 @@ int gcli_pull_clear_milestone(struct gcli_ctx *ctx,
 
 int gcli_pull_add_reviewer(struct gcli_ctx *ctx, struct gcli_path const *path,
                            char const *username);
+
+int gcli_pull_assign(struct gcli_ctx *ctx, struct gcli_path const *path,
+                     char const *username);
 
 int gcli_pull_get_patch(struct gcli_ctx *ctx, FILE *out,
                         struct gcli_path const *path);

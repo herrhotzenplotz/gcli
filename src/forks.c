@@ -1,5 +1,5 @@
 /*
- * Copyright 2021,2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -51,8 +51,8 @@ gcli_fork_create(struct gcli_ctx *ctx,
 void
 gcli_fork_free(struct gcli_fork *fork)
 {
-	free(fork->full_name);
-	free(fork->owner);
+	gcli_clear_ptr(&fork->full_name);
+	gcli_clear_ptr(&fork->owner);
 }
 
 void
@@ -62,8 +62,7 @@ gcli_forks_free(struct gcli_fork_list *const list)
 		gcli_fork_free(&list->forks[i]);
 	}
 
-	free(list->forks);
+	gcli_clear_ptr(&list->forks);
 
-	list->forks = NULL;
 	list->forks_size = 0;
 }

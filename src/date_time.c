@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -84,9 +84,24 @@ gcli_parse_iso8601_date_time(struct gcli_ctx *ctx, char const *const input,
                              time_t *const out)
 {
 	char *endptr = NULL, *oldtz = NULL;
+	time_t offset = 0;
 	struct tm tm_buf = {0};
 
 	endptr = strptime(input, "%Y-%m-%dT%H:%M:%S", &tm_buf);
+
+	/* TZ offset */
+	if (endptr && (*endptr == '+' || *endptr == '-')) {
+		int hours = 0, minutes = 0, rc = 0;
+
+		rc = sscanf(endptr, "%d:%d", &hours, &minutes);
+		if (rc == 0) {
+			return gcli_error(ctx, "failed to parse timezone offset");
+		}
+
+		offset = (time_t)(3600 * hours + 60 * minutes);
+		endptr = NULL;
+	}
+
 	if (endptr && *endptr != '.' && *endptr != 'Z') {
 		return gcli_error(ctx, "failed to parse ISO8601 timestamp \"%s\": %s",
 		                  input, strerror(errno));
@@ -99,14 +114,14 @@ gcli_parse_iso8601_date_time(struct gcli_ctx *ctx, char const *const input,
 			oldtz = strdup(oldtz);
 
 		/* TODO error handling */
-		setenv("TZ", "GMT0", 1);
+		setenv("TZ", "UTC", 1);
 		tzset();
 
-		*out = mktime(&tm_buf);
+		*out = mktime(&tm_buf) - offset;
 
 		if (oldtz) {
 			setenv("TZ", oldtz, 1);
-			free(oldtz);
+			gcli_clear_ptr(&oldtz);
 		} else {
 			unsetenv("TZ");
 		}

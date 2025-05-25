@@ -47,6 +47,8 @@
 #include <gcli/comments.h>
 #include <gcli/forges.h>
 #include <gcli/gitlab/pipelines.h>
+#include <gcli/port/string.h>
+#include <gcli/port/util.h>
 #include <gcli/pulls.h>
 
 #ifdef HAVE_GETOPT_H
@@ -100,6 +102,7 @@ usage(void)
 	fprintf(stderr, "  patch                  Display changes as patch series\n");
 	fprintf(stderr, "  title <new-title>      Change the title of the pull request\n");
 	fprintf(stderr, "  request-review <user>  Add <user> as a reviewer of the PR\n");
+	fprintf(stderr, "  assign <user>          Assign the PR to <user>\n");
 	fprintf(stderr, "  checkout               Do a git-checkout of this PR (GitHub- and GitLab only)\n");
 	fprintf(stderr, "  open                   Open the PR in a web browser\n");
 	if (gcli_config_enable_experimental(g_clictx))
@@ -216,14 +219,14 @@ gcli_pull_print(struct gcli_pull const *const it)
 		gcli_dict_add(dict, "CHANGED", 0, 0, "%d", it->changed_files);
 
 	if ((quirks & GCLI_PRS_QUIRK_AUTOMERGE) == 0)
-		gcli_dict_add_string(dict, "AUTOMERGE", 0, 0, sn_bool_yesno(it->automerge));
+		gcli_dict_add_string(dict, "AUTOMERGE", 0, 0, gcli_bool_yesno(it->automerge));
 
 	if ((quirks & GCLI_PRS_QUIRK_MERGED) == 0)
-		gcli_dict_add_string(dict, "MERGED", 0, 0, sn_bool_yesno(it->merged));
+		gcli_dict_add_string(dict, "MERGED", 0, 0, gcli_bool_yesno(it->merged));
 
-	gcli_dict_add_string(dict, "MERGEABLE", 0, 0, sn_bool_yesno(it->mergeable));
+	gcli_dict_add_string(dict, "MERGEABLE", 0, 0, gcli_bool_yesno(it->mergeable));
 	if ((quirks & GCLI_PRS_QUIRK_DRAFT) == 0)
-		gcli_dict_add_string(dict, "DRAFT", 0, 0, sn_bool_yesno(it->draft));
+		gcli_dict_add_string(dict, "DRAFT", 0, 0, gcli_bool_yesno(it->draft));
 
 	if ((quirks & GCLI_PRS_QUIRK_COVERAGE) == 0 && it->coverage)
 		gcli_dict_add_string(dict, "COVERAGE", 0, 0, it->coverage);
@@ -234,6 +237,12 @@ gcli_pull_print(struct gcli_pull const *const it)
 		                          it->labels_size);
 	} else {
 		gcli_dict_add_string(dict, "LABELS", 0, 0, "none");
+	}
+
+	if (it->assignees_size) {
+		gcli_dict_add_string_list(dict, "ASSIGNEES",
+		                          (char const *const *)it->assignees,
+		                          it->assignees_size);
 	}
 
 	if (it->reviewers_size) {
@@ -425,7 +434,7 @@ create_pull(struct gcli_submit_pull_options *const opts, int always_yes)
 		puts("No message.");
 
 	if (!always_yes) {
-		if (!sn_yesno("Do you want to continue?"))
+		if (!gcli_yesno("Do you want to continue?"))
 			errx(1, "gcli: PR aborted.");
 	}
 
@@ -436,7 +445,7 @@ static char const *
 pr_try_derive_head(void)
 {
 	char const *account;
-	sn_sv branch  = {0};
+	gcli_sv branch  = {0};
 
 	if ((account = gcli_config_get_account_name(g_clictx)) == NULL) {
 		errx(1,
@@ -453,14 +462,14 @@ pr_try_derive_head(void)
 		     " want to pull request.");
 	}
 
-	return sn_asprintf("%s:"SV_FMT, account, SV_ARGS(branch));
+	return gcli_asprintf("%s:"SV_FMT, account, SV_ARGS(branch));
 }
 
 static char *
 derive_head(void)
 {
 	char const *account;
-	sn_sv branch  = {0};
+	gcli_sv branch = {0};
 
 	if ((account = gcli_config_get_account_name(g_clictx)) == NULL)
 		return NULL;
@@ -469,7 +478,7 @@ derive_head(void)
 	if (branch.length == 0)
 		return NULL;
 
-	return sn_asprintf("%s:"SV_FMT, account, SV_ARGS(branch));
+	return gcli_asprintf("%s:"SV_FMT, account, SV_ARGS(branch));
 }
 
 /** Interactive version of the create subcommand */
@@ -502,11 +511,11 @@ subcommand_pull_create_interactive(struct gcli_submit_pull_options *const opts)
 
 	if (!opts->target_branch) {
 		char *tmp = NULL;
-		sn_sv base;
+		gcli_sv base;
 
 		base = gcli_config_get_base(g_clictx);
 		if (base.length != 0)
-			tmp = sn_sv_to_cstr(base);
+			tmp = gcli_sv_to_cstr(base);
 
 		opts->target_branch = gcli_cmd_prompt("To Branch", tmp);
 
@@ -516,7 +525,7 @@ subcommand_pull_create_interactive(struct gcli_submit_pull_options *const opts)
 
 	/* Meta */
 	opts->title = gcli_cmd_prompt("Title", GCLI_PROMPT_RESULT_MANDATORY);
-	opts->automerge = sn_yesno("Enable automerge?");
+	opts->automerge = gcli_yesno("Enable automerge?");
 
 	/* Reviewers */
 	for (;;) {
@@ -637,13 +646,13 @@ subcommand_pull_create(int argc, char *argv[])
 		opts.from = pr_try_derive_head();
 
 	if (!opts.target_branch) {
-		sn_sv base = gcli_config_get_base(g_clictx);
+		gcli_sv base = gcli_config_get_base(g_clictx);
 		if (base.length == 0)
 			errx(1,
 			     "gcli: error: PR base is missing. Please either specify "
 			     "--to branch-name or set pr.base in .gcli.");
 
-		opts.target_branch = sn_sv_to_cstr(base);
+		opts.target_branch = gcli_sv_to_cstr(base);
 	}
 
 	check_path(&opts.target_repo);
@@ -788,7 +797,7 @@ subcommand_pulls(int argc, char *argv[])
 
 		/* Trailing arguments indicate a search term */
 		if (argc)
-			search_term = sn_join_with((char const *const *)argv, argc, " ");
+			search_term = gcli_join_with((char const *const *)argv, argc, " ");
 
 		details.search_term = search_term;
 
@@ -1178,6 +1187,37 @@ action_request_review(struct gcli_path const *const path,
 }
 
 static int
+action_assign(struct gcli_path const *const path,
+              struct gcli_pull const *pull,
+              int *argc, char **argv[])
+{
+	char const *assignee;
+	int rc;
+
+	(void) pull;
+
+	if (*argc < 2) {
+		fprintf(stderr, "gcli: error: missing assignee\n");
+		return GCLI_EX_USAGE;
+	}
+
+	*argc -= 1;
+	*argv += 1;
+
+	assignee = **argv;
+
+	rc = gcli_pull_assign(g_clictx, path, assignee);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to assign: %s\n",
+		        gcli_get_error(g_clictx));
+
+		return GCLI_EX_DATAERR;
+	}
+
+	return GCLI_EX_OK;
+}
+
+static int
 action_title(struct gcli_path const *const path,
              struct gcli_pull *pull, int *argc, char **argv[])
 {
@@ -1365,6 +1405,11 @@ struct gcli_cmd_actions gcli_pull_actions = {
 			.name = "request-review",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler) action_request_review,
+		},
+		{
+			.name = "assign",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler) action_assign,
 		},
 		{
 			.name = "title",

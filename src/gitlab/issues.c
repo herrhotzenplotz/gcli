@@ -51,7 +51,7 @@ gitlab_issue_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	va_list vp;
 
 	va_start(vp, suffix_fmt);
-	suffix = sn_vasprintf(suffix_fmt, vp);
+	suffix = gcli_vasprintf(suffix_fmt, vp);
 	va_end(vp);
 
 	switch (path->kind) {
@@ -61,30 +61,30 @@ gitlab_issue_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/projects/%s%%2F%s/issues/%"PRIid"%s",
-		                   gcli_get_apibase(ctx),
-		                   e_owner, e_repo, path->as_default.id,
-		                   suffix);
+		*url = gcli_asprintf("%s/projects/%s%%2F%s/issues/%"PRIid"%s",
+		                     gcli_get_apibase(ctx),
+		                     e_owner, e_repo, path->as_default.id,
+		                     suffix);
 
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_PID_ID: {
-		*url = sn_asprintf("%s/projects/%"PRIid"/issues/%"PRIid"%s",
-		                   gcli_get_apibase(ctx),
-		                   path->as_pid_id.project_id,
-		                   path->as_pid_id.id,
-		                   suffix);
+		*url = gcli_asprintf("%s/projects/%"PRIid"/issues/%"PRIid"%s",
+		                     gcli_get_apibase(ctx),
+		                     path->as_pid_id.project_id,
+		                     path->as_pid_id.id,
+		                     suffix);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path type for gitlab issue");
 	} break;
 	}
 
-	free(suffix);
+	gcli_clear_ptr(&suffix);
 
 	return rc;
 }
@@ -126,18 +126,18 @@ gitlab_issues_search(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	if (details->author) {
 		char *tmp = gcli_urlencode(details->author);
-		e_author = sn_asprintf("%cauthor_username=%s",
-		                       details->all ? '?' : '&',
-		                       tmp);
-		free(tmp);
+		e_author = gcli_asprintf("%cauthor_username=%s",
+		                         details->all ? '?' : '&',
+		                         tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->label) {
 		char *tmp = gcli_urlencode(details->label);
 		int const should_do_qmark = details->all && !details->author;
 
-		e_labels = sn_asprintf("%clabels=%s", should_do_qmark ? '?' : '&', tmp);
-		free(tmp);
+		e_labels = gcli_asprintf("%clabels=%s", should_do_qmark ? '?' : '&', tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->milestone) {
@@ -145,31 +145,33 @@ gitlab_issues_search(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		int const should_do_qmark = details->all && !details->author &&
 		                            !details->label;
 
-		e_milestone = sn_asprintf("%cmilestone=%s", should_do_qmark ? '?' : '&',
-		                          tmp);
-		free(tmp);
+		e_milestone = gcli_asprintf("%cmilestone=%s",
+		                            should_do_qmark ? '?' : '&', tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
 	if (details->search_term) {
 		char *tmp = gcli_urlencode(details->search_term);
 		int const should_do_qmark = details->all && !details->author &&
 		                            !details->label && !details->milestone;
-		e_search = sn_asprintf("%csearch=%s", should_do_qmark ? '?': '&', tmp);
-		free(tmp);
+		e_search = gcli_asprintf("%csearch=%s",
+		                         should_do_qmark ? '?': '&', tmp);
+		gcli_clear_ptr(&tmp);
 	}
 
-	suffix = sn_asprintf("%s%s%s%s%s", details->all ? "" : "?state=opened",
-	                     e_author ? e_author : "", e_labels ? e_labels : "",
-	                     e_milestone ? e_milestone : "",
-	                     e_search ? e_search : "");
+	suffix = gcli_asprintf("%s%s%s%s%s", details->all ? "" : "?state=opened",
+	                       e_author ? e_author : "",
+	                       e_labels ? e_labels : "",
+	                       e_milestone ? e_milestone : "",
+	                       e_search ? e_search : "");
 
 	rc = gitlab_issues_make_url(ctx, path, suffix, &url);
 
- 	free(e_milestone);
- 	free(e_author);
-	free(e_labels);
-	free(e_search);
-	free(suffix);
+	gcli_clear_ptr(&e_milestone);
+	gcli_clear_ptr(&e_author);
+	gcli_clear_ptr(&e_labels);
+	gcli_clear_ptr(&e_search);
+	gcli_clear_ptr(&suffix);
 
 	if (rc < 0)
 		return rc;
@@ -211,7 +213,7 @@ gitlab_get_issue_summary(struct gcli_ctx *ctx,
 
 	rc = gitlab_fetch_issue(ctx, url, out);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -244,8 +246,8 @@ gitlab_issue_patch_state(struct gcli_ctx *const ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
 
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }
@@ -293,11 +295,11 @@ gitlab_perform_submit_issue(struct gcli_ctx *const ctx,
 	payload = gcli_jsongen_to_string(&gen);
 	gcli_jsongen_free(&gen);
 
-	url = sn_asprintf("%s/projects/%s%%2F%s/issues", gcli_get_apibase(ctx),
-	                  e_owner, e_repo);
+	url = gcli_asprintf("%s/projects/%s%%2F%s/issues",
+	                    gcli_get_apibase(ctx), e_owner, e_repo);
 
-	free(e_owner);
-	free(e_repo);
+	gcli_clear_ptr(&e_owner);
+	gcli_clear_ptr(&e_repo);
 
 	if (out)
 		_buffer = &buffer;
@@ -312,8 +314,8 @@ gitlab_perform_submit_issue(struct gcli_ctx *const ctx,
 	}
 
 	gcli_fetch_buffer_free(&buffer);
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -353,8 +355,8 @@ gitlab_issue_assign(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
 
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }
@@ -376,7 +378,7 @@ gitlab_issues_update_labels(struct gcli_ctx *const ctx,
 
 	/* Generate payload. For some reason Gitlab expects us to put a
 	 * comma-separated list of issues into a JSON string. Figures...*/
-	label_list = sn_join_with(labels, labels_size, ",");
+	label_list = gcli_join_with(labels, labels_size, ",");
 
 	gcli_jsongen_init(&gen);
 	gcli_jsongen_begin_object(&gen);
@@ -386,15 +388,15 @@ gitlab_issues_update_labels(struct gcli_ctx *const ctx,
 	}
 	gcli_jsongen_end_object(&gen);
 
-	free(label_list);
+	gcli_clear_ptr(&label_list);
 
 	payload = gcli_jsongen_to_string(&gen);
 	gcli_jsongen_free(&gen);
 
 	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
 
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }
@@ -429,7 +431,7 @@ gitlab_issue_set_milestone(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PUT", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -462,7 +464,7 @@ gitlab_issue_clear_milestone(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -495,8 +497,8 @@ gitlab_issue_set_title(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
 
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }
@@ -528,8 +530,8 @@ gitlab_issue_set_op(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
 
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }

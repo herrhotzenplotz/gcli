@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,19 +39,18 @@ gcli_attachments_free(struct gcli_attachment_list *list)
 		gcli_attachment_free(&list->attachments[i]);
 	}
 
-	free(list->attachments);
-	list->attachments = NULL;
+	gcli_clear_ptr(&list->attachments);
 	list->attachments_size = 0;
 }
 
 void
 gcli_attachment_free(struct gcli_attachment *it)
 {
-	free(it->author);
-	free(it->file_name);
-	free(it->summary);
-	free(it->content_type);
-	free(it->data_base64);
+	gcli_clear_ptr(&it->author);
+	gcli_clear_ptr(&it->file_name);
+	gcli_clear_ptr(&it->summary);
+	gcli_clear_ptr(&it->content_type);
+	gcli_clear_ptr(&it->data_base64);
 }
 
 int

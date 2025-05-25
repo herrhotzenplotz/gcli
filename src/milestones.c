@@ -46,9 +46,10 @@ gcli_get_milestone(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 int
 gcli_create_milestone(struct gcli_ctx *ctx,
+                      struct gcli_path const *const repo,
                       struct gcli_milestone_create_args const *args)
 {
-	gcli_null_check_call(create_milestone, ctx, args);
+	gcli_null_check_call(create_milestone, ctx, repo, args);
 }
 
 int
@@ -60,16 +61,10 @@ gcli_delete_milestone(struct gcli_ctx *ctx, struct gcli_path const *const path)
 void
 gcli_free_milestone(struct gcli_milestone *const it)
 {
-	free(it->title);
-	it->title = NULL;
-	free(it->state);
-	it->state = NULL;
-
-	free(it->description);
-	it->description = NULL;
-
-	free(it->web_url);
-	it->web_url = NULL;
+	gcli_clear_ptr(&it->title);
+	gcli_clear_ptr(&it->state);
+	gcli_clear_ptr(&it->description);
+	gcli_clear_ptr(&it->web_url);
 }
 
 void
@@ -78,8 +73,7 @@ gcli_free_milestones(struct gcli_milestone_list *const it)
 	for (size_t i = 0; i < it->milestones_size; ++i)
 		gcli_free_milestone(&it->milestones[i]);
 
-	free(it->milestones);
-	it->milestones = NULL;
+	gcli_clear_ptr(&it->milestones);
 	it->milestones_size = 0;
 }
 

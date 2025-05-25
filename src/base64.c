@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2023-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -145,8 +145,7 @@ gcli_base64_decode_print(struct gcli_ctx *ctx, FILE *out, char const *const inpu
 
 	fwrite(buffer, buffer_size, 1, out);
 
-	free(buffer);
-	buffer = NULL;
+	gcli_clear_ptr(&buffer);
 
 	return 0;
 }

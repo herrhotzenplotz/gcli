@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,9 +36,9 @@
 
 #include <gcli/pulls.h>
 
-struct gitlab_reviewer_id_list {
-	gcli_id *reviewers;
-	size_t reviewers_size;
+struct gitlab_user_id_list {
+	gcli_id *users;
+	size_t users_size;
 };
 
 /* Structs used for internal patch generator. Gitlab does not provide
@@ -114,6 +114,9 @@ int gitlab_mr_clear_milestone(struct gcli_ctx *ctx,
                               struct gcli_path const *const mr_path);
 
 int gitlab_mr_add_reviewer(struct gcli_ctx *ctx, struct gcli_path const *path,
+                           char const *username);
+
+int gitlab_mr_add_assignee(struct gcli_ctx *ctx, struct gcli_path const *path,
                            char const *username);
 
 int gitlab_mr_set_title(struct gcli_ctx *ctx, struct gcli_path const *path,

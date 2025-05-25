@@ -33,6 +33,7 @@
 #include <gcli/date_time.h>
 #include <gcli/github/issues.h>
 #include <gcli/github/repos.h>
+#include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
 #include <templates/github/milestones.h>
@@ -59,15 +60,15 @@ github_milestones_make_url(struct gcli_ctx *const ctx,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/repos/%s/%s/milestones%s",
-		                   gcli_get_apibase(ctx),
-		                   e_owner, e_repo, suffix);
+		*url = gcli_asprintf("%s/repos/%s/%s/milestones%s",
+		                     gcli_get_apibase(ctx),
+		                     e_owner, e_repo, suffix);
 
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s/milestones%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s/milestones%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path kind for milestones");
@@ -108,7 +109,7 @@ github_milestone_make_url(struct gcli_ctx *ctx,
 	va_list vp;
 
 	va_start(vp, suffix_fmt);
-	suffix = sn_vasprintf(suffix_fmt, vp);
+	suffix = gcli_vasprintf(suffix_fmt, vp);
 	va_end(vp);
 
 	switch (path->kind) {
@@ -118,22 +119,22 @@ github_milestone_make_url(struct gcli_ctx *ctx,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/repos/%s/%s/milestones/%"PRIid"%s",
-		                   gcli_get_apibase(ctx), e_owner, e_repo,
-		                   path->as_default.id, suffix);
+		*url = gcli_asprintf("%s/repos/%s/%s/milestones/%"PRIid"%s",
+		                     gcli_get_apibase(ctx), e_owner, e_repo,
+		                     path->as_default.id, suffix);
 
-		free(e_owner);
-		free(e_repo);
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*url = sn_asprintf("%s%s", path->as_url, suffix);
+		*url = gcli_asprintf("%s%s", path->as_url, suffix);
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path kind for milestones");
 	} break;
 	}
 
-	free(suffix);
+	gcli_clear_ptr(&suffix);
 
 	return rc;
 }
@@ -159,7 +160,7 @@ github_get_milestone(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		json_close(&stream);
 	}
 
-	free(url);
+	gcli_clear_ptr(&url);
 	gcli_fetch_buffer_free(&buffer);
 
 	return rc;
@@ -187,40 +188,40 @@ github_milestone_get_issues(struct gcli_ctx *ctx,
 
 int
 github_create_milestone(struct gcli_ctx *ctx,
+                        struct gcli_path const *repo,
                         struct gcli_milestone_create_args const *args)
 {
-	char *url, *e_owner, *e_repo;
-	char *json_body, *description;
+	char *url, *payload;
 	int rc = 0;
+	struct gcli_jsongen gen = {0};
 
-	e_owner = gcli_urlencode(args->owner);
-	e_repo = gcli_urlencode(args->repo);
+	/* build url */
+	rc = github_repo_make_url(ctx, repo, &url, "/milestones");
+	if (rc < 0)
+		return rc;
 
-	if (args->description) {
-		/* This is fine :-) */
-		char *e_description = gcli_json_escape_cstr(args->description);
-		description = sn_asprintf(",\"description\": \"%s\"", e_description);
-		free(e_description);
-	} else {
-		description = strdup("");
+	/* generate payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "title");
+		gcli_jsongen_string(&gen, args->title);
+
+		if (args->description) {
+			gcli_jsongen_objmember(&gen, "description");
+			gcli_jsongen_string(&gen, args->description);
+		}
 	}
+	gcli_jsongen_end_object(&gen);
 
-	json_body = sn_asprintf(
-		"{"
-		"    \"title\"      : \"%s\""
-		"    %s"
-		"}", args->title, description);
+	payload = gcli_jsongen_to_string(&gen);
+	gcli_jsongen_free(&gen);
 
-	url = sn_asprintf("%s/repos/%s/%s/milestones",
-	                  gcli_get_apibase(ctx), e_owner, e_repo);
+	/* perform request */
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
 
-	rc = gcli_fetch_with_method(ctx, "POST", url, json_body, NULL, NULL);
-
-	free(json_body);
-	free(description);
-	free(url);
-	free(e_repo);
-	free(e_owner);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -238,7 +239,7 @@ github_delete_milestone(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -260,11 +261,11 @@ github_milestone_set_duedate(struct gcli_ctx *ctx,
 	if (rc < 0)
 		return rc;
 
-	payload = sn_asprintf("{ \"due_on\": \"%s\"}", norm_date);
+	payload = gcli_asprintf("{ \"due_on\": \"%s\"}", norm_date);
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
 
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

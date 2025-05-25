@@ -4,8 +4,8 @@
 
 CONFIGURE_CMD_ARGS="${*}"
 
-PACKAGE_VERSION="2.7.0"
-PACKAGE_DATE="04-Mar-2025"
+PACKAGE_VERSION="2.8.0"
+PACKAGE_DATE="25-May-2025"
 PACKAGE_STRING="gcli $PACKAGE_VERSION"
 PACKAGE_BUGREPORT="https://lists.sr.ht/~herrhotzenplotz/gcli-discuss"
 PACKAGE_URL="https://sr.ht/~herrhotzenplotz/gcli"
@@ -135,6 +135,7 @@ OPTIONS:
     --disable-libreadline   Disable use of libreadline
     --enable-liblowdown     Search and use liblowdown for markdown rendering [DEFAULT: yes]
     --disable-liblowdown    Disable use of liblowdown
+    --disable-librt         Forcefully disable linking librt [DEFAULT: no, except on Darwin]
     --debug                 Compile without optimisations, generate code with
                             debug information and enable additional compiler-specific
                             warnings and portability checks.
@@ -168,6 +169,7 @@ OPTIMISE=
 ENABLE_LIBEDIT=1
 ENABLE_LIBREADLINE=1
 ENABLE_LIBLOWDOWN=1
+ENABLE_LIBRT=1
 
 # Parse flags
 while [ $# -gt 0 ]; do
@@ -198,6 +200,10 @@ while [ $# -gt 0 ]; do
 			;;
 		--enable-liblowdown)
 			ENABLE_LIBLOWDOWN=1
+			shift
+			;;
+		--disable-librt)
+			ENABLE_LIBRT=0
 			shift
 			;;
 		--disable-liblowdown)
@@ -301,6 +307,21 @@ else
 	LIBLOWDOWN_FOUND=0
 fi
 
+# On Darwin the POSIX Real-Time extensions are in libc. We must not
+# link against librt because it doesn't exist.
+if [ $ENABLE_LIBRT -eq 1 ]; then
+	printf "Checking whether host is Darwin for -lrt..."
+	case "${HOST}" in
+		*-apple-darwin*)
+			printf " yes, won't link -lrt\n"
+			ENABLE_LIBRT=0
+			;;
+		*)
+			printf " no\n"
+			;;
+	esac
+fi
+
 ###################################################################
 # TESTS and other programs
 ###################################################################
@@ -344,6 +365,7 @@ sed \
 	-e "s|@LIBLOWDOWN_LIBS@|$LIBLOWDOWN_LIBS|g" \
 	-e "s|@LIBLOWDOWN_MAJOR@|$LIBLOWDOWN_MAJOR|g" \
 	-e "s|@LIBLOWDOWN_MINOR@|$LIBLOWDOWN_MINOR|g" \
+	-e "s|@ENABLE_LIBRT@|$ENABLE_LIBRT|g" \
 	-e "s|@CONFIGURE_CMD_ARGS@|$CONFIGURE_CMD_ARGS|g" \
 	-e "s|@CC@|$CC|g" \
 	-e "s|@CCOM@|$CCOM|g" \
@@ -410,6 +432,9 @@ if [ $LIBLOWDOWN_FOUND -eq 1 ]; then
 echo " Using lowdown ${LIBLOWDOWN_VERSION}:"
 echo "    LIBLOWDOWN_CFLAGS: ${LIBLOWDOWN_CFLAGS}"
 echo "      LIBLOWDOWN_LIBS: ${LIBLOWDOWN_LIBS}"
+fi
+if [ $ENABLE_LIBRT -eq 0 ]; then
+echo " Not linking -lrt because it was disabled"
 fi
 echo ""
 echo "Configuration done. You may now run make."

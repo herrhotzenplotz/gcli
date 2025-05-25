@@ -1,5 +1,5 @@
 /*
- * Copyright 2021,2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -55,6 +55,8 @@
 #include <gcli/cmd/repos.h>
 #include <gcli/cmd/snippets.h>
 #include <gcli/cmd/status.h>
+
+#include <gcli/port/string.h>
 
 static void usage(void);
 
@@ -286,7 +288,7 @@ add_subcommand_alias(char const *alias_name, char const *alias_for)
 	}
 
 	old_fn = old_sc->fn;
-	docstring = sn_asprintf("Alias for %s", alias_for);
+	docstring = gcli_asprintf("Alias for %s", alias_for);
 	subcommands = realloc(subcommands, (subcommands_size + 1) * sizeof(*subcommands));
 
 	/* Copy in data */
@@ -313,8 +315,8 @@ install_aliases(void)
 	TAILQ_FOREACH(entry, entries, next) {
 		char *alias_name, *alias_for;
 
-		alias_name = sn_sv_to_cstr(entry->key);
-		alias_for = sn_sv_to_cstr(entry->value);
+		alias_name = gcli_sv_to_cstr(entry->key);
+		alias_for = gcli_sv_to_cstr(entry->value);
 
 		add_subcommand_alias(alias_name, alias_for);
 

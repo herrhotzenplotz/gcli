@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,7 +37,7 @@
 #include <gcli/gcli.h>
 #include <gcli/path.h>
 
-#include <sn/sn.h>
+#include <stddef.h>
 
 struct gcli_github_check {
 	char *name;

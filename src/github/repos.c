@@ -49,7 +49,7 @@ github_repo_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	va_list vp;
 
 	va_start(vp, fmt);
-	suffix = sn_vasprintf(fmt, vp);
+	suffix = gcli_vasprintf(fmt, vp);
 	va_end(vp);
 
 	switch (path->kind) {
@@ -59,8 +59,8 @@ github_repo_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
 
-		*url = sn_asprintf("%s/repos/%s/%s%s", gcli_get_apibase(ctx),
-		                   e_owner, e_repo, suffix);
+		*url = gcli_asprintf("%s/repos/%s/%s%s", gcli_get_apibase(ctx),
+		                     e_owner, e_repo, suffix);
 
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
@@ -71,8 +71,8 @@ github_repo_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		e_owner = gcli_urlencode(path->as_named.owner);
 		e_repo = gcli_urlencode(path->as_named.repo);
 
-		*url = sn_asprintf("%s/repos/%s/%s%s", gcli_get_apibase(ctx),
-		                   e_owner, e_repo, suffix);
+		*url = gcli_asprintf("%s/repos/%s/%s%s", gcli_get_apibase(ctx),
+		                     e_owner, e_repo, suffix);
 
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
@@ -93,9 +93,9 @@ github_repo_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 int
 github_user_is_org(struct gcli_ctx *ctx, char const *e_owner)
 {
-	char *url = sn_asprintf("%s/users/%s", gcli_get_apibase(ctx), e_owner);
+	char *url = gcli_asprintf("%s/users/%s", gcli_get_apibase(ctx), e_owner);
 	int const rc = gcli_curl_test_success(ctx, url);
-	free(url);
+	gcli_clear_ptr(&url);
 
 	/* 0 = failed, 1 = success, -1 = error (just like a BOOL in Win32
 	 * /sarc). But to make the name of the function make sense, reverse
@@ -126,17 +126,17 @@ github_get_repos(struct gcli_ctx *ctx, char const *owner, int const max,
 
 	if (!rc) {
 		/* it is a user */
-		url = sn_asprintf("%s/users/%s/repos",
-		                  gcli_get_apibase(ctx),
-		                  e_owner);
+		url = gcli_asprintf("%s/users/%s/repos",
+		                    gcli_get_apibase(ctx),
+		                    e_owner);
 	} else {
 		/* this is an actual organization */
-		url = sn_asprintf("%s/orgs/%s/repos",
-		                  gcli_get_apibase(ctx),
-		                  e_owner);
+		url = gcli_asprintf("%s/orgs/%s/repos",
+		                    gcli_get_apibase(ctx),
+		                    e_owner);
 	}
 
-	free(e_owner);
+	gcli_clear_ptr(&e_owner);
 
 	return gcli_fetch_list(ctx, url, &lf);
 }
@@ -153,7 +153,7 @@ github_get_own_repos(struct gcli_ctx *ctx, int const max,
 		.parse = (parsefn)(parse_github_repos),
 	};
 
-	url = sn_asprintf("%s/user/repos", gcli_get_apibase(ctx));
+	url = gcli_asprintf("%s/user/repos", gcli_get_apibase(ctx));
 
 	return gcli_fetch_list(ctx, url, &fl);
 }
@@ -170,7 +170,7 @@ github_repo_delete(struct gcli_ctx *ctx, struct gcli_path const *const path)
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -186,7 +186,7 @@ github_repo_create(struct gcli_ctx *ctx, struct gcli_repo_create_options const *
 	int rc = 0;
 
 	/* Request preparation */
-	url = sn_asprintf("%s/user/repos", gcli_get_apibase(ctx));
+	url = gcli_asprintf("%s/user/repos", gcli_get_apibase(ctx));
 
 	/* Construct payload */
 	gcli_jsongen_init(&gen);
@@ -218,8 +218,8 @@ github_repo_create(struct gcli_ctx *ctx, struct gcli_repo_create_options const *
 
 	/* Cleanup */
 	gcli_fetch_buffer_free(&buffer);
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -250,12 +250,12 @@ github_repo_set_visibility(struct gcli_ctx *ctx,
 	if (rc < 0)
 		return rc;
 
-	payload = sn_asprintf("{ \"visibility\": \"%s\" }", vis_str);
+	payload = gcli_asprintf("{ \"visibility\": \"%s\" }", vis_str);
 
 	rc = gcli_fetch_with_method(ctx, "PATCH", url, payload, NULL, NULL);
 
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

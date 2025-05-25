@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -69,8 +69,8 @@ gitlab_perform_submit_comment(struct gcli_ctx *ctx,
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
 
-	free(payload);
-	free(url);
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }
@@ -84,7 +84,7 @@ reverse_comment_list(struct gcli_comment_list *const list)
 	for (size_t i = 0; i < list->comments_size; ++i)
 		reversed[i] = list->comments[list->comments_size - i - 1];
 
-	free(list->comments);
+	gcli_clear_ptr(&list->comments);
 	list->comments = reversed;
 }
 
@@ -183,7 +183,7 @@ gitlab_get_comment(struct gcli_ctx *ctx, struct gcli_path const *const target,
 
 	rc = gitlab_fetch_comment(ctx, url, out);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

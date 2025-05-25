@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, 2022 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,6 +33,7 @@
 #include <gcli/gitlab/repos.h>
 #include <gcli/json_gen.h>
 #include <gcli/json_util.h>
+#include <gcli/port/err.h>
 
 #include <templates/gitlab/releases.h>
 
@@ -92,21 +93,21 @@ gitlab_get_releases(struct gcli_ctx *ctx,
 }
 
 int
-gitlab_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *release)
+gitlab_create_release(struct gcli_ctx *ctx, struct gcli_create_release_args const *release)
 {
-	char *e_owner = NULL, *e_repo = NULL, *url = NULL, *payload = NULL;
+	char *url = NULL, *payload = NULL;
 	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
 	/* Warnings because unsupported on gitlab */
 	if (release->prerelease)
-		warnx("prereleases are not supported on GitLab, option ignored");
+		gcli_warnx(ctx, "prereleases are not supported on GitLab, option ignored");
 
 	if (release->draft)
-		warnx("draft releases are not supported on GitLab, option ignored");
+		gcli_warnx(ctx, "draft releases are not supported on GitLab, option ignored");
 
 	if (release->assets_size)
-		warnx("GitLab release asset uploads are not yet supported");
+		gcli_warnx(ctx, "GitLab release asset uploads are not yet supported");
 
 	/* Payload generation */
 	gcli_jsongen_init(&gen);
@@ -135,20 +136,16 @@ gitlab_create_release(struct gcli_ctx *ctx, struct gcli_new_release const *relea
 	gcli_jsongen_free(&gen);
 
 	/* Generate URL */
-	e_owner = gcli_urlencode(release->owner);
-	e_repo = gcli_urlencode(release->repo);
+	rc = gitlab_repo_make_url(ctx, &release->repo_path, &url, "/releases");
 
-	/* https://docs.github.com/en/rest/reference/repos#create-a-release */
-	url = sn_asprintf("%s/projects/%s%%2F%s/releases", gcli_get_apibase(ctx),
-	                  e_owner, e_repo);
+	/* perform request */
+	if (rc == 0) {
+		rc = gcli_fetch_with_method(ctx, "POST", url, payload,
+		                            NULL, NULL);
+	}
 
-	free(e_owner);
-	free(e_repo);
-
-	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
-
-	free(url);
-	free(payload);
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
 
 	return rc;
 }
@@ -166,7 +163,7 @@ gitlab_delete_release(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	rc = gcli_fetch_with_method(ctx, "DELETE", url, NULL, NULL, NULL);
 
-	free(url);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

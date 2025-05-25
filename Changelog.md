@@ -2,7 +2,7 @@
 
 This changelog does not follow semantic versioning.
 
-## UNRELEASED
+## 2.8.0 (25-May-2025)
 
 ### Added
 
@@ -48,9 +48,6 @@ This changelog does not follow semantic versioning.
 - Fixed broken automerge feature when creating merge requests on
   Gitlab.
 
-### Changed
-
-### Removed
 
 ## 2.7.0 (04-Mar-2025)
 

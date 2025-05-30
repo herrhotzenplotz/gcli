@@ -1272,7 +1272,7 @@ static int
 action_checkout(struct gcli_path const *const path, struct gcli_pull *pull,
                 int *argc, char **argv[])
 {
-	char *remote;
+	char const *remote;
 	int rc = 0;
 
 	(void) pull;
@@ -1294,8 +1294,6 @@ action_checkout(struct gcli_path const *const path, struct gcli_pull *pull,
 
 		return GCLI_EX_DATAERR;
 	}
-
-	free(remote);
 
 	*argc -= 1;
 	*argv += 1;

@@ -41,7 +41,7 @@ struct gcli_url {
 	char *scheme, *user, *host, *port, *path;
 };
 
-int gcli_parse_url(gcli_sv input, struct gcli_url *out);
+int gcli_parse_url(char const *url, struct gcli_url *out);
 void gcli_url_free(struct gcli_url *);
 
 #endif /* GCLI_CMD_URL_H */

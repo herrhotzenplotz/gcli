@@ -27,4 +27,72 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <gcli/gcli.h>
 #include <gcli/url.h>
+
+#include <gcli/port/string.h>
+
+#include <string.h>
+
+int
+gcli_parse_url(char const *const input, struct gcli_url *out)
+{
+	size_t n;
+	char *buf, *hd, *tmp;
+
+	hd = buf = strdup(input);
+
+	/* check if we can find a scheme */
+	tmp = strstr(hd, "://");
+	if (tmp) {
+		out->scheme = gcli_strndup(hd, tmp - hd);
+		hd = tmp + 3;
+	}
+
+	/* now an optional user, terminated by an '@' */
+	tmp = strchr(hd, '@');
+	if (tmp) {
+		out->user = gcli_strndup(hd, tmp - hd);
+		hd = tmp + 1;
+	}
+
+	/* now the host, terminated by either a ':' or a '/' */
+	tmp = strpbrk(hd, ":/");
+	if (!tmp) {
+		gcli_clear_ptr(&buf);
+		gcli_url_free(out);
+		return -1;
+	}
+
+	out->host = gcli_strndup(hd, tmp - hd);
+	hd = tmp;
+
+	/* if we found a ':', try and parse a port number! */
+	if (*hd++ == ':') {
+		n = strspn(hd, "0123456789");
+		if (n)
+			out->port = gcli_strndup(hd, n);
+
+		/* skip over parsed characters */
+		hd += n;
+
+		/* we should point at a '/' now */
+		if (*hd == '/')
+			hd += 1;
+	}
+
+	out->path = strdup(hd);
+	gcli_clear_ptr(&buf);
+
+	return 0;
+}
+
+void
+gcli_url_free(struct gcli_url *url)
+{
+	gcli_clear_ptr(&url->scheme);
+	gcli_clear_ptr(&url->user);
+	gcli_clear_ptr(&url->host);
+	gcli_clear_ptr(&url->port);
+	gcli_clear_ptr(&url->path);
+}

@@ -38,3 +38,8 @@ atf_test_program{
         name = 'difftests',
 	timeout = 1
 }
+
+atf_test_program{
+	name = 'parse-url',
+	timeout = 1
+}

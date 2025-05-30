@@ -216,6 +216,7 @@ LIBGCLI_SRCS = \
 	src/repos.c \
 	src/sshkeys.c \
 	src/status.c \
+	src/url.c \
 	src/waitproc.c \
 	src/port/err.c \
 	src/port/string.c \
@@ -381,15 +382,16 @@ clean-auto:
 
 ###### TEST SUITE #####################################
 TEST_PROGRAMS = \
-	tests/json-escape \
+	tests/base64 \
+	tests/bugzilla-parse \
+	tests/difftests \
+	tests/gitea-parse \
 	tests/github-parse \
 	tests/gitlab-parse \
-	tests/gitea-parse \
-	tests/bugzilla-parse \
-	tests/url-encode \
+	tests/json-escape \
 	tests/jsongen \
-	tests/base64 \
-	tests/difftests
+	tests/parse-url \
+	tests/url-encode
 
 tests/json-escape: tests/json-escape.tests.o
 tests/github-parse: tests/github-parse.tests.o
@@ -400,6 +402,7 @@ tests/url-encode: tests/url-encode.tests.o
 tests/jsongen: tests/jsongen.tests.o
 tests/base64: tests/base64.tests.o
 tests/difftests: tests/difftests.tests.o
+tests/parse-url: tests/parse-url.tests.o
 
 $(TEST_PROGRAMS): libgcli.a
 	$(CCACHE) $(CC) $(CFLAGS) $(CCDEPFLAGS) $(CPPFLAGS) \

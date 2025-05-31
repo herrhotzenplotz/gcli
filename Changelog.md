@@ -8,6 +8,13 @@ This changelog does not follow semantic versioning.
 
 ### Fixed
 
+- A bug in the autodetection of remotes and forge types from
+  configured git remotes has been fixed.
+
+  In cases where the git remote was pointing at an ssh-URL with a
+  scheme but without a port the remote was not properly detected
+  and lead to an incorrectly recognised owner/repo combination.
+
 ### Changed
 
 ### Removed

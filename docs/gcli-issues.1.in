@@ -32,6 +32,14 @@ to search, list, create, edit or delete issues in repositories in various
 forges such as GitHub, GitLab and Gitea. Without any action specified,
 .Nm
 will list issues in the given or auto-detected repository.
+.Pp
+On Bugzilla one can use the quick-search syntax in the
+.Ar search-query
+to make more fine-grained searches. See
+.Sx "SEE ALSO"
+and
+.Sx "EXAMPLES"
+for more information.
 .Sh OPTIONS
 .Bl -tag -width indent
 .It Fl s , -sorted
@@ -184,9 +192,19 @@ List issues with the label
 .Bd -literal -offset indent
 $ gcli issues -L bug
 .Ed
+.Pp
+Search for Bugzilla Bugs in product
+.Dq foo
+with
+.Dq RandomUser
+set in CC:
+.Bd -literal -offset indent
+$ gcli -t bugzilla issues product:foo cc:RandomUser
+.Ed
 .Sh SEE ALSO
 .Xr git 1 ,
-.Xr gcli 1
+.Xr gcli 1 ,
+.Lk "https://bugzilla.mozilla.org/page.cgi?id=quicksearch.html" "Bugzilla QuickSearch Syntax"
 .Sh AUTHORS
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
 and contributors.

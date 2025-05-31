@@ -90,7 +90,7 @@ gitea_issues_search(struct gcli_ctx *ctx, struct gcli_path const *const path,
                     int const max, struct gcli_issue_list *const out)
 {
 	char *url = NULL, *e_author = NULL, *e_label = NULL,
-	     *e_milestone = NULL, *e_query = NULL;
+	     *e_milestone = NULL, *e_query = NULL, *e_assignee = NULL;
 	int rc = 0;
 
 	struct gcli_fetch_list_ctx fl = {
@@ -118,6 +118,12 @@ gitea_issues_search(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		gcli_clear_ptr(&tmp);
 	}
 
+	if (details->assignee) {
+		char *tmp = gcli_urlencode(details->assignee);
+		e_assignee = gcli_asprintf("&assigned_by=%s", tmp);
+		gcli_clear_ptr(&tmp);
+	}
+
 	if (details->search_term) {
 		char *tmp = gcli_urlencode(details->search_term);
 		e_query = gcli_asprintf("&q=%s", tmp);
@@ -125,17 +131,19 @@ gitea_issues_search(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	}
 
 	rc = gitea_repo_make_url(ctx, path, &url,
-	                         "/issues?type=issues&state=%s%s%s%s%s",
+	                         "/issues?type=issues&state=%s%s%s%s%s%s",
 	                         details->all ? "all" : "open",
 	                         e_author ? e_author : "",
 	                         e_label ? e_label : "",
 	                         e_milestone ? e_milestone : "",
+	                         e_assignee ? e_assignee : "",
 	                         e_query ? e_query : "");
 
 	gcli_clear_ptr(&e_query);
 	gcli_clear_ptr(&e_milestone);
 	gcli_clear_ptr(&e_author);
 	gcli_clear_ptr(&e_label);
+	gcli_clear_ptr(&e_assignee);
 
 	if (rc < 0)
 		return rc;

@@ -65,6 +65,7 @@ usage(void)
 	fprintf(stderr, "  -A author          Only print issues by the given author\n");
 	fprintf(stderr, "  -L label           Filter issues by the given label\n");
 	fprintf(stderr, "  -M milestone       Filter issues by the given milestone\n");
+	fprintf(stderr, "  -S assignee        Filter issues by the given assignee\n");
 	fprintf(stderr, "  -a                 Fetch everything including closed issues \n");
 	fprintf(stderr, "  -s                 Print (sort) in reverse order\n");
 	fprintf(stderr, "  -n number          Number of issues to fetch (-1 = everything)\n");
@@ -452,11 +453,16 @@ subcommand_issues(int argc, char *argv[])
 		  .flag    = NULL,
 		  .val     = 'M',
 		},
+		{ .name    = "assignee",
+		  .has_arg = required_argument,
+		  .flag    = NULL,
+		  .val     = 'S',
+		},
 		{0},
 	};
 
 	/* parse options */
-	while ((ch = getopt_long(argc, argv, "+sn:o:r:i:aA:L:M:", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "+sn:o:r:i:aA:L:M:S:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
 			path.as_default.owner = optarg;
@@ -497,6 +503,9 @@ subcommand_issues(int argc, char *argv[])
 		} break;
 		case 'M': {
 			details.milestone = optarg;
+		} break;
+		case 'S': {
+			details.assignee = optarg;
 		} break;
 		case '?':
 		default:

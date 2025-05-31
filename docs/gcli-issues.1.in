@@ -12,6 +12,7 @@
 .Op Fl A Ar author
 .Op Fl L Ar label
 .Op Fl M Ar milestone
+.Op Fl S Ar assignee
 .Op Fl o Ar owner Fl r Ar repo
 .Op Ar "search-query"
 .Nm
@@ -54,6 +55,8 @@ Only list issues authored by the given user.
 Filter issues by the given label. This option may only be specified once.
 .It Fl M , Fl -milestone Ar milestone
 Filter issues by the given milestone. This option may only be specified once.
+.It Fl S , Fl -assignee Ar assignee
+Filter issues by the given assignee. This option may only be specified once.
 .It Fl n , -count Ar n
 Fetch at least
 .Ar n

@@ -85,6 +85,7 @@ struct gcli_issue_fetch_details {
 	char const *author;         /* filter issues by this author*/
 	char const *label;          /* filter by the given label */
 	char const *milestone;      /* filter by the given milestone */
+	char const *assignee;       /* filter by the given assignee */
 	char const *search_term;    /* a search term or NULL if unspecified */
 };
 

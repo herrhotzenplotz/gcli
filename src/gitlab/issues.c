@@ -121,56 +121,69 @@ gitlab_issues_search(struct gcli_ctx *ctx, struct gcli_path const *const path,
                      int const max, struct gcli_issue_list *const out)
 {
 	char *url = NULL, *e_author = NULL, *e_labels = NULL,
-	     *e_milestone = NULL, *e_search = NULL, *suffix = NULL;
+	     *e_milestone = NULL, *e_search = NULL, *suffix = NULL,
+	     *e_assignee = NULL, separator = '?';
 	int rc = 0;
+
+	if (!details->all)
+		separator = '&';
 
 	if (details->author) {
 		char *tmp = gcli_urlencode(details->author);
-		e_author = gcli_asprintf("%cauthor_username=%s",
-		                         details->all ? '?' : '&',
-		                         tmp);
+
+		e_author = gcli_asprintf("%cauthor_username=%s", separator, tmp);
 		gcli_clear_ptr(&tmp);
+		separator = '&';
 	}
 
 	if (details->label) {
 		char *tmp = gcli_urlencode(details->label);
-		int const should_do_qmark = details->all && !details->author;
 
-		e_labels = gcli_asprintf("%clabels=%s", should_do_qmark ? '?' : '&', tmp);
+		e_labels = gcli_asprintf("%clabels=%s", separator, tmp);
 		gcli_clear_ptr(&tmp);
+		separator = '&';
 	}
 
 	if (details->milestone) {
 		char *tmp = gcli_urlencode(details->milestone);
-		int const should_do_qmark = details->all && !details->author &&
-		                            !details->label;
 
-		e_milestone = gcli_asprintf("%cmilestone=%s",
-		                            should_do_qmark ? '?' : '&', tmp);
+		e_milestone = gcli_asprintf("%cmilestone=%s", separator, tmp);
 		gcli_clear_ptr(&tmp);
+		separator = '&';
+	}
+
+	if (details->assignee) {
+		char *tmp = gcli_urlencode(details->assignee);
+
+		e_assignee = gcli_asprintf("%cassignee_username=%s", separator, tmp);
+		gcli_clear_ptr(&tmp);
+		separator = '&';
 	}
 
 	if (details->search_term) {
 		char *tmp = gcli_urlencode(details->search_term);
-		int const should_do_qmark = details->all && !details->author &&
-		                            !details->label && !details->milestone;
-		e_search = gcli_asprintf("%csearch=%s",
-		                         should_do_qmark ? '?': '&', tmp);
+
+		e_search = gcli_asprintf("%csearch=%s", separator, tmp);
 		gcli_clear_ptr(&tmp);
+		separator = '&';
 	}
 
-	suffix = gcli_asprintf("%s%s%s%s%s", details->all ? "" : "?state=opened",
+	suffix = gcli_asprintf("%s%s%s%s%s%s",
+	                       details->all ? "" : "?state=opened",
 	                       e_author ? e_author : "",
 	                       e_labels ? e_labels : "",
 	                       e_milestone ? e_milestone : "",
+	                       e_assignee ? e_assignee : "",
 	                       e_search ? e_search : "");
-
-	rc = gitlab_issues_make_url(ctx, path, suffix, &url);
 
 	gcli_clear_ptr(&e_milestone);
 	gcli_clear_ptr(&e_author);
 	gcli_clear_ptr(&e_labels);
+	gcli_clear_ptr(&e_assignee);
 	gcli_clear_ptr(&e_search);
+
+	rc = gitlab_issues_make_url(ctx, path, suffix, &url);
+
 	gcli_clear_ptr(&suffix);
 
 	if (rc < 0)

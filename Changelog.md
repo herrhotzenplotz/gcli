@@ -6,6 +6,11 @@ This changelog does not follow semantic versioning.
 
 ### Added
 
+- A `-S` / `--assignee` option has been added to the issues subcommand.
+  This flag allows you to search for issues that are assigned to
+  the given user. See the `gcli-issues(1)` manual page for more
+  details.
+
 ### Fixed
 
 - A bug in the autodetection of remotes and forge types from

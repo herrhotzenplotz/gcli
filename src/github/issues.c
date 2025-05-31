@@ -171,7 +171,7 @@ search_issues(struct gcli_ctx *ctx, struct gcli_path const *const path,
               struct gcli_issue_list *const out)
 {
 	char *url = NULL, *query_string = NULL, *e_query_string = NULL,
-	     *milestone = NULL, *author = NULL, *label = NULL;
+	     *milestone = NULL, *author = NULL, *label = NULL, *assignee = NULL;
 	int rc = 0;
 	struct gcli_fetch_buffer buffer = {0};
 	struct json_stream stream = {0};
@@ -192,13 +192,17 @@ search_issues(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	if (details->label)
 		label = gcli_asprintf("label:%s", details->label);
 
-	query_string = gcli_asprintf("repo:%s/%s is:issue%s %s %s %s %s",
+	if (details->assignee)
+		assignee = gcli_asprintf("assignee:%s", details->assignee);
+
+	query_string = gcli_asprintf("repo:%s/%s is:issue%s %s %s %s %s %s",
 	                             path->as_default.owner,
 	                             path->as_default.repo,
 	                             details->all ? "" : " is:open",
 	                             milestone ? milestone : "",
 	                             author ? author : "",
 	                             label ? label : "",
+	                             assignee ? assignee : "",
 	                             details->search_term);
 
 	e_query_string = gcli_urlencode(query_string);
@@ -209,6 +213,7 @@ search_issues(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	gcli_clear_ptr(&milestone);
 	gcli_clear_ptr(&author);
 	gcli_clear_ptr(&label);
+	gcli_clear_ptr(&assignee);
 	gcli_clear_ptr(&query_string);
 	gcli_clear_ptr(&e_query_string);
 
@@ -266,7 +271,7 @@ get_issues(struct gcli_ctx *ctx, struct gcli_path const *const path,
            struct gcli_issue_list *const out)
 {
 	char *url = NULL, *e_author = NULL, *e_label = NULL,
-	     *e_milestone = NULL, *suffix = NULL;
+	     *e_milestone = NULL, *e_assignee = NULL, *suffix = NULL;
 	int rc = 0;
 
 	if (details->milestone) {
@@ -291,11 +296,18 @@ get_issues(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		gcli_clear_ptr(&tmp);
 	}
 
+	if (details->assignee) {
+		char *tmp = gcli_urlencode(details->assignee);
+		e_assignee = gcli_asprintf("&assignee=%s", tmp);
+		gcli_clear_ptr(&tmp);
+	}
+
 	suffix = gcli_asprintf(
-		"?state=%s%s%s%s",
+		"?state=%s%s%s%s%s",
 		details->all ? "all" : "open",
 		e_author ? e_author : "",
 		e_label ? e_label : "",
+		e_assignee ? e_assignee : "",
 		e_milestone ? e_milestone : "");
 
 	rc = github_issues_make_url(ctx, path, suffix, &url);
@@ -303,6 +315,7 @@ get_issues(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	gcli_clear_ptr(&e_milestone);
 	gcli_clear_ptr(&e_author);
 	gcli_clear_ptr(&e_label);
+	gcli_clear_ptr(&e_assignee);
 	gcli_clear_ptr(&suffix);
 
 	if (rc < 0)

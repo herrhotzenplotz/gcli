@@ -378,10 +378,12 @@ clean-auto:
 		lex.yy.c y.tab.c y.tab.h \
 		$(TEST_PROGRAMS:=.tests.o) \
 		$(TEST_PROGRAMS) \
+		tests/Kyuafile \
 		$(MANPAGES)
 
 ###### TEST SUITE #####################################
 TEST_PROGRAMS = \
+	tests/append-url \
 	tests/base64 \
 	tests/bugzilla-parse \
 	tests/difftests \
@@ -403,6 +405,7 @@ tests/jsongen: tests/jsongen.tests.o
 tests/base64: tests/base64.tests.o
 tests/difftests: tests/difftests.tests.o
 tests/parse-url: tests/parse-url.tests.o
+tests/append-url: tests/append-url.tests.o
 
 $(TEST_PROGRAMS): libgcli.a
 	$(CCACHE) $(CC) $(CFLAGS) $(CCDEPFLAGS) $(CPPFLAGS) \

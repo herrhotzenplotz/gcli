@@ -28,6 +28,7 @@
  */
 
 #include <gcli/gcli.h>
+#include <gcli/curl.h>
 #include <gcli/url.h>
 
 #include <gcli/port/string.h>
@@ -95,4 +96,34 @@ gcli_url_free(struct gcli_url *url)
 	gcli_clear_ptr(&url->host);
 	gcli_clear_ptr(&url->port);
 	gcli_clear_ptr(&url->path);
+}
+
+void
+gcli_url_options_append(char **result, char const *const key,
+                        char const *const value)
+{
+	char *e_key, *e_value, *kvp;
+	size_t kvplen, resultlen;
+
+	if (key == NULL || value == NULL)
+		return;
+
+	e_key = gcli_urlencode(key);
+	e_value = gcli_urlencode(value);
+
+	kvp = gcli_asprintf("%c%s=%s", *result ? '&' : '?', e_key, e_value);
+
+	gcli_clear_ptr(&e_key);
+	gcli_clear_ptr(&e_value);
+
+	kvplen = strlen(kvp);
+
+	resultlen = 0;
+	if (*result)
+		resultlen = strlen(*result);
+
+	*result = realloc(*result, kvplen + resultlen + 1);
+	memcpy(*result + resultlen, kvp, kvplen + 1);
+
+	gcli_clear_ptr(&kvp);
 }

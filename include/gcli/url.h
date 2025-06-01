@@ -44,4 +44,8 @@ struct gcli_url {
 int gcli_parse_url(char const *url, struct gcli_url *out);
 void gcli_url_free(struct gcli_url *);
 
+void gcli_url_options_append(char **result,
+                             char const *key,
+                             char const *value);
+
 #endif /* GCLI_CMD_URL_H */

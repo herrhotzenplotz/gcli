@@ -38,6 +38,7 @@
 
 #include <ctype.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include <curl/curl.h>
 
@@ -349,4 +350,10 @@ gcli_cmd_realpath(char const *const restrict pathname)
 #endif
 
 	return realpath(pathname, resolved_path);
+}
+
+bool
+gcli_cmd_should_do_always_yes(void)
+{
+	return !isatty(STDIN_FILENO);
 }

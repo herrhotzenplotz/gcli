@@ -74,4 +74,6 @@ void gcli_pretty_print(char const *input, int indent, int maxlinelen,
 
 char *gcli_cmd_realpath(char const *const restrict pathname);
 
+bool gcli_cmd_should_do_always_yes(void);
+
 #endif /* GCLI_CMD_CMD_H */

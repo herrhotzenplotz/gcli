@@ -139,6 +139,8 @@ subcommand_forks_create(int argc, char *argv[])
 		{0},
 	};
 
+	always_yes = gcli_cmd_should_do_always_yes();
+
 	while ((ch = getopt_long(argc, argv, "yo:r:i:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
@@ -224,6 +226,8 @@ subcommand_forks(int argc, char *argv[])
 		  .val     = 's' },
 		{0},
 	};
+
+	always_yes = gcli_cmd_should_do_always_yes();
 
 	while ((ch = getopt_long(argc, argv, "n:o:r:ys", options, NULL)) != -1) {
 		switch (ch) {

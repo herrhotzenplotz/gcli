@@ -209,6 +209,8 @@ action_delete(struct gcli_path const *const path, int *argc, char ***argv)
 		{0},
 	};
 
+	always_yes = gcli_cmd_should_do_always_yes();
+
 	while ((ch = getopt_long(*argc, *argv, "+y", options, NULL)) != -1) {
 		switch (ch) {
 		case 'y':

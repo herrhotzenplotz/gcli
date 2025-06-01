@@ -413,7 +413,7 @@ pull_request_target_repo(struct gcli_path const *const repo_path)
 }
 
 static int
-create_pull(struct gcli_submit_pull_options *const opts, int always_yes)
+create_pull(struct gcli_submit_pull_options *const opts, bool always_yes)
 {
 	opts->body = gcli_pull_get_user_message(opts);
 
@@ -556,10 +556,9 @@ subcommand_pull_create_interactive(struct gcli_submit_pull_options *const opts)
 static int
 subcommand_pull_create(int argc, char *argv[])
 {
-	/* we'll use getopt_long here to parse the arguments */
 	int ch;
 	struct gcli_submit_pull_options opts   = {0};
-	int always_yes = 0;
+	bool always_yes = 0;
 
 	const struct option options[] = {
 		{ .name = "from",
@@ -596,6 +595,8 @@ subcommand_pull_create(int argc, char *argv[])
 		  .val = 'R' },
 		{0},
 	};
+
+	always_yes = gcli_cmd_should_do_always_yes();
 
 	while ((ch = getopt_long(argc, argv, "ayf:t:do:r:l:R:", options, NULL)) != -1) {
 		switch (ch) {

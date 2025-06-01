@@ -289,6 +289,8 @@ subcommand_releases_create(int argc, char *argv[])
 		{0},
 	};
 
+	always_yes = gcli_cmd_should_do_always_yes();
+
 	while ((ch = getopt_long(argc, argv, "ydpn:t:c:r:o:a:T:",
 	                         options, NULL)) != -1) {
 		switch (ch) {
@@ -406,6 +408,8 @@ subcommand_releases_delete(int argc, char *argv[])
 		  .val     = 'y' },
 		{0}
 	};
+
+	always_yes = gcli_cmd_should_do_always_yes();
 
 	while ((ch = getopt_long(argc, argv, "yo:r:", options, NULL)) != -1) {
 		switch (ch) {

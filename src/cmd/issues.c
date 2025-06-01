@@ -241,7 +241,7 @@ gcli_issue_get_user_message(struct gcli_submit_issue_options *opts)
 }
 
 static int
-create_issue(struct gcli_submit_issue_options *opts, int always_yes)
+create_issue(struct gcli_submit_issue_options *opts, bool always_yes)
 {
 	int rc;
 
@@ -324,7 +324,7 @@ subcommand_issue_create(int argc, char *argv[])
 {
 	int ch;
 	struct gcli_submit_issue_options opts = {0};
-	int always_yes = 0;
+	bool always_yes = false;
 
 	if (gcli_nvlist_init(&opts.extra) < 0) {
 		fprintf(stderr, "gcli: failed to init nvlist: %s\n",
@@ -348,6 +348,8 @@ subcommand_issue_create(int argc, char *argv[])
 		{0},
 	};
 
+	always_yes = gcli_cmd_should_do_always_yes();
+
 	while ((ch = getopt_long(argc, argv, "o:r:O:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
@@ -357,7 +359,7 @@ subcommand_issue_create(int argc, char *argv[])
 			opts.repo = optarg;
 			break;
 		case 'y':
-			always_yes = 1;
+			always_yes = true;
 			break;
 		case 'O': {
 			int rc = parse_submit_issue_option(&opts);

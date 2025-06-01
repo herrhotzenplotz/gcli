@@ -418,8 +418,14 @@ $(TEST_PROGRAMS): libgcli.a
 
 $(TEST_PROGRAMS:=.c): $(TEMPLATE_HEADERS)
 
-check-auto: $(TEST_PROGRAMS)
-	$(KYUA) test --build-root ./tests --kyuafile @SRCDIR@/tests/Kyuafile
+tests/Kyuafile: Makefile
+	@mkdir -p tests
+	echo "syntax(2)" > tests/Kyuafile
+	echo "test_suite('gcli')" >> tests/Kyuafile
+	for t in $(TEST_PROGRAMS); do printf "atf_test_program{name='%s', timeout = 1}\n" "$${t##tests/}" >> tests/Kyuafile; done
+
+check-auto: tests/Kyuafile $(TEST_PROGRAMS)
+	$(KYUA) test --build-root ./tests --kyuafile tests/Kyuafile
 
 #################### static analysis #######################################
 LIBGCLI_ANALYSE=	${LIBGCLI_SRCS:.c=.libgcli.analyse}

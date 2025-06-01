@@ -36,6 +36,7 @@
 #include <gcli/json_gen.h>
 #include <gcli/json_gen.h>
 #include <gcli/json_util.h>
+#include <gcli/url.h>
 
 #include <templates/gitlab/merge_requests.h>
 
@@ -124,59 +125,35 @@ gitlab_fetch_mrs(struct gcli_ctx *ctx, char *url, int const max,
 	return rc;
 }
 
+static int
+gitlab_mrs_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                    char const *const suffix, char **url)
+{
+	int rc = 0;
+
+	rc = gitlab_repo_make_url(ctx, path, url, "/merge_requests%s",
+	                          suffix ? suffix : "");
+
+	return rc;
+}
+
 int
 gitlab_get_mrs(struct gcli_ctx *ctx, struct gcli_path const *const path,
                struct gcli_pull_fetch_details const *const details, int const max,
                struct gcli_pull_list *const list)
 {
 	int rc = 0;
-	char *url = NULL;
-	char *e_author = NULL;
-	char *e_label = NULL;
-	char *e_milestone = NULL;
-	char *e_search = NULL;
+	char *url = NULL, *suffix = NULL;
 
-	if (details->author) {
-		char *tmp = gcli_urlencode(details->author);
-		bool const need_qmark = details->all;
-		e_author = gcli_asprintf("%cauthor_username=%s", need_qmark ? '?' : '&', tmp);
-		gcli_clear_ptr(&tmp);
-	}
+	gcli_url_options_append(&suffix, "state", details->all ? NULL : "opened");
+	gcli_url_options_append(&suffix, "author_username", details->author);
+	gcli_url_options_append(&suffix, "labels", details->label);
+	gcli_url_options_append(&suffix, "milestone", details->milestone);
+	gcli_url_options_append(&suffix, "search", details->search_term);
 
-	if (details->label) {
-		char *tmp = gcli_urlencode(details->label);
-		bool const need_qmark = details->all && !details->author;
-		e_label = gcli_asprintf("%clabels=%s", need_qmark ? '?' : '&', tmp);
-		gcli_clear_ptr(&tmp);
-	}
+	rc = gitlab_mrs_make_url(ctx, path, suffix, &url);
 
-	if (details->milestone) {
-		char *tmp = gcli_urlencode(details->milestone);
-		bool const need_qmark = details->all && !details->author && !details->label;
-		e_milestone = gcli_asprintf("%cmilestone=%s", need_qmark ? '?' : '&', tmp);
-		gcli_clear_ptr(&tmp);
-	}
-
-	if (details->search_term) {
-		char *tmp = gcli_urlencode(details->search_term);
-		bool const need_qmark = details->all && !details->author &&
-			!details->label && !details->milestone;
-
-		e_search = gcli_asprintf("%csearch=%s", need_qmark ? '?' : '&', tmp);
-		gcli_clear_ptr(&tmp);
-	}
-
-	rc = gitlab_repo_make_url(ctx, path, &url, "/merge_requests%s%s%s%s%s",
-	                          details->all ? "" : "?state=opened",
-	                          e_author ? e_author : "",
-	                          e_label ? e_label : "",
-	                          e_milestone ? e_milestone : "",
-	                          e_search ? e_search : "");
-
-	gcli_clear_ptr(&e_search);
-	gcli_clear_ptr(&e_milestone);
-	gcli_clear_ptr(&e_label);
-	gcli_clear_ptr(&e_author);
+	gcli_clear_ptr(&suffix);
 
 	if (rc < 0)
 		return rc;

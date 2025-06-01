@@ -48,4 +48,7 @@ void gcli_url_options_append(char **result,
                              char const *key,
                              char const *value);
 
+void gcli_url_options_appendf(char **result, char const *key,
+                              char const *fmt, ...) PRINTF_FORMAT(3, 4);
+
 #endif /* GCLI_CMD_URL_H */

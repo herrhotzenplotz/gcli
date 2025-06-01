@@ -127,3 +127,21 @@ gcli_url_options_append(char **result, char const *const key,
 
 	gcli_clear_ptr(&kvp);
 }
+
+void
+gcli_url_options_appendf(char **result, char const *const key,
+                         char const *const fmt, ...)
+{
+	char *value;
+	va_list vp;
+
+	if (key == NULL || fmt == NULL)
+		return;
+
+	va_start(vp, fmt);
+	value = gcli_vasprintf(fmt, vp);
+	va_end(vp);
+
+	gcli_url_options_append(result, key, value);
+	gcli_clear_ptr(&value);
+}

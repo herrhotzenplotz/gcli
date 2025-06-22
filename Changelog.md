@@ -20,6 +20,12 @@ This changelog does not follow semantic versioning.
   scheme but without a port the remote was not properly detected
   and lead to an incorrectly recognised owner/repo combination.
 
+- A confusion about the automerge feature has been fixed causing
+  pull requests with automerge to not work on Github forges. Note
+  that this does not fix the general bug on Github which doesn't
+  correctly report whether a pull request has been marked as
+  auto-merge.
+
 ### Changed
 
 ### Removed

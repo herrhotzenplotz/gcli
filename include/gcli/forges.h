@@ -307,6 +307,12 @@ struct gcli_forge_descriptor {
 		struct gcli_path const *path);
 
 	/**
+	 * Quirks when creating pull requests */
+	enum gcli_pull_quirks {
+		GCLI_PULL_QUIRK_AUTOMERGE = 0x01, /* forge does not support automerge */
+	} pull_quirks;
+
+	/**
 	 * Submit PR/MR */
 	int (*perform_submit_pull)(
 		struct gcli_ctx *ctx,

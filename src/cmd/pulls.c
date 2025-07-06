@@ -1317,6 +1317,36 @@ action_open(struct gcli_path const *const path,
 	return GCLI_EX_OK;
 }
 
+void
+gcli_pull_reviews_print(struct gcli_pull_reviews *list)
+{
+	gcli_tbl table;
+	struct gcli_tblcoldef columns[] = {
+		{ .name = "ID",     .type = GCLI_TBLCOLTYPE_ID,     .flags = 0                         },
+		{ .name = "STATE",  .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
+		{ .name = "DATE",   .type = GCLI_TBLCOLTYPE_TIME_T, .flags = 0                         },
+		{ .name = "AUTHOR", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0                         },
+	};
+
+	if (list->reviews_size == 0) {
+		printf("No reviews.\n");
+		return;
+	}
+
+	table = gcli_tbl_begin(columns, ARRAY_SIZE(columns));
+
+	for (size_t i = 0; i < list->reviews_size; ++i) {
+		gcli_tbl_add_row(
+			table,
+			list->reviews[i].id,
+			list->reviews[i].state,
+			list->reviews[i].submitted_at,
+			list->reviews[i].author);
+	}
+
+	gcli_tbl_end(table);
+}
+
 static int
 action_reviews(struct gcli_path const *const path,
                struct gcli_pull const *const pull,
@@ -1337,7 +1367,7 @@ action_reviews(struct gcli_path const *const path,
 		return GCLI_EX_DATAERR;
 	}
 
-	/* TODO print */
+	gcli_pull_reviews_print(&reviews);
 	gcli_pull_reviews_free(&reviews);
 
 	return GCLI_EX_OK;

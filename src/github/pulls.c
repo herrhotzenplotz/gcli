@@ -786,3 +786,22 @@ bail:
 
 	return rc;
 }
+
+int
+github_pull_get_reviews(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                        struct gcli_pull_reviews *out)
+{
+	char *url;
+	int rc = 0;
+	struct gcli_fetch_list_ctx fl = {
+		.listp = &out->reviews,
+		.sizep = &out->reviews_size,
+		.parse = (parsefn)(parse_github_pull_reviews),
+	};
+
+	rc = github_pull_make_url(ctx, path, &url, "/reviews");
+	if (rc < 0)
+		return rc;
+
+	return gcli_fetch_list(ctx, url, &fl);
+}

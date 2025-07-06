@@ -142,6 +142,7 @@ github_forge_descriptor =
 	.pull_set_milestone        = github_issue_set_milestone,
 
 	.pull_create_review        = github_pull_create_review,
+	.pull_get_reviews          = github_pull_get_reviews,
 
 	.create_release            = github_create_release,
 	.delete_release            = github_delete_release,

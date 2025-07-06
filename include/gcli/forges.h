@@ -281,6 +281,13 @@ struct gcli_forge_descriptor {
 		struct gcli_path const *const pull_path);
 
 	/**
+	 * Fetch reviews on this pull request */
+	int (*pull_get_reviews)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *pull_path,
+		struct gcli_pull_reviews *out);
+
+	/**
 	 * Return a list of checks associated with the given pull.
 	 *
 	 * The type of the returned list depends on the forge type. See

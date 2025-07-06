@@ -215,6 +215,8 @@ Assign the pull request to the given
 .It Cm open
 Open the PR in a web browser using
 .Xr xdg-open 1 .
+.It Cm reviews
+List reviews of this pull request.
 .El
 .Sh EXAMPLES
 Print a list of open PRs in the current project:

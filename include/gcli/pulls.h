@@ -152,6 +152,19 @@ struct gcli_pull_checks_list {
 	int forge_type;
 };
 
+struct gcli_pull_review {
+	gcli_id id;
+	char *author;
+	char *state;
+	time_t submitted_at;
+	char *body;
+};
+
+struct gcli_pull_reviews {
+	struct gcli_pull_review *reviews;
+	size_t reviews_size;
+};
+
 int gcli_search_pulls(struct gcli_ctx *ctx, struct gcli_path const *path,
                       struct gcli_pull_fetch_details const *details, int max,
                       struct gcli_pull_list *out);
@@ -224,5 +237,10 @@ char const *gcli_pull_get_meta_by_key(struct gcli_pull_create_review_details con
 
 int gcli_pull_checkout(struct gcli_ctx *ctx, char const *remote,
                        struct gcli_path const *pull_path);
+
+int gcli_pull_get_reviews(struct gcli_ctx *ctx, struct gcli_path const *path,
+                          struct gcli_pull_reviews *out);
+
+void gcli_pull_reviews_free(struct gcli_pull_reviews *it);
 
 #endif /* PULLS_H */

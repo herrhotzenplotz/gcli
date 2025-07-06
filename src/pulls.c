@@ -268,3 +268,27 @@ gcli_pull_checkout(struct gcli_ctx *ctx, char const *const remote,
 {
 	gcli_null_check_call(pull_checkout, ctx, remote, pull_path);
 }
+
+int
+gcli_pull_get_reviews(struct gcli_ctx *ctx, struct gcli_path const *path,
+                      struct gcli_pull_reviews *out)
+{
+	gcli_null_check_call(pull_get_reviews, ctx, path, out);
+}
+
+void
+gcli_pull_reviews_free(struct gcli_pull_reviews *it)
+{
+	struct gcli_pull_review *r;
+
+	for (size_t i = 0; i < it->reviews_size; ++i) {
+		r = &it->reviews[i];
+
+		gcli_clear_ptr(&r->author);
+		gcli_clear_ptr(&r->state);
+		gcli_clear_ptr(&r->body);
+	}
+
+	gcli_clear_ptr(&it->reviews);
+	it->reviews_size = 0;
+}

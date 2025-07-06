@@ -104,6 +104,7 @@ usage(void)
 	fprintf(stderr, "  open                   Open the PR in a web browser\n");
 	if (gcli_config_enable_experimental(g_clictx))
 		fprintf(stderr, "  review                 Start a review of this PR\n");
+	fprintf(stderr, "  reviews                List reviews of this PR\n");
 
 	fprintf(stderr, "\n");
 	version();
@@ -1316,6 +1317,32 @@ action_open(struct gcli_path const *const path,
 	return GCLI_EX_OK;
 }
 
+static int
+action_reviews(struct gcli_path const *const path,
+               struct gcli_pull const *const pull,
+               int *argc, char **argv[])
+{
+	int rc = 0;
+	struct gcli_pull_reviews reviews = {0};
+
+	(void) pull;
+	(void) argc;
+	(void) argv;
+
+	rc = gcli_pull_get_reviews(g_clictx, path, &reviews);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to fetch reviews: %s\n",
+		        gcli_get_error(g_clictx));
+
+		return GCLI_EX_DATAERR;
+	}
+
+	/* TODO print */
+	gcli_pull_reviews_free(&reviews);
+
+	return GCLI_EX_OK;
+}
+
 struct gcli_cmd_actions gcli_pull_actions = {
 	.fetch_item = (gcli_cmd_action_fetcher)gcli_get_pull,
 	.free_item = (gcli_cmd_action_freeer)gcli_pull_free,
@@ -1423,6 +1450,11 @@ struct gcli_cmd_actions gcli_pull_actions = {
 			.name = "open",
 			.needs_item = true,
 			.handler = (gcli_cmd_action_handler) action_open,
+		},
+		{
+			.name = "reviews",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler) action_reviews,
 		},
 	},
 };

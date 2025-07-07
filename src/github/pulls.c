@@ -805,3 +805,25 @@ github_pull_get_reviews(struct gcli_ctx *ctx, struct gcli_path const *const path
 
 	return gcli_fetch_list(ctx, url, &fl);
 }
+
+int
+github_pull_get_review_comments(struct gcli_ctx *ctx,
+                                struct gcli_path const *const path,
+                                gcli_id const review_id,
+                                struct gcli_pull_review_comments *out)
+{
+	char *url;
+	int rc = 0;
+	struct gcli_fetch_list_ctx fl = {
+		.listp = &out->comments,
+		.sizep = &out->comments_size,
+		.parse = (parsefn)(parse_github_pull_review_comments),
+	};
+
+	rc = github_pull_make_url(ctx, path, &url, "/reviews/%"PRIid"/comments",
+	                          review_id);
+	if (rc < 0)
+		return rc;
+
+	return gcli_fetch_list(ctx, url, &fl);
+}

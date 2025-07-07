@@ -72,6 +72,8 @@ int subcommand_api(int argc, char *argv[]);
 void gcli_pretty_print(char const *input, int indent, int maxlinelen,
                        FILE *stream);
 
+void gcli_pretty_print_diff(char const *const input);
+
 char *gcli_cmd_realpath(char const *const restrict pathname);
 
 bool gcli_cmd_should_do_always_yes(void);

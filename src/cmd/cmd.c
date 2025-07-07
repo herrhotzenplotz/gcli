@@ -33,6 +33,7 @@
 
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/cmdconfig.h>
+#include <gcli/cmd/colour.h>
 #include <gcli/port/util.h>
 #include <gcli/repos.h>
 
@@ -333,6 +334,37 @@ gcli_pretty_print(const char *input, int indent, int maxlinelen, FILE *out)
 		} while (*it && (linelength < maxlinelen));
 
 		fputc('\n', out);
+	}
+}
+
+void
+gcli_pretty_print_diff(char const *const input)
+{
+	char const *hd = input;
+
+	for (;;) {
+		char const *eol;
+		char const *start_colour, *end_colour;
+		size_t linelen;
+
+		if (hd == NULL || *hd == '\0')
+			return;
+
+		eol = strchr(hd, '\n');
+		if (eol == NULL)
+			eol = hd + strlen(hd);
+
+		linelen = eol - hd;
+		end_colour = gcli_resetcolour();
+		if (*hd == '+')
+			start_colour = gcli_setcolour(GCLI_COLOR_GREEN);
+		else if (*hd == '-')
+			start_colour = gcli_setcolour(GCLI_COLOR_RED);
+		else
+			start_colour = "";
+
+		printf("%s%.*s%s\n", start_colour, (int)linelen, hd, end_colour);
+		hd = eol + 1;
 	}
 }
 

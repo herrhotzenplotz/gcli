@@ -292,3 +292,30 @@ gcli_pull_reviews_free(struct gcli_pull_reviews *it)
 	gcli_clear_ptr(&it->reviews);
 	it->reviews_size = 0;
 }
+
+int
+gcli_pull_get_review_comments(struct gcli_ctx *const ctx,
+                              struct gcli_path const *const pull_path,
+                              gcli_id const review_id,
+                              struct gcli_pull_review_comments *const out)
+{
+	gcli_null_check_call(pull_get_review_comments, ctx, pull_path,
+	                     review_id, out);
+}
+
+void
+gcli_pull_review_comments_free(struct gcli_pull_review_comments *it)
+{
+	struct gcli_pull_review_comment *c;
+
+	for (size_t i = 0; i < it->comments_size; ++i) {
+		c = &it->comments[i];
+
+		gcli_clear_ptr(&c->author);
+		gcli_clear_ptr(&c->body);
+		gcli_clear_ptr(&c->diff_hunk);
+	}
+
+	gcli_clear_ptr(&it->comments);
+	it->comments_size = 0;
+}

@@ -35,6 +35,7 @@
 #include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/colour.h>
 #include <gcli/cmd/comment.h>
+#include <gcli/date_time.h>
 #include <gcli/cmd/editor.h>
 #include <gcli/cmd/gitconfig.h>
 #include <gcli/cmd/interactive.h>
@@ -1347,6 +1348,71 @@ gcli_pull_reviews_print(struct gcli_pull_reviews *list)
 	gcli_tbl_end(table);
 }
 
+static void
+gcli_pull_review_comments_print(struct gcli_pull_review_comments const *const list)
+{
+	char *timebuf = NULL;
+	int rc = 0;
+	struct gcli_pull_review_comment const *c;
+
+	if (list->comments_size == 0) {
+		printf("No comments\n");
+		return;
+	}
+
+	for (size_t i = 0; i < list->comments_size; ++i) {
+		c = &list->comments[i];
+
+		rc = gcli_format_as_localtime(g_clictx, c->created_at, &timebuf);
+		if (rc < 0) {
+			fprintf(stderr, "gcli: error: failed to format timestamp: %s\n",
+			        gcli_get_error(g_clictx));
+			continue;
+		}
+
+		printf("%s%s%s - %s\n", gcli_setbold(), c->author,
+		       gcli_resetbold(), timebuf);
+
+		if (c->diff_hunk) {
+			printf("\n");
+			gcli_pretty_print_diff(c->diff_hunk);
+		}
+
+		gcli_pretty_print(c->body, 8, 80, stdout);
+
+		free(timebuf);
+		timebuf = NULL;
+	}
+}
+
+static int
+action_review_comments(struct gcli_path const *const prpath,
+                       char const *const id)
+{
+	gcli_id rid;
+	struct gcli_pull_review_comments comments = {0};
+	int rc = 0;
+
+	rid = strtoul(id, NULL, 10);
+	if (rid == 0) {
+		fprintf(stderr, "gcli: error: failed to parse %s\n", id);
+		return GCLI_EX_USAGE;
+	}
+
+	rc = gcli_pull_get_review_comments(g_clictx, prpath, rid, &comments);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to fetch review comments: %s\n",
+		        gcli_get_error(g_clictx));
+		return GCLI_EX_DATAERR;
+	}
+
+	gcli_pull_review_comments_print(&comments);
+
+	gcli_pull_review_comments_free(&comments);
+
+	return GCLI_EX_OK;
+}
+
 static int
 action_reviews(struct gcli_path const *const path,
                struct gcli_pull const *const pull,
@@ -1356,8 +1422,12 @@ action_reviews(struct gcli_path const *const path,
 	struct gcli_pull_reviews reviews = {0};
 
 	(void) pull;
-	(void) argc;
-	(void) argv;
+
+	if (*argc > 2 && strcmp((*argv)[1], "-i") == 0) {
+		*argc -= 2;
+		*argv += 2;
+		return action_review_comments(path, **argv);
+	}
 
 	rc = gcli_pull_get_reviews(g_clictx, path, &reviews);
 	if (rc < 0) {

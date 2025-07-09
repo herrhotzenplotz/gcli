@@ -1370,15 +1370,15 @@ gcli_pull_review_comments_print(struct gcli_pull_review_comments const *const li
 			continue;
 		}
 
-		printf("%s%s%s - %s\n", gcli_setbold(), c->author,
-		       gcli_resetbold(), timebuf);
+		printf("%s%s%s - %s - in file %s:\n", gcli_setbold(), c->author,
+		       gcli_resetbold(), timebuf, c->path);
 
 		if (c->diff_hunk) {
 			printf("\n");
-			gcli_pretty_print_diff(c->diff_hunk);
+			gcli_pretty_print_diff(c->diff_hunk, 8);
 		}
 
-		gcli_pretty_print(c->body, 8, 80, stdout);
+		gcli_pretty_print(c->body, 4, 80, stdout);
 
 		free(timebuf);
 		timebuf = NULL;

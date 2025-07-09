@@ -171,6 +171,7 @@ struct gcli_pull_review_comment {
 	gcli_id id;
 	char *author;
 	char *body;
+	char *path;
 	char *diff_hunk;
 	time_t created_at;
 };

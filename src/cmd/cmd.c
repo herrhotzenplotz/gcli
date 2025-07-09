@@ -338,7 +338,7 @@ gcli_pretty_print(const char *input, int indent, int maxlinelen, FILE *out)
 }
 
 void
-gcli_pretty_print_diff(char const *const input)
+gcli_pretty_print_diff(char const *const input, int indent)
 {
 	char const *hd = input;
 
@@ -363,7 +363,8 @@ gcli_pretty_print_diff(char const *const input)
 		else
 			start_colour = "";
 
-		printf("%s%.*s%s\n", start_colour, (int)linelen, hd, end_colour);
+		printf("%*.*s%s%.*s%s\n", indent, indent, "", start_colour,
+		       (int)linelen, hd, end_colour);
 		hd = eol + 1;
 	}
 }

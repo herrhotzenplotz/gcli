@@ -276,7 +276,7 @@ print_comment_list(struct gcli_diff_comments const *comments)
 		printf("%s:%d:\n", comment->after.filename, comment->after.start_row);
 		gcli_pretty_print(comment->comment, 6, 80, stdout);
 		printf("The diff is:\n\n");
-		gcli_pretty_print_diff(comment->diff_text);
+		gcli_pretty_print_diff(comment->diff_text, 0);
 	}
 
 	printf("=====================================\n");

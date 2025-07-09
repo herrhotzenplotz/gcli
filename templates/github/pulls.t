@@ -88,7 +88,8 @@ object of struct gcli_pull_review_comment with
 	 "id"         => id as id,
 	 "created_at" => created_at as iso8601_time,
 	 "body"       => body as string,
-	 "diff_hunk"  => diff_hunk as string);
+	 "diff_hunk"  => diff_hunk as string,
+	 "path"       => path as string);
 
 parser github_pull_review_comments is
 array of struct gcli_pull_review_comment use parse_github_pull_review_comment;

@@ -167,8 +167,17 @@ struct gcli_pull_reviews {
 };
 
 /* comments in a review */
+struct gcli_pull_review_comment;
+TAILQ_HEAD(gcli_pull_review_thread, gcli_pull_review_comment);
+
 struct gcli_pull_review_comment {
+	/* threaded comments */
+	TAILQ_ENTRY(gcli_pull_review_comment) next;
+	struct gcli_pull_review_thread replies;
+
+	/* actual fields */
 	gcli_id id;
+	gcli_id in_reply_to;
 	char *author;
 	char *body;
 	char *path;
@@ -259,11 +268,12 @@ int gcli_pull_get_reviews(struct gcli_ctx *ctx, struct gcli_path const *path,
 
 void gcli_pull_reviews_free(struct gcli_pull_reviews *it);
 
-int gcli_pull_get_review_comments(struct gcli_ctx *ctx,
-                                  struct gcli_path const *pull_path,
-                                  gcli_id review_id,
-                                  struct gcli_pull_review_comments *out);
-
 void gcli_pull_review_comments_free(struct gcli_pull_review_comments *it);
+
+int gcli_pull_get_review_threads(struct gcli_ctx *ctx,
+                                 struct gcli_path const *path,
+                                 struct gcli_pull_review_thread *out);
+
+void gcli_pull_review_thread_free(struct gcli_pull_review_thread *thd);
 
 #endif /* PULLS_H */

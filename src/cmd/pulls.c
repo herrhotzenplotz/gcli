@@ -106,6 +106,8 @@ usage(void)
 	if (gcli_config_enable_experimental(g_clictx))
 		fprintf(stderr, "  review                 Start a review of this PR\n");
 	fprintf(stderr, "  reviews                List reviews of this PR\n");
+	if (gcli_config_enable_experimental(g_clictx))
+		fprintf(stderr, "  discussions            Show a threaded view of review discussions\n");
 
 	fprintf(stderr, "\n");
 	version();
@@ -1349,68 +1351,56 @@ gcli_pull_reviews_print(struct gcli_pull_reviews *list)
 }
 
 static void
-gcli_pull_review_comments_print(struct gcli_pull_review_comments const *const list)
+print_comment(struct gcli_pull_review_comment const *c, int const indent)
 {
 	char *timebuf = NULL;
+	int const shift_width = 4;
+	int const shift = shift_width * indent,
+	          diffshift = shift_width * (indent + 1);
 	int rc = 0;
-	struct gcli_pull_review_comment const *c;
 
-	if (list->comments_size == 0) {
+	rc = gcli_format_as_localtime(g_clictx, c->created_at, &timebuf);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to format timestamp: %s\n",
+		        gcli_get_error(g_clictx));
+		return;
+	}
+
+	printf("%*.*s%s%s%s - %s - in file %s:\n", shift, shift, "",
+	       gcli_setbold(), c->author, gcli_resetbold(),
+	       timebuf, c->path);
+
+	if (c->diff_hunk) {
+		printf("\n");
+		gcli_pretty_print_diff(c->diff_hunk, diffshift);
+	}
+
+	gcli_pretty_print(c->body, shift, 80, stdout);
+
+	free(timebuf);
+	timebuf = NULL;
+}
+
+static void
+print_thread(struct gcli_pull_review_thread const *thd, int indent)
+{
+	struct gcli_pull_review_comment *comment = NULL;
+
+	TAILQ_FOREACH(comment, thd, next) {
+		print_comment(comment, indent);
+		print_thread(&comment->replies, indent + 1);
+	}
+}
+
+static void
+gcli_pull_review_threads_print(struct gcli_pull_review_thread const *const thd)
+{
+	if (TAILQ_EMPTY(thd)) {
 		printf("No comments\n");
 		return;
 	}
 
-	for (size_t i = 0; i < list->comments_size; ++i) {
-		c = &list->comments[i];
-
-		rc = gcli_format_as_localtime(g_clictx, c->created_at, &timebuf);
-		if (rc < 0) {
-			fprintf(stderr, "gcli: error: failed to format timestamp: %s\n",
-			        gcli_get_error(g_clictx));
-			continue;
-		}
-
-		printf("%s%s%s - %s - in file %s:\n", gcli_setbold(), c->author,
-		       gcli_resetbold(), timebuf, c->path);
-
-		if (c->diff_hunk) {
-			printf("\n");
-			gcli_pretty_print_diff(c->diff_hunk, 8);
-		}
-
-		gcli_pretty_print(c->body, 4, 80, stdout);
-
-		free(timebuf);
-		timebuf = NULL;
-	}
-}
-
-static int
-action_review_comments(struct gcli_path const *const prpath,
-                       char const *const id)
-{
-	gcli_id rid;
-	struct gcli_pull_review_comments comments = {0};
-	int rc = 0;
-
-	rid = strtoul(id, NULL, 10);
-	if (rid == 0) {
-		fprintf(stderr, "gcli: error: failed to parse %s\n", id);
-		return GCLI_EX_USAGE;
-	}
-
-	rc = gcli_pull_get_review_comments(g_clictx, prpath, rid, &comments);
-	if (rc < 0) {
-		fprintf(stderr, "gcli: error: failed to fetch review comments: %s\n",
-		        gcli_get_error(g_clictx));
-		return GCLI_EX_DATAERR;
-	}
-
-	gcli_pull_review_comments_print(&comments);
-
-	gcli_pull_review_comments_free(&comments);
-
-	return GCLI_EX_OK;
+	print_thread(thd, 0);
 }
 
 static int
@@ -1422,12 +1412,8 @@ action_reviews(struct gcli_path const *const path,
 	struct gcli_pull_reviews reviews = {0};
 
 	(void) pull;
-
-	if (*argc > 2 && strcmp((*argv)[1], "-i") == 0) {
-		*argc -= 2;
-		*argv += 2;
-		return action_review_comments(path, **argv);
-	}
+	(void) argc;
+	(void) argv;
 
 	rc = gcli_pull_get_reviews(g_clictx, path, &reviews);
 	if (rc < 0) {
@@ -1439,6 +1425,44 @@ action_reviews(struct gcli_path const *const path,
 
 	gcli_pull_reviews_print(&reviews);
 	gcli_pull_reviews_free(&reviews);
+
+	return GCLI_EX_OK;
+}
+
+static int
+action_discussion(struct gcli_path const *const path,
+                  struct gcli_pull const *const pull,
+                  int *argc, char **argv[])
+{
+	int rc = 0;
+	struct gcli_pull_review_thread root = {0};
+
+	(void) pull;
+	(void) argc;
+	(void) argv;
+
+	if (gcli_config_enable_experimental(g_clictx) == false) {
+		fprintf(
+			stderr,
+			"gcli: error: discussion is not available because it is "
+			"considered experimental. To enable this feature set "
+			"enable-experimental in your gcli config file or "
+			"set GCLI_ENABLE_EXPERIMENTAL in your environment.\n"
+		);
+
+		return GCLI_EX_DATAERR;
+	}
+
+	rc = gcli_pull_get_review_threads(g_clictx, path, &root);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to fetch reviews: %s\n",
+		        gcli_get_error(g_clictx));
+
+		return GCLI_EX_DATAERR;
+	}
+
+	gcli_pull_review_threads_print(&root);
+	gcli_pull_review_thread_free(&root);
 
 	return GCLI_EX_OK;
 }
@@ -1555,6 +1579,11 @@ struct gcli_cmd_actions gcli_pull_actions = {
 			.name = "reviews",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler) action_reviews,
+		},
+		{
+			.name = "discussions",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler) action_discussion,
 		},
 	},
 };

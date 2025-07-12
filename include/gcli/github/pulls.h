@@ -86,9 +86,8 @@ int github_pull_create_review(struct gcli_ctx *ctx,
 int github_pull_get_reviews(struct gcli_ctx *ctx, struct gcli_path const *path,
                             struct gcli_pull_reviews *out);
 
-int github_pull_get_review_comments(struct gcli_ctx *ctx,
-                                    struct gcli_path const *path,
-                                    gcli_id review_id,
-                                    struct gcli_pull_review_comments *out);
+int github_pull_get_review_threads(struct gcli_ctx *ctx,
+                                   struct gcli_path const *path,
+                                   struct gcli_pull_review_thread *out);
 
 #endif /* GITHUB_PULLS_H */

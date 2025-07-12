@@ -143,7 +143,7 @@ github_forge_descriptor =
 
 	.pull_create_review        = github_pull_create_review,
 	.pull_get_reviews          = github_pull_get_reviews,
-	.pull_get_review_comments  = github_pull_get_review_comments,
+	.pull_get_review_threads   = github_pull_get_review_threads,
 
 	.create_release            = github_create_release,
 	.delete_release            = github_delete_release,

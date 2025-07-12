@@ -293,29 +293,47 @@ gcli_pull_reviews_free(struct gcli_pull_reviews *it)
 	it->reviews_size = 0;
 }
 
-int
-gcli_pull_get_review_comments(struct gcli_ctx *const ctx,
-                              struct gcli_path const *const pull_path,
-                              gcli_id const review_id,
-                              struct gcli_pull_review_comments *const out)
+static void
+gcli_pull_review_comment_free(struct gcli_pull_review_comment *c)
 {
-	gcli_null_check_call(pull_get_review_comments, ctx, pull_path,
-	                     review_id, out);
+	gcli_clear_ptr(&c->author);
+	gcli_clear_ptr(&c->body);
+	gcli_clear_ptr(&c->diff_hunk);
+	gcli_clear_ptr(&c->path);
 }
 
 void
 gcli_pull_review_comments_free(struct gcli_pull_review_comments *it)
 {
-	struct gcli_pull_review_comment *c;
-
-	for (size_t i = 0; i < it->comments_size; ++i) {
-		c = &it->comments[i];
-
-		gcli_clear_ptr(&c->author);
-		gcli_clear_ptr(&c->body);
-		gcli_clear_ptr(&c->diff_hunk);
-	}
+	for (size_t i = 0; i < it->comments_size; ++i)
+		gcli_pull_review_comment_free(&it->comments[i]);
 
 	gcli_clear_ptr(&it->comments);
 	it->comments_size = 0;
+}
+
+int
+gcli_pull_get_review_threads(struct gcli_ctx *ctx,
+                             struct gcli_path const *path,
+                             struct gcli_pull_review_thread *out)
+{
+	gcli_null_check_call(pull_get_review_threads, ctx, path, out);
+}
+
+void
+gcli_pull_review_thread_free(struct gcli_pull_review_thread *thd)
+{
+	struct gcli_pull_review_comment *c, *c1;
+
+	c = TAILQ_FIRST(thd);
+
+	while (c != NULL) {
+		c1 = TAILQ_NEXT(c, next);
+
+		gcli_pull_review_comment_free(c);
+		gcli_pull_review_thread_free(&c->replies);
+		gcli_clear_ptr(&c);
+
+		c = c1;
+	}
 }

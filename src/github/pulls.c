@@ -43,6 +43,7 @@
 
 #include <templates/github/pulls.h>
 
+#include <assert.h>
 #include <stdarg.h>
 
 int
@@ -806,24 +807,104 @@ github_pull_get_reviews(struct gcli_ctx *ctx, struct gcli_path const *const path
 	return gcli_fetch_list(ctx, url, &fl);
 }
 
+struct gcli_pull_review_thread *
+find_thread(struct gcli_pull_review_thread *list, gcli_id const comment_id)
+{
+	struct gcli_pull_review_comment *c;
+
+	TAILQ_FOREACH(c, list, next) {
+		if (c->id == comment_id)
+			return &c->replies;
+	}
+
+	return NULL;
+}
+
+static int
+threadify_comments(struct gcli_ctx *ctx,
+                   struct gcli_pull_review_comments *list,
+                   struct gcli_pull_review_thread *out)
+{
+	struct gcli_pull_review_comment *c, *c1;
+
+	(void) ctx;
+
+	TAILQ_INIT(out);
+
+	/* init the replies and push root-comments */
+	for (size_t i = 0; i < list->comments_size; ++i) {
+		c = calloc(1, sizeof *c);
+		memcpy(c, list->comments + i, sizeof *c);
+
+		TAILQ_INIT(&c->replies);
+		TAILQ_INSERT_TAIL(out, c, next);
+	}
+
+	/* clear list to make dumb stuff obvious */
+	gcli_clear_ptr(&list->comments);
+	list->comments_size = 0;
+
+	/* now iterate through comment list and push the replies as needed */
+	c = TAILQ_FIRST(out);
+	while (c) {
+		struct gcli_pull_review_thread *thd = out;
+
+		c1 = TAILQ_NEXT(c, next);
+
+		/* root comments */
+		if (!c->in_reply_to) {
+			c = c1;
+			continue;
+		}
+
+		thd = find_thread(out, c->in_reply_to);
+
+		/* check for API bugs */
+		if (thd == NULL) {
+			return gcli_error(
+				ctx,
+				"encountered bad comment id reference: %"PRIid
+				" in comment id %"PRIid,
+				c->in_reply_to, c->id);
+		}
+
+		TAILQ_REMOVE(out, c, next);
+		TAILQ_INSERT_TAIL(thd, c, next);
+
+		c = c1;
+	}
+
+	return 0;
+}
+
 int
-github_pull_get_review_comments(struct gcli_ctx *ctx,
-                                struct gcli_path const *const path,
-                                gcli_id const review_id,
-                                struct gcli_pull_review_comments *out)
+github_pull_get_review_threads(struct gcli_ctx *ctx,
+                               struct gcli_path const *const path,
+                               struct gcli_pull_review_thread *out)
 {
 	char *url;
 	int rc = 0;
+
+	// @@@ handle releasing memory!
+	struct gcli_pull_review_comments list = {0};
+
 	struct gcli_fetch_list_ctx fl = {
-		.listp = &out->comments,
-		.sizep = &out->comments_size,
+		.listp = &list.comments,
+		.sizep = &list.comments_size,
 		.parse = (parsefn)(parse_github_pull_review_comments),
 	};
 
-	rc = github_pull_make_url(ctx, path, &url, "/reviews/%"PRIid"/comments",
-	                          review_id);
+	rc = github_pull_make_url(ctx, path, &url, "/comments");
 	if (rc < 0)
 		return rc;
 
-	return gcli_fetch_list(ctx, url, &fl);
+	rc = gcli_fetch_list(ctx, url, &fl);
+	if (rc < 0) {
+		gcli_pull_review_comments_free(&list);
+		return rc;
+	}
+
+	rc = threadify_comments(ctx, &list, out);
+
+	return rc;
 }

@@ -1355,8 +1355,7 @@ print_comment(struct gcli_pull_review_comment const *c, int const indent)
 {
 	char *timebuf = NULL;
 	int const shift_width = 4;
-	int const shift = shift_width * indent,
-	          diffshift = shift_width * (indent + 1);
+	int const shift = shift_width * indent;
 	int rc = 0;
 
 	rc = gcli_format_as_localtime(g_clictx, c->created_at, &timebuf);
@@ -1366,16 +1365,20 @@ print_comment(struct gcli_pull_review_comment const *c, int const indent)
 		return;
 	}
 
-	printf("%*.*s%s%s%s - %s - in file %s:\n", shift, shift, "",
-	       gcli_setbold(), c->author, gcli_resetbold(),
-	       timebuf, c->path);
+	printf("%*.*sAUTHOR : %s%s%s\n"
+	       "%*.*s  DATE : %s\n"
+	       "%*.*s  FILE : %s\n",
+	       shift, shift, "", gcli_setbold(), c->author, gcli_resetbold(),
+	       shift, shift, "", timebuf,
+	       shift, shift, "", c->path);
 
-	if (c->diff_hunk) {
+	/* print diff if one is attached and we are on the root comment */
+	if (c->diff_hunk && indent == 0) {
 		printf("\n");
-		gcli_pretty_print_diff(c->diff_hunk, diffshift);
+		gcli_pretty_print_diff(c->diff_hunk, shift + 9);
 	}
 
-	gcli_pretty_print(c->body, shift, 80, stdout);
+	gcli_pretty_print(c->body, shift + shift_width, 80, stdout);
 
 	free(timebuf);
 	timebuf = NULL;

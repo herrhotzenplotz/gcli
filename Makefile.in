@@ -20,6 +20,12 @@ RANLIB              = @RANLIB@
 RM                  = @RM@
 PREFIX              = @PREFIX@
 SHELL               = @SHELL@
+EXEEXT              = @EXEEXT@
+LIBEXT              = @LIBEXT@
+OBJEXT              = @OBJEXT@
+EXEEXT_FOR_BUILD    = @EXEEXT_FOR_BUILD@
+LIBEXT_FOR_BUILD    = @LIBEXT_FOR_BUILD@
+OBJEXT_FOR_BUILD    = @OBJEXT_FOR_BUILD@
 ################################################################################################
 
 ############## Optimiser / Warning flags #####
@@ -67,10 +73,10 @@ ENV_CPPFLAGS_FOR_BUILD=	@ENV_CPPFLAGS_FOR_BUILD@
 CPPFLAGS_FOR_BUILD=	-DHAVE_CONFIG_H -DYY_NO_UNPUT -DYY_NO_INPUT $(ENV_CPPFLAGS_FOR_BUILD)
 
 # CFLAGS for dependency tracking for various compilers
-CCDEPFLAGS_gcc=		-MD -MF ${@:.o=.d}
-CCDEPFLAGS_clang=	-MD -MF ${@:.o=.d}
-CCDEPFLAGS_xlc=		-qmakedep=gcc -MF ${@:.o=.d}
-CCDEPFLAGS_sunstudio=	-xMD -xMF ${@:.o=.d}
+CCDEPFLAGS_gcc=		-MD -MF ${@:$(OBJEXT)=.d}
+CCDEPFLAGS_clang=	-MD -MF ${@:$(OBJEXT)=.d}
+CCDEPFLAGS_xlc=		-qmakedep=gcc -MF ${@:$(OBJEXT)=.d}
+CCDEPFLAGS_sunstudio=	-xMD -xMF ${@:$(OBJEXT)=.d}
 CCDEPFLAGS_unknown=
 CCDEPFLAGS=		$(CCDEPFLAGS_$(CCOM))
 CCDEPFLAGS_FOR_BUILD=	$(CCDEPFLAGS_$(CCOM_FOR_BUILD))
@@ -143,7 +149,7 @@ install: Makefile
 analyse: Makefile
 	@$(MAKE) analyse-auto
 
-all-auto: gcli manpages
+all-auto: gcli$(EXEEXT) manpages
 
 LIBGCLI_SRCS = \
 	src/bugzilla/api.c \
@@ -304,19 +310,21 @@ Makefile: @SRCDIR@/configure @SRCDIR@/Makefile.in
 		LDFLAGS="${ENV_LDFLAGS}" LDFLAGS_FOR_BUILD="${LDFLAGS_FOR_BUILD}" \
 		CFLAGS_FOR_BUILD="${ENV_CFLAGS_FOR_BUILD}" CPPFLAGS_FOR_BUILD="${ENV_CPPFLAGS_FOR_BUILD}" \
 		PKG_CONFIG="${ENV_PKG_CONFIG}" PKG_CONFIG_PATH="${ENV_PKG_CONFIG_PATH}" CCACHE="${CCACHE}" \
+		EXEEXT="${EXEEXT}" OBJEXT="${OBJEXT}" LIBEXT="${LIBEXT}" \
+		EXEEXT_FOR_BUILD="${EXEEXT_FOR_BUILD}" OBJEXT_FOR_BUILD="${OBJEXT_FOR_BUILD}" LIBEXT_FOR_BUILD="${LIBEXT_FOR_BUILD}" \
 		sh @SRCDIR@/configure @CONFIGURE_CMD_ARGS@
 
-LIBGCLI_OBJS=	${LIBGCLI_SRCS:.c=.libgcli.o} ${TEMPLATE_SRCS:.c=.libgcli.o}
-GCLI_OBJS=	${GCLI_SRCS:.c=.gcli.o}
-PGEN_OBJS=	${PGEN_SRCS:.c=.pgen.o}
+LIBGCLI_OBJS=	${LIBGCLI_SRCS:.c=.libgcli$(OBJEXT)} ${TEMPLATE_SRCS:.c=.libgcli$(OBJEXT)}
+GCLI_OBJS=	${GCLI_SRCS:.c=.gcli$(OBJEXT)}
+PGEN_OBJS=	${PGEN_SRCS:.c=.pgen$(OBJEXT_FOR_BUILD)}
 
 # Dependencies
-DEPS=	${LIBGCLI_OBJS:.o=.d} ${GCLI_OBJS:.o=.d} ${PGEN_OBJS:.o=.d}
+DEPS=	${LIBGCLI_OBJS:$(OBJEXT)=.d} ${GCLI_OBJS:$(OBJEXT)=.d} ${PGEN_OBJS:$(OBJEXT_FOR_BUILD)=.d}
 -include $(DEPS)
 
-pgen: $(PGEN_OBJS)
+pgen$(EXEEXT_FOR_BUILD): $(PGEN_OBJS)
 	$(CCACHE) $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) \
-		$(LDFLAGS_FOR_BUILD) -o pgen $(PGEN_OBJS)
+		$(LDFLAGS_FOR_BUILD) -o pgen$(EXEEXT_FOR_BUILD) $(PGEN_OBJS)
 
 y.tab.c y.tab.h: @SRCDIR@/src/pgen/parser.y
 	$(YACC) -d @SRCDIR@/src/pgen/parser.y
@@ -336,28 +344,28 @@ $(TEMPLATE_HEADERS) $(TEMPLATE_SRCS): pgen
 	@mkdir -p $$(dirname $@)
 	./pgen -tc -o $@ $<
 
-gcli: libgcli.a $(GCLI_OBJS)
+gcli$(EXEEXT): libgcli$(LIBEXT) $(GCLI_OBJS)
 	$(CCACHE) $(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o gcli \
-		$(GCLI_OBJS) libgcli.a $(LIBCURL_LIBS) $(LIBEDIT_LIBS) \
+		$(GCLI_OBJS) libgcli$(LIBEXT) $(LIBCURL_LIBS) $(LIBEDIT_LIBS) \
 		$(LIBREADLINE_LIBS) $(LIBCRYPTO_LIBS) \
 		$(LIBLOWDOWN_LIBS) \
 		$(LIBRT_LIBS)
 
-libgcli.a: $(LIBGCLI_OBJS)
-	$(CCACHE) $(AR) -rc libgcli.a $(LIBGCLI_OBJS)
-	$(CCACHE) $(RANLIB) libgcli.a
+libgcli$(LIBEXT): $(LIBGCLI_OBJS)
+	$(CCACHE) $(AR) -rc libgcli$(LIBEXT) $(LIBGCLI_OBJS)
+	$(CCACHE) $(RANLIB) libgcli$(LIBEXT)
 
 $(LIBGCLI_OBJS): $(TEMPLATE_HEADERS) $(TEMPLATE_SRCS)
 
-.SUFFIXES: .c .libgcli.o .gcli.o .pgen.o .tests.o
-.c.libgcli.o:
+.SUFFIXES: .c .libgcli$(OBJEXT) .gcli$(OBJEXT) .pgen$(OBJEXT_FOR_BUILD) .tests$(OBJEXT)
+.c.libgcli$(OBJEXT):
 	@mkdir -p $$(dirname $@)
 	$(CCACHE) $(CC) $(CFLAGS) $(CCDEPFLAGS) $(CPPFLAGS) \
 		$(LIBCURL_CFLAGS) $(LIBCRYPTO_CFLAGS) \
 		$(LIBLOWDOWN_CFLAGS) $(LIBLOWDOWN_CPPFLAGS) \
 		-DIN_LIBGCLI=1 -c -o $@ $<
 
-.c.gcli.o:
+.c.gcli$(OBJEXT):
 	@mkdir -p $$(dirname $@)
 	$(CCACHE) $(CC) $(CFLAGS) $(CCDEPFLAGS) $(CPPFLAGS) \
 		$(LIBEDIT_CPPFLAGS) $(LIBREADLINE_CPPFLAGS) \
@@ -366,60 +374,62 @@ $(LIBGCLI_OBJS): $(TEMPLATE_HEADERS) $(TEMPLATE_SRCS)
 		$(LIBLOWDOWN_CFLAGS) $(LIBLOWDOWN_CPPFLAGS) \
 		-c -o $@ $<
 
-.c.pgen.o:
+.c.pgen$(OBJEXT_FOR_BUILD):
 	@mkdir -p $$(dirname $@)
-	$(CCACHE) $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(CCDEPFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) -c -o $@ $<
+	$(CCACHE) $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) \
+		$(CCDEPFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) \
+		-c -o $@ $<
 
 clean-auto:
-	$(RM) -f pgen gcli libgcli.a \
+	$(RM) -f pgen gcli libgcli$(LIBEXT) \
 		$(LIBGCLI_OBJS) $(GCLI_OBJS) \
 		$(TEMPLATE_HEADERS) $(TEMPLATE_SRCS) \
 		$(PGEN_OBJS) $(DEPS) \
 		lex.yy.c y.tab.c y.tab.h \
-		$(TEST_PROGRAMS:=.tests.o) \
+		$(TEST_PROGRAMS:=.tests$(OBJEXT)) \
 		$(TEST_PROGRAMS) \
 		tests/Kyuafile \
 		$(MANPAGES)
 
 ###### TEST SUITE #####################################
 TEST_PROGRAMS = \
-	tests/append-url \
-	tests/base64 \
-	tests/bugzilla-parse \
-	tests/difftests \
-	tests/gitea-parse \
-	tests/github-parse \
-	tests/gitlab-parse \
-	tests/json-escape \
-	tests/jsongen \
-	tests/parse-url \
-	tests/url-encode
+	tests/append-url$(EXEEXT) \
+	tests/base64$(EXEEXT) \
+	tests/bugzilla-parse$(EXEEXT) \
+	tests/difftests$(EXEEXT) \
+	tests/gitea-parse$(EXEEXT) \
+	tests/github-parse$(EXEEXT) \
+	tests/gitlab-parse$(EXEEXT) \
+	tests/json-escape$(EXEEXT) \
+	tests/jsongen$(EXEEXT) \
+	tests/parse-url$(EXEEXT) \
+	tests/url-encode$(EXEEXT)
 
-tests/json-escape: tests/json-escape.tests.o
-tests/github-parse: tests/github-parse.tests.o
-tests/gitlab-parse: tests/gitlab-parse.tests.o
-tests/gitea-parse: tests/gitea-parse.tests.o
-tests/bugzilla-parse: tests/bugzilla-parse.tests.o
-tests/url-encode: tests/url-encode.tests.o
-tests/jsongen: tests/jsongen.tests.o
-tests/base64: tests/base64.tests.o
-tests/difftests: tests/difftests.tests.o
-tests/parse-url: tests/parse-url.tests.o
-tests/append-url: tests/append-url.tests.o
+tests/json-escape: tests/json-escape.tests$(OBJEXT)
+tests/github-parse: tests/github-parse.tests$(OBJEXT)
+tests/gitlab-parse: tests/gitlab-parse.tests$(OBJEXT)
+tests/gitea-parse: tests/gitea-parse.tests$(OBJEXT)
+tests/bugzilla-parse: tests/bugzilla-parse.tests$(OBJEXT)
+tests/url-encode: tests/url-encode.tests$(OBJEXT)
+tests/jsongen: tests/jsongen.tests$(OBJEXT)
+tests/base64: tests/base64.tests$(OBJEXT)
+tests/difftests: tests/difftests.tests$(OBJEXT)
+tests/parse-url: tests/parse-url.tests$(OBJEXT)
+tests/append-url: tests/append-url.tests$(OBJEXT)
 
-$(TEST_PROGRAMS): libgcli.a
+$(TEST_PROGRAMS): libgcli$(LIBEXT)
 	$(CCACHE) $(CC) $(CFLAGS) $(CCDEPFLAGS) $(CPPFLAGS) \
 		$(LIBATFC_CFLAGS) $(LIBCURL_CFLAGS) $(LIBCRYPTO_CFLAGS) \
-		$(LDFLAGS) -o $@ $(@:=.tests.o) libgcli.a \
+		$(LDFLAGS) -o $@ $(@:=.tests$(OBJEXT)) libgcli$(LIBEXT) \
 		$(LIBATFC_LIBS) $(LIBCURL_LIBS) $(LIBCRYPTO_LIBS)
 
-.c.tests.o:
+.c.tests$(OBJEXT):
 	@mkdir -p $$(dirname $@)
 	$(CCACHE) $(CC) $(CFLAGS) $(CCDEPFLAGS) $(CPPFLAGS) \
 		$(LIBATFC_CFLAGS) $(LIBCURL_CFLAGS) \
 		-DTESTSRCDIR="\"@SRCDIR@/tests/\"" -c -o $@ $<
 
-$(TEST_PROGRAMS:=.c): $(TEMPLATE_HEADERS)
+$(TEST_PROGRAMS:$(EXEEXT)=.c): $(TEMPLATE_HEADERS)
 
 tests/Kyuafile: Makefile
 	@mkdir -p tests

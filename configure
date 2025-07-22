@@ -158,6 +158,12 @@ ENVIRONMENT:
     KYUA                    Path to Kyua [DEFAULT: autodetect]
     CCACHE                  Path to ccache [DEFAULT: autodetect]
     INSTALL                 Path to install [DEFAULT: autodetect]
+    EXEEXT                  File extension of executable files for the host system [DEFAULT: '', '.exe' on Windows]
+    OBJEXT                  File extension of object files for the host system [DEFAULT: '.o', '.obj' on Windows]
+    LIBEXT                  File extension of static libraries for the host system [DEFAULT: '.a', '.lib' on Windows]
+    EXEEXT_FOR_BUILD        File extension of executable files for the build system [DEFAULT: '', '.exe' on Windows]
+    OBJEXT_FOR_BUILD        File extension of object files for the build system [DEFAULT: '.o', '.obj' on Windows]
+    LIBEXT_FOR_BUILD        File extension of static libraries for the build system [DEFAULT: '.a', '.lib' on Windows]
 EOF
 	exit 1
 }
@@ -323,6 +329,35 @@ if [ $ENABLE_LIBRT -eq 1 ]; then
 fi
 
 ###################################################################
+# File extensions for operating systems
+#
+# LIBEXT refers to static libraries.
+case "${HOST}" in
+	*mingw*|*cygwin*|*winnt*)
+		EXEEXT=".exe"
+		OBJEXT=".obj"
+		LIBEXT=".lib"
+		;;
+esac
+
+case "${BUILD}" in
+	*mingw*|*cygwin*|*winnt*)
+		EXEEXT_FOR_BUILD=".exe"
+		OBJEXT_FOR_BUILD=".obj"
+		LIBEXT_FOR_BUILD=".lib"
+		;;
+esac
+
+# Default values below
+: ${EXEEXT:=""}
+: ${OBJEXT:=".o"}
+: ${LIBEXT:=".a"}
+
+: ${EXEEXT_FOR_BUILD:=""}
+: ${OBJEXT_FOR_BUILD:=".o"}
+: ${LIBEXT_FOR_BUILD:=".a"}
+
+###################################################################
 # TESTS and other programs
 ###################################################################
 AR=${AR:-ar}
@@ -392,6 +427,12 @@ sed \
 	-e "s|@PACKAGE_BUGREPORT@|$PACKAGE_BUGREPORT|g" \
 	-e "s|@PACKAGE_URL@|$PACKAGE_URL|g" \
 	-e "s|@PACKAGE_VERSION@|$PACKAGE_VERSION|g" \
+	-e "s|@EXEEXT@|$EXEEXT|g" \
+	-e "s|@OBJEXT@|$OBJEXT|g" \
+	-e "s|@LIBEXT@|$LIBEXT|g" \
+	-e "s|@EXEEXT_FOR_BUILD@|$EXEEXT_FOR_BUILD|g" \
+	-e "s|@OBJEXT_FOR_BUILD@|$OBJEXT_FOR_BUILD|g" \
+	-e "s|@LIBEXT_FOR_BUILD@|$LIBEXT_FOR_BUILD|g" \
 	< "${srcdir}/Makefile.in" > Makefile
 
 echo "Writing config.h"
@@ -409,6 +450,9 @@ echo ""
 echo "    Build system type: ${BUILD}"
 echo "     Host system type: ${HOST}"
 echo "         optimise for: ${OPTIMISE:-none}"
+echo " Executable extension: Host: '${EXEEXT}', Build: '${EXEEXT_FOR_BUILD}'"
+echo "     Object extension: Host: '${OBJEXT}', Build: '${OBJEXT_FOR_BUILD}'"
+echo "    Library extension: Host: '${LIBEXT}', Build: '${LIBEXT_FOR_BUILD}'"
 echo "                   CC: ${CC}"
 echo "         CC_FOR_BUILD: ${CC_FOR_BUILD}"
 echo "               CFLAGS: ${CFLAGS}"

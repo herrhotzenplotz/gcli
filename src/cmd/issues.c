@@ -45,11 +45,8 @@
 #include <gcli/port/util.h>
 
 #include <errno.h>
-#include <stdlib.h>
-
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#endif
+#include <stdlib.h>
 
 static void
 usage(void)

@@ -40,10 +40,7 @@
 #include <gcli/port/string.h>
 #include <gcli/port/util.h>
 
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#endif
-
 #include <stdlib.h>
 #include <unistd.h>
 

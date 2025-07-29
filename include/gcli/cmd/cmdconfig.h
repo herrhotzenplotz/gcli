@@ -38,9 +38,7 @@
 
 #include <gcli/port/sv.h>
 
-#ifdef HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
-#endif /* HAVE_SYS_QUEUE_H */
 
 struct gcli_config_entry {
 	TAILQ_ENTRY(gcli_config_entry) next;

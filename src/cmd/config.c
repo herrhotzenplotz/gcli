@@ -39,13 +39,10 @@
 #include <gcli/sshkeys.h>
 
 #include <errno.h>
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
-#ifdef HAVE_GETOPT_H
-#include <getopt.h>
-#endif
 
 static void
 usage(void)

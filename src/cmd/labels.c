@@ -38,10 +38,7 @@
 #include <gcli/cmd/colour.h>
 #include <gcli/cmd/table.h>
 
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#endif
-
 #include <stdlib.h>
 #include <string.h>
 

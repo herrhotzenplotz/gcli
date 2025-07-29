@@ -29,12 +29,6 @@
 
 #include <config.h>
 
-#ifdef HAVE_GETOPT_H
-#include <getopt.h>
-#endif
-
-#include <stdlib.h>
-
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/config.h>
@@ -44,6 +38,9 @@
 #include <gcli/port/util.h>
 
 #include <gcli/forks.h>
+
+#include <getopt.h>
+#include <stdlib.h>
 
 static void
 usage(void)

@@ -51,11 +51,8 @@
 #include <gcli/port/util.h>
 #include <gcli/pulls.h>
 
-#ifdef HAVE_GETOPT_H
-#include <getopt.h>
-#endif
-
 #include <assert.h>
+#include <getopt.h>
 #include <stdlib.h>
 
 static void

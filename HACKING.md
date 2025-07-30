@@ -27,6 +27,7 @@ A few caveats are:
   - GNU Make (gmake)
 
   Some of these make implementations are very buggy (most notably GNU make)
+
 - Getting target dependencies just right is not easy
 
 For that reason I highly suggest testing with all three make implementations.
@@ -148,6 +149,15 @@ e.g. to compile from FreeBSD amd64 to a armv7l Linux system:
 
 When you now run make the compilers will be chosen appropriately.
 The test suite will not work when cross-compiling.
+
+If needed you may have to set the values of
+
+  - `EXEEXT`
+  - `OBJEXT`
+  - `LIBEXT`
+
+This is the case on undetected Windows systems.
+It should be possible to build gcli under cygwin this way.
 
 ## Tests
 

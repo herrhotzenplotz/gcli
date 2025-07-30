@@ -28,6 +28,16 @@ This changelog does not follow semantic versioning.
 
 ### Changed
 
+- Compiler output file extensions are now guessed by the configure script
+
+  This is done to eventually restore Windows / Cygwin compatibility.
+  In theory it should be possible to build with Cygwin again, however
+  I haven't tested this to confirm.
+
+  If the guessed extensions are wrong, one may override the guessed
+  extensions using the environment variables  `EXEEXT`, `OBJEXT`,
+  `LIBEXT`, `EXEEXT_FOR_BUILD`, `OBJEXT_FOR_BUILD` and `LIBEXT_FOR_BUILD`.
+
 ### Removed
 
 ## 2.8.0 (25-May-2025)

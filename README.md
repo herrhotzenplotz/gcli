@@ -63,6 +63,8 @@ If you are unsure, consult the builtin configure help by running `./configure --
 
 In case any of the above does not work, please either report a bug, or submit a patch in case you managed to fix it.
 
+Details on cross-compilation can be found in [HACKING.md](HACKING.md).
+
 ### Testing
 
 To run the test suite first make sure you have all the necessary dependencies installed (see above).

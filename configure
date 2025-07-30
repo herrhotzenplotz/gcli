@@ -332,30 +332,40 @@ fi
 # File extensions for operating systems
 #
 # LIBEXT refers to static libraries.
-case "${HOST}" in
-	*mingw*|*cygwin*|*winnt*)
-		EXEEXT=".exe"
-		OBJEXT=".obj"
-		LIBEXT=".lib"
-		;;
-esac
+guess_extension() {
+	# Executables
+	if [ "$1" = EXE ]; then
+		case "${2}" in
+		*mingw*|*cygwin*|*winnt*) echo ".exe" ;;
+		*)                        echo "" ;;
+		esac
 
-case "${BUILD}" in
-	*mingw*|*cygwin*|*winnt*)
-		EXEEXT_FOR_BUILD=".exe"
-		OBJEXT_FOR_BUILD=".obj"
-		LIBEXT_FOR_BUILD=".lib"
-		;;
-esac
+	# Objects
+	elif [ "$1" = OBJ ]; then
+		case "${2}" in
+		*mingw*|*cygwin*|*winnt*) echo ".obj" ;;
+		*)                        echo ".o" ;;
+		esac
 
-# Default values below
-: ${EXEEXT:=""}
-: ${OBJEXT:=".o"}
-: ${LIBEXT:=".a"}
+	# Static Libraries
+	elif [ "$1" = LIB ]; then
+		case "${2}" in
+		*mingw*|*cygwin*|*winnt*) echo ".lib" ;;
+		*)                        echo ".a" ;;
+		esac
 
-: ${EXEEXT_FOR_BUILD:=""}
-: ${OBJEXT_FOR_BUILD:=".o"}
-: ${LIBEXT_FOR_BUILD:=".a"}
+	else
+		die "internal configure error"
+	fi
+}
+
+EXEEXT=${EXEEXT:-$(guess_extension EXE $HOST)} || die "error: failed to guess executable extension for $HOST"
+OBJEXT=${OBJEXT:-$(guess_extension OBJ $HOST)} || die "error: failed to guess object extension for $HOST"
+LIBEXT=${LIBEXT:-$(guess_extension LIB $HOST)} || die "error: failed to guess static library extension for $HOST"
+
+EXEEXT_FOR_BUILD=${EXEEXT_FOR_BUILD:-$(guess_extension EXE $BUILD)} || die "error: failed to guess executable extension for $BUILD"
+OBJEXT_FOR_BUILD=${OBJEXT_FOR_BUILD:-$(guess_extension OBJ $BUILD)} || die "error: failed to guess object extension for $BUILD"
+LIBEXT_FOR_BUILD=${LIBEXT_FOR_BUILD:-$(guess_extension LIB $BUILD)} || die "error: failed to guess static library extension for $BUILD"
 
 ###################################################################
 # TESTS and other programs

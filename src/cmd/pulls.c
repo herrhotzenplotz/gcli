@@ -1293,9 +1293,6 @@ action_checkout(struct gcli_path const *const path, struct gcli_pull *pull,
 		return GCLI_EX_DATAERR;
 	}
 
-	*argc -= 1;
-	*argv += 1;
-
 	return GCLI_EX_OK;
 }
 

@@ -26,6 +26,9 @@ This changelog does not follow semantic versioning.
   correctly report whether a pull request has been marked as
   auto-merge.
 
+- Running the pulls checkout action as the last action used to
+  result in an error 'not enough arguments'.
+
 ### Changed
 
 - Compiler output file extensions are now guessed by the configure script

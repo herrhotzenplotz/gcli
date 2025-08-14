@@ -145,12 +145,12 @@ usage(void)
 	fprintf(stderr, "                      - gitlab (default: gitlab.com)\n");
 	fprintf(stderr, "                      - gitea (default: codeberg.org)\n");
 	fprintf(stderr, "                      - bugzilla (default: bugs.freebsd.org)\n");
-	fprintf(stderr, "  -c               Force colour and text formatting.\n");
-	fprintf(stderr, "  --no-spinner     Disable the animated spinner.\n");
+	fprintf(stderr, "  -c               Force colour and text formatting\n");
+	fprintf(stderr, "  --no-spinner     Disable the animated spinner\n");
 	fprintf(stderr, "  --no-markdown    Disable markdown rendering\n");
 	fprintf(stderr, "  -q               Be quiet. (Not implemented yet)\n");
-	fprintf(stderr, "  -v               Be verbose.\n");
-	fprintf(stderr, "  -V | --version   Print version and exit.\n\n");
+	fprintf(stderr, "  -v               Be verbose\n");
+	fprintf(stderr, "  -V | --version   Print version and exit\n\n");
 	fprintf(stderr, "SUBCOMMANDS:\n");
 	for (size_t i = 0; i < subcommands_size; ++i) {
 		fprintf(stderr,

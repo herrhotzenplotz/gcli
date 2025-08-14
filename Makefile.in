@@ -335,17 +335,17 @@ lex.yy.c: y.tab.h @SRCDIR@/src/pgen/lexer.l
 .SUFFIXES: .h .t .c
 
 # Hack to make GNU make shut up
-$(TEMPLATE_HEADERS) $(TEMPLATE_SRCS): pgen
+$(TEMPLATE_HEADERS) $(TEMPLATE_SRCS): pgen$(EXEEXT_FOR_BUILD)
 .t.h:
 	@mkdir -p $$(dirname $@)
-	./pgen -th -o $@ $<
+	./pgen$(EXEEXT_FOR_BUILD) -th -o $@ $<
 
 .t.c:
 	@mkdir -p $$(dirname $@)
-	./pgen -tc -o $@ $<
+	./pgen$(EXEEXT_FOR_BUILD) -tc -o $@ $<
 
 gcli$(EXEEXT): libgcli$(LIBEXT) $(GCLI_OBJS)
-	$(CCACHE) $(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o gcli \
+	$(CCACHE) $(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o gcli$(EXEEXT) \
 		$(GCLI_OBJS) libgcli$(LIBEXT) $(LIBCURL_LIBS) $(LIBEDIT_LIBS) \
 		$(LIBREADLINE_LIBS) $(LIBCRYPTO_LIBS) \
 		$(LIBLOWDOWN_LIBS) \
@@ -381,7 +381,8 @@ $(LIBGCLI_OBJS): $(TEMPLATE_HEADERS) $(TEMPLATE_SRCS)
 		-c -o $@ $<
 
 clean-auto:
-	$(RM) -f pgen gcli libgcli$(LIBEXT) \
+	$(RM) -f pgen$(EXEEXT_FOR_BUILD) gcli$(EXEEXT) \
+		libgcli$(LIBEXT) \
 		$(LIBGCLI_OBJS) $(GCLI_OBJS) \
 		$(TEMPLATE_HEADERS) $(TEMPLATE_SRCS) \
 		$(PGEN_OBJS) $(DEPS) \

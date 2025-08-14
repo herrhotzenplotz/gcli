@@ -147,6 +147,7 @@ usage(void)
 	fprintf(stderr, "                      - bugzilla (default: bugs.freebsd.org)\n");
 	fprintf(stderr, "  -c               Force colour and text formatting.\n");
 	fprintf(stderr, "  --no-spinner     Disable the animated spinner.\n");
+	fprintf(stderr, "  --no-markdown    Disable markdown rendering\n");
 	fprintf(stderr, "  -q               Be quiet. (Not implemented yet)\n");
 	fprintf(stderr, "  -v               Be verbose.\n");
 	fprintf(stderr, "  -V | --version   Print version and exit.\n\n");

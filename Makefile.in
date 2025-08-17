@@ -26,6 +26,7 @@ OBJEXT              = @OBJEXT@
 EXEEXT_FOR_BUILD    = @EXEEXT_FOR_BUILD@
 LIBEXT_FOR_BUILD    = @LIBEXT_FOR_BUILD@
 OBJEXT_FOR_BUILD    = @OBJEXT_FOR_BUILD@
+ENABLE_MAINTAINER   = @ENABLE_MAINTAINER@
 ################################################################################################
 
 ############## Optimiser / Warning flags #####
@@ -122,6 +123,9 @@ LIBLOWDOWN_CFLAGS=	$(LIBLOWDOWN_CFLAGS_$(LIBLOWDOWN_FOUND))
 LIBLOWDOWN_LIBS=	$(LIBLOWDOWN_LIBS_$(LIBLOWDOWN_FOUND))
 LIBLOWDOWN_CPPFLAGS_1=	-DHAVE_LIBLOWDOWN=1
 LIBLOWDOWN_CPPFLAGS=	$(LIBLOWDOWN_CPPFLAGS_$(LIBLOWDOWN_FOUND))
+
+# Only used in maintainer mode
+LOWDOWN=		@LOWDOWN@
 
 ############## LIBCRYPTO ########################################
 LIBCRYPTO_CFLAGS=	@LIBCRYPTO_CFLAGS@
@@ -305,8 +309,8 @@ TEMPLATE_SRCS=		${TEMPLATES:.t=.c}
 Makefile: @SRCDIR@/configure @SRCDIR@/Makefile.in
 	@echo "Reconfiguring Makefile"
 	env CC="${CC}" YACC="${YACC}" LEX="${LEX}" RM="${RM}" RANLIB="${RANLIB}" \
-		KYUA="${KYUA}" SHELL="${SHELL}" CFLAGS="${ENV_CFLAGS}" CPPFLAGS="${ENV_CPPFLAGS}" \
-		INSTALL="${INSTALL}" CC_FOR_BUILD="${CC_FOR_BUILD}" \
+		KYUA="${KYUA}" LOWDOWN="${LOWDOWN}" SHELL="${SHELL}" CFLAGS="${ENV_CFLAGS}" CPPFLAGS="${ENV_CPPFLAGS}" \
+		INSTALL="${INSTALL}" CC_FOR_BUILD="${CC_FOR_BUILD}" ENABLE_MAINTAINER="${ENABLE_MAINTAINER}" \
 		LDFLAGS="${ENV_LDFLAGS}" LDFLAGS_FOR_BUILD="${LDFLAGS_FOR_BUILD}" \
 		CFLAGS_FOR_BUILD="${ENV_CFLAGS_FOR_BUILD}" CPPFLAGS_FOR_BUILD="${ENV_CPPFLAGS_FOR_BUILD}" \
 		PKG_CONFIG="${ENV_PKG_CONFIG}" PKG_CONFIG_PATH="${ENV_PKG_CONFIG_PATH}" CCACHE="${CCACHE}" \
@@ -512,11 +516,6 @@ $(MANPAGES): @SRCDIR@/configure Makefile
 .SUFFIXES: .1.in .1 .5.in .5 .md
 #################################################
 # Maintainer target for regenerating the tutorial
-#
-# In the case you're building from a tarball, these targets should
-# *NEVER* get invoked, unless your OS doesn't extract the tarball
-# properly. This is checked for sanity by the distcheck target which
-# makes the srcdir untouchable.
 TUTORIAL_PAGES:sh=	find @SRCDIR@/docs/website/tutorial/ -type f -name *.md | grep -v old_index.md | sort
 TUTORIAL_PAGES!=	find @SRCDIR@/docs/website/tutorial/ -type f -name \*.md | grep -v old_index.md | sort
 
@@ -529,9 +528,10 @@ TUTORIAL_PAGES!=	find @SRCDIR@/docs/website/tutorial/ -type f -name \*.md | grep
 		-m date="@PACKAGE_DATE@" \
 	> @SRCDIR@/docs/gcli-tutorial.1.in
 
-# Somehow BSD Make and Schily Make need this dependency declaration
-# to actually grok the dependencies.
-docs/gcli-tutorial.1: @SRCDIR@/docs/gcli-tutorial.1.in
+# Dispatch between maintainer/non-maintainer mode
+TUTORIAL_SRC_MAINTAINER_0=
+TUTORIAL_SRC_MAINTAINER_1=	@SRCDIR@/docs/gcli-tutorial.1.in
+docs/gcli-tutorial.1: $(TUTORIAL_SRC_MAINTAINER_$(ENABLE_MAINTAINER))
 
 #################################################
 # Manual page preprocessing rules

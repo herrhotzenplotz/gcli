@@ -136,6 +136,10 @@ OPTIONS:
     --enable-liblowdown     Search and use liblowdown for markdown rendering [DEFAULT: yes]
     --disable-liblowdown    Disable use of liblowdown
     --disable-librt         Forcefully disable linking librt [DEFAULT: no, except on Darwin]
+    --enable-maintainer     Enable Maintainer Mode [DEFAULT: no]
+                            You only want this if you're working on the gcli source code.
+                            In this case certain build targets get enabled that only work
+                            when the source directory is writable.
     --debug                 Compile without optimisations, generate code with
                             debug information and enable additional compiler-specific
                             warnings and portability checks.
@@ -176,6 +180,7 @@ ENABLE_LIBEDIT=1
 ENABLE_LIBREADLINE=1
 ENABLE_LIBLOWDOWN=1
 ENABLE_LIBRT=1
+ENABLE_MAINTAINER=${ENABLE_MAINTAINER:-0}
 
 # Parse flags
 while [ $# -gt 0 ]; do
@@ -214,6 +219,10 @@ while [ $# -gt 0 ]; do
 			;;
 		--disable-liblowdown)
 			ENABLE_LIBLOWDOWN=0
+			shift
+			;;
+		--enable-maintainer)
+			ENABLE_MAINTAINER=1
 			shift
 			;;
 		--debug)
@@ -379,6 +388,11 @@ INSTALL=${INSTALL:-$(find_program install install ginstall)}
 SHELL=${SHELL:-$(find_program sh sh zsh bash)}
 [ $? -eq 0 ] || die "error: need install program"
 
+# If maintainer mode is enabled, we need lowdown(1)
+if [ ${ENABLE_MAINTAINER} -eq 1 ]; then
+	LOWDOWN=${LOWDOWN:-$(find_program lowdown lowdown)}
+fi
+
 ###################################################################
 # Configure Makefile
 ###################################################################
@@ -443,6 +457,8 @@ sed \
 	-e "s|@EXEEXT_FOR_BUILD@|$EXEEXT_FOR_BUILD|g" \
 	-e "s|@OBJEXT_FOR_BUILD@|$OBJEXT_FOR_BUILD|g" \
 	-e "s|@LIBEXT_FOR_BUILD@|$LIBEXT_FOR_BUILD|g" \
+	-e "s|@ENABLE_MAINTAINER@|$ENABLE_MAINTAINER|g" \
+	-e "s|@LOWDOWN@|$LOWDOWN|g" \
 	< "${srcdir}/Makefile.in" > Makefile
 
 echo "Writing config.h"
@@ -489,6 +505,10 @@ echo "      LIBLOWDOWN_LIBS: ${LIBLOWDOWN_LIBS}"
 fi
 if [ $ENABLE_LIBRT -eq 0 ]; then
 echo " Not linking -lrt because it was disabled"
+fi
+if [ $ENABLE_MAINTAINER -eq 1 ]; then
+echo ""
+echo "     WARNING: Maintainer mode is enabled!"
 fi
 echo ""
 echo "Configuration done. You may now run make."

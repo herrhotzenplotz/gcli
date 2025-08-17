@@ -89,7 +89,7 @@ directory for a build with no optimisations and full debug info.
 
 I suggest you use it for development purposes:
 
-    $ ../configure --debug
+    $ ../configure --debug --enable-maintainer
 
 You can proceed as usual with make.
 

@@ -11,6 +11,10 @@ This changelog does not follow semantic versioning.
   the given user. See the `gcli-issues(1)` manual page for more
   details.
 
+- An experimental `discussions` action was added to the pulls
+  subcommand. It prints reviews and their comments in a threaded
+  view. See the `gcli-pulls(1)` manual page for more details.
+
 ### Fixed
 
 - A bug in the autodetection of remotes and forge types from

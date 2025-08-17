@@ -15,6 +15,12 @@ This changelog does not follow semantic versioning.
   subcommand. It prints reviews and their comments in a threaded
   view. See the `gcli-pulls(1)` manual page for more details.
 
+- The online version of the gcli tutorial is now compiled into a
+  manual page `gcli-tutorial(1)` which is installed by default. It
+  is included pre-generated in the release tarball but can be rebuilt
+  by setting the newly added `--enable-maintainer` option of the
+  configure script.
+
 ### Fixed
 
 - A bug in the autodetection of remotes and forge types from

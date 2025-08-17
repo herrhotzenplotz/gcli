@@ -519,7 +519,11 @@ $(MANPAGES): @SRCDIR@/configure Makefile
 TUTORIAL_PAGES:sh=	find @SRCDIR@/docs/website/tutorial/ -type f -name *.md | grep -v old_index.md | sort
 TUTORIAL_PAGES!=	find @SRCDIR@/docs/website/tutorial/ -type f -name \*.md | grep -v old_index.md | sort
 
-@SRCDIR@/docs/gcli-tutorial.1.in: Makefile $(TUTORIAL_PAGES)
+# Dispatch between maintainer/non-maintainer mode
+TUTORIAL_SRC_MAINTAINER_0=
+TUTORIAL_SRC_MAINTAINER_1=	@SRCDIR@/docs/gcli-tutorial.1.in
+
+$(TUTORIAL_SRC_MAINTAINER_$(ENABLE_MAINTAINER)): Makefile $(TUTORIAL_PAGES)
 	cat $(TUTORIAL_PAGES) \
 	| lowdown -s -tman \
 		-m section=1 \
@@ -528,9 +532,6 @@ TUTORIAL_PAGES!=	find @SRCDIR@/docs/website/tutorial/ -type f -name \*.md | grep
 		-m date="@PACKAGE_DATE@" \
 	> @SRCDIR@/docs/gcli-tutorial.1.in
 
-# Dispatch between maintainer/non-maintainer mode
-TUTORIAL_SRC_MAINTAINER_0=
-TUTORIAL_SRC_MAINTAINER_1=	@SRCDIR@/docs/gcli-tutorial.1.in
 docs/gcli-tutorial.1: $(TUTORIAL_SRC_MAINTAINER_$(ENABLE_MAINTAINER))
 
 #################################################

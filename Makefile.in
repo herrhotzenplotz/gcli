@@ -525,7 +525,7 @@ TUTORIAL_SRC_MAINTAINER_1=	@SRCDIR@/docs/gcli-tutorial.1.in
 
 $(TUTORIAL_SRC_MAINTAINER_$(ENABLE_MAINTAINER)): Makefile $(TUTORIAL_PAGES)
 	cat $(TUTORIAL_PAGES) \
-	| lowdown -s -tman \
+	| $(LOWDOWN) -s -tman \
 		-m section=1 \
 		-m title=gcli-tutorial \
 		-m manheader="Tutorial of GCLI - Generated Offline Version of https://herrhotzenplotz.de/gcli/tutorial" \

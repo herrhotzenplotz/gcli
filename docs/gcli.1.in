@@ -17,6 +17,11 @@ can be used to interact with
 forges like GitHub, GitLab and Gitea from the command line in order to
 make many tasks like managing issues and pull requests easier.
 .Pp
+If you're looking for a guided tutorial either go to
+.Lk https://herrhotzenplotz.de/gcli/tutorial
+or read the offline version
+.Xr gcli-tutorial 1 .
+.Pp
 Calls to
 .Nm
 usually consist of either only the subcommand to list requested data

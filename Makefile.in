@@ -577,3 +577,20 @@ distcheck-auto:
 	(cd dist && tar -x -f @SRCDIR@/dist/gcli-$(GCLI_VERSION)/gcli-$(GCLI_VERSION).tar.gz && chmod -R a-w gcli-$(GCLI_VERSION))
 	(cd dist/.build-gcli-$(GCLI_VERSION) && ../gcli-$(GCLI_VERSION)/configure && $(MAKE) && $(MAKE) check)
 	(chmod -R a+w dist/gcli-$(GCLI_VERSION) && rm -fr dist/.build-gcli-$(GCLI_VERSION) dist/gcli-$(GCLI_VERSION))
+
+###############################################################
+# Help Target
+.PHONY: help help-auto
+help: Makefile
+	@$(MAKE) help-auto
+
+help-auto:
+	@echo "Available targets:"
+	@echo "        all - Do a full build (this is the default target)"
+	@echo "      check - Run the test suite"
+	@echo "       dist - Build distribution tarballs"
+	@echo "  distcheck - Run the test suite on the built distribution tarball."
+	@echo "      clean - Clean the build directory"
+	@echo "    analyse - Run static code analysis"
+	@echo "    install - Install build artifacts"
+	@echo "   manpages - Only build manual pages"

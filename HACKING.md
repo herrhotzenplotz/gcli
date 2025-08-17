@@ -69,6 +69,10 @@ To run the test suite:
 Note that running the test suite requires ATF and Kyua. More details
 can be found below.
 
+To run the compiler's built-in static code analyser:
+
+    $ make analyse
+
 If you wish to change the compiler to be used you can set these in the
 environment:
 

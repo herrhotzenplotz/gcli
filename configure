@@ -512,5 +512,7 @@ echo "     WARNING: Maintainer mode is enabled!"
 fi
 echo ""
 echo "Configuration done. You may now run make."
+echo "For more information about available build targets, run 'make help'."
+echo ""
 
 # vim: ft=sh

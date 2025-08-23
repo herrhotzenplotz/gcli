@@ -220,6 +220,10 @@ List reviews of this pull request.
 .It Cm discussions
 Print the review discussions in a threaded form.
 This is currently only implemented for GitHub.
+.It Cm approve
+Give your approval on the pull request.
+.It Cm unapprove
+Revoke your approval on the pull request.
 .El
 .Sh EXAMPLES
 Print a list of open PRs in the current project:

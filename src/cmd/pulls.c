@@ -108,6 +108,8 @@ usage(void)
 	fprintf(stderr, "  reviews                List reviews of this PR\n");
 	if (gcli_config_enable_experimental(g_clictx))
 		fprintf(stderr, "  discussions            Show a threaded view of review discussions\n");
+	fprintf(stderr, "  approve                Approve this PR\n");
+	fprintf(stderr, "  unapprove              Revoke approval on this PR\n");
 
 	fprintf(stderr, "\n");
 	version();
@@ -1470,6 +1472,50 @@ action_discussion(struct gcli_path const *const path,
 	return GCLI_EX_OK;
 }
 
+static int
+action_approve(struct gcli_path const *const path,
+               struct gcli_pull const *const pull,
+               int *argc, char **argv[])
+{
+	int rc;
+
+	(void) pull;
+	(void) argc;
+	(void) argv;
+
+	rc = gcli_pull_approve(g_clictx, path, NULL);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to approve pull: %s\n",
+		        gcli_get_error(g_clictx));
+
+		return GCLI_EX_DATAERR;
+	}
+
+	return GCLI_EX_OK;
+}
+
+static int
+action_unapprove(struct gcli_path const *const path,
+                 struct gcli_pull const *const pull,
+                 int *argc, char **argv[])
+{
+	int rc;
+
+	(void) pull;
+	(void) argc;
+	(void) argv;
+
+	rc = gcli_pull_unapprove(g_clictx, path, NULL);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to unapprove pull: %s\n",
+		        gcli_get_error(g_clictx));
+
+		return GCLI_EX_DATAERR;
+	}
+
+	return GCLI_EX_OK;
+}
+
 struct gcli_cmd_actions gcli_pull_actions = {
 	.fetch_item = (gcli_cmd_action_fetcher)gcli_get_pull,
 	.free_item = (gcli_cmd_action_freeer)gcli_pull_free,
@@ -1587,6 +1633,16 @@ struct gcli_cmd_actions gcli_pull_actions = {
 			.name = "discussions",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler) action_discussion,
+		},
+		{
+			.name = "approve",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler) action_approve,
+		},
+		{
+			.name = "unapprove",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler) action_unapprove,
 		},
 	},
 };

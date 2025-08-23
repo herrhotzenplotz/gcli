@@ -125,6 +125,11 @@ enum {
 	GCLI_REVIEW_COMMENT = 3,
 };
 
+enum gcli_pull_approval_state {
+	GCLI_PULL_APPROVED = GCLI_REVIEW_ACCEPT_CHANGES,
+	GCLI_PULL_UNAPPROVED = GCLI_REVIEW_REQUEST_CHANGES,
+};
+
 struct gcli_review_meta_line {
 	TAILQ_ENTRY(gcli_review_meta_line) next;
 	char *entry;
@@ -133,7 +138,7 @@ struct gcli_review_meta_line {
 struct gcli_pull_create_review_details {
 	struct gcli_path path;
 	struct gcli_diff_comments comments;
-	char *body;       /* string containing the prelude message by the user */
+	char const *body;       /* string containing the prelude message by the user */
 	TAILQ_HEAD(, gcli_review_meta_line) meta_lines;
 	int review_state;
 };
@@ -275,5 +280,11 @@ int gcli_pull_get_review_threads(struct gcli_ctx *ctx,
                                  struct gcli_pull_review_thread *out);
 
 void gcli_pull_review_thread_free(struct gcli_pull_review_thread *thd);
+
+int gcli_pull_approve(struct gcli_ctx *ctx, struct gcli_path const *path,
+                      char const *const message);
+
+int gcli_pull_unapprove(struct gcli_ctx *ctx, struct gcli_path const *path,
+                        char const *const message);
 
 #endif /* PULLS_H */

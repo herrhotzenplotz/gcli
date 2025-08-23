@@ -715,6 +715,13 @@ github_pull_create_review(struct gcli_ctx *ctx,
 	char *url = NULL, *payload = NULL;
 	struct gcli_jsongen gen = {0};
 
+	/* lookup table for translating enum to string */
+	char const *const state_string[] = {
+		[GCLI_REVIEW_ACCEPT_CHANGES] = "APPROVE",
+		[GCLI_REVIEW_REQUEST_CHANGES] = "REQUEST_CHANGES",
+		[GCLI_REVIEW_COMMENT] = "COMMENT",
+	};
+
 	rc = github_pull_make_url(ctx, &details->path, &url, "/reviews");
 	if (rc < 0)
 		return rc;
@@ -730,21 +737,7 @@ github_pull_create_review(struct gcli_ctx *ctx,
 		gcli_jsongen_string(&gen, details->body);
 
 		gcli_jsongen_objmember(&gen, "event");
-		switch (details->review_state) {
-		case GCLI_REVIEW_ACCEPT_CHANGES:
-			gcli_jsongen_string(&gen, "APPROVE");
-			break;
-		case GCLI_REVIEW_REQUEST_CHANGES:
-			gcli_jsongen_string(&gen, "REQUEST_CHANGES");
-			break;
-		case GCLI_REVIEW_COMMENT:
-			gcli_jsongen_string(&gen, "COMMENT");
-			break;
-		default:
-			rc = gcli_error(ctx, "bad review state: %d",
-			                details->review_state);
-			goto bail;
-		}
+		gcli_jsongen_string(&gen, state_string[details->review_state]);
 
 		gcli_jsongen_objmember(&gen, "comments");
 		gcli_jsongen_begin_array(&gen);

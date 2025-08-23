@@ -337,3 +337,29 @@ gcli_pull_review_thread_free(struct gcli_pull_review_thread *thd)
 		c = c1;
 	}
 }
+
+int
+gcli_pull_approve(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                  char const *const message)
+{
+	struct gcli_pull_create_review_details details = {0};
+
+	details.path = *path;
+	details.body = message;
+	details.review_state = GCLI_PULL_APPROVED;
+
+	return gcli_pull_create_review(ctx, &details);
+}
+
+int
+gcli_pull_unapprove(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                    char const *const message)
+{
+	struct gcli_pull_create_review_details details = {0};
+
+	details.path = *path;
+	details.body = message;
+	details.review_state = GCLI_PULL_UNAPPROVED;
+
+	return gcli_pull_create_review(ctx, &details);
+}

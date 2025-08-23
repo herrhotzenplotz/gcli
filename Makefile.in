@@ -516,7 +516,7 @@ $(MANPAGES): @SRCDIR@/configure Makefile
 .SUFFIXES: .1.in .1 .5.in .5 .md
 #################################################
 # Maintainer target for regenerating the tutorial
-TUTORIAL_PAGES:sh=	find @SRCDIR@/docs/website/tutorial/ -type f -name *.md | grep -v old_index.md | sort
+TUTORIAL_PAGES:sh=	find @SRCDIR@/docs/website/tutorial/ -type f -name \*.md | grep -v old_index.md | sort
 TUTORIAL_PAGES!=	find @SRCDIR@/docs/website/tutorial/ -type f -name \*.md | grep -v old_index.md | sort
 
 # Dispatch between maintainer/non-maintainer mode

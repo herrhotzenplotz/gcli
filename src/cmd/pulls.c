@@ -1472,26 +1472,58 @@ action_discussion(struct gcli_path const *const path,
 	return GCLI_EX_OK;
 }
 
+static void
+approval_init(struct gcli_ctx *ctx, FILE *f, void *data)
+{
+	(void) ctx;
+	(void) data;
+
+	fprintf(f, "\n");
+	fprintf(f, "! Enter your message above, save and exit.\n");
+	fprintf(f, "! All lines starting with '!' will be discarded.\n");
+}
+
+static int
+approval_action(struct gcli_path const *const path,
+                int (*fn)(struct gcli_ctx *ctx, struct gcli_path const *, char const *))
+{
+	int rc;
+	char *message = NULL;
+
+	if (gcli_yesno("Enter a message?")) {
+		message = gcli_editor_get_user_message(g_clictx, approval_init, NULL);
+
+		if (message == NULL) {
+			fprintf(stderr, "gcli: message empty, aborting.\n");
+			return GCLI_EX_DATAERR;
+		}
+	}
+
+	rc = fn(g_clictx, path, message);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to update pull: %s\n",
+		        gcli_get_error(g_clictx));
+
+		rc = GCLI_EX_DATAERR;
+	} else {
+		rc = GCLI_EX_OK;
+	}
+
+	free(message);
+
+	return rc;
+}
+
 static int
 action_approve(struct gcli_path const *const path,
                struct gcli_pull const *const pull,
                int *argc, char **argv[])
 {
-	int rc;
-
 	(void) pull;
 	(void) argc;
 	(void) argv;
 
-	rc = gcli_pull_approve(g_clictx, path, NULL);
-	if (rc < 0) {
-		fprintf(stderr, "gcli: error: failed to approve pull: %s\n",
-		        gcli_get_error(g_clictx));
-
-		return GCLI_EX_DATAERR;
-	}
-
-	return GCLI_EX_OK;
+	return approval_action(path, gcli_pull_approve);
 }
 
 static int
@@ -1499,21 +1531,11 @@ action_unapprove(struct gcli_path const *const path,
                  struct gcli_pull const *const pull,
                  int *argc, char **argv[])
 {
-	int rc;
-
 	(void) pull;
 	(void) argc;
 	(void) argv;
 
-	rc = gcli_pull_unapprove(g_clictx, path, NULL);
-	if (rc < 0) {
-		fprintf(stderr, "gcli: error: failed to unapprove pull: %s\n",
-		        gcli_get_error(g_clictx));
-
-		return GCLI_EX_DATAERR;
-	}
-
-	return GCLI_EX_OK;
+	return approval_action(path, gcli_pull_unapprove);
 }
 
 struct gcli_cmd_actions gcli_pull_actions = {

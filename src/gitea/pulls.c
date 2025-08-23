@@ -318,3 +318,11 @@ gitea_pull_set_title(struct gcli_ctx *ctx, struct gcli_path const *const path,
 {
 	return github_pull_set_title(ctx, path, title);
 }
+
+int
+gitea_pull_get_reviews(struct gcli_ctx *ctx,
+                       struct gcli_path const *const path,
+                       struct gcli_pull_reviews *out)
+{
+	return github_pull_get_reviews(ctx, path, out);
+}

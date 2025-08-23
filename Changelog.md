@@ -21,6 +21,13 @@ This changelog does not follow semantic versioning.
   by setting the newly added `--enable-maintainer` option of the
   configure script.
 
+- Two actions `approve` and `unapprove` have been added to the
+  `pulls` subcommand.  These allow giving approval or rejecting a
+  pull request, offering to enter a commant about why a given PR
+  was approved or rejected.  Because this reuses code from the
+  reviews subsystem this currently only works on GitHub and Gitlab,
+  however support for Gitea will be added in the next release.
+
 ### Fixed
 
 - A bug in the autodetection of remotes and forge types from

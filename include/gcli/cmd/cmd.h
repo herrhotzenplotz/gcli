@@ -78,4 +78,9 @@ char *gcli_cmd_realpath(char const *const restrict pathname);
 
 bool gcli_cmd_should_do_always_yes(void);
 
+void gcli_cmd_save_message(char const *);
+bool gcli_cmd_can_recall_message(void);
+char *gcli_cmd_recall_message(void);
+void gcli_cmd_recall_message_interactive(char **out);
+
 #endif /* GCLI_CMD_CMD_H */

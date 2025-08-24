@@ -38,6 +38,7 @@
 #include <gcli/repos.h>
 
 #include <ctype.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -389,4 +390,58 @@ bool
 gcli_cmd_should_do_always_yes(void)
 {
 	return !isatty(STDIN_FILENO);
+}
+
+void
+gcli_cmd_save_message(char const *const message)
+{
+	FILE *f = fopen("gcli_message", "w");
+	if (!f) {
+		fprintf(stderr, "gcli: warning: failed to open 'gcli_message' "
+		        "for write, cannot save message\n");
+		return;
+	}
+
+	fputs(message, f);
+	fclose(f);
+
+	fprintf(stderr, "gcli: Message was saved in 'gcli_message'. "
+	                "Re-run the command to recall it.\n");
+}
+
+bool
+gcli_cmd_can_recall_message(void)
+{
+	return !access("gcli_message", R_OK);
+}
+
+char *
+gcli_cmd_recall_message(void)
+{
+	char *result = NULL;
+	int rc = 0;
+
+	/* read */
+	rc = gcli_read_file("gcli_message", &result);
+	if (rc < 0)
+		return NULL;
+
+	/* delete old message file */
+	rc = unlink("gcli_message");
+	if (rc < 0) {
+		fprintf(stderr, "gcli: warning: cannot delete gcli_message: %s\n",
+		        strerror(errno));
+	}
+
+	return result;
+}
+
+void
+gcli_cmd_recall_message_interactive(char **out)
+{
+	/* recall an old message if needed, skip if there is a template */
+	if (*out == NULL && gcli_cmd_can_recall_message()) {
+		if (gcli_yesno("Recall previously saved message?"))
+			*out = gcli_cmd_recall_message();
+	}
 }

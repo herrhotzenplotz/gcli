@@ -60,7 +60,7 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: gcli pulls create [-o owner -r repo] [-f from]\n");
-	fprintf(stderr, "                         [-t to] [-d] [-a] [-l label] [pull-request-title]\n");
+	fprintf(stderr, "                         [-t to] [-T template] [-d] [-a] [-l label] [pull-request-title]\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] [-a] [-A author] [-n number]\n");
 	fprintf(stderr, "                  [-L label] [-M milestone] [-s] [search-terms...]\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] -i pull-id actions...\n");
@@ -79,6 +79,7 @@ usage(void)
 	fprintf(stderr, "  -i id           ID of PR to perform actions on\n");
 	fprintf(stderr, "  -s              Print (sort) in reverse order\n");
 	fprintf(stderr, "  -t branch       Specify target branch of the PR\n");
+	fprintf(stderr, "  -T template     Use the given file as a template for the pull message\n");
 	fprintf(stderr, "  -y              Do not ask for confirmation.\n");
 	fprintf(stderr, "ACTIONS:\n");
 	fprintf(stderr, "  all                    Display status, commits, op and checks of the PR\n");
@@ -429,12 +430,7 @@ create_pull(struct gcli_submit_pull_options *const opts, bool always_yes)
 {
 	int rc = 0;
 
-	/* recall an old message if needed */
-	if (opts->body == NULL && gcli_cmd_can_recall_message()) {
-		if (gcli_yesno("Recall previously saved message?"))
-			opts->body = gcli_cmd_recall_message();
-	}
-
+	gcli_cmd_recall_message_interactive(&opts->body);
 	opts->body = gcli_pull_get_user_message(opts);
 
 	printf("The following PR will be created:\n"
@@ -621,12 +617,16 @@ subcommand_pull_create(int argc, char *argv[])
 		  .has_arg = required_argument,
 		  .flag = NULL,
 		  .val = 'R' },
+		{ .name = "template",
+		  .has_arg = required_argument,
+		  .flag = NULL,
+		  .val = 'T' },
 		{0},
 	};
 
 	always_yes = gcli_cmd_should_do_always_yes();
 
-	while ((ch = getopt_long(argc, argv, "ayf:t:do:r:l:R:", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "ayf:t:do:r:l:R:T:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'f':
 			opts.from = optarg;
@@ -658,6 +658,12 @@ subcommand_pull_create(int argc, char *argv[])
 			break;
 		case 'a':
 			opts.automerge = true;
+			break;
+		case 'T': /* template file */
+			if (gcli_read_file(optarg, &opts.body) < 0) {
+				err(1, "gcli: error: failed to read file '%s'",
+				    optarg);
+			}
 			break;
 		default:
 			usage();

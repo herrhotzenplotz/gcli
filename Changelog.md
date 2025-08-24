@@ -50,9 +50,8 @@ This changelog does not follow semantic versioning.
 
 - Compiler output file extensions are now guessed by the configure script
 
-  This is done to eventually restore Windows / Cygwin compatibility.
-  In theory it should be possible to build with Cygwin again, however
-  I haven't tested this to confirm.
+  This is done for Windows compatibility. People have reported that
+  it is now possible again to build gcli on MSYS2.
 
   If the guessed extensions are wrong, one may override the guessed
   extensions using the environment variables  `EXEEXT`, `OBJEXT`,

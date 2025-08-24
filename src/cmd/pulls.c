@@ -383,6 +383,15 @@ pull_init_user_file(struct gcli_ctx *ctx, FILE *stream, void *_opts)
 	struct gcli_submit_pull_options *opts = _opts;
 
 	(void) ctx;
+
+	/* recalled message or template */
+	if (opts->body) {
+		fputs(opts->body, stream);
+
+		free(opts->body);
+		opts->body = NULL;
+	}
+
 	fprintf(
 		stream,
 		"! PR TITLE : %s\n"
@@ -418,6 +427,14 @@ pull_request_target_repo(struct gcli_path const *const repo_path)
 static int
 create_pull(struct gcli_submit_pull_options *const opts, bool always_yes)
 {
+	int rc = 0;
+
+	/* recall an old message if needed */
+	if (opts->body == NULL && gcli_cmd_can_recall_message()) {
+		if (gcli_yesno("Recall previously saved message?"))
+			opts->body = gcli_cmd_recall_message();
+	}
+
 	opts->body = gcli_pull_get_user_message(opts);
 
 	printf("The following PR will be created:\n"
@@ -441,7 +458,17 @@ create_pull(struct gcli_submit_pull_options *const opts, bool always_yes)
 			errx(1, "gcli: PR aborted.");
 	}
 
-	return gcli_pull_submit(g_clictx, opts);
+	rc = gcli_pull_submit(g_clictx, opts);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to create pull: %s\n",
+		        gcli_get_error(g_clictx));
+
+		/* store message away in `gcli_message` */
+		if (opts->body)
+			gcli_cmd_save_message(opts->body);
+	}
+
+	return rc;
 }
 
 static char const *
@@ -548,10 +575,8 @@ subcommand_pull_create_interactive(struct gcli_submit_pull_options *const opts)
 
 	/* create_pull is going to pop up the editor */
 	rc = create_pull(opts, false);
-	if (rc < 0) {
-		fprintf(stderr, "gcli: error: %s\n", gcli_get_error(g_clictx));
+	if (rc < 0)
 		return EXIT_FAILURE;
-	}
 
 	return EXIT_SUCCESS;
 }
@@ -670,8 +695,7 @@ subcommand_pull_create(int argc, char *argv[])
 	opts.title = argv[0];
 
 	if (create_pull(&opts, always_yes) < 0)
-		errx(1, "gcli: error: failed to submit pull request: %s",
-		     gcli_get_error(g_clictx));
+		return EXIT_FAILURE;
 
 	free(opts.labels);
 

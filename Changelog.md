@@ -58,10 +58,11 @@ This changelog does not follow semantic versioning.
   extensions using the environment variables  `EXEEXT`, `OBJEXT`,
   `LIBEXT`, `EXEEXT_FOR_BUILD`, `OBJEXT_FOR_BUILD` and `LIBEXT_FOR_BUILD`.
 
-- When a pull/merge request submission has failed, gcli will now
-  store the entered message in `$PWD/gcli_message`. When the `pulls create`
-  subcommand is later re-run and this file is found, gcli will ask
-  you whether you wish to recall its contents for the new PR message.
+- When a pull/merge request or issue submission has failed, gcli
+  will now store the entered message in `$PWD/gcli_message`. When
+  the `pulls|issue create` subcommand is later re-run and this file
+  is found, gcli will ask you whether you wish to recall its contents
+  for the new message.
 
   Suggested-by: Bence Ferdinandy <bence@ferdinandy.com>
 

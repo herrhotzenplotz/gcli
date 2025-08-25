@@ -65,6 +65,9 @@ This changelog does not follow semantic versioning.
 
   Suggested-by: Bence Ferdinandy <bence@ferdinandy.com>
 
+- The pdjson dependency is now unbundled by default. In case it
+  is not found via pkg-config the vendored copy is used instead.
+
 ### Removed
 
 ## 2.8.0 (25-May-2025)

@@ -36,7 +36,7 @@
 
 #include <gcli/curl.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 #include <stdint.h>
 

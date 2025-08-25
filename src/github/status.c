@@ -33,7 +33,7 @@
 #include <gcli/github/status.h>
 #include <gcli/json_util.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 #include <templates/github/status.h>
 

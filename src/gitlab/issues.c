@@ -38,7 +38,7 @@
 
 #include <templates/gitlab/issues.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 #include <assert.h>
 #include <stdarg.h>

@@ -37,7 +37,7 @@
 
 #include <templates/gitea/milestones.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 #include <gcli/port/string.h>
 

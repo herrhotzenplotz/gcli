@@ -36,7 +36,7 @@
 #include <gcli/curl.h>
 #include <gcli/issues.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 int bugzilla_get_bugs(struct gcli_ctx *ctx, struct gcli_path const *path,
                       struct gcli_issue_fetch_details const *details,

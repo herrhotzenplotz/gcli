@@ -36,7 +36,7 @@
 #include <gcli/gcli.h>
 #include <gcli/issues.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 int parse_bugzilla_bug_comments_dictionary_skip_first(struct gcli_ctx *const ctx,
                                                       struct json_stream *stream,

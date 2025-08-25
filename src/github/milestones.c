@@ -38,7 +38,7 @@
 
 #include <templates/github/milestones.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 #include <assert.h>
 #include <stdarg.h>

@@ -322,6 +322,9 @@ else
 	LIBLOWDOWN_FOUND=0
 fi
 
+# If there is no system-provided pdjson, use the vendored one
+find_package pdjson PDJSON optional
+
 # On Darwin the POSIX Real-Time extensions are in libc. We must not
 # link against librt because it doesn't exist.
 if [ $ENABLE_LIBRT -eq 1 ]; then
@@ -424,6 +427,9 @@ sed \
 	-e "s|@LIBLOWDOWN_LIBS@|$LIBLOWDOWN_LIBS|g" \
 	-e "s|@LIBLOWDOWN_MAJOR@|$LIBLOWDOWN_MAJOR|g" \
 	-e "s|@LIBLOWDOWN_MINOR@|$LIBLOWDOWN_MINOR|g" \
+	-e "s|@PDJSON_FOUND@|$PDJSON_FOUND|g" \
+	-e "s|@PDJSON_CFLAGS@|$PDJSON_CFLAGS|g" \
+	-e "s|@PDJSON_LIBS@|$PDJSON_LIBS|g" \
 	-e "s|@ENABLE_LIBRT@|$ENABLE_LIBRT|g" \
 	-e "s|@CONFIGURE_CMD_ARGS@|$CONFIGURE_CMD_ARGS|g" \
 	-e "s|@CC@|$CC|g" \
@@ -502,6 +508,15 @@ if [ $LIBLOWDOWN_FOUND -eq 1 ]; then
 echo " Using lowdown ${LIBLOWDOWN_VERSION}:"
 echo "    LIBLOWDOWN_CFLAGS: ${LIBLOWDOWN_CFLAGS}"
 echo "      LIBLOWDOWN_LIBS: ${LIBLOWDOWN_LIBS}"
+fi
+if [ $PDJSON_FOUND -eq 1 ]; then
+echo " Using pdjson:"
+echo "        PDJSON_CFLAGS: ${PDJSON_CFLAGS}"
+echo "          PDJSON_LIBS: ${PDJSON_LIBS}"
+else
+echo ""
+echo "     WARNING: pdjson not found, using vendored version."
+echo "              You may wish to install a system version instead."
 fi
 if [ $ENABLE_LIBRT -eq 0 ]; then
 echo " Not linking -lrt because it was disabled"

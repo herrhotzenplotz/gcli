@@ -36,7 +36,7 @@
 
 #include <gcli/github/config.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 #include <templates/github/gists.h>
 

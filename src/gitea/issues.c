@@ -38,7 +38,7 @@
 #include <gcli/labels.h>
 #include <gcli/url.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 #include <templates/github/issues.h>
 

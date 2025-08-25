@@ -66,7 +66,7 @@ header_dump_h(void)
 	fprintf(outfile, "#ifndef %s\n", hname);
 	fprintf(outfile, "#define %s\n\n", hname);
 
-	fprintf(outfile, "#include <pdjson/pdjson.h>\n");
+	fprintf(outfile, "#include <pdjson.h>\n");
 	free(hname);
 }
 

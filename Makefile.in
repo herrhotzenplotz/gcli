@@ -55,7 +55,7 @@ CFLAGS_gcc=		-fPIC -pipe
 CFLAGS_sunstudio=	-m64 -errtags=yes -errfmt=error -errwarn=%all -xcode=pic32 -DPIC -xregs=no%appl
 CFLAGS_sunstudio +=	-erroff=E_TOKENLESS_MACRO                # Causes errors with TAILQ_HEAD(, ...)
 CFLAGS_sunstudio +=	-erroff=E_STATEMENT_NOT_REACHED          # Causes errors in pdjson.c
-CFLAGS=			$(CSTDFLAGS) $(COPTFLAGS) $(CFLAGS_$(CCOM)) -I@SRCDIR@/include -I@SRCDIR@/thirdparty -I. $(ENV_CFLAGS)
+CFLAGS=			$(CSTDFLAGS) $(COPTFLAGS) $(CFLAGS_$(CCOM)) -I@SRCDIR@/include -I. $(ENV_CFLAGS)
 
 ENV_CFLAGS_FOR_BUILD=	@ENV_CFLAGS_FOR_BUILD@
 CFLAGS_FOR_BUILD=	$(CSTDFLAGS_FOR_BUILD) $(COPTFLAGS_FOR_BUILD) $(CFLAGS_$(CCOM)) -I@SRCDIR@/include -I@SRCDIR@/thirdparty -I. $(ENV_CFLAGS_FOR_BUILD)
@@ -135,6 +135,24 @@ LIBCRYPTO_LIBS=		@LIBCRYPTO_LIBS@
 ENABLE_LIBRT=		@ENABLE_LIBRT@
 LIBRT_LIBS_1=		-lrt
 LIBRT_LIBS=		$(LIBRT_LIBS_$(ENABLE_LIBRT))
+
+############## PDJSON ###########################################
+# system version
+PDJSON_CFLAGS_1=	@PDJSON_CFLAGS@
+PDJSON_LIBS_1=		@PDJSON_LIBS@
+PDJSON_SRCS_1=
+
+# vendored version
+PDJSON_CFLAGS_0=	-I@SRCDIR@/thirdparty/pdjson
+PDJSON_LIBS_0=
+PDJSON_SRCS_0=		thirdparty/pdjson/pdjson.c
+
+# dispatch
+PDJSON_FOUND=		@PDJSON_FOUND@
+PDJSON_CFLAGS=		$(PDJSON_CFLAGS_$(PDJSON_FOUND))
+PDJSON_LIBS=		$(PDJSON_LIBS_$(PDJSON_FOUND))
+PDJSON_SRCS=		$(PDJSON_SRCS_$(PDJSON_FOUND))
+
 #################################################################
 
 .PHONY: all all-auto clean clean-auto check check-auto install install-auto analyse analyse-auto
@@ -232,7 +250,7 @@ LIBGCLI_SRCS = \
 	src/port/string.c \
 	src/port/sv.c \
 	src/port/util.c \
-	thirdparty/pdjson/pdjson.c
+	$(PDJSON_SRCS)
 
 GCLI_SRCS= \
 	src/cmd/actions.c \
@@ -352,7 +370,7 @@ gcli$(EXEEXT): libgcli$(LIBEXT) $(GCLI_OBJS)
 	$(CCACHE) $(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o gcli$(EXEEXT) \
 		$(GCLI_OBJS) libgcli$(LIBEXT) $(LIBCURL_LIBS) $(LIBEDIT_LIBS) \
 		$(LIBREADLINE_LIBS) $(LIBCRYPTO_LIBS) \
-		$(LIBLOWDOWN_LIBS) \
+		$(LIBLOWDOWN_LIBS) $(PDJSON_LIBS) \
 		$(LIBRT_LIBS)
 
 libgcli$(LIBEXT): $(LIBGCLI_OBJS)
@@ -367,6 +385,7 @@ $(LIBGCLI_OBJS): $(TEMPLATE_HEADERS) $(TEMPLATE_SRCS)
 	$(CCACHE) $(CC) $(CFLAGS) $(CCDEPFLAGS) $(CPPFLAGS) \
 		$(LIBCURL_CFLAGS) $(LIBCRYPTO_CFLAGS) \
 		$(LIBLOWDOWN_CFLAGS) $(LIBLOWDOWN_CPPFLAGS) \
+		$(PDJSON_CFLAGS) \
 		-DIN_LIBGCLI=1 -c -o $@ $<
 
 .c.gcli$(OBJEXT):
@@ -376,6 +395,7 @@ $(LIBGCLI_OBJS): $(TEMPLATE_HEADERS) $(TEMPLATE_SRCS)
 		$(LIBCURL_CFLAGS) $(LIBEDIT_CFLAGS) \
 		$(LIBREADLINE_CFLAGS) $(LIBCRYPTO_CFLAGS) \
 		$(LIBLOWDOWN_CFLAGS) $(LIBLOWDOWN_CPPFLAGS) \
+		$(PDJSON_CFLAGS) \
 		-c -o $@ $<
 
 .c.pgen$(OBJEXT_FOR_BUILD):
@@ -426,12 +446,13 @@ $(TEST_PROGRAMS): libgcli$(LIBEXT)
 	$(CCACHE) $(CC) $(CFLAGS) $(CCDEPFLAGS) $(CPPFLAGS) \
 		$(LIBATFC_CFLAGS) $(LIBCURL_CFLAGS) $(LIBCRYPTO_CFLAGS) \
 		$(LDFLAGS) -o $@ $(@:=.tests$(OBJEXT)) libgcli$(LIBEXT) \
-		$(LIBATFC_LIBS) $(LIBCURL_LIBS) $(LIBCRYPTO_LIBS)
+		$(LIBATFC_LIBS) $(LIBCURL_LIBS) $(LIBCRYPTO_LIBS) \
+		$(PDJSON_LIBS)
 
 .c.tests$(OBJEXT):
 	@mkdir -p $$(dirname $@)
 	$(CCACHE) $(CC) $(CFLAGS) $(CCDEPFLAGS) $(CPPFLAGS) \
-		$(LIBATFC_CFLAGS) $(LIBCURL_CFLAGS) \
+		$(LIBATFC_CFLAGS) $(LIBCURL_CFLAGS) $(PDJSON_CFLAGS) \
 		-DTESTSRCDIR="\"@SRCDIR@/tests/\"" -c -o $@ $<
 
 $(TEST_PROGRAMS:$(EXEEXT)=.c): $(TEMPLATE_HEADERS)
@@ -460,6 +481,7 @@ $(ANALYSE_TARGETS): $(TEMPLATE_HEADERS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) \
 		$(LIBCURL_CFLAGS) $(LIBCRYPTO_CFLAGS) \
 		$(LIBLOWDOWN_CFLAGS) $(LIBLOWDOWN_CPPFLAGS) \
+		$(PDJSON_CFLAGS) \
 		-DIN_LIBGCLI=1 $(CANALFLAGS) $<
 
 .c.gcli.analyse:
@@ -469,7 +491,7 @@ $(ANALYSE_TARGETS): $(TEMPLATE_HEADERS)
 		$(LIBCURL_CFLAGS) $(LIBEDIT_CFLAGS) \
 		$(LIBREADLINE_CFLAGS) $(LIBCRYPTO_CFLAGS) \
 		$(LIBLOWDOWN_CFLAGS) $(LIBLOWDOWN_CPPFLAGS) \
-		$(CANALFLAGS) $<
+		$(PDJSON_CFLAGS) $(CANALFLAGS) $<
 
 
 #################### install target ########################################

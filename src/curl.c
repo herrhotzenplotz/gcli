@@ -37,7 +37,7 @@
 #include <gcli/port/err.h>
 
 #include <curl/curl.h>
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 /* Hack for NetBSD's and Oracle Solaris broken isalnum implementation */
 #if defined(__NetBSD__) || (defined(__SVR4) && defined(__sun))

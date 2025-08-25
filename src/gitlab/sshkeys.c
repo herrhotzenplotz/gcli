@@ -36,7 +36,7 @@
 #include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 #include <templates/gitlab/sshkeys.h>
 

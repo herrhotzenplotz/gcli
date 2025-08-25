@@ -34,7 +34,7 @@
 #include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 /* Recycle the GitHub parser for labels */
 #include <templates/github/labels.h>

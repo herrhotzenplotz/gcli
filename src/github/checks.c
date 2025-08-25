@@ -40,7 +40,7 @@
 
 #include <templates/github/checks.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 int
 github_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,

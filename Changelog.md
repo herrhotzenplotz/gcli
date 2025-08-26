@@ -2,7 +2,7 @@
 
 This changelog does not follow semantic versioning.
 
-## UNRELEASED
+## 2.9.0 (26-Aug-2025)
 
 ### Added
 
@@ -67,8 +67,6 @@ This changelog does not follow semantic versioning.
 
 - The pdjson dependency is now unbundled by default. In case it
   is not found via pkg-config the vendored copy is used instead.
-
-### Removed
 
 ## 2.8.0 (25-May-2025)
 

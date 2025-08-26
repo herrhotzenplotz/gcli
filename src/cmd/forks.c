@@ -29,12 +29,6 @@
 
 #include <config.h>
 
-#ifdef HAVE_GETOPT_H
-#include <getopt.h>
-#endif
-
-#include <stdlib.h>
-
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/config.h>
@@ -44,6 +38,9 @@
 #include <gcli/port/util.h>
 
 #include <gcli/forks.h>
+
+#include <getopt.h>
+#include <stdlib.h>
 
 static void
 usage(void)
@@ -139,6 +136,8 @@ subcommand_forks_create(int argc, char *argv[])
 		{0},
 	};
 
+	always_yes = gcli_cmd_should_do_always_yes();
+
 	while ((ch = getopt_long(argc, argv, "yo:r:i:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
@@ -224,6 +223,8 @@ subcommand_forks(int argc, char *argv[])
 		  .val     = 's' },
 		{0},
 	};
+
+	always_yes = gcli_cmd_should_do_always_yes();
 
 	while ((ch = getopt_long(argc, argv, "n:o:r:ys", options, NULL)) != -1) {
 		switch (ch) {

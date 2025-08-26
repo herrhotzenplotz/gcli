@@ -39,10 +39,11 @@
 #include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 #include <templates/github/pulls.h>
 
+#include <assert.h>
 #include <stdarg.h>
 
 int
@@ -714,6 +715,13 @@ github_pull_create_review(struct gcli_ctx *ctx,
 	char *url = NULL, *payload = NULL;
 	struct gcli_jsongen gen = {0};
 
+	/* lookup table for translating enum to string */
+	char const *const state_string[] = {
+		[GCLI_REVIEW_ACCEPT_CHANGES] = "APPROVE",
+		[GCLI_REVIEW_REQUEST_CHANGES] = "REQUEST_CHANGES",
+		[GCLI_REVIEW_COMMENT] = "COMMENT",
+	};
+
 	rc = github_pull_make_url(ctx, &details->path, &url, "/reviews");
 	if (rc < 0)
 		return rc;
@@ -729,21 +737,7 @@ github_pull_create_review(struct gcli_ctx *ctx,
 		gcli_jsongen_string(&gen, details->body);
 
 		gcli_jsongen_objmember(&gen, "event");
-		switch (details->review_state) {
-		case GCLI_REVIEW_ACCEPT_CHANGES:
-			gcli_jsongen_string(&gen, "APPROVE");
-			break;
-		case GCLI_REVIEW_REQUEST_CHANGES:
-			gcli_jsongen_string(&gen, "REQUEST_CHANGES");
-			break;
-		case GCLI_REVIEW_COMMENT:
-			gcli_jsongen_string(&gen, "COMMENT");
-			break;
-		default:
-			rc = gcli_error(ctx, "bad review state: %d",
-			                details->review_state);
-			goto bail;
-		}
+		gcli_jsongen_string(&gen, state_string[details->review_state]);
 
 		gcli_jsongen_objmember(&gen, "comments");
 		gcli_jsongen_begin_array(&gen);
@@ -783,6 +777,127 @@ github_pull_create_review(struct gcli_ctx *ctx,
 bail:
 	gcli_clear_ptr(&payload);
 	gcli_clear_ptr(&url);
+
+	return rc;
+}
+
+int
+github_pull_get_reviews(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                        struct gcli_pull_reviews *out)
+{
+	char *url;
+	int rc = 0;
+	struct gcli_fetch_list_ctx fl = {
+		.listp = &out->reviews,
+		.sizep = &out->reviews_size,
+		.parse = (parsefn)(parse_github_pull_reviews),
+	};
+
+	rc = github_pull_make_url(ctx, path, &url, "/reviews");
+	if (rc < 0)
+		return rc;
+
+	return gcli_fetch_list(ctx, url, &fl);
+}
+
+struct gcli_pull_review_thread *
+find_thread(struct gcli_pull_review_thread *list, gcli_id const comment_id)
+{
+	struct gcli_pull_review_comment *c;
+
+	TAILQ_FOREACH(c, list, next) {
+		if (c->id == comment_id)
+			return &c->replies;
+	}
+
+	return NULL;
+}
+
+static int
+threadify_comments(struct gcli_ctx *ctx,
+                   struct gcli_pull_review_comments *list,
+                   struct gcli_pull_review_thread *out)
+{
+	struct gcli_pull_review_comment *c, *c1;
+
+	(void) ctx;
+
+	TAILQ_INIT(out);
+
+	/* init the replies and push root-comments */
+	for (size_t i = 0; i < list->comments_size; ++i) {
+		c = calloc(1, sizeof *c);
+		memcpy(c, list->comments + i, sizeof *c);
+
+		TAILQ_INIT(&c->replies);
+		TAILQ_INSERT_TAIL(out, c, next);
+	}
+
+	/* clear list to make dumb stuff obvious */
+	gcli_clear_ptr(&list->comments);
+	list->comments_size = 0;
+
+	/* now iterate through comment list and push the replies as needed */
+	c = TAILQ_FIRST(out);
+	while (c) {
+		struct gcli_pull_review_thread *thd = out;
+
+		c1 = TAILQ_NEXT(c, next);
+
+		/* root comments */
+		if (!c->in_reply_to) {
+			c = c1;
+			continue;
+		}
+
+		thd = find_thread(out, c->in_reply_to);
+
+		/* check for API bugs */
+		if (thd == NULL) {
+			return gcli_error(
+				ctx,
+				"encountered bad comment id reference: %"PRIid
+				" in comment id %"PRIid,
+				c->in_reply_to, c->id);
+		}
+
+		TAILQ_REMOVE(out, c, next);
+		TAILQ_INSERT_TAIL(thd, c, next);
+
+		c = c1;
+	}
+
+	return 0;
+}
+
+int
+github_pull_get_review_threads(struct gcli_ctx *ctx,
+                               struct gcli_path const *const path,
+                               struct gcli_pull_review_thread *out)
+{
+	char *url;
+	int rc = 0;
+
+	// @@@ handle releasing memory!
+	struct gcli_pull_review_comments list = {0};
+
+	struct gcli_fetch_list_ctx fl = {
+		.listp = &list.comments,
+		.sizep = &list.comments_size,
+		.parse = (parsefn)(parse_github_pull_review_comments),
+	};
+
+	rc = github_pull_make_url(ctx, path, &url, "/comments");
+	if (rc < 0)
+		return rc;
+
+	rc = gcli_fetch_list(ctx, url, &fl);
+	if (rc < 0) {
+		gcli_pull_review_comments_free(&list);
+		return rc;
+	}
+
+	rc = threadify_comments(ctx, &list, out);
 
 	return rc;
 }

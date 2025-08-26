@@ -37,7 +37,7 @@
 
 #include <templates/gitlab/releases.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 #include <string.h>
 

@@ -34,10 +34,11 @@
 #include <gcli/gitlab/repos.h>
 #include <gcli/json_gen.h>
 #include <gcli/json_util.h>
+#include <gcli/url.h>
 
 #include <templates/gitlab/issues.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 #include <assert.h>
 #include <stdarg.h>
@@ -110,7 +111,8 @@ gitlab_issues_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 {
 	int rc = 0;
 
-	rc = gitlab_repo_make_url(ctx, path, url, "/issues%s", suffix);
+	rc = gitlab_repo_make_url(ctx, path, url, "/issues%s",
+	                          suffix ? suffix : "");
 
 	return rc;
 }
@@ -120,57 +122,18 @@ gitlab_issues_search(struct gcli_ctx *ctx, struct gcli_path const *const path,
                      struct gcli_issue_fetch_details const *details,
                      int const max, struct gcli_issue_list *const out)
 {
-	char *url = NULL, *e_author = NULL, *e_labels = NULL,
-	     *e_milestone = NULL, *e_search = NULL, *suffix = NULL;
+	char *url = NULL, *suffix = NULL;
 	int rc = 0;
 
-	if (details->author) {
-		char *tmp = gcli_urlencode(details->author);
-		e_author = gcli_asprintf("%cauthor_username=%s",
-		                         details->all ? '?' : '&',
-		                         tmp);
-		gcli_clear_ptr(&tmp);
-	}
-
-	if (details->label) {
-		char *tmp = gcli_urlencode(details->label);
-		int const should_do_qmark = details->all && !details->author;
-
-		e_labels = gcli_asprintf("%clabels=%s", should_do_qmark ? '?' : '&', tmp);
-		gcli_clear_ptr(&tmp);
-	}
-
-	if (details->milestone) {
-		char *tmp = gcli_urlencode(details->milestone);
-		int const should_do_qmark = details->all && !details->author &&
-		                            !details->label;
-
-		e_milestone = gcli_asprintf("%cmilestone=%s",
-		                            should_do_qmark ? '?' : '&', tmp);
-		gcli_clear_ptr(&tmp);
-	}
-
-	if (details->search_term) {
-		char *tmp = gcli_urlencode(details->search_term);
-		int const should_do_qmark = details->all && !details->author &&
-		                            !details->label && !details->milestone;
-		e_search = gcli_asprintf("%csearch=%s",
-		                         should_do_qmark ? '?': '&', tmp);
-		gcli_clear_ptr(&tmp);
-	}
-
-	suffix = gcli_asprintf("%s%s%s%s%s", details->all ? "" : "?state=opened",
-	                       e_author ? e_author : "",
-	                       e_labels ? e_labels : "",
-	                       e_milestone ? e_milestone : "",
-	                       e_search ? e_search : "");
+	gcli_url_options_append(&suffix, "state", details->all ? NULL : "opened");
+	gcli_url_options_append(&suffix, "author_username", details->author);
+	gcli_url_options_append(&suffix, "labels", details->label);
+	gcli_url_options_append(&suffix, "milestone", details->milestone);
+	gcli_url_options_append(&suffix, "assignee_username", details->assignee);
+	gcli_url_options_append(&suffix, "search", details->search_term);
 
 	rc = gitlab_issues_make_url(ctx, path, suffix, &url);
 
-	gcli_clear_ptr(&e_milestone);
-	gcli_clear_ptr(&e_author);
-	gcli_clear_ptr(&e_labels);
-	gcli_clear_ptr(&e_search);
 	gcli_clear_ptr(&suffix);
 
 	if (rc < 0)

@@ -36,7 +36,7 @@
 
 #include <gcli/gcli.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 struct gcli_gist_file {
 	char *filename;

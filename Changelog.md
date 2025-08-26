@@ -2,6 +2,72 @@
 
 This changelog does not follow semantic versioning.
 
+## 2.9.0 (26-Aug-2025)
+
+### Added
+
+- A `-S` / `--assignee` option has been added to the issues subcommand.
+  This flag allows you to search for issues that are assigned to
+  the given user. See the `gcli-issues(1)` manual page for more
+  details.
+
+- An experimental `discussions` action was added to the pulls
+  subcommand. It prints reviews and their comments in a threaded
+  view. See the `gcli-pulls(1)` manual page for more details.
+
+- The online version of the gcli tutorial is now compiled into a
+  manual page `gcli-tutorial(1)` which is installed by default. It
+  is included pre-generated in the release tarball but can be rebuilt
+  by setting the newly added `--enable-maintainer` option of the
+  configure script.
+
+- Two actions `approve` and `unapprove` have been added to the
+  `pulls` subcommand.  These allow giving approval or rejecting a
+  pull request, offering to enter a commant about why a given PR
+  was approved or rejected.  Because this reuses code from the
+  reviews subsystem this currently only works on GitHub and Gitlab,
+  however support for Gitea will be added in the next release.
+
+### Fixed
+
+- A bug in the autodetection of remotes and forge types from
+  configured git remotes has been fixed.
+
+  In cases where the git remote was pointing at an ssh-URL with a
+  scheme but without a port the remote was not properly detected
+  and lead to an incorrectly recognised owner/repo combination.
+
+- A confusion about the automerge feature has been fixed causing
+  pull requests with automerge to not work on Github forges. Note
+  that this does not fix the general bug on Github which doesn't
+  correctly report whether a pull request has been marked as
+  auto-merge.
+
+- Running the pulls checkout action as the last action used to
+  result in an error 'not enough arguments'.
+
+### Changed
+
+- Compiler output file extensions are now guessed by the configure script
+
+  This is done for Windows compatibility. People have reported that
+  it is now possible again to build gcli on MSYS2.
+
+  If the guessed extensions are wrong, one may override the guessed
+  extensions using the environment variables  `EXEEXT`, `OBJEXT`,
+  `LIBEXT`, `EXEEXT_FOR_BUILD`, `OBJEXT_FOR_BUILD` and `LIBEXT_FOR_BUILD`.
+
+- When a pull/merge request or issue submission has failed, gcli
+  will now store the entered message in `$PWD/gcli_message`. When
+  the `pulls|issue create` subcommand is later re-run and this file
+  is found, gcli will ask you whether you wish to recall its contents
+  for the new message.
+
+  Suggested-by: Bence Ferdinandy <bence@ferdinandy.com>
+
+- The pdjson dependency is now unbundled by default. In case it
+  is not found via pkg-config the vendored copy is used instead.
+
 ## 2.8.0 (25-May-2025)
 
 ### Added

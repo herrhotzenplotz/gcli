@@ -27,6 +27,7 @@ A few caveats are:
   - GNU Make (gmake)
 
   Some of these make implementations are very buggy (most notably GNU make)
+
 - Getting target dependencies just right is not easy
 
 For that reason I highly suggest testing with all three make implementations.
@@ -68,6 +69,10 @@ To run the test suite:
 Note that running the test suite requires ATF and Kyua. More details
 can be found below.
 
+To run the compiler's built-in static code analyser:
+
+    $ make analyse
+
 If you wish to change the compiler to be used you can set these in the
 environment:
 
@@ -88,7 +93,7 @@ directory for a build with no optimisations and full debug info.
 
 I suggest you use it for development purposes:
 
-    $ ../configure --debug
+    $ ../configure --debug --enable-maintainer
 
 You can proceed as usual with make.
 
@@ -148,6 +153,15 @@ e.g. to compile from FreeBSD amd64 to a armv7l Linux system:
 
 When you now run make the compilers will be chosen appropriately.
 The test suite will not work when cross-compiling.
+
+If needed you may have to set the values of
+
+  - `EXEEXT`
+  - `OBJEXT`
+  - `LIBEXT`
+
+This is the case on undetected Windows systems.
+It should be possible to build gcli under cygwin this way.
 
 ## Tests
 

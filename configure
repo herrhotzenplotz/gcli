@@ -4,8 +4,8 @@
 
 CONFIGURE_CMD_ARGS="${*}"
 
-PACKAGE_VERSION="2.8.0"
-PACKAGE_DATE="25-May-2025"
+PACKAGE_VERSION="2.9.0"
+PACKAGE_DATE="26-Aug-2025"
 PACKAGE_STRING="gcli $PACKAGE_VERSION"
 PACKAGE_BUGREPORT="https://lists.sr.ht/~herrhotzenplotz/gcli-discuss"
 PACKAGE_URL="https://sr.ht/~herrhotzenplotz/gcli"
@@ -136,6 +136,10 @@ OPTIONS:
     --enable-liblowdown     Search and use liblowdown for markdown rendering [DEFAULT: yes]
     --disable-liblowdown    Disable use of liblowdown
     --disable-librt         Forcefully disable linking librt [DEFAULT: no, except on Darwin]
+    --enable-maintainer     Enable Maintainer Mode [DEFAULT: no]
+                            You only want this if you're working on the gcli source code.
+                            In this case certain build targets get enabled that only work
+                            when the source directory is writable.
     --debug                 Compile without optimisations, generate code with
                             debug information and enable additional compiler-specific
                             warnings and portability checks.
@@ -158,6 +162,12 @@ ENVIRONMENT:
     KYUA                    Path to Kyua [DEFAULT: autodetect]
     CCACHE                  Path to ccache [DEFAULT: autodetect]
     INSTALL                 Path to install [DEFAULT: autodetect]
+    EXEEXT                  File extension of executable files for the host system [DEFAULT: '', '.exe' on Windows]
+    OBJEXT                  File extension of object files for the host system [DEFAULT: '.o', '.obj' on Windows]
+    LIBEXT                  File extension of static libraries for the host system [DEFAULT: '.a', '.lib' on Windows]
+    EXEEXT_FOR_BUILD        File extension of executable files for the build system [DEFAULT: '', '.exe' on Windows]
+    OBJEXT_FOR_BUILD        File extension of object files for the build system [DEFAULT: '.o', '.obj' on Windows]
+    LIBEXT_FOR_BUILD        File extension of static libraries for the build system [DEFAULT: '.a', '.lib' on Windows]
 EOF
 	exit 1
 }
@@ -170,6 +180,7 @@ ENABLE_LIBEDIT=1
 ENABLE_LIBREADLINE=1
 ENABLE_LIBLOWDOWN=1
 ENABLE_LIBRT=1
+ENABLE_MAINTAINER=${ENABLE_MAINTAINER:-0}
 
 # Parse flags
 while [ $# -gt 0 ]; do
@@ -208,6 +219,10 @@ while [ $# -gt 0 ]; do
 			;;
 		--disable-liblowdown)
 			ENABLE_LIBLOWDOWN=0
+			shift
+			;;
+		--enable-maintainer)
+			ENABLE_MAINTAINER=1
 			shift
 			;;
 		--debug)
@@ -307,6 +322,9 @@ else
 	LIBLOWDOWN_FOUND=0
 fi
 
+# If there is no system-provided pdjson, use the vendored one
+find_package pdjson PDJSON optional
+
 # On Darwin the POSIX Real-Time extensions are in libc. We must not
 # link against librt because it doesn't exist.
 if [ $ENABLE_LIBRT -eq 1 ]; then
@@ -323,6 +341,45 @@ if [ $ENABLE_LIBRT -eq 1 ]; then
 fi
 
 ###################################################################
+# File extensions for operating systems
+#
+# LIBEXT refers to static libraries.
+guess_extension() {
+	# Executables
+	if [ "$1" = EXE ]; then
+		case "${2}" in
+		*mingw*|*cygwin*|*winnt*) echo ".exe" ;;
+		*)                        echo "" ;;
+		esac
+
+	# Objects
+	elif [ "$1" = OBJ ]; then
+		case "${2}" in
+		*mingw*|*cygwin*|*winnt*) echo ".obj" ;;
+		*)                        echo ".o" ;;
+		esac
+
+	# Static Libraries
+	elif [ "$1" = LIB ]; then
+		case "${2}" in
+		*mingw*|*cygwin*|*winnt*) echo ".lib" ;;
+		*)                        echo ".a" ;;
+		esac
+
+	else
+		die "internal configure error"
+	fi
+}
+
+EXEEXT=${EXEEXT:-$(guess_extension EXE $HOST)} || die "error: failed to guess executable extension for $HOST"
+OBJEXT=${OBJEXT:-$(guess_extension OBJ $HOST)} || die "error: failed to guess object extension for $HOST"
+LIBEXT=${LIBEXT:-$(guess_extension LIB $HOST)} || die "error: failed to guess static library extension for $HOST"
+
+EXEEXT_FOR_BUILD=${EXEEXT_FOR_BUILD:-$(guess_extension EXE $BUILD)} || die "error: failed to guess executable extension for $BUILD"
+OBJEXT_FOR_BUILD=${OBJEXT_FOR_BUILD:-$(guess_extension OBJ $BUILD)} || die "error: failed to guess object extension for $BUILD"
+LIBEXT_FOR_BUILD=${LIBEXT_FOR_BUILD:-$(guess_extension LIB $BUILD)} || die "error: failed to guess static library extension for $BUILD"
+
+###################################################################
 # TESTS and other programs
 ###################################################################
 AR=${AR:-ar}
@@ -333,6 +390,11 @@ CCACHE=${CCACHE:-$(find_program ccache ccache)}
 INSTALL=${INSTALL:-$(find_program install install ginstall)}
 SHELL=${SHELL:-$(find_program sh sh zsh bash)}
 [ $? -eq 0 ] || die "error: need install program"
+
+# If maintainer mode is enabled, we need lowdown(1)
+if [ ${ENABLE_MAINTAINER} -eq 1 ]; then
+	LOWDOWN=${LOWDOWN:-$(find_program lowdown lowdown)}
+fi
 
 ###################################################################
 # Configure Makefile
@@ -365,6 +427,9 @@ sed \
 	-e "s|@LIBLOWDOWN_LIBS@|$LIBLOWDOWN_LIBS|g" \
 	-e "s|@LIBLOWDOWN_MAJOR@|$LIBLOWDOWN_MAJOR|g" \
 	-e "s|@LIBLOWDOWN_MINOR@|$LIBLOWDOWN_MINOR|g" \
+	-e "s|@PDJSON_FOUND@|$PDJSON_FOUND|g" \
+	-e "s|@PDJSON_CFLAGS@|$PDJSON_CFLAGS|g" \
+	-e "s|@PDJSON_LIBS@|$PDJSON_LIBS|g" \
 	-e "s|@ENABLE_LIBRT@|$ENABLE_LIBRT|g" \
 	-e "s|@CONFIGURE_CMD_ARGS@|$CONFIGURE_CMD_ARGS|g" \
 	-e "s|@CC@|$CC|g" \
@@ -392,6 +457,14 @@ sed \
 	-e "s|@PACKAGE_BUGREPORT@|$PACKAGE_BUGREPORT|g" \
 	-e "s|@PACKAGE_URL@|$PACKAGE_URL|g" \
 	-e "s|@PACKAGE_VERSION@|$PACKAGE_VERSION|g" \
+	-e "s|@EXEEXT@|$EXEEXT|g" \
+	-e "s|@OBJEXT@|$OBJEXT|g" \
+	-e "s|@LIBEXT@|$LIBEXT|g" \
+	-e "s|@EXEEXT_FOR_BUILD@|$EXEEXT_FOR_BUILD|g" \
+	-e "s|@OBJEXT_FOR_BUILD@|$OBJEXT_FOR_BUILD|g" \
+	-e "s|@LIBEXT_FOR_BUILD@|$LIBEXT_FOR_BUILD|g" \
+	-e "s|@ENABLE_MAINTAINER@|$ENABLE_MAINTAINER|g" \
+	-e "s|@LOWDOWN@|$LOWDOWN|g" \
 	< "${srcdir}/Makefile.in" > Makefile
 
 echo "Writing config.h"
@@ -409,6 +482,9 @@ echo ""
 echo "    Build system type: ${BUILD}"
 echo "     Host system type: ${HOST}"
 echo "         optimise for: ${OPTIMISE:-none}"
+echo " Executable extension: Host: '${EXEEXT}', Build: '${EXEEXT_FOR_BUILD}'"
+echo "     Object extension: Host: '${OBJEXT}', Build: '${OBJEXT_FOR_BUILD}'"
+echo "    Library extension: Host: '${LIBEXT}', Build: '${LIBEXT_FOR_BUILD}'"
 echo "                   CC: ${CC}"
 echo "         CC_FOR_BUILD: ${CC_FOR_BUILD}"
 echo "               CFLAGS: ${CFLAGS}"
@@ -433,10 +509,25 @@ echo " Using lowdown ${LIBLOWDOWN_VERSION}:"
 echo "    LIBLOWDOWN_CFLAGS: ${LIBLOWDOWN_CFLAGS}"
 echo "      LIBLOWDOWN_LIBS: ${LIBLOWDOWN_LIBS}"
 fi
+if [ $PDJSON_FOUND -eq 1 ]; then
+echo " Using pdjson:"
+echo "        PDJSON_CFLAGS: ${PDJSON_CFLAGS}"
+echo "          PDJSON_LIBS: ${PDJSON_LIBS}"
+else
+echo ""
+echo "     WARNING: pdjson not found, using vendored version."
+echo "              You may wish to install a system version instead."
+fi
 if [ $ENABLE_LIBRT -eq 0 ]; then
 echo " Not linking -lrt because it was disabled"
 fi
+if [ $ENABLE_MAINTAINER -eq 1 ]; then
+echo ""
+echo "     WARNING: Maintainer mode is enabled!"
+fi
 echo ""
 echo "Configuration done. You may now run make."
+echo "For more information about available build targets, run 'make help'."
+echo ""
 
 # vim: ft=sh

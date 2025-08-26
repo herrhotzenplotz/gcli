@@ -33,7 +33,7 @@
 #include <gcli/json_util.h>
 #include <gcli/cmd/table.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 #include <stdlib.h>
 

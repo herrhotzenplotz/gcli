@@ -5,7 +5,7 @@
 #include <gcli/ctx.h>
 #include <gcli/status.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 #include "gcli_tests.h"
 

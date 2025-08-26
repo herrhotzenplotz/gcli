@@ -35,6 +35,7 @@
 #include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/colour.h>
 #include <gcli/cmd/comment.h>
+#include <gcli/date_time.h>
 #include <gcli/cmd/editor.h>
 #include <gcli/cmd/gitconfig.h>
 #include <gcli/cmd/interactive.h>
@@ -51,18 +52,15 @@
 #include <gcli/port/util.h>
 #include <gcli/pulls.h>
 
-#ifdef HAVE_GETOPT_H
-#include <getopt.h>
-#endif
-
 #include <assert.h>
+#include <getopt.h>
 #include <stdlib.h>
 
 static void
 usage(void)
 {
 	fprintf(stderr, "usage: gcli pulls create [-o owner -r repo] [-f from]\n");
-	fprintf(stderr, "                         [-t to] [-d] [-a] [-l label] [pull-request-title]\n");
+	fprintf(stderr, "                         [-t to] [-T template] [-d] [-a] [-l label] [pull-request-title]\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] [-a] [-A author] [-n number]\n");
 	fprintf(stderr, "                  [-L label] [-M milestone] [-s] [search-terms...]\n");
 	fprintf(stderr, "       gcli pulls [-o owner -r repo] -i pull-id actions...\n");
@@ -81,6 +79,7 @@ usage(void)
 	fprintf(stderr, "  -i id           ID of PR to perform actions on\n");
 	fprintf(stderr, "  -s              Print (sort) in reverse order\n");
 	fprintf(stderr, "  -t branch       Specify target branch of the PR\n");
+	fprintf(stderr, "  -T template     Use the given file as a template for the pull message\n");
 	fprintf(stderr, "  -y              Do not ask for confirmation.\n");
 	fprintf(stderr, "ACTIONS:\n");
 	fprintf(stderr, "  all                    Display status, commits, op and checks of the PR\n");
@@ -107,6 +106,11 @@ usage(void)
 	fprintf(stderr, "  open                   Open the PR in a web browser\n");
 	if (gcli_config_enable_experimental(g_clictx))
 		fprintf(stderr, "  review                 Start a review of this PR\n");
+	fprintf(stderr, "  reviews                List reviews of this PR\n");
+	if (gcli_config_enable_experimental(g_clictx))
+		fprintf(stderr, "  discussions            Show a threaded view of review discussions\n");
+	fprintf(stderr, "  approve                Approve this PR\n");
+	fprintf(stderr, "  unapprove              Revoke approval on this PR\n");
 
 	fprintf(stderr, "\n");
 	version();
@@ -380,6 +384,15 @@ pull_init_user_file(struct gcli_ctx *ctx, FILE *stream, void *_opts)
 	struct gcli_submit_pull_options *opts = _opts;
 
 	(void) ctx;
+
+	/* recalled message or template */
+	if (opts->body) {
+		fputs(opts->body, stream);
+
+		free(opts->body);
+		opts->body = NULL;
+	}
+
 	fprintf(
 		stream,
 		"! PR TITLE : %s\n"
@@ -413,8 +426,11 @@ pull_request_target_repo(struct gcli_path const *const repo_path)
 }
 
 static int
-create_pull(struct gcli_submit_pull_options *const opts, int always_yes)
+create_pull(struct gcli_submit_pull_options *const opts, bool always_yes)
 {
+	int rc = 0;
+
+	gcli_cmd_recall_message_interactive(&opts->body);
 	opts->body = gcli_pull_get_user_message(opts);
 
 	printf("The following PR will be created:\n"
@@ -438,7 +454,17 @@ create_pull(struct gcli_submit_pull_options *const opts, int always_yes)
 			errx(1, "gcli: PR aborted.");
 	}
 
-	return gcli_pull_submit(g_clictx, opts);
+	rc = gcli_pull_submit(g_clictx, opts);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to create pull: %s\n",
+		        gcli_get_error(g_clictx));
+
+		/* store message away in `gcli_message` */
+		if (opts->body)
+			gcli_cmd_save_message(opts->body);
+	}
+
+	return rc;
 }
 
 static char const *
@@ -545,10 +571,8 @@ subcommand_pull_create_interactive(struct gcli_submit_pull_options *const opts)
 
 	/* create_pull is going to pop up the editor */
 	rc = create_pull(opts, false);
-	if (rc < 0) {
-		fprintf(stderr, "gcli: error: %s\n", gcli_get_error(g_clictx));
+	if (rc < 0)
 		return EXIT_FAILURE;
-	}
 
 	return EXIT_SUCCESS;
 }
@@ -556,10 +580,9 @@ subcommand_pull_create_interactive(struct gcli_submit_pull_options *const opts)
 static int
 subcommand_pull_create(int argc, char *argv[])
 {
-	/* we'll use getopt_long here to parse the arguments */
 	int ch;
 	struct gcli_submit_pull_options opts   = {0};
-	int always_yes = 0;
+	bool always_yes = 0;
 
 	const struct option options[] = {
 		{ .name = "from",
@@ -594,10 +617,16 @@ subcommand_pull_create(int argc, char *argv[])
 		  .has_arg = required_argument,
 		  .flag = NULL,
 		  .val = 'R' },
+		{ .name = "template",
+		  .has_arg = required_argument,
+		  .flag = NULL,
+		  .val = 'T' },
 		{0},
 	};
 
-	while ((ch = getopt_long(argc, argv, "ayf:t:do:r:l:R:", options, NULL)) != -1) {
+	always_yes = gcli_cmd_should_do_always_yes();
+
+	while ((ch = getopt_long(argc, argv, "ayf:t:do:r:l:R:T:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'f':
 			opts.from = optarg;
@@ -629,6 +658,12 @@ subcommand_pull_create(int argc, char *argv[])
 			break;
 		case 'a':
 			opts.automerge = true;
+			break;
+		case 'T': /* template file */
+			if (gcli_read_file(optarg, &opts.body) < 0) {
+				err(1, "gcli: error: failed to read file '%s'",
+				    optarg);
+			}
 			break;
 		default:
 			usage();
@@ -666,8 +701,7 @@ subcommand_pull_create(int argc, char *argv[])
 	opts.title = argv[0];
 
 	if (create_pull(&opts, always_yes) < 0)
-		errx(1, "gcli: error: failed to submit pull request: %s",
-		     gcli_get_error(g_clictx));
+		return EXIT_FAILURE;
 
 	free(opts.labels);
 
@@ -1272,7 +1306,7 @@ static int
 action_checkout(struct gcli_path const *const path, struct gcli_pull *pull,
                 int *argc, char **argv[])
 {
-	char *remote;
+	char const *remote;
 	int rc = 0;
 
 	(void) pull;
@@ -1295,11 +1329,6 @@ action_checkout(struct gcli_path const *const path, struct gcli_pull *pull,
 		return GCLI_EX_DATAERR;
 	}
 
-	free(remote);
-
-	*argc -= 1;
-	*argv += 1;
-
 	return GCLI_EX_OK;
 }
 
@@ -1321,6 +1350,222 @@ action_open(struct gcli_path const *const path,
 	}
 
 	return GCLI_EX_OK;
+}
+
+void
+gcli_pull_reviews_print(struct gcli_pull_reviews *list)
+{
+	gcli_tbl table;
+	struct gcli_tblcoldef columns[] = {
+		{ .name = "ID",     .type = GCLI_TBLCOLTYPE_ID,     .flags = 0                         },
+		{ .name = "STATE",  .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
+		{ .name = "DATE",   .type = GCLI_TBLCOLTYPE_TIME_T, .flags = 0                         },
+		{ .name = "AUTHOR", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0                         },
+	};
+
+	if (list->reviews_size == 0) {
+		printf("No reviews.\n");
+		return;
+	}
+
+	table = gcli_tbl_begin(columns, ARRAY_SIZE(columns));
+
+	for (size_t i = 0; i < list->reviews_size; ++i) {
+		gcli_tbl_add_row(
+			table,
+			list->reviews[i].id,
+			list->reviews[i].state,
+			list->reviews[i].submitted_at,
+			list->reviews[i].author);
+	}
+
+	gcli_tbl_end(table);
+}
+
+static void
+print_comment(struct gcli_pull_review_comment const *c, int const indent)
+{
+	char *timebuf = NULL;
+	int const shift_width = 4;
+	int const shift = shift_width * indent;
+	int rc = 0;
+
+	rc = gcli_format_as_localtime(g_clictx, c->created_at, &timebuf);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to format timestamp: %s\n",
+		        gcli_get_error(g_clictx));
+		return;
+	}
+
+	printf("%*.*sAUTHOR : %s%s%s\n"
+	       "%*.*s  DATE : %s\n"
+	       "%*.*s  FILE : %s\n",
+	       shift, shift, "", gcli_setbold(), c->author, gcli_resetbold(),
+	       shift, shift, "", timebuf,
+	       shift, shift, "", c->path);
+
+	/* print diff if one is attached and we are on the root comment */
+	if (c->diff_hunk && indent == 0) {
+		printf("\n");
+		gcli_pretty_print_diff(c->diff_hunk, shift + 9);
+	}
+
+	gcli_pretty_print(c->body, shift + shift_width, 80, stdout);
+
+	free(timebuf);
+	timebuf = NULL;
+}
+
+static void
+print_thread(struct gcli_pull_review_thread const *thd, int indent)
+{
+	struct gcli_pull_review_comment *comment = NULL;
+
+	TAILQ_FOREACH(comment, thd, next) {
+		print_comment(comment, indent);
+		print_thread(&comment->replies, indent + 1);
+	}
+}
+
+static void
+gcli_pull_review_threads_print(struct gcli_pull_review_thread const *const thd)
+{
+	if (TAILQ_EMPTY(thd)) {
+		printf("No comments\n");
+		return;
+	}
+
+	print_thread(thd, 0);
+}
+
+static int
+action_reviews(struct gcli_path const *const path,
+               struct gcli_pull const *const pull,
+               int *argc, char **argv[])
+{
+	int rc = 0;
+	struct gcli_pull_reviews reviews = {0};
+
+	(void) pull;
+	(void) argc;
+	(void) argv;
+
+	rc = gcli_pull_get_reviews(g_clictx, path, &reviews);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to fetch reviews: %s\n",
+		        gcli_get_error(g_clictx));
+
+		return GCLI_EX_DATAERR;
+	}
+
+	gcli_pull_reviews_print(&reviews);
+	gcli_pull_reviews_free(&reviews);
+
+	return GCLI_EX_OK;
+}
+
+static int
+action_discussion(struct gcli_path const *const path,
+                  struct gcli_pull const *const pull,
+                  int *argc, char **argv[])
+{
+	int rc = 0;
+	struct gcli_pull_review_thread root = {0};
+
+	(void) pull;
+	(void) argc;
+	(void) argv;
+
+	if (gcli_config_enable_experimental(g_clictx) == false) {
+		fprintf(
+			stderr,
+			"gcli: error: discussion is not available because it is "
+			"considered experimental. To enable this feature set "
+			"enable-experimental in your gcli config file or "
+			"set GCLI_ENABLE_EXPERIMENTAL in your environment.\n"
+		);
+
+		return GCLI_EX_DATAERR;
+	}
+
+	rc = gcli_pull_get_review_threads(g_clictx, path, &root);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to fetch reviews: %s\n",
+		        gcli_get_error(g_clictx));
+
+		return GCLI_EX_DATAERR;
+	}
+
+	gcli_pull_review_threads_print(&root);
+	gcli_pull_review_thread_free(&root);
+
+	return GCLI_EX_OK;
+}
+
+static void
+approval_init(struct gcli_ctx *ctx, FILE *f, void *data)
+{
+	(void) ctx;
+	(void) data;
+
+	fprintf(f, "\n");
+	fprintf(f, "! Enter your message above, save and exit.\n");
+	fprintf(f, "! All lines starting with '!' will be discarded.\n");
+}
+
+static int
+approval_action(struct gcli_path const *const path,
+                int (*fn)(struct gcli_ctx *ctx, struct gcli_path const *, char const *))
+{
+	int rc;
+	char *message = NULL;
+
+	if (gcli_yesno("Enter a message?")) {
+		message = gcli_editor_get_user_message(g_clictx, approval_init, NULL);
+
+		if (message == NULL) {
+			fprintf(stderr, "gcli: message empty, aborting.\n");
+			return GCLI_EX_DATAERR;
+		}
+	}
+
+	rc = fn(g_clictx, path, message);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to update pull: %s\n",
+		        gcli_get_error(g_clictx));
+
+		rc = GCLI_EX_DATAERR;
+	} else {
+		rc = GCLI_EX_OK;
+	}
+
+	free(message);
+
+	return rc;
+}
+
+static int
+action_approve(struct gcli_path const *const path,
+               struct gcli_pull const *const pull,
+               int *argc, char **argv[])
+{
+	(void) pull;
+	(void) argc;
+	(void) argv;
+
+	return approval_action(path, gcli_pull_approve);
+}
+
+static int
+action_unapprove(struct gcli_path const *const path,
+                 struct gcli_pull const *const pull,
+                 int *argc, char **argv[])
+{
+	(void) pull;
+	(void) argc;
+	(void) argv;
+
+	return approval_action(path, gcli_pull_unapprove);
 }
 
 struct gcli_cmd_actions gcli_pull_actions = {
@@ -1430,6 +1675,26 @@ struct gcli_cmd_actions gcli_pull_actions = {
 			.name = "open",
 			.needs_item = true,
 			.handler = (gcli_cmd_action_handler) action_open,
+		},
+		{
+			.name = "reviews",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler) action_reviews,
+		},
+		{
+			.name = "discussions",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler) action_discussion,
+		},
+		{
+			.name = "approve",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler) action_approve,
+		},
+		{
+			.name = "unapprove",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler) action_unapprove,
 		},
 	},
 };

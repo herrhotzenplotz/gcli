@@ -40,10 +40,7 @@
 #include <gcli/port/string.h>
 #include <gcli/port/util.h>
 
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#endif
-
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -317,6 +314,8 @@ subcommand_gist_delete(int argc, char *argv[])
 		  .val     = 'y' },
 		{0},
 	};
+
+	always_yes = gcli_cmd_should_do_always_yes();
 
 	while ((ch = getopt_long(argc, argv, "y", options, NULL)) != -1) {
 		switch (ch) {

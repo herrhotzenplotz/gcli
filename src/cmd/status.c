@@ -36,10 +36,7 @@
 #include <gcli/status.h>
 
 #include <string.h>
-
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#endif
 
 static void
 usage(void)

@@ -71,3 +71,26 @@ array of struct gcli_pull use parse_github_pull;
 parser github_pull_search_result is
 object of struct gcli_pull_list with
 	("items" => pulls as array of gcli_pull use parse_github_pull);
+
+parser github_pull_review is
+object of struct gcli_pull_review with
+	("id"           => id as id,
+	 "user"         => author as user,
+	 "submitted_at" => submitted_at as iso8601_time,
+	 "state"        => state as string);
+
+parser github_pull_reviews is
+array of struct gcli_pull_review use parse_github_pull_review;
+
+parser github_pull_review_comment is
+object of struct gcli_pull_review_comment with
+	("user"           => author as user,
+	 "id"             => id as id,
+	 "created_at"     => created_at as iso8601_time,
+	 "body"           => body as string,
+	 "diff_hunk"      => diff_hunk as string,
+	 "path"           => path as string,
+	 "in_reply_to_id" => in_reply_to as id);
+
+parser github_pull_review_comments is
+array of struct gcli_pull_review_comment use parse_github_pull_review_comment;

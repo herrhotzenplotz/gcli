@@ -36,8 +36,9 @@
 #include <gcli/json_gen.h>
 #include <gcli/json_util.h>
 #include <gcli/labels.h>
+#include <gcli/url.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 #include <templates/github/issues.h>
 
@@ -84,13 +85,20 @@ gitea_issue_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	return rc;
 }
 
+static int
+gitea_issues_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                      char const *const suffix, char **url)
+{
+	return gitea_repo_make_url(ctx, path, url, "/issues%s",
+	                           suffix ? suffix : "");
+}
+
 int
 gitea_issues_search(struct gcli_ctx *ctx, struct gcli_path const *const path,
                     struct gcli_issue_fetch_details const *details,
                     int const max, struct gcli_issue_list *const out)
 {
-	char *url = NULL, *e_author = NULL, *e_label = NULL,
-	     *e_milestone = NULL, *e_query = NULL;
+	char *url = NULL, *suffix = NULL;
 	int rc = 0;
 
 	struct gcli_fetch_list_ctx fl = {
@@ -100,42 +108,17 @@ gitea_issues_search(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		.max = max,
 	};
 
-	if (details->milestone) {
-		char *tmp = gcli_urlencode(details->milestone);
-		e_milestone = gcli_asprintf("&milestones=%s", tmp);
-		gcli_clear_ptr(&tmp);
-	}
+	gcli_url_options_append(&suffix, "type", "issues");
+	gcli_url_options_append(&suffix, "state", details->all ? "all" : "open");
+	gcli_url_options_append(&suffix, "milestones", details->milestone);
+	gcli_url_options_append(&suffix, "created_by", details->author);
+	gcli_url_options_append(&suffix, "labels", details->label);
+	gcli_url_options_append(&suffix, "assigned_by", details->assignee);
+	gcli_url_options_append(&suffix, "q", details->search_term);
 
-	if (details->author) {
-		char *tmp = gcli_urlencode(details->author);
-		e_author = gcli_asprintf("&created_by=%s", tmp);
-		gcli_clear_ptr(&tmp);
-	}
+	rc = gitea_issues_make_url(ctx, path, suffix, &url);
 
-	if (details->label) {
-		char *tmp = gcli_urlencode(details->label);
-		e_label = gcli_asprintf("&labels=%s", tmp);
-		gcli_clear_ptr(&tmp);
-	}
-
-	if (details->search_term) {
-		char *tmp = gcli_urlencode(details->search_term);
-		e_query = gcli_asprintf("&q=%s", tmp);
-		gcli_clear_ptr(&tmp);
-	}
-
-	rc = gitea_repo_make_url(ctx, path, &url,
-	                         "/issues?type=issues&state=%s%s%s%s%s",
-	                         details->all ? "all" : "open",
-	                         e_author ? e_author : "",
-	                         e_label ? e_label : "",
-	                         e_milestone ? e_milestone : "",
-	                         e_query ? e_query : "");
-
-	gcli_clear_ptr(&e_query);
-	gcli_clear_ptr(&e_milestone);
-	gcli_clear_ptr(&e_author);
-	gcli_clear_ptr(&e_label);
+	gcli_clear_ptr(&suffix);
 
 	if (rc < 0)
 		return rc;

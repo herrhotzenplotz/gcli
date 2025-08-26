@@ -33,11 +33,14 @@
 
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/cmdconfig.h>
+#include <gcli/cmd/colour.h>
 #include <gcli/port/util.h>
 #include <gcli/repos.h>
 
 #include <ctype.h>
+#include <errno.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include <curl/curl.h>
 
@@ -335,6 +338,38 @@ gcli_pretty_print(const char *input, int indent, int maxlinelen, FILE *out)
 	}
 }
 
+void
+gcli_pretty_print_diff(char const *const input, int indent)
+{
+	char const *hd = input;
+
+	for (;;) {
+		char const *eol;
+		char const *start_colour, *end_colour;
+		size_t linelen;
+
+		if (hd == NULL || *hd == '\0')
+			return;
+
+		eol = strchr(hd, '\n');
+		if (eol == NULL)
+			eol = hd + strlen(hd);
+
+		linelen = eol - hd;
+		end_colour = gcli_resetcolour();
+		if (*hd == '+')
+			start_colour = gcli_setcolour(GCLI_COLOR_GREEN);
+		else if (*hd == '-')
+			start_colour = gcli_setcolour(GCLI_COLOR_RED);
+		else
+			start_colour = "";
+
+		printf("%*.*s%s%.*s%s\n", indent, indent, "", start_colour,
+		       (int)linelen, hd, end_colour);
+		hd = eol + 1;
+	}
+}
+
 /* portability kludge for Slowlaris which to this day doesn't support
  * resolved_path to be NULL. */
 char *
@@ -349,4 +384,64 @@ gcli_cmd_realpath(char const *const restrict pathname)
 #endif
 
 	return realpath(pathname, resolved_path);
+}
+
+bool
+gcli_cmd_should_do_always_yes(void)
+{
+	return !isatty(STDIN_FILENO);
+}
+
+void
+gcli_cmd_save_message(char const *const message)
+{
+	FILE *f = fopen("gcli_message", "w");
+	if (!f) {
+		fprintf(stderr, "gcli: warning: failed to open 'gcli_message' "
+		        "for write, cannot save message\n");
+		return;
+	}
+
+	fputs(message, f);
+	fclose(f);
+
+	fprintf(stderr, "gcli: Message was saved in 'gcli_message'. "
+	                "Re-run the command to recall it.\n");
+}
+
+bool
+gcli_cmd_can_recall_message(void)
+{
+	return !access("gcli_message", R_OK);
+}
+
+char *
+gcli_cmd_recall_message(void)
+{
+	char *result = NULL;
+	int rc = 0;
+
+	/* read */
+	rc = gcli_read_file("gcli_message", &result);
+	if (rc < 0)
+		return NULL;
+
+	/* delete old message file */
+	rc = unlink("gcli_message");
+	if (rc < 0) {
+		fprintf(stderr, "gcli: warning: cannot delete gcli_message: %s\n",
+		        strerror(errno));
+	}
+
+	return result;
+}
+
+void
+gcli_cmd_recall_message_interactive(char **out)
+{
+	/* recall an old message if needed, skip if there is a template */
+	if (*out == NULL && gcli_cmd_can_recall_message()) {
+		if (gcli_yesno("Recall previously saved message?"))
+			*out = gcli_cmd_recall_message();
+	}
 }

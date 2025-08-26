@@ -1,0 +1,853 @@
+.\" -*- mode: troff; coding: utf-8 -*-
+Tutorial of GCLI - Generated Offline Version of https://herrhotzenplotz.de/gcli/tutorial
+.TH "gcli-tutorial" "1" "UNRELEASED"
+.SH Installing GCLI
+.SS
+Through package manager
+.LP
+If you\(cqre on FreeBSD you can just install gcli by running the
+following command:
+.LP
+.EX
+# pkg install gcli
+.EE
+.PP
+On NetBSD you can run:
+.LP
+.EX
+# pkgin install gcli
+.EE
+.PP
+On Ubuntu, Debian, Devuan and the like you can run:
+.LP
+.EX
+# apt install gcli
+.EE
+.PP
+On ArchLinux you can either use the AUR manually or use your favourite AUR helper:
+.LP
+.EX
+# yay -S gcli
+.EE
+.SS
+Compile the source code
+.LP
+Other operating systems may currently require manual compilation and installation.
+.SS
+Windows NT Notes
+.LP
+It is entirely possible to build gcli on Windows using
+.UR https://msys2.org
+MSYS2
+.UE \c
+\&. Please follow their instructions on
+how to set up a development environment.
+.SS
+Generic build instructions
+.LP
+For this purpose go to
+.UR https://herrhotzenplotz.de/gcli/releases
+https://herrhotzenplotz.de/gcli/releases
+.UE
+and choose the latest release. Then download one of the tarballs.
+.PP
+For version 1.1.0 this would be:
+.PP
+.UR https://herrhotzenplotz.de/gcli/releases/gcli-1.1.0/gcli-1.1.0.tar.xz
+.UE
+.PP
+Now that you have a link, you can download it, extract it, compile the
+code and install it:
+.LP
+.EX
+$ mkdir \(ti/build
+$ cd \(ti/build
+$ curl -4LO https://herrhotzenplotz.de/gcli/releases/gcli-1.1.0/gcli-1.1.0.tar.xz
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  342k  100  342k    0     0  2739k      0 --:--:-- --:--:-- --:--:-- 2736k
+$ ls
+gcli-1.1.0.tar.xz
+$
+.EE
+.PP
+Install the dependencies for building gcli:
+.PP
+e.g. on Debian systems:
+.LP
+.EX
+# apt install libcurl4-openssl-dev pkgconf build-essential
+.EE
+.PP
+or on MSYS2:
+.LP
+.EX
+$ pacman -S libcurl-devel pkgconf
+.EE
+.PP
+Extract the tarball:
+.LP
+.EX
+$ tar xf gcli-1.1.0.tar.xz
+$ cd gcli-1.1.0
+.EE
+.PP
+Configure, build and install gcli:
+.LP
+.EX
+$ ./configure
+\&...
+$ make
+\&...
+$ make install
+.EE
+.PP
+Check that the shell finds gcli:
+.LP
+.EX
+$ which gcli
+/usr/local/bin/gcli
+$
+$ gcli version
+gcli 1.1.0 (amd64-unknown-freebsd13.2)
+Using libcurl/8.1.2 OpenSSL/1.1.1t zlib/1.2.13 libpsl/0.21.2 (+libidn2/2.3.4) libssh2/1.11.0 nghttp2/1.53.0
+Using vendored pdjson library
+Report bugs at https://gitlab.com/herrhotzenplotz/gcli/.
+Copyright 2021, 2022, 2023 Nico Sonack <nsonack@herrhotzenplotz.de> and contributors.
+$
+.EE
+.SS
+Advanced Windows Environment Setup
+.LP
+In case you want to use the installed gcli from outside MSYS2 (e.g.
+in cmd.exe) you may wish to update the \f(CRPath\fR environment variable
+and add the \f(CRC:\emsys2\eusr\ebin\fR directory to it. Make sure you have
+the library paths set up correctly.
+.SH First steps
+.SS
+Listing issues
+.LP
+Let\(cqs start off by listing some issues - here for the curl project
+which is hosted on GitHub under \f(CRcurl/curl\fR. To list issues for it one
+would run:
+.LP
+.EX
+$ gcli -t github issues -o curl -r curl
+.EE
+.PP
+You will see the list of the 30 most recent open issue tickets. The
+command above does the following:
+.IP "\(bu" 3
+invoke gcli
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "\(bu" 3
+as a global option we switch it into GitHub-Mode
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "\(bu" 3
+invoke the issues subcommand
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "\(bu" 3
+operate on the repository owner curl (\f(CR-o curl\fR)
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "\(bu" 3
+operate on the repository curl (\f(CR-r curl\fR)
+.LP
+Note that the \f(CR-t github\fR option goes before the issues subcommand
+because it is a global option for gcli that affects how all the
+following things like subcommands operate.
+.PP
+However, now I also want to see closed issues:
+.LP
+.EX
+$ gcli -t github issues -o curl -r curl -a
+.EE
+.PP
+The \f(CR-a\fR option will disregard the status of the issue.
+.PP
+Oh and the screen is a bit cluttered by all these tickets - let\(cqs only
+fetch the first 10 issues:
+.LP
+.EX
+$ gcli -t github issues -o curl -r curl -n10
+.EE
+.SS
+Searching for issues
+.LP
+Before reporting a bug or looking for solutions to a problem that
+you found in a program you may want to search for issues.
+.PP
+Let\(cqs search for \f(CRavast\fR in \f(CRcurl/curl\fR:
+.LP
+.EX
+$ gcli -t github issues -o curl -r curl -a avast
+NUMBER  NOTES  STATE   TITLE
+ 11383      9  open    Issue with FileZilla server (GnuTLS) and close_notify
+ 10551      7  closed  Unable to use curl 7.87 for SSL connections on Windows 10 Pro
+  8848      2  closed  CURL SSL certificate problem when AVAST HTTPS scanning enabled
+$
+.EE
+.PP
+As you can see searching for something is just a matter of appending
+keywords to the \f(CRissues\fR subcommand. You can specify any amount of
+search terms - they will all be used in the query. Again, \f(CR-a\fR
+ignores the status of the issue such that we also see closed tickets.
+.SS
+Examining issues
+.LP
+As of now we only produced lists of issues. However, we may also want
+to look at the details of an issue such as:
+.IP "\(bu" 3
+the original post
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "\(bu" 3
+labels
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "\(bu" 3
+comments
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "\(bu" 3
+assignees of the issue (that is someone who is working on the bug)
+.LP
+Let\(cqs get a good summary of issue \f(CR#11268\fR in the curl project:
+.LP
+.EX
+$ gcli -t github issues -o curl -r curl -i 11268 all
+.EE
+.PP
+As you can see most of the options are the same, however now we tell
+gcli with the \f(CR-i 11268\fR option that we want to work with a single
+issue. Then we tell gcli what actions to perform on the issue. Another
+important action is \f(CRcomments\fR. Guess what it does:
+.LP
+.EX
+$ gcli -t github issues -o curl -r curl -i 11268 comments
+.EE
+.PP
+I know a person that likes to post long verbose traces. Let\(cqs search
+for an issue authored by them on the OpenSSL GitHub page:
+.LP
+.EX
+$ gcli -t github issues -o openssl -r openssl -A blastwave -a
+NUMBER  STATE   TITLE
+ 20379  open    test \(dq80-test_ssl_new.t\(dq fails on Solaris 10 SPARCv9
+ 10547  open    Strict C90 CFLAGS results in sha.h:91 ISO C90 does not support long long
+  8048  closed  OPENSSL_strnlen SIGSEGV in o_str.c line 76
+$
+.EE
+.PP
+The \f(CR-A\fR option lets you filter for specific authors.
+.PP
+Let\(cqs look at the issue state of \f(CR#10547\fR:
+.LP
+.EX
+$ gcli -t github issues -o openssl -r openssl -i 10547 status
+     NAME : 10547
+    TITLE : Strict C90 CFLAGS results in sha.h:91 ISO C90 does not support long long
+  CREATED : 2019-12-01T04:35:23Z
+   AUTHOR : blastwave
+    STATE : open
+ COMMENTS : 9
+   LOCKED : no
+   LABELS : triaged: bug
+ASSIGNEES : none
+$
+.EE
+.PP
+That\(cqs nine comments - let\(cqs read the original post and the comments
+in our favourite pager \f(CRless\fR:
+.LP
+.EX
+$ gcli -t github issues -o openssl -r openssl -i 10547 op comments | less
+.EE
+.PP
+As you can see gcli will accept multiple actions for an issue and
+executes them sequentially.
+.SH How to find documentation
+.LP
+When using gcli one may not always remember all the options and flags
+for every subcommand. gcli has lots of integrated help to guide you
+through its commands.
+.SS
+Subcommand help
+.LP
+You can list all available options for the issues subcommand by doing:
+.LP
+.EX
+$ gcli issues --help
+.EE
+.PP
+With your current knowledge you can also explore the \f(CRgcli pulls\fR subcommand.
+.SS
+General usage
+.LP
+Run the following command:
+.LP
+.EX
+$ gcli --help
+usage: gcli [options] subcommand
+
+OPTIONS:
+  -a account     Use the configured account instead of inferring it
+  -r remote      Infer account from the given git remote
+  -t type        Force the account type:
+                    - github (default: github.com)
+                    - gitlab (default: gitlab.com)
+                    - gitea (default: codeberg.org)
+  -c             Force colour and text formatting.
+  -q             Be quiet. (Not implemented yet)
+
+  -v             Be verbose.
+
+SUBCOMMANDS:
+  ci             Github CI status info
+  comment        Comment under issues and PRs
+  config         Configure forges
+  forks          Create, delete and list repository forks
+  gists          Create, fetch and list Github Gists
+  issues         Manage issues
+  labels         Manage issue and PR labels
+  milestones     Milestone handling
+  pipelines      Gitlab CI management
+  pulls          Create, view and manage PRs
+  releases       Manage releases of repositories
+  repos          Remote Repository management
+  snippets       Fetch and list Gitlab snippets
+  status         General user status and notifications
+  api            Fetch plain JSON info from an API (for debugging purposes)
+  version        Print version
+
+gcli 1.2.0 (amd64-unknown-freebsd13.2)
+Using libcurl/8.1.2 OpenSSL/1.1.1t zlib/1.2.13 libpsl/0.21.2 (+libidn2/2.3.4) libssh2/1.11.0 nghttp2/1.53.0
+Using vendored pdjson library
+Report bugs at https://gitlab.com/herrhotzenplotz/gcli/.
+Copyright 2021, 2022, 2023 Nico Sonack <nsonack@herrhotzenplotz.de> and contributors.
+.EE
+.PP
+This gives you an overview over all the available subcommands. Each
+subcommand in turn allows you to get its usage by supplying the
+\f(CR--help\fR option to it.
+.SS
+Manual pages
+.LP
+Furthermore I recommend reading into the manual page \f(CRgcli-issues(1)\fR
+and \f(CRgcli-pulls(1)\fR:
+.LP
+.EX
+$ man gcli-issues
+$ man gcli-pulls
+.EE
+.SH Setting up gcli for use with an account
+.LP
+Creating issues on GitHub requires an account which we need to
+generate an authentication token for gcli.
+.PP
+If you want to test this with a different forge than GitHub look at \c
+.UR ./08-Other-forges.html
+the tutorial for other forges
+.UE \c
+\&.
+.PP
+Log into your GitHub account and click on your account icon in the top
+right corner. Then choose the \f(CRSettings\fR option. Scroll down and
+choose \f(CRDeveloper settings\fR on the bottom of the left column. Under
+\f(CRPersonal access tokens\fR choose \f(CRTokens (classic)\fR.
+.PP
+Click on \f(CRGenerate new token (classic)\fR.
+.PP
+Set a useful name such as \f(CRgcli\fR in the Note field, set the expiration
+to \f(CRNo expiration\fR and allow the following \f(CRScopes\fR:
+.IP "\(bu" 3
+\f(CRrepo\fR
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "\(bu" 3
+\f(CRworkflow\fR
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "\(bu" 3
+\f(CRadmin:public_key\fR
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "\(bu" 3
+\f(CRgist\fR
+.LP
+Then create the token. It\(cqll be printed in green. Do not share it!
+.PP
+Now we need to tell gcli about this new token. To do this, create
+a configuration file for gcli - on Windows you need to do this from
+the MSYS2 Shell:
+.LP
+.EX
+$ mkdir -p ${HOME}/.config/gcli
+$ vi ${HOME}/.config/gcli/config
+.EE
+.PP
+Obviously, you can choose any other editor of your choice. Put the
+following into this file:
+.LP
+.EX
+defaults {
+    editor=vi
+    github-default-account=my-github-account
+}
+
+my-github-account {
+    token=<token-goes-here>
+    account=<account-name>
+    forge-type=github
+}
+.EE
+.PP
+Replace the \f(CR<token-goes-here>\fR with the previously generated token
+and the \f(CR<account>\fR with your account name.
+.PP
+If you now run
+.LP
+.EX
+$ gcli -t github repos
+.EE
+.PP
+you should get a list of your repos. If not, check again that you did
+all the steps above correctly.
+.SH Creating an issue
+.LP
+\fBNote\fR: This assumes you have \c
+.UR ./04-Account-Setup.html
+configured gcli with an account
+.UE
+for GitHub already.
+.SS
+Preparation
+.LP
+For this case I have a playground repository that you may as well use
+for testing with gcli. It is available at
+\f(CRherrhotzenplotz/ghcli-playground\fR.
+.PP
+To see a list of issues, we can run:
+.LP
+.EX
+$ gcli -t github issues -o herrhotzenplotz -r ghcli-playground -a
+NUMBER  NOTES  STATE   TITLE
+    13      0  open    yet another issue
+    12      0  closed  wat
+    11      0  closed  blaaaaaaaaaaaaaaaaaaaah
+    10      0  closed  \(dqthis is the quoted\(dq issue title? anyone?\(dq
+     9      0  closed  test
+     8      0  closed  foobar
+     7      0  closed  foobar
+     5      0  closed  test2
+     4      0  closed  test
+$
+.EE
+.SS
+Invoke gcli
+.LP
+Let\(cqs create a bug report where we complain about things not working:
+.LP
+.EX
+$ gcli -t github issues create -o herrhotzenplotz -r ghcli-playground \e
+    \(dqBug: Doesn't work on my machine\(dq
+.EE
+.PP
+The message \(lqBug: doesn\(cqt work on my machine\(rq is the title of the
+issue.
+.SS
+Original Post
+.LP
+You will see the default editor come up and instruct you to type in a
+message. This message is the \(lqoriginal post\(rq or the body of the issue
+ticket that you\(cqre about to submit. You can use Markdown Syntax:
+.LP
+.EX
+ I tried building this code on my machine but unfortunately it errors
+ out with the following message:
+
+ \(ga\(ga\(gaconsole
+ $ make love
+ make: don't know how to make love. Stop
+
+ make: stopped in /tmp/wat
+ $
+ \(ga\(ga\(ga
+
+ What am I doing wrong?
+
+ ! ISSUE TITLE : Bug: Doesn't work on my machine
+ ! Enter issue description above.
+ ! All lines starting with '!' will be discarded.
+.EE
+.SS
+Submit the issue
+.LP
+After you save and exit the editor gcli gives you a chance to check
+back and finally submit the issue. Type \(oqy\(cq and hit enter.
+.PP
+You can check back if the issue was created and also view details
+about it as you learned earlier.
+.SH Commenting
+.LP
+Discussions on GitHub and the like are done through comments. You can
+comment on issues and pull requests.
+.SS
+Reviewing a discussion
+.LP
+Say you were looking at an issue in curl/curl:
+.LP
+.EX
+$ gcli issues -o curl -r curl -i 11461 comments
+.EE
+.SS
+Create the comment
+.LP
+And now you wish to respond to this thread:
+.LP
+.EX
+$ gcli comment -o curl -r curl -i 11461
+.EE
+.PP
+This will now open the editor and lets you type in your message.
+After saving and exiting gcli will ask you to confirm. Type \(oqy\(cq and
+hit enter:
+.LP
+.EX
+$ gcli -t github comment -o curl -r curl -i 11461
+You will be commenting the following in curl/curl #11461:
+
+Is this okay? [yN] y
+$
+.EE
+.SS
+Commenting on pull requests
+.LP
+When you want to comment under a pull request use the \f(CR-p\fR flag
+instead of the \f(CR-i\fR flag to indicate the PR number.
+.SH Creating a pull request
+.LP
+Creating a pull request with gcli is usually as simple as running
+.LP
+.EX
+$ gcli pulls create
+.EE
+.SS
+Preparation
+.LP
+Suppose you have a git repository forked and cloned:
+.LP
+.EX
+$ git clone git@github.com:contour-terminal/contour
+$ cd contour
+$ gcli forks create --into herrhotzenplotz
+.EE
+.PP
+Then you do some work on whatever feature you\(cqre planning to submit:
+.LP
+.EX
+$ git checkout -b my-amazing-feature
+<hackhackhack>
+$ git add -p
+$ git commit
+.EE
+.SS
+Push your changes
+.LP
+You then push your changes to your fork:
+.LP
+.EX
+$ git push origin my-amazing-feature
+.EE
+.SS
+Create the pull request
+.LP
+Now you can run the command to create the pull request:
+.LP
+.EX
+$ gcli pulls create
+From (owner:branch) [herrhotzenplotz:my-amazing-feature]:
+Owner [contour-terminal]:
+Repository [contour]:
+To Branch [master]:
+Title: Add new amazing feature
+Enable automerge? [yN]:
+.EE
+.PP
+Most of the defaults you should be able to simply accept. This
+assumes that you have the source branch checked out locally and
+remotes are configured appropriately.
+.PP
+Otherwise you can just change the defaults by entering the correct
+values.
+.SS
+Enter original post
+.LP
+After you entered all the meta data of the pull request gcli will
+drop you into your editor and lets you enter a message for the pull
+request.
+.SS
+Submit
+.LP
+After you saved and exit type \f(CRy\fR and hit enter to submit the pull
+request.
+.SH Other forges and bugtrackers
+.LP
+gcli is capable of not only interacting with Github. It also currently supports:
+.IP "\(bu" 3
+GitLab
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "\(bu" 3
+Gitea
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "\(bu" 3
+Bugzilla
+.SS
+Bugzilla
+.SS
+Notes
+.LP
+Bugzilla is commonly used as a bug tracker in various large open-source
+projects such as FreeBSD, the Linux Kernel, Mozilla and Gentoo.
+.SS
+Searching
+.LP
+Suppose you want to search for bug reports containing \f(CRsparc\fR in
+the Gentoo Bugzilla.
+.PP
+In this case you need to configure an account that points at the
+correct URL in \f(CR$HOME/.config/gcli/config\fR by adding:
+.LP
+.EX
+gentoo {
+    forge-type=bugzilla
+    api-base=https://bugs.gentoo.org/
+}
+.EE
+.PP
+Now you can search the Gentoo Bugs:
+.LP
+.EX
+$ gcli -a gentoo issues sparc
+NUMBER  NOTES  STATE        TITLE
+924443      0  UNCONFIRMED  Add keyword \(tisparc for app-misc/fastfetch
+924430      0  RESOLVED     media-libs/assimp-5.3.1 fails tests on sparc
+924215      0  CONFIRMED    dev-libs/libbson dev-libs/mongo-c-driver: alpha arm ia64 mips ppc ppc64 s390 sparc keyword req
+924191      0  CONFIRMED    media-libs/exempi: unaligned access causes dev-python/python-xmp-toolkit-2.0.2 to fails tests on sparc (test_file_to_dict (test.test_core_unit.UtilsTestCase.test_file_to_dict) ... Bus error)
+924180      0  CONFIRMED    dev-python/psycopg-3.1.17[native-extensions] fails tests on sparc: tests/test_copy_async.py::test_read_rows[asyncio-names-1] Fatal Python error: Bus error
+924031      0  IN_PROGRESS  sys-apps/bfs: \(tiarm \(tiarm64 \(tippc \(tippc64 \(tisparc keywording
+923968      0  CONFIRMED    dev-python/pyarrow-15.0.0 fails to configure on sparc: CMake Error at cmake_modules/SetupCxxFlags.cmake:42 (message): Unknown system processor
+921245      0  CONFIRMED    media-video/rav1e-0.6.6 fails to compile on sparc: Assertion \(gaDT.dominates(RHead, LHead) && \(dqNo dominance between recurrences used by one SCEV?\(dq' failed.
+920956      0  CONFIRMED    dev-python/pygame-2.5.2: pygame.tests.font_test SIGBUS on sparc
+920737      0  CONFIRMED    sparc64-solaris Prefix no longer supported
+
+<snip>
+.EE
+.SS
+Issue details
+.LP
+Furthermore we can look at single issues:
+.LP
+.EX
+$ gcli -a gentoo issues -i 920737 all comments
+   NUMBER : 920737
+    TITLE : sparc64-solaris Prefix no longer supported
+  CREATED : 2023-12-26T19:20:58Z
+  PRODUCT : Gentoo Linux
+COMPONENT : Profiles
+   AUTHOR : Tom Williams
+    STATE : CONFIRMED
+   LABELS : none
+ASSIGNEES : prefix
+
+ORIGINAL POST
+
+    Resurrecting a Prefix install on Solaris 11.4 SPARC. It was working rather well
+    for me; after a hiatus I had hoped to use it again but my first emerge --sync
+    has removed the profile needed to merge any updates or new packages.
+
+    I note commit 8e006b67e06a19fae10c6059c7fc5ede88834601 in May 2023 removed the
+    profile and keywording for prefixed installs.
+
+    There is no associated comment. There doesn't seem to be a bug report in regards
+    to the change (I'm quite sure almost nobody uses it, so probably fair enough)
+
+    Any easy way to restore the profile for now? Eventually Solaris/SPARC and thus
+    Prefix will be gone anyway, but useful for now.
+
+    Thanks for your continued efforts.
+AUTHOR : sam
+DATE   : 2023-12-26T19:21:33Z
+         I think at the very least, when removing Prefix support in future, a 'deprecated'
+         file should be added to the relevant profiles asking if anyone is using
+         it to step forward.
+
+AUTHOR : grobian
+DATE   : 2023-12-26T22:58:12Z
+         Solaris 11.4 itself is a problem.  I doubt you ever had it \(dqworking\(dq.
+
+AUTHOR : grobian
+DATE   : 2023-12-26T22:59:57Z
+         Linux sparc team is not relevant here
+
+$
+.EE
+.SS
+GitLab
+.SS
+Configuring an account for use with a token
+.LP
+First you need to generate a token:
+.IP "1." 3
+Click on your avatar in the top left corner
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "2." 3
+Choose Preferences in the popup menu
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "3." 3
+Select \f(CRAccess tokens\fR in the preference menu
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "4." 3
+Click the \f(CRAdd new token\fR button
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "5." 3
+Choose some reasonable values
+.RS
+.IP "\(bu" 3
+The token name can be your hostname e.g. \f(CRgcli $(hostname)\fR
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "\(bu" 3
+Clear the expiration date. It will be defaulted to some high value by GitLab.
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "\(bu" 3
+Select the \f(CRapi\fR scope
+.RE
+.LP
+Now click \f(CRCreate personal access token\fR. Save this token - \fBdo not share it with anyone else\fR.
+.PP
+You can now update your gcli config in \f(CR$HOME/.config/gcli/config\fR:
+.LP
+.EX
+defaults {
+    gitlab-default-account=gitlab-com
+    ...
+}
+
+gitlab-com {
+    account=<your-username-at-gitlab>
+    token=<the-token-you-just-created>
+    forge-type=gitlab
+}
+.EE
+.PP
+After that you should be able to run the following command:
+.LP
+.EX
+$ gcli -t gitlab issues -o herrhotzenplotz -r gcli
+.EE
+.PP
+If this process errors out check the above steps. If you believe
+this is a bug, please report it at our issue tracker!
+.SS
+Gitea
+.LP
+The steps here are roughly the same as with GitLab.
+.PP
+To generate a token:
+.IP "1." 3
+Click your avatar in the top-right corner
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "2." 3
+Choose \f(CRSettings\fR in the popup menu
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "3." 3
+Select \f(CRApplications\fR in the menu on the left
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "4." 3
+Under \f(CRGenerate new token\fR enter a reasonable token name
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "5." 3
+Click the \f(CRGenerate token\fR button
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
+.IP "6." 3
+Save the token - \fBdo not share it with anyone else\fR.
+.LP
+You can now update your gcli config file in \f(CR$HOME/.config/gcli/config\fR:
+.LP
+.EX
+defaults {
+    gitea-default-account=codeberg-org
+    ...
+}
+
+codeberg-org {
+    account=<your-username-at-gitea>
+    token=<the-token-you-just-created>
+    forge-type=gitea
+    api-base=https://codeberg.org/api/v1
+}
+.EE
+.PP
+The example here uses Codeberg. Update these fields as needed for your own use case.

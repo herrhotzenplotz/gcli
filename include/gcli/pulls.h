@@ -125,6 +125,11 @@ enum {
 	GCLI_REVIEW_COMMENT = 3,
 };
 
+enum gcli_pull_approval_state {
+	GCLI_PULL_APPROVED = GCLI_REVIEW_ACCEPT_CHANGES,
+	GCLI_PULL_UNAPPROVED = GCLI_REVIEW_REQUEST_CHANGES,
+};
+
 struct gcli_review_meta_line {
 	TAILQ_ENTRY(gcli_review_meta_line) next;
 	char *entry;
@@ -133,7 +138,7 @@ struct gcli_review_meta_line {
 struct gcli_pull_create_review_details {
 	struct gcli_path path;
 	struct gcli_diff_comments comments;
-	char *body;       /* string containing the prelude message by the user */
+	char const *body;       /* string containing the prelude message by the user */
 	TAILQ_HEAD(, gcli_review_meta_line) meta_lines;
 	int review_state;
 };
@@ -150,6 +155,44 @@ struct gcli_pull_checks_list {
 	void *checks;
 	size_t checks_size;
 	int forge_type;
+};
+
+/* PR/MR reviews */
+struct gcli_pull_review {
+	gcli_id id;
+	char *author;
+	char *state;
+	time_t submitted_at;
+	char *body;
+};
+
+struct gcli_pull_reviews {
+	struct gcli_pull_review *reviews;
+	size_t reviews_size;
+};
+
+/* comments in a review */
+struct gcli_pull_review_comment;
+TAILQ_HEAD(gcli_pull_review_thread, gcli_pull_review_comment);
+
+struct gcli_pull_review_comment {
+	/* threaded comments */
+	TAILQ_ENTRY(gcli_pull_review_comment) next;
+	struct gcli_pull_review_thread replies;
+
+	/* actual fields */
+	gcli_id id;
+	gcli_id in_reply_to;
+	char *author;
+	char *body;
+	char *path;
+	char *diff_hunk;
+	time_t created_at;
+};
+
+struct gcli_pull_review_comments {
+	struct gcli_pull_review_comment *comments;
+	size_t comments_size;
 };
 
 int gcli_search_pulls(struct gcli_ctx *ctx, struct gcli_path const *path,
@@ -224,5 +267,24 @@ char const *gcli_pull_get_meta_by_key(struct gcli_pull_create_review_details con
 
 int gcli_pull_checkout(struct gcli_ctx *ctx, char const *remote,
                        struct gcli_path const *pull_path);
+
+int gcli_pull_get_reviews(struct gcli_ctx *ctx, struct gcli_path const *path,
+                          struct gcli_pull_reviews *out);
+
+void gcli_pull_reviews_free(struct gcli_pull_reviews *it);
+
+void gcli_pull_review_comments_free(struct gcli_pull_review_comments *it);
+
+int gcli_pull_get_review_threads(struct gcli_ctx *ctx,
+                                 struct gcli_path const *path,
+                                 struct gcli_pull_review_thread *out);
+
+void gcli_pull_review_thread_free(struct gcli_pull_review_thread *thd);
+
+int gcli_pull_approve(struct gcli_ctx *ctx, struct gcli_path const *path,
+                      char const *const message);
+
+int gcli_pull_unapprove(struct gcli_ctx *ctx, struct gcli_path const *path,
+                        char const *const message);
 
 #endif /* PULLS_H */

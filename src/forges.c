@@ -142,6 +142,8 @@ github_forge_descriptor =
 	.pull_set_milestone        = github_issue_set_milestone,
 
 	.pull_create_review        = github_pull_create_review,
+	.pull_get_reviews          = github_pull_get_reviews,
+	.pull_get_review_threads   = github_pull_get_review_threads,
 
 	.create_release            = github_create_release,
 	.delete_release            = github_delete_release,
@@ -181,7 +183,7 @@ github_forge_descriptor =
 	                           | GCLI_MILESTONE_QUIRKS_DUEDATE
 	                           | GCLI_MILESTONE_QUIRKS_PULLS,
 	.pull_summary_quirks       = GCLI_PRS_QUIRK_COVERAGE
-	                           | GCLI_PRS_QUIRK_AUTOMERGE,
+	                           | GCLI_PRS_QUIRK_AUTOMERGE, /* automerge field seems broken */
 };
 
 static struct gcli_forge_descriptor const
@@ -339,6 +341,7 @@ gitea_forge_descriptor =
 	.pull_reopen               = gitea_pull_reopen,
 	.pull_set_milestone        = gitea_pull_set_milestone,
 	.pull_set_title            = gitea_pull_set_title,
+	.pull_get_reviews          = gitea_pull_get_reviews,
 
 	/* Releases */
 	.create_release            = gitea_create_release,
@@ -383,6 +386,8 @@ gitea_forge_descriptor =
 	                           | GCLI_PRS_QUIRK_DRAFT
 	                           | GCLI_PRS_QUIRK_CHANGES
 	                           | GCLI_PRS_QUIRK_COVERAGE,
+	.pull_quirks               = GCLI_PULL_QUIRK_AUTOMERGE, /* uses Github Backend with GraphQL
+	                                                         * which doesn't work with gitea */
 };
 
 static struct gcli_forge_descriptor const

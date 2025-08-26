@@ -36,6 +36,7 @@
 #include <gcli/base64.h>
 #include <gcli/curl.h>
 #include <gcli/json_gen.h>
+#include <gcli/url.h>
 
 #include <gcli/port/string.h>
 
@@ -46,54 +47,37 @@ bugzilla_get_bugs(struct gcli_ctx *ctx, struct gcli_path const *const path,
                   struct gcli_issue_fetch_details const *details, int const max,
                   struct gcli_issue_list *out)
 {
-	char *url, *e_product = NULL, *e_component = NULL, *e_author = NULL,
-	     *e_query = NULL;
+	char *url = NULL, *suffix = NULL;
 	struct gcli_fetch_buffer buffer = {0};
 	int rc = 0;
 
 	if (path->kind != GCLI_PATH_BUGZILLA)
 		return gcli_error(ctx, "unsupported path kind for bugzilla");
 
-	if (path->as_bugzilla.product) {
-		char *tmp = gcli_urlencode(path->as_bugzilla.product);
-		e_product = gcli_asprintf("&product=%s", tmp);
-		gcli_clear_ptr(&tmp);
-	}
-
-	if (path->as_bugzilla.component) {
-		char *tmp = gcli_urlencode(path->as_bugzilla.component);
-		e_component = gcli_asprintf("&component=%s", tmp);
-		gcli_clear_ptr(&tmp);
-	}
-
-	if (details->author) {
-		char *tmp = gcli_urlencode(details->author);
-		e_author = gcli_asprintf("&creator=%s", tmp);
-		gcli_clear_ptr(&tmp);
-	}
-
-	if (details->search_term) {
-		char *tmp = gcli_urlencode(details->search_term);
-		e_query = gcli_asprintf("&quicksearch=%s", tmp);
-		gcli_clear_ptr(&tmp);
-	}
-
-	/* TODO: handle the max = -1 case */
 	/* Note(Nico): Most of the options here are not very well
 	 * documented. Specifically the order= parameter I have figured out by
 	 * reading the code and trying things until it worked. */
-	url = gcli_asprintf("%s/rest/bug?order=bug_id%%20DESC%%2C&limit=%d%s%s%s%s%s",
-	                    gcli_get_apibase(ctx), max,
-	                    details->all ? "&status=All" : "&status=Open&status=New",
-	                    e_product ? e_product : "",
-	                    e_component ? e_component : "",
-	                    e_author ? e_author : "",
-	                    e_query ? e_query : "");
+	gcli_url_options_append(&suffix, "order", "bug_id DESC,");
 
-	gcli_clear_ptr(&e_query);
-	gcli_clear_ptr(&e_product);
-	gcli_clear_ptr(&e_component);
-	gcli_clear_ptr(&e_author);
+	/* TODO: handle the max = -1 case */
+	gcli_url_options_appendf(&suffix, "limit", "%d", max);
+
+	if (details->all) {
+		gcli_url_options_append(&suffix, "status", "All");
+	} else {
+		gcli_url_options_append(&suffix, "status", "Open");
+		gcli_url_options_append(&suffix, "status", "New");
+	}
+
+	gcli_url_options_append(&suffix, "product", path->as_bugzilla.product);
+	gcli_url_options_append(&suffix, "component", path->as_bugzilla.component);
+	gcli_url_options_append(&suffix, "creator", details->author);
+	gcli_url_options_append(&suffix, "assigned_to", details->assignee);
+	gcli_url_options_append(&suffix, "quicksearch", details->search_term);
+
+	url = gcli_asprintf("%s/rest/bug%s", gcli_get_apibase(ctx), suffix);
+
+	gcli_clear_ptr(&suffix);
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc == 0) {

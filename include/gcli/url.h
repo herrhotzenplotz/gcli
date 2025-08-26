@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,46 +27,28 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gcli/curl.h>
-#include <gcli/github/comments.h>
-#include <gcli/github/issues.h>
-#include <gcli/github/status.h>
-#include <gcli/json_util.h>
+#ifndef GCLI_CMD_URL_H
+#define GCLI_CMD_URL_H
 
-#include <pdjson.h>
+/* This URL parser is in no way standards compliant, it has only
+ * the things it needs to be sufficiently able to parse git remote
+ * URLs. */
 
-#include <templates/github/status.h>
+#include <gcli/port/sv.h>
 
-int
-github_get_notifications(struct gcli_ctx *ctx, int const max,
-                         struct gcli_notification_list *const out)
-{
-	char *url = NULL;
+/* struct representing the URL parts */
+struct gcli_url {
+	char *scheme, *user, *host, *port, *path;
+};
 
-	struct gcli_fetch_list_ctx fl = {
-		.listp = &out->notifications,
-		.sizep = &out->notifications_size,
-		.parse = (parsefn)(parse_github_notifications),
-		.max = max,
-	};
+int gcli_parse_url(char const *url, struct gcli_url *out);
+void gcli_url_free(struct gcli_url *);
 
-	url = gcli_asprintf("%s/notifications", gcli_get_apibase(ctx));
-	return gcli_fetch_list(ctx, url, &fl);
-}
+void gcli_url_options_append(char **result,
+                             char const *key,
+                             char const *value);
 
-int
-github_notification_mark_as_read(struct gcli_ctx *ctx, char const *id)
-{
-	char *url = NULL;
-	int rc = 0;
+void gcli_url_options_appendf(char **result, char const *key,
+                              char const *fmt, ...) PRINTF_FORMAT(3, 4);
 
-	url = gcli_asprintf(
-		"%s/notifications/threads/%s",
-		gcli_get_apibase(ctx),
-		id);
-	rc = gcli_fetch_with_method(ctx, "PATCH", url, NULL, NULL, NULL);
-
-	gcli_clear_ptr(&url);
-
-	return rc;
-}
+#endif /* GCLI_CMD_URL_H */

@@ -35,10 +35,10 @@
 #endif
 
 struct gcli_gitremote {
-	gcli_sv name;
-	gcli_sv owner;
-	gcli_sv repo;
-	gcli_sv url;
+	char *name;
+	char *owner;
+	char *repo;
+	char *url;
 	gcli_forge_type forge_type;
 };
 
@@ -53,6 +53,6 @@ int gcli_gitconfig_repo_by_remote(struct gcli_ctx *ctx, char const *const remote
                                   int *const forge);
 
 int gcli_gitconfig_get_remote(struct gcli_ctx *ctx, gcli_forge_type type,
-                              char **remote);
+                              char const **remote);
 
 #endif /* GCLI_CMD_GITCONFIG_H */

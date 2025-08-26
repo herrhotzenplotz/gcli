@@ -84,4 +84,8 @@ int gitea_pull_assign(struct gcli_ctx *ctx,
 int gitea_pull_set_title(struct gcli_ctx *ctx, struct gcli_path const *path,
                          char const *const title);
 
+int gitea_pull_get_reviews(struct gcli_ctx *ctx,
+                           struct gcli_path const *path,
+                           struct gcli_pull_reviews *out);
+
 #endif /* GITEA_PULLS_H */

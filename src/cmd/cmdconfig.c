@@ -45,9 +45,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <dirent.h>
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#endif
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -972,7 +970,7 @@ gcli_config_get_forge_type(struct gcli_ctx *ctx)
 }
 
 int
-gcli_config_get_remote(struct gcli_ctx *ctx, char **remote)
+gcli_config_get_remote(struct gcli_ctx *ctx, char const **remote)
 {
 	struct gcli_config *cfg;
 	gcli_forge_type type;

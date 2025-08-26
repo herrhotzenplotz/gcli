@@ -32,7 +32,7 @@
 
 #include <templates/bugzilla/api.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 char const *
 bugzilla_api_error_string(struct gcli_ctx *ctx, struct gcli_fetch_buffer *const buf)

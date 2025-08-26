@@ -83,4 +83,11 @@ int github_pull_set_title(struct gcli_ctx *ctx, struct gcli_path const *path,
 int github_pull_create_review(struct gcli_ctx *ctx,
                               struct gcli_pull_create_review_details const *details);
 
+int github_pull_get_reviews(struct gcli_ctx *ctx, struct gcli_path const *path,
+                            struct gcli_pull_reviews *out);
+
+int github_pull_get_review_threads(struct gcli_ctx *ctx,
+                                   struct gcli_path const *path,
+                                   struct gcli_pull_review_thread *out);
+
 #endif /* GITHUB_PULLS_H */

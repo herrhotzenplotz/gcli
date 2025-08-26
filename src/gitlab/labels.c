@@ -35,7 +35,7 @@
 
 #include <templates/gitlab/labels.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 int
 gitlab_get_labels(struct gcli_ctx *ctx, struct gcli_path const *const path,

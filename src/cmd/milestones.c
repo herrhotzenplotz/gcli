@@ -39,9 +39,7 @@
 #include <gcli/milestones.h>
 #include <gcli/port/util.h>
 
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#endif
 
 static void
 usage(void)

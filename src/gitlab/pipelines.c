@@ -38,7 +38,7 @@
 #include <gcli/json_util.h>
 #include <gcli/pulls.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 #include <assert.h>
 

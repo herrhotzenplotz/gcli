@@ -91,6 +91,8 @@ github
 gitlab
 .It
 gitea
+.It
+bugzilla
 .El
 .It api-base
 (optional) Used to override the API base URL of the forge. This is
@@ -99,9 +101,10 @@ useful for self-hosted instances.  Depending on the
 the default values are:
 .Bl -column forge-type "default value"
 .It Em forge-type Ta Em "default value"
-.It github Ta Lk "https://api.github.com"
-.It gitlab Ta Lk "https://gitlab.com/api/v4"
-.It gitea  Ta Lk "https://codeberg.org/api/v1"
+.It github        Ta Lk "https://api.github.com"
+.It gitlab        Ta Lk "https://gitlab.com/api/v4"
+.It gitea         Ta Lk "https://codeberg.org/api/v1"
+.It bugzilla      Ta Lk "https://bugs.freebsd.org/bugzilla"
 .El
 .It account
 (optional) The username used to authenticate at the API.

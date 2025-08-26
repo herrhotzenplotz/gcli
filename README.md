@@ -7,9 +7,7 @@ Portable CLI tool for interacting with Git(Hub|Lab|Tea), Forgejo and Bugzilla fr
 ## Why?
 
 The official GitHub CLI tool only supports GitHub.
-I wanted a simple unified tool for various git forges such as GitHub
-and GitLab because every forge does things differently yet all build
-on Git and purposefully break with its philosophy.
+I wanted a simple unified tool for various git forges such as GitHub and GitLab because every forge does things differently yet all build on Git and purposefully break with its philosophy.
 
 ## Building
 
@@ -43,6 +41,7 @@ Optional dependencies:
 - libreadline
 
 The test suite requires:
+
 - [Kyua](https://github.com/jmmv/kyua)
 - [ATF](https://github.com/jmmv/atf)
 
@@ -62,10 +61,18 @@ The final installation destination is `$DESTDIR/$PREFIX/...`.
 
 If you are unsure, consult the builtin configure help by running `./configure --help`.
 
+In case any of the above does not work, please either report a bug, or submit a patch in case you managed to fix it.
+
+Details on cross-compilation can be found in [HACKING.md](HACKING.md).
+
+### Testing
+
+To run the test suite first make sure you have all the necessary dependencies installed (see above).
+Then you can run `make check` in the build directory to run the test suite.
+
 For more details also see [HACKING.md](HACKING.md).
 
-In case any of this does not work, please either report a bug, or
-submit a patch in case you managed to fix it.
+### (Previously) known to work platforms
 
 Incomplete list of tested operating systems:
 
@@ -104,12 +111,9 @@ Alternatively you may also use the mailing list at
 
 ## Bugs and contributions
 
-Please report bugs, issues and questions to
-[~herrhotzenplotz/gcli-discuss@lists.sr.ht](mailto:~herrhotzenplotz/gcli-discuss@lists.sr.ht)
-or on [GitLab](https://gitlab.com/herrhotzenplotz/gcli).
+Please report bugs, issues and questions to [~herrhotzenplotz/gcli-discuss@lists.sr.ht](mailto:~herrhotzenplotz/gcli-discuss@lists.sr.ht) or on [GitLab](https://gitlab.com/herrhotzenplotz/gcli).
 
-You can also submit patches using git-send-email or Mercurial patchbomb to
-[~herrhotzenplotz/gcli-devel@lists.sr.ht](mailto:~herrhotzenplotz/gcli-devl@lists.sr.ht).
+You can also submit patches using git-send-email or Mercurial patchbomb to [~herrhotzenplotz/gcli-devel@lists.sr.ht](mailto:~herrhotzenplotz/gcli-devl@lists.sr.ht).
 
 ## License
 
@@ -117,5 +121,4 @@ BSD-2 CLAUSE (aka. FreeBSD License). Please see the LICENSE file attached.
 
 ## Credits
 
-This program makes heavy use of both [libcurl](https://curl.haxx.se/)
-and [pdjson](https://github.com/skeeto/pdjson).
+This program makes heavy use of both [libcurl](https://curl.haxx.se/) and [pdjson](https://github.com/skeeto/pdjson).

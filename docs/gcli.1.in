@@ -17,6 +17,11 @@ can be used to interact with
 forges like GitHub, GitLab and Gitea from the command line in order to
 make many tasks like managing issues and pull requests easier.
 .Pp
+If you're looking for a guided tutorial either go to
+.Lk https://herrhotzenplotz.de/gcli/tutorial
+or read the offline version
+.Xr gcli-tutorial 1 .
+.Pp
 Calls to
 .Nm
 usually consist of either only the subcommand to list requested data
@@ -112,6 +117,13 @@ See also
 .Ev GCLI_NOSPINNER
 in
 .Sx ENVIRONMENT .
+.It Fl -no-markdown
+Disable automatic markdown rendering.
+This is useful in case improperly formatted markdown is causing unreadable output or if messages aren't markdown at all.
+See also
+.Ev GCLI_RENDER_MARKDOWN
+in
+.Sx ENVIRONMENT .
 .It Fl q , -quiet
 Suppresses most output of
 .Nm .
@@ -200,6 +212,15 @@ If set to
 gcli is making requests. See
 .Sx OPTIONS
 (--disable-spinner)
+.It Ev GCLI_RENDER_MARKDOWN
+If this is set to
+.Sq 0 ,
+.Sq n or
+.Sq no
+(capitalisation ignored) this will disable markdown rendering in gcli's output.
+See
+.Sx OPTIONS
+(--no-markdown).
 .El
 .Sh FILES
 .Bl -tag -width ${XDG_CONFIG_HOME}/gcli/config -compact

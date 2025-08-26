@@ -25,6 +25,7 @@
 .Op Fl f Ar owner:branch
 .Op Fl y
 .Op Fl R Ar reviewer
+.Op Fl T Ar template
 .Op Ar "PR title..."
 .Sh DESCRIPTION
 Use
@@ -101,6 +102,13 @@ on the specified
 Create a new PR in the given or auto-detected repository. The editor
 will come up and ask you to enter the PR message.
 .Pp
+If the pull request submission has failed, gcli will store the entered
+message in a file called
+.Pa gcli_message .
+Whenever this file exists in the current working directory, gcli
+will ask you whether you wish to recall its contents for the pull
+request message.
+.Pp
 When the title is omitted gcli will interactively prompt the various
 options listed below, including the title.
 .Pp
@@ -128,6 +136,12 @@ Add the given
 as a reviewer for the pull request that is to be created.
 To add multiple people as reviewers specify this option more than
 once, one for each reviewer.
+.It Fl T , -template Ar template
+Use the provided
+.Ar template
+as a template for the PR message.
+The template file is going to be loaded into the editor to let you
+edit it further.
 .It Ar "PR Title..."
 The title of the Pull Request or Merge Request.
 .El
@@ -215,6 +229,15 @@ Assign the pull request to the given
 .It Cm open
 Open the PR in a web browser using
 .Xr xdg-open 1 .
+.It Cm reviews
+List reviews of this pull request.
+.It Cm discussions
+Print the review discussions in a threaded form.
+This is currently only implemented for GitHub.
+.It Cm approve
+Give your approval on the pull request.
+.It Cm unapprove
+Revoke your approval on the pull request.
 .El
 .Sh EXAMPLES
 Print a list of open PRs in the current project:

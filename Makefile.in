@@ -20,6 +20,13 @@ RANLIB              = @RANLIB@
 RM                  = @RM@
 PREFIX              = @PREFIX@
 SHELL               = @SHELL@
+EXEEXT              = @EXEEXT@
+LIBEXT              = @LIBEXT@
+OBJEXT              = @OBJEXT@
+EXEEXT_FOR_BUILD    = @EXEEXT_FOR_BUILD@
+LIBEXT_FOR_BUILD    = @LIBEXT_FOR_BUILD@
+OBJEXT_FOR_BUILD    = @OBJEXT_FOR_BUILD@
+ENABLE_MAINTAINER   = @ENABLE_MAINTAINER@
 ################################################################################################
 
 ############## Optimiser / Warning flags #####
@@ -48,7 +55,7 @@ CFLAGS_gcc=		-fPIC -pipe
 CFLAGS_sunstudio=	-m64 -errtags=yes -errfmt=error -errwarn=%all -xcode=pic32 -DPIC -xregs=no%appl
 CFLAGS_sunstudio +=	-erroff=E_TOKENLESS_MACRO                # Causes errors with TAILQ_HEAD(, ...)
 CFLAGS_sunstudio +=	-erroff=E_STATEMENT_NOT_REACHED          # Causes errors in pdjson.c
-CFLAGS=			$(CSTDFLAGS) $(COPTFLAGS) $(CFLAGS_$(CCOM)) -I@SRCDIR@/include -I@SRCDIR@/thirdparty -I. $(ENV_CFLAGS)
+CFLAGS=			$(CSTDFLAGS) $(COPTFLAGS) $(CFLAGS_$(CCOM)) -I@SRCDIR@/include -I. $(ENV_CFLAGS)
 
 ENV_CFLAGS_FOR_BUILD=	@ENV_CFLAGS_FOR_BUILD@
 CFLAGS_FOR_BUILD=	$(CSTDFLAGS_FOR_BUILD) $(COPTFLAGS_FOR_BUILD) $(CFLAGS_$(CCOM)) -I@SRCDIR@/include -I@SRCDIR@/thirdparty -I. $(ENV_CFLAGS_FOR_BUILD)
@@ -61,16 +68,16 @@ LDFLAGS_FOR_BUILD=	$(ENV_LDFLAGS_FOR_BUILD)
 
 ############## CPPFLAGS ######################
 ENV_CPPFLAGS=		@ENV_CPPFLAGS@
-CPPFLAGS=		-DHAVE_CONFIG_H=1 -DHAVE_SYS_QUEUE_H=1 -DHAVE_GETOPT_H=1 $(ENV_CPPFLAGS)
+CPPFLAGS=		-DHAVE_CONFIG_H=1 $(ENV_CPPFLAGS)
 
 ENV_CPPFLAGS_FOR_BUILD=	@ENV_CPPFLAGS_FOR_BUILD@
 CPPFLAGS_FOR_BUILD=	-DHAVE_CONFIG_H -DYY_NO_UNPUT -DYY_NO_INPUT $(ENV_CPPFLAGS_FOR_BUILD)
 
 # CFLAGS for dependency tracking for various compilers
-CCDEPFLAGS_gcc=		-MD -MF ${@:.o=.d}
-CCDEPFLAGS_clang=	-MD -MF ${@:.o=.d}
-CCDEPFLAGS_xlc=		-qmakedep=gcc -MF ${@:.o=.d}
-CCDEPFLAGS_sunstudio=	-xMD -xMF ${@:.o=.d}
+CCDEPFLAGS_gcc=		-MD -MF ${@:$(OBJEXT)=.d}
+CCDEPFLAGS_clang=	-MD -MF ${@:$(OBJEXT)=.d}
+CCDEPFLAGS_xlc=		-qmakedep=gcc -MF ${@:$(OBJEXT)=.d}
+CCDEPFLAGS_sunstudio=	-xMD -xMF ${@:$(OBJEXT)=.d}
 CCDEPFLAGS_unknown=
 CCDEPFLAGS=		$(CCDEPFLAGS_$(CCOM))
 CCDEPFLAGS_FOR_BUILD=	$(CCDEPFLAGS_$(CCOM_FOR_BUILD))
@@ -117,6 +124,9 @@ LIBLOWDOWN_LIBS=	$(LIBLOWDOWN_LIBS_$(LIBLOWDOWN_FOUND))
 LIBLOWDOWN_CPPFLAGS_1=	-DHAVE_LIBLOWDOWN=1
 LIBLOWDOWN_CPPFLAGS=	$(LIBLOWDOWN_CPPFLAGS_$(LIBLOWDOWN_FOUND))
 
+# Only used in maintainer mode
+LOWDOWN=		@LOWDOWN@
+
 ############## LIBCRYPTO ########################################
 LIBCRYPTO_CFLAGS=	@LIBCRYPTO_CFLAGS@
 LIBCRYPTO_LIBS=		@LIBCRYPTO_LIBS@
@@ -125,6 +135,24 @@ LIBCRYPTO_LIBS=		@LIBCRYPTO_LIBS@
 ENABLE_LIBRT=		@ENABLE_LIBRT@
 LIBRT_LIBS_1=		-lrt
 LIBRT_LIBS=		$(LIBRT_LIBS_$(ENABLE_LIBRT))
+
+############## PDJSON ###########################################
+# system version
+PDJSON_CFLAGS_1=	@PDJSON_CFLAGS@
+PDJSON_LIBS_1=		@PDJSON_LIBS@
+PDJSON_SRCS_1=
+
+# vendored version
+PDJSON_CFLAGS_0=	-I@SRCDIR@/thirdparty/pdjson
+PDJSON_LIBS_0=
+PDJSON_SRCS_0=		thirdparty/pdjson/pdjson.c
+
+# dispatch
+PDJSON_FOUND=		@PDJSON_FOUND@
+PDJSON_CFLAGS=		$(PDJSON_CFLAGS_$(PDJSON_FOUND))
+PDJSON_LIBS=		$(PDJSON_LIBS_$(PDJSON_FOUND))
+PDJSON_SRCS=		$(PDJSON_SRCS_$(PDJSON_FOUND))
+
 #################################################################
 
 .PHONY: all all-auto clean clean-auto check check-auto install install-auto analyse analyse-auto
@@ -143,7 +171,7 @@ install: Makefile
 analyse: Makefile
 	@$(MAKE) analyse-auto
 
-all-auto: gcli manpages
+all-auto: gcli$(EXEEXT) manpages
 
 LIBGCLI_SRCS = \
 	src/bugzilla/api.c \
@@ -216,12 +244,13 @@ LIBGCLI_SRCS = \
 	src/repos.c \
 	src/sshkeys.c \
 	src/status.c \
+	src/url.c \
 	src/waitproc.c \
 	src/port/err.c \
 	src/port/string.c \
 	src/port/sv.c \
 	src/port/util.c \
-	thirdparty/pdjson/pdjson.c
+	$(PDJSON_SRCS)
 
 GCLI_SRCS= \
 	src/cmd/actions.c \
@@ -298,24 +327,26 @@ TEMPLATE_SRCS=		${TEMPLATES:.t=.c}
 Makefile: @SRCDIR@/configure @SRCDIR@/Makefile.in
 	@echo "Reconfiguring Makefile"
 	env CC="${CC}" YACC="${YACC}" LEX="${LEX}" RM="${RM}" RANLIB="${RANLIB}" \
-		KYUA="${KYUA}" SHELL="${SHELL}" CFLAGS="${ENV_CFLAGS}" CPPFLAGS="${ENV_CPPFLAGS}" \
-		INSTALL="${INSTALL}" CC_FOR_BUILD="${CC_FOR_BUILD}" \
+		KYUA="${KYUA}" LOWDOWN="${LOWDOWN}" SHELL="${SHELL}" CFLAGS="${ENV_CFLAGS}" CPPFLAGS="${ENV_CPPFLAGS}" \
+		INSTALL="${INSTALL}" CC_FOR_BUILD="${CC_FOR_BUILD}" ENABLE_MAINTAINER="${ENABLE_MAINTAINER}" \
 		LDFLAGS="${ENV_LDFLAGS}" LDFLAGS_FOR_BUILD="${LDFLAGS_FOR_BUILD}" \
 		CFLAGS_FOR_BUILD="${ENV_CFLAGS_FOR_BUILD}" CPPFLAGS_FOR_BUILD="${ENV_CPPFLAGS_FOR_BUILD}" \
 		PKG_CONFIG="${ENV_PKG_CONFIG}" PKG_CONFIG_PATH="${ENV_PKG_CONFIG_PATH}" CCACHE="${CCACHE}" \
+		EXEEXT="${EXEEXT}" OBJEXT="${OBJEXT}" LIBEXT="${LIBEXT}" \
+		EXEEXT_FOR_BUILD="${EXEEXT_FOR_BUILD}" OBJEXT_FOR_BUILD="${OBJEXT_FOR_BUILD}" LIBEXT_FOR_BUILD="${LIBEXT_FOR_BUILD}" \
 		sh @SRCDIR@/configure @CONFIGURE_CMD_ARGS@
 
-LIBGCLI_OBJS=	${LIBGCLI_SRCS:.c=.libgcli.o} ${TEMPLATE_SRCS:.c=.libgcli.o}
-GCLI_OBJS=	${GCLI_SRCS:.c=.gcli.o}
-PGEN_OBJS=	${PGEN_SRCS:.c=.pgen.o}
+LIBGCLI_OBJS=	${LIBGCLI_SRCS:.c=.libgcli$(OBJEXT)} ${TEMPLATE_SRCS:.c=.libgcli$(OBJEXT)}
+GCLI_OBJS=	${GCLI_SRCS:.c=.gcli$(OBJEXT)}
+PGEN_OBJS=	${PGEN_SRCS:.c=.pgen$(OBJEXT_FOR_BUILD)}
 
 # Dependencies
-DEPS=	${LIBGCLI_OBJS:.o=.d} ${GCLI_OBJS:.o=.d} ${PGEN_OBJS:.o=.d}
+DEPS=	${LIBGCLI_OBJS:$(OBJEXT)=.d} ${GCLI_OBJS:$(OBJEXT)=.d} ${PGEN_OBJS:$(OBJEXT_FOR_BUILD)=.d}
 -include $(DEPS)
 
-pgen: $(PGEN_OBJS)
+pgen$(EXEEXT_FOR_BUILD): $(PGEN_OBJS)
 	$(CCACHE) $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) \
-		$(LDFLAGS_FOR_BUILD) -o pgen $(PGEN_OBJS)
+		$(LDFLAGS_FOR_BUILD) -o pgen$(EXEEXT_FOR_BUILD) $(PGEN_OBJS)
 
 y.tab.c y.tab.h: @SRCDIR@/src/pgen/parser.y
 	$(YACC) -d @SRCDIR@/src/pgen/parser.y
@@ -326,97 +357,114 @@ lex.yy.c: y.tab.h @SRCDIR@/src/pgen/lexer.l
 .SUFFIXES: .h .t .c
 
 # Hack to make GNU make shut up
-$(TEMPLATE_HEADERS) $(TEMPLATE_SRCS): pgen
+$(TEMPLATE_HEADERS) $(TEMPLATE_SRCS): pgen$(EXEEXT_FOR_BUILD)
 .t.h:
 	@mkdir -p $$(dirname $@)
-	./pgen -th -o $@ $<
+	./pgen$(EXEEXT_FOR_BUILD) -th -o $@ $<
 
 .t.c:
 	@mkdir -p $$(dirname $@)
-	./pgen -tc -o $@ $<
+	./pgen$(EXEEXT_FOR_BUILD) -tc -o $@ $<
 
-gcli: libgcli.a $(GCLI_OBJS)
-	$(CCACHE) $(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o gcli \
-		$(GCLI_OBJS) libgcli.a $(LIBCURL_LIBS) $(LIBEDIT_LIBS) \
+gcli$(EXEEXT): libgcli$(LIBEXT) $(GCLI_OBJS)
+	$(CCACHE) $(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o gcli$(EXEEXT) \
+		$(GCLI_OBJS) libgcli$(LIBEXT) $(LIBCURL_LIBS) $(LIBEDIT_LIBS) \
 		$(LIBREADLINE_LIBS) $(LIBCRYPTO_LIBS) \
-		$(LIBLOWDOWN_LIBS) \
+		$(LIBLOWDOWN_LIBS) $(PDJSON_LIBS) \
 		$(LIBRT_LIBS)
 
-libgcli.a: $(LIBGCLI_OBJS)
-	$(CCACHE) $(AR) -rc libgcli.a $(LIBGCLI_OBJS)
-	$(CCACHE) $(RANLIB) libgcli.a
+libgcli$(LIBEXT): $(LIBGCLI_OBJS)
+	$(CCACHE) $(AR) -rc libgcli$(LIBEXT) $(LIBGCLI_OBJS)
+	$(CCACHE) $(RANLIB) libgcli$(LIBEXT)
 
 $(LIBGCLI_OBJS): $(TEMPLATE_HEADERS) $(TEMPLATE_SRCS)
 
-.SUFFIXES: .c .libgcli.o .gcli.o .pgen.o .tests.o
-.c.libgcli.o:
+.SUFFIXES: .c .libgcli$(OBJEXT) .gcli$(OBJEXT) .pgen$(OBJEXT_FOR_BUILD) .tests$(OBJEXT)
+.c.libgcli$(OBJEXT):
 	@mkdir -p $$(dirname $@)
 	$(CCACHE) $(CC) $(CFLAGS) $(CCDEPFLAGS) $(CPPFLAGS) \
 		$(LIBCURL_CFLAGS) $(LIBCRYPTO_CFLAGS) \
 		$(LIBLOWDOWN_CFLAGS) $(LIBLOWDOWN_CPPFLAGS) \
+		$(PDJSON_CFLAGS) \
 		-DIN_LIBGCLI=1 -c -o $@ $<
 
-.c.gcli.o:
+.c.gcli$(OBJEXT):
 	@mkdir -p $$(dirname $@)
 	$(CCACHE) $(CC) $(CFLAGS) $(CCDEPFLAGS) $(CPPFLAGS) \
 		$(LIBEDIT_CPPFLAGS) $(LIBREADLINE_CPPFLAGS) \
 		$(LIBCURL_CFLAGS) $(LIBEDIT_CFLAGS) \
 		$(LIBREADLINE_CFLAGS) $(LIBCRYPTO_CFLAGS) \
 		$(LIBLOWDOWN_CFLAGS) $(LIBLOWDOWN_CPPFLAGS) \
+		$(PDJSON_CFLAGS) \
 		-c -o $@ $<
 
-.c.pgen.o:
+.c.pgen$(OBJEXT_FOR_BUILD):
 	@mkdir -p $$(dirname $@)
-	$(CCACHE) $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(CCDEPFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) -c -o $@ $<
+	$(CCACHE) $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) \
+		$(CCDEPFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) \
+		-c -o $@ $<
 
 clean-auto:
-	$(RM) -f pgen gcli libgcli.a \
+	$(RM) -f pgen$(EXEEXT_FOR_BUILD) gcli$(EXEEXT) \
+		libgcli$(LIBEXT) \
 		$(LIBGCLI_OBJS) $(GCLI_OBJS) \
 		$(TEMPLATE_HEADERS) $(TEMPLATE_SRCS) \
 		$(PGEN_OBJS) $(DEPS) \
 		lex.yy.c y.tab.c y.tab.h \
-		$(TEST_PROGRAMS:=.tests.o) \
+		$(TEST_PROGRAMS:=.tests$(OBJEXT)) \
 		$(TEST_PROGRAMS) \
+		tests/Kyuafile \
 		$(MANPAGES)
 
 ###### TEST SUITE #####################################
 TEST_PROGRAMS = \
-	tests/json-escape \
-	tests/github-parse \
-	tests/gitlab-parse \
-	tests/gitea-parse \
-	tests/bugzilla-parse \
-	tests/url-encode \
-	tests/jsongen \
-	tests/base64 \
-	tests/difftests
+	tests/append-url$(EXEEXT) \
+	tests/base64$(EXEEXT) \
+	tests/bugzilla-parse$(EXEEXT) \
+	tests/difftests$(EXEEXT) \
+	tests/gitea-parse$(EXEEXT) \
+	tests/github-parse$(EXEEXT) \
+	tests/gitlab-parse$(EXEEXT) \
+	tests/json-escape$(EXEEXT) \
+	tests/jsongen$(EXEEXT) \
+	tests/parse-url$(EXEEXT) \
+	tests/url-encode$(EXEEXT)
 
-tests/json-escape: tests/json-escape.tests.o
-tests/github-parse: tests/github-parse.tests.o
-tests/gitlab-parse: tests/gitlab-parse.tests.o
-tests/gitea-parse: tests/gitea-parse.tests.o
-tests/bugzilla-parse: tests/bugzilla-parse.tests.o
-tests/url-encode: tests/url-encode.tests.o
-tests/jsongen: tests/jsongen.tests.o
-tests/base64: tests/base64.tests.o
-tests/difftests: tests/difftests.tests.o
+tests/json-escape: tests/json-escape.tests$(OBJEXT)
+tests/github-parse: tests/github-parse.tests$(OBJEXT)
+tests/gitlab-parse: tests/gitlab-parse.tests$(OBJEXT)
+tests/gitea-parse: tests/gitea-parse.tests$(OBJEXT)
+tests/bugzilla-parse: tests/bugzilla-parse.tests$(OBJEXT)
+tests/url-encode: tests/url-encode.tests$(OBJEXT)
+tests/jsongen: tests/jsongen.tests$(OBJEXT)
+tests/base64: tests/base64.tests$(OBJEXT)
+tests/difftests: tests/difftests.tests$(OBJEXT)
+tests/parse-url: tests/parse-url.tests$(OBJEXT)
+tests/append-url: tests/append-url.tests$(OBJEXT)
 
-$(TEST_PROGRAMS): libgcli.a
+$(TEST_PROGRAMS): libgcli$(LIBEXT)
 	$(CCACHE) $(CC) $(CFLAGS) $(CCDEPFLAGS) $(CPPFLAGS) \
 		$(LIBATFC_CFLAGS) $(LIBCURL_CFLAGS) $(LIBCRYPTO_CFLAGS) \
-		$(LDFLAGS) -o $@ $(@:=.tests.o) libgcli.a \
-		$(LIBATFC_LIBS) $(LIBCURL_LIBS) $(LIBCRYPTO_LIBS)
+		$(LDFLAGS) -o $@ $(@:=.tests$(OBJEXT)) libgcli$(LIBEXT) \
+		$(LIBATFC_LIBS) $(LIBCURL_LIBS) $(LIBCRYPTO_LIBS) \
+		$(PDJSON_LIBS)
 
-.c.tests.o:
+.c.tests$(OBJEXT):
 	@mkdir -p $$(dirname $@)
 	$(CCACHE) $(CC) $(CFLAGS) $(CCDEPFLAGS) $(CPPFLAGS) \
-		$(LIBATFC_CFLAGS) $(LIBCURL_CFLAGS) \
+		$(LIBATFC_CFLAGS) $(LIBCURL_CFLAGS) $(PDJSON_CFLAGS) \
 		-DTESTSRCDIR="\"@SRCDIR@/tests/\"" -c -o $@ $<
 
-$(TEST_PROGRAMS:=.c): $(TEMPLATE_HEADERS)
+$(TEST_PROGRAMS:$(EXEEXT)=.c): $(TEMPLATE_HEADERS)
 
-check-auto: $(TEST_PROGRAMS)
-	$(KYUA) test --build-root ./tests --kyuafile @SRCDIR@/tests/Kyuafile
+tests/Kyuafile: Makefile
+	@mkdir -p tests
+	echo "syntax(2)" > tests/Kyuafile
+	echo "test_suite('gcli')" >> tests/Kyuafile
+	for t in $(TEST_PROGRAMS); do printf "atf_test_program{name='%s', timeout = 1}\n" "$${t##tests/}" >> tests/Kyuafile; done
+
+check-auto: tests/Kyuafile $(TEST_PROGRAMS)
+	$(KYUA) test --build-root ./tests --kyuafile tests/Kyuafile
 
 #################### static analysis #######################################
 LIBGCLI_ANALYSE=	${LIBGCLI_SRCS:.c=.libgcli.analyse}
@@ -433,6 +481,7 @@ $(ANALYSE_TARGETS): $(TEMPLATE_HEADERS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) \
 		$(LIBCURL_CFLAGS) $(LIBCRYPTO_CFLAGS) \
 		$(LIBLOWDOWN_CFLAGS) $(LIBLOWDOWN_CPPFLAGS) \
+		$(PDJSON_CFLAGS) \
 		-DIN_LIBGCLI=1 $(CANALFLAGS) $<
 
 .c.gcli.analyse:
@@ -442,7 +491,7 @@ $(ANALYSE_TARGETS): $(TEMPLATE_HEADERS)
 		$(LIBCURL_CFLAGS) $(LIBEDIT_CFLAGS) \
 		$(LIBREADLINE_CFLAGS) $(LIBCRYPTO_CFLAGS) \
 		$(LIBLOWDOWN_CFLAGS) $(LIBLOWDOWN_CPPFLAGS) \
-		$(CANALFLAGS) $<
+		$(PDJSON_CFLAGS) $(CANALFLAGS) $<
 
 
 #################### install target ########################################
@@ -463,7 +512,8 @@ MANPAGES= \
 	docs/gcli-snippets.1 \
 	docs/gcli-status.1 \
 	docs/gcli.1 \
-	docs/gcli.5
+	docs/gcli.5 \
+	docs/gcli-tutorial.1
 
 bindir=	/bin
 mandir=	/share/man
@@ -471,7 +521,6 @@ mandir=	/share/man
 BINDIR=	$(DESTDIR)$(PREFIX)$(bindir)
 MANDIR=	$(DESTDIR)$(PREFIX)$(mandir)
 
-.SUFFIXES: .in
 .PHONY: manpages manpages-auto
 
 # phony target to ensure the makefile is updated with the correct
@@ -484,7 +533,32 @@ manpages-auto: Makefile @SRCDIR@/configure $(MANPAGES)
 manpages: Makefile @SRCDIR@/configure
 	@$(MAKE) manpages-auto
 
-$(MANPAGES): @SRCDIR@/configure Makefile @SRCDIR@/${@:=.in}
+$(MANPAGES): @SRCDIR@/configure Makefile
+
+.SUFFIXES: .1.in .1 .5.in .5 .md
+#################################################
+# Maintainer target for regenerating the tutorial
+TUTORIAL_PAGES:sh=	find @SRCDIR@/docs/website/tutorial/ -type f -name \*.md | grep -v old_index.md | sort
+TUTORIAL_PAGES!=	find @SRCDIR@/docs/website/tutorial/ -type f -name \*.md | grep -v old_index.md | sort
+
+# Dispatch between maintainer/non-maintainer mode
+TUTORIAL_SRC_MAINTAINER_0=
+TUTORIAL_SRC_MAINTAINER_1=	@SRCDIR@/docs/gcli-tutorial.1.in
+
+$(TUTORIAL_SRC_MAINTAINER_$(ENABLE_MAINTAINER)): Makefile $(TUTORIAL_PAGES)
+	cat $(TUTORIAL_PAGES) \
+	| $(LOWDOWN) -s -tman \
+		-m section=1 \
+		-m title=gcli-tutorial \
+		-m manheader="Tutorial of GCLI - Generated Offline Version of https://herrhotzenplotz.de/gcli/tutorial" \
+		-m date="@PACKAGE_DATE@" \
+	> @SRCDIR@/docs/gcli-tutorial.1.in
+
+docs/gcli-tutorial.1: $(TUTORIAL_SRC_MAINTAINER_$(ENABLE_MAINTAINER))
+
+#################################################
+# Manual page preprocessing rules
+.1.in.1 .5.in.5:
 	@mkdir -p $$(dirname $@)
 	sed \
 		-e 's|\@PACKAGE_DATE\@|@PACKAGE_DATE@|g' \
@@ -492,7 +566,7 @@ $(MANPAGES): @SRCDIR@/configure Makefile @SRCDIR@/${@:=.in}
 		-e 's|\@PACKAGE_BUGREPORT\@|@PACKAGE_BUGREPORT@|g' \
 		-e 's|\@PACKAGE_URL\@|@PACKAGE_URL@|g' \
 		-e 's|\@PACKAGE_VERSION\@|@PACKAGE_VERSION@|g' \
-		< @SRCDIR@/${@:=.in} > $@
+		< ${<} > $@
 
 install-auto: manpages gcli
 	$(INSTALL) -d $(BINDIR)
@@ -526,3 +600,20 @@ distcheck-auto:
 	(cd dist && tar -x -f @SRCDIR@/dist/gcli-$(GCLI_VERSION)/gcli-$(GCLI_VERSION).tar.gz && chmod -R a-w gcli-$(GCLI_VERSION))
 	(cd dist/.build-gcli-$(GCLI_VERSION) && ../gcli-$(GCLI_VERSION)/configure && $(MAKE) && $(MAKE) check)
 	(chmod -R a+w dist/gcli-$(GCLI_VERSION) && rm -fr dist/.build-gcli-$(GCLI_VERSION) dist/gcli-$(GCLI_VERSION))
+
+###############################################################
+# Help Target
+.PHONY: help help-auto
+help: Makefile
+	@$(MAKE) help-auto
+
+help-auto:
+	@echo "Available targets:"
+	@echo "        all - Do a full build (this is the default target)"
+	@echo "      check - Run the test suite"
+	@echo "       dist - Build distribution tarballs"
+	@echo "  distcheck - Run the test suite on the built distribution tarball."
+	@echo "      clean - Clean the build directory"
+	@echo "    analyse - Run static code analysis"
+	@echo "    install - Install build artifacts"
+	@echo "   manpages - Only build manual pages"

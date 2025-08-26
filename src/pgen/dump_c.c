@@ -211,7 +211,7 @@ header_dump_c(void)
 	fprintf(outfile, "#include <assert.h>\n");
 	fprintf(outfile, "#include <gcli/json_util.h>\n");
 	fprintf(outfile, "#include <gcli/gcli.h>\n");
-	fprintf(outfile, "#include <pdjson/pdjson.h>\n");
+	fprintf(outfile, "#include <pdjson.h>\n");
 	fprintf(outfile, "#include <stdlib.h>\n");
 	fprintf(outfile, "#include <string.h>\n");
 	fprintf(outfile, "#include <%.*s.h>\n",

@@ -42,7 +42,7 @@
 
 #include <gcli/port/sv.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 typedef int (*parsefn)(struct gcli_ctx *, struct json_stream *stream,
                        void *list, size_t *listsize);

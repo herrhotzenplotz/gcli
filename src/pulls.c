@@ -151,8 +151,8 @@ int
 gcli_pull_submit(struct gcli_ctx *ctx, struct gcli_submit_pull_options *opts)
 {
 	if (opts->automerge) {
-		int const q = gcli_forge(ctx)->pull_summary_quirks;
-		if (q & GCLI_PRS_QUIRK_AUTOMERGE)
+		int const q = gcli_forge(ctx)->pull_quirks;
+		if (q & GCLI_PULL_QUIRK_AUTOMERGE)
 			return gcli_error(ctx, "forge does not support auto-merge");
 	}
 
@@ -267,4 +267,99 @@ gcli_pull_checkout(struct gcli_ctx *ctx, char const *const remote,
                    struct gcli_path const *const pull_path)
 {
 	gcli_null_check_call(pull_checkout, ctx, remote, pull_path);
+}
+
+int
+gcli_pull_get_reviews(struct gcli_ctx *ctx, struct gcli_path const *path,
+                      struct gcli_pull_reviews *out)
+{
+	gcli_null_check_call(pull_get_reviews, ctx, path, out);
+}
+
+void
+gcli_pull_reviews_free(struct gcli_pull_reviews *it)
+{
+	struct gcli_pull_review *r;
+
+	for (size_t i = 0; i < it->reviews_size; ++i) {
+		r = &it->reviews[i];
+
+		gcli_clear_ptr(&r->author);
+		gcli_clear_ptr(&r->state);
+		gcli_clear_ptr(&r->body);
+	}
+
+	gcli_clear_ptr(&it->reviews);
+	it->reviews_size = 0;
+}
+
+static void
+gcli_pull_review_comment_free(struct gcli_pull_review_comment *c)
+{
+	gcli_clear_ptr(&c->author);
+	gcli_clear_ptr(&c->body);
+	gcli_clear_ptr(&c->diff_hunk);
+	gcli_clear_ptr(&c->path);
+}
+
+void
+gcli_pull_review_comments_free(struct gcli_pull_review_comments *it)
+{
+	for (size_t i = 0; i < it->comments_size; ++i)
+		gcli_pull_review_comment_free(&it->comments[i]);
+
+	gcli_clear_ptr(&it->comments);
+	it->comments_size = 0;
+}
+
+int
+gcli_pull_get_review_threads(struct gcli_ctx *ctx,
+                             struct gcli_path const *path,
+                             struct gcli_pull_review_thread *out)
+{
+	gcli_null_check_call(pull_get_review_threads, ctx, path, out);
+}
+
+void
+gcli_pull_review_thread_free(struct gcli_pull_review_thread *thd)
+{
+	struct gcli_pull_review_comment *c, *c1;
+
+	c = TAILQ_FIRST(thd);
+
+	while (c != NULL) {
+		c1 = TAILQ_NEXT(c, next);
+
+		gcli_pull_review_comment_free(c);
+		gcli_pull_review_thread_free(&c->replies);
+		gcli_clear_ptr(&c);
+
+		c = c1;
+	}
+}
+
+int
+gcli_pull_approve(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                  char const *const message)
+{
+	struct gcli_pull_create_review_details details = {0};
+
+	details.path = *path;
+	details.body = message;
+	details.review_state = GCLI_PULL_APPROVED;
+
+	return gcli_pull_create_review(ctx, &details);
+}
+
+int
+gcli_pull_unapprove(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                    char const *const message)
+{
+	struct gcli_pull_create_review_details details = {0};
+
+	details.path = *path;
+	details.body = message;
+	details.review_state = GCLI_PULL_UNAPPROVED;
+
+	return gcli_pull_create_review(ctx, &details);
 }

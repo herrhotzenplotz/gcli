@@ -45,11 +45,8 @@
 #include <gcli/port/util.h>
 
 #include <errno.h>
-#include <stdlib.h>
-
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#endif
+#include <stdlib.h>
 
 static void
 usage(void)
@@ -65,12 +62,14 @@ usage(void)
 	fprintf(stderr, "  -A author          Only print issues by the given author\n");
 	fprintf(stderr, "  -L label           Filter issues by the given label\n");
 	fprintf(stderr, "  -M milestone       Filter issues by the given milestone\n");
+	fprintf(stderr, "  -S assignee        Filter issues by the given assignee\n");
 	fprintf(stderr, "  -a                 Fetch everything including closed issues \n");
 	fprintf(stderr, "  -s                 Print (sort) in reverse order\n");
 	fprintf(stderr, "  -n number          Number of issues to fetch (-1 = everything)\n");
 	fprintf(stderr, "  -i issue           ID of issue to perform actions on\n");
 	fprintf(stderr, "  -R reviewer        Mark a person as a reviewer for the created PR\n");
 	fprintf(stderr, "                     Can be specified more than once.\n");
+	fprintf(stderr, "  -T template        Use the given file as a template for the issue\n");
 	fprintf(stderr, "ACTIONS:\n");
 	fprintf(stderr, "  all                Display both status and and op\n");
 	fprintf(stderr, "  status             Display status information\n");
@@ -223,6 +222,15 @@ issue_init_user_file(struct gcli_ctx *ctx, FILE *stream, void *_opts)
 {
 	(void) ctx;
 	struct gcli_submit_issue_options *opts = _opts;
+
+	/* recalled message or template */
+	if (opts->body) {
+		fputs(opts->body, stream);
+
+		free(opts->body);
+		opts->body = NULL;
+	}
+
 	fprintf(
 		stream,
 		"! ISSUE TITLE : %s\n"
@@ -240,10 +248,11 @@ gcli_issue_get_user_message(struct gcli_submit_issue_options *opts)
 }
 
 static int
-create_issue(struct gcli_submit_issue_options *opts, int always_yes)
+create_issue(struct gcli_submit_issue_options *opts, bool always_yes)
 {
 	int rc;
 
+	gcli_cmd_recall_message_interactive(&opts->body);
 	opts->body = gcli_issue_get_user_message(opts);
 
 	printf("The following issue will be created:\n"
@@ -323,7 +332,7 @@ subcommand_issue_create(int argc, char *argv[])
 {
 	int ch;
 	struct gcli_submit_issue_options opts = {0};
-	int always_yes = 0;
+	bool always_yes = false;
 
 	if (gcli_nvlist_init(&opts.extra) < 0) {
 		fprintf(stderr, "gcli: failed to init nvlist: %s\n",
@@ -344,10 +353,16 @@ subcommand_issue_create(int argc, char *argv[])
 		  .has_arg = no_argument,
 		  .flag    = NULL,
 		  .val     = 'y' },
+		{ .name    = "template",
+		  .has_arg = no_argument,
+		  .flag    = NULL,
+		  .val     = 'T' },
 		{0},
 	};
 
-	while ((ch = getopt_long(argc, argv, "o:r:O:", options, NULL)) != -1) {
+	always_yes = gcli_cmd_should_do_always_yes();
+
+	while ((ch = getopt_long(argc, argv, "o:r:O:T:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
 			opts.owner = optarg;
@@ -356,13 +371,19 @@ subcommand_issue_create(int argc, char *argv[])
 			opts.repo = optarg;
 			break;
 		case 'y':
-			always_yes = 1;
+			always_yes = true;
 			break;
 		case 'O': {
 			int rc = parse_submit_issue_option(&opts);
 			if (rc < 0)
 				return EXIT_FAILURE;
 		} break;
+		case 'T': /* template file */
+			if (gcli_read_file(optarg, &opts.body) < 0) {
+				err(1, "gcli: error: failed to read file '%s'",
+				    optarg);
+			}
+			break;
 		default:
 			usage();
 			return EXIT_FAILURE;
@@ -452,11 +473,16 @@ subcommand_issues(int argc, char *argv[])
 		  .flag    = NULL,
 		  .val     = 'M',
 		},
+		{ .name    = "assignee",
+		  .has_arg = required_argument,
+		  .flag    = NULL,
+		  .val     = 'S',
+		},
 		{0},
 	};
 
 	/* parse options */
-	while ((ch = getopt_long(argc, argv, "+sn:o:r:i:aA:L:M:", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "+sn:o:r:i:aA:L:M:S:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
 			path.as_default.owner = optarg;
@@ -497,6 +523,9 @@ subcommand_issues(int argc, char *argv[])
 		} break;
 		case 'M': {
 			details.milestone = optarg;
+		} break;
+		case 'S': {
+			details.assignee = optarg;
 		} break;
 		case '?':
 		default:

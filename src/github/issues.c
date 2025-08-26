@@ -33,7 +33,8 @@
 #include <gcli/github/milestones.h>
 #include <gcli/json_gen.h>
 #include <gcli/json_util.h>
-#include <pdjson/pdjson.h>
+#include <gcli/url.h>
+#include <pdjson.h>
 
 #include <templates/github/issues.h>
 
@@ -171,7 +172,7 @@ search_issues(struct gcli_ctx *ctx, struct gcli_path const *const path,
               struct gcli_issue_list *const out)
 {
 	char *url = NULL, *query_string = NULL, *e_query_string = NULL,
-	     *milestone = NULL, *author = NULL, *label = NULL;
+	     *milestone = NULL, *author = NULL, *label = NULL, *assignee = NULL;
 	int rc = 0;
 	struct gcli_fetch_buffer buffer = {0};
 	struct json_stream stream = {0};
@@ -192,13 +193,17 @@ search_issues(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	if (details->label)
 		label = gcli_asprintf("label:%s", details->label);
 
-	query_string = gcli_asprintf("repo:%s/%s is:issue%s %s %s %s %s",
+	if (details->assignee)
+		assignee = gcli_asprintf("assignee:%s", details->assignee);
+
+	query_string = gcli_asprintf("repo:%s/%s is:issue%s %s %s %s %s %s",
 	                             path->as_default.owner,
 	                             path->as_default.repo,
 	                             details->all ? "" : " is:open",
 	                             milestone ? milestone : "",
 	                             author ? author : "",
 	                             label ? label : "",
+	                             assignee ? assignee : "",
 	                             details->search_term);
 
 	e_query_string = gcli_urlencode(query_string);
@@ -209,6 +214,7 @@ search_issues(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	gcli_clear_ptr(&milestone);
 	gcli_clear_ptr(&author);
 	gcli_clear_ptr(&label);
+	gcli_clear_ptr(&assignee);
 	gcli_clear_ptr(&query_string);
 	gcli_clear_ptr(&e_query_string);
 
@@ -244,12 +250,12 @@ github_issues_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		e_repo = gcli_urlencode(path->as_default.repo);
 		*out = gcli_asprintf("%s/repos/%s/%s/issues%s",
 		                     gcli_get_apibase(ctx),
-		                     e_owner, e_repo, suffix);
+		                     e_owner, e_repo, suffix ? suffix : "");
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
 	} break;
 	case GCLI_PATH_URL: {
-		*out = gcli_asprintf("%s%s", path->as_url, suffix);
+		*out = gcli_asprintf("%s%s", path->as_url, suffix ? suffix : "");
 	} break;
 	default: {
 		rc = gcli_error(ctx, "unsupported path kind for issue list");
@@ -265,8 +271,7 @@ get_issues(struct gcli_ctx *ctx, struct gcli_path const *const path,
            struct gcli_issue_fetch_details const *details, int const max,
            struct gcli_issue_list *const out)
 {
-	char *url = NULL, *e_author = NULL, *e_label = NULL,
-	     *e_milestone = NULL, *suffix = NULL;
+	char *url = NULL, *suffix = NULL;
 	int rc = 0;
 
 	if (details->milestone) {
@@ -276,33 +281,16 @@ get_issues(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		if (rc < 0)
 			return rc;
 
-		e_milestone = gcli_asprintf("&milestone=%"PRIid, milestone_id);
+		gcli_url_options_appendf(&suffix, "milestone", "%"PRIid, milestone_id);
 	}
 
-	if (details->author) {
-		char *tmp = gcli_urlencode(details->author);
-		e_author = gcli_asprintf("&creator=%s", tmp);
-		gcli_clear_ptr(&tmp);
-	}
-
-	if (details->label) {
-		char *tmp = gcli_urlencode(details->label);
-		e_label = gcli_asprintf("&labels=%s", tmp);
-		gcli_clear_ptr(&tmp);
-	}
-
-	suffix = gcli_asprintf(
-		"?state=%s%s%s%s",
-		details->all ? "all" : "open",
-		e_author ? e_author : "",
-		e_label ? e_label : "",
-		e_milestone ? e_milestone : "");
+	gcli_url_options_append(&suffix, "creator", details->author);
+	gcli_url_options_append(&suffix, "labels", details->label);
+	gcli_url_options_append(&suffix, "assignee", details->assignee);
+	gcli_url_options_append(&suffix, "state", details->all ? "all" : "open");
 
 	rc = github_issues_make_url(ctx, path, suffix, &url);
 
-	gcli_clear_ptr(&e_milestone);
-	gcli_clear_ptr(&e_author);
-	gcli_clear_ptr(&e_label);
 	gcli_clear_ptr(&suffix);
 
 	if (rc < 0)

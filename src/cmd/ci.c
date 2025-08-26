@@ -39,10 +39,7 @@
 #include <gcli/forges.h>
 #include <gcli/github/checks.h>
 
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#endif
-
 #include <stdlib.h>
 
 static void

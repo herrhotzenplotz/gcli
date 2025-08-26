@@ -37,7 +37,7 @@
 #include <gcli/port/err.h>
 
 #include <curl/curl.h>
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 /* Hack for NetBSD's and Oracle Solaris broken isalnum implementation */
 #if defined(__NetBSD__) || (defined(__SVR4) && defined(__sun))
@@ -148,8 +148,8 @@ gcli_fetch(struct gcli_ctx *ctx, char const *url, char **const pagination_next,
 }
 
 static int
-gcli_report_progress(void *_ctx, double dltotal, double dlnow,
-                     double ultotal, double ulnow)
+gcli_report_progress(void *_ctx, curl_off_t dltotal, curl_off_t dlnow,
+                     curl_off_t ultotal, curl_off_t ulnow)
 {
 	struct gcli_ctx *ctx = _ctx;
 

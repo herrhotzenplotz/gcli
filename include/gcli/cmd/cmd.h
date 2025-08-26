@@ -72,6 +72,15 @@ int subcommand_api(int argc, char *argv[]);
 void gcli_pretty_print(char const *input, int indent, int maxlinelen,
                        FILE *stream);
 
+void gcli_pretty_print_diff(char const *const input, int indent);
+
 char *gcli_cmd_realpath(char const *const restrict pathname);
+
+bool gcli_cmd_should_do_always_yes(void);
+
+void gcli_cmd_save_message(char const *);
+bool gcli_cmd_can_recall_message(void);
+char *gcli_cmd_recall_message(void);
+void gcli_cmd_recall_message_interactive(char **out);
 
 #endif /* GCLI_CMD_CMD_H */

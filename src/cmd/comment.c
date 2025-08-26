@@ -257,6 +257,8 @@ subcommand_comment(int argc, char *argv[])
 		{0},
 	};
 
+	always_yes = gcli_cmd_should_do_always_yes();
+
 	while ((ch = getopt_long(argc, argv, "yr:o:i:p:R:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'r':

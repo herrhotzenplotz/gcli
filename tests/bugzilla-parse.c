@@ -36,7 +36,7 @@
 
 #include <templates/bugzilla/bugs.h>
 
-#include <pdjson/pdjson.h>
+#include <pdjson.h>
 
 #include "gcli_tests.h"
 

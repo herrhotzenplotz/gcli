@@ -41,10 +41,7 @@
 
 #include <gcli/gitlab/pipelines.h>
 
-#ifdef HAVE_GETOPT_H
 #include <getopt.h>
-#endif
-
 #include <stdlib.h>
 
 static void

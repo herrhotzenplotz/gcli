@@ -281,6 +281,20 @@ struct gcli_forge_descriptor {
 		struct gcli_path const *const pull_path);
 
 	/**
+	 * Fetch reviews on this pull request */
+	int (*pull_get_reviews)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *pull_path,
+		struct gcli_pull_reviews *out);
+
+	/**
+	 * get review threads */
+	int (*pull_get_review_threads)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *pull_path,
+		struct gcli_pull_review_thread *out);
+
+	/**
 	 * Return a list of checks associated with the given pull.
 	 *
 	 * The type of the returned list depends on the forge type. See
@@ -305,6 +319,12 @@ struct gcli_forge_descriptor {
 	int (*pull_close)(
 		struct gcli_ctx *ctx,
 		struct gcli_path const *path);
+
+	/**
+	 * Quirks when creating pull requests */
+	enum gcli_pull_quirks {
+		GCLI_PULL_QUIRK_AUTOMERGE = 0x01, /* forge does not support automerge */
+	} pull_quirks;
 
 	/**
 	 * Submit PR/MR */

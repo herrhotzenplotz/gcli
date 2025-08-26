@@ -62,6 +62,7 @@ struct gcli_config {
 
 	char const *override_default_account;
 	char const *override_remote;
+	char const *override_config_file;
 	int override_forgetype;
 	int colours_disabled;       /* NO_COLOR set or output is not a TTY */
 	int force_colours;          /* -c option was given */
@@ -70,8 +71,8 @@ struct gcli_config {
 	int enable_experimental;    /* enable experimental features */
 
 	gcli_sv buffer;
-	char    *file_content;
-	bool    inited;
+	char *file_content;
+	bool inited;
 };
 
 struct gcli_dotgcli {
@@ -379,40 +380,15 @@ parse_config_file(struct gcli_config *cfg,
 	}
 }
 
-/**
- * Try to load up the local config file if it exists. If we succeed,
- * return 0. Otherwise return -1.
- */
-static struct gcli_config *
-ensure_config(struct gcli_ctx *ctx)
+static void
+read_config_from_file(struct gcli_ctx *ctx, char const *const file_path)
 {
 	struct gcli_config *cfg = ctx_config(ctx);
-	char *file_path = NULL;
 	struct config_parser parser = {0};
-
-	if (cfg->inited)
-		return cfg;
-
-	cfg->inited = true;
-
-	file_path = getenv("XDG_CONFIG_HOME");
-	if (!file_path) {
-		file_path = getenv("HOME");
-		if (!file_path) {
-			gcli_warnx(ctx, "Neither XDG_CONFIG_HOME nor HOME set in env");
-			return cfg;
-		}
-
-		/*
-		 * Code duplication to avoid leaking pointers */
-		file_path = gcli_asprintf("%s/.config/gcli/config", file_path);
-	} else {
-		file_path = gcli_asprintf("%s/gcli/config", file_path);
-	}
 
 	if (access(file_path, R_OK) < 0) {
 		gcli_warn(ctx, "gcli: cannot access config file at %s", file_path);
-		return cfg;
+		return;
 	}
 
 	int len = gcli_read_file(file_path, &cfg->file_content);
@@ -427,8 +403,48 @@ ensure_config(struct gcli_ctx *ctx)
 	parser.filename = file_path;
 
 	parse_config_file(cfg, &parser);
+}
 
-	free((void *)file_path);
+/**
+ * Try to load up the local config file if it exists. If we succeed,
+ * return 0. Otherwise return -1.
+ */
+static struct gcli_config *
+ensure_config(struct gcli_ctx *ctx)
+{
+	struct gcli_config *cfg = ctx_config(ctx);
+	char *file_path = NULL;
+
+	if (cfg->inited)
+		return cfg;
+
+	cfg->inited = true;
+
+	if (cfg->override_config_file) {
+		/* -C command line flag was given */
+		read_config_from_file(ctx, cfg->override_config_file);
+
+	} else {
+		/* autodetect config file */
+		file_path = getenv("XDG_CONFIG_HOME");
+		if (!file_path) {
+			file_path = getenv("HOME");
+			if (!file_path) {
+				gcli_warnx(ctx, "Neither XDG_CONFIG_HOME nor HOME set in env");
+				return cfg;
+			}
+
+			/*
+			 * Code duplication to avoid leaking pointers */
+			file_path = gcli_asprintf("%s/.config/gcli/config", file_path);
+		} else {
+			file_path = gcli_asprintf("%s/gcli/config", file_path);
+		}
+
+		read_config_from_file(ctx, file_path);
+
+		free((void *)file_path);
+	}
 
 	return cfg;
 }
@@ -555,6 +571,10 @@ gcli_config_parse_args(struct gcli_ctx *ctx, int *argc, char ***argv)
 		  .has_arg = no_argument,
 		  .flag    = NULL,
 		  .val     = 'v' },
+		{ .name    = "config",
+		  .has_arg = required_argument,
+		  .flag    = NULL,
+		  .val     = 'C' },
 		{ .name    = "version",
 		  .has_arg = no_argument,
 		  .flag    = NULL,
@@ -572,7 +592,7 @@ gcli_config_parse_args(struct gcli_ctx *ctx, int *argc, char ***argv)
 	/* Start off by pre-populating the config structure */
 	readenv(cfg);
 
-	while ((ch = getopt_long(*argc, *argv, "+a:r:cqvt:V", options, NULL)) != -1) {
+	while ((ch = getopt_long(*argc, *argv, "+a:r:cqvt:VC:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'a': {
 			cfg->override_default_account = optarg;
@@ -582,6 +602,9 @@ gcli_config_parse_args(struct gcli_ctx *ctx, int *argc, char ***argv)
 		} break;
 		case 'c': {
 			cfg->force_colours = 1;
+		} break;
+		case 'C': {
+			cfg->override_config_file = optarg;
 		} break;
 		case 'q': {
 			gcli_setverbosity(ctx, GCLI_VERBOSITY_QUIET);

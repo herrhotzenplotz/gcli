@@ -348,6 +348,14 @@ main(int argc, char *argv[])
 	if (gcli_config_init_ctx(g_clictx) < 0)
 		errx(1, "gcli: error: failed to init context: %s", gcli_get_error(g_clictx));
 
+	/* Parse first arguments, must be done here because the aliases are
+	 * read from the config file. However, the config file may be
+	 * changed using command line options. */
+	if (gcli_config_parse_args(g_clictx, &argc, &argv)) {
+		usage();
+		return EXIT_FAILURE;
+	}
+
 	/* Initial setup */
 	setup_subcommand_table();
 
@@ -356,12 +364,6 @@ main(int argc, char *argv[])
 
 	/* Sorts the subcommands array alphabatically */
 	presort_subcommands();
-
-	/* Parse first arguments */
-	if (gcli_config_parse_args(g_clictx, &argc, &argv)) {
-		usage();
-		return EXIT_FAILURE;
-	}
 
 	/* Make sure we have a subcommand */
 	if (argc == 0) {

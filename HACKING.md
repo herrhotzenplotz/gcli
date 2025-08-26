@@ -165,12 +165,18 @@ It should be possible to build gcli under cygwin this way.
 
 ## Tests
 
-The test suite depends on [Kyua](https://github.com/jmmv/kyua) and
-[libatf-c](https://github.com/jmmv/atf).
+The test suite currently depends on Perl 5.
+A somewhat recent version should suffice.
 
 To run the test suite in a configured directory `build` run:
 
 	$ make -C build check
+
+You may also invoke the test harness runner directly:
+
+	$ tests/run.pl -h
+
+You should get a simple usage message from it.
 
 # Code Style
 

@@ -42,8 +42,7 @@ Optional dependencies:
 
 The test suite requires:
 
-- [Kyua](https://github.com/jmmv/kyua)
-- [ATF](https://github.com/jmmv/atf)
+- Perl 5
 
 ### Compile
 

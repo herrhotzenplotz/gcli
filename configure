@@ -159,8 +159,8 @@ ENVIRONMENT:
     AR                      Archiver to use [DEFAULT: autodetect]
     RANLIB                  Ranlib to use [DEFAULT: autodetect]
     RM                      rm to use [DEFAULT: autodetect]
-    KYUA                    Path to Kyua [DEFAULT: autodetect]
     CCACHE                  Path to ccache [DEFAULT: autodetect]
+    PERL                    Path to perl for test suite [DEFAULT: autodetect]
     INSTALL                 Path to install [DEFAULT: autodetect]
     EXEEXT                  File extension of executable files for the host system [DEFAULT: '', '.exe' on Windows]
     OBJEXT                  File extension of object files for the host system [DEFAULT: '.o', '.obj' on Windows]
@@ -181,6 +181,7 @@ ENABLE_LIBREADLINE=1
 ENABLE_LIBLOWDOWN=1
 ENABLE_LIBRT=1
 ENABLE_MAINTAINER=${ENABLE_MAINTAINER:-0}
+ENABLE_TESTS=1
 
 # Parse flags
 while [ $# -gt 0 ]; do
@@ -223,6 +224,10 @@ while [ $# -gt 0 ]; do
 			;;
 		--enable-maintainer)
 			ENABLE_MAINTAINER=1
+			shift
+			;;
+		--disable-tests)
+			ENABLE_TESTS=0
 			shift
 			;;
 		--debug)
@@ -289,7 +294,6 @@ PKG_CONFIG=${PKG_CONFIG:-$(find_program pkg-config pkg-config pkgconf)}
 [ $? -eq 0 ] || die "error: need pkg-config or pkgconf"
 
 find_package libcurl LIBCURL required
-find_package atf-c LIBATFC optional
 find_package libcrypto LIBCRYPTO required
 
 # Look for libedit if not disabled
@@ -385,7 +389,6 @@ LIBEXT_FOR_BUILD=${LIBEXT_FOR_BUILD:-$(guess_extension LIB $BUILD)} || die "erro
 AR=${AR:-ar}
 RANLIB=${RANLIB:-ranlib}
 RM=${RM:-rm}
-KYUA=${KYUA:-$(find_program kyua kyua)}
 CCACHE=${CCACHE:-$(find_program ccache ccache)}
 INSTALL=${INSTALL:-$(find_program install install ginstall)}
 SHELL=${SHELL:-$(find_program sh sh zsh bash)}
@@ -394,6 +397,15 @@ SHELL=${SHELL:-$(find_program sh sh zsh bash)}
 # If maintainer mode is enabled, we need lowdown(1)
 if [ ${ENABLE_MAINTAINER} -eq 1 ]; then
 	LOWDOWN=${LOWDOWN:-$(find_program lowdown lowdown)}
+	[ $? -eq 0 ] || die "error: couldn't find lowdown which is required in maintainer mode"
+fi
+
+if [ ${ENABLE_TESTS} -eq 1 ]; then
+	PERL=${PERL:-$(find_program perl perl perl5)}
+	if ! [ $? -eq 0 ]; then
+		ENABLE_TESTS=0
+		echo "configure: warning: tests are disabled because perl couldn't be found" >&2
+	fi
 fi
 
 ###################################################################
@@ -414,8 +426,6 @@ sed \
 	-e "s|@LIBCURL_LIBS@|$LIBCURL_LIBS|g" \
 	-e "s|@LIBCRYPTO_CFLAGS@|$LIBCRYPTO_CFLAGS|g" \
 	-e "s|@LIBCRYPTO_LIBS@|$LIBCRYPTO_LIBS|g" \
-	-e "s|@LIBATFC_CFLAGS@|$LIBATFC_CFLAGS|g" \
-	-e "s|@LIBATFC_LIBS@|$LIBATFC_LIBS|g" \
 	-e "s|@LIBEDIT_FOUND@|$LIBEDIT_FOUND|g" \
 	-e "s|@LIBEDIT_CFLAGS@|$LIBEDIT_CFLAGS|g" \
 	-e "s|@LIBEDIT_LIBS@|$LIBEDIT_LIBS|g" \
@@ -448,7 +458,7 @@ sed \
 	-e "s|@CCACHE@|$CCACHE|g" \
 	-e "s|@RANLIB@|$RANLIB|g" \
 	-e "s|@RM@|$RM|g" \
-	-e "s|@KYUA@|$KYUA|g" \
+	-e "s|@PERL@|$PERL|g" \
 	-e "s|@INSTALL@|$INSTALL|g" \
 	-e "s|@SHELL@|$SHELL|g" \
 	-e "s|@PREFIX@|$PREFIX|g" \
@@ -464,6 +474,7 @@ sed \
 	-e "s|@OBJEXT_FOR_BUILD@|$OBJEXT_FOR_BUILD|g" \
 	-e "s|@LIBEXT_FOR_BUILD@|$LIBEXT_FOR_BUILD|g" \
 	-e "s|@ENABLE_MAINTAINER@|$ENABLE_MAINTAINER|g" \
+	-e "s|@ENABLE_TESTS@|$ENABLE_TESTS|g" \
 	-e "s|@LOWDOWN@|$LOWDOWN|g" \
 	< "${srcdir}/Makefile.in" > Makefile
 
@@ -493,8 +504,6 @@ echo "              LDFLAGS: ${LDFLAGS}"
 echo "    LDFLAGS_FOR_BUILD: ${LDFLAGS_FOR_BUILD}"
 echo "       LIBCURL_CFLAGS: ${LIBCURL_CFLAGS}"
 echo "         LIBCURL_LIBS: ${LIBCURL_LIBS}"
-echo "       LIBATFC_CFLAGS: ${LIBATFC_CFLAGS}"
-echo "         LIBATFC_LIBS: ${LIBATFC_LIBS}"
 if [ $LIBEDIT_FOUND -eq 1 ]; then
 echo " Using libedit:"
 echo "       LIBEDIT_CFLAGS: ${LIBEDIT_CFLAGS}"

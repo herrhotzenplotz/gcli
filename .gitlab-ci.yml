@@ -6,7 +6,7 @@ alpine-amd64:
   stage: testing
   image: alpine:3.17
   script:
-    - apk add libcurl gcc make pkgconf musl-dev curl-dev flex bison libbsd-dev kyua atf-dev libedit-dev git
+    - apk add libcurl gcc make pkgconf musl-dev curl-dev flex bison libbsd-dev perl libedit-dev git
     - ./configure --debug
     - make -j all
     - make -j distcheck
@@ -35,7 +35,7 @@ dist:
   stage: dist
   image: alpine:3.18
   script:
-    - apk add libcurl gcc make pkgconf musl-dev curl-dev flex bison xz gzip bzip2 libbsd-dev kyua atf-dev cmark git
+    - apk add libcurl gcc make pkgconf musl-dev curl-dev flex bison xz gzip bzip2 libbsd-dev perl cmark git
     - ./configure --debug
     - (cd docs/website && ./deploy.sh)
     - tools/gentarball.sh
@@ -47,10 +47,10 @@ dist:
 
 debian-amd64:
   stage: testing
-  image: debian:bookworm
+  image: debian:trixie
   script:
     - apt-get update
-    - apt-get install -y --no-install-recommends build-essential libcurl4-openssl-dev pkgconf bison flex make libbsd-dev libatf-dev kyua libreadline-dev libssl-dev git
+    - apt-get install -y --no-install-recommends build-essential libcurl4-openssl-dev pkgconf bison flex make libbsd-dev perl libreadline-dev libssl-dev git
     - ./configure --debug
     - make -j all
     - make -j distcheck

@@ -27,91 +27,83 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <atf-c.h>
-
 #include <gcli/url.h>
 
 #include <stdlib.h>
+#include "unit.h"
 
-ATF_TC_WITHOUT_HEAD(sanity);
-ATF_TC_BODY(sanity, tc)
+DEFINE_TESTCASE(sanity)
 {
 	char *options = NULL;
 
 	gcli_url_options_append(&options, NULL, NULL);
-	ATF_CHECK_EQ(options, NULL);
+	CHECK_EQ(options, NULL);
 }
 
-ATF_TC_WITHOUT_HEAD(one_option);
-ATF_TC_BODY(one_option, tc)
+DEFINE_TESTCASE(one_option)
 {
 	char *options = NULL;
 
 	gcli_url_options_append(&options, "foo", "bar");
 
-	ATF_REQUIRE(options != NULL);
-	ATF_CHECK_STREQ(options, "?foo=bar");
+	REQUIRE(options != NULL);
+	CHECK_STREQ(options, "?foo=bar");
 
 	free(options);
 }
 
-ATF_TC_WITHOUT_HEAD(two_options);
-ATF_TC_BODY(two_options, tc)
+DEFINE_TESTCASE(two_options)
 {
 	char *options = NULL;
 
 	gcli_url_options_append(&options, "foo", "bar");
 
-	ATF_REQUIRE(options != NULL);
-	ATF_CHECK_STREQ(options, "?foo=bar");
+	REQUIRE(options != NULL);
+	CHECK_STREQ(options, "?foo=bar");
 
 	gcli_url_options_append(&options, "baz", "banana");
-	ATF_REQUIRE(options != NULL);
-	ATF_CHECK_STREQ(options, "?foo=bar&baz=banana");
+	REQUIRE(options != NULL);
+	CHECK_STREQ(options, "?foo=bar&baz=banana");
 
 	free(options);
 }
 
-ATF_TC_WITHOUT_HEAD(three_options_with_one_null);
-ATF_TC_BODY(three_options_with_one_null, tc)
+DEFINE_TESTCASE(three_options_with_one_null)
 {
 	char *options = NULL;
 
 	gcli_url_options_append(&options, "foo", "bar");
 
-	ATF_REQUIRE(options != NULL);
-	ATF_CHECK_STREQ(options, "?foo=bar");
+	REQUIRE(options != NULL);
+	CHECK_STREQ(options, "?foo=bar");
 
 	gcli_url_options_append(&options, "peanut", NULL);
-	ATF_REQUIRE(options != NULL);
-	ATF_CHECK_STREQ(options, "?foo=bar");
+	REQUIRE(options != NULL);
+	CHECK_STREQ(options, "?foo=bar");
 
 	gcli_url_options_append(&options, "baz", "banana");
-	ATF_REQUIRE(options != NULL);
-	ATF_CHECK_STREQ(options, "?foo=bar&baz=banana");
+	REQUIRE(options != NULL);
+	CHECK_STREQ(options, "?foo=bar&baz=banana");
 
 	free(options);
 }
 
-ATF_TC_WITHOUT_HEAD(urlencoded_options);
-ATF_TC_BODY(urlencoded_options, tc)
+DEFINE_TESTCASE(urlencoded_options)
 {
 	char *options = NULL;
 
 	gcli_url_options_append(&options, "path", "foo/bar/baz");
-	ATF_REQUIRE(options != NULL);
-	ATF_CHECK_STREQ(options, "?path=foo%2Fbar%2Fbaz");
+	REQUIRE(options != NULL);
+	CHECK_STREQ(options, "?path=foo%2Fbar%2Fbaz");
 
 	free(options);
 }
 
-ATF_TP_ADD_TCS(tp)
+TESTSUITE
 {
-	ATF_TP_ADD_TC(tp, sanity);
-	ATF_TP_ADD_TC(tp, one_option);
-	ATF_TP_ADD_TC(tp, two_options);
-	ATF_TP_ADD_TC(tp, three_options_with_one_null);
-	ATF_TP_ADD_TC(tp, urlencoded_options);
-
-	return atf_no_error();
+	TESTCASE(sanity);
+	TESTCASE(one_option);
+	TESTCASE(two_options);
+	TESTCASE(three_options_with_one_null);
+	TESTCASE(urlencoded_options);
 }

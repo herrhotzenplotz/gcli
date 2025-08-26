@@ -27,7 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <err.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <gcli/gcli.h>
@@ -38,7 +38,7 @@
 
 #include <pdjson.h>
 
-#include "gcli_tests.h"
+#include "unit.h"
 
 static gcli_forge_type
 get_bugzilla_forge_type(struct gcli_ctx *ctx)
@@ -48,10 +48,10 @@ get_bugzilla_forge_type(struct gcli_ctx *ctx)
 }
 
 static struct gcli_ctx *
-test_context(void)
+test_context(UNIT_CTX)
 {
 	struct gcli_ctx *ctx;
-	ATF_REQUIRE(gcli_init(&ctx, get_bugzilla_forge_type, NULL, NULL) == NULL);
+	REQUIRE(gcli_init(&ctx, get_bugzilla_forge_type, NULL, NULL) == NULL);
 	return ctx;
 }
 
@@ -61,104 +61,101 @@ open_sample(char const *const name)
 	FILE *r;
 	char p[4096] = {0};
 
-	snprintf(p, sizeof p, "%s/samples/%s", TESTSRCDIR, name);
+	snprintf(p, sizeof p, "%s/unit/samples/%s", TESTSRCDIR, name);
 
 	r = fopen(p, "r");
 	return r;
 }
 
-ATF_TC_WITHOUT_HEAD(simple_bugzilla_issue);
-ATF_TC_BODY(simple_bugzilla_issue, tc)
+DEFINE_TESTCASE(simple_bugzilla_issue)
 {
 	struct gcli_issue_list list = {0};
 	struct gcli_issue const *issue;
 	FILE *f;
 	struct json_stream stream;
-	struct gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context(UNIT_CTX_VAR);
 
-	ATF_REQUIRE((f = open_sample("bugzilla_simple_bug.json")));
+	REQUIRE((f = open_sample("bugzilla_simple_bug.json")) != NULL);
 	json_open_stream(&stream, f);
 
-	ATF_REQUIRE(parse_bugzilla_bugs(ctx, &stream, &list) == 0);
+	REQUIRE(parse_bugzilla_bugs(ctx, &stream, &list) == 0);
 
-	ATF_REQUIRE_EQ(list.issues_size, 1);
+	REQUIRE(list.issues_size == 1);
 
 	issue = &list.issues[0];
 
-	ATF_CHECK_EQ(issue->number, 1);
-	ATF_CHECK_STREQ(issue->title, "[aha] [scsi] Toshiba MK156FB scsi drive does not work with 2.0 kernel");
-	ATF_CHECK_EQ(issue->created_at, 779533801);
-	ATF_CHECK_STREQ(issue->author, "Dave Evans");
-	ATF_CHECK_STREQ(issue->state, "Closed");
-	ATF_CHECK_STREQ(issue->product, "Base System");
-	ATF_CHECK_STREQ(issue->component, "kern");
+	CHECK_EQ(issue->number, 1);
+	CHECK_STREQ(issue->title, "[aha] [scsi] Toshiba MK156FB scsi drive does not work with 2.0 kernel");
+	CHECK_EQ(issue->created_at, 779533801);
+	CHECK_STREQ(issue->author, "Dave Evans");
+	CHECK_STREQ(issue->state, "Closed");
+	CHECK_STREQ(issue->product, "Base System");
+	CHECK_STREQ(issue->component, "kern");
 
 	json_close(&stream);
 	gcli_destroy(&ctx);
 }
 
-ATF_TC_WITHOUT_HEAD(bugzilla_comments);
-ATF_TC_BODY(bugzilla_comments, tc)
+DEFINE_TESTCASE(bugzilla_comments)
 {
 	FILE *f;
 	struct gcli_comment const *cmt = NULL;
 	struct gcli_comment_list list = {0};
-	struct gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context(UNIT_CTX_VAR);
 	struct json_stream stream;
 
-	ATF_REQUIRE((f = open_sample("bugzilla_comments.json")));
+	REQUIRE((f = open_sample("bugzilla_comments.json")) != NULL);
 	json_open_stream(&stream, f);
 
-	ATF_REQUIRE(parse_bugzilla_comments(ctx, &stream, &list) == 0);
+	REQUIRE(parse_bugzilla_comments(ctx, &stream, &list) == 0);
 	json_close(&stream);
 	fclose(f);
 	f = NULL;
 
-	ATF_REQUIRE_EQ(list.comments_size, 1);
+	REQUIRE(list.comments_size == 1);
 
 	cmt = &list.comments[0];
-	ATF_CHECK_EQ(cmt->id, 1285943);
-	ATF_CHECK_STREQ(cmt->author, "zlei@FreeBSD.org");
-	ATF_CHECK_EQ(cmt->date, 1701105615);
-	ATF_CHECK(cmt->body != NULL);
+	CHECK_EQ(cmt->id, 1285943);
+	CHECK_STREQ(cmt->author, "zlei@FreeBSD.org");
+	CHECK_EQ(cmt->date, 1701105615);
+	CHECK(cmt->body != NULL);
 
 	gcli_comments_free(&list);
 	gcli_destroy(&ctx);
 }
 
-ATF_TC_WITHOUT_HEAD(bugzilla_attachments);
-ATF_TC_BODY(bugzilla_attachments, tc)
+DEFINE_TESTCASE(bugzilla_attachments)
 {
 	FILE *f = NULL;
 	struct gcli_attachment const *it;
 	struct gcli_attachment_list list = {0};
-	struct gcli_ctx *ctx = test_context();
+	struct gcli_ctx *ctx = test_context(UNIT_CTX_VAR);
 	struct json_stream stream = {0};
 
-	ATF_REQUIRE((f = open_sample("bugzilla_attachments.json")));
+	REQUIRE((f = open_sample("bugzilla_attachments.json")) != NULL);
 	json_open_stream(&stream, f);
 
-	ATF_REQUIRE(parse_bugzilla_bug_attachments(ctx, &stream, &list) == 0);
+	REQUIRE(parse_bugzilla_bug_attachments(ctx, &stream, &list) == 0);
 
-	ATF_CHECK(list.attachments_size == 2);
+	CHECK(list.attachments_size == 2);
 
 	it = list.attachments;
-	ATF_CHECK_EQ(it->id, 246131);
-	ATF_CHECK_EQ(it->is_obsolete, true);
-	ATF_CHECK_STREQ(it->author, "nsonack@outlook.com");
-	ATF_CHECK_STREQ(it->content_type, "text/plain");
-	ATF_CHECK_EQ(it->created_at, 1699129151);
-	ATF_CHECK_STREQ(it->file_name, "0001-devel-open62541-Update-to-version-1.3.8.patch");
-	ATF_CHECK_STREQ(it->summary, "Patch for updating the port");
+	CHECK_EQ(it->id, 246131);
+	CHECK_EQ(it->is_obsolete, true);
+	CHECK_STREQ(it->author, "nsonack@outlook.com");
+	CHECK_STREQ(it->content_type, "text/plain");
+	CHECK_EQ(it->created_at, 1699129151);
+	CHECK_STREQ(it->file_name, "0001-devel-open62541-Update-to-version-1.3.8.patch");
+	CHECK_STREQ(it->summary, "Patch for updating the port");
 
 	it++;
-	ATF_CHECK_EQ(it->id, 246910);
-	ATF_CHECK_EQ(it->is_obsolete, false);
-	ATF_CHECK_STREQ(it->author, "nsonack@outlook.com");
-	ATF_CHECK_STREQ(it->content_type, "text/plain");
-	ATF_CHECK_EQ(it->created_at, 1702055406);
-	ATF_CHECK_STREQ(it->file_name, "0001-devel-open62541-Update-to-version-1.3.8.patch");
-	ATF_CHECK_STREQ(it->summary, "Patch v2 (now for version 1.3.9)");
+	CHECK_EQ(it->id, 246910);
+	CHECK_EQ(it->is_obsolete, false);
+	CHECK_STREQ(it->author, "nsonack@outlook.com");
+	CHECK_STREQ(it->content_type, "text/plain");
+	CHECK_EQ(it->created_at, 1702055406);
+	CHECK_STREQ(it->file_name, "0001-devel-open62541-Update-to-version-1.3.8.patch");
+	CHECK_STREQ(it->summary, "Patch v2 (now for version 1.3.9)");
 
 	gcli_attachments_free(&list);
 
@@ -169,11 +166,9 @@ ATF_TC_BODY(bugzilla_attachments, tc)
 	gcli_destroy(&ctx);
 }
 
-ATF_TP_ADD_TCS(tp)
+TESTSUITE
 {
-	ATF_TP_ADD_TC(tp, simple_bugzilla_issue);
-	ATF_TP_ADD_TC(tp, bugzilla_comments);
-	ATF_TP_ADD_TC(tp, bugzilla_attachments);
-
-	return atf_no_error();
+	TESTCASE(simple_bugzilla_issue);
+	TESTCASE(bugzilla_comments);
+	TESTCASE(bugzilla_attachments);
 }

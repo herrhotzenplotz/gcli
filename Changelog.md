@@ -2,6 +2,16 @@
 
 This changelog does not follow semantic versioning.
 
+## UNRELEASED
+
+### Added
+
+### Fixed
+
+### Changed
+
+### Removed
+
 ## 2.9.0 (26-Aug-2025)
 
 ### Added

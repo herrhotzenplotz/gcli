@@ -110,3 +110,57 @@ err_seek:
 
 	return rc;
 }
+int
+gcli_read_stream(FILE *stream, char **buffer)
+{
+	size_t size = 0;
+	size_t capacity = 1024;
+	char *buf = malloc(capacity);
+	if (!buf)
+		return -1;
+
+	while (!feof(stream)) {
+		size_t const n = fread(buf + size, 1, capacity - size, stream);
+		size += n;
+
+		if (size == capacity) {
+			capacity *= 2;
+			char *new_buf = realloc(buf, capacity);
+			if (!new_buf) {
+				free(buf);
+				return -1;
+			}
+			buf = new_buf;
+		}
+	}
+
+	// Process backslash escapes
+	size_t j = 0;
+	for (size_t i = 0; i < size; i++) {
+		if (buf[i] == '\\' && i + 1 < size) {
+			switch (buf[i+1]) {
+			case 'n':
+				buf[j++] = '\n';
+				i++;
+				break;
+			case 'r':
+				buf[j++] = '\r';
+				i++;
+				break;
+			case '\\':
+				buf[j++] = '\\';
+				i++;
+				break;
+			default:
+				buf[j++] = buf[i];
+			}
+		} else {
+			buf[j++] = buf[i];
+		}
+	}
+	size = j;
+
+	buf[size] = '\0';
+	*buffer = buf;
+	return size;
+}

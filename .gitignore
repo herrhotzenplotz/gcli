@@ -29,6 +29,7 @@
 /stamp-h1
 /ylwrap
 /**/*.o
+/**/*.d
 /**/*.lo
 /**/*.la
 /**/*.*~
@@ -49,3 +50,7 @@
 /m4/lt~obsolete.m4
 /libgcli.pc
 build/**
+lex.yy.c
+y.tab.c
+y.tab.h
+docs/gcli-tutorial.1

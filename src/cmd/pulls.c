@@ -111,6 +111,8 @@ usage(void)
 		fprintf(stderr, "  discussions            Show a threaded view of review discussions\n");
 	fprintf(stderr, "  approve                Approve this PR\n");
 	fprintf(stderr, "  unapprove              Revoke approval on this PR\n");
+	fprintf(stderr, "OPTIONS FOR approve/unapprove:\n");
+	fprintf(stderr, "  -F file, --file=file   Read the message from the specified file\n");
 
 	fprintf(stderr, "\n");
 	version();
@@ -1517,77 +1519,179 @@ approval_init(struct gcli_ctx *ctx, FILE *f, void *data)
 static int
 action_approve(struct gcli_path const *const path,
                struct gcli_pull const *const pull,
-               int *argc, char **argv[])
+               int *argc_p, char ***argv_p)
 {
- char *message = NULL;
- int rc = 0;
+	char *message = NULL;
+	int rc = 0;
+	char *file_message = NULL;
 
- (void) pull;
- (void) argc;
- (void) argv;
+	(void)pull;
 
- if (gcli_yesno("Enter a message?")) {
-  message = gcli_editor_get_user_message(g_clictx, approval_init, NULL);
-  if (!message) {
-   fprintf(stderr, "gcli: empty message, aborting.\n");
-   return GCLI_EX_DATAERR;
-  }
- }
+	/* Parse --file argument */
+	if (*argc_p > 1) {
+		const char *arg = (*argv_p)[1];
+		if (strcmp(arg, "--file") == 0 || strcmp(arg, "-F") == 0) {
+			if (*argc_p < 3) {
+				fprintf(stderr, "gcli: error: --file requires an argument\n");
+				return GCLI_EX_USAGE;
+			}
+			if (strcmp((*argv_p)[2], "-") == 0) {
+				if (gcli_read_stream(stdin, &file_message) < 0) {
+					fprintf(stderr, "gcli: error: failed to read from stdin\n");
+					return GCLI_EX_DATAERR;
+				}
+			} else {
+				if (gcli_read_file((*argv_p)[2], &file_message) < 0) {
+					fprintf(stderr, "gcli: error: failed to read file '%s'\n", (*argv_p)[2]);
+					return GCLI_EX_DATAERR;
+				}
+			}
+			*argc_p -= 2;
+			*argv_p += 2;
+		} else if (strncmp(arg, "--file=", 7) == 0) {
+			if (strcmp(arg + 7, "-") == 0) {
+				if (gcli_read_stream(stdin, &file_message) < 0) {
+					fprintf(stderr, "gcli: error: failed to read from stdin\n");
+					return GCLI_EX_DATAERR;
+				}
+			} else {
+				if (gcli_read_file(arg + 7, &file_message) < 0) {
+					fprintf(stderr, "gcli: error: failed to read file '%s'\n", arg + 7);
+					return GCLI_EX_DATAERR;
+				}
+			}
+			*argc_p -= 1;
+			*argv_p += 1;
+		}
+	}
 
- if (message) {
- 	rc = gcli_pull_approve(g_clictx, path, message);
- } else {
- 	rc = gcli_pull_approve(g_clictx, path, "Approved");
- }
+	/* If we got a message from a file, use it */
+	if (file_message) {
+		message = file_message;
+	} else {
+		/* Otherwise, use the interactive approach */
+		if (gcli_yesno("Enter a message?")) {
+			message = gcli_editor_get_user_message(g_clictx, approval_init, NULL);
+			if (!message) {
+				fprintf(stderr, "gcli: empty message, aborting.\n");
+				free(file_message);
+				return GCLI_EX_DATAERR;
+			}
+		}
+	}
 
- if (rc < 0) {
- 	fprintf(stderr, "gcli: error: failed to approve pull request: %s\n",
- 	        gcli_get_error(g_clictx));
- 	return GCLI_EX_DATAERR;
- }
+	if (message) {
+		rc = gcli_pull_approve(g_clictx, path, message);
+	} else {
+		rc = gcli_pull_approve(g_clictx, path, "Approved");
+	}
 
- free(message);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to approve pull request: %s\n",
+		        gcli_get_error(g_clictx));
+		free(file_message);
+		if (message && message != file_message) {
+			free(message);
+		}
+		return GCLI_EX_DATAERR;
+	}
 
- return GCLI_EX_OK;
+	free(file_message);
+	if (message && message != file_message) {
+		free(message);
+	}
+
+	return GCLI_EX_OK;
 }
 
 static int
 action_unapprove(struct gcli_path const *const path,
                  struct gcli_pull const *const pull,
-                 int *argc, char **argv[])
+                 int *argc_p, char ***argv_p)
 {
-char *message = NULL;
-int rc = 0;
+	char *message = NULL;
+	int rc = 0;
+	char *file_message = NULL;
 
-(void) pull;
-(void) argc;
-(void) argv;
+	(void)pull;
 
-if (gcli_yesno("Enter a message?")) {
- message = gcli_editor_get_user_message(g_clictx, approval_init, NULL);
- if (!message) {
-  fprintf(stderr, "gcli: empty message, aborting.\n");
-  return GCLI_EX_DATAERR;
- }
-}
+	/* Manually parse --file argument */
+	if (*argc_p > 1) {
+		const char *arg = (*argv_p)[1];
+		if (strcmp(arg, "--file") == 0 || strcmp(arg, "-F") == 0) {
+			if (*argc_p < 3) {
+				fprintf(stderr, "gcli: error: --file requires an argument\n");
+				return GCLI_EX_USAGE;
+			}
+			if (strcmp((*argv_p)[2], "-") == 0) {
+				if (gcli_read_stream(stdin, &file_message) < 0) {
+					fprintf(stderr, "gcli: error: failed to read from stdin\n");
+					return GCLI_EX_DATAERR;
+				}
+			} else {
+				if (gcli_read_file((*argv_p)[2], &file_message) < 0) {
+					fprintf(stderr, "gcli: error: failed to read file '%s'\n", (*argv_p)[2]);
+					return GCLI_EX_DATAERR;
+				}
+			}
+			*argc_p -= 2;
+			*argv_p += 2;
+		} else if (strncmp(arg, "--file=", 7) == 0) {
+			if (strcmp(arg + 7, "-") == 0) {
+				if (gcli_read_stream(stdin, &file_message) < 0) {
+					fprintf(stderr, "gcli: error: failed to read from stdin\n");
+					return GCLI_EX_DATAERR;
+				}
+			} else {
+				if (gcli_read_file(arg + 7, &file_message) < 0) {
+					fprintf(stderr, "gcli: error: failed to read file '%s'\n", arg + 7);
+					return GCLI_EX_DATAERR;
+				}
+			}
+			*argc_p -= 1;
+			*argv_p += 1;
+		}
+	}
 
-if (message) {
- rc = gcli_pull_unapprove(g_clictx, path, message);
-} else {
- rc = gcli_pull_unapprove(g_clictx, path, "Unapproved");
-}
+	/* If we got a message from a file, use it */
+	if (file_message) {
+		message = file_message;
+	} else {
+		/* Otherwise, use the interactive approach */
+		if (gcli_yesno("Enter a message?")) {
+			message = gcli_editor_get_user_message(g_clictx, approval_init, NULL);
+			if (!message) {
+				fprintf(stderr, "gcli: empty message, aborting.\n");
+				free(file_message);
+				return GCLI_EX_DATAERR;
+			}
+		}
+	}
 
-if (rc < 0) {
- fprintf(stderr, "gcli: error: failed to unapprove pull request: %s\n",
-         gcli_get_error(g_clictx));
- if (strstr(gcli_get_error(g_clictx), "reject your own pull is not allowed"))
-  fprintf(stderr, "NOTE: Gitea does not allow you to unapprove your own pull requests.\n");
- return GCLI_EX_DATAERR;
-}
+	if (message) {
+		rc = gcli_pull_unapprove(g_clictx, path, message);
+	} else {
+		rc = gcli_pull_unapprove(g_clictx, path, "Unapproved");
+	}
 
-free(message);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to unapprove pull request: %s\n",
+		        gcli_get_error(g_clictx));
+		if (strstr(gcli_get_error(g_clictx), "reject your own pull is not allowed"))
+			fprintf(stderr, "NOTE: Gitea does not allow you to unapprove your own pull requests.\n");
+		free(file_message);
+		if (message && message != file_message) {
+			free(message);
+		}
+		return GCLI_EX_DATAERR;
+	}
 
-return GCLI_EX_OK;
+	free(file_message);
+	if (message && message != file_message) {
+		free(message);
+	}
+
+	return GCLI_EX_OK;
 }
 
 struct gcli_cmd_actions gcli_pull_actions = {

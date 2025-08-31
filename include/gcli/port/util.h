@@ -33,6 +33,7 @@
 #include <gcli/port/err.h>
 
 #include <stdbool.h>
+#include <stdio.h>
 
 /* for convenience */
 #define gcli_unimplemented errx(42, "%s: unimplemented", __func__)
@@ -53,6 +54,7 @@ gcli_min(int x, int y)
 }
 
 int gcli_read_file(char const *path, char **buffer);
+int gcli_read_stream(FILE *stream, char **buffer);
 
 /* interactive user functions */
 bool gcli_yesno(const char *fmt, ...) PRINTF_FORMAT(1, 2);

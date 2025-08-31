@@ -1513,47 +1513,42 @@ approval_init(struct gcli_ctx *ctx, FILE *f, void *data)
 	fprintf(f, "! All lines starting with '!' will be discarded.\n");
 }
 
-static int
-approval_action(struct gcli_path const *const path,
-                int (*fn)(struct gcli_ctx *ctx, struct gcli_path const *, char const *))
-{
-	int rc;
-	char *message = NULL;
-
-	if (gcli_yesno("Enter a message?")) {
-		message = gcli_editor_get_user_message(g_clictx, approval_init, NULL);
-
-		if (message == NULL) {
-			fprintf(stderr, "gcli: message empty, aborting.\n");
-			return GCLI_EX_DATAERR;
-		}
-	}
-
-	rc = fn(g_clictx, path, message);
-	if (rc < 0) {
-		fprintf(stderr, "gcli: error: failed to update pull: %s\n",
-		        gcli_get_error(g_clictx));
-
-		rc = GCLI_EX_DATAERR;
-	} else {
-		rc = GCLI_EX_OK;
-	}
-
-	free(message);
-
-	return rc;
-}
 
 static int
 action_approve(struct gcli_path const *const path,
                struct gcli_pull const *const pull,
                int *argc, char **argv[])
 {
-	(void) pull;
-	(void) argc;
-	(void) argv;
+ char *message = NULL;
+ int rc = 0;
 
-	return approval_action(path, gcli_pull_approve);
+ (void) pull;
+ (void) argc;
+ (void) argv;
+
+ if (gcli_yesno("Enter a message?")) {
+  message = gcli_editor_get_user_message(g_clictx, approval_init, NULL);
+  if (!message) {
+   fprintf(stderr, "gcli: empty message, aborting.\n");
+   return GCLI_EX_DATAERR;
+  }
+ }
+
+ if (message) {
+ 	rc = gcli_pull_approve(g_clictx, path, message);
+ } else {
+ 	rc = gcli_pull_approve(g_clictx, path, "Approved");
+ }
+
+ if (rc < 0) {
+ 	fprintf(stderr, "gcli: error: failed to approve pull request: %s\n",
+ 	        gcli_get_error(g_clictx));
+ 	return GCLI_EX_DATAERR;
+ }
+
+ free(message);
+
+ return GCLI_EX_OK;
 }
 
 static int
@@ -1561,11 +1556,38 @@ action_unapprove(struct gcli_path const *const path,
                  struct gcli_pull const *const pull,
                  int *argc, char **argv[])
 {
-	(void) pull;
-	(void) argc;
-	(void) argv;
+char *message = NULL;
+int rc = 0;
 
-	return approval_action(path, gcli_pull_unapprove);
+(void) pull;
+(void) argc;
+(void) argv;
+
+if (gcli_yesno("Enter a message?")) {
+ message = gcli_editor_get_user_message(g_clictx, approval_init, NULL);
+ if (!message) {
+  fprintf(stderr, "gcli: empty message, aborting.\n");
+  return GCLI_EX_DATAERR;
+ }
+}
+
+if (message) {
+ rc = gcli_pull_unapprove(g_clictx, path, message);
+} else {
+ rc = gcli_pull_unapprove(g_clictx, path, "Unapproved");
+}
+
+if (rc < 0) {
+ fprintf(stderr, "gcli: error: failed to unapprove pull request: %s\n",
+         gcli_get_error(g_clictx));
+ if (strstr(gcli_get_error(g_clictx), "reject your own pull is not allowed"))
+  fprintf(stderr, "NOTE: Gitea does not allow you to unapprove your own pull requests.\n");
+ return GCLI_EX_DATAERR;
+}
+
+free(message);
+
+return GCLI_EX_OK;
 }
 
 struct gcli_cmd_actions gcli_pull_actions = {

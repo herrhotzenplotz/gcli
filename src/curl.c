@@ -428,6 +428,11 @@ gcli_fetch_with_method(
 	}
 
 	ret = curl_easy_perform(ctx->curl);
+	if (gcli_be_verbose(ctx)) {
+		fprintf(stderr, "info: cURL response body:\n");
+		fwrite(buf->data, 1, buf->length, stderr);
+		fprintf(stderr, "\n");
+	}
 	rc = gcli_curl_check_api_error(ctx, ret, url, buf);
 
 	if (ctx->report_progress)

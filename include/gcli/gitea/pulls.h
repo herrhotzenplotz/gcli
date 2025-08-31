@@ -88,4 +88,12 @@ int gitea_pull_get_reviews(struct gcli_ctx *ctx,
                            struct gcli_path const *path,
                            struct gcli_pull_reviews *out);
 
+int gitea_pull_create_review(struct gcli_ctx *ctx,
+                             struct gcli_pull_create_review_details const *details);
+
+
+int gitea_pull_get_review_url(struct gcli_ctx *ctx,
+                              struct gcli_path const *const path,
+                              char **url);
+
 #endif /* GITEA_PULLS_H */

@@ -342,6 +342,7 @@ gitea_forge_descriptor =
 	.pull_set_milestone        = gitea_pull_set_milestone,
 	.pull_set_title            = gitea_pull_set_title,
 	.pull_get_reviews          = gitea_pull_get_reviews,
+	.pull_create_review        = gitea_pull_create_review,
 
 	/* Releases */
 	.create_release            = gitea_create_release,

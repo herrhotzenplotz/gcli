@@ -187,6 +187,7 @@ LIBGCLI_SRCS = \
 	src/gitea/labels.c \
 	src/gitea/milestones.c \
 	src/gitea/pulls.c \
+	src/gitea/review.c \
 	src/gitea/releases.c \
 	src/gitea/repos.c \
 	src/gitea/sshkeys.c \

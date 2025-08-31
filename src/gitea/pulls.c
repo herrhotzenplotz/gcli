@@ -30,6 +30,7 @@
 #include <gcli/gitea/pulls.h>
 #include <gcli/gitea/repos.h>
 #include <gcli/gitea/issues.h>
+#include <gcli/gitea/review.h>
 #include <gcli/github/issues.h>
 #include <gcli/github/pulls.h>
 
@@ -325,4 +326,12 @@ gitea_pull_get_reviews(struct gcli_ctx *ctx,
                        struct gcli_pull_reviews *out)
 {
 	return github_pull_get_reviews(ctx, path, out);
+}
+
+
+int
+gitea_pull_get_review_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                          char **url)
+{
+    return gitea_pull_make_url(ctx, path, url, "/reviews");
 }

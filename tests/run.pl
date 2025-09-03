@@ -9,14 +9,14 @@
 use warnings;
 use strict;
 
-use Cwd;
+use Cwd qw(getcwd realpath);
 use File::Basename;
 use Getopt::Long;
 use TAP::Harness;
 
 #####################
 # Environment setup
-my $testsrcdir = dirname($0);
+my $testsrcdir = dirname(realpath($0));
 my $builddir = getcwd();
 my $verbosity = 0;
 my $jobs = 1;
@@ -40,15 +40,19 @@ GetOptions(
 	"help" => sub { usage; exit 0; },
 ) or die "failed to parse command line arguments";
 
+chdir $builddir;
+
 ##########################
 # Look for unit tests
-my @unit_tests = ();
+my @alltests = ();
 
 while (glob("${testsrcdir}/unit/*.c")) {
 	my $name = fileparse($_, ".c");
 
-	push(@unit_tests, "${builddir}/tests/unit/$name");
+	push(@alltests, "tests/unit/$name");
 }
+
+push(@alltests, $_) for glob "${testsrcdir}/integration/*.t";
 
 my $harness = TAP::Harness->new({
 	verbosity => $verbosity,
@@ -58,4 +62,4 @@ my $harness = TAP::Harness->new({
 	errors => 1,
 	jobs => $jobs,
 });
-$harness->runtests(@unit_tests);
+$harness->runtests(@alltests);

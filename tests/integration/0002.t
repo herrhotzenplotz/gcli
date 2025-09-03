@@ -4,6 +4,8 @@
 # TITLE: basic sanity check. if this doesn't run the build and gcli are generally broken.
 
 use Test2::V0;
+use strict;
+use warnings;
 
 use Cwd qw(realpath getcwd);
 use File::Basename;
@@ -11,8 +13,12 @@ use File::Basename;
 BEGIN { push(@INC, realpath(dirname($0) . "/..")); }
 use server;
 
-my $builddir = getcwd();
+my $srv = server::new(id => 2);
 
-server::runserver();
+my %results = $srv->rungcli("-t github issues -o herrhotzenplotz -r gcli");
+
+ok($results{'rc'} == 1, "exit code must be 1");
+
+$srv->kill;
 
 done_testing;

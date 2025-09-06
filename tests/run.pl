@@ -56,7 +56,7 @@ while (glob("${testsrcdir}/unit/*.c")) {
 
 for (glob "${testsrcdir}/integration/*.t") {
 	# Push the integration tests, the second argument here is the title
-	push(@alltests, ["$_", "I: " . `${testsrcdir}/integrationwrap.pl -g Title $_`]);
+	push(@alltests, ["$_", "I: #" . `${testsrcdir}/integrationwrap.pl -g ID $_` . ": " . `${testsrcdir}/integrationwrap.pl -g Title $_`]);
 }
 
 my $harness = TAP::Harness->new({

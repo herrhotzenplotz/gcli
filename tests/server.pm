@@ -48,6 +48,7 @@ defaults {
 	github-default-account = github
 	gitea-default-account = gitea
 	bugzilla-default-account = bugzilla
+	disable-spinner = true
 }
 
 gitlab {
@@ -133,7 +134,7 @@ sub run_gcli {
 	my ($srv, $args) = @_;
 
 	my $cwd = getcwd();
-	my $cmd = "$cwd/gcli -C $srv->{'cfg_file_name'} $args 2>foo";
+	my $cmd = "$cwd/gcli -C $srv->{'cfg_file_name'} $args 2>&1";
 
 	my $output = qx($cmd);
 	my $rc = $? >> 8; # see perldoc perlop

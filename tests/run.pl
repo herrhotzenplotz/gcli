@@ -52,7 +52,7 @@ while (glob("${testsrcdir}/unit/*.c")) {
 	push(@alltests, "tests/unit/$name");
 }
 
-push(@alltests, $_) for glob "${testsrcdir}/integration/*.t";
+push(@alltests, "$_") for glob "${testsrcdir}/integration/*.t";
 
 my $harness = TAP::Harness->new({
 	verbosity => $verbosity,
@@ -61,5 +61,11 @@ my $harness = TAP::Harness->new({
 	show_count => 1,
 	errors => 1,
 	jobs => $jobs,
+	exec => sub {
+		my ($harness, $test_file) = @_;
+
+		return [ "${testsrcdir}/integrationwrap.pl", $test_file ] if $test_file =~ /\.t$/;
+		return undef;
+	},
 });
 $harness->runtests(@alltests);

@@ -138,7 +138,7 @@ sub run_gcli {
 	my $output = qx($cmd);
 	my $rc = $? >> 8; # see perldoc perlop
 
-	return (rc => $rc, output => $output);
+	return (VerifyClientExitCode => $rc, VerifyClientOutput => $output);
 }
 
 sub get_request {
@@ -166,11 +166,11 @@ sub get_request {
 	}
 
 	return bless {
-		method => $method,
-		path => $path,
-		version => $version,
-		headers => \@headers,
-		body => $body,
+		VerifyRequestMethod => $method,
+		VerifyRequestPath => $path,
+		VerifyRequestVersion => $version,
+		VerifyRequestHeaders => \@headers,
+		VerifyRequestBody => $body,
 	};
 }
 

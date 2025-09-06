@@ -1,21 +1,14 @@
-#!/usr/bin/env perl
-#
-# KEYWORDS: basic
-# TITLE: basic sanity check. if this doesn't run the build and gcli are generally broken.
+Keywords: basic
+Title: basic sanity check. if this doesn't run the build and gcli are generally broken.
 
-use Test2::V0;
-use strict;
-use warnings;
+ClientArgs: -t github issues -o herrhotzenplotz -r gcli
+VerifyClientExitCode: 0
+VerifyClientOutput:
+  No issues
 
-use Cwd qw(realpath getcwd);
-use File::Basename;
+ServerResponseStatus: 200 OK
+ServerResponseBody:
+  []
 
-BEGIN { push(@INC, realpath(dirname($0) . "/..")); }
-use server;
-
-my $builddir = getcwd();
-
-my $output = `${builddir}/gcli version 2>&1`;
-ok($! == 0);
-
-done_testing;
+VerifyRequestMethod: GET
+VerifyRequestPath: /repos/herrhotzenplotz/gcli/issues?state=open

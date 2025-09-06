@@ -1,6 +1,6 @@
 Keywords: github issue
 ID: 2
-Title: GitHub issue list with one issue
+Title: GitHub issue list
 
 ClientArgs: -t github issues -o herrhotzenplotz -r gcli
 VerifyClientExitCode: 0

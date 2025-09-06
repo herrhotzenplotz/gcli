@@ -49,10 +49,13 @@ my @alltests = ();
 while (glob("${testsrcdir}/unit/*.c")) {
 	my $name = fileparse($_, ".c");
 
-	push(@alltests, "tests/unit/$name");
+	push(@alltests, [ "tests/unit/$name", "U: $name" ]);
 }
 
-push(@alltests, "$_") for glob "${testsrcdir}/integration/*.t";
+for (glob "${testsrcdir}/integration/*.t") {
+	# Push the integration tests, the second argument here is the title
+	push(@alltests, ["$_", "I: " . `${testsrcdir}/integrationwrap.pl -g Title $_`]);
+}
 
 my $harness = TAP::Harness->new({
 	verbosity => $verbosity,

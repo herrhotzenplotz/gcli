@@ -23,8 +23,6 @@ sub parsetest {
 
 	open my $infile, '<', $filename or die "bad input file";
 	while (my $ln = <$infile>) {
-#		print "$ln";
-
 		if ($ln eq "\n") {
 			if ($in_multiline) {
 				$testprops{$multi_key} = $multi_val;
@@ -58,9 +56,20 @@ sub parsetest {
 	return %testprops;
 }
 
-my %testprops = parsetest $ARGV[0];
+# Get a value from the test props
+if ($ARGV[0] eq "-g") {
+	my %testprops = parsetest $ARGV[2];
 
-print Dumper(%testprops);
+	if (!defined($testprops{$ARGV[1]})) {
+		die(sprintf "%s not defined by test %s", $ARGV[1], $ARGV[2]);
+	}
+
+	print $testprops{$ARGV[1]};
+	exit 0;
+}
+
+# Otherwise just continue running the test
+my %testprops = parsetest $ARGV[0];
 
 # Build the actual response body
 my $bdy = $testprops{'ServerResponseBody'};
@@ -81,7 +90,10 @@ my @client_verify = (
 );
 
 foreach (@client_verify) {
-	is($results{$_}, $testprops{$_}, "Client check: $_") if defined($testprops{$_});
+	if (defined($testprops{$_})) {
+		ok(defined($results{$_}), "Client check: $_ not undefined");
+		is($results{$_}, $testprops{$_}, "Client check: $_");
+	}
 }
 
 # Server Verification
@@ -96,7 +108,10 @@ my @server_verify = (
 my $rq = $srv->get_request;
 
 foreach (@server_verify) {
-	is($rq->{$_}, $testprops{$_}, "Server check: $_") if defined($testprops{$_});
+	if (defined($testprops{$_})) {
+		ok(defined($rq->{$_}), "Server check: $_ not undefined");
+		is($rq->{$_}, $testprops{$_}, "Server check: $_");
+	}
 }
 
 $srv->kill;

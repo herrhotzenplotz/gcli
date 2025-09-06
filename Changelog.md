@@ -10,6 +10,15 @@ This changelog does not follow semantic versioning.
 
 ### Changed
 
+- The test suite has been converted away from Kyua and atf-c to a
+  perl-based harness.
+
+  Unit tests use a custom header file that allows easy conversion
+  of the existing test.
+
+  New integration tests use the utilities that come with the default
+  Perl5 distribution.
+
 ### Removed
 
 ## 2.9.0 (26-Aug-2025)

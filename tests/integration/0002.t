@@ -1,4 +1,5 @@
 Keywords: github issue
+ID: 2
 Title: GitHub issue list with one issue
 
 ClientArgs: -t github issues -o herrhotzenplotz -r gcli

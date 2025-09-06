@@ -48,7 +48,7 @@ sub parsetest {
 				next;
 			}
 
-			$ln =~ s/\n$//;
+			chomp $ln;
 			$testprops{$key} = substr($ln, $colon + 2);
 		}
 	}
@@ -68,7 +68,7 @@ $bdy =~ s/\n$/\r\n/;
 my $rsp = sprintf("HTTP/1.1 %s\r\n\r\n%s", $testprops{'ServerResponseStatus'}, $bdy);
 
 my $srv = server::new(
-	id => 2,
+	id => $testprops{'ID'},
 	responses => [ $rsp ]
 );
 

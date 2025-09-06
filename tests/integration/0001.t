@@ -1,5 +1,6 @@
 Keywords: basic
-Title: basic sanity check. if this doesn't run the build and gcli are generally broken.
+ID: 1
+Title: Sanity Check
 
 ClientArgs: -t github issues -o herrhotzenplotz -r gcli
 VerifyClientExitCode: 0

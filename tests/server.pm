@@ -95,6 +95,7 @@ EOF
 
 	#################################################################
 	# event loop
+	my $i = 0;
 	for (;;) {
 		my $client_sock = $lsock->accept();
 		my ($client_port, $client_ip) = unpack_sockaddr_in($client_sock->peername());
@@ -110,8 +111,7 @@ EOF
 
 		$srv_out->flush();
 
-		# Response, 404 for now
-		$client_sock->printf('HTTP/1.1 404 Not Found\r\n\r\n{ "message": "not found" }\r\n');
+		$client_sock->printf($parms{'responses'}[$i++]);
 
 		$client_sock->close();
 	}
@@ -122,14 +122,14 @@ EOF
 sub kill {
 	my ($self) = @_;
 
-	kill('INT', $self->{'pid'});
+	kill('KILL', $self->{'pid'});
 	waitpid $self->{'pid'}, 0;
 
 	$self->{'lsock'}->close();
 	unlink $self->{'cfg_file_name'};
 }
 
-sub rungcli {
+sub run_gcli {
 	my ($srv, $args) = @_;
 
 	my $cwd = getcwd();
@@ -139,6 +139,39 @@ sub rungcli {
 	my $rc = $? >> 8; # see perldoc perlop
 
 	return (rc => $rc, output => $output);
+}
+
+sub get_request {
+	my ($srv) = @_;
+
+	# Open server output file
+	open my $f, '<', $srv->{'srv_out_file'};
+
+	# Parse the request line
+	my ($method, $path, $version) = split ' ', <$f>;
+
+	# Parse headers
+	my @headers = ();
+	while (my $ln = <$f>) {
+		last if ($ln eq "\r\n");
+
+		my ($k, $v) = split ": ", $ln;
+		push(@headers, { $k => $v });
+	}
+
+	# And the body
+	my $body = "";
+	while (my $ln = <$f>) {
+		$body = $body . $ln;
+	}
+
+	return bless {
+		method => $method,
+		path => $path,
+		version => $version,
+		headers => \@headers,
+		body => $body,
+	};
 }
 
 1;

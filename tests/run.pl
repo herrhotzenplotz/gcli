@@ -1,6 +1,8 @@
 #!/usr/bin/env perl
 #
-# The test suite of gcli is weird.
+# This is the main test harness for the gcli test suite.
+# Its job is to look for tests and run them.
+# Afterwards it should summarise the results.
 #
 # This file is part of gcli.
 #

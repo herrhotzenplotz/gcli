@@ -1,5 +1,9 @@
 #!/usr/bin/env perl
 #
+# This is the test runner for integration tests.
+# It reads a given file and based on it takes actions.
+#
+# This file is part of gcli.
 use Test2::V0;
 
 use Cwd qw(realpath getcwd);

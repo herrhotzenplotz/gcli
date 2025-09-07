@@ -16,6 +16,9 @@ use File::Basename;
 use Getopt::Long;
 use TAP::Harness;
 
+BEGIN { push(@INC, dirname(realpath($0))); }
+use testparser;
+
 #####################
 # Environment setup
 my $testsrcdir = dirname(realpath($0));
@@ -56,7 +59,8 @@ while (glob("${testsrcdir}/unit/*.c")) {
 
 for (glob "${testsrcdir}/integration/*.t") {
 	# Push the integration tests, the second argument here is the title
-	push(@alltests, ["$_", "I: #" . `${testsrcdir}/integrationwrap.pl -g ID $_` . ": " . `${testsrcdir}/integrationwrap.pl -g Title $_`]);
+	my %data = testparser::parsetest $_;
+	push(@alltests, ["$_", "I: #${data{ID}}: ${data{Title}}"]);
 }
 
 my $harness = TAP::Harness->new({

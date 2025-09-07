@@ -11,6 +11,9 @@
 use warnings;
 use strict;
 
+# Minimum required perl version
+use 5.006002;
+
 use Cwd qw(getcwd realpath);
 use File::Basename;
 use Getopt::Long;

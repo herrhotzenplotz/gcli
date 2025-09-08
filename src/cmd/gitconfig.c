@@ -131,18 +131,13 @@ resolve_worktree_gitdir_if_needed(char *dotgit)
 	return newdir;
 }
 
-/* Search for a file named fname in the .git directory.
- *
- * This is ugly code. However, I don't see an easier way to do
- * this. */
 static char *
-find_file_in_dotgit(char const *fname)
+find_dotdir(char const *dname)
 {
-	DIR           *curr_dir    = NULL;
-	struct dirent *ent;
-	char          *curr_dir_path;
-	char          *dotgit      = NULL;
-	char          *config_path = NULL;
+	DIR *curr_dir = NULL;
+	char *curr_dir_path = NULL;
+	char *found_dir = NULL;
+	struct dirent *ent = NULL;
 
 	curr_dir_path = getcwd(NULL, 128);
 	if (!curr_dir_path)
@@ -161,25 +156,22 @@ find_file_in_dotgit(char const *fname)
 			if (strcmp(".", ent->d_name) == 0 || strcmp("..", ent->d_name) == 0)
 				continue;
 
-			/* Is this the .git directory? If so, allocate some memory
-			 * to store the path into dotgit and append '/\0' */
-			if (strcmp(".git", ent->d_name) == 0) {
+			/* this is it? */
+			if (strcmp(dname, ent->d_name) == 0) {
 				size_t len = strlen(curr_dir_path);
-				dotgit = malloc(len + strlen(ent->d_name) + 2);
-				memcpy(dotgit, curr_dir_path, len);
-				dotgit[len] = '/';
-				memcpy(dotgit + len + 1, ent->d_name, strlen(ent->d_name));
+				found_dir = malloc(len + strlen(ent->d_name) + 2);
+				memcpy(found_dir, curr_dir_path, len);
+				found_dir[len] = '/';
+				memcpy(found_dir + len + 1, ent->d_name, strlen(ent->d_name));
 
-				dotgit[len + 1 + strlen(ent->d_name)] = 0;
+				found_dir[len + 1 + strlen(ent->d_name)] = 0;
 
 				break;
 			}
 		}
 
-		/* If we reach this point and dotgit is NULL we couldn't find
-		 * the .git directory in the current directory. In this case
-		 * we append '..' to the path and resolve it. */
-		if (!dotgit) {
+		/* not in this dir, traverse up */
+		if (!found_dir) {
 			size_t len = strlen(curr_dir_path);
 			char *tmp = malloc(len + sizeof("/.."));
 
@@ -198,16 +190,31 @@ find_file_in_dotgit(char const *fname)
 			if (strcmp("/", curr_dir_path) == 0) {
 				free(curr_dir_path);
 				closedir(curr_dir);
-				gcli_warnx(g_clictx, "not a git repository");
 				return NULL;
 			}
 		}
 
-
 		closedir(curr_dir);
-	} while (dotgit == NULL);
+	} while (found_dir == NULL);
 
 	free(curr_dir_path);
+
+	return found_dir;
+}
+
+/* Search for a file named fname in the .git directory. */
+static char *
+find_file_in_dotgit(char const *fname)
+{
+	char *config_path = NULL;
+	char *dotgit = NULL;
+	size_t fname_len, config_path_len;
+
+	dotgit = find_dotdir(".git");
+	if (!dotgit) {
+		gcli_warnx(g_clictx, "not a git repository");
+		return NULL;
+	}
 
 	/* In case we are working with git worktrees, the .git might be a
 	 * file that contains a pointer to the actual .git directory. Here
@@ -215,36 +222,18 @@ find_file_in_dotgit(char const *fname)
 	dotgit = resolve_worktree_gitdir_if_needed(dotgit);
 
 	/* Now search for the file in the found .git directory */
-	curr_dir = opendir(dotgit);
-	if (!curr_dir)
-		err(1, "gcli: opendir");
+	fname_len = strlen(fname);
+	config_path_len = strlen(dotgit) + 1 + fname_len + 1;
 
-	while ((ent = readdir(curr_dir))) {
-		/* skip over . and .. directory entries */
-		if (strcmp(".", ent->d_name) == 0 || strcmp("..", ent->d_name) == 0)
-			continue;
+	config_path = calloc(1, config_path_len);
+	snprintf(config_path, config_path_len, "%s/%s", dotgit, fname);
 
-		/* We found the config file, put together it's path and return
-		 * that */
-		if (strcmp(fname, ent->d_name) == 0) {
-			int len = strlen(dotgit);
+	if (access(config_path, F_OK) < 0)
+		errx(1, "gcli: error: .git without a config file");
 
-			config_path = malloc(len + 1 + sizeof(fname));
+	free(dotgit);
 
-			memcpy(config_path, dotgit, len);
-			config_path[len] = '/';
-
-			memcpy(config_path + len + 1, fname, strlen(fname) + 1);
-
-			closedir(curr_dir);
-			free(dotgit);
-
-			return config_path;
-		}
-	}
-
-	errx(1, "gcli: error: .git without a config file");
-	return NULL;
+	return config_path;
 }
 
 char *

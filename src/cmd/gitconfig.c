@@ -131,76 +131,6 @@ resolve_worktree_gitdir_if_needed(char *dotgit)
 	return newdir;
 }
 
-static char *
-find_dotdir(char const *dname)
-{
-	DIR *curr_dir = NULL;
-	char *curr_dir_path = NULL;
-	char *found_dir = NULL;
-	struct dirent *ent = NULL;
-
-	curr_dir_path = getcwd(NULL, 128);
-	if (!curr_dir_path)
-		err(1, "gcli: getcwd");
-
-	/* Here we are trying to traverse upwards through the directory
-	 * tree, searching for a directory called .git.
-	 * Starting point is ".".*/
-	do {
-		curr_dir = opendir(curr_dir_path);
-		if (!curr_dir)
-			err(1, "gcli: opendir");
-
-		/* Read entries of the directory */
-		while ((ent = readdir(curr_dir))) {
-			if (strcmp(".", ent->d_name) == 0 || strcmp("..", ent->d_name) == 0)
-				continue;
-
-			/* this is it? */
-			if (strcmp(dname, ent->d_name) == 0) {
-				size_t len = strlen(curr_dir_path);
-				found_dir = malloc(len + strlen(ent->d_name) + 2);
-				memcpy(found_dir, curr_dir_path, len);
-				found_dir[len] = '/';
-				memcpy(found_dir + len + 1, ent->d_name, strlen(ent->d_name));
-
-				found_dir[len + 1 + strlen(ent->d_name)] = 0;
-
-				break;
-			}
-		}
-
-		/* not in this dir, traverse up */
-		if (!found_dir) {
-			size_t len = strlen(curr_dir_path);
-			char *tmp = malloc(len + sizeof("/.."));
-
-			memcpy(tmp, curr_dir_path, len);
-			memcpy(tmp + len, "/..", sizeof("/.."));
-
-			free(curr_dir_path);
-
-			curr_dir_path = gcli_cmd_realpath(tmp);
-			if (!curr_dir_path)
-				err(1, "gcli: error: realpath at %s", tmp);
-
-			free(tmp);
-
-			/* Check if we reached the filesystem root */
-			if (strcmp("/", curr_dir_path) == 0) {
-				free(curr_dir_path);
-				closedir(curr_dir);
-				return NULL;
-			}
-		}
-
-		closedir(curr_dir);
-	} while (found_dir == NULL);
-
-	free(curr_dir_path);
-
-	return found_dir;
-}
 
 /* Search for a file named fname in the .git directory. */
 static char *
@@ -210,7 +140,7 @@ find_file_in_dotgit(char const *fname)
 	char *dotgit = NULL;
 	size_t fname_len, config_path_len;
 
-	dotgit = find_dotdir(".git");
+	dotgit = gcli_find_directory(".git");
 	if (!dotgit) {
 		gcli_warnx(g_clictx, "not a git repository");
 		return NULL;
@@ -478,6 +408,7 @@ int
 gcli_gitconfig_get_forgetype(struct gcli_ctx *ctx, char const *const remote_name)
 {
 	(void) ctx;
+
 	gcli_gitconfig_read_gitconfig();
 
 	if (remote_name) {

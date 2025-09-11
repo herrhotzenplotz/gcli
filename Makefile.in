@@ -282,7 +282,8 @@ GCLI_SRCS= \
 	src/cmd/snippets.c \
 	src/cmd/status.c \
 	src/cmd/status_interactive.c \
-	src/cmd/table.c
+	src/cmd/table.c \
+	src/cmd/vcs.c
 
 TEMPLATES= \
 	templates/bugzilla/api.t \

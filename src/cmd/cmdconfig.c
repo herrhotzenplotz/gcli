@@ -159,7 +159,7 @@ find_dotgcli(void)
 
 			free(curr_dir_path);
 
-			curr_dir_path = gcli_cmd_realpath(tmp);
+			curr_dir_path = gcli_realpath(tmp);
 			if (!curr_dir_path)
 				err(1, "gcli: realpath at %s", tmp);
 

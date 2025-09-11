@@ -370,22 +370,6 @@ gcli_pretty_print_diff(char const *const input, int indent)
 	}
 }
 
-/* portability kludge for Slowlaris which to this day doesn't support
- * resolved_path to be NULL. */
-char *
-gcli_cmd_realpath(char const *const restrict pathname)
-{
-	char *resolved_path = NULL;
-
-#if defined(_XOPEN_SOURCE) && _XOPEN_SOURCE < 700
-	/* This system is certainly very old! Assume that PATH_MAX is defined.
-	 * If not well there you go. Yes, this is flawed and ugly. */
-	resolved_path = calloc(PATH_MAX, 1);
-#endif
-
-	return realpath(pathname, resolved_path);
-}
-
 bool
 gcli_cmd_should_do_always_yes(void)
 {

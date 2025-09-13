@@ -8,6 +8,11 @@ This changelog does not follow semantic versioning.
 
 ### Fixed
 
+- A double-free has been fixed that occered right after issue
+  creation. In some cases this may have caused crashes of gcli.
+
+  Submitted-by: Artyom Sinyugin <writers@altlinux.org>
+
 ### Changed
 
 - The test suite has been converted away from Kyua and atf-c to a

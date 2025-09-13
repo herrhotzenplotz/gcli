@@ -37,13 +37,13 @@
 #include <gcli/cmd/comment.h>
 #include <gcli/date_time.h>
 #include <gcli/cmd/editor.h>
-#include <gcli/cmd/gitconfig.h>
 #include <gcli/cmd/interactive.h>
 #include <gcli/cmd/open.h>
 #include <gcli/cmd/pipelines.h>
 #include <gcli/cmd/pull_reviews.h>
 #include <gcli/cmd/pulls.h>
 #include <gcli/cmd/table.h>
+#include <gcli/cmd/vcs.h>
 
 #include <gcli/comments.h>
 #include <gcli/forges.h>
@@ -470,8 +470,7 @@ create_pull(struct gcli_submit_pull_options *const opts, bool always_yes)
 static char const *
 pr_try_derive_head(void)
 {
-	char const *account;
-	gcli_sv branch  = {0};
+	char *account, *branch, *head;
 
 	if ((account = gcli_config_get_account_name(g_clictx)) == NULL) {
 		errx(1,
@@ -481,30 +480,37 @@ pr_try_derive_head(void)
 		     gcli_get_error(g_clictx));
 	}
 
-	if (!(branch = gcli_gitconfig_get_current_branch()).length) {
+	if (gcli_cmd_vcs_branchname(g_clictx, &branch) < 0) {
 		errx(1,
 		     "gcli: error: Cannot derive PR head. Please specify --from or, if you"
 		     " are in »detached HEAD« state, checkout the branch you"
 		     " want to pull request.");
 	}
 
-	return gcli_asprintf("%s:"SV_FMT, account, SV_ARGS(branch));
+	head = gcli_asprintf("%s:%s", account, branch);
+
+	free(account);
+	free(branch);
+
+	return head;
 }
 
 static char *
 derive_head(void)
 {
-	char const *account;
-	gcli_sv branch = {0};
+	char *account, *branch, *head = NULL;
 
-	if ((account = gcli_config_get_account_name(g_clictx)) == NULL)
+	account = gcli_config_get_account_name(g_clictx);
+	if (account == NULL)
 		return NULL;
 
-	branch = gcli_gitconfig_get_current_branch();
-	if (branch.length == 0)
-		return NULL;
+	if (gcli_cmd_vcs_branchname(g_clictx, &branch) < 0)
+		head = gcli_asprintf("%s:%s", account, branch);
 
-	return gcli_asprintf("%s:"SV_FMT, account, SV_ARGS(branch));
+	free(account);
+	free(branch);
+
+	return head;
 }
 
 /** Interactive version of the create subcommand */

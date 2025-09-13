@@ -27,9 +27,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <gcli/cmd/vcs/git.h>
+
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/cmdconfig.h>
-#include <gcli/cmd/gitconfig.h>
 
 #include <gcli/ctx.h>
 #include <gcli/gcli.h>
@@ -49,7 +50,7 @@
 #include <unistd.h>
 
 #define MAX_REMOTES 64
-static struct gcli_gitremote remotes[MAX_REMOTES];
+static struct gcli_vcs_git_remote remotes[MAX_REMOTES];
 static size_t         remotes_size;
 
 /* Resolve a worktree .git if needed */
@@ -173,7 +174,7 @@ gcli_find_gitconfig(void)
 }
 
 gcli_sv
-gcli_gitconfig_get_current_branch(void)
+gcli_vcs_git_get_current_branch(void)
 {
 	char const *HEAD;
 	char       *file_text;
@@ -203,7 +204,7 @@ gcli_gitconfig_get_current_branch(void)
 }
 
 static void
-parse_remote_url(struct gcli_gitremote *const remote)
+parse_remote_url(struct gcli_vcs_git_remote *const remote)
 {
 	char *tmp;
 	int rc = 0;
@@ -270,7 +271,7 @@ gitconfig_parse_remote(gcli_sv section_title, gcli_sv entry)
 			if (remotes_size == MAX_REMOTES)
 				errx(1, "gcli: error: too many remotes");
 
-			struct gcli_gitremote *const remote = &remotes[remotes_size++];
+			struct gcli_vcs_git_remote *const remote = &remotes[remotes_size++];
 
 			remote->name = gcli_sv_to_cstr(remote_name);
 
@@ -292,7 +293,7 @@ gitconfig_parse_remote(gcli_sv section_title, gcli_sv entry)
 }
 
 static void
-gcli_gitconfig_read_gitconfig(void)
+gcli_vcs_git_read_gitconfig(void)
 {
 	char *path = NULL;
 	gcli_sv buffer = {0}, filebuf = {0};
@@ -345,7 +346,7 @@ gcli_gitconfig_read_gitconfig(void)
 }
 
 void
-gcli_gitconfig_add_fork_remote(char const *org, char const *repo)
+gcli_vcs_git_add_fork_remote(char const *org, char const *repo)
 {
 	char  remote[64]  = {0};
 	FILE *remote_list = popen("git remote", "r");
@@ -405,11 +406,11 @@ gcli_gitconfig_add_fork_remote(char const *org, char const *repo)
  * Return the gcli_forge_type for the given remote or -1 if
  * unknown */
 int
-gcli_gitconfig_get_forgetype(struct gcli_ctx *ctx, char const *const remote_name)
+gcli_vcs_git_get_forgetype(struct gcli_ctx *ctx, char const *const remote_name)
 {
 	(void) ctx;
 
-	gcli_gitconfig_read_gitconfig();
+	gcli_vcs_git_read_gitconfig();
 
 	if (remote_name) {
 		for (size_t i = 0; i < remotes_size; ++i) {
@@ -427,11 +428,11 @@ gcli_gitconfig_get_forgetype(struct gcli_ctx *ctx, char const *const remote_name
 }
 
 int
-gcli_gitconfig_repo_by_remote(struct gcli_ctx *ctx, char const *const remote,
-                              char **const owner, char **const repo,
-                              int *const forge)
+gcli_vcs_git_repo_by_remote(struct gcli_ctx *ctx, char const *const remote,
+                            char const **const owner, char const **const repo,
+                            int *const forge)
 {
-	gcli_gitconfig_read_gitconfig();
+	gcli_vcs_git_read_gitconfig();
 
 	if (remote) {
 		for (size_t i = 0; i < remotes_size; ++i) {
@@ -460,10 +461,10 @@ gcli_gitconfig_repo_by_remote(struct gcli_ctx *ctx, char const *const remote,
 }
 
 int
-gcli_gitconfig_get_remote(struct gcli_ctx *ctx, gcli_forge_type const type,
-                          char const **remote)
+gcli_vcs_git_get_remote(struct gcli_ctx *ctx, gcli_forge_type const type,
+                        char const **remote)
 {
-	gcli_gitconfig_read_gitconfig();
+	gcli_vcs_git_read_gitconfig();
 
 	for (size_t i = 0; i < remotes_size; ++i) {
 		if (remotes[i].forge_type == type) {

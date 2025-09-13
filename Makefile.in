@@ -268,7 +268,6 @@ GCLI_SRCS= \
 	src/cmd/forks.c \
 	src/cmd/gcli.c \
 	src/cmd/gists.c \
-	src/cmd/gitconfig.c \
 	src/cmd/interactive.c \
 	src/cmd/issues.c \
 	src/cmd/labels.c \
@@ -283,7 +282,8 @@ GCLI_SRCS= \
 	src/cmd/status.c \
 	src/cmd/status_interactive.c \
 	src/cmd/table.c \
-	src/cmd/vcs.c
+	src/cmd/vcs.c \
+	src/cmd/vcs/git.c
 
 TEMPLATES= \
 	templates/bugzilla/api.t \

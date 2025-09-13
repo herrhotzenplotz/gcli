@@ -44,3 +44,43 @@ gcli_cmd_vcs_branchname(struct gcli_ctx *ctx, char **out)
 
 	return -1;
 }
+
+int
+gcli_cmd_vcs_forgetype(struct gcli_ctx *ctx, char const *remote_name)
+{
+	(void) ctx;
+	(void) remote_name;
+
+	gcli_unimplemented;
+
+	return -1;
+}
+
+int
+gcli_cmd_vcs_remote_by_forgetype(struct gcli_ctx *ctx, gcli_forge_type type,
+                                 char const **out)
+{
+	(void) ctx;
+	(void) type;
+	(void) out;
+
+	gcli_unimplemented;
+
+	return -1;
+}
+
+int
+gcli_cmd_vcs_repo_by_remote(struct gcli_ctx *ctx, char const *remote_name,
+                            char const **owner, char const **repo,
+                            int *forgetype)
+{
+	(void) ctx;
+	(void) remote_name;
+	(void) owner;
+	(void) repo;
+	(void) forgetype;
+
+	gcli_unimplemented;
+
+	return -1;
+}

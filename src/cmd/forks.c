@@ -33,7 +33,7 @@
 #include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/config.h>
 #include <gcli/cmd/forks.h>
-#include <gcli/cmd/gitconfig.h>
+#include <gcli/cmd/vcs/git.h>
 #include <gcli/cmd/table.h>
 #include <gcli/port/util.h>
 
@@ -182,7 +182,7 @@ subcommand_forks_create(int argc, char *argv[])
 		in = act;
 	}
 
-	gcli_gitconfig_add_fork_remote(in, repo_path.as_default.repo);
+	gcli_vcs_git_add_fork_remote(in, repo_path.as_default.repo);
 
 	return EXIT_SUCCESS;
 }

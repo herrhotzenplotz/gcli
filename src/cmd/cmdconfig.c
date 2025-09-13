@@ -31,7 +31,7 @@
 
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/cmdconfig.h>
-#include <gcli/cmd/gitconfig.h>
+#include <gcli/cmd/vcs.h>
 
 #include <gcli/ctx.h>
 #include <gcli/gcli.h>
@@ -950,8 +950,8 @@ gcli_config_get_forge_type_internal(struct gcli_ctx *ctx)
 			errx(1, "gcli: unknown forge type %s", entry);
 	}
 
-	/* As a last resort, try to infer from the git remote */
-	int const type = gcli_gitconfig_get_forgetype(ctx, cfg->override_remote);
+	/* As a last resort, try to infer from the VCS */
+	int const type = gcli_cmd_vcs_forgetype(ctx, cfg->override_remote);
 	if (type < 0)
 		errx(1, "gcli: error: cannot infer forge type. "
 		     "use -t <forge-type> to overrride manually.");
@@ -988,7 +988,6 @@ gcli_config_get_remote(struct gcli_ctx *ctx, char const **remote)
 {
 	struct gcli_config *cfg;
 	gcli_forge_type type;
-	int rc;
 
 	cfg = ensure_config(ctx);
 
@@ -998,9 +997,8 @@ gcli_config_get_remote(struct gcli_ctx *ctx, char const **remote)
 	}
 
 	type = gcli_config_get_forge_type(ctx);
-	rc = gcli_gitconfig_get_remote(ctx, type, remote);
 
-	return rc;
+	return gcli_cmd_vcs_remote_by_forgetype(ctx, type, remote);
 }
 
 int
@@ -1014,8 +1012,8 @@ gcli_config_get_repo(struct gcli_ctx *ctx, char **const owner, char **const repo
 	if (cfg->override_remote) {
 		int forge = 0, rc = 0;
 
-		rc = gcli_gitconfig_repo_by_remote(ctx, cfg->override_remote, owner,
-		                                   repo, &forge);
+		rc = gcli_cmd_vcs_repo_by_remote(
+			ctx, cfg->override_remote, owner, repo, &forge);
 
 		if (rc < 0)
 			return rc;
@@ -1032,7 +1030,7 @@ gcli_config_get_repo(struct gcli_ctx *ctx, char **const owner, char **const repo
 	if (rc == 0)
 		return 0;
 
-	return gcli_gitconfig_repo_by_remote(ctx, NULL, owner, repo, NULL);
+	return gcli_cmd_vcs_repo_by_remote(ctx, NULL, owner, repo, NULL);
 }
 
 bool

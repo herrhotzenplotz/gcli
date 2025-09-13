@@ -27,14 +27,17 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GCLI_CMD_GITCONFIG_H
-#define GCLI_CMD_GITCONFIG_H
+#ifndef GCLI_CMD_VCS_GIT_H
+#define GCLI_CMD_VCS_GIT_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-struct gcli_gitremote {
+#include <gcli/gcli.h>
+#include <gcli/port/sv.h>
+
+struct gcli_vcs_git_remote {
 	char *name;
 	char *owner;
 	char *repo;
@@ -42,17 +45,17 @@ struct gcli_gitremote {
 	gcli_forge_type forge_type;
 };
 
-gcli_sv gcli_gitconfig_get_current_branch(void);
+gcli_sv gcli_vcs_git_get_current_branch(void);
 
-void gcli_gitconfig_add_fork_remote(char const *org, char const *repo);
+void gcli_vcs_git_add_fork_remote(char const *org, char const *repo);
 
-int gcli_gitconfig_get_forgetype(struct gcli_ctx *ctx, char const *remote_name);
+int gcli_vcs_git_get_forgetype(struct gcli_ctx *ctx, char const *remote_name);
 
-int gcli_gitconfig_repo_by_remote(struct gcli_ctx *ctx, char const *const remote_name,
-                                  char **const owner, char **const repo,
-                                  int *const forge);
+int gcli_vcs_git_repo_by_remote(struct gcli_ctx *ctx, char const *const remote_name,
+                                char const **const owner, char const **const repo,
+                                int *const forge);
 
-int gcli_gitconfig_get_remote(struct gcli_ctx *ctx, gcli_forge_type type,
-                              char const **remote);
+int gcli_vcs_git_get_remote(struct gcli_ctx *ctx, gcli_forge_type type,
+                            char const **remote);
 
-#endif /* GCLI_CMD_GITCONFIG_H */
+#endif /* GCLI_CMD_VCS_GIT_H */

@@ -140,6 +140,7 @@ OPTIONS:
                             You only want this if you're working on the gcli source code.
                             In this case certain build targets get enabled that only work
                             when the source directory is writable.
+    --enable-sanitisers     Enable compiler-specific sanitisers
     --debug                 Compile without optimisations, generate code with
                             debug information and enable additional compiler-specific
                             warnings and portability checks.
@@ -182,6 +183,7 @@ ENABLE_LIBLOWDOWN=1
 ENABLE_LIBRT=1
 ENABLE_MAINTAINER=${ENABLE_MAINTAINER:-0}
 ENABLE_TESTS=1
+ENABLE_SANITISERS=${ENABLE_SANITISERS:-0}
 
 # Parse flags
 while [ $# -gt 0 ]; do
@@ -228,6 +230,10 @@ while [ $# -gt 0 ]; do
 			;;
 		--disable-tests)
 			ENABLE_TESTS=0
+			shift
+			;;
+		--enable-sanitisers)
+			ENABLE_SANITISERS=1
 			shift
 			;;
 		--debug)
@@ -475,6 +481,7 @@ sed \
 	-e "s|@LIBEXT_FOR_BUILD@|$LIBEXT_FOR_BUILD|g" \
 	-e "s|@ENABLE_MAINTAINER@|$ENABLE_MAINTAINER|g" \
 	-e "s|@ENABLE_TESTS@|$ENABLE_TESTS|g" \
+	-e "s|@ENABLE_SANITISERS@|$ENABLE_SANITISERS|g" \
 	-e "s|@LOWDOWN@|$LOWDOWN|g" \
 	< "${srcdir}/Makefile.in" > Makefile
 

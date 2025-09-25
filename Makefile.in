@@ -28,6 +28,7 @@ LIBEXT_FOR_BUILD    = @LIBEXT_FOR_BUILD@
 OBJEXT_FOR_BUILD    = @OBJEXT_FOR_BUILD@
 ENABLE_MAINTAINER   = @ENABLE_MAINTAINER@
 ENABLE_TESTS        = @ENABLE_TESTS@
+ENABLE_SANITISERS   = @ENABLE_SANITISERS@
 ################################################################################################
 
 ############## Optimiser / Warning flags #####
@@ -39,8 +40,12 @@ COPTFLAGS_xlc_debug=		-qpic -qcheck=all -qfulldebug -qnoopt -g -qhalt=w
 COPTFLAGS_xlc_release=		-qpic -qoptimize=4 -DNDEBUG
 COPTFLAGS_sunstudio_debug=	-xO0 -g -xvector=%none
 COPTFLAGS_sunstudio_release=	-xO5 -DNDEBUG
-COPTFLAGS=			$(COPTFLAGS_$(CCOM)_$(OPTIMISE))
-COPTFLAGS_FOR_BUILD=		$(COPTFLAGS_$(CCOM_FOR_BUILD)_$(OPTIMISE))
+
+CSANFLAGS_clang_1=		-fsanitize=address
+CSANFLAGS_gcc_1=		-fsanitize=address
+
+COPTFLAGS=			$(COPTFLAGS_$(CCOM)_$(OPTIMISE)) $(CSANFLAGS_$(CCOM)_$(ENABLE_SANITISERS))
+COPTFLAGS_FOR_BUILD=		$(COPTFLAGS_$(CCOM_FOR_BUILD)_$(OPTIMISE)) $(CSANFLAGS_$(CCOM_FOR_BUILD)_$(ENABLE_SANITISERS))
 
 CSTDFLAGS_gcc=		-std=c11 -pedantic -D_XOPEN_SOURCE=700
 CSTDFLAGS_clang=	-std=c11 -pedantic -D_XOPEN_SOURCE=700
@@ -322,7 +327,7 @@ TEMPLATE_SRCS=		${TEMPLATES:.t=.c}
 Makefile: @SRCDIR@/configure @SRCDIR@/Makefile.in
 	@echo "Reconfiguring Makefile"
 	env CC="${CC}" YACC="${YACC}" LEX="${LEX}" RM="${RM}" RANLIB="${RANLIB}" \
-		ENABLE_TESTS="${ENABLE_TESTS}" PERL="${PERL}" LOWDOWN="${LOWDOWN}" \
+		ENABLE_TESTS="${ENABLE_TESTS}" ENABLE_SANITISERS="${ENABLE_SANITISERS}" PERL="${PERL}" LOWDOWN="${LOWDOWN}" \
 		SHELL="${SHELL}" CFLAGS="${ENV_CFLAGS}" CPPFLAGS="${ENV_CPPFLAGS}" \
 		INSTALL="${INSTALL}" CC_FOR_BUILD="${CC_FOR_BUILD}" ENABLE_MAINTAINER="${ENABLE_MAINTAINER}" \
 		LDFLAGS="${ENV_LDFLAGS}" LDFLAGS_FOR_BUILD="${LDFLAGS_FOR_BUILD}" \

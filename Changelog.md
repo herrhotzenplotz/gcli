@@ -2,9 +2,7 @@
 
 This changelog does not follow semantic versioning.
 
-## UNRELEASED
-
-### Added
+## 2.9.1 (04-Oct-2025)
 
 ### Fixed
 
@@ -12,10 +10,6 @@ This changelog does not follow semantic versioning.
   creation. In some cases this may have caused crashes of gcli.
 
   Submitted-by: Artyom Sinyugin <writers@altlinux.org>
-
-### Changed
-
-### Removed
 
 ## 2.9.0 (26-Aug-2025)
 

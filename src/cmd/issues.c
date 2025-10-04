@@ -276,7 +276,6 @@ create_issue(struct gcli_submit_issue_options *opts, bool always_yes)
 	rc = gcli_issue_submit(g_clictx, opts);
 
 	free(opts->body);
-	free(opts->body);
 
 	return rc;
 }

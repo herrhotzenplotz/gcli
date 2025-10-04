@@ -4,14 +4,9 @@ This changelog does not follow semantic versioning.
 
 ## UNRELEASED
 
-### Added
-
 ### Fixed
 
-- A double-free has been fixed that occered right after issue
-  creation. In some cases this may have caused crashes of gcli.
-
-  Submitted-by: Artyom Sinyugin <writers@altlinux.org>
+### Added
 
 ### Changed
 
@@ -25,6 +20,15 @@ This changelog does not follow semantic versioning.
   Perl5 distribution.
 
 ### Removed
+
+## 2.9.1 (04-Oct-2025)
+
+### Fixed
+
+- A double-free has been fixed that occered right after issue
+  creation. In some cases this may have caused crashes of gcli.
+
+  Submitted-by: Artyom Sinyugin <writers@altlinux.org>
 
 ## 2.9.0 (26-Aug-2025)
 

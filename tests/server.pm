@@ -92,15 +92,13 @@ EOF
 		};
 	}
 
-	my $srv_out = IO::File->new($srv_out_file, "w");
-
 	#################################################################
 	# event loop
-	my $i = 0;
-	for (;;) {
+	for (my $i = 0; $i < scalar($parms{'responses'}); ++$i) {
 		my $client_sock = $lsock->accept();
 		my ($client_port, $client_ip) = unpack_sockaddr_in($client_sock->peername());
 		my $client_ip_str = inet_ntoa($client_ip);
+		my $srv_out = IO::File->new($srv_out_file . ".${i}", "w");
 
 		# Request
 		while (my $line = $client_sock->getline()) {
@@ -111,9 +109,9 @@ EOF
 		}
 
 		$srv_out->flush();
+		$srv_out->close();
 
-		$client_sock->printf($parms{'responses'}[$i++]);
-
+		$client_sock->printf($parms{'responses'}[$i]);
 		$client_sock->close();
 	}
 
@@ -143,10 +141,10 @@ sub run_gcli {
 }
 
 sub get_request {
-	my ($srv) = @_;
+	my ($srv, $i) = @_;
 
 	# Open server output file
-	open my $f, '<', $srv->{'srv_out_file'};
+	open my $f, '<', $srv->{'srv_out_file'} . ".$i";
 
 	# Parse the request line
 	my ($method, $path, $version) = split ' ', <$f>;

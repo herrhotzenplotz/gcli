@@ -30,13 +30,20 @@ if ($ARGV[0] eq "-g") {
 my %testprops = testparser::parsetest $ARGV[0];
 
 # Build the actual response body
-my $bdy = $testprops{'ServerResponseBody'};
-$bdy =~ s/\n$/\r\n/;
-my $rsp = sprintf("HTTP/1.1 %s\r\n\r\n%s", $testprops{'ServerResponseStatus'}, $bdy);
+my @responses = ();
+
+if (scalar($testprops{'ServerResponseBody'}) eq "ARRAY") {
+} else {
+	my $bdy = $testprops{'ServerResponseBody'};
+	$bdy =~ s/\n$/\r\n/;
+	my $rsp = sprintf("HTTP/1.1 %s\r\n\r\n%s", $testprops{'ServerResponseStatus'}, $bdy);
+
+	push(@responses, $rsp);
+}
 
 my $srv = server::new(
 	id => $testprops{'ID'},
-	responses => [ $rsp ]
+	responses => \@responses,
 );
 
 my %results = $srv->run_gcli($testprops{'ClientArgs'});
@@ -63,12 +70,14 @@ my @server_verify = (
 	'VerifyRequestBody',
 );
 
-my $rq = $srv->get_request;
+for (my $i = 0; $i < $#responses; ++$i) {
+	my $rq = $srv->get_request($i);
 
-foreach (@server_verify) {
-	if (defined($testprops{$_})) {
-		ok(defined($rq->{$_}), "Server check: $_ not undefined");
-		is($rq->{$_}, $testprops{$_}, "Server check: $_");
+	foreach (@server_verify) {
+		if (defined($testprops{$_})) {
+			ok(defined($rq->{$_}), "Server check: $_ not undefined");
+			is($rq->{$_}, $testprops{$_}, "Server check: $_");
+		}
 	}
 }
 

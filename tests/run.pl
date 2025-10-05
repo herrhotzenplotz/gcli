@@ -32,12 +32,15 @@ my $jobs = 1;
 #########################
 # Command line Options
 sub usage {
-	print STDERR "usage: $0 [-j <njobs>] [-s <srcdir>] [-b <builddir>] [-v]\n";
+	print STDERR "usage: $0 [-j <njobs>] [-s <srcdir>] [-b <builddir>] [-v] [filter]\n";
 	print STDERR "OPTIONS:\n";
 	print STDERR "   -j --jobs      Run tests in parallel with the given number of jobs\n";
 	print STDERR "   -s --srcdir    Assume the test source tree is at the given directory\n";
 	print STDERR "   -b --builddir  Assume the build output directory is at the given directory\n";
 	print STDERR "   -v --verbose   Be verbose\n";
+	print STDERR "\n";
+	print STDERR "When a filter is given, only integration tests are run.\n";
+	print STDERR "A filter is either a keyword or a test ID.\n";
 }
 
 GetOptions(
@@ -57,13 +60,33 @@ my @alltests = ();
 while (glob("${testsrcdir}/unit/*.c")) {
 	my $name = fileparse($_, ".c");
 
-	push(@alltests, [ "tests/unit/$name", "U: $name" ]);
+	push(@alltests, [ "tests/unit/$name", "U: $name" ]) if ($#ARGV != 0);
 }
 
 for (glob "${testsrcdir}/integration/*.t") {
 	# Push the integration tests, the second argument here is the title
 	my %data = testparser::parsetest $_;
-	push(@alltests, ["$_", "I: #${data{ID}}: ${data{Title}}"]);
+	my @kws = split / /, $data{Keywords};
+
+	my @tdescr = ["$_", "I: #${data{ID}}: ${data{Title}}"];
+
+	if (scalar(@ARGV) != 0) {
+		foreach my $arg (@ARGV) {
+			# test id
+			if ($data{ID} eq $arg) {
+				push(@alltests, @tdescr);
+				last;
+			}
+
+			# test keywords
+			if (scalar(grep($arg eq $_, @kws)) != 0) {
+				push(@alltests, @tdescr);
+				last;
+			}
+		}
+	} else {
+		push(@alltests, @tdescr);
+	}
 }
 
 my $harness = TAP::Harness->new({
@@ -81,3 +104,5 @@ my $harness = TAP::Harness->new({
 	},
 });
 $harness->runtests(@alltests);
+
+# kak: filetype=perl

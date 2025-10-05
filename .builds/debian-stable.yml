@@ -9,7 +9,7 @@ packages:
   - make
   - libtool
   - libbsd-dev
-  - libatf-dev kyua
+  - perl
 sources:
   - https://git.sr.ht/~herrhotzenplotz/gcli
 tasks:

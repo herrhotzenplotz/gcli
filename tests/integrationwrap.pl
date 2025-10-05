@@ -96,9 +96,9 @@ for (my $i = 0; $i < $#responses; ++$i) {
 	my $rq = $srv->get_request($i);
 
 	foreach (@server_verify) {
-		if (defined($testprops{$_})) {
+		if (defined($testprops{$_}[$i])) {
 			ok(defined($rq->{$_}), "Server check: $_ not undefined");
-			is($rq->{$_}, $testprops{$_}, "Server check: $_");
+			is($rq->{$_}, $testprops{$_}[$i], "Server check: $_");
 		}
 	}
 }

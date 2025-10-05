@@ -106,3 +106,5 @@ for (my $i = 0; $i < $#responses; ++$i) {
 $srv->kill;
 
 done_testing;
+
+# kak: filetype=perl

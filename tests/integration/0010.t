@@ -9,6 +9,7 @@ VerifyClientOutput:
        2      0  open   open issue 1
        1     42  open   open issue 2
 
+# First request
 ServerResponseStatus: 200 OK
 ServerResponseHeaders:
   link: "@SERVERURL@/this_is_important"; rel="next"
@@ -19,6 +20,7 @@ ServerResponseBody:
 VerifyRequestMethod: GET
 VerifyRequestPath: /repos/herrhotzenplotz/gcli/issues?state=open
 
+# Second request
 ServerResponseStatus: 200 OK
 ServerResponseHeaders:
 
@@ -27,4 +29,3 @@ ServerResponseBody:
 
 VerifyRequestMethod: GET
 VerifyRequestPath: /this_is_important
-

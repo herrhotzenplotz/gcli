@@ -18,6 +18,8 @@ sub parsetest {
 
 	open my $infile, '<', $filename or die "bad input file";
 	while (my $ln = <$infile>) {
+		next if $ln =~ /^\#/;  # comments
+
 		if ($ln eq "\n") {
 			if ($in_multiline) {
 				if (defined($testprops{$multi_key})) {

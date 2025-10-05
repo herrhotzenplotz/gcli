@@ -32,11 +32,33 @@ my %testprops = testparser::parsetest $ARGV[0];
 # Build the actual response body
 my @responses = ();
 
-if (scalar($testprops{'ServerResponseBody'}) eq "ARRAY") {
+sub build_response {
+	my ($status, $headers, $body) = @_;
+
+	$status = '200 OK' if !defined($status);
+	$headers = '' if !defined($headers);
+
+	$body =~ s/\n$/\r\n/;
+	$headers =~ s/\n$/\r\n/;
+
+	return sprintf("HTTP/1.1 %s\r\n%s\r\n%s", $status, $headers, $body);
+}
+
+if (ref($testprops{'ServerResponseBody'}) eq "ARRAY") {
+	my $n_reqs = scalar(@{$testprops{'ServerResponseBody'}});
+	for (my $i = 0; $i < $n_reqs; ++$i) {
+		my $status = $testprops{'ServerResponseStatus'}[$i];
+		my $headers = $testprops{'ServerResponseHeaders'}[$i];
+		my $body = $testprops{'ServerResponseBody'}[$i];
+		my $rsp = build_response($status, $headers, $body);
+
+		push(@responses, $rsp);
+	}
 } else {
-	my $bdy = $testprops{'ServerResponseBody'};
-	$bdy =~ s/\n$/\r\n/;
-	my $rsp = sprintf("HTTP/1.1 %s\r\n\r\n%s", $testprops{'ServerResponseStatus'}, $bdy);
+	my $status = $testprops{'ServerResponseStatus'};
+	my $headers = $testprops{'ServerResponseHeaders'};
+	my $body = $testprops{'ServerResponseBody'};
+	my $rsp = build_response($status, $headers, $body);
 
 	push(@responses, $rsp);
 }

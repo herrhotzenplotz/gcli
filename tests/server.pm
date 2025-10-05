@@ -23,6 +23,8 @@ sub new {
 	my %parms = @_;
 	my $cfg_file_name = "gcli_" . $parms{'id'} . ".conf";
 	my $srv_out_file = "gcli_" . $parms{'id'} . ".srv.out";
+	my $srv_log_file = "gcli_" . $parms{'id'} . ".srv.log";
+	my $gcli_out_file = "gcli_" . $parms{'id'} . ".console.log";
 
 	##################################################################
 	# Open Socket
@@ -89,21 +91,32 @@ EOF
 			lsock => $lsock,
 			cfg_file_name => $cfg_file_name,
 			srv_out_file => $srv_out_file,
+			gcli_out_file => $gcli_out_file,
 		};
 	}
 
+	open my $srv_log, '>', $srv_log_file or die "cannot open server log file";
+	$srv_log->autoflush;
+
 	#################################################################
 	# event loop
-	for (my $i = 0; $i < scalar($parms{'responses'}); ++$i) {
+	my $max_reqs = scalar(@{$parms{'responses'}});
+	printf $srv_log "Waiting for %d requests\n", $max_reqs;
+
+	for (my $i = 0; $i < $max_reqs; ++$i) {
 		my $client_sock = $lsock->accept();
 		my ($client_port, $client_ip) = unpack_sockaddr_in($client_sock->peername());
 		my $client_ip_str = inet_ntoa($client_ip);
 		my $srv_out = IO::File->new($srv_out_file . ".${i}", "w");
+		my $rsp = $parms{'responses'}[$i];
+
+		print $srv_log "Received connection from ${client_ip_str}\n";
 
 		# Request
 		while (my $line = $client_sock->getline()) {
 			$line =~ s/\r\n$//;
 			print $srv_out "$line\n";
+			print $srv_log "  > $line\n";
 
 			last if length($line) == 0;
 		}
@@ -111,9 +124,17 @@ EOF
 		$srv_out->flush();
 		$srv_out->close();
 
-		$client_sock->printf($parms{'responses'}[$i]);
+		$rsp =~ s/\@SERVERURL\@/http:\/\/${str_ip}:${port}/g;
+
+		print $srv_log "Response is as follows\n";
+		print $srv_log $rsp;
+
+		$client_sock->printf("%s", $rsp);
 		$client_sock->close();
 	}
+
+	$srv_log->flush();
+	$srv_log->close();
 
 	exit 0;
 }
@@ -134,8 +155,14 @@ sub run_gcli {
 	my $cwd = getcwd();
 	my $cmd = "$cwd/gcli -C $srv->{'cfg_file_name'} $args 2>&1";
 
+	open my $logfile, '>', $srv->{'gcli_out_file'};
+	$logfile->autoflush;
+
 	my $output = qx($cmd);
 	my $rc = $? >> 8; # see perldoc perlop
+
+	$logfile->print($output);
+	$logfile->close();
 
 	return (VerifyClientExitCode => $rc, VerifyClientOutput => $output);
 }

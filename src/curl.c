@@ -679,6 +679,8 @@ gcli_fetch_list(struct gcli_ctx *ctx, char *url, struct gcli_fetch_list_ctx *fl)
 	do {
 		struct gcli_fetch_buffer buffer = {0};
 
+		next_url = NULL;
+
 		rc = gcli_fetch(ctx, url, &next_url, &buffer);
 		if (rc == 0) {
 			struct json_stream stream = {0};

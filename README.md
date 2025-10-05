@@ -68,6 +68,7 @@ Details on cross-compilation can be found in [HACKING.md](HACKING.md).
 
 To run the test suite first make sure you have all the necessary dependencies installed (see above).
 Then you can run `make check` in the build directory to run the test suite.
+Note that the check target does not allow running the tests in parallel.
 
 For more details also see [HACKING.md](HACKING.md).
 

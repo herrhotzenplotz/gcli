@@ -201,6 +201,21 @@ You may also invoke the test harness runner directly:
 
 You should get a simple usage message from it.
 
+### Examples
+
+Suppose you are in the source tree root and your build root is in
+`build`. To run all tests in parallel with 12 runners:
+
+	$ tests/run.pl -b build -j 12
+
+To run all tests tagged wit "github":
+
+	$ tests/run.pl -b build github
+
+To run the tests 3, 4 and 5 in parallel:
+
+	$ tests/run.pl -b build -j 3 3 4 5
+
 # Code Style
 
 Please use the BSD Style conventions for formatting your code. This means:

@@ -5,30 +5,32 @@ GCLI_VERSION = @PACKAGE_VERSION@
 VPATH=@SRCDIR@
 
 ################ Enviroment and values saved by the configure script ##########################
-AR                  = @AR@
-CC_FOR_BUILD        = @CC_FOR_BUILD@
-CC                  = @CC@
-CCACHE              = @CCACHE@
-CCOM_FOR_BUILD      = @CCOM_FOR_BUILD@
-CCOM                = @CCOM@
-OPTIMISE            = @OPTIMISE@
-ENV_PKG_CONFIG      = @ENV_PKG_CONFIG@
-ENV_PKG_CONFIG_PATH = @ENV_PKG_CONFIG_PATH@
-INSTALL             = @INSTALL@
-RANLIB              = @RANLIB@
-RM                  = @RM@
-PREFIX              = @PREFIX@
-PERL                = @PERL@
-SHELL               = @SHELL@
-EXEEXT              = @EXEEXT@
-LIBEXT              = @LIBEXT@
-OBJEXT              = @OBJEXT@
-EXEEXT_FOR_BUILD    = @EXEEXT_FOR_BUILD@
-LIBEXT_FOR_BUILD    = @LIBEXT_FOR_BUILD@
-OBJEXT_FOR_BUILD    = @OBJEXT_FOR_BUILD@
-ENABLE_MAINTAINER   = @ENABLE_MAINTAINER@
-ENABLE_TESTS        = @ENABLE_TESTS@
-ENABLE_SANITISERS   = @ENABLE_SANITISERS@
+AR                         = @AR@
+CC_FOR_BUILD               = @CC_FOR_BUILD@
+CC                         = @CC@
+CCACHE                     = @CCACHE@
+CCOM_FOR_BUILD             = @CCOM_FOR_BUILD@
+CCOM                       = @CCOM@
+OPTIMISE                   = @OPTIMISE@
+ENV_PKG_CONFIG             = @ENV_PKG_CONFIG@
+ENV_PKG_CONFIG_PATH        = @ENV_PKG_CONFIG_PATH@
+ENV_PKG_CONFIG_LIBDIR      = @ENV_PKG_CONFIG_LIBDIR@
+ENV_PKG_CONFIG_SYSROOT_DIR = @ENV_PKG_CONFIG_SYSROOT_DIR@
+INSTALL                    = @INSTALL@
+RANLIB                     = @RANLIB@
+RM                         = @RM@
+PREFIX                     = @PREFIX@
+PERL                       = @PERL@
+SHELL                      = @SHELL@
+EXEEXT                     = @EXEEXT@
+LIBEXT                     = @LIBEXT@
+OBJEXT                     = @OBJEXT@
+EXEEXT_FOR_BUILD           = @EXEEXT_FOR_BUILD@
+LIBEXT_FOR_BUILD           = @LIBEXT_FOR_BUILD@
+OBJEXT_FOR_BUILD           = @OBJEXT_FOR_BUILD@
+ENABLE_MAINTAINER          = @ENABLE_MAINTAINER@
+ENABLE_TESTS               = @ENABLE_TESTS@
+ENABLE_SANITISERS          = @ENABLE_SANITISERS@
 ################################################################################################
 
 ############## Optimiser / Warning flags #####
@@ -332,7 +334,9 @@ Makefile: @SRCDIR@/configure @SRCDIR@/Makefile.in
 		INSTALL="${INSTALL}" CC_FOR_BUILD="${CC_FOR_BUILD}" ENABLE_MAINTAINER="${ENABLE_MAINTAINER}" \
 		LDFLAGS="${ENV_LDFLAGS}" LDFLAGS_FOR_BUILD="${LDFLAGS_FOR_BUILD}" \
 		CFLAGS_FOR_BUILD="${ENV_CFLAGS_FOR_BUILD}" CPPFLAGS_FOR_BUILD="${ENV_CPPFLAGS_FOR_BUILD}" \
-		PKG_CONFIG="${ENV_PKG_CONFIG}" PKG_CONFIG_PATH="${ENV_PKG_CONFIG_PATH}" CCACHE="${CCACHE}" \
+		PKG_CONFIG="${ENV_PKG_CONFIG}" PKG_CONFIG_PATH="${ENV_PKG_CONFIG_PATH}" \
+		PKG_CONFIG_LIBDIR="${ENV_PKG_CONFIG_LIBDIR}" PKG_CONFIG_SYSROOT_DIR="${ENV_PKG_CONFIG_SYSROOT_DIR}" \
+		CCACHE="${CCACHE}" \
 		EXEEXT="${EXEEXT}" OBJEXT="${OBJEXT}" LIBEXT="${LIBEXT}" \
 		EXEEXT_FOR_BUILD="${EXEEXT_FOR_BUILD}" OBJEXT_FOR_BUILD="${OBJEXT_FOR_BUILD}" LIBEXT_FOR_BUILD="${LIBEXT_FOR_BUILD}" \
 		sh @SRCDIR@/configure @CONFIGURE_CMD_ARGS@

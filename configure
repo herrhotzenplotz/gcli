@@ -129,17 +129,16 @@ Configure build directory of gcli.
 
 OPTIONS:
     --prefix=PREFIX         Set installation prefix to PREFIX [DEFAULT: /usr/local]
-    --enable-libedit        Search and use libedit for interactive editing [DEFAULT: yes]
-    --disable-libedit       Do not use libedit
-    --enable-libreadline    Search and use libreadline for interactive editing [DEFAULT: yes]
-    --disable-libreadline   Disable use of libreadline
-    --enable-liblowdown     Search and use liblowdown for markdown rendering [DEFAULT: yes]
-    --disable-liblowdown    Disable use of liblowdown
+    --disable-libedit       Disable use of libedit for interactive editing [DEFAULT: autodetect]
+    --disable-libreadline   Disable use of libreadline for interactive editing [DEFAULT: autodetect]
+    --disable-liblowdown    Disable use of liblowdown for markdown rendering [DEFAULT: autodetect]
     --disable-librt         Forcefully disable linking librt [DEFAULT: no, except on Darwin]
     --enable-maintainer     Enable Maintainer Mode [DEFAULT: no]
                             You only want this if you're working on the gcli source code.
                             In this case certain build targets get enabled that only work
                             when the source directory is writable.
+                            Do NOT use this flag together with --release or when packaging
+                            gcli.
     --enable-sanitisers     Enable compiler-specific sanitisers
     --debug                 Compile without optimisations, generate code with
                             debug information and enable additional compiler-specific
@@ -196,24 +195,16 @@ while [ $# -gt 0 ]; do
 			PREFIX=${2}
 			shift; shift
 			;;
-		--enable-libedit)
-			ENABLE_LIBEDIT=1
+		--enable-libedit|--enable-libreadline|--enable-liblowdown)
+			echo "configure: warning: $1 is deprecated and ignored" >&2
 			shift
 			;;
 		--disable-libedit)
 			ENABLE_LIBEDIT=0
 			shift
 			;;
-		--enable-libreadline)
-			ENABLE_LIBREADLINE=1
-			shift
-			;;
 		--disable-libreadline)
 			ENABLE_LIBREADLINE=0
-			shift
-			;;
-		--enable-liblowdown)
-			ENABLE_LIBLOWDOWN=1
 			shift
 			;;
 		--disable-librt)
@@ -397,8 +388,8 @@ RANLIB=${RANLIB:-ranlib}
 RM=${RM:-rm}
 CCACHE=${CCACHE:-$(find_program ccache ccache)}
 INSTALL=${INSTALL:-$(find_program install install ginstall)}
-SHELL=${SHELL:-$(find_program sh sh zsh bash)}
 [ $? -eq 0 ] || die "error: need install program"
+SHELL=${SHELL:-$(find_program sh sh zsh bash)}
 
 # If maintainer mode is enabled, we need lowdown(1)
 if [ ${ENABLE_MAINTAINER} -eq 1 ]; then
@@ -540,6 +531,12 @@ fi
 if [ $ENABLE_MAINTAINER -eq 1 ]; then
 echo ""
 echo "     WARNING: Maintainer mode is enabled!"
+fi
+if [ $ENABLE_MAINTAINER -eq 1 ] && [ "${OPTIMISE}" = "release" ]; then
+echo ""
+echo "     WARNING: --enable-maintainer and --release specified together."
+echo "              You probably don't want this for packaging."
+echo "              Drop --enable-maintainer!"
 fi
 echo ""
 echo "Configuration done. You may now run make."

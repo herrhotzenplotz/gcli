@@ -21,6 +21,13 @@ This changelog does not follow semantic versioning.
 
 ### Removed
 
+- The configure options `--enable-liblowdown`, `--enable-libedit`
+  and `--enable-libreadline` have been deprecated as they were
+  no-ops anyways.  When used, a warning is printed and the flag is
+  ignored.
+
+  You are advised to remove this flag from any build automation.
+
 ## 2.9.1 (04-Oct-2025)
 
 ### Fixed

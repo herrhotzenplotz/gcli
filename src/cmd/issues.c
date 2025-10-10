@@ -51,7 +51,8 @@
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: gcli issues create [-o owner -r repo] [-y] [-R reviewer] [title...]\n");
+	fprintf(stderr, "usage: gcli issues create [-o owner -r repo] [-y] [-R reviewer]\n");
+	fprintf(stderr, "                          [-T template] [title...]\n");
 	fprintf(stderr, "       gcli issues [-o owner -r repo] [-a] [-n number] [-A author] [-L label]\n");
 	fprintf(stderr, "                   [-M milestone] [-s] [search query...]\n");
 	fprintf(stderr, "       gcli issues [-o owner -r repo] -i issue actions...\n");

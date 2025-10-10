@@ -361,7 +361,7 @@ subcommand_issue_create(int argc, char *argv[])
 
 	always_yes = gcli_cmd_should_do_always_yes();
 
-	while ((ch = getopt_long(argc, argv, "o:r:O:T:", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "o:r:yO:T:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
 			opts.owner = optarg;

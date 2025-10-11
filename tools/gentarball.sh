@@ -13,8 +13,13 @@ VERSION=$(findversion)
 DIR=dist/gcli-${VERSION}
 mkdir -p $DIR
 
-repodir=$(got info | grep '^repository' | cut -d: -f2 | xargs)
-head=$(got br)
+if [ -d .got ]; then
+	repodir=$(got info | grep '^repository' | cut -d: -f2 | xargs)
+	head=$(got br)
+else
+	repodir=$(git rev-parse --show-toplevel)/.git
+	head=@
+fi
 
 echo "Making BZIP tarball"
 git --git-dir="${repodir}" archive --format=tar --prefix=gcli-$VERSION/ $head \

@@ -4,7 +4,7 @@ stages:
 
 alpine-amd64:
   stage: testing
-  image: alpine:3.17
+  image: alpine:latest
   script:
     - apk add libcurl gcc make pkgconf musl-dev curl-dev flex bison libbsd-dev perl libedit-dev git
     - ./configure --debug
@@ -33,7 +33,7 @@ freebsd-riscv64:
 
 dist:
   stage: dist
-  image: alpine:3.18
+  image: alpine:latest
   script:
     - apk add libcurl gcc make pkgconf musl-dev curl-dev flex bison xz gzip bzip2 libbsd-dev perl cmark git
     - ./configure --debug

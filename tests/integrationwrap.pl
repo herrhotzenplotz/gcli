@@ -4,8 +4,6 @@
 # It reads a given file and based on it takes actions.
 #
 # This file is part of gcli.
-use Test2::V0;
-
 use Cwd qw(realpath getcwd);
 use File::Basename;
 use Data::Dumper;
@@ -70,6 +68,35 @@ my $srv = server::new(
 
 my %results = $srv->run_gcli($testprops{'ClientArgs'});
 
+my $check_id = 1;
+
+sub ok {
+	my ($result, $description) = @_;
+
+	if ($result) {
+		printf "ok %d - %s\n", $check_id++, $description;
+	} else {
+		printf "not ok %d - %s\n", $check_id++, $description;
+	}
+}
+
+sub is {
+	my ($have, $want, $description) = @_;
+
+	if ($have eq $want) {
+		printf "ok %d - %s\n", $check_id++, $description;
+	} else {
+		printf "not ok %d - %s\n", $check_id++, $description;
+		printf "  ---\n";
+		printf "  data:\n";
+		printf "    got: %s\n", $have;
+		printf "    expect: %s\n", $want;
+		printf "  ...\n";
+	}
+}
+
+print "TAP version 14\n";
+
 # Client Verification
 my @client_verify = (
 	'VerifyClientExitCode',
@@ -105,6 +132,6 @@ for (my $i = 0; $i < $#responses; ++$i) {
 
 $srv->kill;
 
-done_testing;
+printf "1..%d\n", $check_id - 1;
 
 # kak: filetype=perl

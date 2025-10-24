@@ -292,21 +292,30 @@ static void
 parse_section_entry(struct config_parser *input,
                     struct gcli_config_section *section)
 {
-	struct gcli_config_entry *entry = calloc(1, sizeof(*entry));
-	TAILQ_INSERT_TAIL(&section->entries, entry, next);
-
-	gcli_sv key = gcli_sv_chop_until(&input->buffer, '=');
-
-	if (key.length == 0)
-		errx(1, "gcli: %s:%d: empty key", input->filename, input->line);
+	gcli_sv line = gcli_sv_chop_until(&input->buffer, '\n');
+	if (line.length == 0)
+		return;
 
 	input->buffer.data   += 1;
 	input->buffer.length -= 1;
 
-	gcli_sv value = gcli_sv_chop_until(&input->buffer, '\n');
+	gcli_sv key = gcli_sv_chop_until(&line, '=');
+	if (line.length == 0) {
+		errx(1, "gcli: %s:%d: error: missing '=' in config key assignment",
+		     input->filename, input->line);
+	}
+
+	line.data   += 1;
+	line.length -= 1;
+
+	if (key.length == 0)
+		errx(1, "gcli: %s:%d: empty key", input->filename, input->line);
+
+	struct gcli_config_entry *entry = calloc(1, sizeof(*entry));
+	TAILQ_INSERT_TAIL(&section->entries, entry, next);
 
 	entry->key   = gcli_sv_trim(key);
-	entry->value = gcli_sv_trim(value);
+	entry->value = gcli_sv_trim(line);
 }
 
 static gcli_sv

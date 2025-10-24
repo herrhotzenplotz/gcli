@@ -6,6 +6,11 @@ This changelog does not follow semantic versioning.
 
 ### Fixed
 
+- A crash that occured when the config file contains an assignment
+  with the '=' missing was fixed.
+
+  Reported-by: Matthias Andree <mandree@FreeBSD.org>
+
 ### Added
 
 ### Changed

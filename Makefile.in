@@ -467,7 +467,7 @@ $(TEST_PROGRAMS): libgcli$(LIBEXT)
 $(TEST_PROGRAMS:$(EXEEXT)=.c): $(TEMPLATE_HEADERS)
 
 .PHONY: check-auto-1 check-auto-0
-check-auto-1: $(TEST_PROGRAMS)
+check-auto-1: $(TEST_PROGRAMS) gcli$(EXEEXT)
 	$(PERL) @SRCDIR@/tests/run.pl
 
 check-auto-0 check-auto-:

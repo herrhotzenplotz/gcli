@@ -2,7 +2,7 @@ Keywords: github issue
 ID: 10
 Title: GitHub issue list with multiple pages
 
-ClientArgs: -t github issues
+ClientArgs: -t github issues -o herrhotzenplotz -r gcli
 VerifyClientExitCode: 0
 VerifyClientOutput:
   NUMBER  NOTES  STATE  TITLE

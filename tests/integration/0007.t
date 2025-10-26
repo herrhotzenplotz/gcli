@@ -2,7 +2,7 @@ Keywords: gitea issue
 ID: 7
 Title: Gitea issue list
 
-ClientArgs: -t gitea issues
+ClientArgs: -t gitea issues -o herrhotzenplotz -r gcli
 VerifyClientExitCode: 0
 VerifyClientOutput:
   NUMBER  NOTES  STATE  TITLE

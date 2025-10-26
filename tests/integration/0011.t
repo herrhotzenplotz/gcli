@@ -2,7 +2,7 @@ Keywords: gitlab issue
 ID: 11
 Title: GitLab issue list with multiple pages
 
-ClientArgs: -t gitlab issues
+ClientArgs: -t gitlab issues -o herrhotzenplotz -r gcli
 VerifyClientExitCode: 0
 VerifyClientOutput:
   NUMBER  NOTES  STATE   TITLE

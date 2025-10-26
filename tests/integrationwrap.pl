@@ -86,11 +86,15 @@ sub is {
 	if ($have eq $want) {
 		printf "ok %d - %s\n", $check_id++, $description;
 	} else {
+		# Hacky way to eliminate newlines
+		$have =~ s/\n/\\n/g;
+		$want =~ s/\n/\\n/g;
+
 		printf "not ok %d - %s\n", $check_id++, $description;
 		printf "  ---\n";
 		printf "  data:\n";
-		printf "    got: %s\n", $have;
-		printf "    expect: %s\n", $want;
+		printf "    got: \"%s\"\n", $have;
+		printf "    expect: \"%s\"\n", $want;
 		printf "  ...\n";
 	}
 }

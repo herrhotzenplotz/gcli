@@ -2,7 +2,7 @@ Keywords: github issue
 ID: 9
 Title: GitHub issue list with -a
 
-ClientArgs: -t github issues -a
+ClientArgs: -t github issues -a -o herrhotzenplotz -r gcli
 VerifyClientExitCode: 0
 VerifyClientOutput:
   NUMBER  NOTES  STATE   TITLE

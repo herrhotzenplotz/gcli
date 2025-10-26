@@ -37,15 +37,7 @@
 #include <gcli/gcli.h>
 #include <gcli/port/sv.h>
 
-struct gcli_vcs_git_remote {
-	char *name;
-	char *owner;
-	char *repo;
-	char *url;
-	gcli_forge_type forge_type;
-};
-
-gcli_sv gcli_vcs_git_get_current_branch(void);
+int gcli_vcs_git_get_current_branch(struct gcli_ctx *ctx, char **out);
 
 void gcli_vcs_git_add_fork_remote(char const *org, char const *repo);
 

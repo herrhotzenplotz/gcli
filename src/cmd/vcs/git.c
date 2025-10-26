@@ -49,6 +49,14 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+struct gcli_vcs_git_remote {
+	char *name;
+	char *owner;
+	char *repo;
+	char *url;
+	gcli_forge_type forge_type;
+};
+
 #define MAX_REMOTES 64
 static struct gcli_vcs_git_remote remotes[MAX_REMOTES];
 static size_t         remotes_size;
@@ -173,18 +181,20 @@ gcli_find_gitconfig(void)
 	return find_file_in_dotgit("config");
 }
 
-gcli_sv
-gcli_vcs_git_get_current_branch(void)
+int
+gcli_vcs_git_get_current_branch(struct gcli_ctx *ctx, char **out)
 {
+	char *file_text;
 	char const *HEAD;
-	char       *file_text;
-	gcli_sv     buffer;
-	char        prefix[] = "ref: refs/heads/";
+	char prefix[] = "ref: refs/heads/";
+	gcli_sv buffer;
+
+	(void) ctx;
 
 	HEAD = find_file_in_dotgit("HEAD");
 
 	if (!HEAD)
-		return SV_NULL;
+		return -1;
 
 	int len = gcli_read_file(HEAD, &file_text);
 	if (len < 0)
@@ -196,10 +206,11 @@ gcli_vcs_git_get_current_branch(void)
 		buffer.data   += sizeof(prefix) - 1;
 		buffer.length -= sizeof(prefix) - 1;
 
-		return gcli_sv_trim(buffer);
+		*out = gcli_sv_to_cstr(gcli_sv_trim(buffer));
+		return 0;
 	} else {
 		free(file_text);
-		return SV_NULL;
+		return -1;
 	}
 }
 

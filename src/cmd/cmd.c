@@ -110,7 +110,7 @@ check_owner_and_repo(char **owner, char **repo)
 	if (*owner == NULL) {
 		int rc = gcli_config_get_repo(g_clictx, owner, repo);
 		if (rc < 0)
-			errx(1, "gcli: error: %s", gcli_get_error(g_clictx));
+			errx(1, "gcli: error: failed to derive owner/repo combination");
 	}
 }
 

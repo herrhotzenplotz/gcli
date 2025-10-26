@@ -5,14 +5,10 @@
 #include <gcli/cmd/vcs.h>
 #include <gcli/port/util.h>
 #include <gcli/cmd/vcs/git.h>
+#include <gcli/cmd/vcs/got.h>
 
 #include <assert.h>
 #include <stdlib.h>
-
-/* Global Cache for VCS related stuff */
-static struct vcs_cache {
-	int vcs_type;
-} g_vcs_cache = {0};
 
 /* Dispatch table for routines that call into vcs specific routines */
 static struct vcs_dispatch {
@@ -38,19 +34,22 @@ static struct vcs_dispatch {
 		.get_remote_by_forgetype = gcli_vcs_git_get_remote,
 		.get_repo_by_remote = gcli_vcs_git_repo_by_remote,
 	},
-	[GCLI_CMD_VCSTYPE_GOT] = {0},
+	[GCLI_CMD_VCSTYPE_GOT] = {
+		.get_branchname = gcli_vcs_got_get_branchname,
+	},
 };
 
 int
 gcli_cmd_vcs_get_vcstype(struct gcli_ctx *ctx)
 {
+	static int g_vcs_type = GCLI_CMD_VCSTYPE_UNKNOWN;
 	char *dir = NULL;
 	int rc = GCLI_CMD_VCSTYPE_UNKNOWN;
 
 	(void) ctx;
 
-	if (g_vcs_cache.vcs_type)
-		return g_vcs_cache.vcs_type;
+	if (g_vcs_type)
+		return g_vcs_type;
 
 	dir = gcli_find_directory(".git");
 	if (dir) {
@@ -67,6 +66,8 @@ gcli_cmd_vcs_get_vcstype(struct gcli_ctx *ctx)
 done:
 	free(dir);
 	dir = NULL;
+
+	g_vcs_type = rc;
 
 	return rc;
 }

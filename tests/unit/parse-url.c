@@ -62,6 +62,9 @@ URL_TC(simple_ssh_with_scheme, "ssh://git@github.com/herrhotzenplotz/gcli",
 URL_TC(ssh_with_port, "ssh://git@git.example.com:4242/herrhotzenplotz/gcli",
        "ssh", "git", "git.example.com", "4242", "herrhotzenplotz/gcli")
 
+URL_TC(user_and_host, "git@git.example.com",
+       NULL, "git", "git.example.com", NULL, NULL)
+
 TESTSUITE
 {
 	TESTCASE(simple_http);
@@ -69,4 +72,5 @@ TESTSUITE
 	TESTCASE(simple_ssh);
 	TESTCASE(simple_ssh_with_scheme);
 	TESTCASE(ssh_with_port);
+	TESTCASE(user_and_host);
 }

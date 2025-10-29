@@ -57,12 +57,14 @@ gcli_parse_url(char const *const input, struct gcli_url *out)
 		hd = tmp + 1;
 	}
 
-	/* now the host, terminated by either a ':' or a '/' */
+	/* now the host, terminated by either a ':' or a '/'
+	 *
+	 * If not found, the entire thing is the host. */
 	tmp = strpbrk(hd, ":/");
 	if (!tmp) {
+		out->host = strdup(hd);
 		gcli_clear_ptr(&buf);
-		gcli_url_free(out);
-		return -1;
+		return 0;
 	}
 
 	out->host = gcli_strndup(hd, tmp - hd);

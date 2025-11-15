@@ -284,7 +284,7 @@ create_issue(struct gcli_submit_issue_options *opts, bool always_yes)
 static int
 subcommand_issue_create_interactive(struct gcli_submit_issue_options *const opts)
 {
-	char const *deflt_owner = NULL, *deflt_repo = NULL;
+	char *deflt_owner = NULL, *deflt_repo = NULL;
 	int rc = 0;
 
 	gcli_config_get_repo(g_clictx, &deflt_owner, &deflt_repo);

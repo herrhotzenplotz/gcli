@@ -508,7 +508,7 @@ gcli_gitconfig_get_forgetype(struct gcli_ctx *ctx, char const *const remote_name
 
 int
 gcli_gitconfig_repo_by_remote(struct gcli_ctx *ctx, char const *const remote,
-                              char const **const owner, char const **const repo,
+                              char **const owner, char **const repo,
                               int *const forge)
 {
 	gcli_gitconfig_read_gitconfig();

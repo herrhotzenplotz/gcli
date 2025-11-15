@@ -43,7 +43,7 @@ gcli_cmd_open_url(char const *const url)
 {
 	pid_t p;
 	int rc = 0;
-	char *open_program = NULL;
+	char const *open_program = NULL;
 
 	if (!url) {
 		fprintf(stderr, "gcli: error: got no url from forge\n");

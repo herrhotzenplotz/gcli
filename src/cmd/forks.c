@@ -112,7 +112,7 @@ static int
 subcommand_forks_create(int argc, char *argv[])
 {
 	bool always_yes = false;
-	char *in = NULL;
+	char const *in = NULL;
 	int ch;
 	struct gcli_path repo_path = {0};
 
@@ -173,10 +173,13 @@ subcommand_forks_create(int argc, char *argv[])
 	}
 
 	if (!in) {
-		if ((in = gcli_config_get_account_name(g_clictx)) == NULL) {
+		char const *act = gcli_config_get_account_name(g_clictx);
+		if (act == NULL) {
 			errx(1, "gcli: error: could not fetch account: %s",
 			     gcli_get_error(g_clictx));
 		}
+
+		in = act;
 	}
 
 	gcli_gitconfig_add_fork_remote(in, repo_path.as_default.repo);

@@ -42,30 +42,30 @@
 
 struct gcli_config_entry {
 	TAILQ_ENTRY(gcli_config_entry) next;
-	gcli_sv key;
-	gcli_sv value;
+	char *key;
+	char *value;
 };
 
 TAILQ_HEAD(gcli_config_entries, gcli_config_entry);
 
 int gcli_config_parse_args(struct gcli_ctx *ctx, int *argc, char ***argv);
 int gcli_config_init_ctx(struct gcli_ctx *ctx);
-void gcli_config_get_upstream_parts(struct gcli_ctx *ctx, gcli_sv *owner, gcli_sv *repo);
-char *gcli_config_get_apibase(struct gcli_ctx *);
-gcli_sv gcli_config_find_by_key(struct gcli_ctx *ctx, char const *section_name,
-                                char const *key);
+char const *gcli_config_get_apibase(struct gcli_ctx *);
+char const *gcli_config_find_by_key(struct gcli_ctx *ctx,
+                                    char const *section_name,
+                                    char const *key);
 
-char *gcli_config_get_editor(struct gcli_ctx *ctx);
-char *gcli_config_get_token(struct gcli_ctx *ctx);
-char *gcli_config_get_pager(struct gcli_ctx *ctx);
-char *gcli_config_get_url_open_program(struct gcli_ctx *ctx);
-char *gcli_config_get_account_name(struct gcli_ctx *ctx);
-gcli_sv gcli_config_get_upstream(struct gcli_ctx *ctx);
-gcli_sv gcli_config_get_base(struct gcli_ctx *ctx);
+char const *gcli_config_get_editor(struct gcli_ctx *ctx);
+char const *gcli_config_get_token(struct gcli_ctx *ctx);
+char const *gcli_config_get_pager(struct gcli_ctx *ctx);
+char const *gcli_config_get_url_open_program(struct gcli_ctx *ctx);
+char const *gcli_config_get_account_name(struct gcli_ctx *ctx);
+char const *gcli_config_get_upstream(struct gcli_ctx *ctx);
+char const *gcli_config_get_base(struct gcli_ctx *ctx);
 gcli_forge_type gcli_config_get_forge_type(struct gcli_ctx *ctx);
-gcli_sv gcli_config_get_override_default_account(struct gcli_ctx *ctx);
+char const *gcli_config_get_override_default_account(struct gcli_ctx *ctx);
 bool gcli_config_pr_inhibit_delete_source_branch(struct gcli_ctx *ctx);
-int gcli_config_get_repo(struct gcli_ctx *ctx, char const **, char const **);
+int gcli_config_get_repo(struct gcli_ctx *ctx, char **, char **);
 int gcli_config_get_remote(struct gcli_ctx *ctx, char const **remote);
 bool gcli_config_have_colours(struct gcli_ctx *ctx);
 bool gcli_config_display_progress_spinner(struct gcli_ctx *ctx);

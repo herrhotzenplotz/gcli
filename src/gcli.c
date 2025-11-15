@@ -36,8 +36,8 @@
 char const *
 gcli_init(struct gcli_ctx **ctx,
           gcli_forge_type (*get_forge_type)(struct gcli_ctx *),
-          char *(*get_token)(struct gcli_ctx *),
-          char *(*get_apibase)(struct gcli_ctx *))
+          char const *(*get_token)(struct gcli_ctx *),
+          char const *(*get_apibase)(struct gcli_ctx *))
 {
 	*ctx = calloc(1, sizeof (struct gcli_ctx));
 	if (!(*ctx))
@@ -80,4 +80,24 @@ gcli_clear_ptr(void *ptr)
 
 	free(*_ptr);
 	*_ptr = NULL;
+}
+
+int
+gcli_parse_forgetype(struct gcli_ctx *ctx, char const *const in,
+                     gcli_forge_type *const out)
+{
+	int rc = 0;
+
+	if (strcmp(in, "github") == 0)
+		*out = GCLI_FORGE_GITHUB;
+	else if (strcmp(in, "gitlab") == 0)
+		*out = GCLI_FORGE_GITLAB;
+	else if (strcmp(in, "gitea") == 0)
+		*out = GCLI_FORGE_GITEA;
+	else if (strcmp(in, "bugzilla") == 0)
+		*out = GCLI_FORGE_BUGZILLA;
+	else
+		rc = gcli_error(ctx, "bad forge type %s", in);
+
+	return rc;
 }

@@ -313,16 +313,8 @@ install_aliases(void)
 	if (!entries)
 		return;
 
-	TAILQ_FOREACH(entry, entries, next) {
-		char *alias_name, *alias_for;
-
-		alias_name = gcli_sv_to_cstr(entry->key);
-		alias_for = gcli_sv_to_cstr(entry->value);
-
-		add_subcommand_alias(alias_name, alias_for);
-
-		free(alias_for);
-	}
+	TAILQ_FOREACH(entry, entries, next)
+		add_subcommand_alias(entry->key, entry->value);
 }
 
 static void

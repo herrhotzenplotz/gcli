@@ -511,7 +511,7 @@ derive_head(void)
 static int
 subcommand_pull_create_interactive(struct gcli_submit_pull_options *const opts)
 {
-	char const *deflt_owner = NULL, *deflt_repo = NULL;
+	char *deflt_owner = NULL, *deflt_repo = NULL;
 	int rc = 0;
 
 	gcli_config_get_repo(g_clictx, &deflt_owner, &deflt_repo);
@@ -536,17 +536,10 @@ subcommand_pull_create_interactive(struct gcli_submit_pull_options *const opts)
 			gcli_cmd_prompt("Repository", deflt_repo);
 
 	if (!opts->target_branch) {
-		char *tmp = NULL;
-		gcli_sv base;
+		char const *base;
 
 		base = gcli_config_get_base(g_clictx);
-		if (base.length != 0)
-			tmp = gcli_sv_to_cstr(base);
-
-		opts->target_branch = gcli_cmd_prompt("To Branch", tmp);
-
-		free(tmp);
-		tmp = NULL;
+		opts->target_branch = gcli_cmd_prompt("To Branch", base);
 	}
 
 	/* Meta */
@@ -681,13 +674,11 @@ subcommand_pull_create(int argc, char *argv[])
 		opts.from = pr_try_derive_head();
 
 	if (!opts.target_branch) {
-		gcli_sv base = gcli_config_get_base(g_clictx);
-		if (base.length == 0)
+		opts.target_branch = gcli_config_get_base(g_clictx);
+		if (opts.target_branch == NULL)
 			errx(1,
 			     "gcli: error: PR base is missing. Please either specify "
 			     "--to branch-name or set pr.base in .gcli.");
-
-		opts.target_branch = gcli_sv_to_cstr(base);
 	}
 
 	check_path(&opts.target_repo);

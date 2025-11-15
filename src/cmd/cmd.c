@@ -97,7 +97,7 @@ longversion(void)
 }
 
 void
-check_owner_and_repo(const char **owner, const char **repo)
+check_owner_and_repo(char **owner, char **repo)
 {
 	/* HACK */
 	if (gcli_config_get_forge_type(g_clictx) == GCLI_FORGE_BUGZILLA)
@@ -159,8 +159,8 @@ check_path(struct gcli_path *path)
 	}
 
 	check_owner_and_repo(
-		(char const **)&path->as_default.owner,
-		(char const **)&path->as_default.repo);
+		&path->as_default.owner,
+		&path->as_default.repo);
 }
 
 /* Parses (and updates) the given argument list into two seperate lists:

@@ -53,8 +53,7 @@ get_env_editor(void)
 static void
 edit(struct gcli_ctx *ctx, char const *filename)
 {
-	char *editor = get_env_editor();
-	char *env_editor = editor;
+	char const *editor = get_env_editor();
 
 	if (!editor) {
 		editor = gcli_config_get_editor(ctx);
@@ -80,9 +79,6 @@ edit(struct gcli_ctx *ctx, char const *filename)
 			errx(1, "Aborting PR. Editor command exited with code %d",
 			     WEXITSTATUS(status));
 	}
-
-	if (!env_editor)
-		free(editor);
 }
 
 char *

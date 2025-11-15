@@ -317,7 +317,7 @@ bugzilla_bug_submit(struct gcli_ctx *const ctx,
                     struct gcli_issue *const out)
 {
 	char *payload = NULL, *url = NULL;
-	char *token; /* bugzilla wants the api token as a parameter in the url or the json payload */
+	char const *token; /* bugzilla wants the api token as a parameter in the url or the json payload */
 	char const *product = opts->owner, *component = opts->repo,
 	           *summary = opts->title, *description = opts->body;
 	struct gcli_jsongen gen = {0};

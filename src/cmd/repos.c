@@ -295,8 +295,8 @@ int
 subcommand_repos(int argc, char *argv[])
 {
 	int ch, n = 30;
-	char *owner = NULL;
-	char *repo = NULL;
+	char const *owner = NULL;
+	char const *repo = NULL;
 	struct gcli_repo_list repos = {0};
 	enum gcli_output_flags flags = 0;
 
@@ -391,8 +391,8 @@ subcommand_repos(int argc, char *argv[])
 	} else {
 		struct gcli_path path = {
 			.as_default = {
-				.owner = owner,
-				.repo = repo,
+				.owner = strdup(owner),
+				.repo = strdup(repo),
 			},
 		};
 

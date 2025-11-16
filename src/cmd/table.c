@@ -451,38 +451,6 @@ gcli_dict_add_timestamp(gcli_dict list, char const *key, int flags,
 }
 
 int
-gcli_dict_add_sv_list(gcli_dict dict,
-                      char const *const key,
-                      gcli_sv const *const list,
-                      size_t const list_size)
-{
-	size_t totalsize = 0;
-	char *catted, *hd;
-
-	/* Sum of string lengths */
-	for (size_t i = 0; i < list_size; ++i)
-		totalsize += list[i].length;
-
-	/* Account for comma and space between each */
-	totalsize += (list_size - 1) * 2;
-
-	/* concatenate the strings */
-	hd = catted = calloc(totalsize + 1, 1);
-	for (size_t i = 0; i < list_size; ++i) {
-		memcpy(hd, list[i].data, list[i].length);
-		hd += list[i].length;
-
-		if (i + 1 < list_size) {
-			strcat(catted, ", ");
-			hd += 2;
-		}
-	}
-
-	/* Push the row into the state */
-	return gcli_dict_add_row(dict, key, 0, 0, catted);
-}
-
-int
 gcli_dict_add_string_list(gcli_dict dict, char const *const key,
                           char const *const *list, size_t const list_size)
 {

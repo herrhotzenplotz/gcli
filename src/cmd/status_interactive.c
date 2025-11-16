@@ -37,6 +37,8 @@
 
 #include <gcli/status.h>
 
+#include <string.h>
+
 static void
 print_notification_table(struct gcli_notification_list const *list)
 {

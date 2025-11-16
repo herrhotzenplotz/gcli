@@ -99,13 +99,11 @@ char *
 gcli_get_authheader(struct gcli_ctx *ctx)
 {
 	char *hdr = NULL;
-	char const *token = gcli_get_token(ctx);
+	char const *const token = gcli_get_token(ctx);
 
 	if (token && gcli_forge(ctx)->make_authheader) {
 		hdr = gcli_forge(ctx)->make_authheader(ctx, token);
 	}
-
-	gcli_clear_ptr(&token);
 
 	return hdr;
 }

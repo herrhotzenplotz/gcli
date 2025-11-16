@@ -4,38 +4,38 @@
 
 DEFINE_TESTCASE(newlines)
 {
-	gcli_sv const input = SV("\n\r");
-	gcli_sv const escaped = gcli_json_escape(input);
+	char const *input = "\n\r";
+	char *escaped = gcli_json_escape(input);
 
-	CHECK(gcli_sv_eq_to(escaped, "\\n\\r"));
-	free(escaped.data);
+	CHECK_STREQ(escaped, "\\n\\r");
+	free(escaped);
 }
 
 DEFINE_TESTCASE(tabs)
 {
-	gcli_sv const input = SV("\t\t\t");
-	gcli_sv const escaped = gcli_json_escape(input);
+	char const *input = "\t\t\t";
+	char *escaped = gcli_json_escape(input);
 
-	CHECK(gcli_sv_eq_to(escaped, "\\t\\t\\t"));
-	free(escaped.data);
+	CHECK_STREQ(escaped, "\\t\\t\\t");
+	free(escaped);
 }
 
 DEFINE_TESTCASE(backslashes)
 {
-	gcli_sv const input = SV("\\");
-	gcli_sv const escaped = gcli_json_escape(input);
+	char const *input = "\\";
+	char *escaped = gcli_json_escape(input);
 
-	CHECK(gcli_sv_eq_to(escaped, "\\\\"));
-	free(escaped.data);
+	CHECK_STREQ(escaped, "\\\\");
+	free(escaped);
 }
 
 DEFINE_TESTCASE(torture)
 {
-	gcli_sv const input = SV("\n\r\n\n\n\t{}");
-	gcli_sv const escaped = gcli_json_escape(input);
+	char const *input = "\n\r\n\n\n\t{}";
+	char *escaped = gcli_json_escape(input);
 
-	CHECK(gcli_sv_eq_to(escaped, "\\n\\r\\n\\n\\n\\t{}"));
-	free(escaped.data);
+	CHECK_STREQ(escaped, "\\n\\r\\n\\n\\n\\t{}");
+	free(escaped);
 }
 
 TESTSUITE

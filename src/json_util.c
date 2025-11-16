@@ -196,29 +196,31 @@ static struct {
 	{ .c = '"' , .with = "\\\"" },
 };
 
-gcli_sv
-gcli_json_escape(gcli_sv const it)
+char *
+gcli_json_escape(char const *it)
 {
-	gcli_sv result = {0};
+	size_t it_len = strlen(it);
+	char *result = NULL;
+	size_t result_len = 0;
 
-	result.data = calloc(2 * it.length + 1, 1);
-	if (!result.data)
+	result = calloc(2 * it_len + 1, 1);
+	if (!result)
 		err(1, "malloc");
 
-	for (size_t i = 0; i < it.length; ++i) {
+	for (size_t i = 0; i < it_len; ++i) {
 		for (size_t c = 0; c < ARRAY_SIZE(json_escape_table); ++c) {
-			if (json_escape_table[c].c == it.data[i]) {
+			if (json_escape_table[c].c == it[i]) {
 				size_t const len = strlen(json_escape_table[c].with);
-				memcpy(result.data + result.length,
+				memcpy(result + result_len,
 				       json_escape_table[c].with,
 				       len);
-				result.length += len;
+				result_len += len;
+
 				goto next;
 			}
 		}
 
-		memcpy(result.data + result.length, it.data + i, 1);
-		result.length += 1;
+		result[result_len++] = it[i];
 	next:
 		continue;
 	}

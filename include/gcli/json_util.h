@@ -84,8 +84,7 @@ int get_gitea_notification_target_type(struct gcli_ctx *ctx, json_stream *input,
                                        enum gcli_notification_target_type *out);
 int get_gitlab_can_be_merged(struct gcli_ctx *ctx, json_stream *input, bool *out);
 int get_gitea_visibility(struct gcli_ctx *ctx, json_stream *input, char **out);
-gcli_sv gcli_json_escape(gcli_sv);
-#define     gcli_json_escape_cstr(x) (gcli_json_escape(SV((char *)(x))).data)
+char *gcli_json_escape(char const *);
 int gcli_json_advance(struct gcli_ctx *ctx, json_stream *input, char const *fmt, ...);
 int get_url_path_(struct gcli_ctx *ctx, json_stream *input, struct gcli_path *out, char const *function);
 int get_gitlab_notification_target_(struct gcli_ctx *ctx, json_stream *input, struct gcli_path *out, char const *function);

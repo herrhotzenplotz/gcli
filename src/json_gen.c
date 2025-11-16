@@ -249,7 +249,7 @@ gcli_jsongen_objmember(struct gcli_jsongen *gen, char const *const key)
 	}
 
 	put_comma_if_needed(gen);
-	char *e_key = gcli_json_escape_cstr(key);
+	char *e_key = gcli_json_escape(key);
 
 	append_strf(gen, "\"%s\": ", e_key);
 
@@ -302,7 +302,7 @@ int
 gcli_jsongen_string(struct gcli_jsongen *gen, char const *value)
 {
 	put_comma_if_needed(gen);
-	char *e_value = gcli_json_escape_cstr(value);
+	char *e_value = gcli_json_escape(value);
 
 	append_strf(gen, "\"%s\"", e_value);
 

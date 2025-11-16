@@ -227,26 +227,6 @@ gcli_json_escape(gcli_sv const it)
 }
 
 int
-get_sv_(struct gcli_ctx *ctx, json_stream *const input, gcli_sv *out, char const *where)
-{
-	enum json_type type = json_next(input);
-	if (type == JSON_NULL) {
-		*out = SV_NULL;
-		return 0;
-	}
-
-	if (type != JSON_STRING)
-		return gcli_error(ctx, "unexpected non-string field in %s", where);
-
-	size_t len;
-	char const *it = json_get_string(input, &len);
-	char *copy = gcli_strndup(it, len);
-	*out = SV(copy);
-
-	return 0;
-}
-
-int
 get_label_(struct gcli_ctx *ctx, json_stream *const input, char const **out,
            char const *where)
 {
@@ -398,15 +378,15 @@ get_gitea_visibility(struct gcli_ctx *ctx, json_stream *const input, char **out)
 int
 get_gitlab_can_be_merged(struct gcli_ctx *ctx, json_stream *const input, bool *out)
 {
-	gcli_sv tmp;
+	char *tmp;
 	int rc = 0;
 
-	rc = get_sv(ctx, input, &tmp);
+	rc = get_string(ctx, input, &tmp);
 	if (rc < 0)
 		return rc;
 
-	*out = gcli_sv_eq_to(tmp, "can_be_merged");
-	gcli_clear_ptr(&tmp.data);
+	*out = strcmp(tmp, "can_be_merged") == 0;
+	gcli_clear_ptr(&tmp);
 
 	return rc;
 }
@@ -447,30 +427,30 @@ int
 get_github_notification_target_type(struct gcli_ctx *ctx, json_stream *input,
                                     enum gcli_notification_target_type *out)
 {
-	gcli_sv tmp;
+	char *tmp;
 	int rc = 0;
 
-	rc = get_sv(ctx, input, &tmp);
+	rc = get_string(ctx, input, &tmp);
 	if (rc < 0)
 		return rc;
 
-	if (gcli_sv_eq_to(tmp, "Issue")) {
+	if (strcmp(tmp, "Issue") == 0) {
 		*out = GCLI_NOTIFICATION_TARGET_ISSUE;
 
-	} else if (gcli_sv_eq_to(tmp, "PullRequest")) {
+	} else if (strcmp(tmp, "PullRequest") == 0) {
 		*out = GCLI_NOTIFICATION_TARGET_PULL_REQUEST;
 
-	} else if (gcli_sv_eq_to(tmp, "Release")) {
+	} else if (strcmp(tmp, "Release") == 0) {
 		*out = GCLI_NOTIFICATION_TARGET_RELEASE;
 
 	} else {
 		rc = gcli_error(
-			ctx, "bad github notification target type: "SV_FMT,
-			SV_ARGS(tmp));
+			ctx, "bad github notification target type: %s",
+			tmp);
 
 	}
 
-	gcli_clear_ptr(&tmp.data);
+	gcli_clear_ptr(&tmp);
 
 	return rc;
 }
@@ -479,33 +459,33 @@ int
 get_gitlab_notification_target_type(struct gcli_ctx *ctx, json_stream *input,
                                     enum gcli_notification_target_type *out)
 {
-	gcli_sv tmp;
+	char *tmp;
 	int rc = 0;
 
-	rc = get_sv(ctx, input, &tmp);
+	rc = get_string(ctx, input, &tmp);
 	if (rc < 0)
 		return rc;
 
-	if (gcli_sv_eq_to(tmp, "Issue")) {
+	if (strcmp(tmp, "Issue") == 0) {
 		*out = GCLI_NOTIFICATION_TARGET_ISSUE;
 
-	} else if (gcli_sv_eq_to(tmp, "MergeRequest")) {
+	} else if (strcmp(tmp, "MergeRequest") == 0) {
 		*out = GCLI_NOTIFICATION_TARGET_PULL_REQUEST;
 
-	} else if (gcli_sv_eq_to(tmp, "Commit")) {
+	} else if (strcmp(tmp, "Commit") == 0) {
 		*out = GCLI_NOTIFICATION_TARGET_COMMIT;
 
-	} else if (gcli_sv_eq_to(tmp, "Epic")) {
+	} else if (strcmp(tmp, "Epic") == 0) {
 		*out = GCLI_NOTIFICATION_TARGET_EPIC;
 
 	} else {
 		rc = gcli_error(
-			ctx, "bad github notification target type: "SV_FMT,
-			SV_ARGS(tmp));
+			ctx, "bad github notification target type: %s",
+			tmp);
 
 	}
 
-	gcli_clear_ptr(&tmp.data);
+	gcli_clear_ptr(&tmp);
 
 	return rc;
 }
@@ -514,33 +494,33 @@ int
 get_gitea_notification_target_type(struct gcli_ctx *ctx, json_stream *input,
                                    enum gcli_notification_target_type *out)
 {
-	gcli_sv tmp;
+	char *tmp;
 	int rc = 0;
 
-	rc = get_sv(ctx, input, &tmp);
+	rc = get_string(ctx, input, &tmp);
 	if (rc < 0)
 		return rc;
 
-	if (gcli_sv_eq_to(tmp, "Issue")) {
+	if (strcmp(tmp, "Issue") == 0) {
 		*out = GCLI_NOTIFICATION_TARGET_ISSUE;
 
-	} else if (gcli_sv_eq_to(tmp, "Pull")) {
+	} else if (strcmp(tmp, "Pull") == 0) {
 		*out = GCLI_NOTIFICATION_TARGET_PULL_REQUEST;
 
-	} else if (gcli_sv_eq_to(tmp, "Commit")) {
+	} else if (strcmp(tmp, "Commit") == 0) {
 		*out = GCLI_NOTIFICATION_TARGET_COMMIT;
 
-	} else if (gcli_sv_eq_to(tmp, "Repository")) {
+	} else if (strcmp(tmp, "Repository") == 0) {
 		*out = GCLI_NOTIFICATION_TARGET_REPOSITORY;
 
 	} else {
 		rc = gcli_error(
-			ctx, "bad github notification target type: "SV_FMT,
-			SV_ARGS(tmp));
+			ctx, "bad github notification target type: %s",
+			tmp);
 
 	}
 
-	gcli_clear_ptr(&tmp.data);
+	gcli_clear_ptr(&tmp);
 
 	return rc;
 }

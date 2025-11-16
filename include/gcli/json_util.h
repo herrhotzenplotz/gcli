@@ -43,7 +43,6 @@
 #include <gcli/status.h>
 
 #include <gcli/port/string.h>
-#include <gcli/port/sv.h>
 
 #define get_int(ctx, input, out)           get_int_(ctx, input, out, __func__)
 #define get_id(ctx, input, out)            get_id_(ctx, input, out, __func__)
@@ -54,7 +53,6 @@
 #define get_bool(ctx, input, out)          get_bool_(ctx, input, out, __func__)
 #define get_bool_relaxed(ctx, input, out)  get_bool_relaxed_(ctx, input, out, __func__)
 #define get_string(ctx, input, out)        get_string_(ctx, input, out, __func__)
-#define get_sv(ctx, input, out)            get_sv_(ctx, input, out, __func__)
 #define get_user(ctx, input, out)          get_user_(ctx, input, out, __func__)
 #define get_label(ctx, input, out)         get_label_(ctx, input, out, __func__)
 #define get_is_string(ctx, input, out)     ((void)ctx, (*out = json_next(input) == JSON_STRING), 1)
@@ -72,7 +70,6 @@ int get_parse_int_(struct gcli_ctx *ctx, json_stream *input, long *out, char con
 int get_bool_(struct gcli_ctx *ctx, json_stream *input, bool *out, char const *function);
 int get_bool_relaxed_(struct gcli_ctx *ctx, json_stream *input, bool *out, char const *function);
 int get_string_(struct gcli_ctx *ctx, json_stream *input, char **out, char const *function);
-int get_sv_(struct gcli_ctx *ctx, json_stream *input, gcli_sv *out, char const *function);
 int get_user_(struct gcli_ctx *ctx, json_stream *input, char **out, char const *function);
 int get_label_(struct gcli_ctx *ctx, json_stream *input, char const **out, char const *function);
 int get_iso8601_time_(struct gcli_ctx *ctx, json_stream *input, time_t *out, char const *function);

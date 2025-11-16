@@ -143,15 +143,6 @@ gcli_resetbold(void)
 		return "\033[22m";
 }
 
-char const *
-gcli_state_colour_str(char const *it)
-{
-	if (it)
-		return gcli_state_colour_sv(SV((char *)it));
-	else
-		return "";
-}
-
 static const struct { char const *name; int code; }
 	state_colour_table[] =
 {
@@ -176,11 +167,13 @@ static const struct { char const *name; int code; }
 };
 
 char const *
-gcli_state_colour_sv(gcli_sv const state)
+gcli_state_colour_str(char const *it)
 {
-	if (!gcli_sv_null(state)) {
+	if (it) {
+		size_t it_len = strlen(it);
+
 		for (size_t i = 0; i < ARRAY_SIZE(state_colour_table); ++i) {
-			if (gcli_sv_has_prefix(state, state_colour_table[i].name))
+			if (strncmp(it, state_colour_table[i].name, it_len) == 0)
 				return gcli_setcolour(state_colour_table[i].code);
 		}
 	}

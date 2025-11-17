@@ -1030,6 +1030,22 @@ gcli_config_get_repo(struct gcli_ctx *ctx, char **const owner,
 		return 0;
 	}
 
+	/* attempt a guess via forced forge type */
+	if (cfg->override_forgetype != -1) {
+		char const *rname = NULL;
+
+		rc = gcli_cmd_vcs_remote_by_forgetype(
+			ctx, cfg->override_forgetype, &rname);
+
+		if (rc < 0)
+			return rc;
+
+		rc = gcli_cmd_vcs_repo_by_remote(
+			ctx, rname, owner, repo, NULL);
+
+		return rc;
+	}
+
 	rc = gcli_config_get_upstream_parts(ctx, owner, repo);
 	if (rc == 0)
 		return 0;

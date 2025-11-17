@@ -1072,7 +1072,7 @@ gcli_config_display_progress_spinner(struct gcli_ctx *ctx)
 		return false;
 
 	char const *cfg_entry = gcli_config_find_by_key(ctx, "defaults", "disable-spinner");
-	if (cfg_entry)
+	if (cfg_entry == NULL)
 		return true;
 
 	if (string_means_true(cfg_entry))

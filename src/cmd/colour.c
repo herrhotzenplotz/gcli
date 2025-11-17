@@ -36,6 +36,7 @@
 #include <gcli/port/util.h>
 
 #include <stdlib.h>
+#include <strings.h>
 
 static struct {
 	uint32_t code;
@@ -170,10 +171,9 @@ char const *
 gcli_state_colour_str(char const *it)
 {
 	if (it) {
-		size_t it_len = strlen(it);
-
 		for (size_t i = 0; i < ARRAY_SIZE(state_colour_table); ++i) {
-			if (strncmp(it, state_colour_table[i].name, it_len) == 0)
+			size_t n = strlen(state_colour_table[i].name);
+			if (strncasecmp(it, state_colour_table[i].name, n) == 0)
 				return gcli_setcolour(state_colour_table[i].code);
 		}
 	}

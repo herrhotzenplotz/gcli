@@ -6,6 +6,8 @@
 
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/vcs/got.h>
+#include <gcli/cmd/vcs/gotconf_parser.h>
+#include <gcli/port/string.h>
 #include <gcli/port/util.h>
 
 #include <stddef.h>
@@ -86,4 +88,75 @@ gcli_vcs_got_get_branchname(struct gcli_ctx *ctx, char **out)
 	content = NULL;
 
 	return 0;
+}
+
+static int
+find_gotconf(struct gcli_ctx *ctx, char **out)
+{
+	int rc = 0, len = 0;
+	char *repo_file = NULL, *repo_dir = NULL, *gotconf = NULL;
+
+	repo_file = find_file_in_dotgot(ctx, "repository");
+	if (!repo_file)
+		return -1;
+
+	rc = gcli_read_file(repo_file, &repo_dir);
+	free(repo_file);
+	repo_file = NULL;
+	if (rc < 0)
+		return rc;
+
+	len = strlen(repo_dir);
+	if (repo_dir[len - 1] == '\n')
+		repo_dir[--len] = '\0';
+
+	gotconf = gcli_asprintf("%s/got.conf", repo_dir);
+	if (access(gotconf, R_OK) < 0) {
+		gcli_warnx(ctx, "gcli: vcs: got repo dir %s doesn't contain a readable got.conf", repo_dir);
+
+		free(gotconf);
+		gotconf = NULL;
+		rc = -1;
+	}
+
+	free(repo_dir);
+	repo_dir = NULL;
+
+	if (out)
+		*out = gotconf;
+
+	return rc;
+}
+
+/* routine for reading in the got.conf file */
+int
+gcli_vcs_got_read_repoconfig(struct gcli_ctx *ctx, struct gcli_cmd_vcs_remotes *remotes)
+{
+	struct gcli_gotconf_parser p = {0};
+	char *gotconf, *gotconf_text;
+	int rc = 0;
+
+	rc = find_gotconf(ctx, &gotconf);
+	if (rc < 0)
+		return rc;
+
+	rc = gcli_read_file(gotconf, &gotconf_text);
+	if (rc < 0)
+		return rc;
+
+	p.head = gotconf_text;
+
+	rc = gcli_gotconf_parser_run(&p, remotes);
+	if (rc < 0) {
+		gcli_warnx(ctx, "failed to parse %s: %s",
+		           gotconf, p.error_message);
+	}
+
+	free(gotconf_text);
+	gotconf_text = NULL;
+
+	free(gotconf);
+	gotconf = NULL;
+
+	return rc;
 }

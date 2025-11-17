@@ -34,13 +34,14 @@
 #include <gcli/cmd/vcs.h>
 
 #include <gcli/ctx.h>
-#include <gcli/gcli.h>
 #include <gcli/forges.h>
+#include <gcli/gcli.h>
 #include <gcli/gitea/config.h>
 #include <gcli/github/config.h>
 #include <gcli/gitlab/config.h>
 #include <gcli/port/string.h>
 #include <gcli/port/util.h>
+#include <gcli/url.h>
 
 #include <assert.h>
 #include <ctype.h>
@@ -879,6 +880,8 @@ gcli_config_get_upstream_parts(struct gcli_ctx *ctx, char **const owner,
 	ensure_config(ctx);
 
 	upstream = gcli_config_get_upstream(ctx);
+	if (upstream == NULL)
+		return -1;
 
 	hd = strrchr(upstream, '/');
 	if (hd == NULL)
@@ -1002,7 +1005,8 @@ gcli_config_get_remote(struct gcli_ctx *ctx, char const **remote)
 }
 
 int
-gcli_config_get_repo(struct gcli_ctx *ctx, char **const owner, char **const repo)
+gcli_config_get_repo(struct gcli_ctx *ctx, char **const owner,
+                     char **const repo)
 {
 	struct gcli_config *cfg;
 	int rc = 0;
@@ -1122,6 +1126,19 @@ gcli_config_enable_experimental(struct gcli_ctx *ctx)
 	return string_means_true(cfg_entry);
 }
 
+static struct gcli_config_entry *
+gcli_config_section_find_entry(struct gcli_config_section *s, char const *entry)
+{
+	struct gcli_config_entry *e;
+
+	TAILQ_FOREACH(e, &s->entries, next) {
+		if (strcmp(e->key, entry) == 0)
+			return e;
+	}
+
+	return NULL;
+}
+
 int
 gcli_config_get_forge_type_by_host(struct gcli_ctx *ctx,
                                    char const *const host,
@@ -1129,22 +1146,38 @@ gcli_config_get_forge_type_by_host(struct gcli_ctx *ctx,
 {
 	struct gcli_config_section *s;
 	struct gcli_config *cfg;
-
-	(void) host;
-	(void) out;
+	int rc = 0;
 
 	cfg = ctx_config(ctx);
 
 	TAILQ_FOREACH(s, &cfg->sections, next) {
 		struct gcli_config_entry *e;
-//		gcli_forge_type t = -1;
-//		bool found = false;
+		struct gcli_url url = {0};
 
-		TAILQ_FOREACH(e, &s->entries, next) {
-			if (strcmp(e->key, "api-base") == 0) {
-				continue;
-			}
+		e = gcli_config_section_find_entry(s, "api-base");
+		if (e == NULL)
+			continue;
+
+		rc = gcli_parse_url(e->value, &url);
+		if (rc < 0)
+			continue;
+
+		/* not the right host */
+		if (strcmp(url.host, host) != 0) {
+			gcli_url_free(&url);
+			continue;
 		}
+
+		e = gcli_config_section_find_entry(s, "forge-type");
+		if (e == NULL) {
+			gcli_url_free(&url);
+			continue;
+		}
+
+		rc = gcli_parse_forgetype(ctx, e->value, out);
+
+		gcli_url_free(&url);
+		return rc;
 	}
 
 	return -1;

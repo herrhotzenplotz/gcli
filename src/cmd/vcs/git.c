@@ -30,6 +30,7 @@
 #include <gcli/cmd/vcs/git.h>
 
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/vcs.h>
 #include <gcli/cmd/cmdconfig.h>
 
 #include <gcli/ctx.h>
@@ -48,18 +49,6 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
-
-struct gcli_vcs_git_remote {
-	char *name;
-	char *owner;
-	char *repo;
-	char *url;
-	gcli_forge_type forge_type;
-};
-
-#define MAX_REMOTES 64
-static struct gcli_vcs_git_remote remotes[MAX_REMOTES];
-static size_t         remotes_size;
 
 /* Resolve a worktree .git if needed */
 static char *
@@ -214,33 +203,34 @@ gcli_vcs_git_get_current_branch(struct gcli_ctx *ctx, char **out)
 	}
 }
 
-static void
-parse_remote_url(struct gcli_vcs_git_remote *const remote)
+static int
+parse_remote_url(struct gcli_cmd_vcs_remote *const remote, char const *url_text)
 {
 	char *tmp;
 	int rc = 0;
 	size_t n = 0;
 	struct gcli_url url = {0};
 
-	rc = gcli_parse_url(remote->url, &url);
+	rc = gcli_parse_url(url_text, &url);
 	if (rc < 0) {
 		fprintf(stderr, "gcli: failed to parse remote url: %s. "
-		        "This is probably a bug.\n", remote->url);
+		        "This is probably a bug.\n", url_text);
 
 		goto bail;
 	}
 
-	/* automagic forge type */
-	if (strcmp(url.host, "github.com") == 0)
-		remote->forge_type = GCLI_FORGE_GITHUB;
-	else if (strcmp(url.host, "gitlab.com") == 0)
-		remote->forge_type = GCLI_FORGE_GITLAB;
-	else if (strcmp(url.host, "codeberg.org") == 0)
-		remote->forge_type = GCLI_FORGE_GITEA;
+	/* save away the host */
+	remote->host = strdup(url.host);
 
+	/* automagic forge type */
+	gcli_vcs_guess_forgetype_by_hostname(url.host, &remote->forge_type);
+
+	/* split owner/repo */
 	tmp = strrchr(url.path, '/');
-	if (tmp == NULL)
+	if (tmp == NULL) {
+		rc = -1;
 		goto bail;
+	}
 
 	remote->owner = gcli_strndup(url.path, tmp - url.path);
 
@@ -252,13 +242,16 @@ parse_remote_url(struct gcli_vcs_git_remote *const remote)
 		n -= 4;
 
 	remote->repo = gcli_strndup(tmp, n);
+	rc = 0;
 
 bail:
 	gcli_url_free(&url);
+	return rc;
 }
 
 static void
-gitconfig_parse_remote(gcli_sv section_title, gcli_sv entry)
+gitconfig_parse_remote(struct gcli_cmd_vcs_remotes *remotes,
+                       gcli_sv section_title, gcli_sv entry)
 {
 	gcli_sv remote_name = SV_NULL;
 
@@ -279,45 +272,48 @@ gitconfig_parse_remote(gcli_sv section_title, gcli_sv entry)
 
 	while ((entry = gcli_sv_trim_front(entry)).length > 0) {
 		if (gcli_sv_has_prefix(entry, "url")) {
-			if (remotes_size == MAX_REMOTES)
-				errx(1, "gcli: error: too many remotes");
+			char *url;
 
-			struct gcli_vcs_git_remote *const remote = &remotes[remotes_size++];
+			struct gcli_cmd_vcs_remote *const r =
+				calloc(1, sizeof(*r));
 
-			remote->name = gcli_sv_to_cstr(remote_name);
+			r->name = gcli_sv_to_cstr(remote_name);
 
 			gcli_sv_chop_until(&entry, '=');
 
 			entry.data   += 1;
 			entry.length -= 1;
 
-			gcli_sv url = gcli_sv_trim(gcli_sv_chop_until(&entry, '\n'));
+			url = gcli_sv_to_cstr(
+				gcli_sv_trim(
+					gcli_sv_chop_until(&entry, '\n')
+				)
+			);
 
-			remote->url = gcli_sv_to_cstr(url);
-			remote->forge_type = -1;
+			r->forge_type = -1;
 
-			parse_remote_url(remote);
+			parse_remote_url(r, url);
+			free(url);
+
+			TAILQ_INSERT_TAIL(remotes, r, next);
 		} else {
 			gcli_sv_chop_until(&entry, '\n');
 		}
 	}
 }
 
-static void
-gcli_vcs_git_read_gitconfig(void)
+int
+gcli_vcs_git_read_repoconfig(struct gcli_ctx *ctx,
+                             struct gcli_cmd_vcs_remotes *remotes)
 {
 	char *path = NULL;
 	gcli_sv buffer = {0}, filebuf = {0};
-	static int has_read_gitconfig = 0;
 
-	if (has_read_gitconfig)
-		return;
-
-	has_read_gitconfig = 1;
+	(void) ctx;
 
 	path = gcli_find_gitconfig();
 	if (!path)
-		return;
+		return 0;
 
 	filebuf.length = gcli_read_file(path, &filebuf.data);
 	buffer = filebuf;
@@ -345,7 +341,7 @@ gcli_vcs_git_read_gitconfig(void)
 		gcli_sv entry = gcli_sv_chop_until(&buffer, '[');
 
 		if (gcli_sv_has_prefix(section_title, "remote")) {
-			gitconfig_parse_remote(section_title, entry);
+			gitconfig_parse_remote(remotes, section_title, entry);
 		} else {
 			// @@@: skip section
 		}
@@ -354,6 +350,8 @@ gcli_vcs_git_read_gitconfig(void)
 	free(filebuf.data);
 	filebuf.length = 0;
 	filebuf.data = NULL;
+
+	return 0;
 }
 
 void
@@ -411,78 +409,4 @@ gcli_vcs_git_add_fork_remote(char const *org, char const *repo)
 			err(1, "gcli: fork");
 		}
 	}
-}
-
-/**
- * Return the gcli_forge_type for the given remote or -1 if
- * unknown */
-int
-gcli_vcs_git_get_forgetype(struct gcli_ctx *ctx, char const *const remote_name)
-{
-	(void) ctx;
-
-	gcli_vcs_git_read_gitconfig();
-
-	if (remote_name) {
-		for (size_t i = 0; i < remotes_size; ++i) {
-			if (strcmp(remotes[i].name, remote_name) == 0)
-				return remotes[i].forge_type;
-		}
-	}
-
-	if (!remotes_size) {
-		gcli_warn(ctx, "no remotes to auto-detect forge");
-		return -1;
-	}
-
-	return remotes[0].forge_type;
-}
-
-int
-gcli_vcs_git_repo_by_remote(struct gcli_ctx *ctx, char const *const remote,
-                            char const **const owner, char const **const repo,
-                            int *const forge)
-{
-	gcli_vcs_git_read_gitconfig();
-
-	if (remote) {
-		for (size_t i = 0; i < remotes_size; ++i) {
-			if (strcmp(remotes[i].name, remote) == 0) {
-				*owner = remotes[i].owner;
-				*repo  = remotes[i].repo;
-				if (forge)
-					*forge = remotes[i].forge_type;
-
-				return 0;
-			}
-		}
-
-		return gcli_error(ctx, "no such remote: %s", remote);
-	}
-
-	if (!remotes_size)
-		return gcli_error(ctx, "no remotes to auto-detect forge");
-
-	*owner = remotes[0].owner;
-	*repo  = remotes[0].repo;
-	if (forge)
-		*forge = remotes[0].forge_type;
-
-	return 0;
-}
-
-int
-gcli_vcs_git_get_remote(struct gcli_ctx *ctx, gcli_forge_type const type,
-                        char const **remote)
-{
-	gcli_vcs_git_read_gitconfig();
-
-	for (size_t i = 0; i < remotes_size; ++i) {
-		if (remotes[i].forge_type == type) {
-			*remote = remotes[i].url;
-			return 0;
-		}
-	}
-
-	return gcli_error(ctx, "no suitable remote for forge type");
 }

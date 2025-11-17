@@ -8,7 +8,11 @@
 #define GCLI_CMD_VCS_GOT_H
 
 #include <gcli/gcli.h>
+#include <gcli/cmd/vcs.h>
 
 int gcli_vcs_got_get_branchname(struct gcli_ctx *ctx, char **out);
+
+int gcli_vcs_got_read_repoconfig(struct gcli_ctx *ctx,
+                                 struct gcli_cmd_vcs_remotes *remotes);
 
 #endif /* GCLI_CMD_VCS_GOT_H */

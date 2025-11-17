@@ -284,7 +284,8 @@ GCLI_SRCS= \
 	src/cmd/table.c \
 	src/cmd/vcs.c \
 	src/cmd/vcs/git.c \
-	src/cmd/vcs/got.c
+	src/cmd/vcs/got.c \
+	src/cmd/vcs/gotconf_parser.c
 
 TEMPLATES= \
 	templates/bugzilla/api.t \
@@ -429,7 +430,7 @@ distclean: clean
 	@rm -f Makefile config.h
 
 ###### TEST SUITE #####################################
-TEST_PROGRAMS = \
+SIMPLE_TEST_PROGRAMS = \
 	tests/unit/append-url$(EXEEXT) \
 	tests/unit/base64$(EXEEXT) \
 	tests/unit/bugzilla-parse$(EXEEXT) \
@@ -442,19 +443,35 @@ TEST_PROGRAMS = \
 	tests/unit/parse-url$(EXEEXT) \
 	tests/unit/url-encode$(EXEEXT)
 
-tests/unit/json-escape: tests/unit/json-escape.tests$(OBJEXT)
-tests/unit/github-parse: tests/unit/github-parse.tests$(OBJEXT)
-tests/unit/gitlab-parse: tests/unit/gitlab-parse.tests$(OBJEXT)
-tests/unit/gitea-parse: tests/unit/gitea-parse.tests$(OBJEXT)
-tests/unit/bugzilla-parse: tests/unit/bugzilla-parse.tests$(OBJEXT)
-tests/unit/url-encode: tests/unit/url-encode.tests$(OBJEXT)
-tests/unit/jsongen: tests/unit/jsongen.tests$(OBJEXT)
-tests/unit/base64: tests/unit/base64.tests$(OBJEXT)
-tests/unit/difftests: tests/unit/difftests.tests$(OBJEXT)
-tests/unit/parse-url: tests/unit/parse-url.tests$(OBJEXT)
-tests/unit/append-url: tests/unit/append-url.tests$(OBJEXT)
+TEST_PROGRAMS = \
+	$(SIMPLE_TEST_PROGRAMS) \
+	tests/unit/gotconf-parser$(EXEEXT)
 
-$(TEST_PROGRAMS): libgcli$(LIBEXT)
+tests/unit/json-escape$(EXEEXT): tests/unit/json-escape.tests$(OBJEXT)
+tests/unit/github-parse$(EXEEXT): tests/unit/github-parse.tests$(OBJEXT)
+tests/unit/gitlab-parse$(EXEEXT): tests/unit/gitlab-parse.tests$(OBJEXT)
+tests/unit/gitea-parse$(EXEEXT): tests/unit/gitea-parse.tests$(OBJEXT)
+tests/unit/bugzilla-parse$(EXEEXT): tests/unit/bugzilla-parse.tests$(OBJEXT)
+tests/unit/url-encode$(EXEEXT): tests/unit/url-encode.tests$(OBJEXT)
+tests/unit/jsongen$(EXEEXT): tests/unit/jsongen.tests$(OBJEXT)
+tests/unit/base64$(EXEEXT): tests/unit/base64.tests$(OBJEXT)
+tests/unit/difftests$(EXEEXT): tests/unit/difftests.tests$(OBJEXT)
+tests/unit/parse-url$(EXEEXT): tests/unit/parse-url.tests$(OBJEXT)
+tests/unit/append-url$(EXEEXT): tests/unit/append-url.tests$(OBJEXT)
+
+tests/unit/gotconf-parser$(EXEEXT): libgcli$(LIBEXT) tests/unit/gotconf-parser.tests$(OBJEXT) src/cmd/vcs/gotconf_parser.tests$(OBJEXT)
+	@mkdir -p $$(dirname $@)
+	$(CCACHE) $(CC) $(CFLAGS) $(CCDEPFLAGS) $(CPPFLAGS) \
+		$(LIBCURL_CFLAGS) $(LIBCRYPTO_CFLAGS) $(PDJSON_CFLAGS) \
+		$(LDFLAGS) -o $@ $(@:=.tests$(OBJEXT)) src/cmd/vcs/gotconf_parser.tests$(OBJEXT) \
+		libgcli$(LIBEXT) $(LIBCURL_LIBS) $(LIBCRYPTO_LIBS) $(PDJSON_LIBS) $(LIBRT_LIBS)
+
+# extra clean hook
+clean-auto: clean-src/cmd/vcs/gotconf_parser.tests$(OBJEXT)
+clean-src/cmd/vcs/gotconf_parser.tests$(OBJEXT):
+	rm -f src/cmd/vcs/gotconf_parser.tests$(OBJEXT)
+
+$(SIMPLE_TEST_PROGRAMS): libgcli$(LIBEXT)
 	@mkdir -p $$(dirname $@)
 	$(CCACHE) $(CC) $(CFLAGS) $(CCDEPFLAGS) $(CPPFLAGS) \
 		$(LIBCURL_CFLAGS) $(LIBCRYPTO_CFLAGS) $(PDJSON_CFLAGS) \

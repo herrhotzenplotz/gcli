@@ -2,12 +2,14 @@
  *
  * Copyright Nico Sonack <nsonack@herrhotzenplotz.de> */
 
+#include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/vcs.h>
-#include <gcli/port/util.h>
 #include <gcli/cmd/vcs/git.h>
 #include <gcli/cmd/vcs/got.h>
+#include <gcli/port/util.h>
 
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 /* Dispatch table for routines that call into vcs specific routines */
@@ -15,29 +17,33 @@ static struct vcs_dispatch {
 	int (*get_branchname)(struct gcli_ctx *ctx,
 	                      char **out);
 
-	int (*get_forgetype)(struct gcli_ctx *ctx,
-	                     char const *const remote_name);
+	int (*read_repoconfig)(struct gcli_ctx *ctx,
+	                       struct gcli_cmd_vcs_remotes *remotes);
 
-	int (*get_remote_by_forgetype)(struct gcli_ctx *ctx,
-	                               gcli_forge_type type,
-	                               char const **out);
-
-	int (*get_repo_by_remote)(struct gcli_ctx *ctx,
-	                          char const *remote_name,
-	                          char const **owner,
-	                          char const **repo,
-	                          int *forgetype);
 } vcs_dispatches[] = {
 	[GCLI_CMD_VCSTYPE_GIT] = {
 		.get_branchname = gcli_vcs_git_get_current_branch,
-		.get_forgetype = gcli_vcs_git_get_forgetype,
-		.get_remote_by_forgetype = gcli_vcs_git_get_remote,
-		.get_repo_by_remote = gcli_vcs_git_repo_by_remote,
+		.read_repoconfig = gcli_vcs_git_read_repoconfig,
 	},
 	[GCLI_CMD_VCSTYPE_GOT] = {
 		.get_branchname = gcli_vcs_got_get_branchname,
+		.read_repoconfig = gcli_vcs_got_read_repoconfig,
 	},
 };
+
+static struct gcli_cmd_vcs_remotes remotes = {0};
+
+static char const *
+vcs_name(int type)
+{
+	switch (type) {
+	case GCLI_CMD_VCSTYPE_UNKNOWN: return "unknown";
+	case GCLI_CMD_VCSTYPE_GOT:     return "got";
+	case GCLI_CMD_VCSTYPE_GIT:     return "git";
+	}
+
+	assert(0 && "unreachable");
+}
 
 int
 gcli_cmd_vcs_get_vcstype(struct gcli_ctx *ctx)
@@ -67,21 +73,12 @@ done:
 	free(dir);
 	dir = NULL;
 
+        if (gcli_be_verbose(ctx))
+                fprintf(stderr, "gcli: info: vcs type is %s\n", vcs_name(rc));
+
 	g_vcs_type = rc;
 
 	return rc;
-}
-
-static char const *
-vcs_name(int type)
-{
-	switch (type) {
-	case GCLI_CMD_VCSTYPE_UNKNOWN: return "unknown";
-	case GCLI_CMD_VCSTYPE_GOT:     return "got";
-	case GCLI_CMD_VCSTYPE_GIT:     return "git";
-	}
-
-	assert(0 && "unreachable");
 }
 
 #define VCS_CALL(dispatcher, ctx, ...)                                                             \
@@ -98,6 +95,56 @@ do {                                                                            
 	return vcs_dispatches[vcsty].dispatcher(ctx, __VA_ARGS__);                                 \
 } while (0)
 
+static void
+ensure_config(struct gcli_ctx *ctx)
+{
+	static int have_read_config = 0;
+	struct gcli_cmd_vcs_remote *rmt = NULL;
+	int vcsty, rc;
+
+	if (have_read_config)
+		return;
+
+	have_read_config = 1;
+
+	TAILQ_INIT(&remotes);
+	vcsty = gcli_cmd_vcs_get_vcstype(ctx);
+
+	if (vcsty == GCLI_CMD_VCSTYPE_UNKNOWN) {
+		gcli_warnx(ctx, "vcs: no or unknown vcs type");
+		return;
+	}
+
+	if (!vcs_dispatches[vcsty].read_repoconfig) {
+		gcli_warnx(
+			ctx,
+			"vcs: cannot read repo config because %s does not "
+			"implement read_repoconfig",
+			vcs_name(vcsty)
+		);
+
+		return;
+	}
+
+	vcs_dispatches[vcsty].read_repoconfig(ctx, &remotes);
+
+	/* attempt a fixup of unknown forge types by scanning through the
+	 * command config */
+	TAILQ_FOREACH(rmt, &remotes, next) {
+		if ((int)rmt->forge_type != -1)
+			continue;
+
+		rc = gcli_config_get_forge_type_by_host(ctx, rmt->host, &rmt->forge_type);
+		if (rc < 0) {
+			gcli_warnx(
+				ctx,
+				"vcs: failed to get forgetype of host »%s«: %s",
+				rmt->host, gcli_get_error(ctx)
+			);
+		}
+	}
+}
+
 int
 gcli_cmd_vcs_branchname(struct gcli_ctx *ctx, char **out)
 {
@@ -107,20 +154,97 @@ gcli_cmd_vcs_branchname(struct gcli_ctx *ctx, char **out)
 int
 gcli_cmd_vcs_forgetype(struct gcli_ctx *ctx, char const *remote_name)
 {
-	VCS_CALL(get_forgetype, ctx, remote_name);
+	struct gcli_cmd_vcs_remote *r;
+
+	ensure_config(ctx);
+
+	if (remote_name) {
+		TAILQ_FOREACH(r, &remotes, next) {
+			if (strcmp(r->name, remote_name) == 0)
+				return r->forge_type;
+		}
+	}
+
+	if (TAILQ_EMPTY(&remotes)) {
+		gcli_warn(ctx, "no remotes to auto-detect forge");
+		return -1;
+	}
+
+	r = TAILQ_FIRST(&remotes);
+	return r->forge_type;
 }
 
 int
 gcli_cmd_vcs_remote_by_forgetype(struct gcli_ctx *ctx, gcli_forge_type type,
                                  char const **out)
 {
-	VCS_CALL(get_remote_by_forgetype, ctx, type, out);
+	struct gcli_cmd_vcs_remote *r;
+
+	ensure_config(ctx);
+
+	TAILQ_FOREACH(r, &remotes, next) {
+		if (r->forge_type == type) {
+			*out = r->name;
+			return 0;
+		}
+	}
+
+	gcli_warnx(ctx, "no suitable remote for forge type");
+	return -1;
 }
 
 int
 gcli_cmd_vcs_repo_by_remote(struct gcli_ctx *ctx, char const *remote_name,
-                            char const **owner, char const **repo,
+                            char **owner, char **repo,
                             int *forgetype)
 {
-	VCS_CALL(get_repo_by_remote, ctx, remote_name, owner, repo, forgetype);
+	struct gcli_cmd_vcs_remote *r;
+
+	ensure_config(ctx);
+
+	if (remote_name) {
+		TAILQ_FOREACH(r, &remotes, next) {
+			if (strcmp(r->name, remote_name) == 0) {
+				*owner = strdup(r->owner);
+				*repo  = strdup(r->repo);
+				if (forgetype)
+					*forgetype = r->forge_type;
+
+				return 0;
+			}
+		}
+
+		gcli_warnx(ctx, "no such remote: %s", remote_name);
+		return -1;
+	}
+
+	if (TAILQ_EMPTY(&remotes))
+		return gcli_warnx(ctx, "no remotes to auto-detect forge"), -1;
+
+	r = TAILQ_FIRST(&remotes);
+
+	*owner = strdup(r->owner);
+	*repo  = strdup(r->repo);
+
+	if (forgetype)
+		*forgetype = r->forge_type;
+
+	return 0;
+}
+
+int
+gcli_vcs_guess_forgetype_by_hostname(char const *host, gcli_forge_type *out)
+{
+	if (strcmp(host, "github.com") == 0)
+		*out = GCLI_FORGE_GITHUB;
+	else if (strcmp(host, "gitlab.com") == 0)
+		*out = GCLI_FORGE_GITLAB;
+	else if (strcmp(host, "codeberg.org") == 0)
+		*out = GCLI_FORGE_GITEA;
+	else {
+		*out = -1;
+		return -1;
+	}
+
+	return 0;
 }

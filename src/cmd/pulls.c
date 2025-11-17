@@ -470,7 +470,8 @@ create_pull(struct gcli_submit_pull_options *const opts, bool always_yes)
 static char const *
 pr_try_derive_head(void)
 {
-	char *account, *branch, *head;
+	char *branch, *head;
+	char const *account;
 
 	if ((account = gcli_config_get_account_name(g_clictx)) == NULL) {
 		errx(1,
@@ -489,7 +490,6 @@ pr_try_derive_head(void)
 
 	head = gcli_asprintf("%s:%s", account, branch);
 
-	free(account);
 	free(branch);
 
 	return head;
@@ -498,16 +498,16 @@ pr_try_derive_head(void)
 static char *
 derive_head(void)
 {
-	char *account, *branch, *head = NULL;
+	char *branch = NULL, *head = NULL;
+	char const *account;
 
 	account = gcli_config_get_account_name(g_clictx);
 	if (account == NULL)
 		return NULL;
 
-	if (gcli_cmd_vcs_branchname(g_clictx, &branch) < 0)
+	if (gcli_cmd_vcs_branchname(g_clictx, &branch) == 0)
 		head = gcli_asprintf("%s:%s", account, branch);
 
-	free(account);
 	free(branch);
 
 	return head;

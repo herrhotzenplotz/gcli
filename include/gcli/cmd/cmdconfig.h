@@ -74,4 +74,8 @@ bool gcli_config_enable_experimental(struct gcli_ctx *ctx);
 struct gcli_config_entries const *gcli_config_get_section_entries(
 	struct gcli_ctx *ctx, char const *section_name);
 
+int gcli_config_get_forge_type_by_host(struct gcli_ctx *ctx,
+                                       char const *host,
+                                       gcli_forge_type *out);
+
 #endif /* GCLI_CMD_CMDCONFIG_H */

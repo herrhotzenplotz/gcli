@@ -9,10 +9,11 @@
 
 /* Simple single-header unit testing "framework". Emits TAP14. */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <setjmp.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 struct unitctx {
 	/* leave when all fails */
@@ -57,7 +58,7 @@ unit_yamlescape(char const *in)
 		}
 	}
 
-	return NULL;
+	return result;
 }
 
 static inline void
@@ -72,7 +73,7 @@ unit_require(UNIT_CTX, char const *const file, int const line,
 		       "     at:\n"
 		       "       file: %s\n"
 		       "       line: %d\n"
-		       "      ...\n"
+		       "     ...\n"
 		       "\n",
 		       UNIT_CTX_VAR->subtestno, expression, file, line);
 
@@ -163,7 +164,7 @@ unit_check_streq(UNIT_CTX,
 		e_exp = unit_yamlescape(expected);
 
 		UNIT_CTX_VAR->hadfail = 1;
-		printf("    not ok %d - %s\n"
+		printf("    not ok %d - %s == \"%s\"\n"
 		       "      ---\n"
 		       "      wanted: \"%s\"\n"
 		       "      found: \"%s\"\n"
@@ -172,13 +173,13 @@ unit_check_streq(UNIT_CTX,
 		       "        line: %d\n"
 		       "      ...\n"
 		       "\n",
-		       UNIT_CTX_VAR->subtestno, expression,
+		       UNIT_CTX_VAR->subtestno, expression, expected,
 		       e_exp, e_act, file, line);
 
 		free(e_act);
 		free(e_exp);
 	} else {
-		printf("    ok %d - %s\n", UNIT_CTX_VAR->subtestno, expression);
+		printf("    ok %d - %s == \"%s\"\n", UNIT_CTX_VAR->subtestno, expression, expected);
 	}
 }
 #define CHECK_STREQ(expr, expected) unit_check_streq(UNIT_CTX_VAR, #expr, expr, expected, __FILE__, __LINE__)

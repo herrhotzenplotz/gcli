@@ -865,6 +865,8 @@ gcli_config_pr_inhibit_delete_source_branch(struct gcli_ctx *ctx)
 	init_local_config(ctx);
 
 	val = gcli_local_config_find_by_key(ctx, "pr.inhibit-delete-source-branch");
+	if (val == NULL)
+		return false;
 
 	return strcmp(val, "yes") == 0;
 }

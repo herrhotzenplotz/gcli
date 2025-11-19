@@ -724,7 +724,7 @@ gcli_local_config_find_by_key(struct gcli_ctx *ctx, char const *const key)
 	struct gcli_config_entry *entry;
 
 	TAILQ_FOREACH(entry, &lcfg->entries, next) {
-		if (strcmp(entry->key, key))
+		if (strcmp(entry->key, key) == 0)
 			return entry->value;
 	}
 

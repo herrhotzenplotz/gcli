@@ -13,6 +13,12 @@ This changelog does not follow semantic versioning.
 
 ### Added
 
+- Support for the [Game of Trees VCS](https://gameoftrees.org/) has been added
+
+  An abstraction over the version control system currently used was
+  implemented to support this. This now allows integration into git
+  as well as got checkouts.
+
 ### Changed
 
 - The test suite has been converted away from Kyua and atf-c to a

@@ -77,37 +77,57 @@ gcli_yesno(const char *fmt, ...)
 	return result;
 }
 
+/* Read a file at path. '-' is stdin. This routine is usable for
+ * non-seekable streams (such as stdin if it is a terminal). */
 int
 gcli_read_file(char const *path, char **buffer)
 {
 	FILE *f;
-	size_t len;
+	size_t len, buflen;
 	int rc = 0;
 
-	/* open file and determine length */
-	f = fopen(path, "r");
-	if (!f)
-		return -1;
+	if (strcmp(path, "-") == 0) {
+		f = stdin;
+	} else {
+		f = fopen(path, "r");
+		if (!f)
+			return -1;
+	}
 
-	if (fseek(f, 0, SEEK_END) < 0)
-		goto err_seek;
+	if (f == NULL)
+		err(1, "failed to open file %s", path);
 
-	len = ftell(f);
-	rewind(f);
+	/* read in the file */
+	buflen = 8;
+	len = 0;
 
-	*buffer = malloc(len + 1);
-	if (fread(*buffer, 1, len, f) != len) {
-		rc = -1;
-		goto err_read;
+	*buffer = malloc(buflen);
+
+	while (!ferror(f) && !feof(f)) {
+		char c = 0;
+
+		if (len >= buflen) {
+			buflen *= 2;
+			*buffer = realloc(*buffer, buflen);
+		}
+
+		if ((c = fgetc(f)) == EOF)
+			break;
+
+		(*buffer)[len++] = c;
+	}
+
+	if (len >= buflen) {
+		buflen += 1;
+		*buffer = realloc(*buffer, buflen);
 	}
 
 	(*buffer)[len] = '\0';
 
 	rc = (int)(len);
 
-err_read:
-err_seek:
-	fclose(f);
+	if (f != stdin)
+		fclose(f);
 
 	return rc;
 }

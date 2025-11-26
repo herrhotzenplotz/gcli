@@ -67,21 +67,24 @@ gcli_parse_url(char const *const input, struct gcli_url *out)
 		return 0;
 	}
 
-	out->host = gcli_strndup(hd, tmp - hd);
-	hd = tmp;
+	/* FS path? */
+	if (hd[0] != '/') {
+		out->host = gcli_strndup(hd, tmp - hd);
+		hd = tmp;
 
-	/* if we found a ':', try and parse a port number! */
-	if (*hd++ == ':') {
-		n = strspn(hd, "0123456789");
-		if (n)
-			out->port = gcli_strndup(hd, n);
+		/* if we found a ':', try and parse a port number! */
+		if (*hd++ == ':') {
+			n = strspn(hd, "0123456789");
+			if (n)
+				out->port = gcli_strndup(hd, n);
 
-		/* skip over parsed characters */
-		hd += n;
+			/* skip over parsed characters */
+			hd += n;
 
-		/* we should point at a '/' now */
-		if (*hd == '/')
-			hd += 1;
+			/* we should point at a '/' now */
+			if (*hd == '/')
+				hd += 1;
+		}
 	}
 
 	out->path = strdup(hd);

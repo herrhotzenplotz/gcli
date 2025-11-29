@@ -1166,6 +1166,9 @@ gcli_config_get_forge_type_by_host(struct gcli_ctx *ctx,
 
 	cfg = ctx_config(ctx);
 
+	if (host == NULL)
+		return -1;
+
 	TAILQ_FOREACH(s, &cfg->sections, next) {
 		struct gcli_config_entry *e;
 		struct gcli_url url = {0};

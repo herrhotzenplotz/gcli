@@ -219,6 +219,12 @@ parse_remote_url(struct gcli_cmd_vcs_remote *const remote, char const *url_text)
 		goto bail;
 	}
 
+	/* probably a local clone */
+	if (!url.host) {
+		rc = 0;
+		goto bail;
+	}
+
 	/* save away the host */
 	remote->host = strdup(url.host);
 

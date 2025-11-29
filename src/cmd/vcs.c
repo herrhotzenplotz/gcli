@@ -134,6 +134,9 @@ ensure_config(struct gcli_ctx *ctx)
 		if ((int)rmt->forge_type != -1)
 			continue;
 
+		if (rmt->host == NULL)
+			continue; /* cannot guess if we don't have a host */
+
 		rc = gcli_config_get_forge_type_by_host(ctx, rmt->host, &rmt->forge_type);
 		if (rc < 0) {
 			gcli_warnx(
@@ -143,6 +146,23 @@ ensure_config(struct gcli_ctx *ctx)
 			);
 		}
 	}
+}
+
+static struct gcli_cmd_vcs_remote *
+get_most_sensible_remote(struct gcli_ctx *ctx)
+{
+	struct gcli_cmd_vcs_remote *r;
+
+	TAILQ_FOREACH(r, &remotes, next) {
+		if (r->host == NULL || r->owner == NULL || r->repo == NULL)
+			continue;
+
+		if (r->forge_type != (gcli_forge_type)-1)
+			return r;
+	}
+
+	gcli_warn(ctx, "no suitable remotes to auto-detect forge");
+	return NULL;
 }
 
 int
@@ -165,12 +185,10 @@ gcli_cmd_vcs_forgetype(struct gcli_ctx *ctx, char const *remote_name)
 		}
 	}
 
-	if (TAILQ_EMPTY(&remotes)) {
-		gcli_warn(ctx, "no remotes to auto-detect forge");
+	r = get_most_sensible_remote(ctx);
+	if (r == NULL)
 		return -1;
-	}
 
-	r = TAILQ_FIRST(&remotes);
 	return r->forge_type;
 }
 
@@ -218,10 +236,9 @@ gcli_cmd_vcs_repo_by_remote(struct gcli_ctx *ctx, char const *remote_name,
 		return -1;
 	}
 
-	if (TAILQ_EMPTY(&remotes))
-		return gcli_warnx(ctx, "no remotes to auto-detect forge"), -1;
-
-	r = TAILQ_FIRST(&remotes);
+	r = get_most_sensible_remote(ctx);
+	if (r == NULL)
+		return -1;
 
 	*owner = strdup(r->owner);
 	*repo  = strdup(r->repo);

@@ -11,6 +11,11 @@ This changelog does not follow semantic versioning.
 
   Reported-by: Matthias Andree <mandree@FreeBSD.org>
 
+- A crash that occurred when the git configuration contained local
+  filesystem remotes has been fixed.
+
+  Reported-by: xaizek <https://github.com/xaizek>
+
 ### Added
 
 - Support for the [Game of Trees VCS](https://gameoftrees.org/) has been added

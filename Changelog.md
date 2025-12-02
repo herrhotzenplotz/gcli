@@ -24,6 +24,12 @@ This changelog does not follow semantic versioning.
   implemented to support this. This now allows integration into git
   as well as got checkouts.
 
+- The approve and unapprove actions in the pulls subcommand have
+  gained two options:
+
+  - `-y` / `--yes`: makes the action non-interactive (no editor opened, no confirmation)
+  - `-T` / `--template`: allows you to pass a file that is used for the message
+
 ### Changed
 
 - The test suite has been converted away from Kyua and atf-c to a

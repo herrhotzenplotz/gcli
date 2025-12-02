@@ -53,6 +53,7 @@
 #include <gcli/pulls.h>
 
 #include <assert.h>
+#include <errno.h>
 #include <getopt.h>
 #include <stdlib.h>
 
@@ -79,38 +80,38 @@ usage(void)
 	fprintf(stderr, "  -i id           ID of PR to perform actions on\n");
 	fprintf(stderr, "  -s              Print (sort) in reverse order\n");
 	fprintf(stderr, "  -t branch       Specify target branch of the PR\n");
-	fprintf(stderr, "  -T template     Use the given file as a template for the pull message\n");
+	fprintf(stderr, "  -T template     Use the given file as a template for the message\n");
 	fprintf(stderr, "  -y              Do not ask for confirmation.\n");
 	fprintf(stderr, "ACTIONS:\n");
-	fprintf(stderr, "  all                    Display status, commits, op and checks of the PR\n");
-	fprintf(stderr, "  op                     Display original post\n");
-	fprintf(stderr, "  status                 Display PR metadata\n");
-	fprintf(stderr, "  comments               Display comments\n");
-	fprintf(stderr, "  notes                  Alias for notes\n");
-	fprintf(stderr, "  commits                Display commits of the PR\n");
-	fprintf(stderr, "  ci                     Display CI/Pipeline status information about the PR\n");
-	fprintf(stderr, "  merge [-s] [-D]        Merge the PR (-s = squash commits, -D = inhibit deleting source branch)\n");
-	fprintf(stderr, "  milestone <id>         Assign this PR to a milestone\n");
-	fprintf(stderr, "  milestone -d           Clear associated milestones from the PR\n");
-	fprintf(stderr, "  close                  Close the PR\n");
-	fprintf(stderr, "  reopen                 Reopen a closed PR\n");
-	fprintf(stderr, "  labels ...             Add or remove labels:\n");
-	fprintf(stderr, "                            add <name>\n");
-	fprintf(stderr, "                            remove <name>\n");
-	fprintf(stderr, "  diff                   Display changes as diff\n");
-	fprintf(stderr, "  patch                  Display changes as patch series\n");
-	fprintf(stderr, "  title <new-title>      Change the title of the pull request\n");
-	fprintf(stderr, "  request-review <user>  Add <user> as a reviewer of the PR\n");
-	fprintf(stderr, "  assign <user>          Assign the PR to <user>\n");
-	fprintf(stderr, "  checkout               Do a git-checkout of this PR (GitHub- and GitLab only)\n");
-	fprintf(stderr, "  open                   Open the PR in a web browser\n");
+	fprintf(stderr, "  all                       Display status, commits, op and checks of the PR\n");
+	fprintf(stderr, "  op                        Display original post\n");
+	fprintf(stderr, "  status                    Display PR metadata\n");
+	fprintf(stderr, "  comments                  Display comments\n");
+	fprintf(stderr, "  notes                     Alias for notes\n");
+	fprintf(stderr, "  commits                   Display commits of the PR\n");
+	fprintf(stderr, "  ci                        Display CI/Pipeline status information about the PR\n");
+	fprintf(stderr, "  merge [-s] [-D]           Merge the PR (-s = squash commits, -D = inhibit deleting source branch)\n");
+	fprintf(stderr, "  milestone <id>            Assign this PR to a milestone\n");
+	fprintf(stderr, "  milestone -d              Clear associated milestones from the PR\n");
+	fprintf(stderr, "  close                     Close the PR\n");
+	fprintf(stderr, "  reopen                    Reopen a closed PR\n");
+	fprintf(stderr, "  labels ...                Add or remove labels:\n");
+	fprintf(stderr, "                               add <name>\n");
+	fprintf(stderr, "                               remove <name>\n");
+	fprintf(stderr, "  diff                      Display changes as diff\n");
+	fprintf(stderr, "  patch                     Display changes as patch series\n");
+	fprintf(stderr, "  title <new-title>         Change the title of the pull request\n");
+	fprintf(stderr, "  request-review <user>     Add <user> as a reviewer of the PR\n");
+	fprintf(stderr, "  assign <user>             Assign the PR to <user>\n");
+	fprintf(stderr, "  checkout                  Do a git-checkout of this PR (GitHub- and GitLab only)\n");
+	fprintf(stderr, "  open                      Open the PR in a web browser\n");
 	if (gcli_config_enable_experimental(g_clictx))
-		fprintf(stderr, "  review                 Start a review of this PR\n");
-	fprintf(stderr, "  reviews                List reviews of this PR\n");
+		fprintf(stderr, "  review                    Start a review of this PR\n");
+	fprintf(stderr, "  reviews                   List reviews of this PR\n");
 	if (gcli_config_enable_experimental(g_clictx))
-		fprintf(stderr, "  discussions            Show a threaded view of review discussions\n");
-	fprintf(stderr, "  approve                Approve this PR\n");
-	fprintf(stderr, "  unapprove              Revoke approval on this PR\n");
+		fprintf(stderr, "  discussions               Show a threaded view of review discussions\n");
+	fprintf(stderr, "  approve [-y] [-T file]    Approve this PR\n");
+	fprintf(stderr, "  unapprove [-y] [-T file]  Revoke approval on this PR\n");
 
 	fprintf(stderr, "\n");
 	version();
@@ -1502,8 +1503,14 @@ action_discussion(struct gcli_path const *const path,
 static void
 approval_init(struct gcli_ctx *ctx, FILE *f, void *data)
 {
+	char *message = data;
+
 	(void) ctx;
-	(void) data;
+
+	if (message) {
+		fputs(message, f);
+		free(message);
+	}
 
 	fprintf(f, "\n");
 	fprintf(f, "! Enter your message above, save and exit.\n");
@@ -1511,14 +1518,49 @@ approval_init(struct gcli_ctx *ctx, FILE *f, void *data)
 }
 
 static int
-approval_action(struct gcli_path const *const path,
+approval_action(int *argc, char **argv[], struct gcli_path const *const path,
                 int (*fn)(struct gcli_ctx *ctx, struct gcli_path const *, char const *))
 {
-	int rc;
+	int rc, ch;
 	char *message = NULL;
+	bool yflag = false;
 
-	if (gcli_yesno("Enter a message?")) {
-		message = gcli_editor_get_user_message(g_clictx, approval_init, NULL);
+	/* optional flags */
+	struct option options[] = {
+		{ .name = "yes",      .has_arg = no_argument, .flag = NULL, .val = 'y' },
+		{ .name = "template", .has_arg = no_argument, .flag = NULL, .val = 'T' },
+		{0}
+	};
+
+	optind = 0;
+
+	while ((ch = getopt_long(*argc, *argv, "+yT:", options, NULL)) != -1) {
+		switch (ch) {
+		case 'y':
+			yflag = true;
+			break;
+		case 'T':
+			rc = gcli_read_file(optarg, &message);
+			if (rc < 0) {
+				fprintf(stderr, "gcli: error: failed to read template file: %s\n",
+				        strerror(errno));
+
+				return GCLI_EX_DATAERR;
+			}
+			break;
+		default:
+			fprintf(stderr, "gcli: bad flag '%c'\n", ch);
+			return GCLI_EX_USAGE;
+		}
+	}
+
+	optind -= 1;
+	*argc -= optind;
+	*argv += optind;
+
+	/* we only need to ask whether we wish to edit if the yflag was not set */
+	if (!yflag && gcli_yesno("Enter or edit message?")) {
+		message = gcli_editor_get_user_message(g_clictx, approval_init, message);
 
 		if (message == NULL) {
 			fprintf(stderr, "gcli: message empty, aborting.\n");
@@ -1547,10 +1589,8 @@ action_approve(struct gcli_path const *const path,
                int *argc, char **argv[])
 {
 	(void) pull;
-	(void) argc;
-	(void) argv;
 
-	return approval_action(path, gcli_pull_approve);
+	return approval_action(argc, argv, path, gcli_pull_approve);
 }
 
 static int
@@ -1559,10 +1599,8 @@ action_unapprove(struct gcli_path const *const path,
                  int *argc, char **argv[])
 {
 	(void) pull;
-	(void) argc;
-	(void) argv;
 
-	return approval_action(path, gcli_pull_unapprove);
+	return approval_action(argc, argv, path, gcli_pull_unapprove);
 }
 
 struct gcli_cmd_actions gcli_pull_actions = {

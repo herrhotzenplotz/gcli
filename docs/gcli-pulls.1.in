@@ -234,10 +234,23 @@ List reviews of this pull request.
 .It Cm discussions
 Print the review discussions in a threaded form.
 This is currently only implemented for GitHub.
-.It Cm approve
+.It Cm approve Op Ar options
 Give your approval on the pull request.
-.It Cm unapprove
+You may supply the following options:
+.Bl -tag -width xxxxxxxxxxxxxxxxxxx
+.It Fl -yes , y
+Do not ask for confirmation.
+.It Fl -template , T Ar file
+Use the
+.Ar file
+as a template for the approval message. When used with
+.Fl -yes
+this will make the approval non-interactive.
+.El
+.It Cm unapprove Op Ar options
 Revoke your approval on the pull request.
+For allowed options see
+.Cm approve .
 .El
 .Sh EXAMPLES
 Print a list of open PRs in the current project:

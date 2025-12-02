@@ -95,8 +95,7 @@ DEFINE_TESTCASE(empty_patch_should_not_fail)
 
 	REQUIRE(gcli_diff_parser_from_buffer(zeros, sizeof zeros, "zeros", &parser) == 0);
 	REQUIRE(gcli_parse_patch(&parser, &patch) == 0);
-	REQUIRE(patch.prelude != NULL);
-	CHECK_STREQ(patch.prelude, "");
+	CHECK_EQ(patch.prelude, NULL);
 
 	gcli_free_diff_parser(&parser);
 }

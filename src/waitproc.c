@@ -38,7 +38,7 @@ gcli_wait_proc_ok(struct gcli_ctx *ctx, pid_t pid)
 {
 	int status;
 
-	if (waitpid(pid, &status, WEXITED) == -1) {
+	if (waitpid(pid, &status, 0) == -1) {
 		return gcli_error(ctx, "failed to wait for child process: %s",
 		                  strerror(errno));
 	}

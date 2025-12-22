@@ -16,6 +16,14 @@ This changelog does not follow semantic versioning.
 
   Reported-by: xaizek <https://github.com/xaizek>
 
+- An invalid invocation of the `waitpid` routine has been fixed.
+
+  On Linux this caused invalid argument errors in gcli when any
+  subprocesss was launched, most prominently the `open` action was
+  affected by this.
+
+  Submitted-by: xaizek <https://github.com/xaizek>
+
 ### Added
 
 - Support for the [Game of Trees VCS](https://gameoftrees.org/) has been added

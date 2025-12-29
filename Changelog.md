@@ -49,6 +49,12 @@ This changelog does not follow semantic versioning.
   New integration tests use the utilities that come with the default
   Perl5 distribution.
 
+- The `jobs` action in the `pipelines` subcommand that is used to
+  print jobs of a GitLab pipeline now includes trigger jobs.
+
+  The triggered child pipelines are still listed in the `children`
+  action.
+
 ### Removed
 
 - The configure options `--enable-liblowdown`, `--enable-libedit`

@@ -29,6 +29,8 @@ my $builddir = getcwd();
 my $verbosity = 0;
 my $jobs = 1;
 
+$ENV{'TZ'} = "UTC";
+
 #########################
 # Command line Options
 sub usage {
@@ -103,6 +105,8 @@ my $harness = TAP::Harness->new({
 		return undef;
 	},
 });
-$harness->runtests(@alltests);
+
+my $agg = $harness->runtests(@alltests);
+exit 1 if $agg->has_errors;
 
 # kak: filetype=perl

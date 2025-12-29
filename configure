@@ -1,6 +1,19 @@
 #!/usr/bin/env sh
-
-# set -o pipefail
+#
+#
+# NOTE: Before you start yelling, yes this is NOT a GNU auto* build
+#       system. However, I have written this in a way that it
+#       has as few changes as needed.
+#
+#       You still have all the features:
+#
+#       - Cross Compilation Support
+#       - Support for various compilers and operating systems
+#       - Out-of-tree builds
+#       - DESTDIR/PREFIX install
+#       - Test suite
+#
+#       PLEASE READ THE README / HACKING GUIDE FOR MORE INFORMATION.
 
 CONFIGURE_CMD_ARGS="${*}"
 

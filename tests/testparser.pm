@@ -23,7 +23,7 @@ sub parsetest {
 		if ($ln eq "\n") {
 			if ($in_multiline) {
 				if (defined($testprops{$multi_key})) {
-					if (scalar($testprops{$multi_key}) eq "ARRAY") {
+					if (ref($testprops{$multi_key}) eq "ARRAY") {
 						push(@{$testprops{$multi_key}}, $multi_val);
 					} else {
 						$testprops{$multi_key} = [$testprops{$multi_key}, $multi_val];
@@ -56,7 +56,7 @@ sub parsetest {
 
 			my $val = substr($ln, $colon + 2);
 			if (defined($testprops{$key})) {
-				if (scalar($testprops{$key}) eq "ARRAY") {
+				if (ref($testprops{$key}) eq "ARRAY") {
 					push(@{$testprops{$key}}, $val);
 				} else {
 					$testprops{$key} = [$testprops{$key}, $val];

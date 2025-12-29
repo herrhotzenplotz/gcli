@@ -104,7 +104,7 @@ gcli_read_file(char const *path, char **buffer)
 	*buffer = malloc(buflen);
 
 	while (!ferror(f) && !feof(f)) {
-		char c = 0;
+		int c = 0;
 
 		if (len >= buflen) {
 			buflen *= 2;

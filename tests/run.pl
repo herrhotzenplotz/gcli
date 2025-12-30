@@ -29,7 +29,11 @@ my $builddir = getcwd();
 my $verbosity = 0;
 my $jobs = 1;
 
+# Clean environment variables that could mess with the
+# test suite results.
 $ENV{'TZ'} = "UTC";
+$ENV{'LC_ALL'} = "C.UTF-8";
+delete $ENV{'GCLI_ACCOUNT'};
 
 #########################
 # Command line Options

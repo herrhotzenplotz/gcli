@@ -2,7 +2,7 @@
 
 This changelog does not follow semantic versioning.
 
-## UNRELEASED
+## 2.10.0 (31-Dec-2025)
 
 ### Fixed
 

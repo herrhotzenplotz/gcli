@@ -187,6 +187,7 @@ gitlab_get_pipeline_jobs(struct gcli_ctx *ctx,
 {
 	char *url = NULL;
 	int rc = 0;
+
 	struct gcli_fetch_list_ctx fl = {
 		.listp = &out->jobs,
 		.sizep = &out->jobs_size,
@@ -195,6 +196,16 @@ gitlab_get_pipeline_jobs(struct gcli_ctx *ctx,
 	};
 
 	rc = gitlab_pipeline_make_url(ctx, pipeline_path, &url, "/jobs");
+	if (rc < 0)
+		return rc;
+
+	rc = gcli_fetch_list(ctx, url, &fl);
+	if (rc < 0)
+		return rc;
+
+	/* Fetch trigger jobs as well, useful when trying to re-run triggered
+	 * pipelines. */
+	rc = gitlab_pipeline_make_url(ctx, pipeline_path, &url, "/bridges");
 	if (rc < 0)
 		return rc;
 

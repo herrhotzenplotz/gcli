@@ -97,7 +97,7 @@ longversion(void)
 }
 
 void
-check_owner_and_repo(const char **owner, const char **repo)
+check_owner_and_repo(char **owner, char **repo)
 {
 	/* HACK */
 	if (gcli_config_get_forge_type(g_clictx) == GCLI_FORGE_BUGZILLA)
@@ -110,7 +110,7 @@ check_owner_and_repo(const char **owner, const char **repo)
 	if (*owner == NULL) {
 		int rc = gcli_config_get_repo(g_clictx, owner, repo);
 		if (rc < 0)
-			errx(1, "gcli: error: %s", gcli_get_error(g_clictx));
+			errx(1, "gcli: error: failed to derive owner/repo combination");
 	}
 }
 
@@ -159,8 +159,8 @@ check_path(struct gcli_path *path)
 	}
 
 	check_owner_and_repo(
-		(char const **)&path->as_default.owner,
-		(char const **)&path->as_default.repo);
+		&path->as_default.owner,
+		&path->as_default.repo);
 }
 
 /* Parses (and updates) the given argument list into two seperate lists:
@@ -368,22 +368,6 @@ gcli_pretty_print_diff(char const *const input, int indent)
 		       (int)linelen, hd, end_colour);
 		hd = eol + 1;
 	}
-}
-
-/* portability kludge for Slowlaris which to this day doesn't support
- * resolved_path to be NULL. */
-char *
-gcli_cmd_realpath(char const *const restrict pathname)
-{
-	char *resolved_path = NULL;
-
-#if defined(_XOPEN_SOURCE) && _XOPEN_SOURCE < 700
-	/* This system is certainly very old! Assume that PATH_MAX is defined.
-	 * If not well there you go. Yes, this is flawed and ugly. */
-	resolved_path = calloc(PATH_MAX, 1);
-#endif
-
-	return realpath(pathname, resolved_path);
 }
 
 bool

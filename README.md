@@ -7,7 +7,24 @@ Portable CLI tool for interacting with Git(Hub|Lab|Tea), Forgejo and Bugzilla fr
 ## Why?
 
 The official GitHub CLI tool only supports GitHub.
-I wanted a simple unified tool for various git forges such as GitHub and GitLab because every forge does things differently yet all build on Git and purposefully break with its philosophy.
+Since I don't want to remember the commands for every single forge I wrote a tool that integrates with all of them with the same interface.
+
+## Features
+
+- Support for: GitHub, GitLab, Gitea, Forgejo, Bugzilla
+- Manage issues, merge requests, continuous integration, releases, milestones all from the command line
+- Few dependencies, portable code, support for many platforms and architectures
+- Integration into version control systems: Git and GoT
+- Documentation as manual pages as well as help integrated into the tool itself
+- Suitable for both scripted and interactive use
+
+## Installation
+
+There are official packages available:
+
+<a href="https://repology.org/project/gcli/versions">
+<img src="https://repology.org/badge/vertical-allrepos/gcli.svg" alt="Packaging status" align="right">
+</a>
 
 ## Building
 
@@ -16,12 +33,6 @@ I wanted a simple unified tool for various git forges such as GitHub and GitLab 
 Recent tarballs can be downloaded here:
 
 [https://herrhotzenplotz.de/gcli/releases/](https://herrhotzenplotz.de/gcli/releases/)
-
-There are official packages available:
-
-<a href="https://repology.org/project/gcli/versions">
-<img src="https://repology.org/badge/vertical-allrepos/gcli.svg" alt="Packaging status" align="right">
-</a>
 
 ### Dependencies
 
@@ -42,8 +53,7 @@ Optional dependencies:
 
 The test suite requires:
 
-- [Kyua](https://github.com/jmmv/kyua)
-- [ATF](https://github.com/jmmv/atf)
+- Perl 5
 
 ### Compile
 
@@ -69,6 +79,7 @@ Details on cross-compilation can be found in [HACKING.md](HACKING.md).
 
 To run the test suite first make sure you have all the necessary dependencies installed (see above).
 Then you can run `make check` in the build directory to run the test suite.
+Note that the check target does not allow running the tests in parallel.
 
 For more details also see [HACKING.md](HACKING.md).
 
@@ -76,20 +87,18 @@ For more details also see [HACKING.md](HACKING.md).
 
 Incomplete list of tested operating systems:
 
-- FreeBSD 13.0-RELEASE amd64 and arm64
-- Solaris 10 and 11, sparc64
-- SunOS 5.11 i86pc (OmniOS)
-- Devuan GNU/Linux Chimaera x86_64
-- Debian GNU/Linux ppc64, ppc64le
+- FreeBSD (various versions) amd64, arm64 and riscv64
+- Solaris 10 and 11, sparc64, SunOS 5.11 i86pc (OmniOS)
+- Devuan GNU/Linux Chimaera x86_64, Debian GNU/Linux ppc64, ppc64le
 - Gentoo Linux sparc64, ia64
 - Fedora 34 x86_64
 - Haiku x86_64
 - Minix 3.4.0 (GENERIC) i386
-- OpenBSD 7.0 GENERIC amd64
+- OpenBSD (various versions) GENERIC amd64
+- NetBSD (various versions) amd64, sparc64 and VAX
 - Alpine Linux 3.16 x86_64
 - Darwin 22.2.0 arm64
 - Windows 10 (MSYS2 mingw32-w64)
-- NetBSD 9.3 amd64, sparc64 and VAX
 
 Tested Compilers so far:
 

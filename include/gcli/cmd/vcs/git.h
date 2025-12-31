@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,18 +27,22 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GCLI_TESTS_H
-#define GCLI_TESTS_H
+#ifndef GCLI_CMD_VCS_GIT_H
+#define GCLI_CMD_VCS_GIT_H
 
-#if defined(HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif /* HAVE_CONFIG_H */
+#endif
 
-#include <atf-c.h>
+#include <gcli/gcli.h>
+#include <gcli/cmd/vcs.h>
+#include <gcli/port/sv.h>
 
-/* Helper for making assertions on my custom string views. These
- * should get removed at some point */
-#define ATF_CHECK_SV_EQTO(view, str) \
-	ATF_CHECK(sn_sv_eq_to((view), str))
+int gcli_vcs_git_get_current_branch(struct gcli_ctx *ctx, char **out);
 
-#endif /* GCLI_TESTS_H */
+int gcli_vcs_git_read_repoconfig(struct gcli_ctx *ctx,
+                                 struct gcli_cmd_vcs_remotes *out);
+
+void gcli_vcs_git_add_fork_remote(char const *org, char const *repo);
+
+#endif /* GCLI_CMD_VCS_GIT_H */

@@ -104,55 +104,78 @@ TBD
 #### Cross-Compilation
 
 gcli supports cross compilation. A cross-compilation setup can be
-achieved by setting at least the following environment variables:
+achieved by setting one or more of the following environment
+variables:
 
 - `CC` to the target system (aka. host) compiler
+- `CFLAGS` for setting `--target` and/or `--sysrooot`
 - `CC_FOR_BUILD` to the build system (aka. build) compiler
+- `CFLAGS_FOR_BUILD` for configuring build system `CFLAGS`
 - `PKG_CONFIG_PATH` to the path where pkgconfig should look for `.pc` files
 
-e.g. to compile from FreeBSD amd64 to a armv7l Linux system:
+You possibly also need:
 
-	$ CC=/opt/armv7-linux-gnueabihf-gcc/bin/armv7-linux-gnueabihf-gcc \
-	> CC_FOR_BUILD=cc \
-	> PKG_CONFIG_PATH=/opt/armv7-linux-gnueabihf-gcc/root/usr/lib/pkgconfig \
-	> ../configure --debug
-	Configuring gcli 2.4.0-devel
-	Checking for realpath ... realpath
-	Checking host compiler ... /opt/armv7-linux-gnueabihf-gcc/bin/armv7-linux-gnueabihf-gcc
-	Checking host compiler type ... gcc
-	Checking host compiler target ... armv7-linux-gnueabihf
-	Checking for cross-compilation setup ... yes
+- `PKG_CONFIG_LIBDIR` to the path where the system `.pc` files are stored
+- `PKG_CONFIG_SYSROOT_DIR` as a sysroot prefix in case the compiler doesn't prefix the paths internally
+
+So, e.g. set up a sysroot for FreeBSD aarch64 in `/store/sysroot/arm64` and then build against it:
+
+	$ env \
+	>	CFLAGS="--target=aarch64-unknown-freebsd14.3 --sysroot=/store/sysroot/arm64" \
+	>	PKG_CONFIG_LIBDIR=/store/sysroot/arm64/usr/libdata/pkgconfig \
+	>	PKG_CONFIG_PATH=/store/sysroot/arm64/usr/local/libdata/pkgconfig \
+	>	PKG_CONFIG_SYSROOT_DIR=/store/sysroot/arm64 \
+	>	../configure --release
+	Checking for realpath ... /bin/realpath
+	Checking host compiler ... cc
+	Checking host compiler type ... clang
+	Checking host compiler target ... aarch64-unknown-freebsd14.3
+	Checking for build compiler... cc
 	Checking build compiler type... clang
-	Checking build compiler target ... amd64-unknown-freebsd14.1
-	Checking for pkg-config ... pkg-config
+	Checking build compiler target ... amd64-unknown-freebsd14.3
+	Checking for pkg-config ... /usr/local/bin/pkg-config
 	Checking for libcurl ... found
-	Checking for atf-c ... found
-	Checking for libedit ... found
-	Checking for kyua ... kyua
-	Checking for ccache ... ccache
-	Checking for install ... install
+	Checking for libcrypto ... found
+	Checking for libedit ... not found
+	Checking for readline ... not found
+	Checking for lowdown ... found
+	Checking for pdjson ... not found
+	Checking whether host is Darwin for -lrt... no
+	Checking for ccache ... /usr/local/bin/ccache
+	Checking for install ... /usr/bin/install
+	Checking for perl ... /usr/local/bin/perl
 	Writing config.h
-	Configuration Summary:
+	Configuration summary for gcli 2.10.0-devel:
 
-	    Build system type: amd64-unknown-freebsd14.1
-	     Host system type: armv7-linux-gnueabihf
-	         optimise for: debug
-	                   CC: /opt/armv7-linux-gnueabihf-gcc/bin/armv7-linux-gnueabihf-gcc
+	    Build system type: amd64-unknown-freebsd14.3
+	     Host system type: aarch64-unknown-freebsd14.3
+	         optimise for: release
+	 Executable extension: Host: '', Build: ''
+	     Object extension: Host: '.o', Build: '.o'
+	    Library extension: Host: '.a', Build: '.a'
+	                   CC: cc
 	         CC_FOR_BUILD: cc
-	               CFLAGS: 
+	               CFLAGS: --target=aarch64-unknown-freebsd14.3 --sysroot=/store/sysroot/arm64
 	     CFLAGS_FOR_BUILD: 
-	       LIBCURL_CFLAGS: 
-	         LIBCURL_LIBS: -lcurl
-	       LIBATFC_CFLAGS: -I/usr/local/include
-	         LIBATFC_LIBS: -L/usr/local/lib -latf-c
-	 Using libedit:
-	       LIBEDIT_CFLAGS: -I/usr/include/editline
-	         LIBEDIT_LIBS: -ledit
+	              LDFLAGS: 
+	    LDFLAGS_FOR_BUILD: 
+	       LIBCURL_CFLAGS: -I/store/sysroot/arm64/usr/local/include -I/store/sysroot/arm64/usr/include
+	         LIBCURL_LIBS: -L/store/sysroot/arm64/usr/local/lib -lcurl
+	 Using lowdown 2.0.2:
+	    LIBLOWDOWN_CFLAGS: -I/store/sysroot/arm64/usr/local/include
+	      LIBLOWDOWN_LIBS: -L/store/sysroot/arm64/usr/local/lib -llowdown -lm
+
+	     WARNING: pdjson not found, using vendored version.
+	              You may wish to install a system version instead.
 
 	Configuration done. You may now run make.
+	For more information about available build targets, run 'make help'.
+
 
 When you now run make the compilers will be chosen appropriately.
-The test suite will not work when cross-compiling.
+The test suite will not work when cross-compiling.  Notice how the
+`CC` and `CC_FOR_BUILD` are omitted due to the fact that they are
+the same clang, just with different flags for build and host.
 
 If needed you may have to set the values of
 
@@ -165,12 +188,33 @@ It should be possible to build gcli under cygwin this way.
 
 ## Tests
 
-The test suite depends on [Kyua](https://github.com/jmmv/kyua) and
-[libatf-c](https://github.com/jmmv/atf).
+The test suite currently depends on Perl 5.
+A somewhat recent version should suffice.
 
 To run the test suite in a configured directory `build` run:
 
 	$ make -C build check
+
+You may also invoke the test harness runner directly:
+
+	$ tests/run.pl -h
+
+You should get a simple usage message from it.
+
+### Examples
+
+Suppose you are in the source tree root and your build root is in
+`build`. To run all tests in parallel with 12 runners:
+
+	$ tests/run.pl -b build -j 12
+
+To run all tests tagged wit "github":
+
+	$ tests/run.pl -b build github
+
+To run the tests 3, 4 and 5 in parallel:
+
+	$ tests/run.pl -b build -j 3 3 4 5
 
 # Code Style
 

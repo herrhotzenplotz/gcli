@@ -63,5 +63,8 @@ gcli_bool_yesno(bool x)
 	return x ? "yes" : "no";
 }
 
+/* find a directory anywhere up in the directory hierarchy */
+char *gcli_find_directory(char const *dname);
+char *gcli_realpath(char const *const restrict pathname);
 
 #endif /* GCLI_PORT_UTIL_H */

@@ -181,8 +181,12 @@ static void
 process_series_prelude(char *prelude, struct gcli_pull_create_review_details *details)
 {
 	char *comment, *bol;
-	size_t const p_len = strlen(prelude);
+	size_t p_len = 0;
 
+	if (prelude == NULL)
+		return;
+
+	p_len = strlen(prelude);
 	bol = prelude;
 
 	comment = calloc(p_len + 1, 1);

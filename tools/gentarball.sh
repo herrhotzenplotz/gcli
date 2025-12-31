@@ -10,17 +10,25 @@ findversion() {
 
 VERSION=$(findversion)
 
-DIR=$(git rev-parse --show-toplevel)/dist/gcli-${VERSION}
+DIR=dist/gcli-${VERSION}
 mkdir -p $DIR
 
+if [ -d .got ]; then
+	repodir=$(got info | grep '^repository' | cut -d: -f2 | xargs)
+	head=$(got br)
+else
+	repodir=$(git rev-parse --show-toplevel)/.git
+	head=@
+fi
+
 echo "Making BZIP tarball"
-git archive --format=tar --prefix=gcli-$VERSION/ @ \
+git --git-dir="${repodir}" archive --format=tar --prefix=gcli-$VERSION/ $head \
 	| bzip2 -v > $DIR/gcli-$VERSION.tar.bz2
 echo "Making XZ tarball"
-git archive --format=tar --prefix=gcli-$VERSION/ @ \
+git --git-dir="${repodir}" archive --format=tar --prefix=gcli-$VERSION/ $head \
 	| xz -v > $DIR/gcli-$VERSION.tar.xz
 echo "Making GZIP tarball"
-git archive --format=tar --prefix=gcli-$VERSION/ @ \
+git --git-dir="${repodir}" archive --format=tar --prefix=gcli-$VERSION/ $head \
 	| gzip -v > $DIR/gcli-$VERSION.tar.gz
 
 (

@@ -214,8 +214,7 @@ gcli_patch_parse_prelude(struct gcli_diff_parser *parser, struct gcli_patch *out
 	}
 
 	size_t const prelude_len = parser->hd - prelude_begin;
-	out->prelude = calloc(prelude_len + 1, 1);
-	memcpy(out->prelude, prelude_begin, prelude_len);
+	out->prelude = gcli_strndup(prelude_begin, prelude_len);
 
 	return 0;
 }

@@ -56,7 +56,7 @@ shift(int *argc, char ***argv)
 void version(void);
 void longversion(void);
 void copyright(void);
-void check_owner_and_repo(const char **owner, const char **repo);
+void check_owner_and_repo(char **owner, char **repo);
 void check_path(struct gcli_path *path);
 
 void parse_labels_options(
@@ -73,8 +73,6 @@ void gcli_pretty_print(char const *input, int indent, int maxlinelen,
                        FILE *stream);
 
 void gcli_pretty_print_diff(char const *const input, int indent);
-
-char *gcli_cmd_realpath(char const *const restrict pathname);
 
 bool gcli_cmd_should_do_always_yes(void);
 

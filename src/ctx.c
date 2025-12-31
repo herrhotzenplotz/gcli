@@ -80,7 +80,7 @@ gcli_set_progress_func(struct gcli_ctx *ctx,
 	ctx->report_progress = pfunc;
 }
 
-char *
+char const *
 gcli_get_apibase(struct gcli_ctx *ctx)
 {
 	if (!ctx->apibase)
@@ -89,7 +89,7 @@ gcli_get_apibase(struct gcli_ctx *ctx)
 	return ctx->apibase;
 }
 
-char *
+char const *
 gcli_get_token(struct gcli_ctx *ctx)
 {
 	return ctx->get_token(ctx);
@@ -99,13 +99,11 @@ char *
 gcli_get_authheader(struct gcli_ctx *ctx)
 {
 	char *hdr = NULL;
-	char *token = gcli_get_token(ctx);
+	char const *const token = gcli_get_token(ctx);
 
 	if (token && gcli_forge(ctx)->make_authheader) {
 		hdr = gcli_forge(ctx)->make_authheader(ctx, token);
 	}
-
-	gcli_clear_ptr(&token);
 
 	return hdr;
 }

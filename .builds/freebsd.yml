@@ -1,9 +1,7 @@
 image: freebsd/14.x
 packages:
-  - atf
   - ca_root_nss
   - curl
-  - kyua
   - libedit
   - libssh2
   - libtool
@@ -11,6 +9,7 @@ packages:
   - pkg
   - pkgconf
   - readline
+  - perl5
 sources:
   - https://git.sr.ht/~herrhotzenplotz/gcli
 tasks:

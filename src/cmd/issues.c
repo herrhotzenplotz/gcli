@@ -51,7 +51,8 @@
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: gcli issues create [-o owner -r repo] [-y] [-R reviewer] [title...]\n");
+	fprintf(stderr, "usage: gcli issues create [-o owner -r repo] [-y] [-R reviewer]\n");
+	fprintf(stderr, "                          [-T template] [title...]\n");
 	fprintf(stderr, "       gcli issues [-o owner -r repo] [-a] [-n number] [-A author] [-L label]\n");
 	fprintf(stderr, "                   [-M milestone] [-s] [search query...]\n");
 	fprintf(stderr, "       gcli issues [-o owner -r repo] -i issue actions...\n");
@@ -283,7 +284,7 @@ create_issue(struct gcli_submit_issue_options *opts, bool always_yes)
 static int
 subcommand_issue_create_interactive(struct gcli_submit_issue_options *const opts)
 {
-	char const *deflt_owner = NULL, *deflt_repo = NULL;
+	char *deflt_owner = NULL, *deflt_repo = NULL;
 	int rc = 0;
 
 	gcli_config_get_repo(g_clictx, &deflt_owner, &deflt_repo);
@@ -361,7 +362,7 @@ subcommand_issue_create(int argc, char *argv[])
 
 	always_yes = gcli_cmd_should_do_always_yes();
 
-	while ((ch = getopt_long(argc, argv, "o:r:O:T:", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "o:r:yO:T:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
 			opts.owner = optarg;

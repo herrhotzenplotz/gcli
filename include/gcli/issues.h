@@ -67,8 +67,8 @@ struct gcli_issue {
 };
 
 struct gcli_submit_issue_options {
-	char const *owner;
-	char const *repo;
+	char *owner;
+	char *repo;
 	char *title;
 	char *body;
 

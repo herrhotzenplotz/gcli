@@ -326,3 +326,100 @@ gitea_pull_get_reviews(struct gcli_ctx *ctx,
 {
 	return github_pull_get_reviews(ctx, path, out);
 }
+
+static void
+gitea_put_review_comment(struct gcli_jsongen *gen,
+                         struct gcli_diff_comment const *comment)
+{
+	gcli_jsongen_begin_object(gen);
+	{
+		gcli_jsongen_objmember(gen, "path");
+		gcli_jsongen_string(gen, comment->after.filename);
+
+		gcli_jsongen_objmember(gen, "body");
+		gcli_jsongen_string(gen, comment->comment);
+
+		if (comment->end_is_in_new) {
+			gcli_jsongen_objmember(gen, "new_position");
+			gcli_jsongen_number(gen, comment->after.end_row);
+			gcli_jsongen_objmember(gen, "old_position");
+			gcli_jsongen_number(gen, 0);
+		} else {
+			gcli_jsongen_objmember(gen, "old_position");
+			gcli_jsongen_number(gen, comment->before.end_row);
+			gcli_jsongen_objmember(gen, "new_position");
+			gcli_jsongen_number(gen, 0);
+		}
+	}
+	gcli_jsongen_end_object(gen);
+}
+
+static void
+gitea_put_review_comments(struct gcli_jsongen *gen,
+                          struct gcli_diff_comments const *comments)
+{
+	if (TAILQ_EMPTY(comments))
+		return;
+
+	gcli_jsongen_objmember(gen, "comments");
+	gcli_jsongen_begin_array(gen);
+	{
+		struct gcli_diff_comment const *comment;
+
+		TAILQ_FOREACH(comment, comments, next)
+			gitea_put_review_comment(gen, comment);
+	}
+	gcli_jsongen_end_array(gen);
+}
+
+int
+gitea_pull_create_review(struct gcli_ctx *ctx,
+                         struct gcli_pull_create_review_details const *details)
+{
+	int rc = 0;
+	char *url = NULL, *payload = NULL;
+	struct gcli_jsongen gen = {0};
+
+	/* essentially the same as with github, but notice the 'D'
+	 * in approveD ... */
+	char const *const state_string[] = {
+		[GCLI_REVIEW_ACCEPT_CHANGES] = "APPROVED",
+		[GCLI_REVIEW_REQUEST_CHANGES] = "REQUEST_CHANGES",
+		[GCLI_REVIEW_COMMENT] = "COMMENT",
+	};
+
+	rc = gitea_pull_make_url(ctx, &details->path, &url, "/reviews");
+	if (rc < 0)
+		return rc;
+
+	if (gcli_jsongen_init(&gen) < 0) {
+		rc = gcli_error(ctx, "failed to init JSON generator");
+		goto bail;
+	}
+
+	gcli_jsongen_begin_object(&gen);
+	{
+		if (details->body) {
+			gcli_jsongen_objmember(&gen, "body");
+			gcli_jsongen_string(&gen, details->body);
+		}
+
+		gcli_jsongen_objmember(&gen, "event");
+		gcli_jsongen_string(&gen, state_string[details->review_state]);
+
+		gitea_put_review_comments(&gen, &details->comments);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+
+	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
+
+	gcli_jsongen_free(&gen);
+
+bail:
+	gcli_clear_ptr(&payload);
+	gcli_clear_ptr(&url);
+
+	return rc;
+}

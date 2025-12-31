@@ -6,3 +6,6 @@ insert_final_newline = true
 indent_style = tab
 tab_width = 8
 trim_trailing_whitespace = true
+
+[*.t]
+trim_trailing_whitespace = false

@@ -65,10 +65,12 @@ void gcli_clear_ptr(void *ptr);
 
 struct gcli_ctx;
 
+int gcli_parse_forgetype(struct gcli_ctx *, char const *, gcli_forge_type *);
+
 char const *gcli_init(struct gcli_ctx **,
                       gcli_forge_type (*get_forge_type)(struct gcli_ctx *),
-                      char *(*get_authheader)(struct gcli_ctx *),
-                      char *(*get_apibase)(struct gcli_ctx *));
+                      char const *(*get_authheader)(struct gcli_ctx *),
+                      char const *(*get_apibase)(struct gcli_ctx *));
 
 enum {
 	GCLI_VERBOSITY_NORMAL  = 0,

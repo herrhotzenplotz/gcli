@@ -9,8 +9,7 @@ packages:
   - flex
   - bison
   - libbsd-dev
-  - kyua
-  - atf-dev
+  - perl
   - libedit-dev
 sources:
   - https://git.sr.ht/~herrhotzenplotz/gcli

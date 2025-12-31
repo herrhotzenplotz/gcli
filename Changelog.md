@@ -2,6 +2,68 @@
 
 This changelog does not follow semantic versioning.
 
+## 2.10.0 (31-Dec-2025)
+
+### Fixed
+
+- A crash that occured when the config file contains an assignment
+  with the '=' missing was fixed.
+
+  Reported-by: Matthias Andree <mandree@FreeBSD.org>
+
+- A crash that occurred when the git configuration contained local
+  filesystem remotes has been fixed.
+
+  Reported-by: xaizek <https://github.com/xaizek>
+
+- An invalid invocation of the `waitpid` routine has been fixed.
+
+  On Linux this caused invalid argument errors in gcli when any
+  subprocesss was launched, most prominently the `open` action was
+  affected by this.
+
+  Submitted-by: xaizek <https://github.com/xaizek>
+
+### Added
+
+- Support for the [Game of Trees VCS](https://gameoftrees.org/) has been added
+
+  An abstraction over the version control system currently used was
+  implemented to support this. This now allows integration into git
+  as well as got checkouts.
+
+- The approve and unapprove actions in the pulls subcommand have
+  gained two options:
+
+  - `-y` / `--yes`: makes the action non-interactive (no editor opened, no confirmation)
+  - `-T` / `--template`: allows you to pass a file that is used for the message
+
+### Changed
+
+- The test suite has been converted away from Kyua and atf-c to a
+  perl-based harness.
+
+  Unit tests use a custom header file that allows easy conversion
+  of the existing test.
+
+  New integration tests use the utilities that come with the default
+  Perl5 distribution.
+
+- The `jobs` action in the `pipelines` subcommand that is used to
+  print jobs of a GitLab pipeline now includes trigger jobs.
+
+  The triggered child pipelines are still listed in the `children`
+  action.
+
+### Removed
+
+- The configure options `--enable-liblowdown`, `--enable-libedit`
+  and `--enable-libreadline` have been deprecated as they were
+  no-ops anyways.  When used, a warning is printed and the flag is
+  ignored.
+
+  You are advised to remove this flag from any build automation.
+
 ## 2.9.1 (04-Oct-2025)
 
 ### Fixed

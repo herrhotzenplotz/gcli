@@ -313,16 +313,8 @@ install_aliases(void)
 	if (!entries)
 		return;
 
-	TAILQ_FOREACH(entry, entries, next) {
-		char *alias_name, *alias_for;
-
-		alias_name = gcli_sv_to_cstr(entry->key);
-		alias_for = gcli_sv_to_cstr(entry->value);
-
-		add_subcommand_alias(alias_name, alias_for);
-
-		free(alias_for);
-	}
+	TAILQ_FOREACH(entry, entries, next)
+		add_subcommand_alias(entry->key, entry->value);
 }
 
 static void
@@ -348,6 +340,14 @@ main(int argc, char *argv[])
 	if (gcli_config_init_ctx(g_clictx) < 0)
 		errx(1, "gcli: error: failed to init context: %s", gcli_get_error(g_clictx));
 
+	/* Parse first arguments, must be done here because the aliases are
+	 * read from the config file. However, the config file may be
+	 * changed using command line options. */
+	if (gcli_config_parse_args(g_clictx, &argc, &argv)) {
+		usage();
+		return EXIT_FAILURE;
+	}
+
 	/* Initial setup */
 	setup_subcommand_table();
 
@@ -356,12 +356,6 @@ main(int argc, char *argv[])
 
 	/* Sorts the subcommands array alphabatically */
 	presort_subcommands();
-
-	/* Parse first arguments */
-	if (gcli_config_parse_args(g_clictx, &argc, &argv)) {
-		usage();
-		return EXIT_FAILURE;
-	}
 
 	/* Make sure we have a subcommand */
 	if (argc == 0) {

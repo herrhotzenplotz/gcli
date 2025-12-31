@@ -38,7 +38,8 @@ int
 bugzilla_submit_comment(struct gcli_ctx *ctx,
                         struct gcli_submit_comment_opts const *const opts)
 {
-	char *url = NULL, *payload = NULL, *token = NULL;
+	char *url = NULL, *payload = NULL;
+	char const *token = NULL;
 	int rc = 0;
 	struct gcli_jsongen gen = {0};
 	struct gcli_path const *const tgt = &opts->target;

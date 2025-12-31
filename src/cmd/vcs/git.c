@@ -27,9 +27,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <gcli/cmd/vcs/git.h>
+
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/vcs.h>
 #include <gcli/cmd/cmdconfig.h>
-#include <gcli/cmd/gitconfig.h>
 
 #include <gcli/ctx.h>
 #include <gcli/gcli.h>
@@ -47,10 +49,6 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
-
-#define MAX_REMOTES 64
-static struct gcli_gitremote remotes[MAX_REMOTES];
-static size_t         remotes_size;
 
 /* Resolve a worktree .git if needed */
 static char *
@@ -131,83 +129,20 @@ resolve_worktree_gitdir_if_needed(char *dotgit)
 	return newdir;
 }
 
-/* Search for a file named fname in the .git directory.
- *
- * This is ugly code. However, I don't see an easier way to do
- * this. */
+
+/* Search for a file named fname in the .git directory. */
 static char *
 find_file_in_dotgit(char const *fname)
 {
-	DIR           *curr_dir    = NULL;
-	struct dirent *ent;
-	char          *curr_dir_path;
-	char          *dotgit      = NULL;
-	char          *config_path = NULL;
+	char *config_path = NULL;
+	char *dotgit = NULL;
+	size_t fname_len, config_path_len;
 
-	curr_dir_path = getcwd(NULL, 128);
-	if (!curr_dir_path)
-		err(1, "gcli: getcwd");
-
-	/* Here we are trying to traverse upwards through the directory
-	 * tree, searching for a directory called .git.
-	 * Starting point is ".".*/
-	do {
-		curr_dir = opendir(curr_dir_path);
-		if (!curr_dir)
-			err(1, "gcli: opendir");
-
-		/* Read entries of the directory */
-		while ((ent = readdir(curr_dir))) {
-			if (strcmp(".", ent->d_name) == 0 || strcmp("..", ent->d_name) == 0)
-				continue;
-
-			/* Is this the .git directory? If so, allocate some memory
-			 * to store the path into dotgit and append '/\0' */
-			if (strcmp(".git", ent->d_name) == 0) {
-				size_t len = strlen(curr_dir_path);
-				dotgit = malloc(len + strlen(ent->d_name) + 2);
-				memcpy(dotgit, curr_dir_path, len);
-				dotgit[len] = '/';
-				memcpy(dotgit + len + 1, ent->d_name, strlen(ent->d_name));
-
-				dotgit[len + 1 + strlen(ent->d_name)] = 0;
-
-				break;
-			}
-		}
-
-		/* If we reach this point and dotgit is NULL we couldn't find
-		 * the .git directory in the current directory. In this case
-		 * we append '..' to the path and resolve it. */
-		if (!dotgit) {
-			size_t len = strlen(curr_dir_path);
-			char *tmp = malloc(len + sizeof("/.."));
-
-			memcpy(tmp, curr_dir_path, len);
-			memcpy(tmp + len, "/..", sizeof("/.."));
-
-			free(curr_dir_path);
-
-			curr_dir_path = gcli_cmd_realpath(tmp);
-			if (!curr_dir_path)
-				err(1, "gcli: error: realpath at %s", tmp);
-
-			free(tmp);
-
-			/* Check if we reached the filesystem root */
-			if (strcmp("/", curr_dir_path) == 0) {
-				free(curr_dir_path);
-				closedir(curr_dir);
-				gcli_warnx(g_clictx, "not a git repository");
-				return NULL;
-			}
-		}
-
-
-		closedir(curr_dir);
-	} while (dotgit == NULL);
-
-	free(curr_dir_path);
+	dotgit = gcli_find_directory(".git");
+	if (!dotgit) {
+		gcli_warnx(g_clictx, "not a git repository");
+		return NULL;
+	}
 
 	/* In case we are working with git worktrees, the .git might be a
 	 * file that contains a pointer to the actual .git directory. Here
@@ -215,36 +150,18 @@ find_file_in_dotgit(char const *fname)
 	dotgit = resolve_worktree_gitdir_if_needed(dotgit);
 
 	/* Now search for the file in the found .git directory */
-	curr_dir = opendir(dotgit);
-	if (!curr_dir)
-		err(1, "gcli: opendir");
+	fname_len = strlen(fname);
+	config_path_len = strlen(dotgit) + 1 + fname_len + 1;
 
-	while ((ent = readdir(curr_dir))) {
-		/* skip over . and .. directory entries */
-		if (strcmp(".", ent->d_name) == 0 || strcmp("..", ent->d_name) == 0)
-			continue;
+	config_path = calloc(1, config_path_len);
+	snprintf(config_path, config_path_len, "%s/%s", dotgit, fname);
 
-		/* We found the config file, put together it's path and return
-		 * that */
-		if (strcmp(fname, ent->d_name) == 0) {
-			int len = strlen(dotgit);
+	if (access(config_path, F_OK) < 0)
+		errx(1, "gcli: error: .git without a config file");
 
-			config_path = malloc(len + 1 + sizeof(fname));
+	free(dotgit);
 
-			memcpy(config_path, dotgit, len);
-			config_path[len] = '/';
-
-			memcpy(config_path + len + 1, fname, strlen(fname) + 1);
-
-			closedir(curr_dir);
-			free(dotgit);
-
-			return config_path;
-		}
-	}
-
-	errx(1, "gcli: error: .git without a config file");
-	return NULL;
+	return config_path;
 }
 
 char *
@@ -253,18 +170,20 @@ gcli_find_gitconfig(void)
 	return find_file_in_dotgit("config");
 }
 
-gcli_sv
-gcli_gitconfig_get_current_branch(void)
+int
+gcli_vcs_git_get_current_branch(struct gcli_ctx *ctx, char **out)
 {
+	char *file_text;
 	char const *HEAD;
-	char       *file_text;
-	gcli_sv     buffer;
-	char        prefix[] = "ref: refs/heads/";
+	char prefix[] = "ref: refs/heads/";
+	gcli_sv buffer;
+
+	(void) ctx;
 
 	HEAD = find_file_in_dotgit("HEAD");
 
 	if (!HEAD)
-		return SV_NULL;
+		return -1;
 
 	int len = gcli_read_file(HEAD, &file_text);
 	if (len < 0)
@@ -276,40 +195,48 @@ gcli_gitconfig_get_current_branch(void)
 		buffer.data   += sizeof(prefix) - 1;
 		buffer.length -= sizeof(prefix) - 1;
 
-		return gcli_sv_trim(buffer);
+		*out = gcli_sv_to_cstr(gcli_sv_trim(buffer));
+		return 0;
 	} else {
 		free(file_text);
-		return SV_NULL;
+		return -1;
 	}
 }
 
-static void
-parse_remote_url(struct gcli_gitremote *const remote)
+static int
+parse_remote_url(struct gcli_cmd_vcs_remote *const remote, char const *url_text)
 {
 	char *tmp;
 	int rc = 0;
 	size_t n = 0;
 	struct gcli_url url = {0};
 
-	rc = gcli_parse_url(remote->url, &url);
+	rc = gcli_parse_url(url_text, &url);
 	if (rc < 0) {
 		fprintf(stderr, "gcli: failed to parse remote url: %s. "
-		        "This is probably a bug.\n", remote->url);
+		        "This is probably a bug.\n", url_text);
 
 		goto bail;
 	}
 
-	/* automagic forge type */
-	if (strcmp(url.host, "github.com") == 0)
-		remote->forge_type = GCLI_FORGE_GITHUB;
-	else if (strcmp(url.host, "gitlab.com") == 0)
-		remote->forge_type = GCLI_FORGE_GITLAB;
-	else if (strcmp(url.host, "codeberg.org") == 0)
-		remote->forge_type = GCLI_FORGE_GITEA;
-
-	tmp = strrchr(url.path, '/');
-	if (tmp == NULL)
+	/* probably a local clone */
+	if (!url.host) {
+		rc = 0;
 		goto bail;
+	}
+
+	/* save away the host */
+	remote->host = strdup(url.host);
+
+	/* automagic forge type */
+	gcli_vcs_guess_forgetype_by_hostname(url.host, &remote->forge_type);
+
+	/* split owner/repo */
+	tmp = strrchr(url.path, '/');
+	if (tmp == NULL) {
+		rc = -1;
+		goto bail;
+	}
 
 	remote->owner = gcli_strndup(url.path, tmp - url.path);
 
@@ -321,13 +248,16 @@ parse_remote_url(struct gcli_gitremote *const remote)
 		n -= 4;
 
 	remote->repo = gcli_strndup(tmp, n);
+	rc = 0;
 
 bail:
 	gcli_url_free(&url);
+	return rc;
 }
 
 static void
-gitconfig_parse_remote(gcli_sv section_title, gcli_sv entry)
+gitconfig_parse_remote(struct gcli_cmd_vcs_remotes *remotes,
+                       gcli_sv section_title, gcli_sv entry)
 {
 	gcli_sv remote_name = SV_NULL;
 
@@ -348,45 +278,48 @@ gitconfig_parse_remote(gcli_sv section_title, gcli_sv entry)
 
 	while ((entry = gcli_sv_trim_front(entry)).length > 0) {
 		if (gcli_sv_has_prefix(entry, "url")) {
-			if (remotes_size == MAX_REMOTES)
-				errx(1, "gcli: error: too many remotes");
+			char *url;
 
-			struct gcli_gitremote *const remote = &remotes[remotes_size++];
+			struct gcli_cmd_vcs_remote *const r =
+				calloc(1, sizeof(*r));
 
-			remote->name = gcli_sv_to_cstr(remote_name);
+			r->name = gcli_sv_to_cstr(remote_name);
 
 			gcli_sv_chop_until(&entry, '=');
 
 			entry.data   += 1;
 			entry.length -= 1;
 
-			gcli_sv url = gcli_sv_trim(gcli_sv_chop_until(&entry, '\n'));
+			url = gcli_sv_to_cstr(
+				gcli_sv_trim(
+					gcli_sv_chop_until(&entry, '\n')
+				)
+			);
 
-			remote->url = gcli_sv_to_cstr(url);
-			remote->forge_type = -1;
+			r->forge_type = -1;
 
-			parse_remote_url(remote);
+			parse_remote_url(r, url);
+			free(url);
+
+			TAILQ_INSERT_TAIL(remotes, r, next);
 		} else {
 			gcli_sv_chop_until(&entry, '\n');
 		}
 	}
 }
 
-static void
-gcli_gitconfig_read_gitconfig(void)
+int
+gcli_vcs_git_read_repoconfig(struct gcli_ctx *ctx,
+                             struct gcli_cmd_vcs_remotes *remotes)
 {
 	char *path = NULL;
 	gcli_sv buffer = {0}, filebuf = {0};
-	static int has_read_gitconfig = 0;
 
-	if (has_read_gitconfig)
-		return;
-
-	has_read_gitconfig = 1;
+	(void) ctx;
 
 	path = gcli_find_gitconfig();
 	if (!path)
-		return;
+		return 0;
 
 	filebuf.length = gcli_read_file(path, &filebuf.data);
 	buffer = filebuf;
@@ -414,7 +347,7 @@ gcli_gitconfig_read_gitconfig(void)
 		gcli_sv entry = gcli_sv_chop_until(&buffer, '[');
 
 		if (gcli_sv_has_prefix(section_title, "remote")) {
-			gitconfig_parse_remote(section_title, entry);
+			gitconfig_parse_remote(remotes, section_title, entry);
 		} else {
 			// @@@: skip section
 		}
@@ -423,10 +356,12 @@ gcli_gitconfig_read_gitconfig(void)
 	free(filebuf.data);
 	filebuf.length = 0;
 	filebuf.data = NULL;
+
+	return 0;
 }
 
 void
-gcli_gitconfig_add_fork_remote(char const *org, char const *repo)
+gcli_vcs_git_add_fork_remote(char const *org, char const *repo)
 {
 	char  remote[64]  = {0};
 	FILE *remote_list = popen("git remote", "r");
@@ -480,77 +415,4 @@ gcli_gitconfig_add_fork_remote(char const *org, char const *repo)
 			err(1, "gcli: fork");
 		}
 	}
-}
-
-/**
- * Return the gcli_forge_type for the given remote or -1 if
- * unknown */
-int
-gcli_gitconfig_get_forgetype(struct gcli_ctx *ctx, char const *const remote_name)
-{
-	(void) ctx;
-	gcli_gitconfig_read_gitconfig();
-
-	if (remote_name) {
-		for (size_t i = 0; i < remotes_size; ++i) {
-			if (strcmp(remotes[i].name, remote_name) == 0)
-				return remotes[i].forge_type;
-		}
-	}
-
-	if (!remotes_size) {
-		gcli_warn(ctx, "no remotes to auto-detect forge");
-		return -1;
-	}
-
-	return remotes[0].forge_type;
-}
-
-int
-gcli_gitconfig_repo_by_remote(struct gcli_ctx *ctx, char const *const remote,
-                              char const **const owner, char const **const repo,
-                              int *const forge)
-{
-	gcli_gitconfig_read_gitconfig();
-
-	if (remote) {
-		for (size_t i = 0; i < remotes_size; ++i) {
-			if (strcmp(remotes[i].name, remote) == 0) {
-				*owner = remotes[i].owner;
-				*repo  = remotes[i].repo;
-				if (forge)
-					*forge = remotes[i].forge_type;
-
-				return 0;
-			}
-		}
-
-		return gcli_error(ctx, "no such remote: %s", remote);
-	}
-
-	if (!remotes_size)
-		return gcli_error(ctx, "no remotes to auto-detect forge");
-
-	*owner = remotes[0].owner;
-	*repo  = remotes[0].repo;
-	if (forge)
-		*forge = remotes[0].forge_type;
-
-	return 0;
-}
-
-int
-gcli_gitconfig_get_remote(struct gcli_ctx *ctx, gcli_forge_type const type,
-                          char const **remote)
-{
-	gcli_gitconfig_read_gitconfig();
-
-	for (size_t i = 0; i < remotes_size; ++i) {
-		if (remotes[i].forge_type == type) {
-			*remote = remotes[i].url;
-			return 0;
-		}
-	}
-
-	return gcli_error(ctx, "no suitable remote for forge type");
 }

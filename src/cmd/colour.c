@@ -36,6 +36,7 @@
 #include <gcli/port/util.h>
 
 #include <stdlib.h>
+#include <strings.h>
 
 static struct {
 	uint32_t code;
@@ -143,15 +144,6 @@ gcli_resetbold(void)
 		return "\033[22m";
 }
 
-char const *
-gcli_state_colour_str(char const *it)
-{
-	if (it)
-		return gcli_state_colour_sv(SV((char *)it));
-	else
-		return "";
-}
-
 static const struct { char const *name; int code; }
 	state_colour_table[] =
 {
@@ -176,11 +168,12 @@ static const struct { char const *name; int code; }
 };
 
 char const *
-gcli_state_colour_sv(gcli_sv const state)
+gcli_state_colour_str(char const *it)
 {
-	if (!gcli_sv_null(state)) {
+	if (it) {
 		for (size_t i = 0; i < ARRAY_SIZE(state_colour_table); ++i) {
-			if (gcli_sv_has_prefix(state, state_colour_table[i].name))
+			size_t n = strlen(state_colour_table[i].name);
+			if (strncasecmp(it, state_colour_table[i].name, n) == 0)
 				return gcli_setcolour(state_colour_table[i].code);
 		}
 	}

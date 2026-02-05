@@ -500,11 +500,27 @@ static char *
 derive_head(void)
 {
 	char *branch = NULL, *head = NULL;
+	int rc;
+	struct gcli_cmd_vcs_remote const *remote;
 	char const *account;
 
-	account = gcli_config_get_account_name(g_clictx);
-	if (account == NULL)
-		return NULL;
+	/* try to get the owner of the current tracking remote branch */
+	rc = gcli_cmd_vcs_branch_remote(g_clictx, &remote);
+	if (rc < 0) {
+		/* fall back to the current account name */
+		account = gcli_config_get_account_name(g_clictx);
+		if (account == NULL)
+			return NULL;
+
+		if (gcli_be_verbose(g_clictx)) {
+			fprintf(
+				stderr,
+				"gcli: info: derive_head: falling back to current account name\n"
+			);
+		}
+	} else {
+		account = remote->owner;
+	}
 
 	if (gcli_cmd_vcs_branchname(g_clictx, &branch) == 0)
 		head = gcli_asprintf("%s:%s", account, branch);

@@ -160,3 +160,18 @@ gcli_vcs_got_read_repoconfig(struct gcli_ctx *ctx, struct gcli_cmd_vcs_remotes *
 
 	return rc;
 }
+
+int
+gcli_vcs_got_get_branch_remote(struct gcli_ctx *ctx,
+                               char const *branch_name,
+                               char **out_remote_name)
+{
+	/* simple: got always defaults to origin */
+	(void) ctx;
+	(void) branch_name;
+
+	*out_remote_name = strdup("origin");
+
+	return 0;
+}
+

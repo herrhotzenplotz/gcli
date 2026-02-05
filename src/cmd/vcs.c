@@ -20,6 +20,10 @@ static struct vcs_dispatch {
 	int (*read_repoconfig)(struct gcli_ctx *ctx,
 	                       struct gcli_cmd_vcs_remotes *remotes);
 
+	int (*get_branch_remote)(struct gcli_ctx *ctx,
+	                         char const *branch,
+	                         char **remote_name);
+
 } vcs_dispatches[] = {
 	[GCLI_CMD_VCSTYPE_GIT] = {
 		.get_branchname = gcli_vcs_git_get_current_branch,
@@ -28,6 +32,7 @@ static struct vcs_dispatch {
 	[GCLI_CMD_VCSTYPE_GOT] = {
 		.get_branchname = gcli_vcs_got_get_branchname,
 		.read_repoconfig = gcli_vcs_got_read_repoconfig,
+		.get_branch_remote = gcli_vcs_got_get_branch_remote,
 	},
 };
 
@@ -265,3 +270,68 @@ gcli_vcs_guess_forgetype_by_hostname(char const *host, gcli_forge_type *out)
 
 	return 0;
 }
+
+static int
+vcs_remote_by_name(char const *const remote_name, struct gcli_cmd_vcs_remote const **out)
+{
+	struct gcli_cmd_vcs_remote *r = NULL;
+
+	TAILQ_FOREACH(r, &remotes, next) {
+		if (strcmp(remote_name, r->name) == 0) {
+			*out = r;
+			return 0;
+		}
+	}
+
+	return -1;
+}
+
+int
+gcli_cmd_vcs_branch_remote(struct gcli_ctx *ctx, struct gcli_cmd_vcs_remote const **out)
+{
+	char *branch_name = NULL;
+	char *remote_name = NULL;
+	int vcsty = 0;
+	int rc = 0;
+
+	/* clear out for sanity */
+	*out = NULL;
+
+	ensure_config(ctx);
+
+	rc = gcli_cmd_vcs_branchname(ctx, &branch_name);
+	if (rc < 0)
+		return rc;
+
+	vcsty = gcli_cmd_vcs_get_vcstype(ctx);
+
+	if (vcsty == GCLI_CMD_VCSTYPE_UNKNOWN) {
+		gcli_warnx(ctx, "vcs: no or unknown vcs type");
+		return -1;
+	}
+
+	if (!vcs_dispatches[vcsty].get_branch_remote) {
+		gcli_warnx(
+			ctx,
+			"vcs: cannot determine tracked upstream branch because %s does not "
+			"implement get_branch_remote",
+			vcs_name(vcsty)
+		);
+
+		return -1;
+	}
+
+	/* query the remote name */
+	rc = vcs_dispatches[vcsty].get_branch_remote(
+		ctx, branch_name, &remote_name);
+
+	free(branch_name);
+
+	/* resolve to actual remote */
+	rc = vcs_remote_by_name(remote_name, out);
+
+	free(remote_name);
+
+	return rc;
+}
+

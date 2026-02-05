@@ -36,6 +36,8 @@ int gcli_cmd_vcs_repo_by_remote(struct gcli_ctx *ctx, char const *remote_name,
                                 char **owner, char **repo,
                                 int *forgetype);
 
+int gcli_cmd_vcs_branch_remote(struct gcli_ctx *ctx, struct gcli_cmd_vcs_remote const **out);
+
 int gcli_vcs_guess_forgetype_by_hostname(char const *host, gcli_forge_type *out);
 
 #endif /* GCLI_CMD_VCS_H */

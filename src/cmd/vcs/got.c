@@ -130,7 +130,8 @@ find_gotconf(struct gcli_ctx *ctx, char **out)
 
 /* routine for reading in the got.conf file */
 int
-gcli_vcs_got_read_repoconfig(struct gcli_ctx *ctx, struct gcli_cmd_vcs_remotes *remotes)
+gcli_vcs_got_read_repoconfig(struct gcli_ctx *ctx,
+                             struct gcli_cmd_vcs_ctx *vcsctx)
 {
 	struct gcli_gotconf_parser p = {0};
 	char *gotconf, *gotconf_text;
@@ -146,7 +147,7 @@ gcli_vcs_got_read_repoconfig(struct gcli_ctx *ctx, struct gcli_cmd_vcs_remotes *
 
 	p.head = gotconf_text;
 
-	rc = gcli_gotconf_parser_run(&p, remotes);
+	rc = gcli_gotconf_parser_run(&p, &vcsctx->remotes);
 	if (rc < 0) {
 		gcli_warnx(ctx, "failed to parse %s: %s",
 		           gotconf, p.error_message);
@@ -163,11 +164,13 @@ gcli_vcs_got_read_repoconfig(struct gcli_ctx *ctx, struct gcli_cmd_vcs_remotes *
 
 int
 gcli_vcs_got_get_branch_remote(struct gcli_ctx *ctx,
+                               struct gcli_cmd_vcs_ctx *vcsctx,
                                char const *branch_name,
                                char **out_remote_name)
 {
 	/* simple: got always defaults to origin */
 	(void) ctx;
+	(void) vcsctx;
 	(void) branch_name;
 
 	*out_remote_name = strdup("origin");

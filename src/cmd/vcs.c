@@ -18,9 +18,10 @@ static struct vcs_dispatch {
 	                      char **out);
 
 	int (*read_repoconfig)(struct gcli_ctx *ctx,
-	                       struct gcli_cmd_vcs_remotes *remotes);
+	                       struct gcli_cmd_vcs_ctx *vcsctx);
 
 	int (*get_branch_remote)(struct gcli_ctx *ctx,
+	                         struct gcli_cmd_vcs_ctx *vcsctx,
 	                         char const *branch,
 	                         char **remote_name);
 
@@ -36,7 +37,7 @@ static struct vcs_dispatch {
 	},
 };
 
-static struct gcli_cmd_vcs_remotes remotes = {0};
+static struct gcli_cmd_vcs_ctx g_vcsctx = {0};
 
 static char const *
 vcs_name(int type)
@@ -112,7 +113,7 @@ ensure_config(struct gcli_ctx *ctx)
 
 	have_read_config = 1;
 
-	TAILQ_INIT(&remotes);
+	TAILQ_INIT(&g_vcsctx.remotes);
 	vcsty = gcli_cmd_vcs_get_vcstype(ctx);
 
 	if (vcsty == GCLI_CMD_VCSTYPE_UNKNOWN) {
@@ -131,11 +132,11 @@ ensure_config(struct gcli_ctx *ctx)
 		return;
 	}
 
-	vcs_dispatches[vcsty].read_repoconfig(ctx, &remotes);
+	vcs_dispatches[vcsty].read_repoconfig(ctx, &g_vcsctx);
 
 	/* attempt a fixup of unknown forge types by scanning through the
 	 * command config */
-	TAILQ_FOREACH(rmt, &remotes, next) {
+	TAILQ_FOREACH(rmt, &g_vcsctx.remotes, next) {
 		if ((int)rmt->forge_type != -1)
 			continue;
 
@@ -158,7 +159,7 @@ get_most_sensible_remote(struct gcli_ctx *ctx)
 {
 	struct gcli_cmd_vcs_remote *r;
 
-	TAILQ_FOREACH(r, &remotes, next) {
+	TAILQ_FOREACH(r, &g_vcsctx.remotes, next) {
 		if (r->host == NULL || r->owner == NULL || r->repo == NULL)
 			continue;
 
@@ -184,7 +185,7 @@ gcli_cmd_vcs_forgetype(struct gcli_ctx *ctx, char const *remote_name)
 	ensure_config(ctx);
 
 	if (remote_name) {
-		TAILQ_FOREACH(r, &remotes, next) {
+		TAILQ_FOREACH(r, &g_vcsctx.remotes, next) {
 			if (strcmp(r->name, remote_name) == 0)
 				return r->forge_type;
 		}
@@ -205,7 +206,7 @@ gcli_cmd_vcs_remote_by_forgetype(struct gcli_ctx *ctx, gcli_forge_type type,
 
 	ensure_config(ctx);
 
-	TAILQ_FOREACH(r, &remotes, next) {
+	TAILQ_FOREACH(r, &g_vcsctx.remotes, next) {
 		if (r->forge_type == type) {
 			*out = r->name;
 			return 0;
@@ -226,7 +227,7 @@ gcli_cmd_vcs_repo_by_remote(struct gcli_ctx *ctx, char const *remote_name,
 	ensure_config(ctx);
 
 	if (remote_name) {
-		TAILQ_FOREACH(r, &remotes, next) {
+		TAILQ_FOREACH(r, &g_vcsctx.remotes, next) {
 			if (strcmp(r->name, remote_name) == 0) {
 				*owner = strdup(r->owner);
 				*repo  = strdup(r->repo);
@@ -276,7 +277,7 @@ vcs_remote_by_name(char const *const remote_name, struct gcli_cmd_vcs_remote con
 {
 	struct gcli_cmd_vcs_remote *r = NULL;
 
-	TAILQ_FOREACH(r, &remotes, next) {
+	TAILQ_FOREACH(r, &g_vcsctx.remotes, next) {
 		if (strcmp(remote_name, r->name) == 0) {
 			*out = r;
 			return 0;
@@ -323,7 +324,7 @@ gcli_cmd_vcs_branch_remote(struct gcli_ctx *ctx, struct gcli_cmd_vcs_remote cons
 
 	/* query the remote name */
 	rc = vcs_dispatches[vcsty].get_branch_remote(
-		ctx, branch_name, &remote_name);
+		ctx, &g_vcsctx, branch_name, &remote_name);
 
 	free(branch_name);
 

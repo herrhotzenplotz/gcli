@@ -310,7 +310,7 @@ gitconfig_parse_remote(struct gcli_cmd_vcs_remotes *remotes,
 
 int
 gcli_vcs_git_read_repoconfig(struct gcli_ctx *ctx,
-                             struct gcli_cmd_vcs_remotes *remotes)
+                             struct gcli_cmd_vcs_ctx *vcsctx)
 {
 	char *path = NULL;
 	gcli_sv buffer = {0}, filebuf = {0};
@@ -347,7 +347,7 @@ gcli_vcs_git_read_repoconfig(struct gcli_ctx *ctx,
 		gcli_sv entry = gcli_sv_chop_until(&buffer, '[');
 
 		if (gcli_sv_has_prefix(section_title, "remote")) {
-			gitconfig_parse_remote(remotes, section_title, entry);
+			gitconfig_parse_remote(&vcsctx->remotes, section_title, entry);
 		} else {
 			// @@@: skip section
 		}

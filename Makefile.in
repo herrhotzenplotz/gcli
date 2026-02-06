@@ -284,6 +284,7 @@ GCLI_SRCS= \
 	src/cmd/table.c \
 	src/cmd/vcs.c \
 	src/cmd/vcs/git.c \
+	src/cmd/vcs/gitconf_parser.c \
 	src/cmd/vcs/got.c \
 	src/cmd/vcs/gotconf_parser.c
 
@@ -445,6 +446,7 @@ SIMPLE_TEST_PROGRAMS = \
 
 TEST_PROGRAMS = \
 	$(SIMPLE_TEST_PROGRAMS) \
+	tests/unit/gitconf-parser$(EXEEXT) \
 	tests/unit/gotconf-parser$(EXEEXT)
 
 tests/unit/json-escape$(EXEEXT): tests/unit/json-escape.tests$(OBJEXT)
@@ -464,6 +466,13 @@ tests/unit/gotconf-parser$(EXEEXT): libgcli$(LIBEXT) tests/unit/gotconf-parser.t
 	$(CCACHE) $(CC) $(CFLAGS) $(CCDEPFLAGS) $(CPPFLAGS) \
 		$(LIBCURL_CFLAGS) $(LIBCRYPTO_CFLAGS) $(PDJSON_CFLAGS) \
 		$(LDFLAGS) -o $@ $(@:=.tests$(OBJEXT)) src/cmd/vcs/gotconf_parser.tests$(OBJEXT) \
+		libgcli$(LIBEXT) $(LIBCURL_LIBS) $(LIBCRYPTO_LIBS) $(PDJSON_LIBS) $(LIBRT_LIBS)
+
+tests/unit/gitconf-parser$(EXEEXT): libgcli$(LIBEXT) tests/unit/gitconf-parser.tests$(OBJEXT) src/cmd/vcs/gitconf_parser.tests$(OBJEXT)
+	@mkdir -p $$(dirname $@)
+	$(CCACHE) $(CC) $(CFLAGS) $(CCDEPFLAGS) $(CPPFLAGS) \
+		$(LIBCURL_CFLAGS) $(LIBCRYPTO_CFLAGS) $(PDJSON_CFLAGS) \
+		$(LDFLAGS) -o $@ $(@:=.tests$(OBJEXT)) src/cmd/vcs/gitconf_parser.tests$(OBJEXT) \
 		libgcli$(LIBEXT) $(LIBCURL_LIBS) $(LIBCRYPTO_LIBS) $(PDJSON_LIBS) $(LIBRT_LIBS)
 
 # extra clean hook

@@ -157,10 +157,10 @@ unit_check_streq(UNIT_CTX,
 {
 	UNIT_CTX_VAR->subtestno += 1;
 
-	if (strcmp(actual, expected)) {
+	if (actual == NULL || strcmp(actual, expected)) {
 		char *e_act, *e_exp;
 
-		e_act = unit_yamlescape(actual);
+		e_act = unit_yamlescape(actual ? actual : "");
 		e_exp = unit_yamlescape(expected);
 
 		UNIT_CTX_VAR->hadfail = 1;

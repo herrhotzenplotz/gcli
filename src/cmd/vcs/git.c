@@ -30,8 +30,9 @@
 #include <gcli/cmd/vcs/git.h>
 
 #include <gcli/cmd/cmd.h>
-#include <gcli/cmd/vcs.h>
 #include <gcli/cmd/cmdconfig.h>
+#include <gcli/cmd/vcs.h>
+#include <gcli/cmd/vcs/gitconf_parser.h>
 
 #include <gcli/ctx.h>
 #include <gcli/gcli.h>
@@ -203,117 +204,13 @@ gcli_vcs_git_get_current_branch(struct gcli_ctx *ctx, char **out)
 	}
 }
 
-static int
-parse_remote_url(struct gcli_cmd_vcs_remote *const remote, char const *url_text)
-{
-	char *tmp;
-	int rc = 0;
-	size_t n = 0;
-	struct gcli_url url = {0};
-
-	rc = gcli_parse_url(url_text, &url);
-	if (rc < 0) {
-		fprintf(stderr, "gcli: failed to parse remote url: %s. "
-		        "This is probably a bug.\n", url_text);
-
-		goto bail;
-	}
-
-	/* probably a local clone */
-	if (!url.host) {
-		rc = 0;
-		goto bail;
-	}
-
-	/* save away the host */
-	remote->host = strdup(url.host);
-
-	/* automagic forge type */
-	gcli_vcs_guess_forgetype_by_hostname(url.host, &remote->forge_type);
-
-	/* split owner/repo */
-	tmp = strrchr(url.path, '/');
-	if (tmp == NULL) {
-		rc = -1;
-		goto bail;
-	}
-
-	remote->owner = gcli_strndup(url.path, tmp - url.path);
-
-	/* skip over '/' */
-	tmp += 1;
-
-	n = strlen(tmp);
-	if (n > 4 && strcmp(tmp + (n - 4), ".git") == 0)
-		n -= 4;
-
-	remote->repo = gcli_strndup(tmp, n);
-	rc = 0;
-
-bail:
-	gcli_url_free(&url);
-	return rc;
-}
-
-static void
-gitconfig_parse_remote(struct gcli_cmd_vcs_remotes *remotes,
-                       gcli_sv section_title, gcli_sv entry)
-{
-	gcli_sv remote_name = SV_NULL;
-
-	/* If there is no remote name, just return and continue with the
-	 * next section. I don't exactly know why there even are such
-	 * sections and what they are useful for, but ok. */
-	if (gcli_sv_eq_to(gcli_sv_trim(section_title), "remote"))
-		return;
-
-	/* the remote name is wrapped in double quotes */
-	gcli_sv_chop_until(&section_title, '"');
-
-	/* skip the first quote */
-	section_title.data   += 1;
-	section_title.length -= 1;
-
-	remote_name = gcli_sv_chop_until(&section_title, '"');
-
-	while ((entry = gcli_sv_trim_front(entry)).length > 0) {
-		if (gcli_sv_has_prefix(entry, "url")) {
-			char *url;
-
-			struct gcli_cmd_vcs_remote *const r =
-				calloc(1, sizeof(*r));
-
-			r->name = gcli_sv_to_cstr(remote_name);
-
-			gcli_sv_chop_until(&entry, '=');
-
-			entry.data   += 1;
-			entry.length -= 1;
-
-			url = gcli_sv_to_cstr(
-				gcli_sv_trim(
-					gcli_sv_chop_until(&entry, '\n')
-				)
-			);
-
-			r->forge_type = -1;
-
-			parse_remote_url(r, url);
-			free(url);
-
-			TAILQ_INSERT_TAIL(remotes, r, next);
-		} else {
-			gcli_sv_chop_until(&entry, '\n');
-		}
-	}
-}
-
 int
 gcli_vcs_git_read_repoconfig(struct gcli_ctx *ctx,
                              struct gcli_cmd_vcs_ctx *vcsctx)
 {
-	char *path = NULL;
-	gcli_sv buffer = {0}, filebuf = {0};
+	char *path = NULL, *buf = NULL;
+	struct gcli_gitconf_parser p = {0};
+	int rc = 0;
 
 	(void) ctx;
 
@@ -321,43 +218,20 @@ gcli_vcs_git_read_repoconfig(struct gcli_ctx *ctx,
 	if (!path)
 		return 0;
 
-	filebuf.length = gcli_read_file(path, &filebuf.data);
-	buffer = filebuf;
+	if (gcli_read_file(path, &buf) < 0)
+		return -1;
 
 	free(path);
 	path = NULL;
 
-	while (buffer.length > 0) {
-		buffer = gcli_sv_trim_front(buffer);
+	p.head = buf;
 
-		if (buffer.length == 0)
-			break;
+	rc = gcli_gitconf_parser_run(&p, vcsctx);
 
-		/* TODO: Git Config files support comments */
-		if (*buffer.data != '[')
-			errx(1, "gcli: error: invalid git config");
+	free(buf);
+	buf = NULL;
 
-		gcli_sv section_title = gcli_sv_chop_until(&buffer, ']');
-		section_title.length -= 1;
-		section_title.data   += 1;
-
-		buffer.length -= 2;
-		buffer.data   += 2;
-
-		gcli_sv entry = gcli_sv_chop_until(&buffer, '[');
-
-		if (gcli_sv_has_prefix(section_title, "remote")) {
-			gitconfig_parse_remote(&vcsctx->remotes, section_title, entry);
-		} else {
-			// @@@: skip section
-		}
-	}
-
-	free(filebuf.data);
-	filebuf.length = 0;
-	filebuf.data = NULL;
-
-	return 0;
+	return rc;
 }
 
 void
@@ -415,4 +289,25 @@ gcli_vcs_git_add_fork_remote(char const *org, char const *repo)
 			err(1, "gcli: fork");
 		}
 	}
+}
+
+int
+gcli_vcs_git_get_branch_remote(struct gcli_ctx *ctx,
+                               struct gcli_cmd_vcs_ctx *vcsctx,
+                               char const *branch_name,
+                               char **out_remote_name)
+{
+	struct gcli_cmd_vcs_branch *b;
+
+	(void) ctx;
+
+	TAILQ_FOREACH(b, &vcsctx->branches, next) {
+		if (strcmp(b->name, branch_name) == 0) {
+			if (out_remote_name && b->remote)
+				*out_remote_name = strdup(b->remote);
+			return 0;
+		}
+	}
+
+	return -1;
 }

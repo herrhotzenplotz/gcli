@@ -1,4 +1,3 @@
 pr.base=trunk
 pr.upstream=herrhotzenplotz/gcli
 pr.inhibit-delete-source-branch=yes
-forge-type=gitlab

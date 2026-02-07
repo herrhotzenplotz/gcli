@@ -29,6 +29,7 @@ static struct vcs_dispatch {
 	[GCLI_CMD_VCSTYPE_GIT] = {
 		.get_branchname = gcli_vcs_git_get_current_branch,
 		.read_repoconfig = gcli_vcs_git_read_repoconfig,
+		.get_branch_remote = gcli_vcs_git_get_branch_remote,
 	},
 	[GCLI_CMD_VCSTYPE_GOT] = {
 		.get_branchname = gcli_vcs_got_get_branchname,
@@ -113,6 +114,7 @@ ensure_config(struct gcli_ctx *ctx)
 
 	have_read_config = 1;
 
+	TAILQ_INIT(&g_vcsctx.branches);
 	TAILQ_INIT(&g_vcsctx.remotes);
 	vcsty = gcli_cmd_vcs_get_vcstype(ctx);
 
@@ -329,7 +331,8 @@ gcli_cmd_vcs_branch_remote(struct gcli_ctx *ctx, struct gcli_cmd_vcs_remote cons
 	free(branch_name);
 
 	/* resolve to actual remote */
-	rc = vcs_remote_by_name(remote_name, out);
+	if (remote_name)
+		rc = vcs_remote_by_name(remote_name, out);
 
 	free(remote_name);
 

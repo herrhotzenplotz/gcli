@@ -137,6 +137,9 @@ gcli_vcs_got_read_repoconfig(struct gcli_ctx *ctx,
 	char *gotconf, *gotconf_text;
 	int rc = 0;
 
+	TAILQ_INIT(&vcsctx->branches);
+	TAILQ_INIT(&vcsctx->remotes);
+
 	rc = find_gotconf(ctx, &gotconf);
 	if (rc < 0)
 		return rc;
@@ -177,4 +180,3 @@ gcli_vcs_got_get_branch_remote(struct gcli_ctx *ctx,
 
 	return 0;
 }
-

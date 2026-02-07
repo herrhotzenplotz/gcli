@@ -45,4 +45,9 @@ int gcli_vcs_git_read_repoconfig(struct gcli_ctx *ctx,
 
 void gcli_vcs_git_add_fork_remote(char const *org, char const *repo);
 
+int gcli_vcs_git_get_branch_remote(struct gcli_ctx *ctx,
+                                   struct gcli_cmd_vcs_ctx *vcsctx,
+                                   char const *branch_name,
+                                   char **out_remote_name);
+
 #endif /* GCLI_CMD_VCS_GIT_H */

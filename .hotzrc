@@ -15,6 +15,5 @@ evaluate-commands %sh{
 }
 
 hook global BufSetOption filetype=c %{
-	add-highlighter buffer/ show-whitespaces -spc " "
 	smarttab
 }

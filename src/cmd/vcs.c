@@ -34,6 +34,7 @@ static struct vcs_dispatch {
 		.get_branchname = gcli_vcs_git_get_current_branch,
 		.read_repoconfig = gcli_vcs_git_read_repoconfig,
 		.get_branch_remote = gcli_vcs_git_get_branch_remote,
+		.get_head_of_remote = gcli_vcs_git_get_head_of_remote,
 	},
 	[GCLI_CMD_VCSTYPE_GOT] = {
 		.get_branchname = gcli_vcs_got_get_branchname,
@@ -328,6 +329,9 @@ gcli_cmd_vcs_branch_remote(struct gcli_ctx *ctx, struct gcli_cmd_vcs_remote cons
 	if (rc < 0)
 		return rc;
 
+	if (gcli_be_verbose(ctx))
+		fprintf(stderr, "gcli: info: current branch is %s\n", branch_name);
+
 	vcsty = gcli_cmd_vcs_get_vcstype(ctx);
 
 	if (vcsty == GCLI_CMD_VCSTYPE_UNKNOWN) {
@@ -349,6 +353,11 @@ gcli_cmd_vcs_branch_remote(struct gcli_ctx *ctx, struct gcli_cmd_vcs_remote cons
 	/* query the remote name */
 	rc = vcs_dispatches[vcsty].get_branch_remote(
 		ctx, &g_vcsctx, branch_name, &remote_name);
+
+	if (remote_name && branch_name && gcli_be_verbose(ctx)) {
+		fprintf(stderr, "gcli: info: remote tracking %s is %s\n",
+		        branch_name, remote_name);
+	}
 
 	free(branch_name);
 

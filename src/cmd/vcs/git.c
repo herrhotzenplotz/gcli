@@ -315,3 +315,49 @@ gcli_vcs_git_get_branch_remote(struct gcli_ctx *ctx,
 
 	return -1;
 }
+
+int
+gcli_vcs_git_get_head_of_remote(struct gcli_ctx *ctx, char const *remote_name,
+                                char **head)
+{
+	int rc = 0, len = 0;
+	char *repo_dir = NULL, *ref_file = NULL, *ref_ptr = NULL;
+	char const prefix[] = "ref: refs/remotes/";
+
+	(void) ctx;
+
+	repo_dir = find_repodir();
+	if (repo_dir == NULL)
+		return -1;
+
+	ref_file = gcli_asprintf("%s/refs/remotes/%s/HEAD", repo_dir, remote_name);
+
+	rc = access(ref_file, R_OK);
+	if (rc < 0)
+		goto fail_access;
+
+	rc = gcli_read_file(ref_file, &ref_ptr);
+	if (rc < 0)
+		goto fail_read;
+
+	/* trim newline */
+	if (ref_ptr[rc - 1] == '\n')
+		ref_ptr[--rc] = '\0';
+
+	if (strncmp(ref_ptr, prefix, sizeof(prefix) - 1) == 0) {
+		len = strlen(remote_name);
+
+		*head = strdup(ref_ptr + sizeof(prefix) + len);
+	} else {
+		rc = -1;
+	}
+
+	free(ref_ptr);
+
+fail_read:
+fail_access:
+	free(ref_file);
+	free(repo_dir);
+
+	return rc;
+}

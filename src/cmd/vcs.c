@@ -39,6 +39,7 @@ static struct vcs_dispatch {
 		.get_branchname = gcli_vcs_got_get_branchname,
 		.read_repoconfig = gcli_vcs_got_read_repoconfig,
 		.get_branch_remote = gcli_vcs_got_get_branch_remote,
+		.get_head_of_remote = gcli_vcs_got_get_head_of_remote,
 	},
 };
 

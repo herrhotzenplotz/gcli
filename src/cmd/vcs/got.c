@@ -91,24 +91,37 @@ gcli_vcs_got_get_branchname(struct gcli_ctx *ctx, char **out)
 }
 
 static int
-find_gotconf(struct gcli_ctx *ctx, char **out)
+find_repodir(struct gcli_ctx *ctx, char **repo_dir)
 {
+	char *repo_file = NULL;
 	int rc = 0, len = 0;
-	char *repo_file = NULL, *repo_dir = NULL, *gotconf = NULL;
 
 	repo_file = find_file_in_dotgot(ctx, "repository");
 	if (!repo_file)
 		return -1;
 
-	rc = gcli_read_file(repo_file, &repo_dir);
+	rc = gcli_read_file(repo_file, repo_dir);
 	free(repo_file);
 	repo_file = NULL;
 	if (rc < 0)
 		return rc;
 
-	len = strlen(repo_dir);
-	if (repo_dir[len - 1] == '\n')
-		repo_dir[--len] = '\0';
+	len = strlen(*repo_dir);
+	if ((*repo_dir)[len - 1] == '\n')
+		(*repo_dir)[--len] = '\0';
+
+	return 0;
+}
+
+static int
+find_gotconf(struct gcli_ctx *ctx, char **out)
+{
+	int rc = 0;
+	char *repo_dir = NULL, *gotconf = NULL;
+
+	rc = find_repodir(ctx, &repo_dir);
+	if (rc < 0)
+		return rc;
 
 	gotconf = gcli_asprintf("%s/got.conf", repo_dir);
 	if (access(gotconf, R_OK) < 0) {
@@ -179,4 +192,48 @@ gcli_vcs_got_get_branch_remote(struct gcli_ctx *ctx,
 	*out_remote_name = strdup("origin");
 
 	return 0;
+}
+
+int
+gcli_vcs_got_get_head_of_remote(struct gcli_ctx *ctx, char const *remote_name,
+                                char **head)
+{
+	int rc = 0, len = 0;
+	char *repo_dir = NULL, *ref_file = NULL, *ref_ptr = NULL;
+	char const prefix[] = "ref: refs/remotes/";
+
+	rc = find_repodir(ctx, &repo_dir);
+	if (rc < 0)
+		return rc;
+
+	ref_file = gcli_asprintf("%s/refs/remotes/%s/HEAD", repo_dir, remote_name);
+
+	rc = access(ref_file, R_OK);
+	if (rc < 0)
+		goto fail_access;
+
+	rc = gcli_read_file(ref_file, &ref_ptr);
+	if (rc < 0)
+		goto fail_read;
+
+	/* trim newline */
+	if (ref_ptr[rc - 1] == '\n')
+		ref_ptr[--rc] = '\0';
+
+	if (strncmp(ref_ptr, prefix, sizeof(prefix) - 1) == 0) {
+		len = strlen(remote_name);
+
+		*head = strdup(ref_ptr + sizeof(prefix) + len);
+	} else {
+		rc = -1;
+	}
+
+	free(ref_ptr);
+
+fail_read:
+fail_access:
+	free(ref_file);
+	free(repo_dir);
+
+	return rc;
 }

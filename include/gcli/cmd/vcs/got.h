@@ -20,4 +20,8 @@ int gcli_vcs_got_get_branch_remote(struct gcli_ctx *ctx,
                                    char const *branch_name,
                                    char **out_remote_name);
 
+int gcli_vcs_got_get_head_of_remote(struct gcli_ctx *ctx,
+                                    char const *remote_name,
+                                    char **head);
+
 #endif /* GCLI_CMD_VCS_GOT_H */

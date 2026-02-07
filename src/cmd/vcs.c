@@ -165,16 +165,44 @@ ensure_config(struct gcli_ctx *ctx)
 static struct gcli_cmd_vcs_remote *
 get_most_sensible_remote(struct gcli_ctx *ctx)
 {
-	struct gcli_cmd_vcs_remote *r;
+	struct gcli_cmd_vcs_remote *r, *upstream = NULL, *origin = NULL,
+		*first = NULL;
 
 	TAILQ_FOREACH(r, &g_vcsctx.remotes, next) {
 		if (r->host == NULL || r->owner == NULL || r->repo == NULL)
 			continue;
 
-		if (r->forge_type != (gcli_forge_type)-1)
-			return r;
+		if (r->forge_type == (gcli_forge_type)-1)
+			continue;
+
+		if (first == NULL)
+			first = r;
+
+		if (r->name && strcmp(r->name, "origin") == 0)
+			origin = r;
+
+		if (r->name && strcmp(r->name, "upstream") == 0)
+			upstream = r;
 	}
 
+	/* various defaults, in this order */
+	struct gcli_cmd_vcs_remote *rs[] = { upstream, origin, first };
+	for (size_t i = 0; i < ARRAY_SIZE(rs); ++i) {
+		if (rs[i] == NULL)
+			continue;
+
+		if (gcli_be_verbose(ctx)) {
+			fprintf(
+				stderr,
+				"gcli: info: defaulting to %s as remote\n",
+				rs[i]->name
+			);
+		}
+
+		return rs[i];
+	}
+
+	/* ... welp */
 	gcli_warn(ctx, "no suitable remotes to auto-detect forge");
 	return NULL;
 }

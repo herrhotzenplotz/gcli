@@ -25,6 +25,10 @@ static struct vcs_dispatch {
 	                         char const *branch,
 	                         char **remote_name);
 
+	int (*get_head_of_remote)(struct gcli_ctx *ctx,
+	                          char const *remote_name,
+	                          char **head);
+
 } vcs_dispatches[] = {
 	[GCLI_CMD_VCSTYPE_GIT] = {
 		.get_branchname = gcli_vcs_git_get_current_branch,
@@ -289,6 +293,23 @@ vcs_remote_by_name(char const *const remote_name, struct gcli_cmd_vcs_remote con
 	return -1;
 }
 
+static struct gcli_cmd_vcs_remote const *
+vcs_remote_by_owner_repo(char const *owner, char const *repo)
+{
+	struct gcli_cmd_vcs_remote *r = NULL;
+
+	TAILQ_FOREACH(r, &g_vcsctx.remotes, next) {
+		bool const found_remote =
+			r->owner && strcmp(owner, r->owner) == 0 &&
+			r->repo && strcmp(repo, r->repo) == 0;
+
+		if (found_remote)
+			return r;
+	}
+
+	return NULL;
+}
+
 int
 gcli_cmd_vcs_branch_remote(struct gcli_ctx *ctx, struct gcli_cmd_vcs_remote const **out)
 {
@@ -339,3 +360,22 @@ gcli_cmd_vcs_branch_remote(struct gcli_ctx *ctx, struct gcli_cmd_vcs_remote cons
 	return rc;
 }
 
+int
+gcli_cmd_vcs_remote_head_by_owner(struct gcli_ctx *ctx, char const *owner,
+                                  char const *repo, char **head_name)
+{
+	struct gcli_cmd_vcs_remote const *remote;
+
+	ensure_config(ctx);
+
+	remote = vcs_remote_by_owner_repo(owner, repo);
+	if (remote == NULL)
+		return -1;
+
+	if (gcli_be_verbose(ctx))
+		fprintf(stderr, "gcli: info: remote for %s/%s is %s\n",
+		        owner, repo, remote->name);
+
+	/* now ask the vcs implementation for the remote HEAD name */
+	VCS_CALL(get_head_of_remote, ctx, remote->name, head_name);
+}

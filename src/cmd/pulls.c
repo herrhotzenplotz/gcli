@@ -559,10 +559,33 @@ subcommand_pull_create_interactive(struct gcli_submit_pull_options *const opts)
 			gcli_cmd_prompt("Repository", deflt_repo);
 
 	if (!opts->target_branch) {
-		char const *base;
+		char *base = NULL;
+		char const *b = NULL;
+		bool const have_owner_repo =
+			opts->target_repo.as_default.owner &&
+			opts->target_repo.as_default.repo;
 
-		base = gcli_config_get_base(g_clictx);
+		/* query local config for base branch. If it fails try to
+		 * infer from the vcs by looking at what
+                 * refs/remotes/<remote-by-owner-repo>/HEAD points to. */
+		b = gcli_config_get_base(g_clictx);
+		if (b)
+			base = strdup(b);
+
+		if (base == NULL && have_owner_repo) {
+			rc = gcli_cmd_vcs_remote_head_by_owner(
+				g_clictx,
+				opts->target_repo.as_default.owner,
+				opts->target_repo.as_default.repo,
+				&base
+			);
+
+			if (rc < 0)
+				gcli_warnx(g_clictx, "failed to derive remote head");
+		}
+
 		opts->target_branch = gcli_cmd_prompt("To Branch", base);
+		free(base);
 	}
 
 	/* Meta */

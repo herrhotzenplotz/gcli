@@ -70,9 +70,29 @@ DEFINE_TESTCASE(one_branch)
 	CHECK_STREQ(br->remote, "origin");
 }
 
+DEFINE_TESTCASE(one_remote)
+{
+	char const *input = "[remote \"gitlab\"]\n\turl = ssh://git@gitlab.com:herrhotzenplotz/gcli\n";
+	struct gcli_gitconf_parser p = { .head = strdup(input) };
+	struct gcli_cmd_vcs_ctx ctx = {0};
+	struct gcli_cmd_vcs_remote *r;
+
+	REQUIRE(gcli_gitconf_parser_run(&p, &ctx) == 0);
+	REQUIRE(!TAILQ_EMPTY(&ctx.remotes));
+
+	r = TAILQ_FIRST(&ctx.remotes);
+	REQUIRE(r != NULL);
+
+	CHECK_STREQ(r->name, "gitlab");
+	CHECK_STREQ(r->owner, "herrhotzenplotz");
+	CHECK_STREQ(r->repo, "gcli");
+	CHECK_STREQ(r->host, "gitlab.com");
+}
+
 TESTSUITE
 {
 	TESTCASE(tokens);
 	TESTCASE(parse_only_unknown_sections);
 	TESTCASE(one_branch);
+	TESTCASE(one_remote);
 }

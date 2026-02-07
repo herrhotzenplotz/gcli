@@ -5,6 +5,7 @@
 #include <gcli/cmd/vcs/gitconf_parser.h>
 
 #include <gcli/port/string.h>
+#include <gcli/url.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -191,10 +192,108 @@ done:
 }
 
 static int
+parse_remote_url(struct gcli_cmd_vcs_remote *const remote, char const *url_text)
+{
+	char *tmp;
+	int rc = 0;
+	size_t n = 0;
+	struct gcli_url url = {0};
+
+	rc = gcli_parse_url(url_text, &url);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: failed to parse remote url: %s. "
+		        "This is probably a bug.\n", url_text);
+
+		goto bail;
+	}
+
+	/* probably a local clone */
+	if (!url.host) {
+		rc = 0;
+		goto bail;
+	}
+
+	/* save away the host */
+	remote->host = strdup(url.host);
+
+	/* automagic forge type */
+	gcli_vcs_guess_forgetype_by_hostname(url.host, &remote->forge_type);
+
+	/* split owner/repo */
+	tmp = strrchr(url.path, '/');
+	if (tmp == NULL) {
+		rc = -1;
+		goto bail;
+	}
+
+	remote->owner = gcli_strndup(url.path, tmp - url.path);
+
+	/* skip over '/' */
+	tmp += 1;
+
+	n = strlen(tmp);
+	if (n > 4 && strcmp(tmp + (n - 4), ".git") == 0)
+		n -= 4;
+
+	remote->repo = gcli_strndup(tmp, n);
+	rc = 0;
+
+bail:
+	gcli_url_free(&url);
+	return rc;
+}
+
+static int
 parse_remote(struct gcli_gitconf_parser *p, struct gcli_cmd_vcs_ctx *vcsctx)
 {
-	(void) vcsctx;
-	return syntax(p, "%s: not implemented");
+	int tok;
+	struct gcli_cmd_vcs_remote *r;
+	bool is_url = false;
+
+	r = calloc(1, sizeof(*r));
+
+	/* "title" ']' (key = value)* */
+	if (expect(p, GCLI_GITCONF_TOKEN_LITERAL) < 0)
+		return -1;
+
+	r->name = strdup(p->token_text);
+
+	if (expect(p, ']') < 0)
+		return -1;
+
+	for (;;) {
+		tok = gcli_gitconf_parser_next_token(p);
+		switch (tok) {
+		case GCLI_GITCONF_TOKEN_EOF:
+		case '[':
+			goto done;
+
+		case GCLI_GITCONF_TOKEN_LITERAL:
+			is_url = !strcmp(p->token_text, "url");
+			if (expect(p, '=') < 0)
+				return -1;
+
+			if (expect(p, GCLI_GITCONF_TOKEN_LITERAL) < 0)
+				return -1;
+
+			if (is_url)
+				parse_remote_url(r, p->token_text);
+
+			break;
+
+		default:
+			return syntax(
+				p,
+				"expected beginning of section, end of "
+				"file or key-value-pair, got %s instead",
+				token_names[tok]
+			);
+		}
+	}
+
+done:
+	TAILQ_INSERT_TAIL(&vcsctx->remotes, r, next);
+	return 0;
 }
 
 /* The section parser expects the first token to point at the section type */

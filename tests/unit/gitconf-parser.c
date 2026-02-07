@@ -44,7 +44,35 @@ DEFINE_TESTCASE(tokens)
 	CHECK_EQ(gcli_gitconf_parser_next_token(&p), GCLI_GITCONF_TOKEN_EOF);
 }
 
+DEFINE_TESTCASE(parse_only_unknown_sections)
+{
+	char const *input = "[foo \"banana\"]\n\tremote = origin\n";
+	struct gcli_gitconf_parser p = { .head = strdup(input) };
+	struct gcli_cmd_vcs_ctx ctx = {0};
+
+	CHECK_EQ(gcli_gitconf_parser_run(&p, &ctx), 0);
+}
+
+DEFINE_TESTCASE(one_branch)
+{
+	char const *input = "[branch \"trunk\"]\n\tremote = origin\n";
+	struct gcli_gitconf_parser p = { .head = strdup(input) };
+	struct gcli_cmd_vcs_ctx ctx = {0};
+	struct gcli_cmd_vcs_branch *br;
+
+	REQUIRE(gcli_gitconf_parser_run(&p, &ctx) == 0);
+	REQUIRE(!TAILQ_EMPTY(&ctx.branches));
+
+	br = TAILQ_FIRST(&ctx.branches);
+	REQUIRE(br != NULL);
+
+	CHECK_STREQ(br->name, "trunk");
+	CHECK_STREQ(br->remote, "origin");
+}
+
 TESTSUITE
 {
 	TESTCASE(tokens);
+	TESTCASE(parse_only_unknown_sections);
+	TESTCASE(one_branch);
 }

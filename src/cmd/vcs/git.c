@@ -130,14 +130,10 @@ resolve_worktree_gitdir_if_needed(char *dotgit)
 	return newdir;
 }
 
-
-/* Search for a file named fname in the .git directory. */
 static char *
-find_file_in_dotgit(char const *fname)
+find_repodir(void)
 {
-	char *config_path = NULL;
 	char *dotgit = NULL;
-	size_t fname_len, config_path_len;
 
 	dotgit = gcli_find_directory(".git");
 	if (!dotgit) {
@@ -148,15 +144,23 @@ find_file_in_dotgit(char const *fname)
 	/* In case we are working with git worktrees, the .git might be a
 	 * file that contains a pointer to the actual .git directory. Here
 	 * we call into a function that resolves this link if needed. */
-	dotgit = resolve_worktree_gitdir_if_needed(dotgit);
+	return resolve_worktree_gitdir_if_needed(dotgit);
+}
+
+/* Search for a file named fname in the .git directory. */
+static char *
+find_file_in_dotgit(char const *fname)
+{
+	char *config_path = NULL;
+	char *dotgit;
+
+	/* resolve the actual repository dir */
+	dotgit = find_repodir();
+	if (dotgit == NULL)
+		return NULL;
 
 	/* Now search for the file in the found .git directory */
-	fname_len = strlen(fname);
-	config_path_len = strlen(dotgit) + 1 + fname_len + 1;
-
-	config_path = calloc(1, config_path_len);
-	snprintf(config_path, config_path_len, "%s/%s", dotgit, fname);
-
+	config_path = gcli_asprintf("%s/%s", dotgit, fname);
 	if (access(config_path, F_OK) < 0)
 		errx(1, "gcli: error: .git without a config file");
 

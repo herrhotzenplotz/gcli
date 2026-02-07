@@ -25,8 +25,16 @@ struct gcli_cmd_vcs_remote {
 	gcli_forge_type forge_type;
 };
 
+struct gcli_cmd_vcs_branch {
+	TAILQ_ENTRY(gcli_cmd_vcs_branch) next;
+
+	char *name;
+	char *remote;
+};
+
 struct gcli_cmd_vcs_ctx {
 	TAILQ_HEAD(gcli_cmd_vcs_remotes, gcli_cmd_vcs_remote) remotes;
+	TAILQ_HEAD(gcli_cmd_vcs_branches, gcli_cmd_vcs_branch) branches;
 };
 
 int gcli_cmd_vcs_get_vcstype(struct gcli_ctx *ctx);

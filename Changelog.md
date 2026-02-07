@@ -6,9 +6,28 @@ This changelog does not follow semantic versioning.
 
 ### Fixed
 
+- The git config parser has been made more robust
+
+  It has been rewritten as a proper parser which has dedicated unit
+  tests
+
 ### Added
 
 ### Changed
+
+- GCLI now tries to infer most of the interactive prompt questions
+  for branches and remotes from the VCS in use
+
+  This specifically applies to:
+
+  - Source branch and owner, by looking at the current branch,
+    finding its tracking remote and using its owner
+
+  - Target branch, by looking at the owner/repo of the MR/PR target
+    and using the matching remote's HEAD (which typically points at
+    a branch)
+
+  Suggested-by: 999faryad <https://github.com/999faryad>
 
 ### Removed
 

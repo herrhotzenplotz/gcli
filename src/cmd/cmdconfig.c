@@ -65,11 +65,12 @@ struct gcli_config {
 	char const *override_remote;
 	char const *override_config_file;
 	int override_forgetype;
-	int colours_disabled;       /* NO_COLOR set or output is not a TTY */
-	int force_colours;          /* -c option was given */
-	int no_spinner;             /* don't show a progress spinner */
-	int no_markdown;            /* do not render markdown (when built with lowdown) */
-	int enable_experimental;    /* enable experimental features */
+	int colours_disabled;              /* NO_COLOR set or output is not a TTY */
+	int force_colours;                 /* -c option was given */
+	int no_spinner;                    /* don't show a progress spinner */
+	int no_markdown;                   /* do not render markdown (when built with lowdown) */
+	int enable_experimental;           /* enable experimental features */
+	int restrict_pipelines_to_branch;  /* only list pipelines for the current branch */
 
 	gcli_sv buffer;
 	char *file_content;
@@ -1200,4 +1201,24 @@ gcli_config_get_forge_type_by_host(struct gcli_ctx *ctx,
 	}
 
 	return -1;
+}
+
+bool
+gcli_config_enable_pipelines_for_branch(struct gcli_ctx *ctx)
+{
+	ensure_config(ctx);
+
+	struct gcli_config *cfg;
+	cfg = ctx_config(ctx);
+
+	if (cfg->restrict_pipelines_to_branch)
+		return true;
+
+	char const *cfg_entry = gcli_config_find_by_key(
+		ctx, "defaults", "restrict-pipelines-to-branch");
+
+	if (cfg_entry == NULL)
+		return false;
+
+	return string_means_true(cfg_entry);
 }

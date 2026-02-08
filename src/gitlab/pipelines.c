@@ -37,6 +37,7 @@
 #include <gcli/gitlab/repos.h>
 #include <gcli/json_util.h>
 #include <gcli/pulls.h>
+#include <gcli/url.h>
 
 #include <pdjson.h>
 
@@ -60,14 +61,25 @@ fetch_pipelines(struct gcli_ctx *ctx, char *url, int const max,
 
 int
 gitlab_get_pipelines(struct gcli_ctx *ctx, struct gcli_path const *const path,
-                     int const max, struct gitlab_pipeline_list *const list)
+                     struct gitlab_pipelines_fetch_details const *details,
+                     struct gitlab_pipeline_list *const list)
 {
-	char *url = NULL;
-	int rc = 0;
+	char *url = NULL, *args = NULL;
+	int rc = 0, max = -1;
 
-	rc = gitlab_repo_make_url(ctx, path, &url, "/pipelines");
+	if (details) {
+		if (details->ref)
+			gcli_url_options_append(&args, "ref", details->ref);
+
+		max = details->max;
+	}
+
+	rc = gitlab_repo_make_url(ctx, path, &url, "/pipelines%s",
+	                          args ? args : "");
 	if (rc < 0)
 		return rc;
+
+	gcli_clear_ptr(&args);
 
 	return fetch_pipelines(ctx, url, max, list);
 }

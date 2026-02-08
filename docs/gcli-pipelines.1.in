@@ -8,6 +8,7 @@
 .Nm
 .Op Fl n Ar n
 .Op Fl o Ar owner Fl r Ar repo
+.Op Fl a
 .Nm
 .Fl p Ar pipeline-id
 .Op Fl o Ar owner Fl r Ar repo
@@ -48,6 +49,14 @@ execute the given
 .Ar actions
 for the specified
 .Ar job .
+.It Fl a , -all
+Do not restrict the pipelines list to pipelines running on the current branch.
+This option only applies if you have enabled
+.Sq restrict-pipelines-to-branch
+inside the
+.Sq defaults
+section of
+.Xr gcli 5 .
 .El
 .Sh ACTIONS
 .Ar job-actions...

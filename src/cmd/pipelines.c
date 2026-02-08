@@ -36,6 +36,9 @@
 #include <gcli/cmd/open.h>
 #include <gcli/cmd/pipelines.h>
 #include <gcli/cmd/table.h>
+#include <gcli/cmd/vcs.h>
+
+#include <gcli/port/string.h>
 
 #include <gcli/forges.h>
 
@@ -56,6 +59,9 @@ usage(void)
 	fprintf(stderr, "  -p pipeline              Run actions for the given pipeline\n");
 	fprintf(stderr, "  -j job                   Run actions for the given job\n");
 	fprintf(stderr, "  -n number                Number of pipelines to fetch (-1 = everything)\n");
+	if (gcli_config_enable_pipelines_for_branch(g_clictx))
+		fprintf(stderr, "  -a                       Print all pipelines, do not restrict to current branch.\n");
+
 	fprintf(stderr, "\n");
 	fprintf(stderr, "PIPELINE ACTIONS:\n");
 	fprintf(stderr, "  all                      Show status of this pipeline (including jobs and children)\n");
@@ -553,12 +559,29 @@ handle_job_actions(struct gcli_path const *const job_path,
 }
 
 static int
-list_pipelines(struct gcli_path const *const path, int max)
+list_pipelines(struct gcli_path const *const path, int max, bool const all)
 {
 	struct gitlab_pipeline_list list = {0};
+	struct gitlab_pipelines_fetch_details details = {0};
 	int rc = 0;
 
-	rc = gitlab_get_pipelines(g_clictx, path, max, &list);
+	details.max = max;
+
+	/* config setting that enables per-branch pipelines */
+	if (gcli_config_enable_pipelines_for_branch(g_clictx) && !all) {
+		rc = gcli_cmd_vcs_branchname(g_clictx, &details.ref);
+		if (rc < 0) {
+			fprintf(stderr, "gcli: failed to get branch name\n");
+			return -1;
+		}
+
+		if (gcli_be_verbose(g_clictx))
+			fprintf(stderr,
+			        "gcli: info: restricting pipelines to ref %s\n",
+			        details.ref);
+	}
+
+	rc = gitlab_get_pipelines(g_clictx, path, &details, &list);
 	if (rc < 0) {
 		fprintf(stderr, "gcli: failed to get pipelines: %s\n",
 		        gcli_get_error(g_clictx));
@@ -569,13 +592,16 @@ list_pipelines(struct gcli_path const *const path, int max)
 	gitlab_print_pipelines(&list);
 	gitlab_pipelines_free(&list);
 
+	free(details.ref);
+	details.ref = NULL;
+
 	return GCLI_EX_OK;
 }
 
 int
 subcommand_pipelines(int argc, char *argv[])
 {
-	int ch = 0, count = 30, pflag = 0, jflag = 0;
+	int ch = 0, count = 30, pflag = 0, jflag = 0, aflag = 0;
 	struct gcli_path path = {0};
 
 	/* Parse options */
@@ -585,10 +611,11 @@ subcommand_pipelines(int argc, char *argv[])
 		{.name = "count",    .has_arg = required_argument, .flag = NULL, .val = 'c'},
 		{.name = "pipeline", .has_arg = required_argument, .flag = NULL, .val = 'p'},
 		{.name = "job",      .has_arg = required_argument, .flag = NULL, .val = 'j'},
+		{.name = "all",      .has_arg = no_argument,       .flag = NULL, .val = 'a'},
 		{0}
 	};
 
-	while ((ch = getopt_long(argc, argv, "+n:o:r:p:j:", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "+n:o:r:p:j:a", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
 			path.as_default.owner = optarg;
@@ -624,6 +651,9 @@ subcommand_pipelines(int argc, char *argv[])
 
 			jflag = 1;
 		} break;
+		case 'a': {
+			aflag = 1;
+		} break;
 		case '?':
 		default:
 			usage();
@@ -636,6 +666,18 @@ subcommand_pipelines(int argc, char *argv[])
 
 	if (pflag && jflag) {
 		fprintf(stderr, "gcli: error: -p and -j are mutually exclusive\n");
+		usage();
+		return EXIT_FAILURE;
+	}
+
+	if (pflag && aflag) {
+		fprintf(stderr, "gcli: error: -p and -a are mutually exclusive\n");
+		usage();
+		return EXIT_FAILURE;
+	}
+
+	if (jflag && aflag) {
+		fprintf(stderr, "gcli: error: -j and -a are mutually exclusive\n");
 		usage();
 		return EXIT_FAILURE;
 	}
@@ -667,5 +709,5 @@ subcommand_pipelines(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	return list_pipelines(&path, count);
+	return list_pipelines(&path, count, aflag);
 }

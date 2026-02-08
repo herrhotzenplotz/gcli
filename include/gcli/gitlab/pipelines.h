@@ -74,8 +74,14 @@ struct gitlab_job_list {
 	size_t jobs_size;
 };
 
+struct gitlab_pipelines_fetch_details {
+	int max;
+	char *ref;
+};
+
 int gitlab_get_pipelines(struct gcli_ctx *ctx,
-                         struct gcli_path const *repo_path, int max,
+                         struct gcli_path const *repo_path,
+                         struct gitlab_pipelines_fetch_details const *details,
                          struct gitlab_pipeline_list *out);
 
 int gitlab_get_pipeline(struct gcli_ctx *ctx,

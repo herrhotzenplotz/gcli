@@ -184,14 +184,48 @@ gcli_vcs_got_get_branch_remote(struct gcli_ctx *ctx,
                                char const *branch_name,
                                char **out_remote_name)
 {
-	/* simple: got always defaults to origin */
-	(void) ctx;
-	(void) vcsctx;
-	(void) branch_name;
+	struct gcli_cmd_vcs_remote *rmt = NULL;
+	int rc = 0;
+	char *ref_ptr, *repo_dir;
 
-	*out_remote_name = strdup("origin");
+	/* GoT doesn't really have a concept of "tracking remote".
+	 * Instead, scan through remotes and look for matching refs. First
+	 * match succeeds. */
 
-	return 0;
+	rc = find_repodir(ctx, &repo_dir);
+	if (rc < 0)
+		return rc;
+
+	TAILQ_FOREACH(rmt, &vcsctx->remotes, next) {
+		if (rmt->forge_type == (gcli_forge_type)-1)
+			continue;
+
+		ref_ptr = gcli_asprintf("%s/refs/remotes/%s/%s",
+		                        repo_dir, rmt->name, branch_name);
+
+		if (gcli_be_verbose(ctx))
+			fprintf(stderr, "gcli: vcs: got: testing for %s\n", ref_ptr);
+
+		if (access(ref_ptr, F_OK) < 0) {
+			free(ref_ptr);
+			continue;
+		}
+
+		if (gcli_be_verbose(ctx))
+			fprintf(stderr,
+			        "gcli: vcs: got: using %s as remote for %s\n",
+			        rmt->name, branch_name);
+
+		free(ref_ptr);
+		free(repo_dir);
+
+		*out_remote_name = strdup(rmt->name);
+
+		return 0;
+	}
+
+	free(repo_dir);
+	return -1;
 }
 
 int

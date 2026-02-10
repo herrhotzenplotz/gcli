@@ -13,6 +13,20 @@ This changelog does not follow semantic versioning.
 
 ### Added
 
+- The setting `restrict-pipelines-to-branch = yes` in the `defaults`
+  section of the gcli config file allows you to make the `gcli
+  pipelines` subcommand only list GitLab pipelines running on the
+  currently checked out branch by default.
+
+  For listing pipelines running on any ref, a `-a` flag has been
+  added.
+
+  This setting is turned off by default in order not to break the
+  existing behaviour. Please speak up if you wish to have this be
+  the default or not.
+
+  See also: `gcli-pipelines(1)`
+
 ### Changed
 
 - GCLI now tries to infer most of the interactive prompt questions

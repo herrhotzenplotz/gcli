@@ -99,7 +99,9 @@ You can proceed as usual with make.
 
 #### Sanitized Builds
 
-TBD
+Use the configure option `--enable-sanitisers`.  This has been
+tested with LLVM Clang and GCC. Other compilers may require changes
+to the Makefile.
 
 #### Cross-Compilation
 

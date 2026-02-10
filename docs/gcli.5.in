@@ -76,6 +76,18 @@ to open URLs with. Defaults to
 which uses your default web browser. Note that the program name may
 not contain any arguments. If you need to pass any arguments to the
 program you must write a wrapper script.
+.It restrict-pipelines-to-branch
+This setting makes the
+.Xr gcli-pipelines 1
+subcommand behave slightly differently when listing branches.
+Setting this to
+.Sq yes
+causes
+.Nm
+to determine the currently checked out branch and queries only
+pipelines for this branch.
+See also
+.Xr gcli-pipelines 1 .
 .El
 .Pp
 All other sections define accounts for forges. Each of these account

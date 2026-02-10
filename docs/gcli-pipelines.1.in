@@ -23,6 +23,18 @@ is used to display data about the Continuous Integration (CI) service
 of GitLab. You can list pipelines of a given repository, list jobs in
 a given pipeline or perform actions such as restarting jobs or
 fetching their logs.
+.Pp
+If you have set
+.Sq restrict-pipelines-to-branch
+in the
+.Sq defaults
+section of your
+.Xr gcli 5
+config file,
+.Nm
+will only list pipelines for the currently checked out branch unless the
+.Fl a
+flag has been specified.
 .Sh OPTIONS
 .Bl -tag -width indent
 .It Fl o , -owner Ar owner
@@ -99,6 +111,18 @@ Print a list of the last 30 pipelines in the current project:
 $ gcli pipelines
 .Ed
 .Pp
+When
+.Sq restrict-pipelines-to-branch
+is set and you are on the
+.Sq foobar
+branch which is up-to-date with
+.Sq origin/foobar
+then
+.Nm
+will give you all pipelines that ran on the
+.Sq foobar
+branch.
+.Pp
 Print a summary of pipeline 420:
 .Bd -literal -offset indent
 $ gcli pipelines -p 420 all
@@ -120,9 +144,7 @@ $ gcli pipelines -o herrhotzenplotz -r gcli -j 423141 log
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
 and contributors.
 .Sh BUGS
-We are missing a
-.Fl a
-flag. This is the current implied behaviour.
+None currently known.
 .Pp
 Please report bugs via E-Mail to
 .Mt @PACKAGE_BUGREPORT@ .

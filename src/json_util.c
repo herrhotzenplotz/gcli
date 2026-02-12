@@ -557,6 +557,35 @@ get_iso8601_time_(struct gcli_ctx *ctx, json_stream *input, time_t *out,
 }
 
 int
+get_date_(struct gcli_ctx *ctx, json_stream *input, time_t *out,
+                  char const *where)
+{
+	char *copy;
+	char const *it;
+	enum json_type type;
+	size_t len;
+	int rc = 0;
+
+	type = json_next(input);
+	if (type == JSON_NULL) {
+		*out = 0;
+		return 0;
+	}
+
+	if (type != JSON_STRING)
+		return gcli_error(ctx, "unexpected non-string field in %s", where);
+
+	it = json_get_string(input, &len);
+	copy = gcli_strndup(it, len);
+
+	rc = gcli_parse_date(ctx, copy, out);
+
+	gcli_clear_ptr(&copy);
+
+	return rc;
+}
+
+int
 get_url_path_(struct gcli_ctx *ctx, struct json_stream *input,
               struct gcli_path *out, char const *function)
 {

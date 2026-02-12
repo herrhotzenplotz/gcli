@@ -134,6 +134,46 @@ gcli_parse_iso8601_date_time(struct gcli_ctx *ctx, char const *const input,
 }
 
 int
+gcli_parse_date(struct gcli_ctx *ctx, char const *const input,
+                time_t *const out)
+{
+	char *endptr = NULL, *oldtz = NULL;
+	struct tm tm_buf = {0};
+
+	endptr = strptime(input, "%Y-%m-%d", &tm_buf);
+
+	if (endptr && *endptr != '\0') {
+		return gcli_error(ctx, "failed to parse date \"%s\": %s",
+		                  input, strerror(errno));
+	}
+
+	/* Thanks, POSIX, for this ugly pile of rubbish! */
+	{
+		oldtz = getenv("TZ");
+		if (oldtz)
+			oldtz = strdup(oldtz);
+
+		/* TODO error handling */
+		setenv("TZ", "UTC", 1);
+		tzset();
+
+		*out = mktime(&tm_buf);
+
+		if (oldtz) {
+			setenv("TZ", oldtz, 1);
+			gcli_clear_ptr(&oldtz);
+		} else {
+			unsetenv("TZ");
+		}
+
+		tzset();
+	}
+
+
+	return 0;
+}
+
+int
 gcli_format_as_localtime(struct gcli_ctx *ctx, time_t timestamp, char **out)
 {
 	char tmp[sizeof "YYYY-MMM-DD HH:MM:SS"] = {0};

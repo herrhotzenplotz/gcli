@@ -169,6 +169,9 @@ gcli_issue_print_summary(struct gcli_issue const *const it)
 
 	gcli_dict_add_timestamp(dict, "CREATED", 0, 0, it->created_at);
 
+	if (it->due_date)
+		gcli_dict_add_timestamp(dict, "DUE", 0, 0, it->due_date);
+
 	if ((quirks & GCLI_ISSUE_QUIRKS_PROD_COMP) == 0) {
 		gcli_dict_add(dict, "PRODUCT", 0, 0, "%s", it->product);
 		gcli_dict_add(dict, "COMPONENT", 0, 0, "%s", it->component);

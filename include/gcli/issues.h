@@ -51,6 +51,7 @@ struct gcli_issue {
 	char *component;   /* only on Bugzilla */
 	char *url;         /* only on Bugzilla */
 	time_t created_at;
+	time_t due_date;
 	char *author;
 	char *state;
 	int comments;

@@ -13,6 +13,7 @@ object of struct gcli_issue with
 	 "state"        => state as string,
 	 "body"         => body as string,
 	 "created_at"   => created_at as iso8601_time,
+	 "due_date"     => due_date as iso8601_time, # NOTE: only applies to Gitea/Forgejo
 	 "number"       => number as id,
 	 "comments"     => comments as int,
 	 "user"         => author as user,

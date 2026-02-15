@@ -17,6 +17,7 @@ object of struct gcli_issue with
 	 "summary" => title as string,
 	 "creation_time" => created_at as iso8601_time,
 	 "creator_detail" => use parse_bugzilla_bug_creator,
+	 "deadline" => due_date as date,
 	 "status" => state as string,
 	 "product" => product as string,
 	 "component" => component as string,

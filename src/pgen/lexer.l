@@ -84,5 +84,6 @@ struct                             { yycol += yyleng; return STRUCT;    }
                                        yylval.strlit.text[strlen(yytext + 1) - 1] = '\0';
                                        return STRLIT;
                                    }
+"#"[^\n]*\n                        { yycol = 1; yyrow += 1; /* comment, skip */ }
 .                                  { yyerror("unrecognized character"); }
 %%

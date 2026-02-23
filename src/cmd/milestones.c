@@ -229,9 +229,9 @@ action_milestone_delete(struct gcli_path const *const path,
 }
 
 static int
-action_milestone_set_duedate(struct gcli_path const *const path,
-                             struct gcli_milestone const *const milestone,
-                             int *argc, char **argv[])
+action_milestone_set_due_date(struct gcli_path const *const path,
+                              struct gcli_milestone const *const milestone,
+                              int *argc, char **argv[])
 {
 	char *new_date = NULL;
 	int rc = 0;
@@ -248,7 +248,7 @@ action_milestone_set_duedate(struct gcli_path const *const path,
 	new_date = (*argv)[0];
 
 	/* Do it! */
-	rc = gcli_milestone_set_duedate(g_clictx, path, new_date);
+	rc = gcli_milestone_set_due_date(g_clictx, path, new_date);
 	if (rc < 0) {
 		fprintf(stderr, "gcli: error: could not update milestone due date: %s\n",
 		        gcli_get_error(g_clictx));
@@ -308,7 +308,7 @@ struct gcli_cmd_actions milestone_actions = {
 		{
 			.name = "set-duedate",
 			.needs_item = false,
-			.handler = (gcli_cmd_action_handler)action_milestone_set_duedate,
+			.handler = (gcli_cmd_action_handler)action_milestone_set_due_date,
 		},
 		{
 			.name = "open",

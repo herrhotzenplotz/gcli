@@ -210,9 +210,9 @@ gitlab_delete_milestone(struct gcli_ctx *ctx, struct gcli_path const *const path
 }
 
 int
-gitlab_milestone_set_duedate(struct gcli_ctx *ctx,
-                             struct gcli_path const *const path,
-                             char const *const date)
+gitlab_milestone_set_due_date(struct gcli_ctx *ctx,
+                              struct gcli_path const *const path,
+                              char const *const date)
 {
 	char *url = NULL, norm_date[9] = {0};
 	int rc = 0;

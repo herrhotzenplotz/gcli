@@ -115,7 +115,7 @@ github_forge_descriptor =
 	.get_milestone             = github_get_milestone,
 	.get_milestone_issues      = github_milestone_get_issues,
 	.get_milestones            = github_get_milestones,
-	.milestone_set_duedate     = github_milestone_set_duedate,
+	.milestone_set_due_date    = github_milestone_set_due_date,
 
 	/* Pull requests */
 	.get_pull                  = github_get_pull,
@@ -221,7 +221,7 @@ gitlab_forge_descriptor =
 	.get_milestone             = gitlab_get_milestone,
 	.get_milestone_issues      = gitlab_milestone_get_issues,
 	.get_milestones            = gitlab_get_milestones,
-	.milestone_set_duedate     = gitlab_milestone_set_duedate,
+	.milestone_set_due_date    = gitlab_milestone_set_due_date,
 
 	/* Pull requests */
 	.get_pull                  = gitlab_get_pull,
@@ -321,7 +321,7 @@ gitea_forge_descriptor =
 	.get_milestone             = gitea_get_milestone,
 	.get_milestone_issues      = gitea_milestone_get_issues,
 	.get_milestones            = gitea_get_milestones,
-	.milestone_set_duedate     = gitea_milestone_set_duedate,
+	.milestone_set_due_date    = gitea_milestone_set_due_date,
 
 	/* Pull requests */
 	.get_pull                  = gitea_get_pull,

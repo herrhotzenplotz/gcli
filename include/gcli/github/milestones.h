@@ -49,8 +49,8 @@ int github_milestone_get_issues(struct gcli_ctx *ctx,
                                 struct gcli_path const *const path,
                                 struct gcli_issue_list *out);
 
-int github_milestone_set_duedate(struct gcli_ctx *ctx,
-                                 struct gcli_path const *path,
-                                 char const *date);
+int github_milestone_set_due_date(struct gcli_ctx *ctx,
+                                  struct gcli_path const *path,
+                                  char const *date);
 
 #endif /* GCLI_GITHUB_MILESTONES_H */

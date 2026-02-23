@@ -239,8 +239,8 @@ struct gcli_forge_descriptor {
 		struct gcli_path const *path);
 
 	/**
-	 * delete a milestone */
-	int (*milestone_set_duedate)(
+	 * Set milestone due date */
+	int (*milestone_set_due_date)(
 		struct gcli_ctx *ctx,
 		struct gcli_path const *path,
 		char const *date);

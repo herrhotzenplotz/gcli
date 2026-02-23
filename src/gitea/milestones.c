@@ -167,9 +167,9 @@ gitea_delete_milestone(struct gcli_ctx *ctx,
 }
 
 int
-gitea_milestone_set_duedate(struct gcli_ctx *ctx,
-                            struct gcli_path const *const path,
-                            char const *const date)
+gitea_milestone_set_due_date(struct gcli_ctx *ctx,
+                             struct gcli_path const *const path,
+                             char const *const date)
 {
-	return github_milestone_set_duedate(ctx, path, date);
+	return github_milestone_set_due_date(ctx, path, date);
 }

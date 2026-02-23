@@ -46,9 +46,9 @@ int gitea_create_milestone(struct gcli_ctx *ctx,
 int gitea_delete_milestone(struct gcli_ctx *ctx,
                            struct gcli_path const *const path);
 
-int gitea_milestone_set_duedate(struct gcli_ctx *ctx,
-                                struct gcli_path const *path,
-                                char const *date);
+int gitea_milestone_set_due_date(struct gcli_ctx *ctx,
+                                 struct gcli_path const *path,
+                                 char const *date);
 
 int gitea_milestone_get_issues(struct gcli_ctx *ctx,
                                struct gcli_path const *path,

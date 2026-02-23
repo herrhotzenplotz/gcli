@@ -245,9 +245,9 @@ github_delete_milestone(struct gcli_ctx *ctx,
 }
 
 int
-github_milestone_set_duedate(struct gcli_ctx *ctx,
-                             struct gcli_path const *const path,
-                             char const *const date)
+github_milestone_set_due_date(struct gcli_ctx *ctx,
+                              struct gcli_path const *const path,
+                              char const *const date)
 {
 	char *url = NULL, *payload = NULL, norm_date[21] = {0};
 	int rc = 0;

@@ -86,9 +86,9 @@ gcli_milestone_get_issues(struct  gcli_ctx *ctx,
 }
 
 int
-gcli_milestone_set_duedate(struct  gcli_ctx *ctx,
+gcli_milestone_set_due_date(struct  gcli_ctx *ctx,
                            struct gcli_path const *const path,
                            char const *const date)
 {
-	gcli_null_check_call(milestone_set_duedate, ctx, path, date);
+	gcli_null_check_call(milestone_set_due_date, ctx, path, date);
 }

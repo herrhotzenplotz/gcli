@@ -90,8 +90,8 @@ int gcli_milestone_get_issues(struct gcli_ctx *ctx,
                               struct gcli_path const *path,
                               struct gcli_issue_list *out);
 
-int gcli_milestone_set_duedate(struct gcli_ctx *ctx,
-                               struct gcli_path const *path,
-                               char const *date);
+int gcli_milestone_set_due_date(struct gcli_ctx *ctx,
+                                struct gcli_path const *path,
+                                char const *date);
 
 #endif /* GCLI_MILESTONES_H */

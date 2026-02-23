@@ -162,3 +162,12 @@ gcli_issue_set_op(struct gcli_ctx *ctx,
 {
 	gcli_null_check_call(issue_set_op, ctx, issue_path, new_op);
 }
+
+int
+gcli_issue_set_due_date(struct gcli_ctx *ctx,
+                        struct gcli_path const *const path,
+                        time_t const new_date)
+{
+	gcli_null_check_call(issue_set_due_date, ctx, path, new_date);
+}
+

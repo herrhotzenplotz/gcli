@@ -136,4 +136,8 @@ int gcli_issue_get_attachments(struct gcli_ctx *ctx,
 int gcli_issue_set_op(struct gcli_ctx *ctx, struct gcli_path const *const path,
                       char const *new_op);
 
+int gcli_issue_set_due_date(struct gcli_ctx *ctx,
+                            struct gcli_path const *path,
+                            time_t new_date);
+
 #endif /* ISSUES_H */

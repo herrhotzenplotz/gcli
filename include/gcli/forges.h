@@ -180,6 +180,13 @@ struct gcli_forge_descriptor {
 		char const *new_op);
 
 	/**
+	 * Change the due date of the issue */
+	 int (*issue_set_due_date)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *issue_path,
+		time_t new_date);
+
+	/**
 	 * Dump the contents of the attachment to the given file */
 	int (*attachment_get_content)(
 		struct gcli_ctx *ctx,

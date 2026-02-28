@@ -115,7 +115,7 @@ find_package() {
 	printf "Checking for $1 ..." >&2
 	if ! $PKG_CONFIG --exists $1; then
 		if [ "${3}" = optional ]; then
-			printf " not found\n"
+			printf " not found\n" >&2
 			export ${2}_FOUND=0
 			return
 		else # $3 = required
@@ -342,14 +342,14 @@ find_package pdjson PDJSON optional
 # On Darwin the POSIX Real-Time extensions are in libc. We must not
 # link against librt because it doesn't exist.
 if [ $ENABLE_LIBRT -eq 1 ]; then
-	printf "Checking whether host is Darwin for -lrt..."
+	printf "Checking whether host is Darwin for -lrt..." >&2
 	case "${HOST}" in
 		*-apple-darwin*)
-			printf " yes, won't link -lrt\n"
+			printf " yes, won't link -lrt\n" >&2
 			ENABLE_LIBRT=0
 			;;
 		*)
-			printf " no\n"
+			printf " no\n" >&2
 			;;
 	esac
 fi

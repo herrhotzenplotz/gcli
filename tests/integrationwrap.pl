@@ -123,13 +123,18 @@ my @server_verify = (
 	'VerifyRequestBody',
 );
 
-for (my $i = 0; $i < $#responses; ++$i) {
+for (my $i = 0; $i < scalar @responses; ++$i) {
 	my $rq = $srv->get_request($i);
 
 	foreach (@server_verify) {
-		if (defined($testprops{$_}[$i])) {
+		if (defined($testprops{$_}) and ref($testprops{$_}) eq "ARRAY") {
+			if (defined($testprops{$_}[$i])) {
+				ok(defined($rq->{$_}), "Server check: $_ not undefined");
+				is($rq->{$_}, $testprops{$_}[$i], "Server check: $_");
+			}
+		} elsif (defined($testprops{$_})) {
 			ok(defined($rq->{$_}), "Server check: $_ not undefined");
-			is($rq->{$_}, $testprops{$_}[$i], "Server check: $_");
+			is($rq->{$_}, $testprops{$_}, "Server check: $_");
 		}
 	}
 }

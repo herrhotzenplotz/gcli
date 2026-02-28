@@ -28,6 +28,7 @@
  */
 
 #include <gcli/curl.h>
+#include <gcli/date_time.h>
 #include <gcli/gitea/config.h>
 #include <gcli/gitea/issues.h>
 #include <gcli/gitea/labels.h>
@@ -386,4 +387,23 @@ gitea_issue_set_op(struct gcli_ctx *ctx,
                    char const *const new_op)
 {
 	return github_issue_set_op(ctx, path, new_op);
+}
+
+int
+gitea_issue_set_due_date(struct gcli_ctx *ctx,
+                         struct gcli_path const *path,
+                         time_t date)
+{
+	char *date_repr = NULL;
+	int rc = 0;
+
+	rc = gcli_format_iso8601_date_time(ctx, date, &date_repr);
+	if (rc < 0)
+		return rc;
+
+	rc = gitea_issue_patch_property(ctx, path, "due_date", date_repr);
+
+	gcli_clear_ptr(&date_repr);
+
+	return rc;
 }

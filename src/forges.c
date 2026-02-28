@@ -311,6 +311,7 @@ gitea_forge_descriptor =
 	.issue_set_milestone       = gitea_issue_set_milestone,
 	.issue_set_title           = gitea_issue_set_title,
 	.issue_set_op              = gitea_issue_set_op,
+	.issue_set_due_date        = gitea_issue_set_due_date,
 	.perform_submit_issue      = gitea_submit_issue,
 	.issue_quirks              = GCLI_ISSUE_QUIRKS_PROD_COMP
 	                           | GCLI_ISSUE_QUIRKS_URL,

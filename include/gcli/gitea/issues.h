@@ -78,4 +78,9 @@ int gitea_issue_set_title(struct gcli_ctx *ctx,
 int gitea_issue_set_op(struct gcli_ctx *ctx,
                        struct gcli_path const *const path,
                        char const *const new_op);
+
+int gitea_issue_set_due_date(struct gcli_ctx *ctx,
+                             struct gcli_path const *path,
+                             time_t date);
+
 #endif /* GITEA_ISSUES_H */

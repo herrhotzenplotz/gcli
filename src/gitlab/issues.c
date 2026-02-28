@@ -28,6 +28,7 @@
  */
 
 #include <gcli/curl.h>
+#include <gcli/date_time.h>
 #include <gcli/gitlab/api.h>
 #include <gcli/gitlab/config.h>
 #include <gcli/gitlab/issues.h>
@@ -495,6 +496,33 @@ gitlab_issue_set_op(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	gcli_clear_ptr(&url);
 	gcli_clear_ptr(&payload);
+
+	return rc;
+}
+
+int
+gitlab_issue_set_due_date(struct gcli_ctx *ctx,
+                          struct gcli_path const *const path,
+                          time_t const date)
+{
+	char *date_repr = NULL, *options = NULL, *url = NULL;
+	int rc = 0;
+
+	rc = gcli_format_date(ctx, date, &date_repr);
+	if (rc < 0)
+		return rc;
+
+	gcli_url_options_append(&options, "due_date", date_repr);
+	gcli_clear_ptr(&date_repr);
+
+	rc = gitlab_issue_make_url(ctx, path, &url, options);
+	gcli_clear_ptr(&options);
+
+	if (rc < 0)
+		return rc;
+
+	rc = gcli_fetch_with_method(ctx, "PUT", url, NULL, NULL, NULL);
+	gcli_clear_ptr(&url);
 
 	return rc;
 }

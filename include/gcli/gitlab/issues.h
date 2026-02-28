@@ -86,4 +86,8 @@ int gitlab_issue_set_op(struct gcli_ctx *ctx,
                         struct gcli_path const *const path,
                         char const *const new_op);
 
+int gitlab_issue_set_due_date(struct gcli_ctx *ctx,
+                              struct gcli_path const *path,
+                              time_t date);
+
 #endif /* GITLAB_ISSUES_H */

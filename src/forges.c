@@ -211,6 +211,7 @@ gitlab_forge_descriptor =
 	.issue_set_milestone       = gitlab_issue_set_milestone,
 	.issue_set_title           = gitlab_issue_set_title,
 	.issue_set_op              = gitlab_issue_set_op,
+	.issue_set_due_date        = gitlab_issue_set_due_date,
 	.perform_submit_issue      = gitlab_perform_submit_issue,
 	.issue_quirks              = GCLI_ISSUE_QUIRKS_PROD_COMP
 	                           | GCLI_ISSUE_QUIRKS_URL,

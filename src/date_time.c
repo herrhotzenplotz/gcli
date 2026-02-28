@@ -129,7 +129,6 @@ gcli_parse_iso8601_date_time(struct gcli_ctx *ctx, char const *const input,
 		tzset();
 	}
 
-
 	return 0;
 }
 

@@ -39,6 +39,7 @@
 #include <gcli/cmd/table.h>
 
 #include <gcli/comments.h>
+#include <gcli/date_time.h>
 #include <gcli/forges.h>
 #include <gcli/issues.h>
 #include <gcli/port/string.h>
@@ -88,6 +89,7 @@ usage(void)
 	fprintf(stderr, "  title <new-title>  Change the title of the issue\n");
 	fprintf(stderr, "  open               Open the issue in a web browser\n");
 	fprintf(stderr, "  edit               Edit the OP\n");
+	fprintf(stderr, "  due <date>         Set the issue to be due at the given date\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
@@ -983,6 +985,47 @@ done:
 	return rc;
 }
 
+static int
+action_due(struct gcli_path const *const path,
+           struct gcli_issue const *const issue,
+           int *argc, char **argv[])
+{
+	char const *date_str = NULL;
+	time_t date = 0;
+	int rc;
+
+	(void) issue;
+
+	/* extract arguments from argv */
+	if (*argc < 2) {
+		fprintf(stderr, "gcli: error: missing date\n");
+		return GCLI_EX_USAGE;
+	}
+
+	*argc -= 1;
+	*argv += 1;
+	date_str = (*argv)[0];
+
+	/* parse date */
+	rc = gcli_parse_date(g_clictx, date_str, &date);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: %s\n", gcli_get_error(g_clictx));
+		return GCLI_EX_USAGE;
+	}
+
+	/* pass down to forge */
+	rc = gcli_issue_set_due_date(g_clictx, path, date);
+
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to set issue due date: %s\n",
+		        gcli_get_error(g_clictx));
+
+		return GCLI_EX_DATAERR;
+	}
+
+	return GCLI_EX_OK;
+}
+
 struct gcli_cmd_actions gcli_issue_actions = {
 	.fetch_item = (gcli_cmd_action_fetcher)gcli_get_issue,
 	.free_item = (gcli_cmd_action_freeer)gcli_issue_free,
@@ -1060,6 +1103,11 @@ struct gcli_cmd_actions gcli_issue_actions = {
 			.name = "edit",
 			.needs_item = true,
 			.handler = (gcli_cmd_action_handler)action_edit,
+		},
+		{
+			.name = "due",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler)action_due,
 		},
 	},
 };

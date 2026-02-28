@@ -146,6 +146,8 @@ Open the issue in a web browser using
 .It Cm edit
 Open the original post in an editor for editing.
 After saving and exiting the editor the original post is updated when confirmed by the user.
+.It Cm due Ar YYYY-mm-dd
+Set the issue to be due at the given date.
 .El
 .Sh EXAMPLES
 Print a list of issues in the current project:

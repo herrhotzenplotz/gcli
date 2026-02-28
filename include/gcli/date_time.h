@@ -49,7 +49,10 @@ int gcli_normalize_date(struct gcli_ctx *ctx, int fmt, char const *const input,
 int gcli_parse_iso8601_date_time(struct gcli_ctx *ctx, char const *input,
                                  time_t *out);
 
+int gcli_format_iso8601_date_time(struct gcli_ctx *ctx, time_t input, char **out);
+
 int gcli_parse_date(struct gcli_ctx *ctx, char const *input, time_t *out);
+int gcli_format_date(struct gcli_ctx *ctx, time_t input, char **out);
 
 int gcli_format_as_localtime(struct gcli_ctx *ctx, time_t timestamp, char **out);
 

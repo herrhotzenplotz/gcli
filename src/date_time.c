@@ -137,7 +137,7 @@ int
 gcli_parse_date(struct gcli_ctx *ctx, char const *const input,
                 time_t *const out)
 {
-	char *endptr = NULL, *oldtz = NULL;
+	char *endptr = NULL;
 	struct tm tm_buf = {0};
 
 	endptr = strptime(input, "%Y-%m-%d", &tm_buf);
@@ -147,28 +147,7 @@ gcli_parse_date(struct gcli_ctx *ctx, char const *const input,
 		                  "want YYYY-mm-dd", input);
 	}
 
-	/* Thanks, POSIX, for this ugly pile of rubbish! */
-	{
-		oldtz = getenv("TZ");
-		if (oldtz)
-			oldtz = strdup(oldtz);
-
-		/* TODO error handling */
-		setenv("TZ", "UTC", 1);
-		tzset();
-
-		*out = mktime(&tm_buf);
-
-		if (oldtz) {
-			setenv("TZ", oldtz, 1);
-			gcli_clear_ptr(&oldtz);
-		} else {
-			unsetenv("TZ");
-		}
-
-		tzset();
-	}
-
+	*out = mktime(&tm_buf);
 
 	return 0;
 }
@@ -188,6 +167,48 @@ gcli_format_as_localtime(struct gcli_ctx *ctx, time_t timestamp, char **out)
 
 	rc = strftime(tmp, sizeof tmp, "%Y-%b-%d %H:%M:%S",
 	              localtime_r(&timestamp, &tm_buf));
+
+	if (rc + 1 != sizeof tmp)
+		return gcli_error(ctx, "error formatting time stamp");
+
+	*out = strdup(tmp);
+
+	return 0;
+}
+
+int
+gcli_format_iso8601_date_time(struct gcli_ctx *ctx, time_t timestamp, char **out)
+{
+	char tmp[sizeof "YYYY-MM-DDTHH:MM:SSZ"] = {0};
+	struct tm tm_buf = {0};
+	size_t rc = 0;
+
+	/* if the timestamp is 0 we assume it is unset. */
+	if (timestamp == 0) {
+		*out = strdup("N/A");
+		return 0;
+	}
+
+	rc = strftime(tmp, sizeof tmp, "%Y-%m-%dT%H:%M:%SZ",
+	              gmtime_r(&timestamp, &tm_buf));
+
+	if (rc + 1 != sizeof tmp)
+		return gcli_error(ctx, "error formatting time stamp");
+
+	*out = strdup(tmp);
+
+	return 0;
+}
+
+int
+gcli_format_date(struct gcli_ctx *ctx, time_t const input, char **const out)
+{
+	char tmp[sizeof "YYYY-MM-DD"] = {0};
+	struct tm tm_buf = {0};
+	size_t rc = 0;
+
+	rc = strftime(tmp, sizeof tmp, "%Y-%m-%d",
+	              localtime_r(&input, &tm_buf));
 
 	if (rc + 1 != sizeof tmp)
 		return gcli_error(ctx, "error formatting time stamp");

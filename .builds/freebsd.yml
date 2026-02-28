@@ -1,4 +1,4 @@
-image: freebsd/14.x
+image: freebsd/15.x
 packages:
   - ca_root_nss
   - curl
@@ -10,6 +10,7 @@ packages:
   - pkgconf
   - readline
   - perl5
+  - pdjson
 sources:
   - https://git.sr.ht/~herrhotzenplotz/gcli
 tasks:

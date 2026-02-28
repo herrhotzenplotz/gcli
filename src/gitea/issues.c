@@ -142,9 +142,9 @@ gitea_submit_issue(struct gcli_ctx *const ctx,
 }
 
 static int
-gitea_issue_patch_state(struct gcli_ctx *ctx,
-                        struct gcli_path const *const path,
-                        char const *const state)
+gitea_issue_patch_property(struct gcli_ctx *ctx,
+                           struct gcli_path const *const path,
+                           char const *const name, char const *const value)
 {
 	char *url = NULL, *payload = NULL;
 	struct gcli_jsongen gen = {0};
@@ -157,8 +157,8 @@ gitea_issue_patch_state(struct gcli_ctx *ctx,
 	gcli_jsongen_init(&gen);
 	gcli_jsongen_begin_object(&gen);
 	{
-		gcli_jsongen_objmember(&gen, "state");
-		gcli_jsongen_string(&gen, state);
+		gcli_jsongen_objmember(&gen, name);
+		gcli_jsongen_string(&gen, value);
 	}
 	gcli_jsongen_end_object(&gen);
 
@@ -171,6 +171,14 @@ gitea_issue_patch_state(struct gcli_ctx *ctx,
 	gcli_clear_ptr(&url);
 
 	return rc;
+}
+
+static int
+gitea_issue_patch_state(struct gcli_ctx *ctx,
+                        struct gcli_path const *const path,
+                        char const *const state)
+{
+	return gitea_issue_patch_property(ctx, path, "state", state);
 }
 
 /* Gitea has closed, Github has close ... go figure */

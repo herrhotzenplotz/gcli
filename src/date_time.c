@@ -142,9 +142,9 @@ gcli_parse_date(struct gcli_ctx *ctx, char const *const input,
 
 	endptr = strptime(input, "%Y-%m-%d", &tm_buf);
 
-	if (endptr && *endptr != '\0') {
-		return gcli_error(ctx, "failed to parse date \"%s\": %s",
-		                  input, strerror(errno));
+	if (!endptr || *endptr != '\0') {
+		return gcli_error(ctx, "failed to parse date \"%s\", "
+		                  "want YYYY-mm-dd", input);
 	}
 
 	/* Thanks, POSIX, for this ugly pile of rubbish! */

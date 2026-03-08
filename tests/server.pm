@@ -109,6 +109,7 @@ EOF
 		my $client_ip_str = inet_ntoa($client_ip);
 		my $srv_out = IO::File->new($srv_out_file . ".${i}", "w");
 		my $rsp = $parms{'responses'}[$i];
+		my $content_length = -1;
 
 		print $srv_log "Received connection from ${client_ip_str}\n";
 
@@ -118,7 +119,25 @@ EOF
 			print $srv_out "$line\n";
 			print $srv_log "  > $line\n";
 
+			# Read a content length, if it exists
+			my ($k, $v) = split /:\s*/, $line;
+			if ($k and ($k eq "Content-Length")) {
+				$content_length = $v + 0;
+			}
+
 			last if length($line) == 0;
+		}
+
+		# Handle the body
+		if ($content_length > 0) {
+			print $srv_log "Content length = $content_length\n";
+			print $srv_log "Reading this many bytes!\n";
+
+			my $body;
+			$client_sock->read($body, $content_length);
+
+			print $srv_out $body;
+			print $srv_log " > Body:\n$body\n";
 		}
 
 		$srv_out->flush();
@@ -179,7 +198,7 @@ sub get_request {
 	# Parse headers
 	my @headers = ();
 	while (my $ln = <$f>) {
-		last if ($ln eq "\r\n");
+		last if ($ln eq "\r\n" or $ln eq "\n");
 
 		my ($k, $v) = split ": ", $ln;
 		push(@headers, { $k => $v });

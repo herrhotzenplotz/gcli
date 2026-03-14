@@ -1,0 +1,65 @@
+#!/bin/sh
+
+# Copyright Nico Sonack <nsonack@herrhotzenplotz.de>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above
+# copyright notice, this list of conditions and the following
+# disclaimer in the documentation and/or other materials provided
+# with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+# STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+# OF THE POSSIBILITY OF SUCH DAMAGE.
+
+source_dirs="src include"
+line_limit=10
+autofix=0
+
+[ $# -eq 1 -a "$1" = "--fix" ] && autofix=1
+
+list_files() {
+	find $source_dirs -type f -name \*.[hc]
+}
+
+files=$(list_files)
+
+autofix_year_in_copyright()
+{
+	[ $autofix -eq 1 ] &&
+		printf '/Copyright/s/Copyright [[:digit:]-]*/Copyright/p\nf\nwq\n' | ed $1
+}
+
+for source_file in $files
+do
+	copyright_line="$(sed "${line_limit}q" < $source_file | grep -n Copyright)"
+	if ! [ $? -eq 0 ]; then
+		printf "%s: fatal: no copyright line found\n" "${source_file}"
+		continue
+	fi
+
+	line_no="${copyright_line%%: *}"
+	line_text="${copyright_line##*: }"
+
+	echo "${line_text}" | grep -Eq 'Copyright[ ]*[0-9]{4}' &&
+		printf "%s:%d: error: Copyright line contains year number\n" "${source_file}" "${line_no}" &&
+		autofix_year_in_copyright ${source_file}
+
+	sed "${line_limit}q" < ${source_file} | grep -q Redistributions ||
+		printf "%s:%d: error: file is missing full license\n" "${source_file}" "${line_no}"
+done

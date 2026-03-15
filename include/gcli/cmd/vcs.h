@@ -1,6 +1,6 @@
 /* This file is part of gcli.
  *
- * Copyright 2025 Nico Sonack <nsonack@herrhotzenplotz.de> */
+ * Copyright Nico Sonack <nsonack@herrhotzenplotz.de> */
 
 #ifndef GCLI_CMD_VCS_H
 #define GCLI_CMD_VCS_H

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>
+ * Copyright Nico Sonack <nsonack@herrhotzenplotz.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

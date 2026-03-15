@@ -42,7 +42,18 @@ files=$(list_files)
 autofix_year_in_copyright()
 {
 	[ $autofix -eq 1 ] &&
-		printf '/Copyright/s/Copyright [[:digit:]-]*/Copyright/p\nf\nwq\n' | ed $1
+		printf '/Copyright/s/Copyright [[:digit:]-]*/Copyright/p\nwq\n' | ed $1
+}
+
+autofix_bad_copyright_header()
+{
+	[ $autofix -eq 1 ] && (
+		(
+			echo '/^\/\*/,/\*\/$/d'
+			echo '0r tools/default-license'
+			echo 'wq'
+		) | ed $1
+	)
 }
 
 for source_file in $files
@@ -56,10 +67,13 @@ do
 	line_no="${copyright_line%%: *}"
 	line_text="${copyright_line##*: }"
 
-	echo "${line_text}" | grep -Eq 'Copyright[ ]*[0-9]{4}' &&
-		printf "%s:%d: error: Copyright line contains year number\n" "${source_file}" "${line_no}" &&
+	echo "${line_text}" | grep -Eq 'Copyright[ ]*[0-9]{4}' && (
+		printf "%s:%d: error: Copyright line contains year number\n" "${source_file}" "${line_no}"
 		autofix_year_in_copyright ${source_file}
+	)
 
-	sed "${line_limit}q" < ${source_file} | grep -q Redistributions ||
+	sed "${line_limit}q" < ${source_file} | grep -q Redistributions || (
 		printf "%s:%d: error: file is missing full license\n" "${source_file}" "${line_no}"
+		autofix_bad_copyright_header ${source_file}
+	)
 done

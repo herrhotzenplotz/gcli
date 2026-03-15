@@ -41,8 +41,10 @@ files=$(list_files)
 
 autofix_year_in_copyright()
 {
-	[ $autofix -eq 1 ] &&
-		printf '/Copyright/s/Copyright [[:digit:]-]*/Copyright/p\nwq\n' | ed $1
+	[ $autofix -eq 1 ] && (
+		printf '/Copyright/s/Copyright [[:digit:]-]*/Copyright/p\nwq\n' | ed $1 > /dev/null 2>&1
+		printf "%s: note: autofix applied\n" "${1}"
+	)
 }
 
 autofix_bad_copyright_header()
@@ -52,7 +54,22 @@ autofix_bad_copyright_header()
 			echo '/^\/\*/,/\*\/$/d'
 			echo '0r tools/default-license'
 			echo 'wq'
-		) | ed $1
+		) | ed $1 > /dev/null 2>&1
+		printf "%s: note: autofix applied\n" "${1}"
+	)
+}
+
+autofix_missing_copyright_header()
+{
+	[ $autofix -eq 1 ] && (
+		(
+			echo '0r tools/default-license'
+			echo 'a'
+			echo ''
+			echo '.'
+			echo wq
+		) | ed $1 > /dev/null 2>&1
+		printf "%s: note: autofix applied\n" "${1}"
 	)
 }
 
@@ -61,6 +78,7 @@ do
 	copyright_line="$(sed "${line_limit}q" < $source_file | grep -n Copyright)"
 	if ! [ $? -eq 0 ]; then
 		printf "%s: fatal: no copyright line found\n" "${source_file}"
+		autofix_missing_copyright_header ${source_file}
 		continue
 	fi
 

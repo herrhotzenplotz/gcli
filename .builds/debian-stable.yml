@@ -21,3 +21,6 @@ tasks:
       cd gcli
       ./configure --debug
       make -j 4 check
+  - copyright: |
+      cd gcli
+      tools/check-copyright

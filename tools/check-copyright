@@ -27,14 +27,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 
-source_dirs="src include"
+source_dirs="src include tests"
 line_limit=10
 autofix=0
 
 [ $# -eq 1 -a "$1" = "--fix" ] && autofix=1
 
 list_files() {
-	find $source_dirs -type f -name \*.[hc]
+	find $source_dirs -type f -name \*.[hcly]
 }
 
 files=$(list_files)
@@ -42,7 +42,7 @@ files=$(list_files)
 autofix_year_in_copyright()
 {
 	[ $autofix -eq 1 ] && (
-		printf '/Copyright/s/Copyright [[:digit:]-]*/Copyright/p\nwq\n' | ed $1 > /dev/null 2>&1
+		printf '/Copyright/s/Copyright[, ]*[[:digit:]-]*/Copyright/p\nwq\n' | ed $1 > /dev/null 2>&1
 		printf "%s: note: autofix applied\n" "${1}"
 	)
 }
@@ -85,7 +85,7 @@ do
 	line_no="${copyright_line%%: *}"
 	line_text="${copyright_line##*: }"
 
-	echo "${line_text}" | grep -Eq 'Copyright[ ]*[0-9]{4}' && (
+	echo "${line_text}" | grep -Eq 'Copyright[ ,]*[0-9]+' && (
 		printf "%s:%d: error: Copyright line contains year number\n" "${source_file}" "${line_no}"
 		autofix_year_in_copyright ${source_file}
 	)

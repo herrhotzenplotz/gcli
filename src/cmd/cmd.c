@@ -66,8 +66,7 @@ copyright(void)
 {
 	fprintf(
 		stderr,
-		"Copyright 2021-2025 Nico Sonack <nsonack@herrhotzenplotz.de>"
-		" and contributors.\n");
+		"Copyright Nico Sonack <nsonack@herrhotzenplotz.de> and contributors.\n");
 }
 
 void

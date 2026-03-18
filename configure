@@ -174,6 +174,7 @@ ENVIRONMENT:
     RM                      rm to use [DEFAULT: autodetect]
     CCACHE                  Path to ccache [DEFAULT: autodetect]
     PERL                    Path to perl for test suite [DEFAULT: autodetect]
+    GZIP                    Path to gzip for manual page compression [DEFAULT: autodetect]
     INSTALL                 Path to install [DEFAULT: autodetect]
     EXEEXT                  File extension of executable files for the host system [DEFAULT: '', '.exe' on Windows]
     OBJEXT                  File extension of object files for the host system [DEFAULT: '.o', '.obj' on Windows]
@@ -417,6 +418,11 @@ if [ ${ENABLE_TESTS} -eq 1 ]; then
 		echo "configure: warning: tests are disabled because perl couldn't be found" >&2
 	fi
 fi
+###################################################################
+# Manual Pages require gzip
+###################################################################
+GZIP=${GZIP:-$(find_program gzip gzip)}
+[ $? -eq 0 ] || die "Need gzip for manual page compression"
 
 ###################################################################
 # Configure Makefile
@@ -471,6 +477,7 @@ sed \
 	-e "s|@RANLIB@|$RANLIB|g" \
 	-e "s|@RM@|$RM|g" \
 	-e "s|@PERL@|$PERL|g" \
+	-e "s|@GZIP@|$GZIP|g" \
 	-e "s|@INSTALL@|$INSTALL|g" \
 	-e "s|@SHELL@|$SHELL|g" \
 	-e "s|@PREFIX@|$PREFIX|g" \

@@ -21,6 +21,7 @@ RANLIB                     = @RANLIB@
 RM                         = @RM@
 PREFIX                     = @PREFIX@
 PERL                       = @PERL@
+GZIP                       = @GZIP@
 SHELL                      = @SHELL@
 EXEEXT                     = @EXEEXT@
 LIBEXT                     = @LIBEXT@
@@ -341,7 +342,7 @@ Makefile: @SRCDIR@/configure @SRCDIR@/Makefile.in
 		PKG_CONFIG="${ENV_PKG_CONFIG}" PKG_CONFIG_PATH="${ENV_PKG_CONFIG_PATH}" \
 		$$(test -n "$(ENV_PKG_CONFIG_LIBDIR)" && echo 'PKG_CONFIG_LIBDIR="${ENV_PKG_CONFIG_LIBDIR}"') \
 		PKG_CONFIG_SYSROOT_DIR="${ENV_PKG_CONFIG_SYSROOT_DIR}" \
-		CCACHE="${CCACHE}" \
+		CCACHE="${CCACHE}" GZIP="$(GZIP)" \
 		EXEEXT="${EXEEXT}" OBJEXT="${OBJEXT}" LIBEXT="${LIBEXT}" \
 		EXEEXT_FOR_BUILD="${EXEEXT_FOR_BUILD}" OBJEXT_FOR_BUILD="${OBJEXT_FOR_BUILD}" LIBEXT_FOR_BUILD="${LIBEXT_FOR_BUILD}" \
 		sh @SRCDIR@/configure @CONFIGURE_CMD_ARGS@
@@ -619,7 +620,7 @@ docs/gcli-tutorial.1: $(TUTORIAL_SRC_MAINTAINER_$(ENABLE_MAINTAINER))
 # Compression
 .SUFFIXES: .1.gz .5.gz .1.gz-install .5.gz-install
 .1.1.gz .5.5.gz:
-	gzip < $< > $@
+	$(GZIP) < $< > $@
 
 # Install targets
 .PHONY: .1.gz-install .5.gz-install

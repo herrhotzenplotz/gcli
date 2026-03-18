@@ -424,7 +424,7 @@ clean-auto:
 		lex.yy.c y.tab.c y.tab.h \
 		$(TEST_PROGRAMS:=.tests$(OBJEXT)) \
 		$(TEST_PROGRAMS) \
-		$(MANPAGES) \
+		$(MANPAGES) $(MANPAGES:=.gz) \
 		gcli_*.srv.log gcli_*srv.out.* gcli_*.console.log
 
 .PHONY: distclean
@@ -561,6 +561,8 @@ MANPAGES= \
 	docs/gcli.5 \
 	docs/gcli-tutorial.1
 
+COMP_MANPAGES=	$(MANPAGES:=.gz)
+
 bindir=	/bin
 mandir=	/share/man
 
@@ -574,7 +576,7 @@ MANDIR=	$(DESTDIR)$(PREFIX)$(mandir)
 #
 # The -auto target here makes make not print "foo is up-to-date"
 # when they are up-to-date.
-manpages-auto: Makefile @SRCDIR@/configure $(MANPAGES)
+manpages-auto: Makefile @SRCDIR@/configure $(MANPAGES:=.gz)
 
 manpages: Makefile @SRCDIR@/configure
 	@$(MAKE) manpages-auto
@@ -614,26 +616,26 @@ docs/gcli-tutorial.1: $(TUTORIAL_SRC_MAINTAINER_$(ENABLE_MAINTAINER))
 		-e 's|\@PACKAGE_VERSION\@|@PACKAGE_VERSION@|g' \
 		< ${<} > $@
 
-install-auto: manpages gcli
-	$(INSTALL) -d $(BINDIR)
-	$(INSTALL) -m 0755 gcli $(BINDIR)
+# Compression
+.SUFFIXES: .1.gz .5.gz .1.gz-install .5.gz-install
+.1.1.gz .5.5.gz:
+	gzip < $< > $@
+
+# Install targets
+.PHONY: .1.gz-install .5.gz-install
+.1.gz.1.gz-install:
+	$(INSTALL) -d $(MANDIR)
+	$(INSTALL) -d $(MANDIR)/man1
+	$(INSTALL) -m 644 $< $(MANDIR)/man1
+
+.5.gz.5.gz-install:
 	$(INSTALL) -d $(MANDIR)
 	$(INSTALL) -d $(MANDIR)/man5
-	$(INSTALL) -d $(MANDIR)/man1
-	# TODO: compress manual pages
-	for PAGE in $(MANPAGES); do                               \
-		case $$PAGE in                                    \
-		*.1)                                              \
-			$(INSTALL) -m 644 $$PAGE $(MANDIR)/man1   \
-			;;                                        \
-		*.5)                                              \
-			$(INSTALL) -m 644 $$PAGE $(MANDIR)/man5   \
-			;;                                        \
-		*)                                                \
-			echo error installing man page $$PAGE >&2 \
-			;;                                        \
-		esac                                              \
-	done
+	$(INSTALL) -m 644 $< $(MANDIR)/man5
+
+install-auto: gcli $(COMP_MANPAGES:=-install)
+	$(INSTALL) -d $(BINDIR)
+	$(INSTALL) -m 0755 gcli $(BINDIR)
 
 ###############################################################
 # Distcheck target

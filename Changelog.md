@@ -43,6 +43,8 @@ This changelog does not follow semantic versioning.
 
   Suggested-by: 999faryad <https://github.com/999faryad>
 
+- GCLI's manual pages are now installed gzip compressed by default
+
 ### Removed
 
 

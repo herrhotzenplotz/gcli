@@ -197,6 +197,8 @@ ENABLE_LIBRT=1
 ENABLE_MAINTAINER=${ENABLE_MAINTAINER:-0}
 ENABLE_TESTS=1
 ENABLE_SANITISERS=${ENABLE_SANITISERS:-0}
+DEPRECATED_OPTIONS_USED=0
+UNKNOWN_OPTIONS_USED=0
 
 # Parse flags
 while [ $# -gt 0 ]; do
@@ -208,10 +210,6 @@ while [ $# -gt 0 ]; do
 		--prefix)
 			PREFIX=${2}
 			shift; shift
-			;;
-		--enable-libedit|--enable-libreadline|--enable-liblowdown)
-			echo "configure: warning: $1 is deprecated and ignored" >&2
-			shift
 			;;
 		--disable-libedit)
 			ENABLE_LIBEDIT=0
@@ -252,8 +250,19 @@ while [ $# -gt 0 ]; do
 		--help)
 			usage
 			;;
+
+		# Deprecated section
+		--enable-libedit|--enable-libreadline|--enable-liblowdown)
+			echo "configure: warning: $1 is deprecated and ignored" >&2
+			DEPRECATED_OPTIONS_USED=1
+			shift
+			;;
+
+		# Unknown. Do not error out, but inform the user later.
 		*)
-			die "error: unknown flag: $1"
+			echo "configure: warning: unrecognised option '$1'" >&2
+			UNKNOWN_OPTIONS_USED=1
+			shift
 			;;
 	esac
 done
@@ -559,6 +568,16 @@ echo ""
 echo "     WARNING: --enable-maintainer and --release specified together."
 echo "              You probably don't want this for packaging."
 echo "              Drop --enable-maintainer!"
+fi
+if [ $DEPRECATED_OPTIONS_USED -eq 1 ]; then
+echo ""
+echo "     WARNING: Deprecated options have been supplied to the configure script."
+echo "              Please review the messages above and remove deprecated options."
+fi
+if [ $UNKNOWN_OPTIONS_USED -eq 1 ]; then
+echo ""
+echo "     WARNING: Unknown options have been supplied to the configure script."
+echo "              Please review the messages above and fix the supplied options."
 fi
 echo ""
 echo "Configuration done. You may now run make."

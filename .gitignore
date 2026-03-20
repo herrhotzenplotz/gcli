@@ -29,3 +29,5 @@ build/**
 /lex.yy.c
 /lex.yy.pgen.d
 /lex.yy.pgen.o
+/dist
+/.kak.*

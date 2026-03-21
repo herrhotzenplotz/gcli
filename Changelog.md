@@ -2,7 +2,7 @@
 
 This changelog does not follow semantic versioning.
 
-## UNRELEASED
+## 2.11.0 (21-Mar-2026)
 
 ### Fixed
 
@@ -44,8 +44,6 @@ This changelog does not follow semantic versioning.
   Suggested-by: 999faryad <https://github.com/999faryad>
 
 - GCLI's manual pages are now installed gzip compressed by default
-
-### Removed
 
 
 ## 2.10.0 (31-Dec-2025)

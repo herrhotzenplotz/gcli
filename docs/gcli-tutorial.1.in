@@ -1,6 +1,6 @@
 .\" -*- mode: troff; coding: utf-8 -*-
 Tutorial of GCLI - Generated Offline Version of https://herrhotzenplotz.de/gcli/tutorial
-.TH "gcli-tutorial" "1" "UNRELEASED"
+.TH "gcli-tutorial" "1" "21-Mar-2026"
 .SH Installing GCLI
 .SS
 Through package manager

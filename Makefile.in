@@ -470,6 +470,11 @@ tests/unit/gotconf-parser$(EXEEXT): libgcli$(LIBEXT) tests/unit/gotconf-parser.t
 		$(LDFLAGS) -o $@ $(@:=.tests$(OBJEXT)) src/cmd/vcs/gotconf_parser.tests$(OBJEXT) \
 		libgcli$(LIBEXT) $(LIBCURL_LIBS) $(LIBCRYPTO_LIBS) $(PDJSON_LIBS) $(LIBRT_LIBS)
 
+# extra clean hook
+clean-auto: clean-src/cmd/vcs/gotconf_parser.tests$(OBJEXT)
+clean-src/cmd/vcs/gotconf_parser.tests$(OBJEXT):
+	rm -f src/cmd/vcs/gotconf_parser.tests$(OBJEXT)
+
 tests/unit/gitconf-parser$(EXEEXT): libgcli$(LIBEXT) tests/unit/gitconf-parser.tests$(OBJEXT) src/cmd/vcs/gitconf_parser.tests$(OBJEXT)
 	@mkdir -p $$(dirname $@)
 	$(CCACHE) $(CC) $(CFLAGS) $(CCDEPFLAGS) $(CPPFLAGS) \
@@ -478,9 +483,9 @@ tests/unit/gitconf-parser$(EXEEXT): libgcli$(LIBEXT) tests/unit/gitconf-parser.t
 		libgcli$(LIBEXT) $(LIBCURL_LIBS) $(LIBCRYPTO_LIBS) $(PDJSON_LIBS) $(LIBRT_LIBS)
 
 # extra clean hook
-clean-auto: clean-src/cmd/vcs/gotconf_parser.tests$(OBJEXT)
-clean-src/cmd/vcs/gotconf_parser.tests$(OBJEXT):
-	rm -f src/cmd/vcs/gotconf_parser.tests$(OBJEXT)
+clean-auto: clean-src/cmd/vcs/gitconf_parser.tests$(OBJEXT)
+clean-src/cmd/vcs/gitconf_parser.tests$(OBJEXT):
+	rm -f src/cmd/vcs/gitconf_parser.tests$(OBJEXT)
 
 $(SIMPLE_TEST_PROGRAMS): libgcli$(LIBEXT)
 	@mkdir -p $$(dirname $@)
@@ -647,7 +652,8 @@ distcheck-auto:
 	(cd @SRCDIR@ && @SRCDIR@/tools/gentarball.sh)
 	mkdir -p dist/.build-gcli-$(GCLI_VERSION)
 	(cd dist && tar -x -f @SRCDIR@/dist/gcli-$(GCLI_VERSION)/gcli-$(GCLI_VERSION).tar.gz && chmod -R a-w gcli-$(GCLI_VERSION))
-	(cd dist/.build-gcli-$(GCLI_VERSION) && ../gcli-$(GCLI_VERSION)/configure && $(MAKE) && $(MAKE) check)
+	(cd dist/.build-gcli-$(GCLI_VERSION) && ../gcli-$(GCLI_VERSION)/configure && $(MAKE) && $(MAKE) check && $(MAKE) clean)
+	@if find dist/.build-gcli-$(GCLI_VERSION) -type f -name '*.o' | grep '\.o'; then echo "DISTCHECK ERROR: clean target doesn't clean up the files listed above" >&2; exit 1; fi
 	(chmod -R a+w dist/gcli-$(GCLI_VERSION) && rm -fr dist/.build-gcli-$(GCLI_VERSION) dist/gcli-$(GCLI_VERSION))
 
 ###############################################################

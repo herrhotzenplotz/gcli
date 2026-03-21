@@ -2,6 +2,17 @@
 
 This changelog does not follow semantic versioning.
 
+## UNRELEASED
+
+### Fixed
+
+### Added
+
+### Changed
+
+### Removed
+
+
 ## 2.11.0 (21-Mar-2026)
 
 ### Fixed

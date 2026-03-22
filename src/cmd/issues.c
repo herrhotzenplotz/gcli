@@ -342,7 +342,7 @@ subcommand_issue_create(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	const struct option options[] = {
+	struct option const options[] = {
 		{ .name    = "owner",
 		  .has_arg = required_argument,
 		  .flag    = NULL,
@@ -436,7 +436,7 @@ subcommand_issues(int argc, char *argv[])
 		return subcommand_issue_create(argc, argv);
 	}
 
-	const struct option options[] = {
+	struct option const options[] = {
 		{ .name    = "all",
 		  .has_arg = no_argument,
 		  .flag    = NULL,

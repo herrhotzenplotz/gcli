@@ -23,6 +23,7 @@
 .Cm create
 .Op Fl o Ar owner Fl r Ar repo
 .Op Fl y
+.Op Fl T Ar template-file
 .Op Ar issue-title
 .Sh DESCRIPTION
 Use
@@ -92,8 +93,14 @@ for all the details to create an issue.
 .Pp
 The following flags can be specified:
 .Bl -tag -width indent
-.It Fl i , -in Ar owner/repo
+.It Fl o , -owner Ar owner
+Specify the owner of the repository in which to create the issue.
+.It Fl r , -repo Ar repository
 Specify in which repository the issue is to be created.
+.It Fl T , -template Ar template-file
+Use the given
+.Ar template-file
+as a template for the issue message body.
 .It Fl y , -yes
 Do not ask for confirmation before creating the issue. Assume yes.
 .El

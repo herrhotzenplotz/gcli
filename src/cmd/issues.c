@@ -253,25 +253,29 @@ gcli_issue_get_user_message(struct gcli_submit_issue_options *opts)
 static int
 create_issue(struct gcli_submit_issue_options *opts, bool always_yes)
 {
-	int rc;
+	bool const interactive = !always_yes;
+	int rc = 0;
 
-	gcli_cmd_recall_message_interactive(&opts->body);
-	opts->body = gcli_issue_get_user_message(opts);
+	if (interactive)
+		gcli_cmd_recall_message_interactive(&opts->body);
 
-	printf("The following issue will be created:\n"
-	       "\n"
-	       "TITLE   : %s\n"
-	       "OWNER   : %s\n"
-	       "REPO    : %s\n"
-	       "MESSAGE :\n",
-	       opts->title, opts->owner, opts->repo);
+	if (opts->body == NULL)
+		opts->body = gcli_issue_get_user_message(opts);
 
-	if (opts->body)
-		gcli_pretty_print(opts->body, 4, 80, stdout);
-	else
-		puts("No message");
+	if (interactive) {
+		printf("The following issue will be created:\n"
+		       "\n"
+		       "TITLE   : %s\n"
+		       "OWNER   : %s\n"
+		       "REPO    : %s\n"
+		       "MESSAGE :\n",
+		       opts->title, opts->owner, opts->repo);
 
-	if (!always_yes) {
+		if (opts->body)
+			gcli_pretty_print(opts->body, 4, 80, stdout);
+		else
+			puts("No message");
+
 		if (!gcli_yesno("Do you want to continue?"))
 			errx(1, "gcli: Submission aborted.");
 	}

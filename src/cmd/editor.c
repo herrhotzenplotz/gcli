@@ -76,7 +76,7 @@ edit(struct gcli_ctx *ctx, char const *filename)
 			errx(1, "Editor child exited abnormally");
 
 		if (WEXITSTATUS(status) != 0)
-			errx(1, "Aborting PR. Editor command exited with code %d",
+			errx(1, "Aborting. Editor command exited with code %d",
 			     WEXITSTATUS(status));
 	}
 }

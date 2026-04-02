@@ -490,6 +490,28 @@ if [ ${ENABLE_TESTS} -eq 1 ]; then
 		ENABLE_TESTS=0
 		echo "configure: warning: tests are disabled because perl couldn't be found" >&2
 	fi
+
+	# Determine Version of TAP::Harness Module
+	printf "Checking version of TAP::Harness ... " >&2
+	TAPHARNESS_VER="$($PERL -MTAP::Harness -e 'print $TAP::Harness::VERSION ."\n";' 2>&1)"
+	if [ ! $? -eq 0 ]; then
+		printf 'failed to determine: %s. Disabling tests.\n' "${TAPHARNESS_VER}" >&2
+		ENABLE_TESTS=0
+	else
+		printf '%s, ' "${TAPHARNESS_VER}" >&2
+		TAPHARNESS_MAJOR="${TAPHARNESS_VER%.*}"
+		TAPHARNESS_MINOR="${TAPHARNESS_VER#*.}"
+
+		if [ ${TAPHARNESS_MAJOR} -gt 3 ] ||
+		   [ ${TAPHARNESS_MAJOR} -eq 3 -a ${TAPHARNESS_MINOR} -gt 48 ]
+		then
+			printf 'tests are enabled.\n' >&2
+			TAPVER=14
+		else
+			printf 'too old, disabling tests.\n' >&2
+			ENABLE_TESTS=0
+		fi
+	fi
 fi
 ###################################################################
 # Manual Pages require gzip

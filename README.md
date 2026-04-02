@@ -53,7 +53,7 @@ Optional dependencies:
 
 The test suite requires:
 
-- Perl 5
+- Perl 5 (a version that includes TAP::Harness of at least 3.48)
 
 ### Compile
 

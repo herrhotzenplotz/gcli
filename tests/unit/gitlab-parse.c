@@ -56,7 +56,9 @@ static struct gcli_ctx *
 test_context(UNIT_CTX)
 {
 	struct gcli_ctx *ctx;
-	REQUIRE(gcli_init(&ctx, get_gitlab_forge_type, NULL, NULL) == NULL);
+	REQUIRE(gcli_init(&ctx, get_gitlab_forge_type,
+	        (char const *(*)(struct gcli_ctx *))NULL,
+	        (char const *(*)(struct gcli_ctx *))NULL) == NULL);
 	return ctx;
 }
 

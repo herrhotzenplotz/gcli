@@ -307,6 +307,70 @@ printf "Checking build compiler target ..."
 BUILD=$(compiler_target $CCOM_FOR_BUILD $CC_FOR_BUILD)
 printf " $BUILD\n"
 
+####################################################################
+# The following check is to determine whether we can use 700
+# for _XOPEN_SOURCE. We need this for PATH_MAX because Solaris is
+# silly. Don't do this check if we already have the X/Open Flag in
+# CPPFLAGS otherwise it piles up on reconfig. Also don't override
+# user-provided flags.
+# args: cc
+solaris_check_xopensource() {
+	tmpfile="$(mktemp "gcli_conftest.XXX.c")"
+	cc="${1}"
+
+	cat > "${tmpfile}" <<EOF
+#include <stdio.h>
+int main(void) { puts("1"); return 0; }
+EOF
+
+	$cc -D_XOPEN_SOURCE=700 -o /tmp/gcliconftest $tmpfile >/dev/null 2>&1 &&
+		echo 1 ||
+		echo 0
+
+	rm -f /tmp/gcliconftest ${tmpfile}
+}
+
+misses_xopen_source() {
+	case "${1}" in
+	*XOPEN_SOURCE=*) return 1 ;;
+	*) return 0 ;;
+	esac
+}
+
+if misses_xopen_source "${CPPFLAGS}"; then
+	XOPEN_SOURCE="-D_XOPEN_SOURCE=700"
+	if [ "${CCOM}" = sunstudio ] && [ "${HOST}" = sparc64-unknown-solaris ]; then
+		printf "Checking whether we can define _XOPEN_SOURCE=700 for the host ... "
+		if [ "$(solaris_check_xopensource "${CC} ${CPPFLAGS} ${CFLAGS}")" = 1 ]; then
+			printf " yes\n"
+		else
+			printf "no, falling back to 600\n"
+			XOPEN_SOURCE="-D_XOPEN_SOURCE=600"
+		fi
+	fi
+
+	[ -z "${CPPFLAGS}" ] &&
+		CPPFLAGS="${XOPEN_SOURCE}" ||
+		CPPFLAGS="${CPPFLAGS} ${XOPEN_SOURCE}"
+fi
+
+if misses_xopen_source "${CPPFLAGS_FOR_BUILD}"; then
+	XOPEN_SOURCE_FOR_BUILD="-D_XOPEN_SOURCE=700"
+	if [ "${CCOM_FOR_BUILD}" = sunstudio ] && [ "${BUILD}" = sparc64-unknown-solaris ]; then
+		printf "Checking whether we can define _XOPEN_SOURCE=700 for the build system ... "
+		if [ "$(solaris_check_xopensource "${CC_FOR_BUILD} ${CPPFLAGS_FOR_BUILD} ${CFLAGS_FOR_BUILD}")" = 1 ]; then
+			printf " yes\n"
+		else
+			printf "no, falling back to 600\n"
+			XOPEN_SOURCE_FOR_BUILD="-D_XOPEN_SOURCE=600"
+		fi
+	fi
+
+	[ -z "${CPPFLAGS_FOR_BUILD}" ] &&
+		CPPFLAGS_FOR_BUILD="${XOPEN_SOURCE_FOR_BUILD}" ||
+		CPPFLAGS_FOR_BUILD="${CPPFLAGS_FOR_BUILD} ${XOPEN_SOURCE_FOR_BUILD}"
+fi
+
 ############################################################################
 # LIBRARIES
 ############################################################################
@@ -530,6 +594,7 @@ echo "         CC_FOR_BUILD: ${CC_FOR_BUILD}"
 echo "               CFLAGS: ${CFLAGS}"
 echo "     CFLAGS_FOR_BUILD: ${CFLAGS_FOR_BUILD}"
 echo "             CPPFLAGS: ${CPPFLAGS}"
+echo "   CPPFLAGS_FOR_BUILD: ${CPPFLAGS_FOR_BUILD}"
 echo "              LDFLAGS: ${LDFLAGS}"
 echo "    LDFLAGS_FOR_BUILD: ${LDFLAGS_FOR_BUILD}"
 echo "       LIBCURL_CFLAGS: ${LIBCURL_CFLAGS}"

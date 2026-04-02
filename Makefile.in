@@ -50,10 +50,10 @@ CSANFLAGS_gcc_1=		-fsanitize=address
 COPTFLAGS=			$(COPTFLAGS_$(CCOM)_$(OPTIMISE)) $(CSANFLAGS_$(CCOM)_$(ENABLE_SANITISERS))
 COPTFLAGS_FOR_BUILD=		$(COPTFLAGS_$(CCOM_FOR_BUILD)_$(OPTIMISE)) $(CSANFLAGS_$(CCOM_FOR_BUILD)_$(ENABLE_SANITISERS))
 
-CSTDFLAGS_gcc=		-std=c11 -pedantic -D_XOPEN_SOURCE=700
-CSTDFLAGS_clang=	-std=c11 -pedantic -D_XOPEN_SOURCE=700
-CSTDFLAGS_xlc=		-qlanglvl=stdc11 -D_XOPEN_SOURCE=700
-CSTDFLAGS_sunstudio=	-std=c11 -D_XOPEN_SOURCE=600 -pedantic=yes    # Oracle Compiler on Solaris doesn't support 700
+CSTDFLAGS_gcc=		-std=c11 -pedantic
+CSTDFLAGS_clang=	-std=c11 -pedantic
+CSTDFLAGS_xlc=		-qlanglvl=stdc11
+CSTDFLAGS_sunstudio=	-std=c11 -pedantic=yes
 CSTDFLAGS=		$(CSTDFLAGS_$(CCOM))
 CSTDFLAGS_FOR_BUILD=	$(CSTDFLAGS_$(CCOM_FOR_BUILD))
 
@@ -507,11 +507,18 @@ check-auto-1: $(TEST_PROGRAMS) gcli$(EXEEXT)
 	$(PERL) @SRCDIR@/tests/run.pl
 
 check-auto-0 check-auto-:
-	@echo "The test suite is disabled because I couldn't find perl."
-	@echo "To enable it, please either install perl and make it available"
-	@echo "in the PATH or alternatively set the PERL env variable to a"
-	@echo "valid perl executable."
-	@echo "Then reconfigure the build directory."
+	@echo "The test suite is disabled because I couldn't find Perl or the"
+	@echo "TAP::Harness Module which is distributed with Perl is too old."
+	@echo ""
+	@echo "To enable tests, please either install a suitable Perl and make it"
+	@echo "available in the PATH or alternatively set the PERL env variable"
+	@echo "to a valid Perl executable. Then reconfigure the build directory."
+	@echo ""
+	@echo "For build requirements please check on the README.md."
+	@echo ""
+	@echo "HINT: If you know what you're doing you may override this"
+	@echo "sanity check and invoke make with ENABLE_TESTS=1 as an"
+	@echo "argument; expect the spanish inquisition. And bugs."
 
 check-auto: check-auto-$(ENABLE_TESTS)
 

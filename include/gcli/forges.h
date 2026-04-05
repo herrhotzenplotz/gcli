@@ -48,9 +48,9 @@
 #include <gcli/status.h>
 
 /* Hopefully temporary hack */
-typedef int (*gcli_get_pull_checks_cb)(
+typedef int (*gcli_get_pull_pipelines_cb)(
 	struct gcli_ctx *, struct gcli_path const *,
-	struct gcli_pull_checks_list *);
+	struct gcli_pipeline_list *);
 
 /**
  * Struct of function pointers to perform actions in the given
@@ -306,7 +306,7 @@ struct gcli_forge_descriptor {
 	 *
 	 * The type of the returned list depends on the forge type. See
 	 * the definition of struct gcli_pull_checks_list. */
-	gcli_get_pull_checks_cb get_pull_checks;
+	gcli_get_pull_pipelines_cb get_pull_checks;
 
 	/**
 	 * Merge the given PR/MR */

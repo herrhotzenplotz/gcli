@@ -127,24 +127,9 @@ gcli_get_pull(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 int
 gcli_pull_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
-                     struct gcli_pull_checks_list *out)
+                     struct gcli_pipeline_list *out)
 {
 	gcli_null_check_call(get_pull_checks, ctx, path, out);
-}
-
-void
-gcli_pull_checks_free(struct gcli_pull_checks_list *list)
-{
-	switch (list->forge_type) {
-	case GCLI_FORGE_GITHUB:
-		github_free_checks((struct github_check_list *)list);
-		break;
-	case GCLI_FORGE_GITLAB:
-		gcli_pipelines_free((struct gcli_pipeline_list *)list);
-		break;
-	default:
-		assert(0 && "unreachable");
-	}
 }
 
 int

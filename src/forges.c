@@ -226,7 +226,7 @@ gitlab_forge_descriptor =
 
 	/* Pull requests */
 	.get_pull                  = gitlab_get_pull,
-	.get_pull_checks           = (gcli_get_pull_checks_cb)gitlab_get_mr_pipelines,
+	.get_pull_checks           = (gcli_get_pull_pipelines_cb)gitlab_get_mr_pipelines,
 	.get_pull_commits          = gitlab_get_pull_commits,
 	.search_pulls              = gitlab_get_mrs,
 	.perform_submit_pull       = gitlab_perform_submit_mr,

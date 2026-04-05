@@ -268,42 +268,20 @@ gcli_pull_print_op(struct gcli_pull const *const pull)
 		gcli_pretty_print(pull->body, 4, 80, stdout);
 }
 
-static void
-gcli_print_checks_list(struct gcli_pull_checks_list const *const list)
-{
-	switch (list->forge_type) {
-	case GCLI_FORGE_GITLAB:
-		gcli_print_pipelines((struct gcli_pipeline_list const*)(list));
-		break;
-	default:
-		assert(0 && "unreachable");
-	}
-}
-
 int
 gcli_pull_checks(struct gcli_path const *const path)
 {
-	struct gcli_pull_checks_list list = {0};
-	gcli_forge_type t = gcli_config_get_forge_type(g_clictx);
+	struct gcli_pipeline_list pipelines = {0};
+	int rc = 0;
 
-	list.forge_type = t;
+	rc = gcli_pull_get_checks(g_clictx, path, &pipelines);
+	if (rc < 0)
+		return rc;
 
-	switch (t) {
-	case GCLI_FORGE_GITHUB:
-	case GCLI_FORGE_GITLAB: {
-		int rc = gcli_pull_get_checks(g_clictx, path, &list);
-		if (rc < 0)
-			return rc;
+	gcli_print_pipelines(&pipelines);
+	gcli_pipelines_free(&pipelines);
 
-		gcli_print_checks_list(&list);
-		gcli_pull_checks_free(&list);
-
-		return 0;
-	} break;
-	default:
-		puts("No checks.");
-		return 0;               /* no CI support / not implemented */
-	}
+	return 0;
 }
 
 /**

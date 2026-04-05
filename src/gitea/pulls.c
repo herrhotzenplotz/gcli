@@ -268,7 +268,7 @@ gitea_pull_get_diff(struct gcli_ctx *ctx, FILE *const stream,
 
 int
 gitea_pull_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
-                      struct gcli_pull_checks_list *out)
+                      struct gcli_pipeline_list *out)
 {
 	(void) ctx;
 	(void) path;

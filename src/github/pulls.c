@@ -633,7 +633,7 @@ github_get_pull(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 int
 github_pull_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
-                       struct gcli_pull_checks_list *out)
+                       struct gcli_pipeline_list *out)
 {
 	int rc = 0;
 	char refname[64] = {0};

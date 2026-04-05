@@ -27,23 +27,47 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GCLI_CMD_PIPELINES_H
-#define GCLI_CMD_PIPELINES_H
-
-#include <gcli/gcli.h>
-#include <gcli/path.h>
 #include <gcli/pipelines.h>
 
-void gcli_print_pipelines(struct gcli_pipeline_list const *const list);
+void
+gcli_pipeline_free(struct gcli_pipeline *pipeline)
+{
+	gcli_clear_ptr(&pipeline->status);
+	gcli_clear_ptr(&pipeline->ref);
+	gcli_clear_ptr(&pipeline->sha);
+	gcli_clear_ptr(&pipeline->source);
+	gcli_clear_ptr(&pipeline->web_url);
+}
 
-int gcli_mr_pipelines(struct gcli_path const *const path);
+void
+gcli_pipelines_free(struct gcli_pipeline_list *const list)
+{
+	for (size_t i = 0; i < list->pipelines_size; ++i) {
+		gcli_pipeline_free(&list->pipelines[i]);
+	}
 
-int gcli_pipeline_jobs(struct gcli_path const *const path, int count);
+	gcli_clear_ptr(&list->pipelines);
+	list->pipelines_size = 0;
+}
 
-void gcli_print_jobs(struct gcli_job_list const *const list);
+void
+gcli_free_job(struct gcli_job *const job)
+{
+	gcli_clear_ptr(&job->status);
+	gcli_clear_ptr(&job->stage);
+	gcli_clear_ptr(&job->name);
+	gcli_clear_ptr(&job->ref);
+	gcli_clear_ptr(&job->runner_name);
+	gcli_clear_ptr(&job->runner_description);
+	gcli_clear_ptr(&job->web_url);
+}
 
-void gcli_print_job_status(struct gcli_job const *const job);
+void
+gcli_free_jobs(struct gcli_job_list *list)
+{
+	for (size_t i = 0; i < list->jobs_size; ++i)
+		gcli_free_job(&list->jobs[i]);
 
-int subcommand_pipelines(int argc, char *argv[]);
-
-#endif /* GCLI_CMD_PIPELINES_H */
+	gcli_clear_ptr(&list->jobs);
+	list->jobs_size = 0;
+}

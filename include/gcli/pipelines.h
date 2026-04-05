@@ -27,23 +27,60 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GCLI_CMD_PIPELINES_H
-#define GCLI_CMD_PIPELINES_H
+#ifndef GCLI_PIPELINES_H
+#define GCLI_PIPELINES_H
 
 #include <gcli/gcli.h>
-#include <gcli/path.h>
-#include <gcli/pipelines.h>
 
-void gcli_print_pipelines(struct gcli_pipeline_list const *const list);
+#include <time.h>
 
-int gcli_mr_pipelines(struct gcli_path const *const path);
+struct gcli_pipeline {
+	gcli_id id;
+	char *status;
+	time_t created_at;
+	time_t updated_at;
+	char *ref;
+	char *sha;
+	char *source;
+	char *name;
+	char *web_url;
+};
 
-int gcli_pipeline_jobs(struct gcli_path const *const path, int count);
+struct gcli_pipeline_list {
+	struct gcli_pipeline *pipelines;
+	size_t pipelines_size;
+};
 
-void gcli_print_jobs(struct gcli_job_list const *const list);
+struct gcli_job {
+	gcli_id id;
+	char *status;
+	char *stage;
+	char *name;
+	char *ref;
+	time_t created_at;
+	time_t started_at;
+	time_t finished_at;
+	double duration;
+	char *runner_name;
+	char *runner_description;
+	double coverage;
+	char *web_url;
+};
 
-void gcli_print_job_status(struct gcli_job const *const job);
+struct gcli_job_list {
+	struct gcli_job *jobs;
+	size_t jobs_size;
+};
 
-int subcommand_pipelines(int argc, char *argv[]);
+struct gcli_pipelines_fetch_details {
+	int max;
+	char *ref;
+};
 
-#endif /* GCLI_CMD_PIPELINES_H */
+void gcli_pipeline_free(struct gcli_pipeline *pipeline);
+void gcli_pipelines_free(struct gcli_pipeline_list *list);
+
+void gcli_free_jobs(struct gcli_job_list *jobs);
+void gcli_free_job(struct gcli_job *job);
+
+#endif /* GCLI_PIPELINES_H */

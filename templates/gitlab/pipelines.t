@@ -1,7 +1,7 @@
 include "gcli/gitlab/pipelines.h";
 
 parser gitlab_pipeline is
-object of struct gitlab_pipeline with
+object of struct gcli_pipeline with
 	("status"     => status as string,
 	 "created_at" => created_at as iso8601_time,
 	 "updated_at" => updated_at as iso8601_time,
@@ -12,15 +12,15 @@ object of struct gitlab_pipeline with
 	 "web_url"    => web_url as string);
 
 parser gitlab_pipelines is
-array of struct gitlab_pipeline use parse_gitlab_pipeline;
+array of struct gcli_pipeline use parse_gitlab_pipeline;
 
 parser gitlab_job_runner is
-object of struct gitlab_job with
+object of struct gcli_job with
 	("name"        => runner_name as string,
 	 "description" => runner_description as string);
 
 parser gitlab_job is
-object of struct gitlab_job with
+object of struct gcli_job with
 	("status"      => status as string,
 	 "stage"       => stage as string,
 	 "name"        => name as string,
@@ -35,12 +35,12 @@ object of struct gitlab_job with
 	 "web_url"     => web_url as string);
 
 parser gitlab_jobs is
-array of struct gitlab_job use parse_gitlab_job;
+array of struct gcli_job use parse_gitlab_job;
 
 parser gitlab_pipeline_child is
-object of struct gitlab_pipeline with
+object of struct gcli_pipeline with
 	("downstream_pipeline" => use parse_gitlab_pipeline,
 	 "name"                => name as string);
 
 parser gitlab_pipeline_children is
-array of struct gitlab_pipeline use parse_gitlab_pipeline_child;
+array of struct gcli_pipeline use parse_gitlab_pipeline_child;

@@ -250,6 +250,11 @@ LIBGCLI_SRCS = \
 	src/milestones.c \
 	src/nvlist.c \
 	src/path.c \
+	src/pipelines.c \
+	src/port/err.c \
+	src/port/string.c \
+	src/port/sv.c \
+	src/port/util.c \
 	src/pulls.c \
 	src/releases.c \
 	src/repos.c \
@@ -257,10 +262,6 @@ LIBGCLI_SRCS = \
 	src/status.c \
 	src/url.c \
 	src/waitproc.c \
-	src/port/err.c \
-	src/port/string.c \
-	src/port/sv.c \
-	src/port/util.c \
 	$(PDJSON_SRCS)
 
 GCLI_SRCS= \

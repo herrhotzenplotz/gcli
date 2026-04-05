@@ -269,7 +269,7 @@ DEFINE_TESTCASE(gitlab_simple_pipeline)
 	struct json_stream stream = {0};
 	struct gcli_ctx *ctx = test_context(UNIT_CTX_VAR);
 	FILE *f = open_sample(UNIT_CTX_VAR, "gitlab_simple_pipeline.json");
-	struct gitlab_pipeline pipeline = {0};
+	struct gcli_pipeline pipeline = {0};
 
 	json_open_stream(&stream, f);
 	REQUIRE(parse_gitlab_pipeline(ctx, &stream, &pipeline) == 0);
@@ -283,7 +283,7 @@ DEFINE_TESTCASE(gitlab_simple_pipeline)
 	CHECK_STREQ(pipeline.source, "merge_request_event");
 
 	json_close(&stream);
-	gitlab_pipeline_free(&pipeline);
+	gcli_pipeline_free(&pipeline);
 	gcli_destroy(&ctx);
 }
 

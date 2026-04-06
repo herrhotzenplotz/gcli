@@ -30,7 +30,6 @@
 #include <config.h>
 
 #include <gcli/cmd/actions.h>
-#include <gcli/cmd/ci.h>
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/colour.h>
@@ -273,9 +272,6 @@ static void
 gcli_print_checks_list(struct gcli_pull_checks_list const *const list)
 {
 	switch (list->forge_type) {
-	case GCLI_FORGE_GITHUB:
-		github_print_checks((struct github_check_list const *)(list));
-		break;
 	case GCLI_FORGE_GITLAB:
 		gcli_print_pipelines((struct gcli_pipeline_list const*)(list));
 		break;

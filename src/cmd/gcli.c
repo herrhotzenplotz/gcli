@@ -39,7 +39,6 @@
 #include <unistd.h>
 
 #include <gcli/cmd/attachments.h>
-#include <gcli/cmd/ci.h>
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/comment.h>
@@ -77,9 +76,6 @@ static struct subcommand {
 	char const *docstring;
 	int (*fn)(int, char **);
 } default_subcommands[] = {
-	{ .cmd_name = "ci",
-	  .fn = subcommand_ci,
-	  .docstring = "GitHub CI status info" },
 	{ .cmd_name = "comment",
 	  .fn = subcommand_comment,
 	  .docstring = "Comment under issues and PRs" },

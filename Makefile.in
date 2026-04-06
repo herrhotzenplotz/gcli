@@ -268,7 +268,6 @@ GCLI_SRCS= \
 	src/cmd/actions.c \
 	src/cmd/api.c \
 	src/cmd/attachments.c \
-	src/cmd/ci.c \
 	src/cmd/cmd.c \
 	src/cmd/cmdconfig.c \
 	src/cmd/colour.c \

@@ -32,6 +32,7 @@
 #include <gcli/forges.h>
 
 #include <gcli/github/api.h>
+#include <gcli/github/checks.h>
 #include <gcli/github/checkout.h>
 #include <gcli/github/comments.h>
 #include <gcli/github/config.h>
@@ -172,6 +173,10 @@ github_forge_descriptor =
 	/* Notifications */
 	.get_notifications         = github_get_notifications,
 	.notification_mark_as_read = github_notification_mark_as_read,
+
+	/* Pipelines */
+	.get_pipelines             = github_get_check_suites,
+	.get_pipeline_jobs         = github_get_check_runs,
 
 	/* Internal stuff */
 	.get_api_error_string      = github_api_error_string,

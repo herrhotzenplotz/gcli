@@ -31,6 +31,7 @@
 #define GCLI_PIPELINES_H
 
 #include <gcli/gcli.h>
+#include <gcli/path.h>
 
 #include <time.h>
 
@@ -82,5 +83,14 @@ void gcli_pipelines_free(struct gcli_pipeline_list *list);
 
 void gcli_free_jobs(struct gcli_job_list *jobs);
 void gcli_free_job(struct gcli_job *job);
+
+int gcli_get_pipelines(struct gcli_ctx *ctx,
+                       struct gcli_path const *repo_path,
+                       struct gcli_pipelines_fetch_details const *details,
+                       struct gcli_pipeline_list *out);
+
+int gcli_get_pipeline(struct gcli_ctx *ctx,
+                      struct gcli_path const *pipeline_path,
+                      struct gcli_pipeline *out);
 
 #endif /* GCLI_PIPELINES_H */

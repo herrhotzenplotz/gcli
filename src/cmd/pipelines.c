@@ -309,7 +309,7 @@ action_pipeline_open(struct gcli_path const *path,
 }
 
 static struct gcli_cmd_actions const pipeline_actions = {
-	.fetch_item = (gcli_cmd_action_fetcher)gitlab_get_pipeline,
+	.fetch_item = (gcli_cmd_action_fetcher)gcli_get_pipeline,
 	.free_item = (gcli_cmd_action_freeer)gcli_pipeline_free,
 	.item_size = sizeof(struct gcli_pipeline),
 
@@ -581,7 +581,7 @@ list_pipelines(struct gcli_path const *const path, int max, bool const all)
 			        details.ref);
 	}
 
-	rc = gitlab_get_pipelines(g_clictx, path, &details, &list);
+	rc = gcli_get_pipelines(g_clictx, path, &details, &list);
 	if (rc < 0) {
 		fprintf(stderr, "gcli: failed to get pipelines: %s\n",
 		        gcli_get_error(g_clictx));
@@ -684,16 +684,8 @@ subcommand_pipelines(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
+	/* Validate the path */
 	check_path(&path);
-
-	/* Make sure we are actually talking about a gitlab remote because
-	 * we might be incorrectly inferring it */
-	if (gcli_config_get_forge_type(g_clictx) != GCLI_FORGE_GITLAB) {
-		fprintf(stderr, "gcli: error: The pipelines subcommand only works for GitLab. "
-		     "Use gcli -t gitlab ... to force a GitLab remote.\n");
-
-		return EXIT_FAILURE;
-	}
 
 	/* In case a Pipeline ID was specified handle its actions */
 	if (pflag)

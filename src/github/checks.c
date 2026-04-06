@@ -42,15 +42,16 @@
 #include <pdjson.h>
 
 int
-github_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
-                  struct gcli_pipelines_fetch_details const *details,
-                  struct gcli_pipeline_list *const out)
+github_get_check_suites(struct gcli_ctx *ctx,
+                        struct gcli_path const *const path,
+                        struct gcli_pipelines_fetch_details const *details,
+                        struct gcli_pipeline_list *const out)
 {
-	struct gcli_fetch_buffer buffer = {0};
+	struct gcli_fetch_list_ctx flctx = {0};
 	struct gcli_path norm_path = {0};
 	char const *ref = "HEAD";
-	char *url = NULL, *next_url = NULL;
-	int max = -1, rc = 0;
+	char *url = NULL;
+	int rc = 0;
 
 	assert(out);
 
@@ -63,29 +64,22 @@ github_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	if (details->ref)
 		ref = details->ref;
 
-	if (details->max > 0)
-		max = details->max;
-
 	rc = github_repo_make_url(ctx, path, &url, "/commits/%s/check-suites", ref);
 	if (rc < 0)
 		return rc;
 
-	do {
-		rc = gcli_fetch(ctx, url, &next_url, &buffer);
-		if (rc == 0) {
-			struct json_stream stream = {0};
+	flctx.listp = out;
+	flctx.sizep = &out->pipelines_size;
+	flctx.max = details->max;
+	flctx.flags = GCLI_FL_ARRAYPARSER;
+	flctx.arrparse = (arrparsefn)parse_github_checksuites;
 
-			json_open_buffer(&stream, buffer.data, buffer.length);
-			parse_github_checksuites(ctx, &stream, out);
-			json_close(&stream);
-		}
+	rc = gcli_fetch_list(ctx, url, &flctx);
 
-		gcli_clear_ptr(&url);
-		gcli_fetch_buffer_free(&buffer);
+	gcli_path_free(&norm_path);
 
-		if (rc < 0)
-			break;
-	} while ((url = next_url) && ((int)(out->pipelines_size) < max || max < 0));
+	return rc;
+}
 
 	/* TODO: don't leak list on error */
 	gcli_clear_ptr(&next_url);

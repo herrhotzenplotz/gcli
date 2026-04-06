@@ -657,7 +657,7 @@ github_pull_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	details.max = -1;
 	details.ref = refname;
 
-	rc = github_get_checks(ctx, p, &details, out);
+	rc = github_get_check_suites(ctx, p, &details, out);
 
 	/* clean up normalised path if it has been normalised */
 	if (p == &norm_path) {

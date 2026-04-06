@@ -661,6 +661,8 @@ gcli_urldecode(struct gcli_ctx *ctx, char const *input)
 
 /* Convenience function for fetching lists.
  *
+ * If GCLI_FL_ARRAYPARSER is unset:
+ *
  * listptr must be a double-pointer (pointer to a pointer to the start
  * of the array). e.g.
  *
@@ -668,6 +670,12 @@ gcli_urldecode(struct gcli_ctx *ctx, char const *input)
  *
  *    listptr = &out->foos;
  *    listsize = &out->foos_size;
+ *
+ * If GCLI_FL_ARRAYPARSER is set:
+ *
+ *   listptr must be a pointer to the list head which is passed to the
+ *   generated array parser. listsize must be a pointer to the size field
+ *   of the list head.
  *
  * If max is -1 then everything will be fetched. */
 int
@@ -686,7 +694,11 @@ gcli_fetch_list(struct gcli_ctx *ctx, char *url, struct gcli_fetch_list_ctx *fl)
 			struct json_stream stream = {0};
 
 			json_open_buffer(&stream, buffer.data, buffer.length);
-			rc = fl->parse(ctx, &stream, fl->listp, fl->sizep);
+			if (fl->flags & GCLI_FL_ARRAYPARSER)
+				rc = fl->arrparse(ctx, &stream, fl->listp);
+			else
+				rc = fl->parse(ctx, &stream, fl->listp, fl->sizep);
+
 			if (fl->filter)
 				fl->filter(fl->listp, fl->sizep, fl->userdata);
 

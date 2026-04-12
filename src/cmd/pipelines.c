@@ -125,7 +125,6 @@ gcli_print_jobs(struct gcli_job_list const *const list)
 		{ .name = "STATUS",     .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
 		{ .name = "STARTED",    .type = GCLI_TBLCOLTYPE_TIME_T, .flags = 0 },
 		{ .name = "FINISHED",   .type = GCLI_TBLCOLTYPE_TIME_T, .flags = 0 },
-		{ .name = "RUNNERDESC", .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 		{ .name = "REF",        .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 	};
 
@@ -145,7 +144,6 @@ gcli_print_jobs(struct gcli_job_list const *const list)
 		                 list->jobs[i].status,
 		                 list->jobs[i].started_at,
 		                 list->jobs[i].finished_at,
-		                 list->jobs[i].runner_description,
 		                 list->jobs[i].ref);
 	}
 

@@ -6,8 +6,8 @@ Title: GitLab Pipeline with Trigger Jobs
 ClientArgs: -t gitlab pi -o gitlab-org -r terraform-provider-gitlab -p 2235706226 jobs children
 VerifyClientExitCode: 0
 VerifyClientOutput:
-  ID           NAME                     STATUS   STARTED               FINISHED              RUNNERDESC  REF
-  12556302952  testacc:nightly:failure  success  2025-Dec-29 04:06:31  2025-Dec-29 04:07:29  wat         main
+  ID           NAME                     STATUS   STARTED               FINISHED              REF
+  12556302952  testacc:nightly:failure  success  2025-Dec-29 04:06:31  2025-Dec-29 04:07:29  main
   
   ID          STATUS  CREATED               UPDATED               NAME                     REF
   2235713532  failed  2025-Dec-29 03:07:08  2025-Dec-29 04:06:30  testacc:nightly:failure  main

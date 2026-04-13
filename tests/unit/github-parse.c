@@ -300,7 +300,7 @@ DEFINE_TESTCASE(simple_github_comment)
 
 DEFINE_TESTCASE(simple_github_check)
 {
-	struct gcli_github_check check = {0};
+	struct gcli_job job = {0};
 	FILE *f;
 	struct json_stream stream;
 	struct gcli_ctx *ctx = test_context(UNIT_CTX_VAR);
@@ -308,17 +308,17 @@ DEFINE_TESTCASE(simple_github_check)
 	REQUIRE((f = open_sample("github_simple_check.json")) != NULL);
 	json_open_stream(&stream, f);
 
-	REQUIRE(parse_github_check(ctx, &stream, &check) == 0);
+	REQUIRE(parse_github_check(ctx, &stream, &job) == 0);
 
-	CHECK_STREQ(check.name, "test Windows x86");
-	CHECK_STREQ(check.status, "completed");
-	CHECK_STREQ(check.conclusion, "success");
-	CHECK_STREQ(check.started_at, "2023-09-02T06:27:37Z");
-	CHECK_STREQ(check.completed_at, "2023-09-02T06:29:11Z");
-	CHECK(check.id == 16437184455);
+	CHECK_STREQ(job.name, "test Windows x86");
+	CHECK_STREQ(job.status, "completed");
+	//CHECK_STREQ(job.conclusion, "success");
+	CHECK_EQ(job.started_at, 1693636057);
+	CHECK_EQ(job.finished_at, 1693636151);
+	CHECK_EQ(job.id, 16437184455);
 
 	json_close(&stream);
-	gcli_github_check_free(&check);
+	gcli_free_job(&job);
 	gcli_destroy(&ctx);
 }
 

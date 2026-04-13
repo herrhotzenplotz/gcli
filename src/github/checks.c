@@ -33,7 +33,6 @@
 #include <gcli/cmd/table.h>
 #include <gcli/curl.h>
 #include <gcli/github/checks.h>
-#include <gcli/github/checks.h>
 #include <gcli/github/path.h>
 #include <gcli/github/repos.h>
 #include <gcli/json_util.h>
@@ -44,12 +43,14 @@
 
 int
 github_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
-                  char const *ref, int const max, struct github_check_list *const out)
+                  struct gcli_pipelines_fetch_details const *details,
+                  struct gcli_pipeline_list *const out)
 {
 	struct gcli_fetch_buffer buffer = {0};
 	struct gcli_path norm_path = {0};
+	char const *ref = "HEAD";
 	char *url = NULL, *next_url = NULL;
-	int rc = 0;
+	int max = -1, rc = 0;
 
 	assert(out);
 
@@ -59,7 +60,13 @@ github_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	if (rc < 0)
 		return rc;
 
-	rc = github_repo_make_url(ctx, path, &url, "/commits/%s/check-runs", ref);
+	if (details->ref)
+		ref = details->ref;
+
+	if (details->max > 0)
+		max = details->max;
+
+	rc = github_repo_make_url(ctx, path, &url, "/commits/%s/check-suites", ref);
 	if (rc < 0)
 		return rc;
 
@@ -69,7 +76,7 @@ github_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
 			struct json_stream stream = {0};
 
 			json_open_buffer(&stream, buffer.data, buffer.length);
-			parse_github_checks(ctx, &stream, out);
+			parse_github_checksuites(ctx, &stream, out);
 			json_close(&stream);
 		}
 
@@ -78,7 +85,7 @@ github_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 		if (rc < 0)
 			break;
-	} while ((url = next_url) && ((int)(out->checks_size) < max || max < 0));
+	} while ((url = next_url) && ((int)(out->pipelines_size) < max || max < 0));
 
 	/* TODO: don't leak list on error */
 	gcli_clear_ptr(&next_url);
@@ -86,25 +93,4 @@ github_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	gcli_path_free(&norm_path);
 
 	return rc;
-}
-
-void
-gcli_github_check_free(struct gcli_github_check *check)
-{
-	gcli_clear_ptr(&check->name);
-	gcli_clear_ptr(&check->status);
-	gcli_clear_ptr(&check->conclusion);
-	gcli_clear_ptr(&check->started_at);
-	gcli_clear_ptr(&check->completed_at);
-}
-
-void
-github_free_checks(struct github_check_list *const list)
-{
-	for (size_t i = 0; i < list->checks_size; ++i) {
-		gcli_github_check_free(&list->checks[i]);
-	}
-
-	gcli_clear_ptr(&list->checks);
-	list->checks_size = 0;
 }

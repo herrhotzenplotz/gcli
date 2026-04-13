@@ -35,30 +35,13 @@
 #endif
 
 #include <gcli/gcli.h>
+#include <gcli/pipelines.h>
 #include <gcli/path.h>
 
 #include <stddef.h>
 
-struct gcli_github_check {
-	char *name;
-	char *status;
-	char *conclusion;
-	char *started_at;
-	char *completed_at;
-	gcli_id id;
-};
-
-struct github_check_list {
-	struct gcli_github_check *checks;
-	size_t checks_size;
-};
-
 int github_get_checks(struct gcli_ctx *ctx, struct gcli_path const *repo_path,
-                      char const *ref, int max,
-                      struct github_check_list *checks);
-
-void github_free_checks(struct github_check_list *checks);
-
-void gcli_github_check_free(struct gcli_github_check *check);
+                      struct gcli_pipelines_fetch_details const *details,
+                      struct gcli_pipeline_list *out);
 
 #endif /* GITHUB_CHECKS_H */

@@ -639,6 +639,7 @@ github_pull_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	char refname[64] = {0};
 	struct gcli_path norm_path = {0};
 	struct gcli_path const *p = path;
+	struct gcli_pipelines_fetch_details details = {0};
 
 	if (path->kind != GCLI_PATH_DEFAULT) {
 		rc = github_path_normalise(ctx, path, &norm_path);
@@ -653,7 +654,10 @@ github_pull_get_checks(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	snprintf(refname, sizeof refname, "refs%%2Fpull%%2F%"PRIid"%%2Fhead",
 	         p->as_default.id);
 
-	rc = github_get_checks(ctx, p, refname, -1, (struct github_check_list *)out);
+	details.max = -1;
+	details.ref = refname;
+
+	rc = github_get_checks(ctx, p, &details, out);
 
 	/* clean up normalised path if it has been normalised */
 	if (p == &norm_path) {

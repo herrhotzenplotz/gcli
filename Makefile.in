@@ -506,8 +506,14 @@ $(SIMPLE_TEST_PROGRAMS): libgcli$(LIBEXT)
 $(TEST_PROGRAMS:$(EXEEXT)=.c): $(TEMPLATE_HEADERS)
 
 .PHONY: check-auto-1 check-auto-0
+
+# HACK: BSD Make exposes the number of jobs in .MAKE.JOBS, define
+# it to one for makes that don't expose it (effectively unchanged
+# behaviour). This makes the tests run in parallel when -j X has
+# been specified on the command line
+.MAKE.JOBS ?=   1
 check-auto-1: $(TEST_PROGRAMS) gcli$(EXEEXT)
-	$(PERL) @SRCDIR@/tests/run.pl
+	$(PERL) @SRCDIR@/tests/run.pl -j $(.MAKE.JOBS)
 
 check-auto-0 check-auto-:
 	@echo "The test suite is disabled because I couldn't find Perl or the"

@@ -4,6 +4,9 @@ GCLI_VERSION = @PACKAGE_VERSION@
 .PATH: @SRCDIR@
 VPATH=@SRCDIR@
 
+# Don't print directory messages when reinvoking make
+GNUMAKEFLAGS+=   --no-print-directory
+
 ################ Enviroment and values saved by the configure script ##########################
 AR                         = @AR@
 CC_FOR_BUILD               = @CC_FOR_BUILD@

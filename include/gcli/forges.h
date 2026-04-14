@@ -552,7 +552,8 @@ struct gcli_forge_descriptor {
 	/**
 	 * Special forge-specific quirks for pipelines */
 	enum {
-		GCLI_PIPELINE_QUIRKS_NOCHILDREN = (1 << 0), /* pipelines cannot have children */
+		GCLI_PIPELINE_QUIRKS_NOCHILDREN   = (1 << 0), /* pipelines cannot have children */
+		GCLI_PIPELINE_QUIRKS_NOCONCLUSION = (1 << 1), /* pipelines conflate status with conclusion */
 	} const pipeline_quirks;
 
 	/**

@@ -4,6 +4,7 @@ parser github_check is
 object of struct gcli_job with
 	("name"         => name as string,
 	 "status"       => status as string,
+	 "conclusion"   => conclusion as string,
 	 "started_at"   => started_at as iso8601_time,
 	 "completed_at" => finished_at as iso8601_time,
 	 "id"           => id as id);
@@ -16,6 +17,7 @@ parser github_checksuite is
 object of struct gcli_pipeline with
 	("id"          => id as id,
 	 "status"      => status as string,
+	 "conclusion"  => conclusion as string,
 	 "created_at"  => created_at as iso8601_time,
 	 "updated_at"  => updated_at as iso8601_time,
 	 "head_sha"    => sha as string,

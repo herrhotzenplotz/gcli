@@ -389,7 +389,7 @@ gitlab_issue_set_milestone(struct gcli_ctx *ctx,
 	int rc = 0;
 
 	rc = gitlab_issue_make_url(ctx, issue_path, &url,
-	                           "?milestone_url=%"PRIid, milestone);
+	                           "?milestone_id=%"PRIid, milestone);
 	if (rc < 0)
 		return rc;
 

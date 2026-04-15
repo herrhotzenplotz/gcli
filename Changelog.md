@@ -6,6 +6,12 @@ This changelog does not follow semantic versioning.
 
 ### Fixed
 
+- issue_set_milestone has been fixed for GitLab
+
+  This unbreaks the `milestone` action in the issues subcommand for
+  GitLab. Previous versions of gcli have incorrectly generated the
+  request URL to the GitLab API resulting in cryptic error messages.
+
 ### Added
 
 ### Changed

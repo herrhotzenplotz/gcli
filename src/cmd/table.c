@@ -46,7 +46,7 @@ struct gcli_tblrow;
 /* Internal state of a table printer. We return a handle to it in
  * gcli_table_init. */
 struct gcli_tbl {
-	struct gcli_tblcoldef const *cols; /* user provided column definitons */
+	struct gcli_tblcoldef *cols;       /* user provided column definitons */
 	int *col_widths;                   /* minimum width of the columns */
 	size_t cols_size;                  /* size of above arrays */
 
@@ -77,7 +77,7 @@ table_pushrow(struct gcli_tbl *const table, struct gcli_tblrow row)
 
 /** Initialize the internal state structure of the table printer. */
 gcli_tbl
-gcli_tbl_begin(struct gcli_tblcoldef const *const cols, size_t const cols_size)
+gcli_tbl_begin(struct gcli_tblcoldef *const cols, size_t const cols_size)
 {
 	struct gcli_tbl *tbl;
 
@@ -102,10 +102,27 @@ gcli_tbl_begin(struct gcli_tblcoldef const *const cols, size_t const cols_size)
 
 		/* Compute the header's length and use these as initial
 		 * values */
-		tbl->col_widths[i] = strlen(cols[i].name);
+		if (tbl->cols[i].flags & GCLI_TBLCOL_HIDDEN)
+			tbl->col_widths[i] = 0;
+		else
+			tbl->col_widths[i] = strlen(cols[i].name);
 	}
 
 	return tbl;
+}
+
+void
+gcli_tbl_hide_column(gcli_tbl *table, char const *const colname)
+{
+	struct gcli_tbl *tbl = (struct gcli_tbl *)table;
+
+	for (size_t i = 0; i < tbl->cols_size; ++i) {
+		if (strcmp(tbl->cols[i].name, colname) == 0) {
+			tbl->cols[i].flags |= GCLI_TBLCOL_HIDDEN;
+			tbl->col_widths[i] = 0;
+			return;
+		}
+	}
 }
 
 static void
@@ -188,6 +205,10 @@ tablerow_add_cell(struct gcli_tbl *const table,
 	default:
 		return -1;
 	}
+
+	/* if hidden we have a zero cell size */
+	if (table->cols[col].flags & GCLI_TBLCOL_HIDDEN)
+		cell_size = 0;
 
 	/* Update the column width if needed */
 	if (table->col_widths[col] < cell_size)

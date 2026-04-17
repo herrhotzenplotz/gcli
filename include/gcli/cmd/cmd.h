@@ -58,6 +58,7 @@ void longversion(void);
 void copyright(void);
 void check_owner_and_repo(char **owner, char **repo);
 void check_path(struct gcli_path *path);
+bool parse_forge_path_arg(int *argc, char ***argv, struct gcli_path *path);
 
 void parse_labels_options(
 	int *argc, char ***argv,

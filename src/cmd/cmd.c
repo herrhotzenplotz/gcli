@@ -34,6 +34,7 @@
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/colour.h>
+#include <gcli/port/string.h>
 #include <gcli/port/util.h>
 #include <gcli/repos.h>
 
@@ -93,6 +94,55 @@ longversion(void)
 	fprintf(stderr, "\n");
 	fprintf(stderr, "Project website: "PACKAGE_URL"\n");
 	fprintf(stderr, "Bug reports: "PACKAGE_BUGREPORT"\n");
+}
+
+bool
+parse_forge_path_arg(int *argc, char ***argv, struct gcli_path *path)
+{
+	char const *arg;
+	char const *colon, *slash;
+	gcli_forge_type forge;
+
+	/* Need at least one argument beyond the subcommand name */
+	if (*argc < 2)
+		return false;
+
+	arg = (*argv)[1];
+
+	/* Must not start with '-' (flag) */
+	if (arg[0] == '-')
+		return false;
+
+	colon = strchr(arg, ':');
+	if (colon == NULL)
+		return false;
+
+	slash = strchr(colon + 1, '/');
+	if (slash == NULL || slash == colon + 1 || slash[1] == '\0')
+		return false;
+
+	if (strncmp(arg, "gh:", 3) == 0) {
+		forge = GCLI_FORGE_GITHUB;
+	} else if (strncmp(arg, "gl:", 3) == 0) {
+		forge = GCLI_FORGE_GITLAB;
+	} else if (strncmp(arg, "cb:", 3) == 0) {
+		forge = GCLI_FORGE_GITEA;
+	} else {
+		return false;
+	}
+
+	path->as_default.owner = gcli_strndup(colon + 1, (size_t)(slash - (colon + 1)));
+	path->as_default.repo  = strdup(slash + 1);
+
+	gcli_config_set_override_forgetype(g_clictx, forge);
+
+	/* Consume argv[1]: slide the base pointer forward, keeping argv[0]
+	 * (the subcommand name) visible at the new argv[0] position. */
+	(*argv)[1] = (*argv)[0];
+	(*argv)++;
+	(*argc)--;
+
+	return true;
 }
 
 void

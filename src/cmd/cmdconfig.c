@@ -963,6 +963,13 @@ gcli_config_get_forge_type_internal(struct gcli_ctx *ctx)
 	return type;
 }
 
+void
+gcli_config_set_override_forgetype(struct gcli_ctx *ctx, gcli_forge_type const type)
+{
+	struct gcli_config *cfg = ctx_config(ctx);
+	cfg->override_forgetype = (int)type;
+}
+
 gcli_forge_type
 gcli_config_get_forge_type(struct gcli_ctx *ctx)
 {

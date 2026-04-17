@@ -217,3 +217,30 @@ github_get_check_suite(struct gcli_ctx *ctx,
 
 	return rc;
 }
+
+int
+github_get_check(struct gcli_ctx *ctx,
+                 struct gcli_path const *job_path,
+                 struct gcli_job *const out)
+{
+	int rc = 0;
+	char *url = NULL;
+	struct gcli_fetch_buffer buffer = {0};
+	struct json_stream stream = {0};
+
+	rc = github_checkrun_make_url(ctx, job_path, &url, "");
+	if (rc < 0)
+		return rc;
+
+	rc = gcli_fetch(ctx, url, NULL, &buffer);
+	if (rc == 0) {
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		rc = parse_github_check(ctx, &stream, out);
+		json_close(&stream);
+	}
+
+	gcli_fetch_buffer_free(&buffer);
+	gcli_clear_ptr(&url);
+
+	return rc;
+}

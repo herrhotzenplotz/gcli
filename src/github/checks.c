@@ -41,19 +41,17 @@
 
 #include <pdjson.h>
 
-int
-github_checksuite_make_url(struct gcli_ctx *ctx,
-                           struct gcli_path const *const path,
-                           char **url,
-                           char const *const fmt, ...)
+static int
+github_checks_make_url(struct gcli_ctx *ctx,
+                       char const *const type,
+                       struct gcli_path const *const path,
+                       char **url,
+                       char const *const fmt, va_list *vp)
 {
 	int rc = 0;
 	char *suffix = NULL;
-	va_list vp;
 
-	va_start(vp, fmt);
-	suffix = gcli_vasprintf(fmt, vp);
-	va_end(vp);
+	suffix = gcli_vasprintf(fmt, *vp);
 
 	switch (path->kind) {
 	case GCLI_PATH_DEFAULT: {
@@ -62,9 +60,9 @@ github_checksuite_make_url(struct gcli_ctx *ctx,
 		e_owner = gcli_urlencode(path->as_default.owner);
 		e_repo = gcli_urlencode(path->as_default.repo);
 
-		*url = gcli_asprintf("%s/repos/%s/%s/check-suites/%"PRIid"%s",
+		*url = gcli_asprintf("%s/repos/%s/%s/%s/%"PRIid"%s",
 		                     gcli_get_apibase(ctx), e_owner, e_repo,
-		                     path->as_default.id, suffix);
+		                     type, path->as_default.id, suffix);
 
 		gcli_clear_ptr(&e_owner);
 		gcli_clear_ptr(&e_repo);
@@ -78,6 +76,21 @@ github_checksuite_make_url(struct gcli_ctx *ctx,
 	}
 
 	gcli_clear_ptr(&suffix);
+
+	return rc;
+}
+
+int
+github_checksuite_make_url(struct gcli_ctx *ctx,
+                           struct gcli_path const *const path,
+                           char **url, char const *const fmt, ...)
+{
+	int rc = 0;
+	va_list vp;
+
+	va_start(vp, fmt);
+	rc = github_checks_make_url(ctx, "check-suites", path, url, fmt, &vp);
+	va_end(vp);
 
 	return rc;
 }

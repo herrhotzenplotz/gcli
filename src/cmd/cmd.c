@@ -99,42 +99,56 @@ longversion(void)
 bool
 parse_forge_path_arg(int *argc, char ***argv, struct gcli_path *path)
 {
-	char const *arg;
-	char const *colon, *slash;
-	gcli_forge_type forge;
+	char const *arg, *colon, *slash;
+	char *account;
 
-	/* Need at least one argument beyond the subcommand name */
 	if (*argc < 2)
 		return false;
 
 	arg = (*argv)[1];
 
-	/* Must not start with '-' (flag) */
 	if (arg[0] == '-')
 		return false;
 
 	colon = strchr(arg, ':');
-	if (colon == NULL)
-		return false;
 
-	slash = strchr(colon + 1, '/');
-	if (slash == NULL || slash == colon + 1 || slash[1] == '\0')
-		return false;
-
-	if (strncmp(arg, "gh:", 3) == 0) {
-		forge = GCLI_FORGE_GITHUB;
-	} else if (strncmp(arg, "gl:", 3) == 0) {
-		forge = GCLI_FORGE_GITLAB;
-	} else if (strncmp(arg, "cb:", 3) == 0) {
-		forge = GCLI_FORGE_GITEA;
+	if (colon == NULL) {
+		/* Bare account name: look up in config to disambiguate from an
+		 * owner name. */
+		account = strdup(arg);
+		if (gcli_config_find_by_key(g_clictx, account, "forge-type") == NULL) {
+			free(account);
+			return false;
+		}
+		gcli_config_set_override_default_account(g_clictx, account);
 	} else {
-		return false;
+		/* prefix:owner/repo form */
+		if (colon == arg)
+			return false;
+
+		slash = strrchr(colon + 1, '/');
+		if (slash == NULL || slash == colon + 1 || slash[1] == '\0')
+			return false;
+
+		if (strncmp(arg, "gh:", 3) == 0) {
+			gcli_config_set_override_forgetype(g_clictx, GCLI_FORGE_GITHUB);
+		} else if (strncmp(arg, "gl:", 3) == 0) {
+			gcli_config_set_override_forgetype(g_clictx, GCLI_FORGE_GITLAB);
+		} else if (strncmp(arg, "cb:", 3) == 0) {
+			gcli_config_set_override_forgetype(g_clictx, GCLI_FORGE_GITEA);
+		} else {
+			account = gcli_strndup(arg, (size_t)(colon - arg));
+			if (gcli_config_find_by_key(g_clictx, account, "forge-type") == NULL) {
+				free(account);
+				return false;
+			}
+			gcli_config_set_override_default_account(g_clictx, account);
+		}
+
+		path->as_default.owner =
+			gcli_strndup(colon + 1, (size_t)(slash - (colon + 1)));
+		path->as_default.repo = strdup(slash + 1);
 	}
-
-	path->as_default.owner = gcli_strndup(colon + 1, (size_t)(slash - (colon + 1)));
-	path->as_default.repo  = strdup(slash + 1);
-
-	gcli_config_set_override_forgetype(g_clictx, forge);
 
 	/* Consume argv[1]: slide the base pointer forward, keeping argv[0]
 	 * (the subcommand name) visible at the new argv[0] position. */

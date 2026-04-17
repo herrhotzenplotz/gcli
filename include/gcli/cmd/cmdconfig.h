@@ -82,4 +82,7 @@ int gcli_config_get_forge_type_by_host(struct gcli_ctx *ctx,
 void gcli_config_set_override_forgetype(struct gcli_ctx *ctx,
                                         gcli_forge_type type);
 
+void gcli_config_set_override_default_account(struct gcli_ctx *ctx,
+                                              char const *account);
+
 #endif /* GCLI_CMD_CMDCONFIG_H */

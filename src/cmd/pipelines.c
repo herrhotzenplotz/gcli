@@ -604,6 +604,8 @@ subcommand_pipelines(int argc, char *argv[])
 	int ch = 0, count = 30, pflag = 0, jflag = 0, aflag = 0;
 	struct gcli_path path = {0};
 
+	parse_forge_path_arg(&argc, &argv, &path);
+
 	/* Parse options */
 	const struct option options[] = {
 		{.name = "repo",     .has_arg = required_argument, .flag = NULL, .val = 'r'},

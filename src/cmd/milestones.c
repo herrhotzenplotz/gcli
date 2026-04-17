@@ -408,6 +408,9 @@ subcommand_milestones(int argc, char *argv[])
 {
 	int ch, rc, max = 30;
 	struct gcli_path path = {0};
+
+	parse_forge_path_arg(&argc, &argv, &path);
+
 	struct option const options[] = {
 		{ .name = "owner",
 		  .has_arg = required_argument,

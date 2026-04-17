@@ -760,6 +760,8 @@ subcommand_pulls(int argc, char *argv[])
 	struct gcli_pull_fetch_details details = {0};
 	struct gcli_pull_list pulls = {0};
 
+	parse_forge_path_arg(&argc, &argv, &pull);
+
 	/* detect whether we wanna create a PR */
 	if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
 		shift(&argc, &argv);

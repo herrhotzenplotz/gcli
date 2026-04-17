@@ -197,6 +197,8 @@ subcommand_forks(int argc, char *argv[])
 	bool always_yes = false;
 	enum gcli_output_flags flags = 0;
 
+	parse_forge_path_arg(&argc, &argv, &repo_path);
+
 	/* detect whether we wanna create a fork */
 	if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
 		shift(&argc, &argv);

@@ -369,6 +369,8 @@ subcommand_labels(int argc, char *argv[])
 	int count = 30, ch, rc;
 	struct gcli_path path = {0};
 
+	parse_forge_path_arg(&argc, &argv, &path);
+
 	const struct option options[] = {
 		{.name = "repo",  .has_arg = required_argument, .flag = NULL, .val = 'r'},
 		{.name = "owner", .has_arg = required_argument, .flag = NULL, .val = 'o'},

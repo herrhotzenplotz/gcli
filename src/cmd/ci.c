@@ -111,6 +111,8 @@ subcommand_ci(int argc, char *argv[])
 	char const *ref = NULL;
 	int count = -1;             /* fetch all checks by default */
 
+	parse_forge_path_arg(&argc, &argv, &repo_path);
+
 	/* Parse options */
 	struct option const options[] = {
 		{.name = "repo",  .has_arg = required_argument, .flag = NULL, .val = 'r'},

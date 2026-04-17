@@ -229,6 +229,8 @@ subcommand_comment(int argc, char *argv[])
 	bool always_yes = false;
 	gcli_id reply_to_id = 0;
 
+	parse_forge_path_arg(&argc, &argv, &sctx.opts.target);
+
 	struct option const options[] = {
 		{ .name    = "yes",
 		  .has_arg = no_argument,

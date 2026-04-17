@@ -434,6 +434,8 @@ subcommand_issues(int argc, char *argv[])
 	struct gcli_issue_fetch_details details = {0};
 	enum gcli_output_flags flags = 0;
 
+	parse_forge_path_arg(&argc, &argv, &path);
+
 	/* detect whether we wanna create an issue */
 	if (argc > 1 && (strcmp(argv[1], "create") == 0)) {
 		shift(&argc, &argv);

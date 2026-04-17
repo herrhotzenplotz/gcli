@@ -467,6 +467,8 @@ subcommand_releases(int argc, char *argv[])
 	struct gcli_path repo_path = {0};
 	struct gcli_release_list releases = {0};
 
+	parse_forge_path_arg(&argc, &argv, &repo_path);
+
 	if (argc > 1) {
 		for (size_t i = 0; i < ARRAY_SIZE(releases_subcommands); ++i) {
 			if (strcmp(releases_subcommands[i].name, argv[1]) == 0)

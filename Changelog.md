@@ -14,6 +14,48 @@ This changelog does not follow semantic versioning.
 
 ### Added
 
+- Subcommands now accept an optional `forge:owner/repo` positional argument
+
+  As a shorthand for `-t github -o torvalds -r linux`, you can write:
+
+  ```
+  gcli issues gh:curl/curl
+  gcli pulls gl:gitlab-org/gitlab
+  gcli pipelines cb:forgejo/forgejo
+  ```
+
+  The built-in prefixes are `gh:` (GitHub), `gl:` (GitLab), and
+  `cb:` (Codeberg). Named account sections from the gcli config file
+  are also accepted as the prefix. For example, given:
+
+  ```
+  freebsd-bz {
+      apibase=https://bugs.freebsd.org/bugzilla
+      forge-type=bugzilla
+  }
+
+  work-gl {
+      apibase=https://gitlab.example.com
+      forge-type=gitlab
+  }
+  ```
+
+  These work as positional arguments:
+
+  ```
+  gcli issues freebsd-bz:"Base System/tests"
+  gcli pulls work-glb:acme-corp/frontend
+  ```
+
+  Note: for Bugzilla the path is `product/component` rather than
+  `owner/repo`.
+
+  This works across all repository subcommands: `issues`, `pulls`,
+  `pipelines`, `ci`, `releases`, `forks`, `labels`, `milestones`, and
+  `comment`.
+
+  The existing `-t`, `-o`, and `-r` flags remain supported.
+
 ### Changed
 
 ### Removed

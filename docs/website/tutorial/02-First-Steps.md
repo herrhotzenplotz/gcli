@@ -32,6 +32,16 @@ fetch the first 10 issues:
 
     $ gcli -t github issues -o curl -r curl -n10
 
+gcli also accepts a shorthand that combines the forge, owner and
+repository into a single argument — `gh:curl/curl` is equivalent to
+`-t github -o curl -r curl`:
+
+    $ gcli issues gh:curl/curl -a -n10
+
+The prefix sets the forge: `gh:` for GitHub, `gl:` for GitLab, `cb:`
+for Codeberg. It works with any subcommand. The examples in this
+tutorial continue to use the explicit flags for clarity.
+
 ## Searching for issues
 
 Before reporting a bug or looking for solutions to a problem that

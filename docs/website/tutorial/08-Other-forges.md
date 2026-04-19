@@ -126,6 +126,13 @@ After that you should be able to run the following command:
 
 	$ gcli -t gitlab issues -o herrhotzenplotz -r gcli
 
+Or more concisely using the forge path shorthand. Once your account is
+configured you can also use its name as the prefix directly, which is
+handy when you have multiple accounts of the same forge type:
+
+	$ gcli issues gl:herrhotzenplotz/gcli
+	$ gcli issues gitlab-com:herrhotzenplotz/gcli
+
 If this process errors out check the above steps. If you believe
 this is a bug, please report it at our issue tracker!
 

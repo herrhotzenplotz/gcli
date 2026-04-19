@@ -182,6 +182,18 @@ fetch the first 10 issues:
 .EX
 $ gcli -t github issues -o curl -r curl -n10
 .EE
+.PP
+gcli also accepts a shorthand that combines the forge, owner and
+repository into a single argument — \f(CRgh:curl/curl\fR is equivalent to
+\f(CR-t github -o curl -r curl\fR:
+.LP
+.EX
+$ gcli issues gh:curl/curl -a -n10
+.EE
+.PP
+The prefix sets the forge: \f(CRgh:\fR for GitHub, \f(CRgl:\fR for GitLab, \f(CRcb:\fR
+for Codeberg. It works with any subcommand. The examples in this
+tutorial continue to use the explicit flags for clarity.
 .SS
 Searching for issues
 .LP
@@ -753,6 +765,10 @@ Click the \f(CRAdd new token\fR button
 .sp -0.25v
 .IP "5." 3
 Choose some reasonable values
+.if n \
+.sp -1
+.if t \
+.sp -0.25v
 .RS
 .IP "\(bu" 3
 The token name can be your hostname e.g. \f(CRgcli $(hostname)\fR
@@ -791,6 +807,15 @@ After that you should be able to run the following command:
 .LP
 .EX
 $ gcli -t gitlab issues -o herrhotzenplotz -r gcli
+.EE
+.PP
+Or more concisely using the forge path shorthand. Once your account is
+configured you can also use its name as the prefix directly, which is
+handy when you have multiple accounts of the same forge type:
+.LP
+.EX
+$ gcli issues gl:herrhotzenplotz/gcli
+$ gcli issues gitlab-com:herrhotzenplotz/gcli
 .EE
 .PP
 If this process errors out check the above steps. If you believe

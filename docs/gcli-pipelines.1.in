@@ -6,10 +6,12 @@
 .Nd Inspect and manage GitLab Pipelines
 .Sh SYNOPSIS
 .Nm
+.Op Ar forge-path
 .Op Fl n Ar n
 .Op Fl o Ar owner Fl r Ar repo
 .Op Fl a
 .Nm
+.Op Ar forge-path
 .Fl p Ar pipeline-id
 .Op Fl o Ar owner Fl r Ar repo
 .Ar pipeline-actions...
@@ -136,6 +138,11 @@ $ gcli pipelines -p3316 jobs
 Dump the log of Job #423141 in herrhotzenplotz/gcli:
 .Bd -literal -offset indent
 $ gcli pipelines -o herrhotzenplotz -r gcli -j 423141 log
+.Ed
+.Pp
+List pipelines in herrhotzenplotz/gcli using the forge path shorthand:
+.Bd -literal -offset indent
+$ gcli pipelines gl:herrhotzenplotz/gcli
 .Ed
 .Sh SEE ALSO
 .Xr git 1 ,

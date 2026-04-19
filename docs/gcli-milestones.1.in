@@ -6,11 +6,14 @@
 .Nd List and manage milestones in various Git Forges
 .Sh SYNOPSIS
 .Nm
+.Op Ar forge-path
 .Op Fl o Ar owner Fl r Ar repo
 .Nm
+.Op Ar forge-path
 .Op Fl o Ar owner Fl r Ar repo
 .Op Fl i Ar id
 .Nm
+.Op Ar forge-path
 .Cm create
 .Op Fl o Ar owner Fl r Ar repo
 .Fl t Ar title
@@ -75,6 +78,11 @@ $ gcli milestones create -t foobar
 Delete milestone number 420 in vim/vim on GitHub:
 .Bd -literal -offset indent
 $ gcli -t github milestones -i 420 delete
+.Ed
+.Pp
+List milestones in herrhotzenplotz/gcli on GitHub using the forge path shorthand:
+.Bd -literal -offset indent
+$ gcli milestones gh:herrhotzenplotz/gcli
 .Ed
 .Sh SEE ALSO
 .Xr git 1 ,

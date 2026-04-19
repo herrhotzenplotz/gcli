@@ -6,8 +6,10 @@
 .Nd Manage ticket labels in git forges
 .Sh SYNOPSIS
 .Nm
+.Op Ar forge-path
 .Op Fl o Ar owner Fl r Ar repo
 .Nm
+.Op Ar forge-path
 .Cm create
 .Op Fl o Ar owner Fl r Ar repo
 .Fl d Ar description
@@ -107,6 +109,11 @@ in herrhotzenplotz/gcli and use the configured account
 .Sq gitlab :
 .Bd -literal -offset indent
 $ gcli -a gitlab labels -o herrhotzenplotz -r gcli -i foobar delete
+.Ed
+.Pp
+List labels in herrhotzenplotz/gcli on GitLab using the forge path shorthand:
+.Bd -literal -offset indent
+$ gcli labels gl:herrhotzenplotz/gcli
 .Ed
 .Sh SEE ALSO
 .Xr git 1 ,

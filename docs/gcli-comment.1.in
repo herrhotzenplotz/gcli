@@ -7,6 +7,7 @@
 .Nd Comment on tickets in git forges
 .Sh SYNOPSIS
 .Nm
+.Op Ar forge-path
 .Op Fl y
 .Op Fl o Ar owner Fl r Ar repo
 .Op Fl i Ar issue | Fl p Ar PR
@@ -62,6 +63,11 @@ $ gcli comment -p 11
 Comment under issue 1 in herrhotzenplotz/gcli:
 .Bd -literal -offset indent
 $ gcli comment -o herrhotzenplotz -r gcli -i 1
+.Ed
+.Pp
+Comment under issue 1 in herrhotzenplotz/gcli on GitLab using the forge path shorthand:
+.Bd -literal -offset indent
+$ gcli comment gl:herrhotzenplotz/gcli -i 1
 .Ed
 .Sh SEE ALSO
 .Xr git 1 ,

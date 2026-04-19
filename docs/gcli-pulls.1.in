@@ -6,6 +6,7 @@
 .Nd Manage Pull Requests on Git Forges
 .Sh SYNOPSIS
 .Nm
+.Op Ar forge-path
 .Op Fl a
 .Op Fl A Ar author
 .Op Fl L Ar label
@@ -15,10 +16,12 @@
 .Op Fl o Ar owner Fl r Ar repo
 .Op Ar search-terms...
 .Nm
+.Op Ar forge-path
 .Fl i Ar pr
 .Op Fl o Ar owner Fl r Ar repo
 .Ar actions...
 .Nm
+.Op Ar forge-path
 .Cm create
 .Op Fl o Ar owner Fl r Ar repo
 .Op Fl t Ar branch
@@ -305,6 +308,11 @@ $ gcli -t github pulls -i 42 title "This is the new title"
 Same command as above, but with abbreviated pulls subcommand:
 .Bd -literal -offset indent
 $ gcli -t github pu -i 42 title "This is the new title"
+.Ed
+.Pp
+List open PRs in herrhotzenplotz/gcli on GitHub using the forge path shorthand:
+.Bd -literal -offset indent
+$ gcli pulls gh:herrhotzenplotz/gcli
 .Ed
 .Sh SEE ALSO
 .Xr git 1 ,

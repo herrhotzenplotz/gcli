@@ -6,10 +6,12 @@
 .Nd manage releases on git forges
 .Sh SYNOPSIS
 .Nm
+.Op Ar forge-path
 .Op Fl sl
 .Op Fl n Ar n
 .Op Fl o Ar owner Fl r Ar repo
 .Nm
+.Op Ar forge-path
 .Cm create
 .Fl t Ar tagname
 .Op Fl n Ar name
@@ -20,6 +22,7 @@
 .Op Fl p
 .Op Fl T Pa template-file.md
 .Nm
+.Op Ar forge-path
 .Cm delete
 .Op Fl o Ar owner Fl r Ar repo
 .Op Fl y
@@ -164,6 +167,11 @@ and do not ask for confirmation.
 .Bd -literal -offset indent
 $ gcli releases create --tag v2.8.0 --name 'Version 2.8.0' \\
   --commitish v2.8.0 --template relnotes.md --yes
+.Ed
+.Pp
+List releases in herrhotzenplotz/gcli on GitHub using the forge path shorthand:
+.Bd -literal -offset indent
+$ gcli releases gh:herrhotzenplotz/gcli
 .Ed
 .Sh SEE ALSO
 .Xr git 1 ,

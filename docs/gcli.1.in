@@ -9,6 +9,7 @@
 .Nm
 .Op overrides
 .Cm subcommand
+.Op Ar forge-path
 .Op options
 .Sh DESCRIPTION
 .Nm
@@ -173,6 +174,39 @@ Operate on the given numeric identifier.
 .Pp
 Other options specific to the context are documented in the respective
 man pages.
+.Ss Forge path shorthand
+Many subcommands accept an optional
+.Ar forge-path
+argument immediately following the subcommand name and before any
+flags.
+When present it overrides the default owner, repository and/or forge
+selection.
+The following forms are recognised:
+.Bl -tag -width indent
+.It Cm gh Ns : Ns Ar owner Ns / Ns Ar repo
+Use GitHub and operate on the repository
+.Ar owner Ns / Ns Ar repo .
+.It Cm gl Ns : Ns Ar owner Ns / Ns Ar repo
+Use GitLab and operate on the repository
+.Ar owner Ns / Ns Ar repo .
+.It Cm cb Ns : Ns Ar owner Ns / Ns Ar repo
+Use Codeberg and operate on the repository
+.Ar owner Ns / Ns Ar repo .
+.It Ar account Ns : Ns Ar owner Ns / Ns Ar repo
+Use the named config
+.Ar account
+and operate on the repository
+.Ar owner Ns / Ns Ar repo .
+.Ar account
+must be a section name in the user config file. See
+.Xr gcli 5 .
+.It Ar account
+Switch to the named config
+.Ar account
+while inferring the repository from the git remote as usual.
+This is useful when multiple accounts of the same forge type are
+configured.
+.El
 .Sh ENVIRONMENT
 .Bl -tag -width XDG_CONFIG_HOME
 .It Ev GIT_EDITOR, VISUAL, EDITOR
@@ -263,6 +297,16 @@ $ gcli -t github pulls -o contour-terminal -r contour -a -n10
 .Pp
 This can be useful if neither your config file nor the directory you're
 working from contain the relevant forge and repository information.
+.Pp
+List issues in herrhotzenplotz/gcli on GitLab:
+.Bd -literal -offset indent
+$ gcli issues gl:herrhotzenplotz/gcli
+.Ed
+.Pp
+List open PRs using a named config account:
+.Bd -literal -offset indent
+$ gcli pulls myaccount:owner/repo
+.Ed
 .Sh SEE ALSO
 .Xr git 1 ,
 .Xr gcli-issues 1 ,

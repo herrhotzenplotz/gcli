@@ -6,6 +6,7 @@
 .Nd Manage issues in various git forges
 .Sh SYNOPSIS
 .Nm
+.Op Ar forge-path
 .Op Fl n Ar n
 .Op Fl a
 .Op Fl s
@@ -16,10 +17,12 @@
 .Op Fl o Ar owner Fl r Ar repo
 .Op Ar "search-query"
 .Nm
+.Op Ar forge-path
 .Fl i Ar issue
 .Op Fl o Ar owner Fl r Ar repo
 .Ar actions...
 .Nm
+.Op Ar forge-path
 .Cm create
 .Op Fl o Ar owner Fl r Ar repo
 .Op Fl y
@@ -167,6 +170,11 @@ Search for issues containing
 in contour-terminal/contour on GitHub including closed issues:
 .Bd -literal -offset indent
 $ gcli -t github issues -o contour-terminal -r contour -a crash
+.Ed
+.Pp
+List issues in herrhotzenplotz/gcli on GitLab using the forge path shorthand:
+.Bd -literal -offset indent
+$ gcli issues gl:herrhotzenplotz/gcli
 .Ed
 .Pp
 Report a new issue in the current project; interactively asking for

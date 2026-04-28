@@ -42,8 +42,6 @@
 
 #include <gcli/forges.h>
 
-#include <gcli/gitlab/pipelines.h>
-
 #include <getopt.h>
 #include <stdlib.h>
 
@@ -221,7 +219,7 @@ action_pipeline_jobs(struct gcli_path const *path,
 	(void) argc;
 	(void) argv;
 
-	rc = gitlab_get_pipeline_jobs(g_clictx, path, -1, &jobs);
+	rc = gcli_get_pipeline_jobs(g_clictx, path, -1, &jobs);
 
 	if (rc < 0) {
 		fprintf(stderr, "gcli: error: failed to get pipeline jobs: %s\n",
@@ -248,7 +246,7 @@ action_pipeline_children(struct gcli_path const *path,
 	(void) argc;
 	(void) argv;
 
-	rc = gitlab_get_pipeline_children(g_clictx, path, -1, &children);
+	rc = gcli_get_pipeline_children(g_clictx, path, -1, &children);
 	if (rc < 0) {
 		fprintf(stderr, "gcli: error: failed to get pipeline children: %s\n",
 		        gcli_get_error(g_clictx));
@@ -390,7 +388,7 @@ action_job_log(struct gcli_path const *const path,
 	(void) argc;
 	(void) argv;
 
-	rc = gitlab_job_get_log(g_clictx, path, stdout);
+	rc = gcli_job_get_log(g_clictx, path, stdout);
 	if (rc < 0) {
 		fprintf(stderr, "gcli: error: failed to get job log: %s\n",
 		        gcli_get_error(g_clictx));
@@ -412,7 +410,7 @@ action_job_cancel(struct gcli_path const *const path,
 	(void) argc;
 	(void) argv;
 
-	rc = gitlab_job_cancel(g_clictx, path);
+	rc = gcli_job_cancel(g_clictx, path);
 	if (rc < 0) {
 		fprintf(stderr, "gcli: error: failed to cancel the job: %s\n",
 		        gcli_get_error(g_clictx));
@@ -434,7 +432,7 @@ action_job_retry(struct gcli_path const *const path,
 	(void) argc;
 	(void) argv;
 
-	rc = gitlab_job_retry(g_clictx, path);
+	rc = gcli_job_retry(g_clictx, path);
 	if (rc < 0) {
 		fprintf(stderr, "gcli: error: failed to retry the job: %s\n",
 		        gcli_get_error(g_clictx));
@@ -467,7 +465,7 @@ action_job_artifacts(struct gcli_path const *const path,
 		*argv += 2;
 	}
 
-	rc = gitlab_job_download_artifacts(g_clictx, path, outfile);
+	rc = gcli_job_download_artifacts(g_clictx, path, outfile);
 	if (rc < 0) {
 		fprintf(stderr, "gcli: error: failed to download file: %s\n",
 		        gcli_get_error(g_clictx));
@@ -499,7 +497,7 @@ action_job_open(struct gcli_path const *path,
 }
 
 static struct gcli_cmd_actions job_actions = {
-	.fetch_item = (gcli_cmd_action_fetcher)gitlab_get_job,
+	.fetch_item = (gcli_cmd_action_fetcher)gcli_get_job,
 	.free_item = (gcli_cmd_action_freeer)gcli_free_job,
 	.item_size = sizeof(struct gcli_job),
 

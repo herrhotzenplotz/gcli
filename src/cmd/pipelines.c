@@ -35,6 +35,7 @@
 #include <gcli/cmd/colour.h>
 #include <gcli/cmd/open.h>
 #include <gcli/cmd/pipelines.h>
+#include <gcli/cmd/pipelines_watch.h>
 #include <gcli/cmd/table.h>
 #include <gcli/cmd/vcs.h>
 

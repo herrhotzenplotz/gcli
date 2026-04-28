@@ -391,8 +391,8 @@ subcommand_repos(int argc, char *argv[])
 	} else {
 		struct gcli_path path = {
 			.as_default = {
-				.owner = strdup(owner),
-				.repo = strdup(repo),
+				.owner = (char *)owner,
+				.repo = (char *)repo,
 			},
 		};
 

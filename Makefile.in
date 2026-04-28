@@ -428,8 +428,8 @@ clean-auto:
 		lex.yy.c y.tab.c y.tab.h \
 		$(TEST_PROGRAMS:=.tests$(OBJEXT)) \
 		$(TEST_PROGRAMS) \
-		$(MANPAGES) $(MANPAGES:=.gz) \
-		gcli_*.srv.log gcli_*srv.out.* gcli_*.console.log
+		$(MANPAGES) $(MANPAGES:=.gz)
+	sh -c 'rm -f gcli_*.srv.log gcli_*srv.out.* gcli_*.console.log'
 
 .PHONY: distclean
 distclean: clean

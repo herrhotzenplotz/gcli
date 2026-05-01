@@ -68,6 +68,11 @@ Disable the progress spinner in the ui.
 uses this when making requests. This can also be set, and overridden with the
 .Ev GCLI_NOSPINNER
 environment variable.
+.It render-markdown
+If gcli is compiled with liblowdown support for rendering, setting this
+value to
+.Dq no
+will disable markdown rendering and instead output the plain text.
 .It url-open-program
 Name of a program in the
 .Ev PATH

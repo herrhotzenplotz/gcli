@@ -17,9 +17,7 @@ VerifyClientOutput:
   
   ORIGINAL POST
   
-  
       This is the test bug description.
-  
 
 # First request: fetch the bug by ID
 ServerResponseStatus: 200 OK

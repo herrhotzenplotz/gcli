@@ -51,6 +51,7 @@ defaults {
 	gitea-default-account = gitea
 	bugzilla-default-account = bugzilla
 	disable-spinner = true
+	render-markdown = false
 }
 
 gitlab {

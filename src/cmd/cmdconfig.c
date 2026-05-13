@@ -71,6 +71,7 @@ struct gcli_config {
 	int no_markdown;                   /* do not render markdown (when built with lowdown) */
 	int enable_experimental;           /* enable experimental features */
 	int restrict_pipelines_to_branch;  /* only list pipelines for the current branch */
+	int monitor_delay;        /* delay between pipeline monitor refetch */
 
 	gcli_sv buffer;
 	char *file_content;
@@ -755,6 +756,39 @@ gcli_config_get_url_open_program(struct gcli_ctx *ctx)
 	ensure_config(ctx);
 
 	return gcli_config_find_by_key(ctx, "defaults", "url-open-program");
+}
+
+int
+gcli_config_get_monitor_delay(struct gcli_ctx *ctx)
+{
+	char *endptr;
+	char const *delaystr;
+	int const default_delay = 5;
+	int rc = 0;
+	struct gcli_config *cfg;
+
+	ensure_config(ctx);
+
+	/* check if we have it cached already or set otherwise */
+	cfg = ctx_config(ctx);
+	if (cfg->monitor_delay)
+		return cfg->monitor_delay;
+
+	/* look for and parse a possibly existing configuration key */
+	delaystr = gcli_config_find_by_key(ctx, "defaults", "monitor-delay");
+	if (!delaystr)
+		return default_delay;
+
+	rc = strtol(delaystr, &endptr, 10);
+	if (rc < 0 || endptr != delaystr + strlen(delaystr)) {
+		gcli_warnx(ctx, "bad monitor delay: %s", delaystr);
+		return default_delay;
+	}
+
+	/* cache it for future calls */
+	cfg->monitor_delay = rc;
+
+	return rc;
 }
 
 static char const *const

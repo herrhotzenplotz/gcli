@@ -155,3 +155,37 @@ github_get_check_runs(struct gcli_ctx *ctx,
 
 	return rc;
 }
+
+int
+github_get_check_suite(struct gcli_ctx *ctx,
+                       struct gcli_path const *pipeline_path,
+                       struct gcli_pipeline *out)
+{
+	char *url = NULL;
+	int rc = 0;
+	struct gcli_fetch_buffer buffer = {0};
+	struct gcli_path norm_path = {0};
+	struct json_stream stream = {0};
+
+	rc = github_path_normalise(ctx, pipeline_path, &norm_path);
+	if (rc < 0)
+		return rc;
+
+	rc = github_checksuite_make_url(ctx, &norm_path, &url, "");
+	gcli_path_free(&norm_path);
+
+	if (rc < 0)
+		return rc;
+
+	rc = gcli_fetch(ctx, url, NULL, &buffer);
+	if (rc == 0) {
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		rc = parse_github_checksuite(ctx, &stream, out);
+		json_close(&stream);
+	}
+
+	gcli_fetch_buffer_free(&buffer);
+	gcli_clear_ptr(&url);
+
+	return rc;
+}

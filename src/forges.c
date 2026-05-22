@@ -175,8 +175,9 @@ github_forge_descriptor =
 	.notification_mark_as_read = github_notification_mark_as_read,
 
 	/* Pipelines */
-	.get_pipelines             = github_get_check_suites,
+	.get_pipeline              = github_get_check_suite,
 	.get_pipeline_jobs         = github_get_check_runs,
+	.get_pipelines             = github_get_check_suites,
 
 	/* Internal stuff */
 	.get_api_error_string      = github_api_error_string,

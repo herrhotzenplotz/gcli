@@ -30,6 +30,7 @@
 /* Watch a pipeline executing in real-time */
 
 #include <gcli/cmd/cmd.h>
+#include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/pipelines.h>
 #include <gcli/forges.h>
 #include <gcli/gcli.h>
@@ -67,11 +68,13 @@ finished(struct gcli_pipeline const *const p)
 int
 gcli_cmd_watch_pipeline(struct gcli_path const *const path)
 {
-	int rc = 0;
+	int rc = 0, delay = 0;
 	struct gcli_pipeline pipeline = {0};
 	struct gcli_job_list jobs = {0};
 	size_t lines = 0, room_needed;
 	bool done = false;
+
+	delay = gcli_config_get_monitor_delay(g_clictx);
 
 	for (;;) {
 		/* fetch the job list */
@@ -107,7 +110,7 @@ gcli_cmd_watch_pipeline(struct gcli_path const *const path)
 		if (done)
 			break;
 
-		sleep(5);
+		sleep(delay);
 	}
 
 

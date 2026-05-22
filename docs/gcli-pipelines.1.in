@@ -112,9 +112,18 @@ This presents a view of the
 .Cm jobs
 list that is refreshed live.
 The action exits once the pipeline has completed.
+.Pp
 This action requires an
 .Xr xterm 1
 compatible terminal emulator because control characters are printed to stdout.
+The refresh interval can be configured via the
+.Dq monitor-delay
+option
+in the
+.Dq defaults
+section of the
+.Xr gcli 5
+config file.
 .El
 .Sh EXAMPLES
 Print a list of the last 30 pipelines in the current project:

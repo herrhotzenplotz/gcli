@@ -79,6 +79,8 @@ int gcli_config_get_forge_type_by_host(struct gcli_ctx *ctx,
                                        char const *host,
                                        gcli_forge_type *out);
 
+int gcli_config_get_monitor_delay(struct gcli_ctx *ctx);
+
 void gcli_config_set_override_forgetype(struct gcli_ctx *ctx,
                                         gcli_forge_type type);
 

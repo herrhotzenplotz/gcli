@@ -93,6 +93,12 @@ to determine the currently checked out branch and queries only
 pipelines for this branch.
 See also
 .Xr gcli-pipelines 1 .
+.It monitor-delay
+Specifies an integer refresh interval for the
+.Cm monitor
+action for the
+.Xr gcli-pipelines 1
+subcommand in seconds.
 .El
 .Pp
 All other sections define accounts for forges. Each of these account

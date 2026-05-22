@@ -128,10 +128,12 @@ void
 gcli_print_jobs(struct gcli_job_list const *const list)
 {
 	gcli_tbl table;
+	struct gcli_forge_descriptor const *fd;
 	struct gcli_tblcoldef cols[] = {
 		{ .name = "ID",         .type = GCLI_TBLCOLTYPE_ID,     .flags = GCLI_TBLCOL_JUSTIFYR },
 		{ .name = "NAME",       .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 		{ .name = "STATUS",     .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
+		{ .name = "CONCLUSION", .type = GCLI_TBLCOLTYPE_STRING, .flags = GCLI_TBLCOL_STATECOLOURED },
 		{ .name = "STARTED",    .type = GCLI_TBLCOLTYPE_TIME_T, .flags = 0 },
 		{ .name = "FINISHED",   .type = GCLI_TBLCOLTYPE_TIME_T, .flags = 0 },
 		{ .name = "REF",        .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
@@ -146,11 +148,17 @@ gcli_print_jobs(struct gcli_job_list const *const list)
 	if (!table)
 		errx(1, "gcli: error: could not initialize table");
 
+	/* Hide the conclusion column if needed */
+	fd = gcli_forge(g_clictx);
+	if (fd->pipeline_quirks & GCLI_PIPELINE_QUIRKS_NOCONCLUSION)
+		gcli_tbl_hide_column(table, "CONCLUSION");
+
 	for (size_t i = 0; i < list->jobs_size; ++i) {
 		gcli_tbl_add_row(table,
 		                 list->jobs[i].id,
 		                 list->jobs[i].name,
 		                 list->jobs[i].status,
+		                 list->jobs[i].conclusion,
 		                 list->jobs[i].started_at,
 		                 list->jobs[i].finished_at,
 		                 list->jobs[i].ref);

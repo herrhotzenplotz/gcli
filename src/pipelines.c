@@ -89,3 +89,60 @@ gcli_get_pipeline(struct gcli_ctx *ctx,
 {
 	gcli_null_check_call(get_pipeline, ctx, pipeline_path, out);
 }
+
+int
+gcli_get_pipeline_jobs(struct gcli_ctx *ctx,
+                       struct gcli_path const *pipeline_path,
+                       int count,
+                       struct gcli_job_list *out)
+{
+	gcli_null_check_call(get_pipeline_jobs, ctx, pipeline_path, count, out);
+}
+
+int
+gcli_get_pipeline_children(struct gcli_ctx *ctx,
+                           struct gcli_path const *pipeline_path,
+                           int count,
+                           struct gcli_pipeline_list *out)
+{
+	gcli_null_check_call(get_pipeline_children, ctx, pipeline_path, count,
+	                     out);
+}
+
+int
+gcli_job_get_log(struct gcli_ctx *ctx,
+                 struct gcli_path const *job_path,
+                 FILE *stream)
+{
+	gcli_null_check_call(job_get_log, ctx, job_path, stream);
+}
+
+int
+gcli_job_cancel(struct gcli_ctx *ctx,
+                struct gcli_path const *job_path)
+{
+	gcli_null_check_call(job_cancel, ctx, job_path);
+}
+
+int
+gcli_job_retry(struct gcli_ctx *ctx,
+               struct gcli_path const *job_path)
+{
+	gcli_null_check_call(job_retry, ctx, job_path);
+}
+
+int
+gcli_job_download_artifacts(struct gcli_ctx *ctx,
+                            struct gcli_path const *job_path,
+                            char const *outfile)
+{
+	gcli_null_check_call(job_download_artifacts, ctx, job_path, outfile);
+}
+
+int
+gcli_get_job(struct gcli_ctx *ctx,
+             struct gcli_path const *job_path,
+             struct gcli_job *const out)
+{
+	gcli_null_check_call(get_job, ctx, job_path, out);
+}

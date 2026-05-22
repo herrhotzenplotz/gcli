@@ -565,6 +565,55 @@ struct gcli_forge_descriptor {
 		struct gcli_pipeline *out);
 
 	/**
+	 * Get the jobs of a pipeline */
+	int (*get_pipeline_jobs)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *pipeline_path,
+		int count,
+		struct gcli_job_list *out);
+
+	/**
+	 * Downstream child pipelines */
+	int (*get_pipeline_children)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *pipeline_path,
+		int count,
+		struct gcli_pipeline_list *out);
+
+	/**
+	 * Get a single job */
+	int (*get_job)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *job_path,
+		struct gcli_job *const out);
+
+	/**
+	 * Dump job log into the given file stream */
+	int (*job_get_log)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *job_path,
+		FILE *stream);
+
+	/**
+	 * Cancel a job */
+	int (*job_cancel)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *job_path);
+
+	/**
+	 * Reschedule a job */
+	int (*job_retry)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *job_path);
+
+	/**
+	 * Download Job Artifacts into the given file */
+	int (*job_download_artifacts)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *job_path,
+		char const *outfile);
+
+	/**
 	 * Get an the http authentication header for use by curl */
 	char *(*make_authheader)(struct gcli_ctx *ctx, char const *token);
 

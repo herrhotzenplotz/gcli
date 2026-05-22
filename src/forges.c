@@ -275,8 +275,15 @@ gitlab_forge_descriptor =
 	.notification_mark_as_read = gitlab_notification_mark_as_read,
 
 	/* Pipelines */
-	.get_pipelines             = gitlab_get_pipelines,
+	.get_job                   = gitlab_get_job,
 	.get_pipeline              = gitlab_get_pipeline,
+	.get_pipeline_children     = gitlab_get_pipeline_children,
+	.get_pipeline_jobs         = gitlab_get_pipeline_jobs,
+	.get_pipelines             = gitlab_get_pipelines,
+	.job_cancel                = gitlab_job_cancel,
+	.job_download_artifacts    = gitlab_job_download_artifacts,
+	.job_get_log               = gitlab_job_get_log,
+	.job_retry                 = gitlab_job_retry,
 
 	/* Internal stuff */
 	.get_api_error_string      = gitlab_api_error_string,

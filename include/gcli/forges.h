@@ -550,6 +550,21 @@ struct gcli_forge_descriptor {
 		char const *id);
 
 	/**
+	 * Get pipelines */
+	int (*get_pipelines)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *repo_path,
+		struct gcli_pipelines_fetch_details const *details,
+		struct gcli_pipeline_list *out);
+
+	/**
+	 * Get a single pipeline */
+	int (*get_pipeline)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *pipeline_path,
+		struct gcli_pipeline *out);
+
+	/**
 	 * Get an the http authentication header for use by curl */
 	char *(*make_authheader)(struct gcli_ctx *ctx, char const *token);
 

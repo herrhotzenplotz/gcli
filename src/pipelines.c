@@ -27,6 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <gcli/forges.h>
 #include <gcli/pipelines.h>
 
 void
@@ -70,4 +71,21 @@ gcli_free_jobs(struct gcli_job_list *list)
 
 	gcli_clear_ptr(&list->jobs);
 	list->jobs_size = 0;
+}
+
+int
+gcli_get_pipelines(struct gcli_ctx *ctx,
+                   struct gcli_path const *repo_path,
+                   struct gcli_pipelines_fetch_details const *details,
+                   struct gcli_pipeline_list *out)
+{
+	gcli_null_check_call(get_pipelines, ctx, repo_path, details, out);
+}
+
+int
+gcli_get_pipeline(struct gcli_ctx *ctx,
+                  struct gcli_path const *pipeline_path,
+                  struct gcli_pipeline *out)
+{
+	gcli_null_check_call(get_pipeline, ctx, pipeline_path, out);
 }

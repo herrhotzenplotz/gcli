@@ -274,6 +274,10 @@ gitlab_forge_descriptor =
 	.get_notifications         = gitlab_get_notifications,
 	.notification_mark_as_read = gitlab_notification_mark_as_read,
 
+	/* Pipelines */
+	.get_pipelines             = gitlab_get_pipelines,
+	.get_pipeline              = gitlab_get_pipeline,
+
 	/* Internal stuff */
 	.get_api_error_string      = gitlab_api_error_string,
 	.make_authheader           = gitlab_make_authheader,

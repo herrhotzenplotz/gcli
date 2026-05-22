@@ -43,7 +43,7 @@ static void
 print_notification_table(struct gcli_notification_list const *list)
 {
 	gcli_tbl *table;
-	struct gcli_tblcoldef const columns[] = {
+	struct gcli_tblcoldef columns[] = {
 		{ .name = "NUMBER", .type = GCLI_TBLCOLTYPE_LONG,   .flags = 0 },
 		{ .name = "REPO",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },
 		{ .name = "TYPE",   .type = GCLI_TBLCOLTYPE_STRING, .flags = 0 },

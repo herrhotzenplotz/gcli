@@ -48,18 +48,20 @@ typedef void *gcli_dict;
 /** Flags for table column definitions */
 enum gcli_tblcol_flags {
 	/* column is as string and colour is derived from its contents. */
-	GCLI_TBLCOL_STATECOLOURED  = 1,
+	GCLI_TBLCOL_STATECOLOURED  = (1 << 0),
 	/* Right-justify the column */
-	GCLI_TBLCOL_JUSTIFYR       = 2,
+	GCLI_TBLCOL_JUSTIFYR       = (1 << 1),
 	/* Make it bold */
-	GCLI_TBLCOL_BOLD           = 4,
+	GCLI_TBLCOL_BOLD           = (1 << 2),
 	/* Explicit colour - provide the colour to gcli_tbl_add_row first
 	 * and second the content of the cell. */
-	GCLI_TBLCOL_COLOUREXPL     = 8,
+	GCLI_TBLCOL_COLOUREXPL     = (1 << 3),
 	/* 256 colour handling. Just like the above */
-	GCLI_TBLCOL_256COLOUR      = 16,
+	GCLI_TBLCOL_256COLOUR      = (1 << 4),
 	/* Have a column spacing to the right of one instead of two spaces */
-	GCLI_TBLCOL_TIGHT          = 32,
+	GCLI_TBLCOL_TIGHT          = (1 << 5),
+	/* Hide the column dynamically */
+	GCLI_TBLCOL_HIDDEN         = (1 << 6),
 };
 
 enum gcli_tblcoltype {
@@ -80,8 +82,9 @@ struct gcli_tblcoldef {
 };
 
 /* Init a table printer */
-gcli_tbl gcli_tbl_begin(struct gcli_tblcoldef const *cols,
-                        size_t cols_size);
+gcli_tbl gcli_tbl_begin(struct gcli_tblcoldef *cols, size_t cols_size);
+
+void gcli_tbl_hide_column(gcli_tbl *table, char const *colname);
 
 /* Print the table contents and free all the resources allocated in
  * the table */

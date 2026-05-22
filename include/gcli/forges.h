@@ -550,6 +550,12 @@ struct gcli_forge_descriptor {
 		char const *id);
 
 	/**
+	 * Special forge-specific quirks for pipelines */
+	enum {
+		GCLI_PIPELINE_QUIRKS_NOCHILDREN = (1 << 0), /* pipelines cannot have children */
+	} const pipeline_quirks;
+
+	/**
 	 * Get pipelines */
 	int (*get_pipelines)(
 		struct gcli_ctx *ctx,

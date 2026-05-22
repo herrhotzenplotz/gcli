@@ -266,6 +266,9 @@ action_pipeline_all(struct gcli_path const *path,
                     int *argc, char **argv[])
 {
 	int rc = 0;
+	struct gcli_forge_descriptor const *fd;
+
+	fd = gcli_forge(g_clictx);
 
 	rc = action_pipeline_status(path, pipeline, argc, argv);
 	if (rc)
@@ -278,10 +281,12 @@ action_pipeline_all(struct gcli_path const *path,
 	if (rc)
 		return rc;
 
-	fprintf(stdout, "\n");
-
-	fprintf(stdout, "CHILDREN\n");
-	rc = action_pipeline_children(path, pipeline, argc, argv);
+	/* Only fetch child pipelines if the nochildren quirks isn't set */
+	if ((fd->pipeline_quirks & GCLI_PIPELINE_QUIRKS_NOCHILDREN) == 0) {
+		fprintf(stdout, "\n");
+		fprintf(stdout, "CHILDREN\n");
+		rc = action_pipeline_children(path, pipeline, argc, argv);
+	}
 
 	return rc;
 }

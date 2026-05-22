@@ -47,7 +47,7 @@
 
 static int
 fetch_pipelines(struct gcli_ctx *ctx, char *url, int const max,
-                struct gitlab_pipeline_list *const list)
+                struct gcli_pipeline_list *const list)
 {
 	struct gcli_fetch_list_ctx fl = {
 		.listp = &list->pipelines,
@@ -61,8 +61,8 @@ fetch_pipelines(struct gcli_ctx *ctx, char *url, int const max,
 
 int
 gitlab_get_pipelines(struct gcli_ctx *ctx, struct gcli_path const *const path,
-                     struct gitlab_pipelines_fetch_details const *details,
-                     struct gitlab_pipeline_list *const list)
+                     struct gcli_pipelines_fetch_details const *details,
+                     struct gcli_pipeline_list *const list)
 {
 	char *url = NULL, *args = NULL;
 	int rc = 0, max = -1;
@@ -129,7 +129,7 @@ gitlab_pipeline_make_url(struct gcli_ctx *ctx,
 int
 gitlab_get_pipeline(struct gcli_ctx *ctx,
                     struct gcli_path const *const pipeline_path,
-                    struct gitlab_pipeline *out)
+                    struct gcli_pipeline *out)
 {
 	char *url = NULL;
 	int rc = 0;
@@ -158,7 +158,7 @@ gitlab_get_pipeline(struct gcli_ctx *ctx,
 int
 gitlab_get_mr_pipelines(struct gcli_ctx *ctx,
                         struct gcli_path const *const path,
-                        struct gitlab_pipeline_list *const list)
+                        struct gcli_pipeline_list *const list)
 {
 	char *url = NULL;
 	int rc = 0;
@@ -171,31 +171,10 @@ gitlab_get_mr_pipelines(struct gcli_ctx *ctx,
 	return fetch_pipelines(ctx, url, -1, list);
 }
 
-void
-gitlab_pipeline_free(struct gitlab_pipeline *pipeline)
-{
-	gcli_clear_ptr(&pipeline->status);
-	gcli_clear_ptr(&pipeline->ref);
-	gcli_clear_ptr(&pipeline->sha);
-	gcli_clear_ptr(&pipeline->source);
-	gcli_clear_ptr(&pipeline->web_url);
-}
-
-void
-gitlab_pipelines_free(struct gitlab_pipeline_list *const list)
-{
-	for (size_t i = 0; i < list->pipelines_size; ++i) {
-		gitlab_pipeline_free(&list->pipelines[i]);
-	}
-
-	gcli_clear_ptr(&list->pipelines);
-	list->pipelines_size = 0;
-}
-
 int
 gitlab_get_pipeline_jobs(struct gcli_ctx *ctx,
                          struct gcli_path const *const pipeline_path,
-                         int const max, struct gitlab_job_list *const out)
+                         int const max, struct gcli_job_list *const out)
 {
 	char *url = NULL;
 	int rc = 0;
@@ -228,7 +207,7 @@ int
 gitlab_get_pipeline_children(struct gcli_ctx *ctx,
                              struct gcli_path const *const pipeline_path,
                              int count,
-                             struct gitlab_pipeline_list *out)
+                             struct gcli_pipeline_list *out)
 {
 	char *url = NULL;
 	int rc = 0;
@@ -244,28 +223,6 @@ gitlab_get_pipeline_children(struct gcli_ctx *ctx,
 		return rc;
 
 	return gcli_fetch_list(ctx, url, &fl);
-}
-
-void
-gitlab_free_job(struct gitlab_job *const job)
-{
-	gcli_clear_ptr(&job->status);
-	gcli_clear_ptr(&job->stage);
-	gcli_clear_ptr(&job->name);
-	gcli_clear_ptr(&job->ref);
-	gcli_clear_ptr(&job->runner_name);
-	gcli_clear_ptr(&job->runner_description);
-	gcli_clear_ptr(&job->web_url);
-}
-
-void
-gitlab_free_jobs(struct gitlab_job_list *list)
-{
-	for (size_t i = 0; i < list->jobs_size; ++i)
-		gitlab_free_job(&list->jobs[i]);
-
-	gcli_clear_ptr(&list->jobs);
-	list->jobs_size = 0;
 }
 
 static int
@@ -330,7 +287,7 @@ gitlab_job_get_log(struct gcli_ctx *ctx, struct gcli_path const *const job_path,
 
 int
 gitlab_get_job(struct gcli_ctx *ctx, struct gcli_path const *const job_path,
-               struct gitlab_job *const out)
+               struct gcli_job *const out)
 {
 	struct gcli_fetch_buffer buffer = {0};
 	char *url = NULL;

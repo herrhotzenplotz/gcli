@@ -83,7 +83,7 @@ usage(void)
 }
 
 void
-gitlab_print_pipelines(struct gitlab_pipeline_list const *const list)
+gcli_print_pipelines(struct gcli_pipeline_list const *const list)
 {
 	gcli_tbl table;
 	struct gcli_tblcoldef cols[] = {
@@ -118,7 +118,7 @@ gitlab_print_pipelines(struct gitlab_pipeline_list const *const list)
 }
 
 void
-gitlab_print_jobs(struct gitlab_job_list const *const list)
+gcli_print_jobs(struct gcli_job_list const *const list)
 {
 	gcli_tbl table;
 	struct gcli_tblcoldef cols[] = {
@@ -155,7 +155,7 @@ gitlab_print_jobs(struct gitlab_job_list const *const list)
 }
 
 void
-gitlab_print_job_status(struct gitlab_job const *const job)
+gcli_print_job_status(struct gcli_job const *const job)
 {
 	gcli_dict printer;
 
@@ -178,7 +178,7 @@ gitlab_print_job_status(struct gitlab_job const *const job)
 }
 
 void
-gitlab_print_pipeline(struct gitlab_pipeline const *const pipeline)
+gcli_print_pipeline(struct gcli_pipeline const *const pipeline)
 {
 	gcli_dict printer;
 
@@ -198,24 +198,24 @@ gitlab_print_pipeline(struct gitlab_pipeline const *const pipeline)
 
 static int
 action_pipeline_status(struct gcli_path const *path,
-                       struct gitlab_pipeline *pipeline,
+                       struct gcli_pipeline *pipeline,
                        int *argc, char **argv[])
 {
 	(void) path;
 	(void) argc;
 	(void) argv;
 
-	gitlab_print_pipeline(pipeline);
+	gcli_print_pipeline(pipeline);
 	return GCLI_EX_OK;
 }
 
 static int
 action_pipeline_jobs(struct gcli_path const *path,
-                     struct gitlab_pipeline *pipeline,
+                     struct gcli_pipeline *pipeline,
                      int *argc, char **argv[])
 {
 	int rc = 0;
-	struct gitlab_job_list jobs = {0};
+	struct gcli_job_list jobs = {0};
 
 	(void) pipeline;
 	(void) argc;
@@ -230,19 +230,19 @@ action_pipeline_jobs(struct gcli_path const *path,
 		return GCLI_EX_DATAERR;
 	}
 
-	gitlab_print_jobs(&jobs);
-	gitlab_free_jobs(&jobs);
+	gcli_print_jobs(&jobs);
+	gcli_free_jobs(&jobs);
 
 	return GCLI_EX_OK;
 }
 
 static int
 action_pipeline_children(struct gcli_path const *path,
-                         struct gitlab_pipeline *pipeline,
+                         struct gcli_pipeline *pipeline,
                          int *argc, char **argv[])
 {
 	int rc = 0;
-	struct gitlab_pipeline_list children = {0};
+	struct gcli_pipeline_list children = {0};
 
 	(void) pipeline;
 	(void) argc;
@@ -256,15 +256,15 @@ action_pipeline_children(struct gcli_path const *path,
 		return GCLI_EX_DATAERR;
 	}
 
-	gitlab_print_pipelines(&children);
-	gitlab_pipelines_free(&children);
+	gcli_print_pipelines(&children);
+	gcli_pipelines_free(&children);
 
 	return GCLI_EX_OK;
 }
 
 static int
 action_pipeline_all(struct gcli_path const *path,
-                    struct gitlab_pipeline *pipeline,
+                    struct gcli_pipeline *pipeline,
                     int *argc, char **argv[])
 {
 	int rc = 0;
@@ -290,7 +290,7 @@ action_pipeline_all(struct gcli_path const *path,
 
 static int
 action_pipeline_open(struct gcli_path const *path,
-                     struct gitlab_pipeline *pipeline,
+                     struct gcli_pipeline *pipeline,
                      int *argc, char **argv[])
 {
 	int rc;
@@ -310,8 +310,8 @@ action_pipeline_open(struct gcli_path const *path,
 
 static struct gcli_cmd_actions const pipeline_actions = {
 	.fetch_item = (gcli_cmd_action_fetcher)gitlab_get_pipeline,
-	.free_item = (gcli_cmd_action_freeer)gitlab_pipeline_free,
-	.item_size = sizeof(struct gitlab_pipeline),
+	.free_item = (gcli_cmd_action_freeer)gcli_pipeline_free,
+	.item_size = sizeof(struct gcli_pipeline),
 
 	.defs = {
 		{
@@ -367,21 +367,21 @@ handle_pipeline_actions(struct gcli_path const *const pipeline_path,
  * *****************************/
 static int
 action_job_status(struct gcli_path const *const path,
-                  struct gitlab_job const *const job,
+                  struct gcli_job const *const job,
                   int *argc, char **argv[])
 {
 	(void) path;
 	(void) argc;
 	(void) argv;
 
-	gitlab_print_job_status(job);
+	gcli_print_job_status(job);
 
 	return GCLI_EX_OK;
 }
 
 static int
 action_job_log(struct gcli_path const *const path,
-               struct gitlab_job const *const job,
+               struct gcli_job const *const job,
                int *argc, char **argv[])
 {
 	int rc = 0;
@@ -403,7 +403,7 @@ action_job_log(struct gcli_path const *const path,
 
 static int
 action_job_cancel(struct gcli_path const *const path,
-                  struct gitlab_job const *const job,
+                  struct gcli_job const *const job,
                   int *argc, char **argv[])
 {
 	int rc = 0;
@@ -425,7 +425,7 @@ action_job_cancel(struct gcli_path const *const path,
 
 static int
 action_job_retry(struct gcli_path const *const path,
-                 struct gitlab_job const *const job,
+                 struct gcli_job const *const job,
                  int *argc, char **argv[])
 {
 	int rc = 0;
@@ -447,7 +447,7 @@ action_job_retry(struct gcli_path const *const path,
 
 static int
 action_job_artifacts(struct gcli_path const *const path,
-                     struct gitlab_job const *const job,
+                     struct gcli_job const *const job,
                      int *argc, char **argv[])
 {
 	int rc = 0;
@@ -480,7 +480,7 @@ action_job_artifacts(struct gcli_path const *const path,
 
 static int
 action_job_open(struct gcli_path const *path,
-                struct gitlab_job *job,
+                struct gcli_job *job,
                 int *argc, char **argv[])
 {
 	int rc;
@@ -500,8 +500,8 @@ action_job_open(struct gcli_path const *path,
 
 static struct gcli_cmd_actions job_actions = {
 	.fetch_item = (gcli_cmd_action_fetcher)gitlab_get_job,
-	.free_item = (gcli_cmd_action_freeer)gitlab_free_job,
-	.item_size = sizeof(struct gitlab_job),
+	.free_item = (gcli_cmd_action_freeer)gcli_free_job,
+	.item_size = sizeof(struct gcli_job),
 
 	.defs = {
 		{
@@ -561,8 +561,8 @@ handle_job_actions(struct gcli_path const *const job_path,
 static int
 list_pipelines(struct gcli_path const *const path, int max, bool const all)
 {
-	struct gitlab_pipeline_list list = {0};
-	struct gitlab_pipelines_fetch_details details = {0};
+	struct gcli_pipeline_list list = {0};
+	struct gcli_pipelines_fetch_details details = {0};
 	int rc = 0;
 
 	details.max = max;
@@ -589,8 +589,8 @@ list_pipelines(struct gcli_path const *const path, int max, bool const all)
 		return GCLI_EX_DATAERR;
 	}
 
-	gitlab_print_pipelines(&list);
-	gitlab_pipelines_free(&list);
+	gcli_print_pipelines(&list);
+	gcli_pipelines_free(&list);
 
 	free(details.ref);
 	details.ref = NULL;

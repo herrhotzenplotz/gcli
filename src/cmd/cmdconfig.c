@@ -771,7 +771,7 @@ gcli_config_get_monitor_delay(struct gcli_ctx *ctx)
 
 	/* check if we have it cached already or set otherwise */
 	cfg = ctx_config(ctx);
-	if (cfg->monitor_delay)
+	if (cfg->monitor_delay > 0)
 		return cfg->monitor_delay;
 
 	/* look for and parse a possibly existing configuration key */
@@ -780,7 +780,7 @@ gcli_config_get_monitor_delay(struct gcli_ctx *ctx)
 		return default_delay;
 
 	rc = strtol(delaystr, &endptr, 10);
-	if (rc < 0 || endptr != delaystr + strlen(delaystr)) {
+	if (rc <= 0 || endptr != delaystr + strlen(delaystr)) {
 		gcli_warnx(ctx, "bad monitor delay: %s", delaystr);
 		return default_delay;
 	}

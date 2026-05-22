@@ -54,4 +54,8 @@ int github_get_check_runs(struct gcli_ctx *ctx,
                           int count,
                           struct gcli_job_list *out);
 
+int github_get_check(struct gcli_ctx *ctx,
+                     struct gcli_path const *job_path,
+                     struct gcli_job *const out);
+
 #endif /* GITHUB_CHECKS_H */

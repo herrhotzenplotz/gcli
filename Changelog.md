@@ -60,6 +60,8 @@ This changelog does not follow semantic versioning.
 
 ### Removed
 
+- The `ci` subcommand has been removed because it was undocumented
+  and not well maintained.
 
 ## 2.11.0 (21-Mar-2026)
 

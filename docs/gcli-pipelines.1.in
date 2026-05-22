@@ -3,7 +3,7 @@
 .Os @PACKAGE_STRING@
 .Sh NAME
 .Nm gcli\ pipelines
-.Nd Inspect and manage GitLab Pipelines
+.Nd Inspect and manage CI Services
 .Sh SYNOPSIS
 .Nm
 .Op Ar forge-path
@@ -22,9 +22,9 @@
 .Sh DESCRIPTION
 .Nm
 is used to display data about the Continuous Integration (CI) service
-of GitLab. You can list pipelines of a given repository, list jobs in
-a given pipeline or perform actions such as restarting jobs or
-fetching their logs.
+of git forges. You can list pipelines of a given repository, list
+jobs in a given pipeline or perform actions such as restarting jobs
+or fetching their logs.
 .Pp
 If you have set
 .Sq restrict-pipelines-to-branch
@@ -106,6 +106,15 @@ Print a list of jobs running in the pipeline.
 Print a list of child pipelines triggered by this pipeline.
 .It Cm open
 Opens the pipeline in a web browser.
+.It Cm monitor
+Continuously monitor the jobs of this pipeline.
+This presents a view of the
+.Cm jobs
+list that is refreshed live.
+The action exits once the pipeline has completed.
+This action requires an
+.Xr xterm 1
+compatible terminal emulator because control characters are printed to stdout.
 .El
 .Sh EXAMPLES
 Print a list of the last 30 pipelines in the current project:
@@ -151,7 +160,15 @@ $ gcli pipelines gl:herrhotzenplotz/gcli
 .An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
 and contributors.
 .Sh BUGS
-None currently known.
+.Bl -bullet
+.It
+The interface has been modelled after the GitLab CI service.
+GitHub behaves differently in some cases.
+.It
+The command
+.Cm gcli pipelines -a
+only fetches checks for the HEAD ref on GitHub.
+.El
 .Pp
 Please report bugs via E-Mail to
 .Mt @PACKAGE_BUGREPORT@ .

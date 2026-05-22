@@ -46,6 +46,8 @@
 
 typedef int (*parsefn)(struct gcli_ctx *, struct json_stream *stream,
                        void *list, size_t *listsize);
+typedef int (*arrparsefn)(struct gcli_ctx *, struct json_stream *stream,
+                          void *list_head);
 typedef void (*filterfn)(void *list, size_t *listsize, void const *userdata);
 
 struct gcli_fetch_buffer {
@@ -53,13 +55,22 @@ struct gcli_fetch_buffer {
 	size_t length;
 };
 
-struct gcli_fetch_list_ctx {
-	void *listp;                /* pointer to pointer of start of list */
-	size_t *sizep;              /* pointer to list size */
-	int max;
+enum {
+	GCLI_FL_ARRAYPARSER = (1 << 0), /* if set the parser function is arrparse and expects a list head */
+};
 
-	parsefn parse;              /* json parse routine */
-	filterfn filter;            /* optional filter */
+struct gcli_fetch_list_ctx {
+	void *listp;                 /* pointer to pointer of start of list or pointer to list head */
+	size_t *sizep;               /* pointer to list size */
+	int max;
+	int flags;
+
+	union {
+		parsefn parse;       /* single element parser routine */
+		arrparsefn arrparse; /* array parser routine if GCLI_FL_ARRAYPARSER is set */
+	};
+
+	filterfn filter;             /* optional filter */
 	void const *userdata;
 };
 

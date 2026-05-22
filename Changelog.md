@@ -58,6 +58,20 @@ This changelog does not follow semantic versioning.
 
 ### Changed
 
+- The pipelines subcommand now supports GitHub actions
+
+  The old ci subcommand that was undocumented and not well
+  maintained has been removed.
+
+  The pipeline subcommand now additionally gained a `monitor`
+  action that allows continuous monitoring of a running CI
+  check suite / pipeline.
+
+  This new action requires an Xterm-compatible terminal emulator
+  to function correctly.
+
+  Suggested by: Sergey Bronnikov <https://github.com/ligurio> 
+
 ### Removed
 
 - The `ci` subcommand has been removed because it was undocumented

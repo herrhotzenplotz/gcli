@@ -45,4 +45,9 @@ int github_get_check_suites(struct gcli_ctx *ctx,
                             struct gcli_pipelines_fetch_details const *details,
                             struct gcli_pipeline_list *out);
 
+int github_get_check_runs(struct gcli_ctx *ctx,
+                          struct gcli_path const *pipeline_path,
+                          int count,
+                          struct gcli_job_list *out);
+
 #endif /* GITHUB_CHECKS_H */

@@ -42,6 +42,47 @@
 #include <pdjson.h>
 
 int
+github_checksuite_make_url(struct gcli_ctx *ctx,
+                           struct gcli_path const *const path,
+                           char **url,
+                           char const *const fmt, ...)
+{
+	int rc = 0;
+	char *suffix = NULL;
+	va_list vp;
+
+	va_start(vp, fmt);
+	suffix = gcli_vasprintf(fmt, vp);
+	va_end(vp);
+
+	switch (path->kind) {
+	case GCLI_PATH_DEFAULT: {
+		char *e_owner, *e_repo;
+
+		e_owner = gcli_urlencode(path->as_default.owner);
+		e_repo = gcli_urlencode(path->as_default.repo);
+
+		*url = gcli_asprintf("%s/repos/%s/%s/check-suites/%"PRIid"%s",
+		                     gcli_get_apibase(ctx), e_owner, e_repo,
+		                     path->as_default.id, suffix);
+
+		gcli_clear_ptr(&e_owner);
+		gcli_clear_ptr(&e_repo);
+	} break;
+	case GCLI_PATH_URL: {
+		*url = gcli_asprintf("%s%s", path->as_url, suffix);
+	} break;
+	default: {
+		rc = gcli_error(ctx, "unsupported path type for github checksuite");
+	} break;
+	}
+
+	gcli_clear_ptr(&suffix);
+
+	return rc;
+}
+
+int
 github_get_check_suites(struct gcli_ctx *ctx,
                         struct gcli_path const *const path,
                         struct gcli_pipelines_fetch_details const *details,
@@ -81,8 +122,34 @@ github_get_check_suites(struct gcli_ctx *ctx,
 	return rc;
 }
 
-	/* TODO: don't leak list on error */
-	gcli_clear_ptr(&next_url);
+int
+github_get_check_runs(struct gcli_ctx *ctx,
+                      struct gcli_path const *pipeline_path,
+                      int max,
+                      struct gcli_job_list *out)
+{
+	char *url = NULL;
+	int rc = 0;
+	struct gcli_fetch_list_ctx flctx = {0};
+	struct gcli_path norm_path = {0};
+
+	assert(out);
+
+	rc = github_path_normalise(ctx, pipeline_path, &norm_path);
+	if (rc < 0)
+		return rc;
+
+	rc = github_checksuite_make_url(ctx, &norm_path, &url, "/check-runs");
+	if (rc < 0)
+		return rc;
+
+	flctx.listp = out;
+	flctx.sizep = &out->jobs_size;
+	flctx.max = max;
+	flctx.flags = GCLI_FL_ARRAYPARSER;
+	flctx.arrparse = (arrparsefn)parse_github_check_runs;
+
+	rc = gcli_fetch_list(ctx, url, &flctx);
 
 	gcli_path_free(&norm_path);
 

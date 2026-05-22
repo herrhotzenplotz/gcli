@@ -38,6 +38,7 @@ gcli_pipeline_free(struct gcli_pipeline *pipeline)
 	gcli_clear_ptr(&pipeline->ref);
 	gcli_clear_ptr(&pipeline->sha);
 	gcli_clear_ptr(&pipeline->source);
+	gcli_clear_ptr(&pipeline->name);
 	gcli_clear_ptr(&pipeline->web_url);
 }
 

@@ -345,11 +345,6 @@ Not all features that are available from the web version are available in
 However, it is a non-goal of the project to provide all this
 functionality.
 .Sh BUGS
-There is an undocumented
-.Cm ci
-subcommand available for GitHub CI services. The subcommand is
-undocumented as it is not well tested and likely subject to changes.
-.Pp
 Please report bugs via E-Mail to
 .Mt @PACKAGE_BUGREPORT@ .
 .Pp

@@ -54,7 +54,7 @@ int github_print_pull_patch(struct gcli_ctx *ctx, FILE *stream, char const *owne
                             char const *reponame, gcli_id pr_number);
 
 int github_pull_get_checks(struct gcli_ctx *ctx, struct gcli_path const *path,
-                           struct gcli_pull_checks_list *out);
+                           struct gcli_pipeline_list *out);
 
 int github_pull_merge(struct gcli_ctx *ctx, struct gcli_path const *path,
                       enum gcli_merge_flags flags);

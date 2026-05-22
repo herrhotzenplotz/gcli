@@ -40,6 +40,7 @@
 
 #include <gcli/diffutil.h>
 #include <gcli/gcli.h>
+#include <gcli/pipelines.h>
 #include <gcli/path.h>
 
 struct gcli_pull_list {
@@ -143,20 +144,6 @@ struct gcli_pull_create_review_details {
 	int review_state;
 };
 
-/** Generic list of checks ran on a pull request
- *
- * NOTE: KEEP THIS ORDER! WE DEPEND ON THE ABI HERE.
- *
- * For github the type of checks is gitlab_check*
- * For gitlab the type of checks is struct gitlab_pipeline*
- *
- * You can cast this type to the list type of either one of them. */
-struct gcli_pull_checks_list {
-	void *checks;
-	size_t checks_size;
-	int forge_type;
-};
-
 /* PR/MR reviews */
 struct gcli_pull_review {
 	gcli_id id;
@@ -208,9 +195,7 @@ int gcli_pull_get_diff(struct gcli_ctx *ctx, FILE *fout,
 
 int gcli_pull_get_checks(struct gcli_ctx *ctx,
                          struct gcli_path const *const path,
-                         struct gcli_pull_checks_list *out);
-
-void gcli_pull_checks_free(struct gcli_pull_checks_list *list);
+                         struct gcli_pipeline_list *out);
 
 int gcli_pull_get_commits(struct gcli_ctx *ctx, struct gcli_path const *path,
                           struct gcli_commit_list *out);

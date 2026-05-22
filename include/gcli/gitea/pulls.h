@@ -65,7 +65,7 @@ int gitea_pull_get_patch(struct gcli_ctx *ctx, FILE *stream,
                          struct gcli_path const *pull_path);
 
 int gitea_pull_get_checks(struct gcli_ctx *ctx, struct gcli_path const *path,
-                          struct gcli_pull_checks_list *out);
+                          struct gcli_pipeline_list *out);
 
 int gitea_pull_set_milestone(struct gcli_ctx *ctx,
                              struct gcli_path const *const pull_path,

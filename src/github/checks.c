@@ -96,6 +96,21 @@ github_checksuite_make_url(struct gcli_ctx *ctx,
 }
 
 int
+github_checkrun_make_url(struct gcli_ctx *ctx,
+                         struct gcli_path const *const path,
+                         char **url, char const *const fmt, ...)
+{
+	int rc = 0;
+	va_list vp;
+
+	va_start(vp, fmt);
+	rc = github_checks_make_url(ctx, "check-runs", path, url, fmt, &vp);
+	va_end(vp);
+
+	return rc;
+}
+
+int
 github_get_check_suites(struct gcli_ctx *ctx,
                         struct gcli_path const *const path,
                         struct gcli_pipelines_fetch_details const *details,

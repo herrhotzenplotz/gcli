@@ -40,8 +40,9 @@
 
 #include <stddef.h>
 
-int github_get_checks(struct gcli_ctx *ctx, struct gcli_path const *repo_path,
-                      struct gcli_pipelines_fetch_details const *details,
-                      struct gcli_pipeline_list *out);
+int github_get_check_suites(struct gcli_ctx *ctx,
+                            struct gcli_path const *repo_path,
+                            struct gcli_pipelines_fetch_details const *details,
+                            struct gcli_pipeline_list *out);
 
 #endif /* GITHUB_CHECKS_H */

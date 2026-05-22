@@ -8,10 +8,9 @@ object of struct gcli_job with
 	 "completed_at" => finished_at as iso8601_time,
 	 "id"           => id as id);
 
-parser github_checks is
+parser github_check_runs is
 object of struct gcli_job_list with
 	("check_runs" => jobs as array of gcli_job use parse_github_check);
-
 
 parser github_checksuite is
 object of struct gcli_pipeline with

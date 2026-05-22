@@ -34,6 +34,7 @@ void
 gcli_pipeline_free(struct gcli_pipeline *pipeline)
 {
 	gcli_clear_ptr(&pipeline->status);
+	gcli_clear_ptr(&pipeline->conclusion);
 	gcli_clear_ptr(&pipeline->ref);
 	gcli_clear_ptr(&pipeline->sha);
 	gcli_clear_ptr(&pipeline->source);
@@ -55,6 +56,7 @@ void
 gcli_free_job(struct gcli_job *const job)
 {
 	gcli_clear_ptr(&job->status);
+	gcli_clear_ptr(&job->conclusion);
 	gcli_clear_ptr(&job->stage);
 	gcli_clear_ptr(&job->name);
 	gcli_clear_ptr(&job->ref);

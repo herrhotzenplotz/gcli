@@ -39,6 +39,7 @@
 struct gcli_pipeline {
 	gcli_id id;
 	char *status;
+	char *conclusion;
 	time_t created_at;
 	time_t updated_at;
 	char *ref;
@@ -56,6 +57,7 @@ struct gcli_pipeline_list {
 struct gcli_job {
 	gcli_id id;
 	char *status;
+	char *conclusion;
 	char *stage;
 	char *name;
 	char *ref;

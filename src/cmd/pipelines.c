@@ -154,11 +154,17 @@ void
 gcli_print_job_status(struct gcli_job const *const job)
 {
 	gcli_dict printer;
+	struct gcli_forge_descriptor const *fd;
 
+	fd = gcli_forge(g_clictx);
 	printer = gcli_dict_begin();
 
 	gcli_dict_add(printer,           "ID", 0, 0, "%"PRIid, job->id);
 	gcli_dict_add_string(printer,    "STATUS", GCLI_TBLCOL_STATECOLOURED, 0, job->status);
+
+	if ((fd->pipeline_quirks & GCLI_PIPELINE_QUIRKS_NOCONCLUSION) == 0)
+		gcli_dict_add_string(printer, "CONCLUSION", GCLI_TBLCOL_STATECOLOURED, 0, job->conclusion);
+
 	gcli_dict_add_string(printer,    "STAGE", 0, 0, job->stage);
 	gcli_dict_add_string(printer,    "NAME", GCLI_TBLCOL_BOLD, 0, job->name);
 	gcli_dict_add_string(printer,    "REF", GCLI_TBLCOL_COLOUREXPL, GCLI_COLOR_YELLOW, job->ref);
@@ -177,12 +183,18 @@ void
 gcli_print_pipeline(struct gcli_pipeline const *const pipeline)
 {
 	gcli_dict printer;
+	struct gcli_forge_descriptor const *fd;
 
+	fd = gcli_forge(g_clictx);
 	printer = gcli_dict_begin();
 
 	gcli_dict_add(printer,           "ID", 0, 0, "%"PRIid, pipeline->id);
 	gcli_dict_add_string(printer,    "NAME", 0, 0, pipeline->name ? pipeline->name : "N/A");
 	gcli_dict_add_string(printer,    "STATUS", GCLI_TBLCOL_STATECOLOURED, 0, pipeline->status);
+
+	if ((fd->pipeline_quirks & GCLI_PIPELINE_QUIRKS_NOCONCLUSION) == 0)
+		gcli_dict_add_string(printer, "CONCLUSION", GCLI_TBLCOL_STATECOLOURED, 0, pipeline->conclusion);
+
 	gcli_dict_add_timestamp(printer, "CREATED", 0, 0, pipeline->created_at);
 	gcli_dict_add_timestamp(printer, "UPDATED", 0, 0, pipeline->updated_at);
 	gcli_dict_add_string(printer,    "REF", GCLI_TBLCOL_COLOUREXPL, GCLI_COLOR_YELLOW, pipeline->ref);

@@ -68,6 +68,7 @@ usage(void)
 	fprintf(stderr, "  children                 Print the list of child pipelines\n");
 	fprintf(stderr, "  jobs                     Print the list of jobs of this pipeline\n");
 	fprintf(stderr, "  open                     Open the pipeline in a web browser\n");
+	fprintf(stderr, "  monitor                  Continuously monitor this pipeline's jobs.\n");
 	fprintf(stderr, "\n");
 	fprintf(stderr, "JOB ACTIONS:\n");
 	fprintf(stderr, "  status                   Display status information\n");
@@ -236,6 +237,24 @@ action_pipeline_status(struct gcli_path const *path,
 }
 
 static int
+action_pipeline_monitor(struct gcli_path const *path,
+                        struct gcli_pipeline *pipeline,
+                        int *argc, char **argv[])
+{
+	int rc = 0;
+
+	(void) pipeline;
+	(void) argc;
+	(void) argv;
+
+	rc = gcli_cmd_watch_pipeline(path);
+	if (rc < 0)
+		return GCLI_EX_DATAERR;
+
+	return GCLI_EX_OK;
+}
+
+static int
 action_pipeline_jobs(struct gcli_path const *path,
                      struct gcli_pipeline *pipeline,
                      int *argc, char **argv[])
@@ -359,6 +378,11 @@ static struct gcli_cmd_actions const pipeline_actions = {
 			.name = "jobs",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler)action_pipeline_jobs
+		},
+		{
+			.name = "monitor",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler)action_pipeline_monitor
 		},
 		{
 			.name = "children",

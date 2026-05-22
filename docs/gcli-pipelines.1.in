@@ -106,7 +106,7 @@ Print a list of jobs running in the pipeline.
 Print a list of child pipelines triggered by this pipeline.
 .It Cm open
 Opens the pipeline in a web browser.
-.It Cm monitor
+.It Cm monitor Op Fl d Ar secs
 Continuously monitor the jobs of this pipeline.
 This presents a view of the
 .Cm jobs
@@ -116,6 +116,7 @@ The action exits once the pipeline has completed.
 This action requires an
 .Xr xterm 1
 compatible terminal emulator because control characters are printed to stdout.
+.Pp
 The refresh interval can be configured via the
 .Dq monitor-delay
 option
@@ -124,6 +125,10 @@ in the
 section of the
 .Xr gcli 5
 config file.
+Alternatively you can override the delay by passing it via the
+.Fl d
+flag.
+The command line flag takes prescendence over the config file.
 .El
 .Sh EXAMPLES
 Print a list of the last 30 pipelines in the current project:

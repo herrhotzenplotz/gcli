@@ -66,15 +66,16 @@ finished(struct gcli_pipeline const *const p)
 }
 
 int
-gcli_cmd_watch_pipeline(struct gcli_path const *const path)
+gcli_cmd_watch_pipeline(struct gcli_path const *const path, int delay)
 {
-	int rc = 0, delay = 0;
+	int rc = 0;
 	struct gcli_pipeline pipeline = {0};
 	struct gcli_job_list jobs = {0};
 	size_t lines = 0, room_needed;
 	bool done = false;
 
-	delay = gcli_config_get_monitor_delay(g_clictx);
+	if (delay <= 0)
+		delay = gcli_config_get_monitor_delay(g_clictx);
 
 	for (;;) {
 		/* fetch the job list */

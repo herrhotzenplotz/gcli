@@ -340,6 +340,7 @@ PGEN_SRCS= \
 TEMPLATE_HEADERS=	${TEMPLATES:.t=.h}
 TEMPLATE_SRCS=		${TEMPLATES:.t=.c}
 
+.PRECIOUS: Makefile
 Makefile: @SRCDIR@/configure @SRCDIR@/Makefile.in
 	@echo "Reconfiguring Makefile"
 	env CC="${CC}" YACC="${YACC}" LEX="${LEX}" RM="${RM}" RANLIB="${RANLIB}" \

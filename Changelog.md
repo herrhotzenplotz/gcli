@@ -6,6 +6,16 @@ This changelog does not follow semantic versioning.
 
 ### Fixed
 
+### Added
+
+### Changed
+
+### Removed
+
+## 2.12.0 (30-May-2026)
+
+### Fixed
+
 - issue_set_milestone has been fixed for GitLab
 
   This unbreaks the `milestone` action in the issues subcommand for

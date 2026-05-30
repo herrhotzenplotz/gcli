@@ -112,12 +112,9 @@ Tested Compilers so far:
 
 Please refer to the manual pages that come with gcli.
 You may want to start at `gcli(1)`.
-For further questions refer to the issues on Github and Gitlab.
+You can also post questions on the mailing list at [https://lists.sr.ht/~herrhotzenplotz/gcli-discuss](https://lists.sr.ht/~herrhotzenplotz/gcli-discuss).
 
 Also, there's an IRC channel #gcli on [Libera.Chat](https://libera.chat/).
-
-Alternatively you may also use the mailing list at
-[https://lists.sr.ht/~herrhotzenplotz/gcli-discuss](https://lists.sr.ht/~herrhotzenplotz/gcli-discuss).
 
 ## Bugs and contributions
 

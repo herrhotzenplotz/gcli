@@ -106,6 +106,7 @@ Tested Compilers so far:
 - GCC (various versions)
 - Oracle DeveloperStudio 12.6
 - IBM XL C/C++ V16.1.1 (Community Edition)
+- Kefir C 0.5.0
 
 ## Support / Community
 

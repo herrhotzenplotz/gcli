@@ -188,6 +188,23 @@ If needed you may have to set the values of
 This is the case on undetected Windows systems.
 It should be possible to build gcli under cygwin this way.
 
+## Compilers
+
+### IBM XL C
+
+This compiler has previously ICEd on gcli's codebase, I have worked around these compiler bugs.
+Should you encounter any issues please report them.
+
+### Kefir
+
+This compiler manages to compile gcli on at least FreeBSD with:
+
+	$ env \
+		CC=kefir \
+		CFLAGS='-include runetype.h -D__RUNETYPE_INTERNAL' \
+		CFLAGS_FOR_BUILD='-include runetype.h -D__RUNETYPE_INTERNAL' \
+		../configure --debug
+
 ## Tests
 
 The test suite currently depends on Perl 5.

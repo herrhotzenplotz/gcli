@@ -63,6 +63,8 @@ compiler_type() {
 		echo "xlc"
 	elif ${1} -V 2>&1 | grep 'Studio' > /dev/null; then
 		echo "sunstudio"
+	elif ${1} --compiler-info 2>&1 | grep -i kefir > /dev/null; then
+		echo "kefir"
 	else
 		echo "unknown"
 	fi
@@ -104,7 +106,13 @@ compiler_target() {
 				echo "unknown-unknown-unknown"
 			fi
 			;;
-		*)
+		kefir)
+			(
+				eval $($cc --environment-info 2>&1)
+				[ -n "${KEFIR_TARGET}" ] && echo ${KEFIR_TARGET} || echo "unknown-unknown-unknown"
+			)
+			;;
+        	*)
 			echo "unknown-unknown-unknown"
 			;;
 	esac | normalise_compiler_target

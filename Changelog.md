@@ -2,7 +2,7 @@
 
 This changelog does not follow semantic versioning.
 
-## UNRELEASED
+## 2.12.0 (30-May-2026)
 
 ### Fixed
 
@@ -70,7 +70,7 @@ This changelog does not follow semantic versioning.
   This new action requires an Xterm-compatible terminal emulator
   to function correctly.
 
-  Suggested by: Sergey Bronnikov <https://github.com/ligurio> 
+  Suggested by: Sergey Bronnikov <https://github.com/ligurio>
 
 ### Removed
 

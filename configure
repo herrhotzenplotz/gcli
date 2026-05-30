@@ -17,8 +17,8 @@
 
 CONFIGURE_CMD_ARGS="${*}"
 
-PACKAGE_VERSION="2.12.0-devel"
-PACKAGE_DATE="UNRELEASED"
+PACKAGE_VERSION="2.12.0"
+PACKAGE_DATE="30-May-2026"
 PACKAGE_STRING="gcli $PACKAGE_VERSION"
 PACKAGE_BUGREPORT="https://lists.sr.ht/~herrhotzenplotz/gcli-discuss"
 PACKAGE_URL="https://sr.ht/~herrhotzenplotz/gcli"

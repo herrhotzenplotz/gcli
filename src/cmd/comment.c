@@ -271,24 +271,27 @@ subcommand_comment(int argc, char *argv[])
 			break;
 		case 'p':
 			sctx.opts.target_type = PR_COMMENT;
-			goto parse_target_id;
+
+			rc = gcli_cmd_parse_id(optarg, &sctx.opts.target.as_default.id);
+			if (rc < 0)
+				err(1, "gcli: error: cannot parse pull number");
+
+			break;
 		case 'i':
 			sctx.opts.target_type = ISSUE_COMMENT;
-		parse_target_id: {
-				char *endptr;
-				sctx.opts.target.as_default.id = strtoul(optarg, &endptr, 10);
-				if (endptr != optarg + strlen(optarg))
-					err(1, "gcli: error: Cannot parse issue/PR number");
-			} break;
+
+			rc = gcli_cmd_parse_id(optarg, &sctx.opts.target.as_default.id);
+			if (rc < 0)
+				err(1, "gcli: error: cannot parse issue number");
+
+			break;
 		case 'y':
 			always_yes = true;
 			break;
-		case 'R': {
-			char *endptr = NULL;
-			reply_to_id = strtoul(optarg, &endptr, 10);
-			if (endptr != optarg + strlen(optarg))
+		case 'R':
+			if (gcli_cmd_parse_id(optarg, &reply_to_id) < 0)
 				err(1, "gcli: error: cannot parse comment id");
-		} break;
+			break;
 		default:
 			usage();
 			return EXIT_FAILURE;

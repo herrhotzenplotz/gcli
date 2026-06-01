@@ -136,15 +136,10 @@ subcommand_attachments(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "+i:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'i': {
-			char *endptr;
-
 			iflag_seen = true;
-			iflag = strtoull(optarg, &endptr, 10);
 
-			if (optarg + strlen(optarg) != endptr) {
-				fprintf(stderr, "gcli: bad attachment id »%s«\n", optarg);
-				return EXIT_FAILURE;
-			}
+			if (gcli_cmd_parse_id(optarg, &iflag) < 0)
+				err(1, "gcli: error: cannot parse attachment id");
 		} break;
 		default:
 			usage();

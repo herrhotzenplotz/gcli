@@ -190,8 +190,12 @@ sub run_gcli {
 sub get_request {
 	my ($srv, $i) = @_;
 
+	my $fname = $srv->{'srv_out_file'} . ".$i";
+
 	# Open server output file
-	open my $f, '<', $srv->{'srv_out_file'} . ".$i";
+	return bless {} if not -e $fname;
+
+	open my $f, '<', $fname;
 
 	# Parse the request line
 	my ($method, $path, $version) = split ' ', <$f>;

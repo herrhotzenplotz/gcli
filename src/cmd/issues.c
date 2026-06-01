@@ -499,12 +499,8 @@ subcommand_issues(int argc, char *argv[])
 			path.as_default.repo = optarg;
 			break;
 		case 'i': {
-			path.as_default.id = strtol(optarg, &endptr, 10);
-			if (endptr != (optarg + strlen(optarg)))
+			if (gcli_cmd_parse_id(optarg, &path.as_default.id) < 0)
 				err(1, "gcli: error: cannot parse issue number");
-
-			if (path.as_default.id == 0)
-				errx(1, "gcli: error: issue number is out of range");
 		} break;
 		case 'n': {
 			n = strtol(optarg, &endptr, 10);

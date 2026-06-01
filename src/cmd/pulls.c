@@ -792,12 +792,8 @@ subcommand_pulls(int argc, char *argv[])
 			pull.as_default.repo = optarg;
 			break;
 		case 'i': {
-			pull.as_default.id = strtoul(optarg, &endptr, 10);
-			if (endptr != (optarg + strlen(optarg)))
-				err(1, "gcli: error: cannot parse pr number »%s«", optarg);
-
-			if (pull.as_default.id == 0)
-				errx(1, "gcli: error: pr number is out of range");
+			if (gcli_cmd_parse_id(optarg, &pull.as_default.id) < 0)
+				err(1, "gcli: error: cannot parse pr number");
 		} break;
 		case 'n': {
 			n = strtoul(optarg, &endptr, 10);

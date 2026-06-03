@@ -34,9 +34,10 @@
 #include <gcli/port/sv.h>
 
 #include <assert.h>
-#include <string.h>
-#include <stdlib.h>
+#include <errno.h>
 #include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
 
 int
 get_int_(struct gcli_ctx *ctx, json_stream *const input, int *out, char const *where)
@@ -311,10 +312,17 @@ get_parse_int_(struct gcli_ctx *ctx, json_stream *const input, long *out,
 	if (rc < 0)
 		return rc;
 
+	errno = 0;
 	*out = strtol(string, &endptr, 10);
 	if (endptr != string + strlen(string))
 		return gcli_error(ctx, "%s: cannot parse %s as integer", function,
 		                  string);
+
+	if (errno == ERANGE)
+		return gcli_error(ctx,
+		                  "%s: integer overflow during conversion, "
+		                  "potentially bug in gcli",
+		                  function);
 
 	return 0;
 }

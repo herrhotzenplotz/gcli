@@ -150,8 +150,7 @@ add_sshkey(int argc, char *argv[])
 static int
 delete_sshkey(int argc, char *argv[])
 {
-	int id;
-	char *endptr;
+	gcli_id id;
 
 	/* skip 'delete' keyword */
 	--argc; ++argv;
@@ -162,10 +161,7 @@ delete_sshkey(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	/* parse the id */
-	id = strtol(argv[0], &endptr, 10);
-
-	if (endptr != argv[0] + strlen(argv[0])) {
+	if (gcli_cmd_parse_id(argv[0], &id) < 0) {
 		fprintf(stderr, "gcli: error: could not parse ID of SSH key to delete\n");
 		return EXIT_FAILURE;
 	}

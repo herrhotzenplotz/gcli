@@ -702,9 +702,7 @@ subcommand_pipelines(int argc, char *argv[])
 			}
 		} break;
 		case 'p': {
-			char *endptr = NULL;
-			path.as_default.id = strtoul(optarg, &endptr, 10);
-			if (endptr != (optarg + strlen(optarg))) {
+			if (gcli_cmd_parse_id(optarg, &path.as_default.id) < 0) {
 				fprintf(stderr, "gcli: error: cannot parse argument to -p\n");
 				return EXIT_FAILURE;
 			}
@@ -712,9 +710,7 @@ subcommand_pipelines(int argc, char *argv[])
 			pflag = 1;
 		} break;
 		case 'j': {
-			char *endptr = NULL;
-			path.as_default.id = strtoul(optarg, &endptr, 10);
-			if (endptr != (optarg + strlen(optarg))) {
+			if (gcli_cmd_parse_id(optarg, &path.as_default.id) < 0) {
 				fprintf(stderr, "gcli: error: cannot parse argument to -j\n");
 				return EXIT_FAILURE;
 			}

@@ -760,8 +760,8 @@ action_milestone(struct gcli_path const *const path,
                  int *argc, char ***argv)
 {
 	char const *milestone_str;
-	char *endptr;
-	int milestone, rc;
+	gcli_id milestone;
+	int rc;
 
 	(void) issue;
 
@@ -794,10 +794,7 @@ action_milestone(struct gcli_path const *const path,
 	}
 
 	/* It is a milestone ID. Parse it. */
-	milestone = strtoul(milestone_str, &endptr, 10);
-
-	/* Check successful for parse */
-	if (endptr != milestone_str + strlen(milestone_str)) {
+	if (gcli_cmd_parse_id(milestone_str, &milestone) < 0) {
 		fprintf(stderr, "gcli: error: could not parse milestone id\n");
 		return GCLI_EX_USAGE;
 	}

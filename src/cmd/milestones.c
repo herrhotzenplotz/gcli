@@ -453,10 +453,8 @@ subcommand_milestones(int argc, char *argv[])
 				errx(1, "gcli: error: cannot parse milestone count");
 		} break;
 		case 'i': {
-			char *endptr;
-			path.as_default.id = strtoul(optarg, &endptr, 10);
-			if (endptr != optarg + strlen(optarg))
-				errx(1, "gcli: error: cannot parse milestone id");
+			if (gcli_cmd_parse_id(optarg, &path.as_default.id) < 0)
+				err(1, "gcli: error: cannot parse milestone id");
 		} break;
 		default: {
 			usage();

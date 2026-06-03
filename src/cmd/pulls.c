@@ -1175,12 +1175,10 @@ action_milestone(struct gcli_path const *const path, struct gcli_pull *pull,
 		}
 
 	} else {
-		int milestone_id = 0;
-		char *endptr;
+		gcli_id milestone_id;
 		int rc = 0;
 
-		milestone_id = strtoul(arg, &endptr, 10);
-		if (endptr != arg + strlen(arg)) {
+		if (gcli_cmd_parse_id(arg, &milestone_id) < 0) {
 			fprintf(stderr, "gcli: error: cannot parse milestone id »%s«\n",
 			        arg);
 

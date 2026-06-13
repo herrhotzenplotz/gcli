@@ -541,3 +541,21 @@ gcli_cmd_parse_int(char const *const text, int *const out)
 
 	return 0;
 }
+
+int
+gcli_cmd_parse_count(char const *const text, int *const out)
+{
+	int rc = 0;
+
+	rc = gcli_cmd_parse_int(text, out);
+	if (rc < 0)
+		return rc;
+
+	/* -1 is usually allowed for 'everything', exactly zero is .. silly. */
+	if (*out < -1 || *out == 0) {
+		errno = ERANGE;
+		return -1;
+	}
+
+	return 0;
+}

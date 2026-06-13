@@ -397,15 +397,9 @@ subcommand_labels(int argc, char *argv[])
 			path.as_named.id = optarg;
 			break;
 		case 'n': {
-			char *endptr = NULL;
-
-			count = strtol(optarg, &endptr, 10);
-
-			if (endptr != (optarg + strlen(optarg)))
-				errx(1, "gcli: error: cannot parse label count");
-
-			if (count == 0)
-				errx(1, "gcli: error: number of labels must not be zero");
+			rc = gcli_cmd_parse_count(optarg, &count);
+			if (rc < 0)
+				errx(1, "gcli: error: cannot parse label count parameter");
 		} break;
 		case '?':
 		default:

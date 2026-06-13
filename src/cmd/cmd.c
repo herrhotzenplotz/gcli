@@ -516,3 +516,28 @@ gcli_cmd_parse_id(char const *const text, gcli_id *const out)
 
 	return 0;
 }
+
+int
+gcli_cmd_parse_int(char const *const text, int *const out)
+{
+	char *endptr = NULL;
+	long n = 0;
+
+	assert(out);
+	assert(text);
+
+	n = strtol(text, &endptr, 10);
+	if (endptr && text + strlen(text) != endptr)
+		return -1;
+
+	/* Check for over/underflow and possible truncation when converting
+	 * to int. */
+	if (n == LONG_MIN || n == LONG_MAX || n > INT_MAX || n < INT_MIN) {
+		errno = ERANGE;
+		return -1;
+	}
+
+	*out = (int)n;
+
+	return 0;
+}

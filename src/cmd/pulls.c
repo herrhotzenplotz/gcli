@@ -597,7 +597,7 @@ subcommand_pull_create(int argc, char *argv[])
 	struct gcli_submit_pull_options opts   = {0};
 	bool always_yes = 0;
 
-	const struct option options[] = {
+	struct option const options[] = {
 		{ .name = "from",
 		  .has_arg = required_argument,
 		  .flag = NULL,

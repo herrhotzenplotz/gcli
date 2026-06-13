@@ -144,7 +144,7 @@ gcli_resetbold(void)
 		return "\033[22m";
 }
 
-static const struct { char const *name; int code; }
+static struct { char const *name; int code; } const
 	state_colour_table[] =
 {
 	{ .name = "open",              .code = GCLI_COLOR_GREEN   },

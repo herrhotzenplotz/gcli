@@ -135,7 +135,7 @@ subcommand_labels_create(int argc, char *argv[])
 	struct gcli_label label = {0};
 	struct gcli_path repo_path = {0};
 
-	const struct option options[] = {
+	struct option const options[] = {
 		{.name = "repo",        .has_arg = required_argument, .val = 'r'},
 		{.name = "owner",       .has_arg = required_argument, .val = 'o'},
 		{.name = "name",        .has_arg = required_argument, .val = 'n'},
@@ -371,7 +371,7 @@ subcommand_labels(int argc, char *argv[])
 
 	parse_forge_path_arg(&argc, &argv, &path);
 
-	const struct option options[] = {
+	struct option const options[] = {
 		{.name = "repo",  .has_arg = required_argument, .flag = NULL, .val = 'r'},
 		{.name = "owner", .has_arg = required_argument, .flag = NULL, .val = 'o'},
 		{.name = "name",  .has_arg = required_argument, .flag = NULL, .val = 'i'},

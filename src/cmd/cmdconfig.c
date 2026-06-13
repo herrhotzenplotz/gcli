@@ -551,7 +551,7 @@ gcli_config_parse_args(struct gcli_ctx *ctx, int *argc, char ***argv)
 	struct gcli_config *cfg = ctx_config(ctx);
 
 	int ch;
-	const struct option options[] = {
+	struct option const options[] = {
 		{ .name    = "account",
 		  .has_arg = required_argument,
 		  .flag    = NULL,

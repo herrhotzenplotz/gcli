@@ -96,7 +96,7 @@ subcommand_status(int argc, char *argv[])
 	int count = 30, ch = 0, mark = 0, list = 0;
 	char *endptr = NULL;
 
-	const struct option options[] = {
+	struct option const options[] = {
 		{ .name    = "count",
 		  .has_arg = required_argument,
 		  .flag    = NULL,

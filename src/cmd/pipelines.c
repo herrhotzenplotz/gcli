@@ -675,7 +675,7 @@ subcommand_pipelines(int argc, char *argv[])
 	parse_forge_path_arg(&argc, &argv, &path);
 
 	/* Parse options */
-	const struct option options[] = {
+	struct option const options[] = {
 		{.name = "repo",     .has_arg = required_argument, .flag = NULL, .val = 'r'},
 		{.name = "owner",    .has_arg = required_argument, .flag = NULL, .val = 'o'},
 		{.name = "count",    .has_arg = required_argument, .flag = NULL, .val = 'c'},

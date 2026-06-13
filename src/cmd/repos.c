@@ -137,7 +137,7 @@ subcommand_repos_create(int argc, char *argv[])
 	struct gcli_repo_create_options create_options = {0};
 	struct gcli_repo repo = {0};
 
-	const struct option options[] = {
+	struct option const options[] = {
 		{ .name    = "repo",
 		  .has_arg = required_argument,
 		  .flag    = NULL,

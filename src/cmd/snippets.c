@@ -236,7 +236,7 @@ subcommand_snippets(int argc, char *argv[])
 		}
 	}
 
-	const struct option options[] = {
+	struct option const options[] = {
 		{ .name    = "count",
 		  .has_arg = required_argument,
 		  .flag    = NULL,

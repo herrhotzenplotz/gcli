@@ -94,7 +94,6 @@ int
 subcommand_status(int argc, char *argv[])
 {
 	int count = 30, ch = 0, mark = 0, list = 0;
-	char *endptr = NULL;
 
 	struct option const options[] = {
 		{ .name    = "count",
@@ -115,9 +114,8 @@ subcommand_status(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "n:ml", options, NULL)) != -1) {
 		switch (ch) {
 		case 'n': {
-			count = strtol(optarg, &endptr, 10);
-			if (endptr != optarg + strlen(optarg))
-				err(1, "gcli: error: cannot parse parameter to -n");
+			if (gcli_cmd_parse_count(optarg, &count) < 0)
+				err(1, "gcli: error: cannot parse count parameter");
 		} break;
 		case 'm': {
 			mark = 1;

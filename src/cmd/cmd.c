@@ -38,6 +38,7 @@
 #include <gcli/port/util.h>
 #include <gcli/repos.h>
 
+#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -491,4 +492,27 @@ gcli_cmd_recall_message_interactive(char **out)
 		if (gcli_yesno("Recall previously saved message?"))
 			*out = gcli_cmd_recall_message();
 	}
+}
+
+int
+gcli_cmd_parse_id(char const *const text, gcli_id *const out)
+{
+	char *endptr = NULL;
+
+	assert(out);
+	assert(text);
+
+	if (*text == '-') {
+		errno = EINVAL;
+		return -1;
+	}
+
+	*out = strtoull(text, &endptr, 10);
+	if (endptr && text + strlen(text) != endptr)
+		return -1;
+
+	if (*out == ULLONG_MAX || *out <= 0)
+		return -1;
+
+	return 0;
 }

@@ -82,4 +82,6 @@ bool gcli_cmd_can_recall_message(void);
 char *gcli_cmd_recall_message(void);
 void gcli_cmd_recall_message_interactive(char **out);
 
+int gcli_cmd_parse_id(char const *text, gcli_id *out);
+
 #endif /* GCLI_CMD_CMD_H */

@@ -248,16 +248,14 @@ action_pipeline_monitor(struct gcli_path const *path,
 
 	/* parse delay if possible */
 	if (*argc >= 3 && strcmp((*argv)[1], "-d") == 0) {
-		delay = strtol((*argv)[2], NULL, 10);
-
 		*argc -= 2;
 		*argv += 2;
 
-		if (delay <= 0) {
+		rc = gcli_cmd_parse_int((*argv)[0], &delay);
+		if (rc < 0 || delay <= 0) {
 			fprintf(stderr, "gcli: error: bad monitoring delay\n");
 			return GCLI_EX_USAGE;
 		}
-
 	}
 
 	rc = gcli_cmd_watch_pipeline(path, delay);

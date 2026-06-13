@@ -761,7 +761,6 @@ gcli_config_get_url_open_program(struct gcli_ctx *ctx)
 int
 gcli_config_get_monitor_delay(struct gcli_ctx *ctx)
 {
-	char *endptr;
 	char const *delaystr;
 	int const default_delay = 5;
 	int rc = 0;
@@ -779,16 +778,13 @@ gcli_config_get_monitor_delay(struct gcli_ctx *ctx)
 	if (!delaystr)
 		return default_delay;
 
-	rc = strtol(delaystr, &endptr, 10);
-	if (rc <= 0 || endptr != delaystr + strlen(delaystr)) {
+	rc = gcli_cmd_parse_int(delaystr, &cfg->monitor_delay);
+	if (rc < 0 || cfg->monitor_delay <= 0) {
 		gcli_warnx(ctx, "bad monitor delay: %s", delaystr);
 		return default_delay;
 	}
 
-	/* cache it for future calls */
-	cfg->monitor_delay = rc;
-
-	return rc;
+	return cfg->monitor_delay;
 }
 
 static char const *const

@@ -667,7 +667,7 @@ list_pipelines(struct gcli_path const *const path, int max, bool const all)
 int
 subcommand_pipelines(int argc, char *argv[])
 {
-	int ch = 0, count = 30, pflag = 0, jflag = 0, aflag = 0;
+	int ch = 0, count = 30, pflag = 0, jflag = 0, aflag = 0, rc = 0;
 	struct gcli_path path = {0};
 
 	parse_forge_path_arg(&argc, &argv, &path);
@@ -692,10 +692,9 @@ subcommand_pipelines(int argc, char *argv[])
 			path.as_default.repo = optarg;
 			break;
 		case 'n': {
-			char *endptr = NULL;
-			count = strtol(optarg, &endptr, 10);
-			if (endptr != (optarg + strlen(optarg))) {
-				fprintf(stderr, "gcli: error: cannot parse argument to -n\n");
+			rc = gcli_cmd_parse_count(optarg, &count);
+			if (rc < 0) {
+				fprintf(stderr, "gcli: error: cannot parse count parameter\n");
 				return EXIT_FAILURE;
 			}
 		} break;

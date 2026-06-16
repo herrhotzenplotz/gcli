@@ -223,9 +223,8 @@ static struct snippet_subcommand {
 int
 subcommand_snippets(int argc, char *argv[])
 {
-	int ch;
+	int ch, rc = 0, count = 30;
 	struct gcli_gitlab_snippet_list list = {0};
-	int count = 30;
 	enum gcli_output_flags flags = 0;
 
 	for (size_t i = 0; i < ARRAY_SIZE(snippet_subcommands); ++i) {
@@ -255,14 +254,9 @@ subcommand_snippets(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "sn:l", options, NULL)) != -1) {
 		switch (ch) {
 		case 'n': {
-			char *endptr = NULL;
-			count = strtol(optarg, &endptr, 10);
-
-			if (endptr != (optarg + strlen(optarg)))
+			rc = gcli_cmd_parse_count(optarg, &count);
+			if (rc < 0)
 				err(1, "gcli: error: cannot parse snippets count");
-
-			if (count == 0)
-				errx(1, "gcli: error: snippets count must not be zero");
 		} break;
 		case 's':
 			flags |= OUTPUT_SORTED;

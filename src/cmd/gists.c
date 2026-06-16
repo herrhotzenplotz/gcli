@@ -356,8 +356,7 @@ subcommand_gists(int argc, char *argv[])
 {
 	char const *user = NULL;
 	enum gcli_output_flags flags = 0;
-	int ch;
-	int count = 30;
+	int ch, count = 30, rc = 0;
 	struct gcli_gist_list gists = {0};
 
 	/* Make sure we are looking at a GitHub forge */
@@ -401,10 +400,9 @@ subcommand_gists(int argc, char *argv[])
 			user = optarg;
 			break;
 		case 'n': {
-			char *endptr = NULL;
-			count        = strtol(optarg, &endptr, 10);
-			if (endptr != (optarg + strlen(optarg)))
-				err(1, "gists: cannot parse gists count");
+			rc = gcli_cmd_parse_count(optarg, &count);
+			if (rc < 0)
+				err(1, "gcli: error: cannot parse gists count");
 		} break;
 		case 's':
 			flags |= OUTPUT_SORTED;

@@ -429,8 +429,7 @@ subcommand_issues(int argc, char *argv[])
 {
 	struct gcli_issue_list list = {0};
 	struct gcli_path path = {0};
-	char *endptr = NULL;
-	int ch = 0, n = 30;
+	int ch = 0, count = 30, rc = 0;
 	struct gcli_issue_fetch_details details = {0};
 	enum gcli_output_flags flags = 0;
 
@@ -503,15 +502,9 @@ subcommand_issues(int argc, char *argv[])
 				err(1, "gcli: error: cannot parse issue number");
 		} break;
 		case 'n': {
-			n = strtol(optarg, &endptr, 10);
-			if (endptr != (optarg + strlen(optarg)))
+			rc = gcli_cmd_parse_count(optarg, &count);
+			if (rc < 0)
 				err(1, "gcli: error: cannot parse issue count");
-
-			if (n < -1)
-				errx(1, "gcli: error: issue count is out of range");
-
-			if (n == 0)
-				errx(1, "gcli: error: issue count must not be zero");
 		} break;
 		case 'a':
 			details.all = true;
@@ -549,10 +542,10 @@ subcommand_issues(int argc, char *argv[])
 		if (argc)
 			details.search_term = gcli_join_with((char const *const *)argv, argc, " ");
 
-		if (gcli_issues_search(g_clictx, &path, &details, n, &list) < 0)
+		if (gcli_issues_search(g_clictx, &path, &details, count, &list) < 0)
 			errx(1, "gcli: error: could not get issues: %s", gcli_get_error(g_clictx));
 
-		gcli_print_issues(flags, &list, n);
+		gcli_print_issues(flags, &list, count);
 
 		gcli_issues_free(&list);
 		return EXIT_SUCCESS;

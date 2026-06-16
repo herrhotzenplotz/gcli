@@ -192,8 +192,7 @@ subcommand_forks(int argc, char *argv[])
 {
 	struct gcli_fork_list forks = {0};
 	struct gcli_path repo_path = {0};
-	int ch = 0;
-	int count = 30;
+	int ch = 0, count = 30, rc = 0;
 	bool always_yes = false;
 	enum gcli_output_flags flags = 0;
 
@@ -243,14 +242,9 @@ subcommand_forks(int argc, char *argv[])
 			always_yes = true;
 			break;
 		case 'n': {
-			char *endptr = NULL;
-			count = strtol(optarg, &endptr, 10);
-
-			if (endptr != (optarg + strlen(optarg)))
+			rc = gcli_cmd_parse_count(optarg, &count);
+			if (rc < 0)
 				err(1, "gcli: error: unable to parse forks count argument");
-
-			if (count == 0)
-				errx(1, "gcli: error: forks count must not be zero");
 		} break;
 		case 's':
 			flags |= OUTPUT_SORTED;

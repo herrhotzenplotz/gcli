@@ -6,6 +6,18 @@ This changelog does not follow semantic versioning.
 
 ### Fixed
 
+- Parsing of integer arguments on the CLI have been fixed
+
+  Specifically, this concerns the following edge cases where:
+
+  - `-n <count>` was truncated due to conversion to long integers
+  - `-i <id>` caused an arithmetic overflow due to converting a negative integer to an unsigned integer
+
+  This only occured when the user provided such illegal values and
+  thus caused the bug.
+
+  Reported-by: Sulev-Madis Silber
+
 ### Added
 
 ### Changed

@@ -406,7 +406,7 @@ subcommand_milestone_create(int argc, char *argv[])
 int
 subcommand_milestones(int argc, char *argv[])
 {
-	int ch, rc, max = 30;
+	int ch, rc, count = 30;
 	struct gcli_path path = {0};
 
 	parse_forge_path_arg(&argc, &argv, &path);
@@ -447,9 +447,8 @@ subcommand_milestones(int argc, char *argv[])
 			path.as_default.repo = optarg;
 		} break;
 		case 'n': {
-			char *endptr;
-			max = strtol(optarg, &endptr, 10);
-			if (endptr != optarg + strlen(optarg))
+			rc = gcli_cmd_parse_count(optarg, &count);
+			if (rc < 0)
 				errx(1, "gcli: error: cannot parse milestone count");
 		} break;
 		case 'i': {
@@ -471,13 +470,13 @@ subcommand_milestones(int argc, char *argv[])
 	if (path.as_default.id == 0) {
 		struct gcli_milestone_list list = {0};
 
-		rc = gcli_get_milestones(g_clictx, &path, max, &list);
+		rc = gcli_get_milestones(g_clictx, &path, count, &list);
 		if (rc < 0) {
 			errx(1, "gcli: error: cannot get list of milestones: %s",
 			     gcli_get_error(g_clictx));
 		}
 
-		gcli_print_milestones(&list, max);
+		gcli_print_milestones(&list, count);
 
 		gcli_free_milestones(&list);
 

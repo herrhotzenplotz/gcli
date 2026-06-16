@@ -294,7 +294,7 @@ find_action(char const *const name)
 int
 subcommand_repos(int argc, char *argv[])
 {
-	int ch, n = 30;
+	int ch, count = 30, rc = 0;
 	char const *owner = NULL;
 	char const *repo = NULL;
 	struct gcli_repo_list repos = {0};
@@ -338,13 +338,9 @@ subcommand_repos(int argc, char *argv[])
 			flags |= OUTPUT_SORTED;
 			break;
 		case 'n': {
-			char *endptr = NULL;
-			n = strtol(optarg, &endptr, 10);
-			if (endptr != (optarg + strlen(optarg)))
+			rc = gcli_cmd_parse_count(optarg, &count);
+			if (rc < 0)
 				err(1, "gcli: error: cannot parse repo count");
-
-			if (n == 0)
-				errx(1, "gcli: error: number of repos must not be zero");
 		} break;
 		case '?':
 		default:
@@ -359,8 +355,6 @@ subcommand_repos(int argc, char *argv[])
 
 	/* List repos of the owner */
 	if (argc == 0) {
-		int rc = 0;
-
 		if (repo) {
 			fprintf(stderr, "gcli: error: no actions specified\n");
 			usage();
@@ -380,13 +374,13 @@ subcommand_repos(int argc, char *argv[])
 			return EXIT_FAILURE;
 		}
 
-		rc = gcli_get_repos(g_clictx, owner, n, &repos);
+		rc = gcli_get_repos(g_clictx, owner, count, &repos);
 		if (rc < 0) {
 			errx(1, "gcli: error: failed to fetch repos: %s",
 			     gcli_get_error(g_clictx));
 		}
 
-		gcli_print_repos(flags, &repos, n);
+		gcli_print_repos(flags, &repos, count);
 		gcli_repos_free(&repos);
 	} else {
 		struct gcli_path path = {

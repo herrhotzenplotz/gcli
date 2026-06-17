@@ -511,8 +511,10 @@ gcli_cmd_parse_id(char const *const text, gcli_id *const out)
 	if (endptr && text + strlen(text) != endptr)
 		return -1;
 
-	if (*out == ULLONG_MAX || *out <= 0)
+	if (*out == ULLONG_MAX || *out <= 0) {
+		errno = EINVAL;
 		return -1;
+	}
 
 	return 0;
 }

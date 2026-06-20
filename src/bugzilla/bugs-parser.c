@@ -177,10 +177,12 @@ parse_bugzilla_attachment_content_only_first(struct gcli_ctx *ctx,
 	if (json_next(stream) != JSON_OBJECT)
 		return gcli_error(ctx, "expected bugzilla attachments dictionary");
 
-	while ((next = json_next(stream)) == JSON_STRING) {
+	if ((next = json_next(stream)) == JSON_STRING) {
 		rc = parse_bugzilla_bug_attachment(ctx, stream, out);
 		if (rc < 0)
 			return rc;
+	} else {
+		return gcli_error(ctx, "no attachment in result");
 	}
 
 	if (next != JSON_OBJECT_END)

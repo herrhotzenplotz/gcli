@@ -18,6 +18,10 @@ This changelog does not follow semantic versioning.
 
   Reported-by: Sulev-Madis Silber
 
+- A crash that occured when trying to print a non-existant Bugzilla attachment has been fixed
+
+  Reported-by: Sulev-Madis Silber
+
 ### Added
 
 ### Changed

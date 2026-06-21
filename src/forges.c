@@ -429,6 +429,7 @@ bugzilla_forge_descriptor =
 	.perform_submit_comment    = bugzilla_submit_comment,
 
 	.attachment_get_content    = bugzilla_attachment_get_content,
+	.create_attachment         = bugzilla_attachment_create,
 
 	/* Internal stuff */
 	.make_authheader           = bugzilla_make_authheader,

@@ -35,4 +35,7 @@
 int bugzilla_attachment_get_content(struct gcli_ctx *ctx, gcli_id attachment_id,
                                     FILE *output);
 
+int bugzilla_attachment_create(struct gcli_ctx *ctx,
+                               struct gcli_attachment_create_opts const *opts);
+
 #endif /* GCLI_BUGZILLA_ATTACHMENTS_H */

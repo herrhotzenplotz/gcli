@@ -40,4 +40,7 @@ int gcli_decode_base64(struct gcli_ctx *ctx, char const *input, char *buffer,
 int gcli_base64_decode_print(struct gcli_ctx *ctx, FILE *out,
                              char const *const input);
 
+int gcli_encode_base64(struct gcli_ctx *ctx, uint8_t const *input,
+                       size_t input_size, char **out);
+
 #endif /* GCLI_BASE64_H */

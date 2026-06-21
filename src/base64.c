@@ -29,6 +29,7 @@
 
 #include <gcli/base64.h>
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -146,6 +147,80 @@ gcli_base64_decode_print(struct gcli_ctx *ctx, FILE *out, char const *const inpu
 	fwrite(buffer, buffer_size, 1, out);
 
 	gcli_clear_ptr(&buffer);
+
+	return 0;
+}
+
+static inline uint8_t
+m(size_t n)
+{
+	return (1 << n) - 1;
+}
+
+int
+gcli_encode_base64(struct gcli_ctx *ctx, uint8_t const *input,
+                   size_t input_size, char **out)
+{
+	char const alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	                        "abcdefghijklmnopqrstuvwxyz"
+	                        "0123456789+/";
+
+	uint8_t sextet = 0;
+	uint8_t byte;
+	size_t bits = 0, rem, rqsize;
+	char *hd;
+
+	(void) ctx;
+
+	rqsize = ((4 * input_size) / 3) + 4;
+	*out = calloc(1, rqsize);
+	hd = *out;
+
+	/* encode full sextets */
+	while (input_size) {
+		assert(bits <= 6);
+
+		rem = 6 - bits;
+		if (bits)
+			sextet = (byte & m(bits)) << rem;
+
+		/* flush if full sextet */
+		if (bits == 6) {
+			assert(sextet < sizeof alphabet);
+			*hd++ = alphabet[sextet];
+			sextet = 0;
+			rem = 6;
+		}
+
+		byte = *input++;
+		input_size--;
+
+		bits = 8 - rem;
+		sextet |= (byte >> bits);
+
+		assert(sextet < sizeof alphabet);
+		*hd++ = alphabet[sextet];
+	}
+
+	/* remaining sextet */
+	if (bits) {
+		assert(bits <= 6);
+
+		rem = 6 - bits;
+		sextet = (byte & m(bits)) << rem;
+		assert(sextet < sizeof alphabet);
+		*hd++ = alphabet[sextet];
+
+		bits = 8 - rem;
+	}
+
+	/* padding if required */
+	while (bits % 8) {
+		*hd++ = '=';
+		bits += 2;
+	}
+
+	*hd++ = '\0';
 
 	return 0;
 }

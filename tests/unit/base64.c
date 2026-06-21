@@ -41,7 +41,33 @@ DEFINE_TESTCASE(simple_decode)
 	CHECK_STREQ(output, "hello world");
 }
 
+#define ENCODE_CASE(name, in, out)                                                    \
+	DEFINE_TESTCASE(name)                                                         \
+	{                                                                             \
+		uint8_t const input[] = in;                                           \
+		char *output = NULL;                                                  \
+                                                                                      \
+		int rc = gcli_encode_base64(NULL, input, sizeof(input) - 1, &output); \
+		REQUIRE(rc == 0);                                                     \
+		CHECK_STREQ(output, out);                                             \
+                                                                                      \
+		free(output);                                                         \
+	}
+
+ENCODE_CASE(encode_onebyte, "A", "QQ==")
+ENCODE_CASE(encode_twobyte, "A\n", "QQo=")
+ENCODE_CASE(encode_threebyte, "AA\n", "QUEK")
+ENCODE_CASE(encode_foobar, "foobar", "Zm9vYmFy")
+ENCODE_CASE(encode_binary, "\01\02\02\04\05\06\07\010\011\012",
+                           "AQICBAUGBwgJCg==")
+
 TESTSUITE
 {
 	TESTCASE(simple_decode);
+
+	TESTCASE(encode_onebyte);
+	TESTCASE(encode_twobyte);
+	TESTCASE(encode_threebyte);
+	TESTCASE(encode_foobar);
+	TESTCASE(encode_binary);
 }

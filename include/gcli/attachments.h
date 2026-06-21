@@ -59,9 +59,24 @@ struct gcli_attachment_list {
 	size_t attachments_size;
 };
 
+struct gcli_attachment_create_opts {
+	gcli_id bug_id;
+	char *comment;
+	char *summary;
+	char *content_type;
+	char *file_name;
+	uint8_t *data;
+	size_t data_size;
+	bool is_patch;
+	bool is_private;
+};
+
 void gcli_attachments_free(struct gcli_attachment_list *list);
 void gcli_attachment_free(struct gcli_attachment *attachment);
 int gcli_attachment_get_content(struct gcli_ctx *const ctx, gcli_id const id,
                                 FILE *out);
+
+int gcli_attachment_create(struct gcli_ctx *ctx,
+                           struct gcli_attachment_create_opts const *options);
 
 #endif /* GCLI_ATTACHMENTS_H */

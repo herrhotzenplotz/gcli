@@ -193,6 +193,12 @@ struct gcli_forge_descriptor {
 		gcli_id id,
 		FILE *out);
 
+	/**
+	 * Create an attachment */
+	int (*create_attachment)(
+		struct gcli_ctx *ctx,
+		struct gcli_attachment_create_opts const *opts);
+
 	/* Issue quirk bitmask */
 	enum {
 		GCLI_ISSUE_QUIRKS_LOCKED      = 0x1,

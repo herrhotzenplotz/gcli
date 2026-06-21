@@ -58,3 +58,10 @@ gcli_attachment_get_content(struct gcli_ctx *const ctx, gcli_id const id, FILE *
 {
 	gcli_null_check_call(attachment_get_content, ctx, id, out);
 }
+
+int
+gcli_attachment_create(struct gcli_ctx *const ctx,
+                       struct gcli_attachment_create_opts const *const flags)
+{
+	gcli_null_check_call(create_attachment, ctx, flags);
+}

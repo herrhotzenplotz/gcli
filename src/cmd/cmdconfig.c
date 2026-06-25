@@ -988,7 +988,7 @@ gcli_config_get_forge_type_internal(struct gcli_ctx *ctx)
 	int const type = gcli_cmd_vcs_forgetype(ctx, cfg->override_remote);
 	if (type < 0)
 		errx(1, "gcli: error: cannot infer forge type. "
-		     "use -t <forge-type> to overrride manually.");
+		     "use -t <forge-type> to override manually.");
 
 	return type;
 }

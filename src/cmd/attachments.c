@@ -55,8 +55,9 @@ usage(void)
 	fprintf(stderr, "  -P               The attachment is private\n");
 	fprintf(stderr, "  -s summary       Summary of the attachment to create\n");
 	fprintf(stderr, "ACTIONS:\n");
-	fprintf(stderr, "  get [-o path]  Fetch and dump the contents of the "
-	                  "attachments to the given path or stdout\n");
+	fprintf(stderr, "  get [-o path]    Fetch and dump the contents of the "
+	                                   "attachments to the given path or stdout\n");
+	fprintf(stderr, "  obsolete         Mark the attachment as obsolete\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();
@@ -118,6 +119,27 @@ action_attachment_get(struct gcli_path const *path,
 	return GCLI_EX_OK;
 }
 
+static int
+action_attachment_obsolete(struct gcli_path const *path,
+                           void *item,
+                           int *argc, char ***argv)
+{
+	int rc = 0;
+
+	(void) item;
+	(void) argc;
+	(void) argv;
+
+	rc = gcli_attachment_set_obsolete(g_clictx, path, true);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: failed to obsolete attachment: %s\n",
+		        gcli_get_error(g_clictx));
+		return GCLI_EX_DATAERR;
+	}
+
+	return GCLI_EX_OK;
+}
+
 static struct gcli_cmd_actions const actions =
 {
 	.fetch_item = NULL,
@@ -129,6 +151,10 @@ static struct gcli_cmd_actions const actions =
 		  .help = "Print or download attachment",
 		  .needs_item = false,
 		  .handler = action_attachment_get, },
+		{ .name = "obsolete",
+		  .help = "Obsolete the attachment",
+		  .needs_item = false,
+		  .handler = action_attachment_obsolete, },
 	},
 };
 

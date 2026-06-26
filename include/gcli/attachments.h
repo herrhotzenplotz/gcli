@@ -78,6 +78,10 @@ int gcli_attachment_get_content(struct gcli_ctx *ctx,
                                 struct gcli_path const *path,
                                 FILE *out);
 
+int gcli_attachment_set_obsolete(struct gcli_ctx *ctx,
+                                 struct gcli_path const *path,
+                                 bool obsolete_flag);
+
 int gcli_attachment_create(struct gcli_ctx *ctx,
                            struct gcli_attachment_create_opts const *options);
 

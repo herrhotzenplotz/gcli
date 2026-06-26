@@ -199,3 +199,52 @@ bugzilla_attachment_create(struct gcli_ctx *ctx,
 
 	return 0;
 }
+
+int
+gcli_attachment_set_obsolete(struct gcli_ctx *const ctx,
+                             struct gcli_path const *const path,
+                             bool const obsolete_flag)
+{
+	int rc = 0;
+	char *url = NULL, *payload = NULL;
+	char const *token = NULL;
+	struct gcli_jsongen gen = {0};
+
+	if (path->kind != GCLI_PATH_ID) {
+		return gcli_error(ctx,
+		                  "unsupported path kind for attachment, "
+		                  "requires ID");
+	}
+
+	/* we must have an api token! */
+	token = gcli_get_token(ctx);
+	if (!token)
+		return gcli_error(ctx, "obsoleting attachments on bugzilla requires a token");
+
+	/* generate URL */
+	url = gcli_asprintf("%s/rest/bug/attachment/%"PRIid,
+	                    gcli_get_apibase(ctx), path->as_id);
+
+	/* payload */
+	gcli_jsongen_init(&gen);
+	gcli_jsongen_begin_object(&gen);
+	{
+		gcli_jsongen_objmember(&gen, "is_obsolete");
+		gcli_jsongen_bool(&gen, obsolete_flag);
+
+		gcli_jsongen_objmember(&gen, "api_key");
+		gcli_jsongen_string(&gen, token);
+	}
+	gcli_jsongen_end_object(&gen);
+
+	payload = gcli_jsongen_to_string(&gen);
+
+	/* perform request */
+	rc = gcli_fetch_with_method(ctx, "PUT", url, payload, NULL, NULL);
+
+	/* cleanup */
+	gcli_clear_ptr(&url);
+	gcli_clear_ptr(&payload);
+
+	return rc;
+}

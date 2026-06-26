@@ -27,6 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <gcli/cmd/actions.h>
 #include <gcli/cmd/cmd.h>
 #include <gcli/gcli.h>
 #include <gcli/port/util.h>
@@ -62,11 +63,16 @@ usage(void)
 }
 
 static int
-action_attachment_get(int *argc, char ***argv, gcli_id const id)
+action_attachment_get(struct gcli_path const *path,
+                      void *item,
+                      int *argc, char ***argv)
 {
 	int ch, rc = 0;
 	bool oflag_seen = false;
 	FILE *outfile = NULL;
+
+	(void) item;
+
 	struct option options[] = {
 		{ .name = "output", .has_arg = required_argument, .flag = NULL, .val = 'o' },
 		{0},
@@ -77,32 +83,31 @@ action_attachment_get(int *argc, char ***argv, gcli_id const id)
 		case 'o': {
 			outfile = fopen(optarg, "w");
 			if (!outfile) {
-				fprintf(stderr, "gcli: failed to open »%s«: %s\n",
+				fprintf(stderr, "gcli: failed to open '%s': %s\n",
 				        optarg, strerror(errno));
-				return EXIT_FAILURE;
+				return GCLI_EX_DATAERR;
 			}
 			oflag_seen = true;
 		} break;
 		default: {
-			usage();
-			return EXIT_FAILURE;
+			return GCLI_EX_USAGE;
 		} break;
 		}
 	}
 
-	*argc -= optind;
-	*argv += optind;
+	*argc -= optind - 1;
+	*argv += optind - 1;
 	optind = 0; /* reset */
 
 	/* -o wasn't specified */
 	if (outfile == NULL)
 		outfile = stdout;
 
-	rc = gcli_attachment_get_content(g_clictx, id, outfile);
+	rc = gcli_attachment_get_content(g_clictx, path->as_id, outfile);
 	if (rc < 0) {
 		fprintf(stderr, "gcli: failed to get attachment: %s\n",
 		        gcli_get_error(g_clictx));
-		return EXIT_FAILURE;
+		return GCLI_EX_DATAERR;
 	}
 
 	if (oflag_seen)
@@ -110,27 +115,22 @@ action_attachment_get(int *argc, char ***argv, gcli_id const id)
 
 	outfile = NULL;
 
-	return EXIT_SUCCESS;
+	return GCLI_EX_OK;
 }
 
-static struct action {
-	char const *const name;
-	int (*fn)(int *argc, char ***argv, gcli_id const id);
-} const actions[] = {
-	{ .name = "get", .fn = action_attachment_get },
-};
-
-static size_t const actions_size = ARRAY_SIZE(actions);
-
-static struct action const *
-find_action(char const *const name)
+static struct gcli_cmd_actions const actions =
 {
-	for (size_t i = 0; i < actions_size; ++i) {
-		if (strcmp(name, actions[i].name) == 0)
-			return &actions[i];
-	}
-	return NULL;
-}
+	.fetch_item = NULL,
+	.free_item = NULL,
+	.item_size = sizeof(struct gcli_attachment),
+
+	.defs = {
+		{ .name = "get",
+		  .help = "Print or download attachment",
+		  .needs_item = false,
+		  .handler = action_attachment_get, },
+	},
+};
 
 static int
 subcommand_attachments_create(int argc, char *argv[])
@@ -217,9 +217,9 @@ subcommand_attachments_create(int argc, char *argv[])
 int
 subcommand_attachments(int argc, char *argv[])
 {
-	int ch;
-	gcli_id iflag;
 	bool iflag_seen = false;
+	int ch, rc = 0;
+	struct gcli_path path = { .kind = GCLI_PATH_ID };
 
 	struct option options[] = {
 		{ .name = "id", .has_arg = required_argument, .flag = NULL, .val = 'i' },
@@ -237,7 +237,7 @@ subcommand_attachments(int argc, char *argv[])
 		case 'i': {
 			iflag_seen = true;
 
-			if (gcli_cmd_parse_id(optarg, &iflag) < 0)
+			if (gcli_cmd_parse_id(optarg, &path.as_id) < 0)
 				err(1, "gcli: error: cannot parse attachment id");
 		} break;
 		default:
@@ -263,21 +263,9 @@ subcommand_attachments(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	while (argc) {
-		int rc;
-		char const *const action_name = *argv;
-		struct action const *const action = find_action(action_name);
+	rc = gcli_cmd_actions_handle(&actions, &path, &argc, &argv);
+	if (rc == GCLI_EX_USAGE)
+		usage();
 
-		if (action == NULL) {
-			fprintf(stderr, "gcli: %s: no such action\n", action_name);
-			usage();
-			return EXIT_FAILURE;
-		}
-
-		rc = action->fn(&argc, &argv, iflag);
-		if (rc)
-			return rc;
-	}
-
-	return 0;
+	return !!rc;
 }

@@ -72,7 +72,6 @@ struct gcli_cmd_actions {
 
 	struct gcli_cmd_action defs[GCLI_ACTION_LIST_MAX];
 };
-
 int gcli_cmd_actions_handle(struct gcli_cmd_actions const *actions,
                             struct gcli_path const *path,
                             int *argc, char ***argv);

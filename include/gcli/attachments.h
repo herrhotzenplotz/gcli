@@ -41,6 +41,7 @@
 #include <time.h>
 
 #include <gcli/gcli.h>
+#include <gcli/path.h>
 
 struct gcli_attachment {
 	gcli_id id;
@@ -73,7 +74,8 @@ struct gcli_attachment_create_opts {
 
 void gcli_attachments_free(struct gcli_attachment_list *list);
 void gcli_attachment_free(struct gcli_attachment *attachment);
-int gcli_attachment_get_content(struct gcli_ctx *const ctx, gcli_id const id,
+int gcli_attachment_get_content(struct gcli_ctx *ctx,
+                                struct gcli_path const *path,
                                 FILE *out);
 
 int gcli_attachment_create(struct gcli_ctx *ctx,

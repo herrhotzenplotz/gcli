@@ -190,7 +190,7 @@ struct gcli_forge_descriptor {
 	 * Dump the contents of the attachment to the given file */
 	int (*attachment_get_content)(
 		struct gcli_ctx *ctx,
-		gcli_id id,
+		struct gcli_path const *path,
 		FILE *out);
 
 	/**

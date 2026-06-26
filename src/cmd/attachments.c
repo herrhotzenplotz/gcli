@@ -103,7 +103,7 @@ action_attachment_get(struct gcli_path const *path,
 	if (outfile == NULL)
 		outfile = stdout;
 
-	rc = gcli_attachment_get_content(g_clictx, path->as_id, outfile);
+	rc = gcli_attachment_get_content(g_clictx, path, outfile);
 	if (rc < 0) {
 		fprintf(stderr, "gcli: failed to get attachment: %s\n",
 		        gcli_get_error(g_clictx));

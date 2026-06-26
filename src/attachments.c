@@ -54,9 +54,10 @@ gcli_attachment_free(struct gcli_attachment *it)
 }
 
 int
-gcli_attachment_get_content(struct gcli_ctx *const ctx, gcli_id const id, FILE *out)
+gcli_attachment_get_content(struct gcli_ctx *const ctx,
+                            struct gcli_path const *path, FILE *out)
 {
-	gcli_null_check_call(attachment_get_content, ctx, id, out);
+	gcli_null_check_call(attachment_get_content, ctx, path, out);
 }
 
 int

@@ -38,7 +38,8 @@
 #include <templates/bugzilla/bugs.h>
 
 int
-bugzilla_attachment_get_content(struct gcli_ctx *ctx, gcli_id attachment_id,
+bugzilla_attachment_get_content(struct gcli_ctx *ctx,
+                                struct gcli_path const *path,
                                 FILE *output)
 {
 	int rc = 0;
@@ -47,8 +48,14 @@ bugzilla_attachment_get_content(struct gcli_ctx *ctx, gcli_id attachment_id,
 	struct json_stream stream = {0};
 	struct gcli_attachment attachment = {0};
 
+	if (path->kind != GCLI_PATH_ID) {
+		return gcli_error(ctx,
+		                  "unsupported path kind for attachment, "
+		                  "requires ID");
+	}
+
 	url = gcli_asprintf("%s/rest/bug/attachment/%"PRIid,
-	                    gcli_get_apibase(ctx), attachment_id);
+	                    gcli_get_apibase(ctx), path->as_id);
 
 	rc = gcli_fetch(ctx, url, NULL, &buffer);
 	if (rc < 0)

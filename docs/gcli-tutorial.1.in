@@ -765,10 +765,6 @@ Click the \f(CRAdd new token\fR button
 .sp -0.25v
 .IP "5." 3
 Choose some reasonable values
-.if n \
-.sp -1
-.if t \
-.sp -0.25v
 .RS
 .IP "\(bu" 3
 The token name can be your hostname e.g. \f(CRgcli $(hostname)\fR

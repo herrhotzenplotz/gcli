@@ -22,6 +22,9 @@ This changelog does not follow semantic versioning.
 
   Reported-by: Sulev-Madis Silber
 
+- The manual page `gcli-status(1)` has been fixed and was updated to reflect
+  the current behaviour
+
 ### Added
 
 ### Changed

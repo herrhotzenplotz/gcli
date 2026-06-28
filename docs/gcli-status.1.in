@@ -3,13 +3,28 @@
 .Os @PACKAGE_STRING@
 .Sh NAME
 .Nm gcli\ status
-.Nd Print a list of notifications and/or TODOs
+.Nd Work with TODO lists
 .Sh SYNOPSIS
 .Nm
+.Nm
+.Fl l
 .Op Fl n Ar number-of-items
+.Nm
+.Fl m Ar id
 .Sh DESCRIPTION
 .Nm
-prints a list of TODOs and notifications on the given account.
+is used to work with TODO lists of forges.
+.Pp
+When invoked without subcommand argumends, gcli will switch to interactive mode.
+This interactive mode lets you select TODO list items,
+operate on them by e.g. running actions or marking them as done.
+The actions are documented in the respective manual pages of the item types.
+If you, for example, select a TODO item that refers to an issue then you can invoke any action
+that is documented in
+.Xr gcli-issues 1
+from within the prompt.
+.Pp
+All other invocations are non-interactive.
 .Sh OPTIONS
 .Bl -tag -width indent
 .It Fl n Ar number-of-items
@@ -17,12 +32,49 @@ Fetch at most
 .Ar number-of-items
 items and print them. If given a negative number, all notifications
 are fetched. The default is 30.
+.It Fl l , -list
+List TODO list items non-interactively.
+.It Fl m , -mark Ar id
+Mark the TODO list item
+.Ar id
+as done.
+This will cause the item to not appear on the TODO list anymore.
 .El
 .Sh EXAMPLES
 Print a TODO list for my-account:
 .Bd -literal -offset indent
 $ gcli -a my-account status
 .Ed
+.Pp
+Look through TODO list, select a merge request, view changes, approve it, merge and mark as done:
+.Bd -literal -offset indent
+$ gcli status
+NUMBER  REPO     TYPE          REASON
+1       foo/bar  Pull Request  mentioned
+Enter number, list or quit: 1
+Enter action, done or quit: status
+   NUMBER : 381
+    TITLE : Foo bar baz
+     HEAD : author:bork
+     BASE : target:master
+  CREATED : 1970-Jan-1 00:00:00
+   AUTHOR : author
+    STATE : open
+   MERGED : no
+MERGEABLE : yes
+    DRAFT : no
+ASSIGNEES : someone
+REVIEWERS : none
+Enter action, done or quit: diff
+Enter action, done or quit: approve -y
+Enter action, done or quit: merge
+Enter action, done or quit: done
+Enter number, list or quit: l
+NUMBER  REPO  TYPE  REASON
+Enter number, list or quit: q
+.Ed
+.Pp
+The diff is viewed in a pager.
 .Pp
 .Sh SEE ALSO
 .Xr gcli 1 ,

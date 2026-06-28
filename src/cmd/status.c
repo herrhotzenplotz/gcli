@@ -41,13 +41,13 @@
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: gcli status -m id\n");
+	fprintf(stderr, "usage: gcli status\n");
 	fprintf(stderr, "       gcli status -l [-n number]\n");
-	fprintf(stderr, "       gcli status\n");
+	fprintf(stderr, "       gcli status -m id\n");
 	fprintf(stderr, "OPTIONS:\n");
-	fprintf(stderr, "  -l          Print list of todo items and exit\n");
-	fprintf(stderr, "  -n number   Number of messages to fetch\n");
-	fprintf(stderr, "  -m id       Mark the given message as read\n");
+	fprintf(stderr, "  -l   Print list of todo items and exit\n");
+	fprintf(stderr, "  -n   Number of messages to fetch\n");
+	fprintf(stderr, "  -m   Mark the given message as read\n");
 	fprintf(stderr, "\n");
 	version();
 	copyright();

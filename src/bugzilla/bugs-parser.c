@@ -185,7 +185,7 @@ parse_bugzilla_attachment_content_only_first(struct gcli_ctx *ctx,
 		return gcli_error(ctx, "no attachment in result");
 	}
 
-	if (next != JSON_OBJECT_END)
+	if ((next = json_next(stream)) != JSON_OBJECT_END)
 		return gcli_error(ctx, "unclosed bugzilla attachments dictionary");
 
 	return rc;

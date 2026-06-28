@@ -1,0 +1,109 @@
+.Dd @PACKAGE_DATE@
+.Dt GCLI-ATTACHMENTS 1
+.Os @PACKAGE_STRING@
+.Sh NAME
+.Nm gcli\ attachments
+.Nd Create, view or update Bugzilla attachments
+.Sh SYNOPSIS
+.Nm
+.Fl i Ar attachment
+.Ar actions...
+.Nm
+.Cm create
+.Fl f Ar file
+.Fl s Ar summary
+.Fl i Ar bug-id
+.Op Fl p
+.Op Fl P
+.Op Fl c Ar comment
+.Op fl C Ar content-type
+.Op Fl F Ar filename
+.Sh DESCRIPTION
+.Nm
+is used to manage Bugzilla attachments.
+Attachments are referred to by unique IDs.
+You can assoiate attachments with one or more bugs.
+.Sh OPTIONS
+.Bl -tag -width indent
+.It Fl i , -id
+Execute actions on the given attachment ID.
+.El
+.Sh SUBCOMMANDS
+.Bl -tag -width indent
+.It Cm create
+Create an attachment.
+.Pp
+The following flags can be specified:
+.Bl -tag -width indent
+.It Fl s , -summary Ar summary
+Summary of the attachment
+.It Fl f , -file Ar path
+Upload the given file as the attachment content.
+You can also use
+.Dq -
+to read the content from stdin.
+.It Fl i , -id Ar bug-id
+Upload the attachment for the given
+.Ar bug-id .
+.It Fl F , -filename Ar filename
+When uploading the file,
+.Nm
+uses the the filename from
+.Fl f
+to pass the filename to Bugzilla.
+.Fl F
+lets you pass a different file name and override the
+.Fl f
+provided name.
+This is useful when reading the content from stdin.
+.It Fl c , -comment Ar comment
+Comment for the attachment.
+.It Fl C , -content-type Ar content-type
+Content type of the attachment.
+This option is set automatically when
+.Fl p
+is set.
+Otherwise this option is mandatory.
+.It Fl p , -patch
+The attachment is a patch.
+When this flag is set you don't need to specify a content-type via
+.Fl C .
+.It Fl P , -private
+The attachment is private.
+.El
+.El
+.Sh ACTIONS
+.Ar actions...
+may be one or more of the following:
+.Bl -tag -width "labels [options]"
+.It Cm obsolete
+Mark the attachment as obsolete.
+.It Cm get Op Fl o Ar output
+Print or download the attachment content.
+When
+.Fl o
+is specified, the contents are written to the given file.
+.El
+.Sh EXAMPLES
+Print the content of attachment with ID 42:
+.Bd -literal -offset indent
+$ gcli att -i 42 get
+.Ed
+.Pp
+Create an attachment for bug 22 from a git diff:
+.Bd -literal -offset indent
+$ git diff | gcli att create -f - -F gcli.diff -i 22 -s 'git diff' -p
+.Ed
+.Pp
+Mark attachment 100 as obsolete:
+.Bd -literal -offset indent
+$ gcli att -i 100 obsolete
+.Ed
+.Sh SEE ALSO
+.Xr git 1 ,
+.Xr gcli 1 ,
+.Sh AUTHORS
+.An Nico Sonack aka. herrhotzenplotz Aq Mt nsonack@herrhotzenplotz.de
+and contributors.
+.Sh BUGS
+There are a lot of features missing in this subcommand.

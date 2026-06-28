@@ -43,12 +43,14 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: gcli [options] attachments create -s <summary> -i <bug-id>\n");
-	fprintf(stderr, "            -f <file> [-c <comment>] [-C content-type] [-P] [-p]\n");
+	fprintf(stderr, "            -f <file> [-F <filename>] [-c <comment>] [-C content-type]\n");
+	fprintf(stderr, "            [-P] [-p]\n");
 	fprintf(stderr, "       gcli [options] attachments -i <id> actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
 	fprintf(stderr, "  -c comment       Comment of the attachment to create\n");
 	fprintf(stderr, "  -C content-type  Content type of the attachment\n");
 	fprintf(stderr, "  -f file          Upload the given file as attachment\n");
+	fprintf(stderr, "  -F filename      Pass filename to Bugzilla instead of using -f\n");
 	fprintf(stderr, "  -i bug-id        Create the attachment for the given bug ID\n");
 	fprintf(stderr, "  -i id            Execute the given actions for the specified attachment id\n");
 	fprintf(stderr, "  -p               The attachment is a patch\n");

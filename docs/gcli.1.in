@@ -38,7 +38,7 @@ can be overridden to accommodate more nuanced use cases. Manual
 overrides must be passed before subcommands and their options.
 .Sh SUBCOMMANDS
 Most of these subcommands are documented in dedicated man pages.
-.Bl -tag -width milestones
+.Bl -tag -width attachments
 .It Cm issues
 Issues in repositories. See
 .Xr gcli-issues 1 .
@@ -76,6 +76,9 @@ Create and manage releases. See
 .It Cm milestones
 List and manage milestones. See
 .Xr gcli-milestones 1 .
+.It Cm attachments
+Work with Bugzilla attachments. See
+.Xr gcli-attachments 1 .
 .It Cm config
 Change user settings for the forge. Allows you to e.g. upload or
 delete ssh keys. See

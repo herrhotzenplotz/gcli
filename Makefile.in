@@ -580,6 +580,7 @@ $(ANALYSE_TARGETS): $(TEMPLATE_HEADERS)
 #################### install target ########################################
 MANPAGES= \
 	docs/gcli-api.1 \
+	docs/gcli-attachments.1 \
 	docs/gcli-comment.1 \
 	docs/gcli-config.1 \
 	docs/gcli-forks.1 \

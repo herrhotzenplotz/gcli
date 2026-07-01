@@ -27,6 +27,9 @@ This changelog does not follow semantic versioning.
 
 ### Added
 
+- The `attachments` subcommand gained support for creating Bugzilla
+  attachments as well as marking them as obsolete
+
 ### Changed
 
 ### Removed

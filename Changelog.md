@@ -30,6 +30,10 @@ This changelog does not follow semantic versioning.
 - The `attachments` subcommand gained support for creating Bugzilla
   attachments as well as marking them as obsolete
 
+- A new manual page `gcli-attachments(1)` has been added documenting
+  the options of this subcommand. The `gcli(1)` manual page has
+  been updated and references the new manual page as well.
+
 ### Changed
 
 ### Removed

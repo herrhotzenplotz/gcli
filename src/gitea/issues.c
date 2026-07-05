@@ -231,56 +231,9 @@ gitea_issue_assign(struct gcli_ctx *ctx,
 	return rc;
 }
 
-/* Return the stringified id of the given label */
-static char *
-get_id_of_label(char const *label_name,
-                struct gcli_label_list const *const list)
-{
-	for (size_t i = 0; i < list->labels_size; ++i)
-		if (strcmp(list->labels[i].name, label_name) == 0)
-			return gcli_asprintf("%"PRIid, list->labels[i].id);
-	return NULL;
-}
-
-static void
-free_id_list(char *list[], size_t const list_size)
-{
-	for (size_t i = 0; i < list_size; ++i) {
-		gcli_clear_ptr(&list[i]);
-	}
-	gcli_clear_ptr(&list);
-}
-
-static char **
-label_names_to_ids(struct gcli_ctx *ctx, struct gcli_path const *const path,
-                   char const *const names[], size_t const names_size)
-{
-	struct gcli_label_list list = {0};
-	char **ids = NULL;
-	size_t ids_size = 0;
-
-	gitea_get_labels(ctx, path, -1, &list);
-
-	for (size_t i = 0; i < names_size; ++i) {
-		char *const label_id = get_id_of_label(names[i], &list);
-
-		if (!label_id) {
-			free_id_list(ids, ids_size);
-			ids = NULL;
-			gcli_error(ctx, "no such label '%s'", names[i]);
-			goto out;
-		}
-
-		ids = realloc(ids, sizeof(*ids) * (ids_size +1));
-		ids[ids_size++] = label_id;
-	}
-
-out:
-	gcli_free_labels(&list);
-
-	return ids;
-}
-
+/* Quirk: The issues POST endpoint accepts labels in string form by their names.
+ * Thus we do not need to convert the labels to IDs and then post them to the
+ * API. For deletion however we must do this. */
 int
 gitea_issue_add_labels(struct gcli_ctx *ctx, struct gcli_path const *const path,
                        char const *const labels[], size_t const labels_size)
@@ -289,16 +242,9 @@ gitea_issue_add_labels(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	struct gcli_jsongen gen = {0};
 	int rc = 0;
 
-	/* First, convert to ids */
-	char **ids = label_names_to_ids(ctx, path, labels, labels_size);
-	if (!ids)
-		return -1;
-
 	rc = gitea_issue_make_url(ctx, path, &url, "/labels");
-	if (rc < 0) {
-		free_id_list(ids, labels_size);
+	if (rc < 0)
 		return rc;
-	}
 
 	/* Construct json payload */
 	gcli_jsongen_init(&gen);
@@ -307,7 +253,7 @@ gitea_issue_add_labels(struct gcli_ctx *ctx, struct gcli_path const *const path,
 		gcli_jsongen_objmember(&gen, "labels");
 		gcli_jsongen_begin_array(&gen);
 		for (size_t i = 0; i < labels_size; ++i) {
-			gcli_jsongen_string(&gen, ids[i]);
+			gcli_jsongen_string(&gen, labels[i]);
 		}
 		gcli_jsongen_end_array(&gen);
 	}
@@ -315,7 +261,6 @@ gitea_issue_add_labels(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	payload = gcli_jsongen_to_string(&gen);
 	gcli_jsongen_free(&gen);
-	free_id_list(ids, labels_size);
 
 	rc = gcli_fetch_with_method(ctx, "POST", url, payload, NULL, NULL);
 
@@ -325,23 +270,41 @@ gitea_issue_add_labels(struct gcli_ctx *ctx, struct gcli_path const *const path,
 	return rc;
 }
 
+static gcli_id
+get_id_of_label(char const *label_name,
+                struct gcli_label_list const *const list)
+{
+	for (size_t i = 0; i < list->labels_size; ++i)
+		if (strcmp(list->labels[i].name, label_name) == 0)
+			return list->labels[i].id;
+
+	return 0;
+}
+
 int
 gitea_issue_remove_labels(struct gcli_ctx *ctx,
                           struct gcli_path const *const path,
                           char const *const labels[], size_t const labels_size)
 {
 	int rc = 0;
+	struct gcli_label_list llist = {0};
+
 	/* Unfortunately the gitea api does not give us an endpoint to
 	 * delete labels from an issue in bulk. So, just iterate over the
 	 * given labels and delete them one after another. */
-	char **ids = label_names_to_ids(ctx, path, labels, labels_size);
-	if (!ids)
-		return -1;
+	rc = gitea_get_labels(ctx, path, -1, &llist);
+	if (rc < 0)
+		return rc;
 
 	for (size_t i = 0; i < labels_size; ++i) {
 		char *url = NULL;
+		gcli_id id = 0;
 
-		rc = gitea_issue_make_url(ctx, path, &url, "/labels/%s", ids[i]);
+		id = get_id_of_label(labels[i], &llist);
+		if (!id)
+			return gcli_error(ctx, "no such label: %s", labels[i]);
+
+		rc = gitea_issue_make_url(ctx, path, &url, "/labels/%"PRIid, id);
 		if (rc < 0)
 			break;
 
@@ -352,8 +315,6 @@ gitea_issue_remove_labels(struct gcli_ctx *ctx,
 		if (rc < 0)
 			break;
 	}
-
-	free_id_list(ids, labels_size);
 
 	return rc;
 }

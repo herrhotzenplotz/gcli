@@ -25,6 +25,11 @@ This changelog does not follow semantic versioning.
 - The manual page `gcli-status(1)` has been fixed and was updated to reflect
   the current behaviour
 
+- A crash when creating a repo on GitHub without specifying a
+  description has been fixed.
+
+  Reported-by: Sandro Santilli
+
 ### Added
 
 - The `attachments` subcommand gained support for creating Bugzilla

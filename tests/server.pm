@@ -180,11 +180,18 @@ sub run_gcli {
 
 	my $output = qx($cmd);
 	my $rc = $? >> 8; # see perldoc perlop
+	my $termsig = $? & 127;
+	my $caught_signal = $? & 128;
 
 	$logfile->print($output);
 	$logfile->close();
 
-	return (VerifyClientExitCode => $rc, VerifyClientOutput => $output);
+	return (
+		VerifyClientExitCode => $rc,
+		VerifyClientOutput => $output,
+		VerifyClientSignalled => $caught_signal,
+		VerifyClientTermSig => $termsig,
+	);
 }
 
 sub get_request {

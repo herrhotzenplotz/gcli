@@ -105,6 +105,8 @@ print "TAP version 14\n";
 my @client_verify = (
 	'VerifyClientExitCode',
 	'VerifyClientOutput',
+	'VerifyClientSignalled',
+	'VerifyClientTermSig',
 );
 
 foreach (@client_verify) {
@@ -112,6 +114,12 @@ foreach (@client_verify) {
 		ok(defined($results{$_}), "Client check: $_ not undefined");
 		is($results{$_}, $testprops{$_}, "Client check: $_");
 	}
+}
+
+# Force-check that we haven't died (segfaults etc)
+if (!defined($testprops{'VerifyClientSignalled'})) {
+	is($results{'VerifyClientSignalled'}, 0,
+	   sprintf("gcli died with signal %d", $results{'VerifyClientTermSig'}));
 }
 
 # Server Verification

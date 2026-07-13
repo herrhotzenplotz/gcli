@@ -195,8 +195,10 @@ github_repo_create(struct gcli_ctx *ctx, struct gcli_repo_create_options const *
 		gcli_jsongen_objmember(&gen, "name");
 		gcli_jsongen_string(&gen, options->name);
 
-		gcli_jsongen_objmember(&gen, "description");
-		gcli_jsongen_string(&gen, options->description);
+		if (options->description) {
+			gcli_jsongen_objmember(&gen, "description");
+			gcli_jsongen_string(&gen, options->description);
+		}
 
 		gcli_jsongen_objmember(&gen, "private");
 		gcli_jsongen_bool(&gen, options->private);

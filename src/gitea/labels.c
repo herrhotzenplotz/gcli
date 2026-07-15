@@ -39,11 +39,80 @@
 /* Recycle the GitHub parser for labels */
 #include <templates/github/labels.h>
 
+static char *
+get_owner_of_path_urlencoded(struct gcli_path const *const path)
+{
+	char *e_owner = NULL;
+
+	switch (path->kind) {
+	case GCLI_PATH_DEFAULT:
+		e_owner = gcli_urlencode(path->as_default.owner);
+		break;
+	case GCLI_PATH_NAMED:
+		e_owner = gcli_urlencode(path->as_named.owner);
+		break;
+	default:
+		break;
+	}
+
+	return e_owner;
+}
+
+static char *
+build_org_label_url(struct gcli_ctx *ctx, struct gcli_path const *const path)
+{
+	char *url = NULL, *e_owner = NULL;
+
+	e_owner = get_owner_of_path_urlencoded(path);
+	if (e_owner == NULL)
+		return NULL;
+
+	url = gcli_asprintf("%s/orgs/%s/labels", gcli_get_apibase(ctx), e_owner);
+
+	gcli_clear_ptr(&e_owner);
+
+	return url;
+}
+
+static int
+gitea_get_org_labels(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                     int const max, struct gcli_label_list *const out)
+{
+	char *url = NULL;
+	struct gcli_fetch_list_ctx fl = {
+		.listp = &out->labels,
+		.sizep = &out->labels_size,
+		.parse = (parsefn)(parse_github_labels),
+		.max = max,
+	};
+
+	url = build_org_label_url(ctx, path);
+	if (url == NULL)
+		return 0; /* best-effort: unsupported, bail out. */
+
+	gcli_fetch_list(ctx, url, &fl);
+
+	/* fetch_list always frees the URL. Also, just ignore the result. */
+
+	return 0;
+}
+
+/* Gitea supports labels on Organisation level. These can be inherited by
+ * repositories under the organisation. */
 int
 gitea_get_labels(struct gcli_ctx *ctx, struct gcli_path const *const path,
                  int max, struct gcli_label_list *const list)
 {
-	return github_get_labels(ctx, path, max, list);
+	int rc = 0;
+
+	rc = github_get_labels(ctx, path, max, list);
+	if (rc < 0)
+		return rc;
+
+	/* this is best-effort */
+	rc = gitea_get_org_labels(ctx, path, max, list);
+
+	return rc;
 }
 
 int

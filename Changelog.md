@@ -30,6 +30,13 @@ This changelog does not follow semantic versioning.
 
   Reported-by: Sandro Santilli
 
+- Modifying labels attached to issues and pull requests on Gitea
+  has been fixed
+
+  Previously this silently failed.
+
+  Reported-by: Michael Niedermayer
+
 ### Added
 
 - The `attachments` subcommand gained support for creating Bugzilla
@@ -40,6 +47,9 @@ This changelog does not follow semantic versioning.
   been updated and references the new manual page as well.
 
 ### Changed
+
+- `gcli labels` now includes inherited labels from the organisation
+  for Gitea
 
 ### Removed
 

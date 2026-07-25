@@ -31,6 +31,7 @@
 #include <gcli/github/repos.h>
 
 #include <gcli/curl.h>
+#include <gcli/url.h>
 
 #include <gcli/port/string.h>
 
@@ -38,13 +39,52 @@
 
 #include <stdarg.h>
 
+#include <templates/gitea/repos.h>
+
+static int
+search_repos(struct gcli_ctx *ctx,
+             struct gcli_path const *const path,
+             struct gcli_repo_search_details const *const details,
+             struct gcli_repo_list *const list)
+{
+	char *url = NULL, *options = NULL;
+
+	struct gcli_fetch_list_ctx fl = {
+		.listp = &list->repos,
+		.sizep = &list->repos_size,
+		.max = details->max,
+		.flags = GCLI_FL_ARRAYPARSER,
+		.arrparse = (arrparsefn)(parse_gitea_repo_search_result),
+	};
+
+	if (path->as_default.owner) {
+		/* FIXME: implement owner-restricted repo search for Gitea */
+		return gcli_error(
+			ctx,
+			"searching for repos of an owner is not yet implemented"
+		);
+	}
+
+	gcli_url_options_append(&options, "q", details->search_term);
+	gcli_url_options_append(&options, "includeDesc", "true");
+	url = gcli_asprintf("%s/repos/search%s", gcli_get_apibase(ctx),
+	                    options);
+
+	gcli_clear_ptr(&options);
+
+	return gcli_fetch_list(ctx, url, &fl);
+}
+
 int
 gitea_search_repos(struct gcli_ctx *ctx,
                    struct gcli_path const *const path,
                    struct gcli_repo_search_details const *const details,
                    struct gcli_repo_list *const list)
 {
-	return github_search_repos(ctx, path, details, list);
+	if (details->search_term)
+		return search_repos(ctx, path, details, list);
+	else
+		return github_search_repos(ctx, path, details, list);
 }
 
 int

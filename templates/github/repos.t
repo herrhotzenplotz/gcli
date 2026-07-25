@@ -14,3 +14,7 @@ object of struct gcli_repo with
 
 parser github_repos is array of struct gcli_repo
 	use parse_github_repo;
+
+parser github_repo_search is
+object of  struct gcli_repo_list with
+	("items" => repos as array of gcli_repo use parse_github_repo);

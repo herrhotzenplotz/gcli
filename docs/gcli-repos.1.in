@@ -9,25 +9,37 @@
 .Op Fl s
 .Op Fl n Ar n
 .Op Fl o Ar owner
+.Op Ar search-terms...
 .Nm
 .Cm create
 .Fl r Ar name
 .Op Fl d Ar description
 .Op Fl p
 .Nm
-.Op Fl o Ar owner Fl r Ar repo
+.Fl o Ar owner Fl r Ar repo
 .Ar actions...
 .Sh DESCRIPTION
 .Nm
-can be used to list or manage your own or an organisation's
+can be used to list, search or manage your own or an organisation's
 repositories on
 .Xr git 1
-forges such as GitHub, Gitea and GitLab. With no actions given,
+forges such as GitHub, Gitea and GitLab.
+.Pp
+With no actions given,
 .Nm
 will list repositories, either of the through
 .Fl o
-specified owner or, if omitted, your own. Otherwise the given actions
-are executed on the specified or auto-detected repository. See
+specified owner or, if omitted, your own.
+.Pp
+When
+.Ar search-terms...
+have been specified, repos are instead searched for.
+To restrict the search to a specific owner, use
+.Fl o Ar owner .
+.Pp
+With both owner and repository specified the given
+.Ar actions...
+are executed on the specified repository. See
 .Sx ACTIONS .
 .Sh OPTIONS
 .Bl -tag -width indent

@@ -45,8 +45,8 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: gcli repos create -r repo [-d description] [-p]\n");
-	fprintf(stderr, "       gcli repos [-o owner -r repo] [-n number] [-s]\n");
-	fprintf(stderr, "       gcli repos [-o owner -r repo] actions...\n");
+	fprintf(stderr, "       gcli repos [-o owner] [-n number] [-s] [search-terms...]\n");
+	fprintf(stderr, "       gcli repos -o owner -r repo actions...\n");
 	fprintf(stderr, "OPTIONS:\n");
 	fprintf(stderr, "  -o owner                The repository owner\n");
 	fprintf(stderr, "  -r repo                 The repository name\n");

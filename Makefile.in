@@ -302,6 +302,7 @@ TEMPLATES= \
 	templates/bugzilla/api.t \
 	templates/bugzilla/bugs.t \
 	templates/gitea/milestones.t \
+	templates/gitea/repos.t \
 	templates/gitea/status.t \
 	templates/github/api.t \
 	templates/github/checks.t \

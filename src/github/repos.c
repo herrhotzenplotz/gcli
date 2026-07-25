@@ -32,6 +32,7 @@
 #include <gcli/github/repos.h>
 #include <gcli/json_gen.h>
 #include <gcli/json_util.h>
+#include <gcli/url.h>
 
 #include <pdjson.h>
 
@@ -104,28 +105,25 @@ github_user_is_org(struct gcli_ctx *ctx, char const *e_owner)
 	return rc < 0 ? rc : !rc;
 }
 
-int
-github_search_repos(struct gcli_ctx *ctx,
-                    struct gcli_path const *const path,
-                    struct gcli_repo_search_details const *const details,
-                    struct gcli_repo_list *const list)
+static int
+list_repos(struct gcli_ctx *ctx,
+           struct gcli_path const *const path,
+           struct gcli_repo_search_details const *const details,
+           struct gcli_repo_list *const list)
 {
-	char *url = NULL, *e_owner = NULL;
+	char *e_owner = NULL, *url = NULL;
 	int rc = 0;
 
-	struct gcli_fetch_list_ctx lf = {
+	struct gcli_fetch_list_ctx fl = {
 		.listp = &list->repos,
 		.sizep = &list->repos_size,
 		.max = details->max,
 		.parse = (parsefn)(parse_github_repos),
 	};
 
-	if (path->kind != GCLI_PATH_DEFAULT)
-		return gcli_error(ctx, "unsupported path kind");
-
 	e_owner = gcli_urlencode(path->as_default.owner);
-	rc = github_user_is_org(ctx, e_owner);
 
+	rc = github_user_is_org(ctx, e_owner);
 	if (rc < 0)
 		return rc;
 
@@ -143,7 +141,55 @@ github_search_repos(struct gcli_ctx *ctx,
 
 	gcli_clear_ptr(&e_owner);
 
-	return gcli_fetch_list(ctx, url, &lf);
+	return gcli_fetch_list(ctx, url, &fl);
+}
+
+static int
+search_repos(struct gcli_ctx *ctx,
+             struct gcli_path const *const path,
+             struct gcli_repo_search_details const *const details,
+             struct gcli_repo_list *const list)
+{
+	char *url = NULL, *options = NULL;
+
+	struct gcli_fetch_list_ctx fl = {
+		.listp = &list->repos,
+		.sizep = &list->repos_size,
+		.max = details->max,
+		.flags = GCLI_FL_ARRAYPARSER,
+		.arrparse = (arrparsefn)(parse_github_repo_search),
+	};
+
+	gcli_url_options_appendf(
+		&options, "q", "%s%s %s",
+		path->as_default.owner ? "owner:" : "",
+		path->as_default.owner ? path->as_default.owner : "",
+		details->search_term);
+
+	url = gcli_asprintf("%s/search/repositories%s",
+	                    gcli_get_apibase(ctx), options);
+
+	gcli_clear_ptr(&options);
+
+	return gcli_fetch_list(ctx, url, &fl);
+}
+
+int
+github_search_repos(struct gcli_ctx *ctx,
+                    struct gcli_path const *const path,
+                    struct gcli_repo_search_details const *const details,
+                    struct gcli_repo_list *const list)
+{
+	if (path->kind != GCLI_PATH_DEFAULT)
+		return gcli_error(ctx, "unsupported path kind");
+
+	if (!details->search_term && !path->as_default.owner)
+		return gcli_error(ctx, "missing repository owner or search term");
+
+	if (details->search_term)
+		return search_repos(ctx, path, details, list);
+	else
+		return list_repos(ctx, path, details, list);
 }
 
 int

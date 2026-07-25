@@ -123,6 +123,13 @@ Currently it is only possible to create repositories for authenticated
 users thus it is impossible to create a repository in another
 organisations.
 .Pp
+The Gitea backend doesn't yet support searching repositories of a given user:
+.Bd -literal -offset indent
+$ gcli repos -o herrhotzenplotz foobar
+.Ed
+.Pp
+This will error out indicating that this is not supported by gcli.
+.Pp
 Please report bugs via E-Mail to
 .Mt @PACKAGE_BUGREPORT@ .
 .Pp

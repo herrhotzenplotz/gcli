@@ -31,6 +31,7 @@
 #include <gcli/gitlab/repos.h>
 #include <gcli/json_gen.h>
 #include <gcli/json_util.h>
+#include <gcli/url.h>
 
 #include <pdjson.h>
 
@@ -87,9 +88,9 @@ gitlab_search_repos(struct gcli_ctx *ctx,
                     struct gcli_repo_search_details const *const details,
                     struct gcli_repo_list *const list)
 {
-	char *url = NULL;
-	char *e_owner = NULL;
+	char *url = NULL, *e_owner = NULL, *options = NULL;
 	int rc = 0;
+
 	struct gcli_fetch_list_ctx fl = {
 		.listp = &list->repos,
 		.sizep = &list->repos_size,
@@ -100,9 +101,27 @@ gitlab_search_repos(struct gcli_ctx *ctx,
 	if (path->kind != GCLI_PATH_DEFAULT)
 		return gcli_error(ctx, "unsupported path kind");
 
-	e_owner = gcli_urlencode(path->as_default.owner);
-	url = gcli_asprintf("%s/users/%s/projects", gcli_get_apibase(ctx), e_owner);
-	gcli_clear_ptr(&e_owner);
+	if (details->search_term)
+		gcli_url_options_append(&options, "search", details->search_term);
+
+	/* list/search restricted to a given owner */
+	if (path->as_default.owner) {
+		e_owner = gcli_urlencode(path->as_default.owner);
+
+		url = gcli_asprintf("%s/users/%s/projects%s",
+		                    gcli_get_apibase(ctx),
+		                    e_owner,
+		                    options ? options : "");
+
+		gcli_clear_ptr(&e_owner);
+	} else {
+		/* global search */
+		url = gcli_asprintf("%s/projects%s",
+		                    gcli_get_apibase(ctx),
+		                    options ? options : "");
+	}
+
+	gcli_clear_ptr(&options);
 
 	rc = gcli_fetch_list(ctx, url, &fl);
 

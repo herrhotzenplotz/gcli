@@ -105,8 +105,10 @@ github_user_is_org(struct gcli_ctx *ctx, char const *e_owner)
 }
 
 int
-github_get_repos(struct gcli_ctx *ctx, char const *owner, int const max,
-                 struct gcli_repo_list *const list)
+github_search_repos(struct gcli_ctx *ctx,
+                    struct gcli_path const *const path,
+                    struct gcli_repo_search_details const *const details,
+                    struct gcli_repo_list *const list)
 {
 	char *url = NULL, *e_owner = NULL;
 	int rc = 0;
@@ -114,11 +116,14 @@ github_get_repos(struct gcli_ctx *ctx, char const *owner, int const max,
 	struct gcli_fetch_list_ctx lf = {
 		.listp = &list->repos,
 		.sizep = &list->repos_size,
-		.max = max,
+		.max = details->max,
 		.parse = (parsefn)(parse_github_repos),
 	};
 
-	e_owner = gcli_urlencode(owner);
+	if (path->kind != GCLI_PATH_DEFAULT)
+		return gcli_error(ctx, "unsupported path kind");
+
+	e_owner = gcli_urlencode(path->as_default.owner);
 	rc = github_user_is_org(ctx, e_owner);
 
 	if (rc < 0)

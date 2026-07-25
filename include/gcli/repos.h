@@ -60,13 +60,20 @@ struct gcli_repo_create_options {
 	bool private;
 };
 
+struct gcli_repo_search_details {
+	int max;
+	char *search_term;
+};
+
 typedef enum {
 	GCLI_REPO_VISIBILITY_PRIVATE = 1,
 	GCLI_REPO_VISIBILITY_PUBLIC,
 } gcli_repo_visibility;
 
-int gcli_get_repos(struct gcli_ctx *ctx, char const *owner, int max,
-                   struct gcli_repo_list *list);
+int gcli_search_repos(struct gcli_ctx *ctx,
+                      struct gcli_path const *path,
+                      struct gcli_repo_search_details const *details,
+                      struct gcli_repo_list *list);
 
 void gcli_repos_free(struct gcli_repo_list *list);
 void gcli_repo_free(struct gcli_repo *it);

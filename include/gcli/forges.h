@@ -507,10 +507,10 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Get a list of repos of the given owner */
-	int (*get_repos)(
+	int (*search_repos)(
 		struct gcli_ctx *ctx,
-		char const *owner,
-		int max,
+		struct gcli_path const *path,
+		struct gcli_repo_search_details const *details,
 		struct gcli_repo_list *out);
 
 	/**

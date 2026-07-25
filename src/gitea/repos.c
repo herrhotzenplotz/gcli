@@ -39,10 +39,12 @@
 #include <stdarg.h>
 
 int
-gitea_get_repos(struct gcli_ctx *ctx, char const *owner, int const max,
-                struct gcli_repo_list *const list)
+gitea_search_repos(struct gcli_ctx *ctx,
+                   struct gcli_path const *const path,
+                   struct gcli_repo_search_details const *const details,
+                   struct gcli_repo_list *const list)
 {
-	return github_get_repos(ctx, owner, max, list);
+	return github_search_repos(ctx, path, details, list);
 }
 
 int

@@ -82,8 +82,10 @@ gitlab_repos_fixup_missing_visibility(struct gcli_repo_list *const list)
 }
 
 int
-gitlab_get_repos(struct gcli_ctx *ctx, char const *owner, int const max,
-                 struct gcli_repo_list *const list)
+gitlab_search_repos(struct gcli_ctx *ctx,
+                    struct gcli_path const *const path,
+                    struct gcli_repo_search_details const *const details,
+                    struct gcli_repo_list *const list)
 {
 	char *url = NULL;
 	char *e_owner = NULL;
@@ -92,10 +94,13 @@ gitlab_get_repos(struct gcli_ctx *ctx, char const *owner, int const max,
 		.listp = &list->repos,
 		.sizep = &list->repos_size,
 		.parse = (parsefn)(parse_gitlab_repos),
-		.max = max,
+		.max = details->max,
 	};
 
-	e_owner = gcli_urlencode(owner);
+	if (path->kind != GCLI_PATH_DEFAULT)
+		return gcli_error(ctx, "unsupported path kind");
+
+	e_owner = gcli_urlencode(path->as_default.owner);
 	url = gcli_asprintf("%s/users/%s/projects", gcli_get_apibase(ctx), e_owner);
 	gcli_clear_ptr(&e_owner);
 

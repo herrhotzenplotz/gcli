@@ -42,8 +42,10 @@ int gitlab_repo_make_url(struct gcli_ctx *ctx, struct gcli_path const *path,
 int gitlab_get_repo(struct gcli_ctx *ctx, struct gcli_path const *path,
                     struct gcli_repo *out);
 
-int gitlab_get_repos(struct gcli_ctx *ctx, char const *owner, int max,
-                     struct gcli_repo_list *out);
+int gitlab_search_repos(struct gcli_ctx *ctx,
+                        struct gcli_path const *path,
+                        struct gcli_repo_search_details const *details,
+                        struct gcli_repo_list *out);
 
 int gitlab_get_own_repos(struct gcli_ctx *ctx, int max,
                          struct gcli_repo_list *out);

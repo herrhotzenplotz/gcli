@@ -35,10 +35,12 @@
 #include <stdlib.h>
 
 int
-gcli_get_repos(struct gcli_ctx *ctx, char const *owner, int const max,
-               struct gcli_repo_list *const out)
+gcli_search_repos(struct gcli_ctx *ctx,
+                  struct gcli_path const *const path,
+                  struct gcli_repo_search_details const *details,
+                  struct gcli_repo_list *const out)
 {
-	gcli_null_check_call(get_repos, ctx, owner, max, out);
+	gcli_null_check_call(search_repos, ctx, path, details, out);
 }
 
 void

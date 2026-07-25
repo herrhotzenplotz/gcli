@@ -36,8 +36,10 @@
 
 #include <gcli/repos.h>
 
-int gitea_get_repos(struct gcli_ctx *ctx, char const *owner, int max,
-                    struct gcli_repo_list *out);
+int gitea_search_repos(struct gcli_ctx *ctx,
+                       struct gcli_path const *path,
+                       struct gcli_repo_search_details const *details,
+                       struct gcli_repo_list *out);
 
 int gitea_get_own_repos(struct gcli_ctx *ctx, int max,
                         struct gcli_repo_list *out);

@@ -41,8 +41,10 @@ int github_repo_make_url(struct gcli_ctx *ctx, struct gcli_path const *path,
 
 int github_user_is_org(struct gcli_ctx *ctx, char const *e_owner);
 
-int github_get_repos(struct gcli_ctx *ctx, char const *owner, int max,
-                     struct gcli_repo_list *out);
+int github_search_repos(struct gcli_ctx *ctx,
+                        struct gcli_path const *path,
+                        struct gcli_repo_search_details const *details,
+                        struct gcli_repo_list *out);
 
 int github_get_own_repos(struct gcli_ctx *ctx, int max,
                          struct gcli_repo_list *out);

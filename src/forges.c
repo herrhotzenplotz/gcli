@@ -160,7 +160,7 @@ github_forge_descriptor =
 	.label_set_colour          = github_label_set_colour,
 
 	/* Repos */
-	.get_repos                 = github_get_repos,
+	.search_repos              = github_search_repos,
 	.repo_create               = github_repo_create,
 	.repo_delete               = github_repo_delete,
 	.repo_set_visibility       = github_repo_set_visibility,
@@ -268,7 +268,7 @@ gitlab_forge_descriptor =
 	.label_set_colour          = gitlab_label_set_colour,
 
 	/* Repos */
-	.get_repos                 = gitlab_get_repos,
+	.search_repos              = gitlab_search_repos,
 	.repo_create               = gitlab_repo_create,
 	.repo_delete               = gitlab_repo_delete,
 	.repo_set_visibility       = gitlab_repo_set_visibility,
@@ -381,7 +381,7 @@ gitea_forge_descriptor =
 	.label_set_colour          = gitea_label_set_colour,
 
 	/* Repos */
-	.get_repos                 = gitea_get_repos,
+	.search_repos              = gitea_search_repos,
 	.repo_create               = gitea_repo_create,
 	.repo_delete               = gitea_repo_delete,
 	.repo_set_visibility       = gitea_repo_set_visibility,

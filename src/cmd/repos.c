@@ -34,6 +34,7 @@
 #include <gcli/cmd/repos.h>
 #include <gcli/cmd/table.h>
 
+#include <gcli/port/string.h>
 #include <gcli/port/util.h>
 #include <gcli/repos.h>
 
@@ -295,8 +296,9 @@ int
 subcommand_repos(int argc, char *argv[])
 {
 	int ch, count = 30, rc = 0;
-	char const *owner = NULL;
-	char const *repo = NULL;
+	char const *owner = NULL, *repo = NULL;
+	struct gcli_path path = {0};
+	struct gcli_repo_search_details details = {0};
 	struct gcli_repo_list repos = {0};
 	enum gcli_output_flags flags = 0;
 
@@ -326,6 +328,8 @@ subcommand_repos(int argc, char *argv[])
 		{0},
 	};
 
+	path.kind = GCLI_PATH_DEFAULT;
+
 	while ((ch = getopt_long(argc, argv, "+n:o:r:s", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
@@ -351,30 +355,35 @@ subcommand_repos(int argc, char *argv[])
 
 	argc -= optind;
 	argv += optind;
+
 	optind = 0;
 
-	/* List repos of the owner */
-	if (argc == 0) {
-		if (repo) {
-			fprintf(stderr, "gcli: error: no actions specified\n");
-			usage();
-			return EXIT_FAILURE;
-		}
+	/* List repos of the owner or search */
+	if (repo == NULL) {
 
-		if (!owner)
+		/* no search term given, require an owner or attempt inferring
+		 * it. */
+		if (!owner && argc == 0) {
 			owner = gcli_config_get_account_name(g_clictx);
 
-		/* whenever there is no default account we would be passing NULL to
-		 * gcli_get_repos. This is bad since that causes segfaults down the
-		 * line. (https://github.com/herrhotzenplotz/gcli/issues/118) */
-		if (!owner) {
-			fprintf(stderr, "gcli: error: no account specified or no default"
-			        " account configured. use -o to provide an explicit"
-			        " account name.\n");
-			return EXIT_FAILURE;
+			/* whenever there is no default account we would be passing NULL to
+			 * gcli_get_repos. This is bad since that causes segfaults down the
+			 * line. (https://github.com/herrhotzenplotz/gcli/issues/118) */
+			if (!owner) {
+				fprintf(stderr, "gcli: error: no account specified or no default"
+				        " account configured. use -o to provide an explicit"
+				        " account name.\n");
+				return EXIT_FAILURE;
+			}
 		}
 
-		rc = gcli_get_repos(g_clictx, owner, count, &repos);
+		path.as_default.owner = (char *)owner;
+
+		details.max = count;
+		if (argc)
+			details.search_term = gcli_join_with((char const *const *)argv, argc, " ");
+
+		rc = gcli_search_repos(g_clictx, &path, &details, &repos);
 		if (rc < 0) {
 			errx(1, "gcli: error: failed to fetch repos: %s",
 			     gcli_get_error(g_clictx));
@@ -382,15 +391,19 @@ subcommand_repos(int argc, char *argv[])
 
 		gcli_print_repos(flags, &repos, count);
 		gcli_repos_free(&repos);
+
+		free(details.search_term);
 	} else {
-		struct gcli_path path = {
-			.as_default = {
-				.owner = (char *)owner,
-				.repo = (char *)repo,
-			},
-		};
+		path.as_default.owner = (char *)owner;
+		path.as_default.repo = (char *)repo;
 
 		check_path(&path);
+
+		if (argc == 0) {
+			fprintf(stderr, "gcli: missing actions\n");
+			usage();
+			return EXIT_FAILURE;
+		}
 
 		while (argc) {
 			struct action const *action = find_action(argv[0]);

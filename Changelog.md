@@ -46,10 +46,23 @@ This changelog does not follow semantic versioning.
   the options of this subcommand. The `gcli(1)` manual page has
   been updated and references the new manual page as well.
 
+- It is now possible to search for repositories via the `gcli repos`
+  subcommand. Search keywords are taken as is after the subcommand:
+
+	gcli repos foo bar baz
+
+  This would search for `foo bar baz`.
+
+  Suggested by: Dmitry Atamanov <https://github.com/data-man>
+
 ### Changed
 
 - `gcli labels` now includes inherited labels from the organisation
   for Gitea
+
+- When performing actions on a repository via `gcli repos` it is
+  now mandatory to specify both the owner and the repository name
+  via `-o` and `-r` respectively.
 
 ### Removed
 

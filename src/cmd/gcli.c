@@ -33,6 +33,7 @@
 #include <getopt.h>
 #endif
 
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -327,6 +328,8 @@ main(int argc, char *argv[])
 	char const *errmsg;
 	struct subcommand const *sc;
 	int error_reason;
+
+	setlocale(LC_ALL, "");
 
 	errmsg = gcli_init(&g_clictx, gcli_config_get_forge_type,
 	                   gcli_config_get_token, gcli_config_get_apibase);

@@ -39,6 +39,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <wchar.h>
 
 /* A row */
 struct gcli_tblrow;
@@ -81,7 +82,7 @@ gcli_tbl_begin(struct gcli_tblcoldef *const cols, size_t const cols_size)
 {
 	struct gcli_tbl *tbl;
 
-    /* Allocate the structure and fill in the handle */
+	/* Allocate the structure and fill in the handle */
 	tbl = calloc(1, sizeof(*tbl));
 	if (!tbl)
 		return NULL;
@@ -135,6 +136,34 @@ table_freerow(struct gcli_tblrow *row, size_t const cols)
 	row->cells = NULL;
 }
 
+/* Helper to compute the actual display width of a string, accounting for
+ * the Unicode encoding. */
+static size_t
+display_width(char const *buf)
+{
+	mbstate_t state = {0};
+	size_t width = 0, clen = 0, buf_size = 0;
+	wchar_t chr = L'\0';
+
+	if (buf == NULL)
+		return 0;
+
+	buf_size = strlen(buf);
+
+	while (buf_size > 0) {
+		clen = mbrtowc(&chr, buf, buf_size, &state);
+		if (clen == (size_t)-1)
+			return width; /* assume string termination here */
+
+		width += wcwidth(chr);
+
+		buf += clen;
+		buf_size -= clen;
+	}
+
+	return width;
+}
+
 static int
 tablerow_add_cell(struct gcli_tbl *const table,
                   struct gcli_tblrow *const row,
@@ -175,7 +204,7 @@ tablerow_add_cell(struct gcli_tbl *const table,
 		if (!it)
 			it = "N/A"; /* hack */
 		row->cells[col].text = strdup(it);
-		cell_size = strlen(it);
+		cell_size = display_width(it);
 	} break;
 	case GCLI_TBLCOLTYPE_DOUBLE: {
 		row->cells[col].text = gcli_asprintf("%lf", va_arg(*vp, double));
@@ -264,16 +293,20 @@ dump_row(struct gcli_tbl const *const table, size_t const i)
 	struct gcli_tblrow const *const row = &table->rows[i];
 
 	for (size_t col = 0; col < table->cols_size; ++col) {
+		size_t cell_disp_width = 0;
 
 		/* Skip empty columns (as with colour indicators in no-colour
 		 * mode) */
 		if (table->col_widths[col] == 0)
 			continue;
 
+		if (row->cells[col].text)
+			cell_disp_width = display_width(row->cells[col].text);
+
 		/* If right justified and not last column, print padding */
 		if ((table->cols[col].flags & GCLI_TBLCOL_JUSTIFYR) &&
 		    (col + 1) < table->cols_size)
-			pad(table->col_widths[col] - strlen(row->cells[col].text));
+			pad(table->col_widths[col] - cell_disp_width);
 
 		/* State colour */
 		if (table->cols[col].flags & GCLI_TBLCOL_STATECOLOURED)
@@ -310,7 +343,7 @@ dump_row(struct gcli_tbl const *const table, size_t const i)
 			/* If left-justified, print justify-padding */
 			if (!(table->cols[col].flags & GCLI_TBLCOL_JUSTIFYR) &&
 			    (col + 1) < table->cols_size)
-				padding += table->col_widths[col] - strlen(row->cells[col].text);
+				padding += table->col_widths[col] - cell_disp_width;
 
 			pad(padding);
 		}

@@ -28,6 +28,7 @@ my $testsrcdir = dirname(realpath($0));
 my $builddir = getcwd();
 my $verbosity = 0;
 my $jobs = 1;
+my $wrapper = "";
 
 # Clean environment variables that could mess with the
 # test suite results.
@@ -43,6 +44,9 @@ sub usage {
 	print STDERR "   -j --jobs      Run tests in parallel with the given number of jobs\n";
 	print STDERR "   -s --srcdir    Assume the test source tree is at the given directory\n";
 	print STDERR "   -b --builddir  Assume the build output directory is at the given directory\n";
+	print STDERR "   -w --wrap      Wrap the gcli call with a program\n";
+	print STDERR "      --debug     Set wrapper to lldb server. You can connect with gdb-remote 127.0.0.1:4242 to it\n";
+	print STDERR "      --trace     Set wrapper to ktrace -di\n";
 	print STDERR "   -v --verbose   Be verbose\n";
 	print STDERR "\n";
 	print STDERR "When a filter is given, only integration tests are run.\n";
@@ -52,7 +56,10 @@ sub usage {
 GetOptions(
 	"srcdir=s" => \$testsrcdir,
 	"builddir=s" => \$builddir,
+	"wrap=s" => \$wrapper,
 	"verbose" => \$verbosity,
+	"debug" => sub { $wrapper = "lldb-server g --log-file /dev/null :4242 --"; },
+	"trace" => sub { $wrapper = "ktrace -di"; },
 	"jobs=i" => \$jobs,
 	"help" => sub { usage; exit 0; },
 ) or die "failed to parse command line arguments";
@@ -93,6 +100,10 @@ for (glob "${testsrcdir}/integration/*.t") {
 	} else {
 		push(@alltests, @tdescr);
 	}
+}
+
+if (length($wrapper) > 0) {
+	$ENV{GCLI_TEST_WRAPPER} = $wrapper;
 }
 
 my $harness = TAP::Harness->new({

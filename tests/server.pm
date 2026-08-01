@@ -175,6 +175,10 @@ sub run_gcli {
 	my $cwd = getcwd();
 	my $cmd = "$cwd/gcli -C $srv->{'cfg_file_name'} $args 2>&1";
 
+	if (defined($ENV{GCLI_TEST_WRAPPER})) {
+		$cmd = "$ENV{GCLI_TEST_WRAPPER} $cmd";
+	}
+
 	open my $logfile, '>', $srv->{'gcli_out_file'};
 	$logfile->autoflush;
 

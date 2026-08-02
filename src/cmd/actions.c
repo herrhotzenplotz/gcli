@@ -60,7 +60,7 @@ gcli_cmd_actions_handle(struct gcli_cmd_actions const *const actions,
 
 	if (*argc < 1) {
 		fprintf(stderr, "gcli: error: missing action\n");
-		return 1;
+		return GCLI_EX_USAGE;
 	}
 
 	/* check until we don't have any more remaining arguments */

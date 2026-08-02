@@ -29,6 +29,7 @@
 
 #include <config.h>
 
+#include <gcli/cmd/actions.h>
 #include <gcli/cmd/cmd.h>
 #include <gcli/cmd/cmdconfig.h>
 #include <gcli/cmd/repos.h>
@@ -154,7 +155,7 @@ subcommand_repos_create(int argc, char *argv[])
 		{0},
 	};
 
-	while ((ch = getopt_long(argc, argv, "r:d:p", options, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "+r:d:p", options, NULL)) != -1) {
 		switch (ch) {
 		case 'r':
 			create_options.name = optarg;
@@ -174,6 +175,7 @@ subcommand_repos_create(int argc, char *argv[])
 
 	argc -= optind;
 	argv += optind;
+	optind = 0;
 
 	if (!create_options.name) {
 		fprintf(stderr,
@@ -195,7 +197,8 @@ subcommand_repos_create(int argc, char *argv[])
 }
 
 static int
-action_delete(struct gcli_path const *const path, int *argc, char ***argv)
+action_delete(struct gcli_path const *const path, void *item,
+              int *argc, char ***argv)
 {
 	int ch;
 	bool always_yes = false;
@@ -206,6 +209,8 @@ action_delete(struct gcli_path const *const path, int *argc, char ***argv)
 		  .val     = 'y' },
 		{0},
 	};
+
+	(void) item;
 
 	always_yes = gcli_cmd_should_do_always_yes();
 
@@ -220,8 +225,9 @@ action_delete(struct gcli_path const *const path, int *argc, char ***argv)
 		}
 	}
 
-	*argc -= optind;
-	*argv += optind;
+	*argc -= optind - 1;
+	*argv += optind - 1;
+	optind = 0;
 
 	delete_repo(always_yes, path);
 
@@ -244,12 +250,14 @@ parse_visibility(char const *str)
 /* Change the visibility level of a repository (e.g. public, private
  * etc) */
 static int
-action_set_visibility(struct gcli_path const *const path, int *argc,
-                      char ***argv)
+action_set_visibility(struct gcli_path const *const path, void *item,
+                      int *argc, char ***argv)
 {
 	char const *visblty_str;
 	gcli_repo_visibility visblty;
 	int rc;
+
+	(void) item;
 
 	if (*argc < 2) {
 		fprintf(stderr, "gcli: error: missing visibility level\n");
@@ -257,8 +265,8 @@ action_set_visibility(struct gcli_path const *const path, int *argc,
 	}
 
 	visblty_str = (*argv)[1];
-	*argv += 2;
-	*argc -= 2;
+	*argv += 1;
+	*argc -= 1;
 
 	visblty = parse_visibility(visblty_str);
 
@@ -271,26 +279,24 @@ action_set_visibility(struct gcli_path const *const path, int *argc,
 	return 0;
 }
 
-static struct action {
-	char const *const name;
-	int (*fn)(struct gcli_path const *const path, int *argc, char ***argv);
-} const actions[] = {
-	{ .name = "delete",         .fn = action_delete },
-	{ .name = "set-visibility", .fn = action_set_visibility },
+static struct gcli_cmd_actions const actions = {
+	.fetch_item = NULL,
+	.free_item = NULL,
+	.item_size = sizeof(struct gcli_repo),
+	.defs = {
+		{ .name = "delete",
+		  .help = "Delete the repository",
+		  .needs_item = false,
+		  .handler = action_delete,
+		},
+		{ .name = "set-visibility",
+		  .help = "Change the visibility of the repository",
+		  .needs_item = false,
+		  .handler = action_set_visibility,
+		},
+		{0},
+	},
 };
-
-static size_t const actions_size = ARRAY_SIZE(actions);
-
-static struct action const *
-find_action(char const *const name)
-{
-	for (size_t i = 0; i < actions_size; ++i) {
-		if (strcmp(name, actions[i].name) == 0)
-			return &actions[i];
-	}
-
-	return NULL;
-}
 
 int
 subcommand_repos(int argc, char *argv[])
@@ -399,25 +405,11 @@ subcommand_repos(int argc, char *argv[])
 
 		check_path(&path);
 
-		if (argc == 0) {
-			fprintf(stderr, "gcli: missing actions\n");
+		rc = gcli_cmd_actions_handle(&actions, &path, &argc, &argv);
+		if (rc == GCLI_EX_USAGE)
 			usage();
-			return EXIT_FAILURE;
-		}
 
-		while (argc) {
-			struct action const *action = find_action(argv[0]);
-			int rc = 0;
-
-			if (!action) {
-				fprintf(stderr, "gcli: error: unrecognised action »%s«\n", argv[0]);
-				return EXIT_FAILURE;
-			}
-
-			rc = action->fn(&path, &argc, &argv);
-			if (rc)
-				return rc;
-		}
+		return !!rc;
 	}
 
 	return EXIT_SUCCESS;

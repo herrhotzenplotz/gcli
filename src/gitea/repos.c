@@ -75,6 +75,45 @@ search_repos(struct gcli_ctx *ctx,
 	return gcli_fetch_list(ctx, url, &fl);
 }
 
+static int
+list_repos(struct gcli_ctx *ctx,
+           struct gcli_path const *const path,
+           struct gcli_repo_search_details const *const details,
+           struct gcli_repo_list *const list)
+{
+	char *e_owner = NULL, *url = NULL;
+	int rc = 0;
+
+	struct gcli_fetch_list_ctx fl = {
+		.listp = &list->repos,
+		.sizep = &list->repos_size,
+		.max = details->max,
+		.parse = (parsefn)(parse_gitea_repos),
+	};
+
+	e_owner = gcli_urlencode(path->as_default.owner);
+
+	rc = github_user_is_org(ctx, e_owner);
+	if (rc < 0)
+		return rc;
+
+	if (!rc) {
+		/* it is a user */
+		url = gcli_asprintf("%s/users/%s/repos",
+		                    gcli_get_apibase(ctx),
+		                    e_owner);
+	} else {
+		/* this is an actual organization */
+		url = gcli_asprintf("%s/orgs/%s/repos",
+		                    gcli_get_apibase(ctx),
+		                    e_owner);
+	}
+
+	gcli_clear_ptr(&e_owner);
+
+	return gcli_fetch_list(ctx, url, &fl);
+}
+
 int
 gitea_search_repos(struct gcli_ctx *ctx,
                    struct gcli_path const *const path,
@@ -84,7 +123,7 @@ gitea_search_repos(struct gcli_ctx *ctx,
 	if (details->search_term)
 		return search_repos(ctx, path, details, list);
 	else
-		return github_search_repos(ctx, path, details, list);
+		return list_repos(ctx, path, details, list);
 }
 
 int

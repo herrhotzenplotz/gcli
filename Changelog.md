@@ -2,7 +2,7 @@
 
 This changelog does not follow semantic versioning.
 
-## UNRELEASED
+## 2.13.0 (05-Aug-2026)
 
 ### Fixed
 
@@ -63,8 +63,6 @@ This changelog does not follow semantic versioning.
 - When performing actions on a repository via `gcli repos` it is
   now mandatory to specify both the owner and the repository name
   via `-o` and `-r` respectively.
-
-### Removed
 
 ## 2.12.0 (30-May-2026)
 

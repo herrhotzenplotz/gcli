@@ -118,16 +118,30 @@ compiler_target() {
 	esac | normalise_compiler_target
 }
 
-# args= pkgconfig-name variable-name is-mandatory
+# Check whether we should check for something ($1 = 1 or auto)
+#
+# args: $enable
+check_if_needed() {
+	case "${1}" in
+	1|auto) return 0 ;;
+	*)      return 1 ;;
+	esac
+}
+
+# args= pkgconfig-name variable-name is-mandatory is-enabled
 find_package() {
+	eval local force_enabled="\$ENABLE_${2}"
+
 	printf "Checking for $1 ..." >&2
 	if ! $PKG_CONFIG --exists $1; then
-		if [ "${3}" = optional ]; then
+		if [ "${3}" = optional ] && ! [ "$force_enabled" = 1 ]; then
 			printf " not found\n" >&2
 			export ${2}_FOUND=0
 			return
-		else # $3 = required
-			die "not found"
+		else # $3 = required or force_enabled
+			printf >&2 "not found\n"
+			printf >&2 "configure: required or forced dependency not found: %s\n" "${1}"
+			die "configure: exiting due to dependency problems"
 		fi
 	fi
 
@@ -150,9 +164,14 @@ Configure build directory of gcli.
 
 OPTIONS:
     --prefix=PREFIX         Set installation prefix to PREFIX [DEFAULT: /usr/local]
-    --disable-libedit       Disable use of libedit for interactive editing [DEFAULT: autodetect]
+    --enable-libedit        Force use of libedit for interactive editing [DEFAULT: autodetect]
+                            This flag is mutually exclusive with --enable-libreadline.
+    --disable-libedit       Disable use of libedit for interactive editing
+    --enable-libreadline    Force use of libreadline for interactive editing
+                            This flag is mutually exclusive with --enable-libedit.
     --disable-libreadline   Disable use of libreadline for interactive editing [DEFAULT: autodetect]
-    --disable-liblowdown    Disable use of liblowdown for markdown rendering [DEFAULT: autodetect]
+    --enable-liblowdown     Force use of liblowdown for markdown rendering [DEFAULT: autodetect]
+    --disable-liblowdown    Disable use of liblowdown for markdown rendering
     --disable-librt         Forcefully disable linking librt [DEFAULT: no, except on Darwin]
     --enable-maintainer     Enable Maintainer Mode [DEFAULT: no]
                             You only want this if you're working on the gcli source code.
@@ -198,12 +217,12 @@ EOF
 #
 PREFIX=/usr/local
 OPTIMISE=
-ENABLE_LIBEDIT=1
-ENABLE_LIBREADLINE=1
-ENABLE_LIBLOWDOWN=1
+ENABLE_LIBEDIT=auto
+ENABLE_LIBREADLINE=auto
+ENABLE_LIBLOWDOWN=auto
 ENABLE_LIBRT=1
 ENABLE_MAINTAINER=${ENABLE_MAINTAINER:-0}
-ENABLE_TESTS=1
+ENABLE_TESTS=auto
 ENABLE_SANITISERS=${ENABLE_SANITISERS:-0}
 DEPRECATED_OPTIONS_USED=0
 UNKNOWN_OPTIONS_USED=0
@@ -219,34 +238,16 @@ while [ $# -gt 0 ]; do
 			PREFIX=${2}
 			shift; shift
 			;;
-		--disable-libedit)
-			ENABLE_LIBEDIT=0
-			shift
-			;;
-		--disable-libreadline)
-			ENABLE_LIBREADLINE=0
-			shift
-			;;
-		--disable-librt)
-			ENABLE_LIBRT=0
-			shift
-			;;
-		--disable-liblowdown)
-			ENABLE_LIBLOWDOWN=0
-			shift
-			;;
-		--enable-maintainer)
-			ENABLE_MAINTAINER=1
-			shift
-			;;
-		--disable-tests)
-			ENABLE_TESTS=0
-			shift
-			;;
-		--enable-sanitisers)
-			ENABLE_SANITISERS=1
-			shift
-			;;
+		--enable-libedit)      ENABLE_LIBEDIT=1;     shift ;;
+		--disable-libedit)     ENABLE_LIBEDIT=0;     shift ;;
+		--enable-libreadline)  ENABLE_LIBREADLINE=1; shift ;;
+		--disable-libreadline) ENABLE_LIBREADLINE=0; shift ;;
+		--enable-liblowdown)   ENABLE_LIBLOWDOWN=1;  shift ;;
+		--disable-liblowdown)  ENABLE_LIBLOWDOWN=0;  shift ;;
+		--disable-librt)       ENABLE_LIBRT=0;       shift ;;
+		--enable-maintainer)   ENABLE_MAINTAINER=1;  shift ;;
+		--disable-tests)       ENABLE_TESTS=0;       shift ;;
+		--enable-sanitisers)   ENABLE_SANITISERS=1;  shift ;;
 		--debug)
 			OPTIMISE=debug
 			shift
@@ -258,14 +259,6 @@ while [ $# -gt 0 ]; do
 		--help)
 			usage
 			;;
-
-		# Deprecated section
-		--enable-libedit|--enable-libreadline|--enable-liblowdown)
-			echo "configure: warning: $1 is deprecated and ignored" >&2
-			DEPRECATED_OPTIONS_USED=1
-			shift
-			;;
-
 		# Unknown. Do not error out, but inform the user later.
 		*)
 			echo "configure: warning: unrecognised option '$1'" >&2
@@ -385,11 +378,16 @@ fi
 PKG_CONFIG=${PKG_CONFIG:-$(find_program pkg-config pkg-config pkgconf)}
 [ $? -eq 0 ] || die "error: need pkg-config or pkgconf"
 
+# We only support one interactive editing helper
+if [ "${ENABLE_LIBEDIT}" = 1 ] && [ "${ENABLE_LIBREADLINE}" = 1 ]; then
+	die "configure: error: --enable-libedit and --enable-libreadline don't make sense together. You must choose either one or none!"
+fi
+
 find_package libcurl LIBCURL required
 find_package libcrypto LIBCRYPTO required
 
 # Look for libedit if not disabled
-if [ $ENABLE_LIBEDIT -eq 1 ]; then
+if check_if_needed "$ENABLE_LIBEDIT"; then
 	find_package libedit LIBEDIT optional
 else
 	LIBEDIT_FOUND=0
@@ -399,14 +397,14 @@ fi
 # and readline support hasn't been disabled.
 if [ $LIBEDIT_FOUND -eq 1 ]; then
 	LIBREADLINE_FOUND=0
-elif [ $ENABLE_LIBREADLINE -eq 1 ]; then
+elif check_if_needed "$ENABLE_LIBREADLINE"; then
 	find_package readline LIBREADLINE optional
 else
 	LIBREADLINE_FOUND=0
 fi
 
 # Lowdown
-if [ $ENABLE_LIBLOWDOWN -eq 1 ]; then
+if check_if_needed "$ENABLE_LIBLOWDOWN"; then
 	find_package lowdown LIBLOWDOWN optional
 
 	# Workaround for breaking API changes and header without versions:
@@ -423,7 +421,7 @@ find_package pdjson PDJSON optional
 
 # On Darwin the POSIX Real-Time extensions are in libc. We must not
 # link against librt because it doesn't exist.
-if [ $ENABLE_LIBRT -eq 1 ]; then
+if check_if_needed "${ENABLE_LIBRT}"; then
 	printf "Checking whether host is Darwin for -lrt..." >&2
 	case "${HOST}" in
 		*-apple-darwin*)
@@ -492,7 +490,7 @@ if [ ${ENABLE_MAINTAINER} -eq 1 ]; then
 	[ $? -eq 0 ] || die "error: couldn't find lowdown which is required in maintainer mode"
 fi
 
-if [ ${ENABLE_TESTS} -eq 1 ]; then
+if check_if_needed "${ENABLE_TESTS}"; then
 	PERL=${PERL:-$(find_program perl perl perl5)}
 	if ! [ $? -eq 0 ]; then
 		ENABLE_TESTS=0
@@ -515,6 +513,7 @@ if [ ${ENABLE_TESTS} -eq 1 ]; then
 		then
 			printf 'tests are enabled.\n' >&2
 			TAPVER=14
+			ENABLE_TESTS=1
 		else
 			printf 'too old, disabling tests.\n' >&2
 			ENABLE_TESTS=0

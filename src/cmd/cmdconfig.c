@@ -803,17 +803,20 @@ get_default_account(struct gcli_ctx *ctx, gcli_forge_type ftype)
 	return act;
 }
 
-static char const *
+static char *
 gcli_config_get_account(struct gcli_ctx *ctx)
 {
 	struct gcli_config *cfg = ctx_config(ctx);
 	gcli_forge_type ftype = gcli_config_get_forge_type(ctx);
-	char const *account;
+	char *account = NULL;
+	char const *tmp;
 
 	if (cfg->override_default_account) {
 		account = strdup(cfg->override_default_account);
 	} else {
-		account = get_default_account(ctx, ftype);
+		tmp = get_default_account(ctx, ftype);
+		if (tmp)
+			account = strdup(tmp);
 	}
 
 	return account;
@@ -829,7 +832,7 @@ static char const *const default_urls[] = {
 char const *
 gcli_config_get_apibase(struct gcli_ctx *ctx)
 {
-	char const *acct = gcli_config_get_account(ctx);
+	char *acct = gcli_config_get_account(ctx);
 	char const *url = NULL;
 
 	if (acct) {
@@ -846,6 +849,8 @@ gcli_config_get_apibase(struct gcli_ctx *ctx)
 
 	if (!url)
 		url = default_urls[gcli_config_get_forge_type(ctx)];
+
+	free(acct);
 
 	return url;
 }
@@ -864,13 +869,17 @@ gcli_config_get_account_name(struct gcli_ctx *ctx)
 static char const *
 get_account_token(struct gcli_ctx *ctx)
 {
-	char const *account;
+	char *account;
+	char const *token;
 
 	account = gcli_config_get_account(ctx);
 	if (!account)
 		return NULL;
 
-	return gcli_config_find_by_key(ctx, account, "token");
+	token = gcli_config_find_by_key(ctx, account, "token");
+	free(account);
+
+	return token;
 }
 
 char const *

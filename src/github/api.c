@@ -34,7 +34,7 @@
 
 #include <pdjson.h>
 
-char const *
+char *
 github_api_error_string(struct gcli_ctx *ctx, struct gcli_fetch_buffer *const buf)
 {
 	struct json_stream stream = {0};

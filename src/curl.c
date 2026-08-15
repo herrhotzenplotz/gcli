@@ -109,10 +109,11 @@ gcli_curl_check_api_error(struct gcli_ctx *ctx, CURLcode code, char const *url,
 	curl_easy_getinfo(ctx->curl, CURLINFO_RESPONSE_CODE, &status_code);
 
 	if (status_code >= 300L) {
-		return gcli_error(ctx,
-		                  "request to %s failed with code %ld: API error: %s",
-		                  url, status_code,
-		                  gcli_forge(ctx)->get_api_error_string(ctx, result));
+		char *api_error = gcli_forge(ctx)->get_api_error_string(ctx, result);
+		gcli_error(ctx, "request to %s failed with code %ld: API error: %s",
+		           url, status_code, api_error);
+		gcli_clear_ptr(&api_error);
+		return -1;
 	}
 
 	return 0;

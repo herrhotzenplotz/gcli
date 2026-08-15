@@ -34,7 +34,7 @@
 
 #include <pdjson.h>
 
-char const *
+char *
 gitlab_api_error_string(struct gcli_ctx *ctx, struct gcli_fetch_buffer *const buf)
 {
 	char *msg = NULL;

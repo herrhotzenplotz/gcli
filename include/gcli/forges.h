@@ -648,7 +648,7 @@ struct gcli_forge_descriptor {
 
 	/**
 	 * Get the error string from the API */
-	char const *(*get_api_error_string)(
+	char *(*get_api_error_string)(
 		struct gcli_ctx *ctx,
 		struct gcli_fetch_buffer *);
 

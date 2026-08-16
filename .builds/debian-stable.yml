@@ -10,17 +10,19 @@ packages:
   - libtool
   - libbsd-dev
   - perl
+  - valgrind
 sources:
   - https://git.sr.ht/~herrhotzenplotz/gcli
 tasks:
+  - configure: |
+      cd gcli
+      ./configure --debug
   - build: |
-      cd gcli
-      ./configure --debug
-      make -j 4 all
+      make -C gcli -j 4
   - check: |
-      cd gcli
-      ./configure --debug
-      make -j 4 check
+      make -C gcli -j 4 check-valgrind
+  - distcheck: |
+      make -C gcli -j 4 distcheck
   - copyright: |
       cd gcli
       tools/check-copyright

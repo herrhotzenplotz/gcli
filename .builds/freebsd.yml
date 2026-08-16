@@ -15,13 +15,13 @@ packages:
 sources:
   - https://git.sr.ht/~herrhotzenplotz/gcli
 tasks:
+  - configure: |
+      mkdir -p gcli/build
+      cd gcli/build
+      ../configure --debug
   - build: |
-      cd gcli
-      ./configure --debug
-      make -j 4 all
-
+      make -C gcli/build -j 4
   - check: |
-      cd gcli
-      ./configure --debug
-      make -j 4 check-valgrind
-      make -j 4 distcheck
+      make -C gcli/build -j 4 check-valgrind
+  - distcheck: |
+      make -C gcli/build -j 4 distcheck

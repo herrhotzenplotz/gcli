@@ -264,10 +264,10 @@ subcommand_comment(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "yr:o:i:p:R:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'r':
-			sctx.opts.target.as_default.repo = optarg;
+			sctx.opts.target.as_default.repo = strdup(optarg);
 			break;
 		case 'o':
-			sctx.opts.target.as_default.owner = optarg;
+			sctx.opts.target.as_default.owner = strdup(optarg);
 			break;
 		case 'p':
 			sctx.opts.target_type = PR_COMMENT;
@@ -323,6 +323,7 @@ subcommand_comment(int argc, char *argv[])
 	rc = comment_submit(&sctx, always_yes);
 
 	gcli_comment_free(&sctx.reply_comment);
+	gcli_path_free(&sctx.opts.target);
 
 	if (rc < 0)
 		errx(1, "gcli: error: failed to submit comment: %s", gcli_get_error(g_clictx));

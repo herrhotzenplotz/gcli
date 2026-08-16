@@ -371,10 +371,10 @@ subcommand_issue_create(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "o:r:yO:T:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
-			opts.owner = optarg;
+			opts.owner = strdup(optarg);
 			break;
 		case 'r':
-			opts.repo = optarg;
+			opts.repo = strdup(optarg);
 			break;
 		case 'y':
 			always_yes = true;
@@ -416,6 +416,8 @@ subcommand_issue_create(int argc, char *argv[])
 		errx(1, "gcli: error: failed to submit issue: %s",
 		     gcli_get_error(g_clictx));
 
+	free(opts.owner);
+	free(opts.repo);
 	gcli_nvlist_free(&opts.extra);
 
 	return EXIT_SUCCESS;
@@ -492,10 +494,10 @@ subcommand_issues(int argc, char *argv[])
 	while ((ch = getopt_long(argc, argv, "+sn:o:r:i:aA:L:M:S:", options, NULL)) != -1) {
 		switch (ch) {
 		case 'o':
-			path.as_default.owner = optarg;
+			path.as_default.owner = strdup(optarg);
 			break;
 		case 'r':
-			path.as_default.repo = optarg;
+			path.as_default.repo = strdup(optarg);
 			break;
 		case 'i': {
 			if (gcli_cmd_parse_id(optarg, &path.as_default.id) < 0)
@@ -548,6 +550,8 @@ subcommand_issues(int argc, char *argv[])
 		gcli_print_issues(flags, &list, count);
 
 		gcli_issues_free(&list);
+		gcli_path_free(&path);
+
 		return EXIT_SUCCESS;
 	}
 
@@ -556,11 +560,16 @@ subcommand_issues(int argc, char *argv[])
 		fprintf(stderr, "gcli: error: -a cannot be combined with operations on "
 		        "an issue\n");
 		usage();
+
+		gcli_path_free(&path);
 		return EXIT_FAILURE;
 	}
 
 	/* Handle all the actions */
-	return handle_issues_actions(argc, argv, &path);
+	rc = handle_issues_actions(argc, argv, &path);
+
+	gcli_path_free(&path);
+	return rc;
 }
 
 static int

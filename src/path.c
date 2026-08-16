@@ -56,7 +56,10 @@ gcli_path_free(struct gcli_path *const path)
 	case GCLI_PATH_PID_ID:
 		break;
 
-	default:
-		assert(0 && "unreachable");
+	case GCLI_PATH_NAMED:
+		gcli_clear_ptr(&path->as_named.owner);
+		gcli_clear_ptr(&path->as_named.repo);
+		gcli_clear_ptr(&path->as_named.id);
+		break;
 	}
 }

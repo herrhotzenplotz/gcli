@@ -60,6 +60,7 @@ GetOptions(
 	"verbose" => \$verbosity,
 	"debug" => sub { $wrapper = "lldb-server g --log-file /dev/null :4242 --"; },
 	"trace" => sub { $wrapper = "ktrace -di"; },
+	"valgrind" => sub { $wrapper = "valgrind --quiet --error-exitcode=75 --leak-check=full --track-origins=yes"; },
 	"jobs=i" => \$jobs,
 	"help" => sub { usage; exit 0; },
 ) or die "failed to parse command line arguments";

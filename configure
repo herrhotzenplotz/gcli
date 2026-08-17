@@ -509,7 +509,7 @@ if check_if_needed "${ENABLE_TESTS}"; then
 		TAPHARNESS_MINOR="${TAPHARNESS_VER#*.}"
 
 		if [ ${TAPHARNESS_MAJOR} -gt 3 ] ||
-		   [ ${TAPHARNESS_MAJOR} -eq 3 -a ${TAPHARNESS_MINOR} -gt 48 ]
+		   [ ${TAPHARNESS_MAJOR} -eq 3 -a ${TAPHARNESS_MINOR} -ge 48 ]
 		then
 			printf 'tests are enabled.\n' >&2
 			TAPVER=14

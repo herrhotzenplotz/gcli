@@ -345,7 +345,7 @@ struct gcli_cmd_actions label_actions = {
 };
 
 static int
-list_issues(struct gcli_path const *const path, int count)
+list_labels(struct gcli_path const *const path, int count)
 {
 	struct gcli_label_list labels = {0};
 
@@ -415,7 +415,7 @@ subcommand_labels(int argc, char *argv[])
 
 	/* List labels if no id was given */
 	if (path.as_named.id == NULL)
-		return list_issues(&path, count);
+		return list_labels(&path, count);
 
 	/* otherwise handle actions */
 	rc = gcli_cmd_actions_handle(&label_actions, &path, &argc, &argv);

@@ -178,7 +178,7 @@ tablerow_add_cell(struct gcli_tbl *const table,
 		/* don't free that! it's allocated and free'ed inside colour.c */
 		row->cells[col].colour = gcli_setcolour(code);
 	} else if (table->cols[col].flags & GCLI_TBLCOL_256COLOUR) {
-		uint64_t hexcode = va_arg(*vp, uint64_t);
+		uint32_t hexcode = va_arg(*vp, uint32_t);
 
 		/* see comment above */
 		row->cells[col].colour = gcli_setcolour256(hexcode);
@@ -192,7 +192,8 @@ tablerow_add_cell(struct gcli_tbl *const table,
 		cell_size = strlen(row->cells[col].text);
 	} break;
 	case GCLI_TBLCOLTYPE_ID: {
-		row->cells[col].text = gcli_asprintf("%"PRIid, va_arg(*vp, uint64_t));
+		gcli_id id = va_arg(*vp, gcli_id);
+		row->cells[col].text = gcli_asprintf("%"PRIid, id);
 		cell_size = strlen(row->cells[col].text);
 	} break;
 	case GCLI_TBLCOLTYPE_LONG: {

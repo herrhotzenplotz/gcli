@@ -92,7 +92,7 @@ gcli_labels_print(struct gcli_label_list const *const list, int const max)
 
 	for (size_t i = 0; i < n; ++i) {
 		gcli_tbl_add_row(table,
-		                 (long)list->labels[i].id, /* Cast is important here (#165) */
+		                 list->labels[i].id,
 		                 list->labels[i].colour,
 		                 gcli_config_have_colours(g_clictx) ? "  " : "",
 		                 list->labels[i].name,

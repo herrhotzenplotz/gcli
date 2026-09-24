@@ -164,6 +164,7 @@ github_forge_descriptor =
 	.repo_create               = github_repo_create,
 	.repo_delete               = github_repo_delete,
 	.repo_set_visibility       = github_repo_set_visibility,
+	.repo_get_readme           = github_repo_get_readme,
 
 	/* SSH Key management */
 	.add_sshkey                = github_add_sshkey,

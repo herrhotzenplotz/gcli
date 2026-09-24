@@ -312,3 +312,35 @@ github_repo_set_visibility(struct gcli_ctx *ctx,
 
 	return rc;
 }
+
+int
+github_repo_get_readme(struct gcli_ctx *const ctx,
+                       struct gcli_path const *const repo,
+                       char **const out)
+{
+	int rc = 0;
+	char *url;
+	struct gcli_fetch_ex_args args = {0};
+	struct gcli_fetch_buffer buffer = {0};
+
+	assert(out);
+	*out = NULL;
+
+	rc = github_repo_make_url(ctx, repo, &url, "/readme");
+	if (rc < 0)
+		return rc;
+
+	args.url = url;
+	args.method = "GET";
+	args.accept_type = "application/vnd.github.raw+json";
+	args.buffer = &buffer;
+
+	rc = gcli_fetch_ex(ctx, &args);
+	if (rc == 0 && buffer.length > 0)
+		*out = gcli_strndup(buffer.data, buffer.length);
+
+	gcli_fetch_buffer_free(&buffer);
+	gcli_clear_ptr(&url);
+
+	return rc;
+}

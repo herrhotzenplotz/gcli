@@ -51,6 +51,9 @@ int github_get_own_repos(struct gcli_ctx *ctx, int max,
 
 int github_repo_delete(struct gcli_ctx *ctx, struct gcli_path const *const path);
 
+int github_repo_get_readme(struct gcli_ctx *ctx, struct gcli_path const *repo,
+                           char **out);
+
 int github_repo_create(struct gcli_ctx *ctx,
                        struct gcli_repo_create_options const *options,
                        struct gcli_repo *out);

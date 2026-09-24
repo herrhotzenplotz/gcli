@@ -55,6 +55,7 @@ usage(void)
 	fprintf(stderr, "  -p                      Make the repo private\n");
 	fprintf(stderr, "  -s                      Print (sort) in reverse order\n");
 	fprintf(stderr, "ACTIONS:\n");
+	fprintf(stderr, "  view                    Show a description or readme of the repository\n");
 	fprintf(stderr, "  delete [-y]             Delete this repository:\n");
 	fprintf(stderr, "                            -y    Do not ask for confirmation\n");
 	fprintf(stderr, "  set-visibility <level>  Mark the reposity as public or private. Level may be one of:\n");
@@ -279,6 +280,31 @@ action_set_visibility(struct gcli_path const *const path, void *item,
 	return 0;
 }
 
+static int
+action_view(struct gcli_path const *const path, void *item,
+            int *argc, char ***argv)
+{
+	char *text;
+	int rc = 0;
+
+	(void) item;
+	(void) argc;
+	(void) argv;
+
+	if ((rc = gcli_repo_get_readme(g_clictx, path, &text)) < 0) {
+		fprintf(stderr, "gcli: error: failed to fetch readme: %s\n",
+		        gcli_get_error(g_clictx));
+		return GCLI_EX_DATAERR;
+	}
+
+	gcli_pretty_print(text, 2, 80, stdout);
+
+	free(text);
+	text = NULL;
+
+	return GCLI_EX_OK;
+}
+
 static struct gcli_cmd_actions const actions = {
 	.fetch_item = NULL,
 	.free_item = NULL,
@@ -293,6 +319,12 @@ static struct gcli_cmd_actions const actions = {
 		  .help = "Change the visibility of the repository",
 		  .needs_item = false,
 		  .handler = action_set_visibility,
+		},
+		{ .name = "view",
+		  .help = "Show a description or readme of the repository",
+		  .needs_item = false,
+		  .handler = action_view,
+		  .use_pager = true,
 		},
 		{0},
 	},

@@ -83,3 +83,11 @@ gcli_repo_set_visibility(struct gcli_ctx *ctx, struct gcli_path const *const pat
 {
 	gcli_null_check_call(repo_set_visibility, ctx, path, vis);
 }
+
+int
+gcli_repo_get_readme(struct gcli_ctx *const ctx,
+                     struct gcli_path const *const repo,
+                     char **const out)
+{
+	gcli_null_check_call(repo_get_readme, ctx, repo, out);
+}

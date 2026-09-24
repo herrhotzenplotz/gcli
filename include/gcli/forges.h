@@ -527,6 +527,13 @@ struct gcli_forge_descriptor {
 		struct gcli_path const *path);
 
 	/**
+         * Get the repository README contents */
+	int (*repo_get_readme)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *path,
+		char **out);
+
+	/**
 	 * Change the visibility level of a repository */
 	int (*repo_set_visibility)(
 		struct gcli_ctx *ctx,

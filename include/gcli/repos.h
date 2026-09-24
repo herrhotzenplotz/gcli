@@ -88,4 +88,8 @@ int gcli_repo_set_visibility(struct gcli_ctx *ctx,
                              struct gcli_path const *const path,
                              gcli_repo_visibility visibility);
 
+int gcli_repo_get_readme(struct gcli_ctx *ctx,
+                         struct gcli_path const *repo,
+                         char **out);
+
 #endif /* REPOS_H */

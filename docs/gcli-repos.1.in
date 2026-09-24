@@ -89,6 +89,8 @@ Make the repository private.
 .It public
 Make the repository public.
 .El
+.It Cm view
+Show the README of the repository.
 .El
 .Sh EXAMPLES
 List your own repos:

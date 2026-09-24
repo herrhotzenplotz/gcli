@@ -227,62 +227,21 @@ int
 gcli_curl(struct gcli_ctx *ctx, FILE *stream, char const *url,
           char const *content_type)
 {
-	CURLcode ret;
-	struct curl_slist *headers;
 	struct gcli_fetch_buffer buffer = {0};
-	char *auth_header = NULL;
 	int rc = 0;
 
-	headers = NULL;
+	struct gcli_fetch_ex_args args = {
+		.method = "GET",
+		.url = url,
+		.content_type = content_type,
+		.buffer = &buffer,
+	};
 
-	if ((rc = gcli_curl_ensure(ctx)) < 0)
-		return rc;
-
-	if (content_type)
-		headers = curl_slist_append(headers, content_type);
-
-	auth_header = gcli_get_authheader(ctx);
-	if (auth_header)
-		headers = curl_slist_append(headers, auth_header);
-
-	curl_easy_setopt(ctx->curl, CURLOPT_URL, url);
-	curl_easy_setopt(ctx->curl, CURLOPT_BUFFERSIZE, 102400L);
-	curl_easy_setopt(ctx->curl, CURLOPT_NOPROGRESS, 1L);
-	curl_easy_setopt(ctx->curl, CURLOPT_MAXREDIRS, 50L);
-	curl_easy_setopt(ctx->curl, CURLOPT_FTP_SKIP_PASV_IP, 1L);
-	curl_easy_setopt(ctx->curl, CURLOPT_HTTPHEADER, headers);
-	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, ctx->curl_useragent);
-#if defined(CURL_HTTP_VERSION_2TLS)
-	curl_easy_setopt(
-		ctx->curl, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
-#endif
-	curl_easy_setopt(ctx->curl, CURLOPT_TCP_KEEPALIVE, 1L);
-	curl_easy_setopt(ctx->curl, CURLOPT_WRITEDATA, &buffer);
-	curl_easy_setopt(ctx->curl, CURLOPT_WRITEFUNCTION, fetch_write_callback);
-	curl_easy_setopt(ctx->curl, CURLOPT_FAILONERROR, 0L);
-	curl_easy_setopt(ctx->curl, CURLOPT_FOLLOWLOCATION, 1L);
-
-	if (ctx->report_progress) {
-		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFOFUNCTION,
-		                 gcli_report_progress);
-		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFODATA, ctx);
-		curl_easy_setopt(ctx->curl, CURLOPT_NOPROGRESS, 0L);
-	}
-
-	ret = curl_easy_perform(ctx->curl);
-	rc = gcli_curl_check_api_error(ctx, ret, url, &buffer);
-
-	if (ctx->report_progress)
-		ctx->report_progress(true);
-
+	rc = gcli_fetch_ex(ctx, &args);
 	if (rc == 0)
 		fwrite(buffer.data, 1, buffer.length, stream);
 
 	gcli_fetch_buffer_free(&buffer);
-
-	curl_slist_free_all(headers);
-
-	gcli_clear_ptr(&auth_header);
 
 	return rc;
 }
@@ -348,6 +307,103 @@ parse_link_header(char *_header)
 	return NULL;
 }
 
+int
+gcli_fetch_ex(struct gcli_ctx *ctx, struct gcli_fetch_ex_args *args)
+{
+	CURLcode ret;
+	struct curl_slist *headers;
+	struct gcli_fetch_buffer tmpbuf = {0}; /* used for error codes when out is NULL */
+	struct gcli_fetch_buffer *buf = NULL;
+	char *link_header = NULL, *tmp = NULL;
+	int rc = 0;
+
+	if ((rc = gcli_curl_ensure(ctx)) < 0)
+		return rc;
+
+	char *auth_header = gcli_get_authheader(ctx);
+
+	if (gcli_be_verbose(ctx))
+		fprintf(stderr, "info: cURL request %s %s...\n",
+		        args->method, args->url);
+
+	headers = NULL;
+	if (args->accept_type) {
+		tmp = gcli_asprintf("Accept: %s", args->accept_type);
+		headers = curl_slist_append(headers, tmp);
+		gcli_clear_ptr(&tmp);
+	}
+
+	if (args->content_type) {
+		tmp = gcli_asprintf("Content-Type: %s", args->content_type);
+		headers = curl_slist_append(headers, tmp);
+		gcli_clear_ptr(&tmp);
+	}
+
+	if (auth_header)
+		headers = curl_slist_append(headers, auth_header);
+
+	/* Only clear the output buffer if we have a pointer to it. If the
+	 * user is not interested in the result we use a temporary buffer
+	 * for proper error reporting. */
+	if (args->buffer) {
+		buf = args->buffer;
+		*buf = (struct gcli_fetch_buffer) {0};
+	} else {
+		buf = &tmpbuf;
+	}
+
+	curl_easy_setopt(ctx->curl, CURLOPT_URL, args->url);
+
+	if (args->payload)
+		curl_easy_setopt(ctx->curl, CURLOPT_POSTFIELDS, args->payload);
+
+	curl_easy_setopt(ctx->curl, CURLOPT_HTTPHEADER, headers);
+	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, ctx->curl_useragent);
+	curl_easy_setopt(ctx->curl, CURLOPT_CUSTOMREQUEST, args->method);
+	curl_easy_setopt(ctx->curl, CURLOPT_TCP_KEEPALIVE, 1L);
+	curl_easy_setopt(ctx->curl, CURLOPT_WRITEDATA, buf);
+	curl_easy_setopt(ctx->curl, CURLOPT_WRITEFUNCTION, fetch_write_callback);
+	curl_easy_setopt(ctx->curl, CURLOPT_FAILONERROR, 0L);
+	curl_easy_setopt(ctx->curl, CURLOPT_HEADERFUNCTION, fetch_header_callback);
+	curl_easy_setopt(ctx->curl, CURLOPT_HEADERDATA, &link_header);
+	curl_easy_setopt(ctx->curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+	if (ctx->report_progress) {
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFOFUNCTION,
+		                 gcli_report_progress);
+		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFODATA, ctx);
+		curl_easy_setopt(ctx->curl, CURLOPT_NOPROGRESS, 0L);
+	}
+
+	ret = curl_easy_perform(ctx->curl);
+	rc = gcli_curl_check_api_error(ctx, ret, args->url, buf);
+
+	if (ctx->report_progress)
+		ctx->report_progress(true);
+
+	/* only parse these headers and continue if there was no error */
+	if (rc == 0) {
+		if (link_header && args->pagination_next)
+			*args->pagination_next = parse_link_header(link_header);
+	} else if (args->buffer) { /* error happened and we have an output buffer */
+		gcli_fetch_buffer_free(args->buffer);
+	}
+
+	gcli_clear_ptr(&link_header);
+
+	curl_slist_free_all(headers);
+	headers = NULL;
+
+	/* if the user is not interested in the result, free the temporary
+	 * buffer */
+	if (!args->buffer)
+		gcli_fetch_buffer_free(&tmpbuf);
+
+	gcli_clear_ptr(&auth_header);
+
+	return rc;
+}
+
 /* Perform a HTTP Request with the given method to the url
  *
  * - data may be NULL.
@@ -370,91 +426,17 @@ gcli_fetch_with_method(
 	char **const pagination_next,        /* Next URL for pagination */
 	struct gcli_fetch_buffer *const out) /* output buffer */
 {
-	CURLcode ret;
-	struct curl_slist *headers;
-	struct gcli_fetch_buffer tmp = {0}; /* used for error codes when out is NULL */
-	struct gcli_fetch_buffer *buf = NULL;
-	char *link_header = NULL;
-	int rc = 0;
+	struct gcli_fetch_ex_args args = {
+		.method = method,
+		.url = url,
+		.payload = data,
+		.accept_type = "application/vnd.github.v3+json",
+		.content_type = "application/json",
+		.pagination_next = pagination_next,
+		.buffer = out,
+	};
 
-	if ((rc = gcli_curl_ensure(ctx)) < 0)
-		return rc;
-
-	char *auth_header = gcli_get_authheader(ctx);
-
-	if (gcli_be_verbose(ctx))
-		fprintf(stderr, "info: cURL request %s %s...\n", method, url);
-
-	headers = NULL;
-	headers = curl_slist_append(
-		headers,
-		"Accept: application/vnd.github.v3+json");
-	headers = curl_slist_append(
-		headers,
-		"Content-Type: application/json");
-	if (auth_header)
-		headers = curl_slist_append(headers, auth_header);
-
-	/* Only clear the output buffer if we have a pointer to it. If the
-	 * user is not interested in the result we use a temporary buffer
-	 * for proper error reporting. */
-	if (out) {
-		*out = (struct gcli_fetch_buffer) {0};
-		buf = out;
-	} else {
-		buf = &tmp;
-	}
-
-	curl_easy_setopt(ctx->curl, CURLOPT_URL, url);
-
-	if (data)
-		curl_easy_setopt(ctx->curl, CURLOPT_POSTFIELDS, data);
-
-	curl_easy_setopt(ctx->curl, CURLOPT_HTTPHEADER, headers);
-	curl_easy_setopt(ctx->curl, CURLOPT_USERAGENT, ctx->curl_useragent);
-	curl_easy_setopt(ctx->curl, CURLOPT_CUSTOMREQUEST, method);
-	curl_easy_setopt(ctx->curl, CURLOPT_TCP_KEEPALIVE, 1L);
-	curl_easy_setopt(ctx->curl, CURLOPT_WRITEDATA, buf);
-	curl_easy_setopt(ctx->curl, CURLOPT_WRITEFUNCTION, fetch_write_callback);
-	curl_easy_setopt(ctx->curl, CURLOPT_FAILONERROR, 0L);
-	curl_easy_setopt(ctx->curl, CURLOPT_HEADERFUNCTION, fetch_header_callback);
-	curl_easy_setopt(ctx->curl, CURLOPT_HEADERDATA, &link_header);
-	curl_easy_setopt(ctx->curl, CURLOPT_FOLLOWLOCATION, 1L);
-
-	if (ctx->report_progress) {
-		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFOFUNCTION,
-		                 gcli_report_progress);
-		curl_easy_setopt(ctx->curl, CURLOPT_XFERINFODATA, ctx);
-		curl_easy_setopt(ctx->curl, CURLOPT_NOPROGRESS, 0L);
-	}
-
-	ret = curl_easy_perform(ctx->curl);
-	rc = gcli_curl_check_api_error(ctx, ret, url, buf);
-
-	if (ctx->report_progress)
-		ctx->report_progress(true);
-
-	/* only parse these headers and continue if there was no error */
-	if (rc == 0) {
-		if (link_header && pagination_next)
-			*pagination_next = parse_link_header(link_header);
-	} else if (out) { /* error happened and we have an output buffer */
-		gcli_fetch_buffer_free(out);
-	}
-
-	gcli_clear_ptr(&link_header);
-
-	curl_slist_free_all(headers);
-	headers = NULL;
-
-	/* if the user is not interested in the result, free the temporary
-	 * buffer */
-	if (!out)
-		gcli_fetch_buffer_free(&tmp);
-
-	gcli_clear_ptr(&auth_header);
-
-	return rc;
+	return gcli_fetch_ex(ctx, &args);
 }
 
 /* Perform a POST request to the given URL and upload the buffer to it.

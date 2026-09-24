@@ -74,10 +74,25 @@ struct gcli_fetch_list_ctx {
 	void const *userdata;
 };
 
+struct gcli_fetch_ex_args {
+	/* Input */
+	char const *method;
+	char const *url;
+	char const *accept_type;
+	char const *content_type;
+	char const *payload;
+
+	/* Output */
+	char **pagination_next;
+	struct gcli_fetch_buffer *buffer;
+};
+
 void gcli_fetch_buffer_free(struct gcli_fetch_buffer *buffer);
 
 int gcli_fetch(struct gcli_ctx *ctx, char const *url, char **pagination_next,
                struct gcli_fetch_buffer *out);
+
+int gcli_fetch_ex(struct gcli_ctx *ctx, struct gcli_fetch_ex_args *args);
 
 int gcli_curl(struct gcli_ctx *ctx, FILE *stream, char const *url,
               char const *content_type);

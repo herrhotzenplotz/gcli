@@ -39,6 +39,7 @@
 
 #include <assert.h>
 #include <stdarg.h>
+#include <string.h>
 
 int
 gitlab_get_repo(struct gcli_ctx *ctx, struct gcli_path const *const path,
@@ -281,5 +282,109 @@ gitlab_repo_make_url(struct gcli_ctx *ctx, struct gcli_path const *const path,
 
 	gcli_clear_ptr(&suffix);
 
+	return rc;
+}
+
+static int
+gitlab_repo_get_readmeurl(struct gcli_ctx *ctx,
+                          struct gcli_path const *const repo_path,
+                          char **out)
+{
+	char *url = NULL;
+	int rc = 0;
+	struct gcli_fetch_buffer buffer = {0};
+
+	rc = gitlab_repo_make_url(ctx, repo_path, &url, "");
+	if (rc < 0)
+		return rc;
+
+	rc = gcli_fetch(ctx, url, NULL, &buffer);
+	if (rc == 0) {
+		struct json_stream stream = {0};
+
+		json_open_buffer(&stream, buffer.data, buffer.length);
+		rc = parse_gitlab_repo_readmeurl(ctx, &stream, out);
+		json_close(&stream);
+	}
+
+	gcli_fetch_buffer_free(&buffer);
+	gcli_clear_ptr(&url);
+
+	return rc;
+}
+
+static int
+extract_ref_and_filename(struct gcli_ctx *ctx, char *url, char **filename,
+                         char **ref)
+{
+	char *hd;
+
+	/*
+	 * Weird hack because Gitlab doesn't have an API to fetch the README
+	 * contents like Github does.
+	 */
+	hd = strstr(url, "-/blob/");
+	if (hd == NULL)
+		return gcli_error(ctx, "malformed README URL");
+
+	hd += sizeof("-/blob/") - 1;
+
+	/*
+	 * The URL now contains the ref and the filename separated by a slash.
+	 * Split by those. We cannot use strsep(3) for portability reasons.
+	 */
+	*ref = hd;
+	hd = strchr(hd, '/');
+	if (hd == NULL || *hd != '/')
+		return gcli_error(ctx, "missing ref in URL");
+
+	*hd++ = '\0';
+	*filename = hd;
+
+	return 0;
+}
+
+int
+gitlab_repo_get_readme(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                       char **out)
+{
+	char *url = NULL, *ref, *filename, *e_filename, *readme_url,
+	     *suffix = NULL;
+	int rc = 0;
+	struct gcli_fetch_buffer buffer = {0};
+
+	rc = gitlab_repo_get_readmeurl(ctx, path, &url);
+	if (rc < 0)
+		return rc;
+
+	rc = extract_ref_and_filename(ctx, url, &filename, &ref);
+	if (rc < 0)
+		goto bail;
+
+	/*
+	 * Fetch the actual file contents (file @ ref)
+	 */
+	e_filename = gcli_urlencode(filename);
+	gcli_url_options_append(&suffix, "ref", ref);
+
+	rc = gitlab_repo_make_url(ctx, path, &readme_url,
+	                          "/repository/files/%s/raw%s",
+	                          e_filename, suffix);
+
+	gcli_clear_ptr(&e_filename);
+	gcli_clear_ptr(&suffix);
+
+	if (rc < 0)
+		goto bail;
+
+	rc = gcli_fetch(ctx, readme_url, NULL, &buffer);
+	if (rc == 0)
+		*out = gcli_strndup(buffer.data, buffer.length);
+
+	gcli_fetch_buffer_free(&buffer);
+	gcli_clear_ptr(&readme_url);
+
+bail:
+	gcli_clear_ptr(&url);
 	return rc;
 }

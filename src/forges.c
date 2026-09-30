@@ -273,6 +273,7 @@ gitlab_forge_descriptor =
 	.repo_create               = gitlab_repo_create,
 	.repo_delete               = gitlab_repo_delete,
 	.repo_set_visibility       = gitlab_repo_set_visibility,
+	.repo_get_readme           = gitlab_repo_get_readme,
 
 	/* SSH Key management */
 	.add_sshkey                = gitlab_add_sshkey,

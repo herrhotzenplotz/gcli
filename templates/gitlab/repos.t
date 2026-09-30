@@ -12,3 +12,6 @@ object of struct gcli_repo with
 
 parser gitlab_repos is
 array of struct gcli_repo use parse_gitlab_repo;
+
+parser gitlab_repo_readmeurl is
+object of char* select "readme_url" as string;

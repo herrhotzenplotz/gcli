@@ -60,4 +60,7 @@ int gitlab_repo_set_visibility(struct gcli_ctx *ctx,
                                struct gcli_path const *path,
                                gcli_repo_visibility vis);
 
+int gitlab_repo_get_readme(struct gcli_ctx *ctx, struct gcli_path const *,
+                           char **out);
+
 #endif /* GITLAB_REPOS_H */

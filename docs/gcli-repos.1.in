@@ -130,7 +130,10 @@ The Gitea backend doesn't yet support searching repositories of a given user:
 $ gcli repos -o herrhotzenplotz foobar
 .Ed
 .Pp
-This will error out indicating that this is not supported by gcli.
+.Pp
+The Gitea backend also doesn't support viewing the repository README.
+.Pp
+Both of the above cases will error out indicating that this is not supported by gcli.
 .Pp
 Please report bugs via E-Mail to
 .Mt @PACKAGE_BUGREPORT@ .

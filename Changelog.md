@@ -8,6 +8,14 @@ This changelog does not follow semantic versioning.
 
 ### Added
 
+- The `repos` subcommand now has an action `view` to show the README
+  of a given repository.
+
+  This action is currently only implemented for GitLab and GitHub,
+  Gitea/Forgejo support is planned.
+
+  Suggested by: Dmitry Atamanov <https://github.com/data-man>
+
 ### Changed
 
 ### Removed

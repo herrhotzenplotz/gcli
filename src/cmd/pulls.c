@@ -1669,41 +1669,49 @@ struct gcli_cmd_actions gcli_pull_actions = {
 			.name = "merge",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler) action_merge,
+			.no_newline = true,
 		},
 		{
 			.name = "close",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler) action_close,
+			.no_newline = true,
 		},
 		{
 			.name = "reopen",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler) action_reopen,
+			.no_newline = true,
 		},
 		{
 			.name = "labels",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler) action_labels,
+			.no_newline = true,
 		},
 		{
 			.name = "milestone",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler) action_milestone,
+			.no_newline = true,
 		},
 		{
 			.name = "request-review",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler) action_request_review,
+			.no_newline = true,
 		},
 		{
 			.name = "assign",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler) action_assign,
+			.no_newline = true,
 		},
 		{
 			.name = "title",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler) action_title,
+			.no_newline = true,
 		},
 		{
 			.name = "review",
@@ -1714,11 +1722,13 @@ struct gcli_cmd_actions gcli_pull_actions = {
 			.name = "checkout",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler) action_checkout,
+			.no_newline = true,
 		},
 		{
 			.name = "open",
 			.needs_item = true,
 			.handler = (gcli_cmd_action_handler) action_open,
+			.no_newline = true,
 		},
 		{
 			.name = "reviews",
@@ -1734,11 +1744,13 @@ struct gcli_cmd_actions gcli_pull_actions = {
 			.name = "approve",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler) action_approve,
+			.no_newline = true,
 		},
 		{
 			.name = "unapprove",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler) action_unapprove,
+			.no_newline = true,
 		},
 	},
 };

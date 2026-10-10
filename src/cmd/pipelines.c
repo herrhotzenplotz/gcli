@@ -403,7 +403,8 @@ static struct gcli_cmd_actions const pipeline_actions = {
 		{
 			.name = "open",
 			.needs_item = true,
-			.handler = (gcli_cmd_action_handler)action_pipeline_open
+			.handler = (gcli_cmd_action_handler)action_pipeline_open,
+			.no_newline = true,
 		},
 		{0},
 	},
@@ -584,21 +585,25 @@ static struct gcli_cmd_actions job_actions = {
 			.name = "cancel",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler)action_job_cancel,
+			.no_newline = true,
 		},
 		{
 			.name = "retry",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler)action_job_retry,
+			.no_newline = true,
 		},
 		{
 			.name = "artifacts",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler)action_job_artifacts,
+			.no_newline = true,
 		},
 		{
 			.name = "open",
 			.needs_item = true,
 			.handler = (gcli_cmd_action_handler)action_job_open,
+			.no_newline = true,
 		},
 		{0},
 	},

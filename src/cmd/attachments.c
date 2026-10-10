@@ -156,7 +156,8 @@ static struct gcli_cmd_actions const actions =
 		{ .name = "obsolete",
 		  .help = "Obsolete the attachment",
 		  .needs_item = false,
-		  .handler = action_attachment_obsolete, },
+		  .handler = action_attachment_obsolete,
+		  .no_newline = true, },
 	},
 };
 

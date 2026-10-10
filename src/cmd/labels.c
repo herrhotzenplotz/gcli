@@ -335,11 +335,35 @@ struct gcli_cmd_actions label_actions = {
 	.item_size = sizeof(struct gcli_label),
 
 	.defs = {
-		{ .name = "delete",      .needs_item = false, .handler = action_delete,      },
-		{ .name = "status",      .needs_item = true,  .handler = action_status,      },
-		{ .name = "name",        .needs_item = false, .handler = action_name,        },
-		{ .name = "colour",      .needs_item = false, .handler = action_colour,      },
-		{ .name = "description", .needs_item = false, .handler = action_description, },
+		{
+			.name = "delete",
+			.needs_item = false,
+			.handler = action_delete,
+			.no_newline = true,
+		},
+		{
+			.name = "status",
+			.needs_item = true,
+			.handler = action_status,
+		},
+		{
+			.name = "name",
+			.needs_item = false,
+			.handler = action_name,
+			.no_newline = true,
+		},
+		{
+			.name = "colour",
+			.needs_item = false,
+			.handler = action_colour,
+			.no_newline = true,
+		},
+		{
+			.name = "description",
+			.needs_item = false,
+			.handler = action_description,
+			.no_newline = true,
+		},
 		{0},
 	},
 };

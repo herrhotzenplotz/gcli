@@ -1061,31 +1061,37 @@ struct gcli_cmd_actions gcli_issue_actions = {
 			.name = "close",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler)action_close,
+			.no_newline = true,
 		},
 		{
 			.name = "reopen",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler)action_reopen,
+			.no_newline = true,
 		},
 		{
 			.name = "assign",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler)action_assign,
+			.no_newline = true,
 		},
 		{
 			.name = "labels",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler)action_labels,
+			.no_newline = true,
 		},
 		{
 			.name = "milestone",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler)action_milestone,
+			.no_newline = true,
 		},
 		{
 			.name = "title",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler)action_title,
+			.no_newline = true,
 		},
 		{
 			.name = "attachments",
@@ -1096,6 +1102,7 @@ struct gcli_cmd_actions gcli_issue_actions = {
 			.name = "open",
 			.needs_item = true,
 			.handler = (gcli_cmd_action_handler)action_open,
+			.no_newline = true,
 		},
 		{
 			.name = "edit",
@@ -1106,6 +1113,7 @@ struct gcli_cmd_actions gcli_issue_actions = {
 			.name = "due",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler)action_due,
+			.no_newline = true,
 		},
 	},
 };

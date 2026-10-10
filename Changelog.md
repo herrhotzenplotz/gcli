@@ -18,6 +18,14 @@ This changelog does not follow semantic versioning.
 
 ### Changed
 
+- Actions on subcommands that do not print anything to stdout now
+  do not cause empty lines to be printed when they are chained
+  in a subcommand. E.g.:
+
+     $ gcli issues -i 42 labels add foobar milestone 123456
+
+  This would previously have printed an empty line, now it doesn't anymore.
+
 ### Removed
 
 ## 2.13.0 (05-Aug-2026)

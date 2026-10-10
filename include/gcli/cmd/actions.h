@@ -59,6 +59,7 @@ struct gcli_cmd_action {
 	char *help;                        /* short description of this action */
 	bool use_pager;                    /* whether to pipe the output through a pager in an interactive context */
 	bool needs_item;                   /* whether we must pass the fetched item or can just pass a NULL */
+	bool no_newline;                   /* whether we should print a newline after finishing this action */
 	gcli_cmd_action_handler handler;   /* the action handler */
 };
 

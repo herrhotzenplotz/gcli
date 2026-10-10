@@ -110,7 +110,8 @@ gcli_cmd_actions_handle(struct gcli_cmd_actions const *const actions,
 		if (*argc == 0)
 			break;
 
-		fputc('\n', stdout);
+		if (!action->no_newline)
+			fputc('\n', stdout);
 	}
 
 	if (item) {

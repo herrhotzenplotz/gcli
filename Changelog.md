@@ -6,6 +6,11 @@ This changelog does not follow semantic versioning.
 
 ### Fixed
 
+- A few issues regarding 32-bit platforms have been fixed in the
+  table printing code.
+
+  Reported-by: Simon Richter
+
 ### Added
 
 - The `repos` subcommand now has an action `view` to show the README

@@ -32,6 +32,11 @@ section-name {
 }
 .Ed
 .Pp
+Values may have prefixes to indicate that the value must be expanded.
+See
+.Sx "Value Expansion"
+for details about value expansion.
+.Pp
 There must be a section named
 .Dq defaults
 which may contain the following keys:
@@ -137,6 +142,15 @@ The gcli tutorial at
 .Lk https://herrhotzenplotz.de/gcli/tutorial
 has some documentation on how to generate thes tokens.
 .El
+.Ss "Value Expansion"
+Values prefixed with an expansion type tag followed by a colon are expanded and substituted.
+The following expansion types are supported:
+.Bl -tag -width indent
+.It env:
+Everything after the colon is taken as an environment variable name.
+The value is then substituted by the contents of the environment variable.
+If the environment variable is not set, gcli will behave as if the config entry wasn't defined.
+.El
 .Ss Repository Local Configuration File
 For repository-local configuration you can use a special configuration
 file. It contains definitions for gcli that are specific to the
@@ -177,7 +191,7 @@ GitHub and a GitLab account:
 .Bd -literal
 defaults {
 	editor=/path/to/ganoooo/emacs
-	pager=less
+	pager=env:PAGER
 	github-default-account=herrhotzenplotz-gh
 	gitlab-default-account=herrhotzenplotz-gitlab
 }

@@ -291,18 +291,57 @@ not_whitespace:
 	}
 }
 
+static char *
+value_expand(gcli_sv line)
+{
+	gcli_sv t = gcli_sv_trim(line);
+
+	if (gcli_sv_has_prefix(t, "env:")) {
+		char *varname = NULL, *content = NULL;
+
+		t.length -= 4;
+		t.data   += 4;
+
+		if (t.length == 0) {
+			gcli_warnx(g_clictx,
+			           "missing environment variable name in config");
+			return NULL;
+		}
+
+		varname = gcli_sv_to_cstr(t);
+		content = getenv(varname);
+		if (content == NULL) {
+			gcli_warnx(g_clictx,
+			           "reference to undefined environment variable"
+			           " in config: %s",
+			           varname);
+			return NULL;
+		}
+
+		free(varname);
+
+		return strdup(content);
+	} else {
+		return gcli_sv_to_cstr(t);
+	}
+}
+
 static void
 parse_section_entry(struct config_parser *input,
                     struct gcli_config_section *section)
 {
-	gcli_sv line = gcli_sv_chop_until(&input->buffer, '\n');
+	char *value;
+	gcli_sv line, key;
+	struct gcli_config_entry *entry;
+
+	line = gcli_sv_chop_until(&input->buffer, '\n');
 	if (line.length == 0)
 		return;
 
 	input->buffer.data   += 1;
 	input->buffer.length -= 1;
 
-	gcli_sv key = gcli_sv_chop_until(&line, '=');
+	key = gcli_sv_chop_until(&line, '=');
 	if (line.length == 0) {
 		errx(1, "gcli: %s:%d: error: missing '=' in config key assignment",
 		     input->filename, input->line);
@@ -314,11 +353,15 @@ parse_section_entry(struct config_parser *input,
 	if (key.length == 0)
 		errx(1, "gcli: %s:%d: empty key", input->filename, input->line);
 
-	struct gcli_config_entry *entry = calloc(1, sizeof(*entry));
-	TAILQ_INSERT_TAIL(&section->entries, entry, next);
+	value = value_expand(line);
+	if (value == NULL)
+		return;
 
-	entry->key= gcli_sv_to_cstr(gcli_sv_trim(key));
-	entry->value = gcli_sv_to_cstr(gcli_sv_trim(line));
+	entry = calloc(1, sizeof(*entry));
+	entry->key = gcli_sv_to_cstr(gcli_sv_trim(key));
+	entry->value = value;
+
+	TAILQ_INSERT_TAIL(&section->entries, entry, next);
 }
 
 static char *

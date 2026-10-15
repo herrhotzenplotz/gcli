@@ -21,6 +21,19 @@ This changelog does not follow semantic versioning.
 
   Suggested by: Dmitry Atamanov <https://github.com/data-man>
 
+- The gcli user configuration file now supports environment varible
+  value expansion:
+
+  ```
+  defaults {
+  	editor = env:EDITOR
+  }
+  ```
+
+  There are plans to add command expansion as well.
+
+  Suggested by: Sandro Santilli
+
 ### Changed
 
 - Actions on subcommands that do not print anything to stdout now

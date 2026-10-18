@@ -11,6 +11,14 @@ This changelog does not follow semantic versioning.
 
   Reported-by: Simon Richter
 
+- The configure script now sends both an xtrace and various messages to
+  config.log.
+
+  When configure fails, one can inspect this log file to check for
+  obvious errors and failures of commands.
+
+  Requested-by: Simon Richter
+
 ### Added
 
 - The `repos` subcommand now has an action `view` to show the README

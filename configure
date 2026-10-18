@@ -23,26 +23,47 @@ PACKAGE_STRING="gcli $PACKAGE_VERSION"
 PACKAGE_BUGREPORT="https://lists.sr.ht/~herrhotzenplotz/gcli-discuss"
 PACKAGE_URL="https://sr.ht/~herrhotzenplotz/gcli"
 
+# What follows is an ugly hack:
+exec 2>config.log # stderr goes to config log
+exec 3>&1         # terminal output in fd #3
+exec 1>&2         # stdout also goes to the config log
+set -x            # enable xtrace to stderr
+
+# Helpers for terminal logging
+l_echo() {
+	echo >&3 "$@"
+}
+
+l_printf() {
+	printf >&3 "$@"
+}
+
+# Notes:
+#
+#  Comments that should end up in the config.log can be made
+#  using the : builtin.
+#
+#  Use above helpers for printing to the terminal.
+
 find_program() {
 	varname=$1
 	shift
 
-	printf "Checking for $varname ..." >&2
+	l_printf "Checking for $varname ..."
 	for x in $*; do
 		if command -v $x >/dev/null 2>&1 && [ -x $(command -v $x) ]; then
 			binary="$(command -v $x)"
-			printf " $binary\n" >&2
+			l_printf " $binary\n"
 			echo "${binary}"
 			exit 0
 		fi
 	done
-	printf " not found\n" >&2
+	l_printf " not found\n"
 	exit 1
-
 }
 
 die() {
-	printf "%s\n" "${*}"
+	l_printf "%s\n" "${*}"
 	exit 1
 }
 
@@ -77,6 +98,8 @@ normalise_compiler_target() {
 compiler_target() {
 	ccom=$1
 	cc=$2
+
+	: Trying to find out target for $cc which appears to be $ccom
 
 	case $ccom in
 		gcc|clang)
@@ -132,15 +155,16 @@ check_if_needed() {
 find_package() {
 	eval local force_enabled="\$ENABLE_${2}"
 
-	printf "Checking for $1 ..." >&2
+	l_printf "Checking for $1 ..."
 	if ! $PKG_CONFIG --exists $1; then
+		: '<< ERROR >>' $PKG_CONFIG failed
 		if [ "${3}" = optional ] && ! [ "$force_enabled" = 1 ]; then
-			printf " not found\n" >&2
+			l_printf " not found\n"
 			export ${2}_FOUND=0
 			return
 		else # $3 = required or force_enabled
-			printf >&2 "not found\n"
-			printf >&2 "configure: required or forced dependency not found: %s\n" "${1}"
+			l_printf "not found\n"
+			l_printf "configure: required or forced dependency not found: %s\n" "${1}"
 			die "configure: exiting due to dependency problems"
 		fi
 	fi
@@ -153,11 +177,11 @@ find_package() {
 	export ${2}_FOUND=1
 	export ${2}_VERSION="$($PKG_CONFIG --modversion $1)"
 
-	printf " found\n" >&2
+	l_printf " found\n"
 }
 
 usage() {
-	cat >&2 <<EOF
+	cat >&3 <<EOF
 usage: ./configure [options]
 
 Configure build directory of gcli.
@@ -261,7 +285,7 @@ while [ $# -gt 0 ]; do
 			;;
 		# Unknown. Do not error out, but inform the user later.
 		*)
-			echo "configure: warning: unrecognised option '$1'" >&2
+			l_echo "configure: warning: unrecognised option '$1'"
 			UNKNOWN_OPTIONS_USED=1
 			shift
 			;;
@@ -278,35 +302,43 @@ srcdir="$(${REALPATH} ${rel_srcdir})"
 # COMPILERS
 ###############################################################
 
-# Host Compiler
-printf "Checking host compiler ..."
+:
+: Begin compiler checks
+:
+
+:
+: Host compiler
+:
+l_printf "Checking host compiler ..."
 CC=${CC:-cc}
 check_compiler "${CC}"
-printf " $CC\n"
+l_printf " $CC\n"
 
 # Detect the compiler type and enable dependency tracking
-printf "Checking host compiler type ..."
+l_printf "Checking host compiler type ..."
 CCOM=$(compiler_type "${CC}")
-printf " $CCOM\n"
+l_printf " $CCOM\n"
 
-printf "Checking host compiler target ..."
+l_printf "Checking host compiler target ..."
 HOST=$(compiler_target $CCOM "$CC $CFLAGS $CPPFLAGS")
-printf " $HOST\n"
+l_printf " $HOST\n"
 
-# Build compiler
+:
+: Build compiler
+:
 CC_FOR_BUILD=${CC_FOR_BUILD:-${CC}}
 
-printf "Checking for build compiler..."
+l_printf "Checking for build compiler..."
 check_compiler "${CC_FOR_BUILD}"
-printf " ${CC_FOR_BUILD}\n"
+l_printf " ${CC_FOR_BUILD}\n"
 
-printf "Checking build compiler type..."
+l_printf "Checking build compiler type..."
 CCOM_FOR_BUILD=$(compiler_type "${CC_FOR_BUILD}")
-printf " ${CCOM_FOR_BUILD}\n"
+l_printf " ${CCOM_FOR_BUILD}\n"
 
-printf "Checking build compiler target ..."
+l_printf "Checking build compiler target ..."
 BUILD=$(compiler_target $CCOM_FOR_BUILD $CC_FOR_BUILD)
-printf " $BUILD\n"
+l_printf " $BUILD\n"
 
 ####################################################################
 # The following check is to determine whether we can use 700
@@ -338,14 +370,17 @@ misses_xopen_source() {
 	esac
 }
 
+:
+: Checking if we should define _XOPEN_SOURCE and if so, to what value
+:
 if misses_xopen_source "${CPPFLAGS}"; then
 	XOPEN_SOURCE="-D_XOPEN_SOURCE=700"
 	if [ "${CCOM}" = sunstudio ] && [ "${HOST}" = sparc64-unknown-solaris ]; then
-		printf "Checking whether we can define _XOPEN_SOURCE=700 for the host ... "
+		l_printf "Checking whether we can define _XOPEN_SOURCE=700 for the host ... "
 		if [ "$(solaris_check_xopensource "${CC} ${CPPFLAGS} ${CFLAGS}")" = 1 ]; then
-			printf " yes\n"
+			l_printf " yes\n"
 		else
-			printf "no, falling back to 600\n"
+			l_printf "no, falling back to 600\n"
 			XOPEN_SOURCE="-D_XOPEN_SOURCE=600"
 		fi
 	fi
@@ -358,11 +393,11 @@ fi
 if misses_xopen_source "${CPPFLAGS_FOR_BUILD}"; then
 	XOPEN_SOURCE_FOR_BUILD="-D_XOPEN_SOURCE=700"
 	if [ "${CCOM_FOR_BUILD}" = sunstudio ] && [ "${BUILD}" = sparc64-unknown-solaris ]; then
-		printf "Checking whether we can define _XOPEN_SOURCE=700 for the build system ... "
+		l_printf "Checking whether we can define _XOPEN_SOURCE=700 for the build system ... "
 		if [ "$(solaris_check_xopensource "${CC_FOR_BUILD} ${CPPFLAGS_FOR_BUILD} ${CFLAGS_FOR_BUILD}")" = 1 ]; then
-			printf " yes\n"
+			l_printf " yes\n"
 		else
-			printf "no, falling back to 600\n"
+			l_printf "no, falling back to 600\n"
 			XOPEN_SOURCE_FOR_BUILD="-D_XOPEN_SOURCE=600"
 		fi
 	fi
@@ -375,6 +410,9 @@ fi
 ############################################################################
 # LIBRARIES
 ############################################################################
+:
+: Detecting dependencies via pkgconf / pkg-config
+:
 PKG_CONFIG=${PKG_CONFIG:-$(find_program pkg-config pkg-config pkgconf)}
 [ $? -eq 0 ] || die "error: need pkg-config or pkgconf"
 
@@ -386,7 +424,7 @@ fi
 find_package libcurl LIBCURL required
 find_package libcrypto LIBCRYPTO required
 
-# Look for libedit if not disabled
+: Look for libedit if not disabled
 if check_if_needed "$ENABLE_LIBEDIT"; then
 	find_package libedit LIBEDIT optional
 else
@@ -422,14 +460,14 @@ find_package pdjson PDJSON optional
 # On Darwin the POSIX Real-Time extensions are in libc. We must not
 # link against librt because it doesn't exist.
 if check_if_needed "${ENABLE_LIBRT}"; then
-	printf "Checking whether host is Darwin for -lrt..." >&2
+	l_printf "Checking whether host is Darwin for -lrt..."
 	case "${HOST}" in
 		*-apple-darwin*)
-			printf " yes, won't link -lrt\n" >&2
+			l_printf " yes, won't link -lrt\n"
 			ENABLE_LIBRT=0
 			;;
 		*)
-			printf " no\n" >&2
+			l_printf " no\n"
 			;;
 	esac
 fi
@@ -465,6 +503,9 @@ guess_extension() {
 	fi
 }
 
+:
+: Guessing file extensions
+:
 EXEEXT=${EXEEXT:-$(guess_extension EXE $HOST)} || die "error: failed to guess executable extension for $HOST"
 OBJEXT=${OBJEXT:-$(guess_extension OBJ $HOST)} || die "error: failed to guess object extension for $HOST"
 LIBEXT=${LIBEXT:-$(guess_extension LIB $HOST)} || die "error: failed to guess static library extension for $HOST"
@@ -490,32 +531,35 @@ if [ ${ENABLE_MAINTAINER} -eq 1 ]; then
 	[ $? -eq 0 ] || die "error: couldn't find lowdown which is required in maintainer mode"
 fi
 
+:
+: Dependencies and checks for the test suite
+:
 if check_if_needed "${ENABLE_TESTS}"; then
 	PERL=${PERL:-$(find_program perl perl perl5)}
 	if ! [ $? -eq 0 ]; then
 		ENABLE_TESTS=0
-		echo "configure: warning: tests are disabled because perl couldn't be found" >&2
+		l_echo "configure: warning: tests are disabled because perl couldn't be found"
 	fi
 
 	# Determine Version of TAP::Harness Module
-	printf "Checking version of TAP::Harness ... " >&2
+	l_printf "Checking version of TAP::Harness ... "
 	TAPHARNESS_VER="$($PERL -MTAP::Harness -e 'print $TAP::Harness::VERSION ."\n";' 2>&1)"
 	if [ ! $? -eq 0 ]; then
-		printf 'failed to determine: %s. Disabling tests.\n' "${TAPHARNESS_VER}" >&2
+		l_printf 'failed to determine: %s. Disabling tests.\n' "${TAPHARNESS_VER}"
 		ENABLE_TESTS=0
 	else
-		printf '%s, ' "${TAPHARNESS_VER}" >&2
+		l_printf '%s, ' "${TAPHARNESS_VER}"
 		TAPHARNESS_MAJOR="${TAPHARNESS_VER%.*}"
 		TAPHARNESS_MINOR="${TAPHARNESS_VER#*.}"
 
 		if [ ${TAPHARNESS_MAJOR} -gt 3 ] ||
 		   [ ${TAPHARNESS_MAJOR} -eq 3 -a ${TAPHARNESS_MINOR} -ge 48 ]
 		then
-			printf 'tests are enabled.\n' >&2
+			l_printf 'tests are enabled.\n'
 			TAPVER=14
 			ENABLE_TESTS=1
 		else
-			printf 'too old, disabling tests.\n' >&2
+			l_printf 'too old, disabling tests.\n'
 			ENABLE_TESTS=0
 		fi
 	fi
@@ -601,7 +645,7 @@ sed \
 	< "${srcdir}/Makefile.in" > Makefile
 
 echo "Writing config.h"
-cat > config.h <<EOF
+tee config.h <<EOF
 #define PACKAGE_STRING "$PACKAGE_STRING"
 #define PACKAGE_URL "$PACKAGE_URL"
 #define PACKAGE_VERSION "$PACKAGE_VERSION"
@@ -610,73 +654,73 @@ cat > config.h <<EOF
 #define HOSTOS "$HOST"
 EOF
 
-echo "Configuration summary for ${PACKAGE_STRING}:"
-echo ""
-echo "    Build system type: ${BUILD}"
-echo "     Host system type: ${HOST}"
-echo "         optimise for: ${OPTIMISE:-none}"
-echo " Executable extension: Host: '${EXEEXT}', Build: '${EXEEXT_FOR_BUILD}'"
-echo "     Object extension: Host: '${OBJEXT}', Build: '${OBJEXT_FOR_BUILD}'"
-echo "    Library extension: Host: '${LIBEXT}', Build: '${LIBEXT_FOR_BUILD}'"
-echo "                   CC: ${CC}"
-echo "         CC_FOR_BUILD: ${CC_FOR_BUILD}"
-echo "               CFLAGS: ${CFLAGS}"
-echo "     CFLAGS_FOR_BUILD: ${CFLAGS_FOR_BUILD}"
-echo "             CPPFLAGS: ${CPPFLAGS}"
-echo "   CPPFLAGS_FOR_BUILD: ${CPPFLAGS_FOR_BUILD}"
-echo "              LDFLAGS: ${LDFLAGS}"
-echo "    LDFLAGS_FOR_BUILD: ${LDFLAGS_FOR_BUILD}"
-echo "       LIBCURL_CFLAGS: ${LIBCURL_CFLAGS}"
-echo "         LIBCURL_LIBS: ${LIBCURL_LIBS}"
+l_echo "Configuration summary for ${PACKAGE_STRING}:"
+l_echo ""
+l_echo "    Build system type: ${BUILD}"
+l_echo "     Host system type: ${HOST}"
+l_echo "         optimise for: ${OPTIMISE:-none}"
+l_echo " Executable extension: Host: '${EXEEXT}', Build: '${EXEEXT_FOR_BUILD}'"
+l_echo "     Object extension: Host: '${OBJEXT}', Build: '${OBJEXT_FOR_BUILD}'"
+l_echo "    Library extension: Host: '${LIBEXT}', Build: '${LIBEXT_FOR_BUILD}'"
+l_echo "                   CC: ${CC}"
+l_echo "         CC_FOR_BUILD: ${CC_FOR_BUILD}"
+l_echo "               CFLAGS: ${CFLAGS}"
+l_echo "     CFLAGS_FOR_BUILD: ${CFLAGS_FOR_BUILD}"
+l_echo "             CPPFLAGS: ${CPPFLAGS}"
+l_echo "   CPPFLAGS_FOR_BUILD: ${CPPFLAGS_FOR_BUILD}"
+l_echo "              LDFLAGS: ${LDFLAGS}"
+l_echo "    LDFLAGS_FOR_BUILD: ${LDFLAGS_FOR_BUILD}"
+l_echo "       LIBCURL_CFLAGS: ${LIBCURL_CFLAGS}"
+l_echo "         LIBCURL_LIBS: ${LIBCURL_LIBS}"
 if [ $LIBEDIT_FOUND -eq 1 ]; then
-echo " Using libedit:"
-echo "       LIBEDIT_CFLAGS: ${LIBEDIT_CFLAGS}"
-echo "         LIBEDIT_LIBS: ${LIBEDIT_LIBS}"
+l_echo " Using libedit:"
+l_echo "       LIBEDIT_CFLAGS: ${LIBEDIT_CFLAGS}"
+l_echo "         LIBEDIT_LIBS: ${LIBEDIT_LIBS}"
 elif [ $LIBREADLINE_FOUND -eq 1 ]; then
-echo " Using libreadline:"
-echo "   LIBREADLINE_CFLAGS: ${LIBREADLINE_CFLAGS}"
-echo "     LIBREADLINE_LIBS: ${LIBREADLINE_LIBS}"
+l_echo " Using libreadline:"
+l_echo "   LIBREADLINE_CFLAGS: ${LIBREADLINE_CFLAGS}"
+l_echo "     LIBREADLINE_LIBS: ${LIBREADLINE_LIBS}"
 fi
 if [ $LIBLOWDOWN_FOUND -eq 1 ]; then
-echo " Using lowdown ${LIBLOWDOWN_VERSION}:"
-echo "    LIBLOWDOWN_CFLAGS: ${LIBLOWDOWN_CFLAGS}"
-echo "      LIBLOWDOWN_LIBS: ${LIBLOWDOWN_LIBS}"
+l_echo " Using lowdown ${LIBLOWDOWN_VERSION}:"
+l_echo "    LIBLOWDOWN_CFLAGS: ${LIBLOWDOWN_CFLAGS}"
+l_echo "      LIBLOWDOWN_LIBS: ${LIBLOWDOWN_LIBS}"
 fi
 if [ $PDJSON_FOUND -eq 1 ]; then
-echo " Using pdjson:"
-echo "        PDJSON_CFLAGS: ${PDJSON_CFLAGS}"
-echo "          PDJSON_LIBS: ${PDJSON_LIBS}"
+l_echo " Using pdjson:"
+l_echo "        PDJSON_CFLAGS: ${PDJSON_CFLAGS}"
+l_echo "          PDJSON_LIBS: ${PDJSON_LIBS}"
 else
-echo ""
-echo "     WARNING: pdjson not found, using vendored version."
-echo "              You may wish to install a system version instead."
+l_echo ""
+l_echo "     WARNING: pdjson not found, using vendored version."
+l_echo "              You may wish to install a system version instead."
 fi
 if [ $ENABLE_LIBRT -eq 0 ]; then
-echo " Not linking -lrt because it was disabled"
+l_echo " Not linking -lrt because it was disabled"
 fi
 if [ $ENABLE_MAINTAINER -eq 1 ]; then
-echo ""
-echo "     WARNING: Maintainer mode is enabled!"
+l_echo ""
+l_echo "     WARNING: Maintainer mode is enabled!"
 fi
 if [ $ENABLE_MAINTAINER -eq 1 ] && [ "${OPTIMISE}" = "release" ]; then
-echo ""
-echo "     WARNING: --enable-maintainer and --release specified together."
-echo "              You probably don't want this for packaging."
-echo "              Drop --enable-maintainer!"
+l_echo ""
+l_echo "     WARNING: --enable-maintainer and --release specified together."
+l_echo "              You probably don't want this for packaging."
+l_echo "              Drop --enable-maintainer!"
 fi
 if [ $DEPRECATED_OPTIONS_USED -eq 1 ]; then
-echo ""
-echo "     WARNING: Deprecated options have been supplied to the configure script."
-echo "              Please review the messages above and remove deprecated options."
+l_echo ""
+l_echo "     WARNING: Deprecated options have been supplied to the configure script."
+l_echo "              Please review the messages above and remove deprecated options."
 fi
 if [ $UNKNOWN_OPTIONS_USED -eq 1 ]; then
-echo ""
-echo "     WARNING: Unknown options have been supplied to the configure script."
-echo "              Please review the messages above and fix the supplied options."
+l_echo ""
+l_echo "     WARNING: Unknown options have been supplied to the configure script."
+l_echo "              Please review the messages above and fix the supplied options."
 fi
-echo ""
-echo "Configuration done. You may now run make."
-echo "For more information about available build targets, run 'make help'."
-echo ""
+l_echo ""
+l_echo "Configuration done. You may now run make."
+l_echo "For more information about available build targets, run 'make help'."
+l_echo ""
 
 # vim: ft=sh

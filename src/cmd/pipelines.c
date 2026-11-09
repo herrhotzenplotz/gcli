@@ -76,6 +76,7 @@ usage(void)
 	fprintf(stderr, "                           (default output filename: artifacts.zip)\n");
 	fprintf(stderr, "  log                      Display job log\n");
 	fprintf(stderr, "  cancel                   Cancel the job\n");
+	fprintf(stderr, "  start                    Start the given job\n");
 	fprintf(stderr, "  retry                    Retry the given job\n");
 	fprintf(stderr, "  open                     Open the job in a web browser\n");
 	fprintf(stderr, "\n");
@@ -513,6 +514,28 @@ action_job_retry(struct gcli_path const *const path,
 }
 
 static int
+action_job_start(struct gcli_path const *const path,
+                 struct gcli_job const *const job,
+                 int *argc, char **argv[])
+{
+	int rc = 0;
+
+	(void) job;
+	(void) argc;
+	(void) argv;
+
+	rc = gcli_job_start(g_clictx, path, NULL);
+	if (rc < 0) {
+		fprintf(stderr, "gcli: error: failed to start the job: %s\n",
+		        gcli_get_error(g_clictx));
+
+		return GCLI_EX_DATAERR;
+	}
+
+	return GCLI_EX_OK;
+}
+
+static int
 action_job_artifacts(struct gcli_path const *const path,
                      struct gcli_job const *const job,
                      int *argc, char **argv[])
@@ -591,6 +614,12 @@ static struct gcli_cmd_actions job_actions = {
 			.name = "retry",
 			.needs_item = false,
 			.handler = (gcli_cmd_action_handler)action_job_retry,
+			.no_newline = true,
+		},
+		{
+			.name = "start",
+			.needs_item = false,
+			.handler = (gcli_cmd_action_handler)action_job_start,
 			.no_newline = true,
 		},
 		{

@@ -84,6 +84,9 @@ Print a short summary of the job.
 Cancel the job.
 .It Cm retry
 Retry the job.
+.It Cm start
+Start the job.
+This can be applied to jobs which have to be triggered manually.
 .It Cm artifacts Op Fl o Ar outfile
 Download the artifacts archive as a zip to disk. The default output file is
 .Pa artifacts.zip

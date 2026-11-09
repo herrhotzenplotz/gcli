@@ -8,6 +8,18 @@ This changelog does not follow semantic versioning.
 
 ### Added
 
+- A new `start` action was added to the `pipelines` subcommand that
+  can be used for manually triggering CI jobs.
+
+  This is useful for jobs which are only created but have to manually
+  started.
+
+  To e.g. start job number 35120:
+
+  ```console
+  $ gcli pipelines -j 35120 start
+  ```
+
 ### Changed
 
 ### Removed

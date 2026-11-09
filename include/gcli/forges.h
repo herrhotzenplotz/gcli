@@ -627,6 +627,13 @@ struct gcli_forge_descriptor {
 		struct gcli_path const *job_path);
 
 	/**
+	 * Start a job */
+	int (*job_start)(
+		struct gcli_ctx *ctx,
+		struct gcli_path const *job_path,
+		struct gcli_nvlist const *variables);
+
+	/**
 	 * Download Job Artifacts into the given file */
 	int (*job_download_artifacts)(
 		struct gcli_ctx *ctx,

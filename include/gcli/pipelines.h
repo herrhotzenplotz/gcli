@@ -32,6 +32,7 @@
 
 #include <gcli/gcli.h>
 #include <gcli/path.h>
+#include <gcli/nvlist.h>
 
 #include <stdio.h>
 #include <time.h>
@@ -115,6 +116,10 @@ int gcli_job_cancel(struct gcli_ctx *ctx,
 
 int gcli_job_retry(struct gcli_ctx *ctx,
                    struct gcli_path const *job_path);
+
+int gcli_job_start(struct gcli_ctx *ctx,
+                   struct gcli_path const *job_path,
+                   struct gcli_nvlist const *const variables);
 
 int gcli_job_download_artifacts(struct gcli_ctx *ctx,
                                 struct gcli_path const *job_path,

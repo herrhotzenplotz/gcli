@@ -135,6 +135,14 @@ gcli_job_retry(struct gcli_ctx *ctx,
 }
 
 int
+gcli_job_start(struct gcli_ctx *ctx,
+               struct gcli_path const *job_path,
+               struct gcli_nvlist const *const variables)
+{
+	gcli_null_check_call(job_start, ctx, job_path, variables);
+}
+
+int
 gcli_job_download_artifacts(struct gcli_ctx *ctx,
                             struct gcli_path const *job_path,
                             char const *outfile)

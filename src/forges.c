@@ -294,6 +294,7 @@ gitlab_forge_descriptor =
 	.job_download_artifacts    = gitlab_job_download_artifacts,
 	.job_get_log               = gitlab_job_get_log,
 	.job_retry                 = gitlab_job_retry,
+	.job_start                 = gitlab_job_start,
 	.pipeline_quirks           = GCLI_PIPELINE_QUIRKS_NOCONCLUSION,
 
 	/* Internal stuff */

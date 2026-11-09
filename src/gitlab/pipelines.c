@@ -348,6 +348,26 @@ gitlab_job_retry(struct gcli_ctx *ctx, struct gcli_path const *const path)
 }
 
 int
+gitlab_job_start(struct gcli_ctx *ctx, struct gcli_path const *const path,
+                 struct gcli_nvlist const *const variables)
+{
+	int rc = 0;
+	char *url = NULL;
+
+	(void) variables;
+
+	rc = gitlab_job_make_url(ctx, path, &url, "/play");
+	if (rc < 0)
+		return rc;
+
+	rc = gcli_fetch_with_method(ctx, "POST", url, NULL, NULL, NULL);
+
+	gcli_clear_ptr(&url);
+
+	return rc;
+}
+
+int
 gitlab_job_download_artifacts(struct gcli_ctx *ctx,
                               struct gcli_path const *const job_path,
                               char const *const outfile)

@@ -60,6 +60,9 @@ int gitlab_job_cancel(struct gcli_ctx *ctx, struct gcli_path const *job_path);
 
 int gitlab_job_retry(struct gcli_ctx *ctx, struct gcli_path const *job_path);
 
+int gitlab_job_start(struct gcli_ctx *ctx, struct gcli_path const *job_path,
+                     struct gcli_nvlist const *variables);
+
 int gitlab_job_download_artifacts(struct gcli_ctx *ctx,
                                   struct gcli_path const *job_path,
                                   char const *outfile);
